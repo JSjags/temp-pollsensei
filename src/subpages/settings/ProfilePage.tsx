@@ -52,6 +52,9 @@ const ProfilePage: React.FC = () => {
     }
   }, [data]);
 
+  console.log(data);
+  console.log(userData);
+
   const [updateUserProfile, { isLoading }] = useUpdateUserProfileMutation();
   const [updateProfileImage, { isLoading: Updating }] =
     useUpdateProfileImageMutation();

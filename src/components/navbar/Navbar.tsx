@@ -26,7 +26,7 @@ import "./styles.css";
 import { generateInitials } from "@/lib/utils";
 
 const Navbar = () => {
-  const user = useSelector((state: RootState) => state.user);
+  const user = useSelector((state: RootState) => state.user.user);
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");

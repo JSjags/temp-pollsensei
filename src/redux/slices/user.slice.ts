@@ -71,6 +71,8 @@ const userSlice = createSlice({
       console.log(state);
       console.log(action);
 
+      console.log({ ...state, ...action.payload });
+
       return { ...state, ...action.payload };
     },
     logoutUser(state: UserState) {

@@ -15,8 +15,11 @@ export const userApiSlice = apiSlice.injectEndpoints({
           const data = await queryFulfilled;
           console.log("GULAG");
           console.log(data);
-          const accessToken = data?.data?.access_token;
-          const user = data?.data?.user;
+          const accessToken = data?.data?.data?.access_token;
+          const user = data?.data?.data?.user;
+
+          console.log(accessToken);
+          console.log(user);
 
           dispatch(
             updateUser({
