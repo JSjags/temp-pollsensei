@@ -1,0 +1,56 @@
+.auth-label {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #333333;
+}
+.auth-input {
+  padding: 20px;
+  border-radius: 6px;
+  opacity: 0px;
+  color: #333333;
+}
+.auth-text-area {
+  /* padding: 40px; */
+  border-radius: 6px;
+  opacity: 0px;
+  color: #333333;
+}
+.auth-input::placeholder {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: #bdbdbd;
+}
+.check-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px !important;
+  border: 1px solid #e5efff !important;
+  opacity: 0px !important;
+  background: #f7faff !important;
+}
+.rate-title {
+  /* font-family: Helvetica; */
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16.1px;
+  color: #333333;
+}
+.rate-value {
+  /* font-family: Helvetica; */
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 13.8px;
+  color: #7a8699;
+}
+.rate-id {
+  width: 27px;
+  height: 27px;
+  border: 1px solid #f0f2f5;
+  /* font-family: Helvetica; */
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 18.4px;
+  color: #333333;
+}

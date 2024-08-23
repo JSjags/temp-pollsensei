@@ -1,0 +1,78 @@
+.auth-header {
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 36.8px;
+  letter-spacing: -0.5px;
+  color: #242424;
+}
+.auth-title {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 20.7px;
+}
+.check-text {
+  /* font-family: Helvetica; */
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+.auth-btn {
+  background: linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
+  border-radius: 6px;
+  padding: 14px 20px !important;
+  font-family: Inter;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  text-align: center;
+  color: #ffffff;
+}
+.auth-bg {
+  background-image: url("../../assets//auth/background.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.auth-heading {
+  /* font-family: Helvetica; */
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 37.5px;
+  letter-spacing: -0.5px;
+  text-align: center;
+  color: #ffffff;
+}
+.auth-subtitle {
+  /* font-family: Helvetica; */
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 20.7px;
+  text-align: center;
+  color: #ffffff;
+}
+.auth-head {
+  /* font-family: Helvetica; */
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 38px;
+  color: #ffffff;
+}
+.auth-divider {
+  /* font-family: Helvetica; */
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  text-align: center;
+}
+
+/* Hide spinner controls in Chrome, Safari, Edge, and Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide spinner controls in Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}

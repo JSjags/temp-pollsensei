@@ -1,0 +1,24 @@
+.filter-button {
+  /* font-family: Helvetica !important; */
+  font-size: 12px !important;
+  font-weight: 400;
+  line-height: 13.8px !important;
+  color: #333333;
+  border: 1px solid #fafbfb;
+  width: 60px;
+  height: 36px;
+  border-radius: 0px;
+  background: #fff;
+}
+.active {
+  width: 89px;
+  height: 34px;
+  border-radius: 8px;
+  background: #f5f6f7;
+}
+.chart-title {
+  /* font-family: Helvetica; */
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 20.7px;
+}
