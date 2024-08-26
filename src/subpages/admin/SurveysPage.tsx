@@ -30,7 +30,7 @@ const SurveysPage = () => {
               Your Surveys
             </h2>
             <div className="block md:hidden mt-2 md:mt-0">
-              <Button label="Create new survey +" />
+              <Button label="Create new survey +"  />
             </div>
             <div className="hidden lg:flex items-center pl-4 gap-2 rounded-[8px] border-[1px] px- border-[#d9d9d9] w-[292px] h-[40px]">
               <Image src={search} alt="Search icon" width={20} height={20} />

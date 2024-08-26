@@ -24,6 +24,8 @@ import help from "../../assets/images/help.svg";
 import helpActive from "../../assets/images/helpActive.svg";
 import "./styles.css";
 import { generateInitials } from "@/lib/utils";
+import { pollsensei_new_logo } from "@/assets/images";
+import MilestoneCTA from "@/subpages/milestone/MilestoneCTA";
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -63,8 +65,8 @@ const Navbar = () => {
       <div className="border-b-2">
         <header className="container flex items-center justify-between py-5 px-5">
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
-            <Image src={logo} alt="Logo" />
-            <h2 className="text-xl text-[#5B03B2]">PollSensei</h2>
+            <Image src={pollsensei_new_logo} alt="Logo" />
+            {/* <h2 className="text-xl text-[#5B03B2]">PollSensei</h2> */}
           </div>
           <div
             className="lg:hidden flex items-center gap-2 cursor-pointer"
@@ -158,9 +160,8 @@ const Navbar = () => {
 
       {/* Sidebar for mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out lg:hidden`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out lg:hidden`}
       >
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
@@ -220,11 +221,10 @@ const Navbar = () => {
                 <Link href={item.href}>
                   <div
                     onClick={() => handleSetActiveTab(item.name.toLowerCase())}
-                    className={`flex items-center px-4 py-2 text-sm ${
-                      activeTab === item.name.toLowerCase()
+                    className={`flex items-center px-4 py-2 text-sm ${activeTab === item.name.toLowerCase()
                         ? "text-[#9D50BB] bg-purple-100"
                         : "text-[#4F5B67]"
-                    }`}
+                      }`}
                   >
                     <Image
                       src={item.icon}
@@ -247,11 +247,10 @@ const Navbar = () => {
             <Link href="/dashboard">
               <li
                 onClick={() => handleSetActiveTab("dashboard")}
-                className={`flex flex-col items-center cursor-pointer ${
-                  activeTab == "dashboard"
+                className={`flex flex-col items-center cursor-pointer ${activeTab == "dashboard"
                     ? "text-[#9D50BB]"
                     : "text-[#4F5B67] pb-[17px]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Image
@@ -261,20 +260,18 @@ const Navbar = () => {
                   <p className={`lg:text-[16px] text-[14px] `}>Dashboard</p>
                 </div>
                 <div
-                  className={`${
-                    activeTab == "dashboard" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
+                  className={`${activeTab == "dashboard" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                 />
               </li>
             </Link>
             <Link href="/surveys">
               <li
                 onClick={() => handleSetActiveTab("surveys")}
-                className={`flex flex-col items-center cursor-pointer ${
-                  activeTab == "surveys"
+                className={`flex flex-col items-center cursor-pointer ${activeTab == "surveys"
                     ? "text-[#9D50BB]"
                     : "text-[#4F5B67] pb-[17px]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Image
@@ -284,20 +281,18 @@ const Navbar = () => {
                   <p className="lg:text-[16px] text-[14px]">Surveys</p>
                 </div>
                 <div
-                  className={`${
-                    activeTab == "surveys" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
+                  className={`${activeTab == "surveys" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                 />
               </li>
             </Link>
             <Link href="/team-members">
               <li
                 onClick={() => handleSetActiveTab("team-members")}
-                className={`flex items-center flex-col cursor-pointer ${
-                  activeTab == "team-members"
+                className={`flex items-center flex-col cursor-pointer ${activeTab == "team-members"
                     ? "text-[#9D50BB]"
                     : "text-[#4F5B67] pb-[17px]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Image
@@ -307,20 +302,18 @@ const Navbar = () => {
                   <p className="lg:text-[16px] text-[14px]">Team members</p>
                 </div>
                 <div
-                  className={`${
-                    activeTab == "team-members" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
+                  className={`${activeTab == "team-members" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                 />
               </li>
             </Link>
             <Link href="/settings/profile">
               <li
                 onClick={() => handleSetActiveTab("settings")}
-                className={`flex items-center flex-col cursor-pointer ${
-                  activeTab == "settings"
+                className={`flex items-center flex-col cursor-pointer ${activeTab == "settings"
                     ? "text-[#9D50BB]"
                     : "text-[#4F5B67] pb-[17px]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Image
@@ -330,20 +323,18 @@ const Navbar = () => {
                   <p className="lg:text-[16px] text-[14px]">Settings</p>
                 </div>
                 <div
-                  className={`${
-                    activeTab == "settings" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
+                  className={`${activeTab == "settings" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                 />
               </li>
             </Link>
             <Link href="/help-centre">
               <li
                 onClick={() => handleSetActiveTab("help-centre")}
-                className={`flex flex-col items-center cursor-pointer ${
-                  activeTab == "help-centre"
+                className={`flex flex-col items-center cursor-pointer ${activeTab == "help-centre"
                     ? "text-[#9D50BB]"
                     : "text-[#4F5B67] pb-[17px]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Image
@@ -353,14 +344,16 @@ const Navbar = () => {
                   <p className="lg:text-[16px] text-[14px]">Help Centre</p>
                 </div>
                 <div
-                  className={`${
-                    activeTab == "help-centre" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
+                  className={`${activeTab == "help-centre" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                 />
               </li>
             </Link>
           </ul>
         </nav>
+        <div className="flex justify-end items-center px-5">
+         <MilestoneCTA />
+        </div>
       </div>
     </div>
   );
