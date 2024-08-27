@@ -136,7 +136,6 @@ export default function App({ stage }: { stage: string }) {
         strokeDasharray: currentStage <= 1 ? 10 : 0,
       },
       animated: currentStage <= 1,
-      className: "duration-[10000ms] animate-in",
     },
     {
       id: "e2-3",
@@ -149,7 +148,6 @@ export default function App({ stage }: { stage: string }) {
         strokeDasharray: currentStage <= 2 ? 10 : 0,
       },
       animated: currentStage <= 2,
-      className: "duration-[10000ms] animate-in",
     },
     {
       id: "e3-4",
@@ -163,7 +161,6 @@ export default function App({ stage }: { stage: string }) {
       },
       type: "custom-edge",
       animated: currentStage <= 3,
-      className: "duration-[10000ms] animate-in",
     },
     {
       id: "e4-5",
@@ -177,7 +174,6 @@ export default function App({ stage }: { stage: string }) {
       },
       type: "step",
       animated: currentStage <= 4,
-      className: "duration-[10000ms] animate-in",
     },
     {
       id: "e5-6",
@@ -191,7 +187,6 @@ export default function App({ stage }: { stage: string }) {
       },
       type: "custom-edge",
       animated: currentStage <= 5,
-      className: "duration-[10000ms] animate-in",
     },
     {
       id: "e6-7",
@@ -204,7 +199,6 @@ export default function App({ stage }: { stage: string }) {
         strokeDasharray: currentStage <= 6 ? 10 : 0,
       },
       animated: currentStage <= 6,
-      className: "duration-[10000ms] animate-in",
     },
     {
       id: "e7-8",
@@ -217,7 +211,6 @@ export default function App({ stage }: { stage: string }) {
         strokeDasharray: currentStage <= 7 ? 10 : 0,
       },
       animated: currentStage <= 7,
-      className: "duration-[10000ms] animate-in",
     },
   ];
 
