@@ -1,13 +1,10 @@
 import React, { useCallback, useMemo, useState } from "react";
 import {
   addEdge,
-  Background,
   Controls,
   Edge,
   Handle,
-  MiniMap,
   Node,
-  NodeProps,
   PanOnScrollMode,
   Position,
   ReactFlow,
@@ -122,7 +119,6 @@ export default function App({ stage }: { stage: string }) {
       targetPosition: Position.Left,
     },
   ];
-  // const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
 
   const initialEdges: Edge[] = [
     {
@@ -311,14 +307,6 @@ export default function App({ stage }: { stage: string }) {
         default:
           return null;
       }
-      // id === "8" ? (
-      //     <data.icon
-      //       style={{ color: "#4A148C", fontSize: "1.5em" }}
-      //       className={"-translate-y-12 translate-x-16"}
-      //     />
-      //   ) : (
-      //
-      //   )
     };
     const handleLabelIcon = (id: string, label: string) => {
       if (id === "2") {
