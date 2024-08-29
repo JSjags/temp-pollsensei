@@ -26,9 +26,11 @@ import "./styles.css";
 import { generateInitials } from "@/lib/utils";
 import { pollsensei_new_logo } from "@/assets/images";
 import MilestoneCTA from "@/subpages/milestone/MilestoneCTA";
+import DesktopNavigation from "./DesktopNavigation";
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
+  const user2 = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -41,6 +43,7 @@ const Navbar = () => {
   };
 
   console.log(user);
+  console.log(user2);
 
   useEffect(() => {
     if (path && path.includes("/surveys")) {
@@ -242,115 +245,7 @@ const Navbar = () => {
 
       {/* Desktop navigation */}
       <div className="hidden lg:block border-b-2 shadow-md">
-        <nav className="container pt-5 px-5">
-          <ul className="flex items-center gap-10">
-            <Link href="/dashboard">
-              <li
-                onClick={() => handleSetActiveTab("dashboard")}
-                className={`flex flex-col items-center cursor-pointer ${activeTab == "dashboard"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                  }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "dashboard" ? homeActive : homeIcon}
-                    alt="Dashboard Icon"
-                  />
-                  <p className={`lg:text-[16px] text-[14px] `}>Dashboard</p>
-                </div>
-                <div
-                  className={`${activeTab == "dashboard" ? "block" : "hidden"
-                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/surveys">
-              <li
-                onClick={() => handleSetActiveTab("surveys")}
-                className={`flex flex-col items-center cursor-pointer ${activeTab == "surveys"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                  }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "surveys" ? pieChartActive : pieChartLogo}
-                    alt="Survey Icon"
-                  />
-                  <p className="lg:text-[16px] text-[14px]">Surveys</p>
-                </div>
-                <div
-                  className={`${activeTab == "surveys" ? "block" : "hidden"
-                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/team-members">
-              <li
-                onClick={() => handleSetActiveTab("team-members")}
-                className={`flex items-center flex-col cursor-pointer ${activeTab == "team-members"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                  }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "team-members" ? usersActive : users}
-                    alt="Team Icon"
-                  />
-                  <p className="lg:text-[16px] text-[14px]">Team members</p>
-                </div>
-                <div
-                  className={`${activeTab == "team-members" ? "block" : "hidden"
-                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/settings/profile">
-              <li
-                onClick={() => handleSetActiveTab("settings")}
-                className={`flex items-center flex-col cursor-pointer ${activeTab == "settings"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                  }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "settings" ? settingsActive : settings}
-                    alt="Settings Icon"
-                  />
-                  <p className="lg:text-[16px] text-[14px]">Settings</p>
-                </div>
-                <div
-                  className={`${activeTab == "settings" ? "block" : "hidden"
-                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/help-centre">
-              <li
-                onClick={() => handleSetActiveTab("help-centre")}
-                className={`flex flex-col items-center cursor-pointer ${activeTab == "help-centre"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                  }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "help-centre" ? helpActive : help}
-                    alt="Help Icon"
-                  />
-                  <p className="lg:text-[16px] text-[14px]">Help Centre</p>
-                </div>
-                <div
-                  className={`${activeTab == "help-centre" ? "block" : "hidden"
-                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-          </ul>
-        </nav>
+      <DesktopNavigation />
         <div className="flex justify-end items-center px-5">
          <MilestoneCTA />
         </div>

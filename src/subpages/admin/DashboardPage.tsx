@@ -15,8 +15,10 @@ import SurveyTable from "../../components/ui/SurveyTable";
 import NoSurvey from "../../components/ui/NoSurvey";
 import Image from "next/image";
 import TopResponse from "@/components/ui/TopResponse";
+import { useRouter } from "next/navigation";
 
 const DashboardPage = () => {
+  const router = useRouter();
   const { data: item } = useFormResponseRateQuery("year");
   const { data: collectedDataCount } = useDataCollectorCountQuery("year");
   const { data: surveyCount } = useSurveysCountQuery("year");
@@ -24,7 +26,6 @@ const DashboardPage = () => {
   const { data: surveys } = useSurveyQuery("year");
 
   console.log(surveyCount);
-
   return (
     <>
       <div className="container mx-auto px-4">
@@ -109,7 +110,9 @@ const DashboardPage = () => {
                 {surveys?.data?.length > 0 ? (
                   <SurveyTable />
                 ) : (
-                  <NoSurvey onCreateSurvey={() => {}} />
+                  <NoSurvey
+                    onCreateSurvey={() => router.push("/surveys/create-survey")}
+                  />
                 )}
               </div>
             </div>

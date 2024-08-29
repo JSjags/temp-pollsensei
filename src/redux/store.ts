@@ -25,12 +25,14 @@ import toggleReducer from "./slices/invite.slice";
 import formReducer from "./slices/form.slice";
 import { PersistPartial } from "redux-persist/es/persistReducer";
 import { createPersistStorage } from "./storage";
+import questionReducer from "./slices/questions.slice";
 
 // At the top of the file, after imports
 export type RootState = {
   user: ReturnType<typeof userReducer>;
   toggle: ReturnType<typeof toggleReducer>;
   form: ReturnType<typeof formReducer>;
+  question: ReturnType<typeof questionReducer>;
   [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
 };
 
@@ -38,6 +40,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   toggle: toggleReducer,
   form: formReducer,
+  question: questionReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 

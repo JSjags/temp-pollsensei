@@ -357,3 +357,21 @@ input[type="number"] {
 .animate-fade-expand-alt {
   animation: fadeExpandAlt 4s ease-in-out infinite;
 }
+
+.gradient-border {
+  border: 2px solid;
+  border-image:linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
+  border-image-slice: 1;
+}
+
+.gradient-text {
+  background: linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+.twitter-picker span div{
+  width: 4rem !important;
+  height: 4rem !important;
+}
