@@ -238,7 +238,7 @@ const UseAnotherPrompt =() =>{
               </button>
             </div>
             <div
-              className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 ${
+              className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 relative ${
                 selectedDiv === 5 ? "border-[#CC9BFD] border-2" : ""
               }`}
               onClick={() => handleSurveyType(5, "Qualitative & Quantitative")}
@@ -283,6 +283,9 @@ const UseAnotherPrompt =() =>{
               >
                 Proceed
               </button>
+              <div className="bg-[#F70A0A] text-white py-2 absolute top-0 right-0 rounded-tr px-4 ">
+                Most Preferred
+              </div>
             </div>
           </div>
         </div>

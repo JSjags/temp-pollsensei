@@ -29,7 +29,16 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    addSurveyHeader: builder.mutation({
+      query: (body) => ({
+        url: "/survey/file",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useRegenerateSingleSurveyMutation } = surveyApiSlice
+
+
+export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useRegenerateSingleSurveyMutation, useAddSurveyHeaderMutation } = surveyApiSlice

@@ -5,32 +5,43 @@ import LinearScaleQuestion from "@/components/survey/LinearScaleQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
-import { updateQuestions } from "@/redux/slices/questions.slice";
+import { addQuestion, updateQuestions } from "@/redux/slices/questions.slice";
 import { RootState } from "@/redux/store";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import StyleEditor from "./StyleEditor";
 import QuestionType from "./QuestionType";
-import Image from 'next/image'
-import { sparkly } from "@/assets/images";
+import Image from "next/image";
+import { pollsensei_new_logo, sparkly } from "@/assets/images";
+import { HiOutlinePlus } from "react-icons/hi";
+import { IoDocumentOutline } from "react-icons/io5";
+import IsLoadingModal from "@/components/modals/IsLoadingModal";
+import AddQuestion from "./AddQuestion";
 
 const EditSurvey = () => {
   const question = useSelector((state: RootState) => state.question);
+  const headerUrl = useSelector((state: RootState) => state?.themes?.headerUrl);
+  const logoUrl = useSelector((state: RootState) => state?.themes?.logoUrl);
+  const theme = useSelector((state: RootState) => state?.themes?.theme);
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
-  const [addquestions, setAddQuestions] = useState({});
+  const [addquestions, setAddQuestions] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [isSidebar, setIsSidebarOpen] = useState(true)
+  const [isSidebar, setIsSidebarOpen] = useState(true);
   console.log(question);
 
   const EditQuestion = (index: number) => {
     setEditIndex(index);
     setIsEdit(true);
-    setIsSidebarOpen((prev)=>!prev);
+    setIsSidebarOpen((prev) => !prev);
   };
 
-  const handleSave = (updatedQuestion: string, updatedOptions: string[],   updatedQuestionType: string) => {
+  const handleSave = (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string
+  ) => {
     const updatedQuestions = [...question.questions];
     if (editIndex !== null) {
       // @ts-ignore
@@ -43,34 +54,55 @@ const EditSurvey = () => {
       setEditIndex(null);
       setIsEdit(false);
     }
-    setIsSidebarOpen((prev)=>!prev);
+    setIsSidebarOpen((prev) => !prev);
   };
 
   const handleCancel = () => {
     setEditIndex(null);
     setIsEdit(false);
-    setIsSidebarOpen((prev)=>!prev);
+    setIsSidebarOpen((prev) => !prev);
   };
 
-  // const EditQuestion = async (id: any) => {
-  //   const questionIndex = question.questions?.findIndex(
-  //     (_question: any, index: any) => index === id
-  //   );
-  //   setEditIndex(questionIndex);
-  //   setIsEdit(true);
-  //   console.log(question.questions[questionIndex]);
-  // };
-
   return (
-    <div className="bg-[#e5e5e5] flex flex-col gap-5 w-full pl-16">
-      <div className="bg-[#e5e5e5] flex justify-between gap-10 w-full">
+    <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
+      <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="w-2/3 flex flex-col">
-          <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white py-3 flex items-center flex-col ">
-            <p>LOGO GOES HERE</p>
-          </div>
+          {logoUrl ? (
+            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
+            <Image
+              src={
+                logoUrl instanceof File
+                  ? URL.createObjectURL(logoUrl)
+                  : typeof logoUrl === "string"
+                  ? logoUrl
+                  : sparkly
+              }
+              alt=""
+              className="w-full object-cover bg-no-repeat h-16 rounded-full"
+              width={"100"}
+              height={"200"}
+            />
+            </div>
+          ) : (
+            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white py-3 flex items-center flex-col ">
+              <p>LOGO GOES HERE</p>
+            </div>
+          )}
 
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
-            <Image src={sparkly}alt="" className="w-full object-cover bg-no-repeat h-24 rounded-lg "  />
+            <Image
+              src={
+                headerUrl instanceof File
+                  ? URL.createObjectURL(headerUrl)
+                  : typeof headerUrl === "string"
+                  ? headerUrl
+                  : sparkly
+              }
+              alt=""
+              className="w-full object-cover bg-no-repeat h-24 rounded-lg"
+              width={"100"}
+              height={"200"}
+            />
           </div>
           {question?.questions?.map((item: any, index: number) => (
             <div key={index} className="mb-4">
@@ -91,12 +123,13 @@ const EditSurvey = () => {
                   index={index + 1}
                 />
               ) : item["Option type"] === "Comment" ? (
-                <CommentQuestion 
-                key={index} 
-                index={index + 1}
-                questionType={item["Option type"]}
-                question={item.Question} 
-                EditQuestion={() => EditQuestion(index)} />
+                <CommentQuestion
+                  key={index}
+                  index={index + 1}
+                  questionType={item["Option type"]}
+                  question={item.Question}
+                  EditQuestion={() => EditQuestion(index)}
+                />
               ) : item["Option type"] === "Linear Scale" ? (
                 <LinearScaleQuestion
                   question={item.Question}
@@ -119,32 +152,53 @@ const EditSurvey = () => {
                   questionType={item["Option type"]}
                   EditQuestion={() => EditQuestion(index)}
                 />
-              )
-               : null}
+              ) : null}
             </div>
           ))}
           <div className="flex justify-between items-center pb-10">
             <div className="flex gap-2 items-center">
-              <div className="bg-white rounded-full px-5 py-1">
-                Add Question
+              <div className="bg-white rounded-full px-5 py-1" onClick={()=>setAddQuestions((prev)=>!prev)}>
+              <HiOutlinePlus className="inline-block mr-2" />  Add Question
               </div>
-              <div className="bg-white rounded-full px-5 py-1">New Section</div>
+              <div className="bg-white rounded-full px-5 py-1">
+              <IoDocumentOutline className="inline-block mr-2" />
+                New Section</div>
             </div>
             <div>Pagination</div>
           </div>
+          {
+           addquestions && <IsLoadingModal
+           openModal={addquestions} modalSize={"2xl"}
+           >
+              <AddQuestion onCancel={()=>setAddQuestions((prev)=>!prev)} onSave={(question, options, questionType)=>{
+                const newQuestion = {
+                  Question: question,
+                  "Option type": questionType,
+                  Options:options,
+              }
+                dispatch(addQuestion(newQuestion));
+                setAddQuestions((prev)=>!prev);
+              
+              }} />
+            </IsLoadingModal>
+          }
+          <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+            <div className="flex flex-col">
+          <p>Form created by</p>
+          <Image src={pollsensei_new_logo} alt="Logo" />
+            </div>
+            <span className="absolute bottom-2 right-4 text-[#828282]">Remove watermark</span>
+          </div>
         </div>
-        <div className="w-1/3">
-        {
-          isSidebar ? (
-            <StyleEditor />
-          ) : (
-            <QuestionType />
-          )
-        }
+        <div className={`w-1/3`}>
+          {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>
       </div>
     </div>
   );
 };
 
+
 export default EditSurvey;
+
+

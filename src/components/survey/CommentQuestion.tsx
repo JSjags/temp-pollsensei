@@ -21,8 +21,8 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   const pathname = usePathname();
 
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 ">
-      <Image src={draggable} alt="draggable icon" />
+    <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded ">
+      <Image src={draggable} alt="draggable icon" className={pathname === "/surveys/edit-survey" ? "invisible" : "visible"} />
       <div className="w-full">
         <div>
           <h3 className="text-lg font-semibold"><span>{index}. </span>{question}</h3>

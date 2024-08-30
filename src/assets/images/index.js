@@ -19,6 +19,7 @@ import stars from './stars.svg'
 import draggable from './draggable.svg'
 import neon from './neon.svg'
 import sparkly from './Sparkly.svg'
+import defaultBg from './default.svg'
 
 
 
@@ -45,4 +46,5 @@ export {
     draggable,
     neon,
     sparkly,
+    defaultBg
 }
