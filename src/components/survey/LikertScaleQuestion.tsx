@@ -9,6 +9,7 @@ interface LikertScaleQuestionProps {
   questionType?: string;
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
+  DeleteQuestion?: () => void;
 }
 
 const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
@@ -17,6 +18,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
   questionType,
   EditQuestion,
   onChange,
+  DeleteQuestion
 }) => {
   const pathname = usePathname();
 
@@ -58,7 +60,9 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
             >
               Edit
             </button>
-            <button className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full">
+            <button className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
+            onClick={DeleteQuestion}
+            >
               Delete
             </button>
           </div>

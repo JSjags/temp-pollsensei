@@ -9,6 +9,7 @@ interface ComponentQuestionProps {
   questionType: string;
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
+  DeleteQuestion?: () => void;
   index: number;
 }
 
@@ -16,6 +17,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   question,
   questionType,
   EditQuestion,
+  DeleteQuestion,
   index,
 }) => {
   const pathname = usePathname();
@@ -40,7 +42,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           >
             Edit
           </button>
-          <button className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full">
+          <button className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full" onClick={DeleteQuestion}>
             Delete
           </button>
         </div>

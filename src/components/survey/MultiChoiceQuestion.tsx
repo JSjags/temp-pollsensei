@@ -10,6 +10,7 @@ interface MultiChoiceQuestionProps {
   options: string[] | undefined;
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
+  DeleteQuestion?: () => void;
   index: number;
 }
 
@@ -20,6 +21,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   options,
   questionType,
   EditQuestion,
+  DeleteQuestion,
   index,
 }) => {
   const pathname = usePathname();
@@ -49,7 +51,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           <button className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full" onClick={EditQuestion}>
             Edit
           </button>
-          <button className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full">
+          <button className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full" onClick={DeleteQuestion}>
             Delete
           </button>
         </div>}

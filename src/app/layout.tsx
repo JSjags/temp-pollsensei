@@ -3,6 +3,8 @@ import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import ReduxContext from "@/contexts/ReduxContext";
 import { cn } from "@/lib/utils";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -29,6 +31,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
+        <ToastContainer/>
         <ReduxContext>{children}</ReduxContext>
       </body>
     </html>

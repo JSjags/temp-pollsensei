@@ -11,6 +11,7 @@ interface StarRatingQuestionProps {
   currentRating?: number; 
   onRate?: (value: number) => void;
   EditQuestion?: () => void;
+  DeleteQuestion?: () => void;
 }
 
 const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
@@ -20,6 +21,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   currentRating = 0,
   onRate,
   EditQuestion,
+  DeleteQuestion
 }) => {
   const pathname = usePathname();
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
@@ -62,7 +64,9 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             >
               Edit
             </button>
-            <button className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full">
+            <button className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
+            onClick={DeleteQuestion}
+            >
               Delete
             </button>
           </div>

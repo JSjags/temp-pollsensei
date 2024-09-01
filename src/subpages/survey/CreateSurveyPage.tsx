@@ -13,10 +13,17 @@ import {
 } from "@/assets/images";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "flowbite-react";
-import { useCreateAiSurveyMutation } from "@/services/survey.service";
+import {
+  useCreateAiSurveyMutation,
+  useGenerateTopicsMutation,
+} from "@/services/survey.service";
 import { toast } from "react-toastify";
 import IsLoadingModal from "@/components/modals/IsLoadingModal";
 import GeneratedSurvey from "./GeneratedSurvey";
+import IsGenerating from "@/components/modals/IsGenerating";
+import { useDispatch } from "react-redux";
+import { updateDescription, updateTitle } from "@/redux/slices/questions.slice";
+import { saveGeneratedBy } from "@/redux/slices/theme.slice";
 
 const CreateSurveyPage = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
@@ -24,12 +31,18 @@ const CreateSurveyPage = () => {
   const [whatDoYouWant, setWhatDoYouWant] = useState(true);
   const [oneMoreThing, setOneMoreThing] = useState(false);
   const [promptForm, setPromptForm] = useState(false);
+  const [isTopicModal, setIsTopicModal] = useState(false);
   const navigate = useRouter();
+  const dispatch = useDispatch();
   const [surveyType, setSurveyType] = useState("");
   const [surveyPrompt, setSurveyPrompt] = useState("");
   const [createAiSurvey, { data, isLoading, isSuccess }] =
     useCreateAiSurveyMutation();
-  const [ generated, setGenerated ] = useState(false)
+  const [
+    generateTopics,
+    { data: topics, isLoading: isLoadingTopics, isSuccess: isTopicSuccess, isError:isTpoicError, error:topicError },
+  ] = useGenerateTopicsMutation();
+  const [generated, setGenerated] = useState(false);
 
   const handleDivClick = (userType: any) => {
     setSelectedDiv(userType);
@@ -47,7 +60,34 @@ const CreateSurveyPage = () => {
     }
   };
 
+  const handleGenerateTopics = async () => {
+    try {
+      await generateTopics({
+        user_query: surveyPrompt,
+      });
+    } catch (e) {
+      toast.error("Failed to create survey");
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (isTopicSuccess) {
+      toast.success("Survey topic created successfully");
+      dispatch(updateDescription(surveyPrompt))
+      setIsTopicModal((prev) => !prev);
+      setPromptForm(!promptForm);
+    }
+    if(isTpoicError || topicError){
+      toast.error("Failed to generate survey topic");
+    }
+  }, [isTopicSuccess, isTpoicError, topicError]);
+
   const handleGenerateQuestion = async () => {
+    console.log({
+      user_query: surveyPrompt,
+      survey_type: selectedSurveyType,
+    })
     try {
       await createAiSurvey({
         user_query: surveyPrompt,
@@ -61,17 +101,20 @@ const CreateSurveyPage = () => {
   };
 
   useEffect(() => {
+    // if(isLoading){
+    //   setIsTopicModal(false);
+    // }
+
     if (isSuccess) {
-      // navigate.push(`/surveys`);
-      setGenerated((prev)=>!prev);
-      setPromptForm(!promptForm)
+      setGenerated((prev) => !prev);
+      setPromptForm(false);
     }
   }, [isSuccess]);
 
-const UseAnotherPrompt =() =>{
-  setGenerated((prev)=>!prev);
-  setPromptForm(!promptForm)
-}
+  const UseAnotherPrompt = () => {
+    setGenerated((prev) => !prev);
+    setPromptForm(!promptForm);
+  };
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center">
@@ -86,7 +129,10 @@ const UseAnotherPrompt =() =>{
               className={`flex flex-col items-center pb-20 justify-center gap-5 border rounded-md px-10 pt-10 text-center ${
                 selectedDiv === 1 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() => handleDivClick(1)}
+              onClick={() =>{ 
+                handleDivClick(1)
+                dispatch(saveGeneratedBy("ai"))
+              }}
             >
               <Image src={chatbot} alt="Logo" className="h-8 w-auto" />
               <h1 className="text-lg">Generate with AI</h1>
@@ -109,7 +155,10 @@ const UseAnotherPrompt =() =>{
               className={`flex flex-col items-center pb-20 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 ${
                 selectedDiv === 2 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() => handleDivClick(2)}
+              onClick={() =>{
+                 handleDivClick(2)
+                dispatch(saveGeneratedBy("manually"))
+                }}
             >
               <Image src={User_Setting} alt="Logo" className="h-8 w-auto" />
               <h1 className="text-lg">Create Manually</h1>
@@ -241,7 +290,7 @@ const UseAnotherPrompt =() =>{
               className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 relative ${
                 selectedDiv === 5 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() => handleSurveyType(5, "Qualitative & Quantitative")}
+              onClick={() => handleSurveyType(5, "both")}
             >
               <Image
                 src={quantitative_qualitative_survey}
@@ -305,32 +354,25 @@ const UseAnotherPrompt =() =>{
             className={`flex flex-col mx-auto w-full md:w-2/3 lg:w-1/2 text-start justify-start gap-2`}
             onSubmit={(e) => {
               e.preventDefault();
-              handleGenerateQuestion();
+              handleGenerateTopics();
             }}
           >
-            {/* <label htmlFor="title">Title</label>
-            <input
-              type="text"
-              placeholder="Enter Title of Survey here"
-              className="rounded-md px-3 py-2 border w-full border-[#BDBDBD]"
-              style={{ border: "2px  solid #BDBDBD" }}
-            /> */}
             <label htmlFor="Your Prompt">Your Prompt</label>
             <textarea
               value={surveyPrompt}
               name=""
               id=""
               placeholder="Write your prompt"
-              className="rounded-md px-3 border w-full h-36 border-[#BDBDBD]"
+              className="rounded-md py-2 px-3 border w-full h-36 border-[#BDBDBD]"
               style={{ border: "2px  solid #BDBDBD" }}
               onChange={(e) => setSurveyPrompt(e.target.value)}
             ></textarea>
             <button
               className="gradient-border gradient-text px-6 py-3 w-1/3 rounded-lg flex items-center space-x-2"
-              disabled={!surveyPrompt && !surveyType ? true : false}
+              disabled={!surveyPrompt ? true : false}
             >
               <span
-                className={!surveyPrompt && !surveyType ? "text-gray-300" : ""}
+                className={!surveyPrompt ? "text-gray-300" : ""}
               >
                 Generate
               </span>
@@ -350,7 +392,9 @@ const UseAnotherPrompt =() =>{
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-start mt-4 md:mt-0`}
               >
-                <h1 className="text-lg text-start">Student Satisfaction Survey</h1>
+                <h1 className="text-lg text-start">
+                  Student Satisfaction Survey
+                </h1>
 
                 <p className="text-start">
                   Assess learning experiences, teaching quality,{" "}
@@ -363,7 +407,9 @@ const UseAnotherPrompt =() =>{
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0 `}
               >
-                <h1 className="text-lg text-start">Employee Engagement Survey</h1>
+                <h1 className="text-lg text-start">
+                  Employee Engagement Survey
+                </h1>
                 <p className="text-start">
                   Measure staff satisfaction, motivation, and{" "}
                   <br className="hidden lg:block" /> workplace culture, helping
@@ -386,20 +432,66 @@ const UseAnotherPrompt =() =>{
           </div>
         </div>
       )}
+      {isTopicModal && (
+        <IsLoadingModal openModal={isTopicModal} modalSize="lg">
+          <div className="flex flex-col gap-3">
+            <div className="text-center">
+              <h2 className="text-lg font-normal ">
+                Set Survey Topic and Continue
+              </h2>
+              <p className="text-sm">
+                We have recommended suitable topic for your survey based on your
+                entered prompt
+              </p>
+            </div>
 
-      {isLoading && (
-        <IsLoadingModal openModal={isLoading} modalSize={"lg"}>
-          <div className="flex flex-col text-center gap-2">
-            <Image src={stars} alt="stars" className={`h-8 w-auto animate-spin-slow`} />
-            <h2 className="text-lg">Generating Questions for you</h2>
-            <p className="text-sm">Hold on while we do the hard work for you.</p>
+            {topics &&
+              topics?.data.topics.map((topic: string[], index: number) => (
+                <div className="border py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md " key=
+                {index} onClick={(e)=>{
+                  // @ts-ignore
+                  dispatch(updateTitle(e.target.innerHTML))
+                }}>
+                  {topic}
+                </div>
+              ))}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setIsTopicModal(false);
+                handleGenerateQuestion();
+              }}
+              className="mt-5 flex flex-col gap-3"
+            >
+              <label htmlFor="manual-prompt">
+                Manually Enter your preferred topic below:
+              </label>
+              <input
+                type="text"
+                placeholder="Input your survey topic"
+                className="w-full px-3 py-3 border border-[#BDBDBD] rounded-md"
+              />
+              <button
+                className="gradient-border gradient-text px-6 py-3 w-1/3 mx-auto rounded-md flex items-center space-x-2"
+                disabled={!surveyPrompt && !surveyType ? true : false}
+              >
+                <span
+                  className={
+                    !surveyPrompt && !surveyType ? "text-gray-300" : ""
+                  }
+                >
+                 {isLoading ? "Generating..." : "Generate Survey"}
+                </span>
+                <Image src={stars} alt="stars" className={``} />
+              </button>
+            </form>
           </div>
         </IsLoadingModal>
       )}
-
-      {
-        generated && <GeneratedSurvey data={data} onClick={UseAnotherPrompt} />
-      }
+      {isLoadingTopics && <IsGenerating isGeneratingSurveyLoading={isLoadingTopics} />}
+      {isLoading && <IsGenerating isGeneratingSurveyLoading={isLoading} />}
+      {generated && <GeneratedSurvey data={data} onClick={UseAnotherPrompt} />}
     </div>
   );
 };

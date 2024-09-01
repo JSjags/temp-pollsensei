@@ -26,7 +26,7 @@ const customStyles = {
 const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [question, setQuestion] = useState<string>("");
   const [questionType, setQuestionType] = useState<string>("Multi-choice");
-  const [options, setOptions] = useState<string[]>([""]);
+  const [options, setOptions] = useState<string[] | any>([""]);
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -68,6 +68,12 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
       case "Comment":
         setOptions([]);
         break;
+      case "Matrix":
+        setOptions({
+            Head: ["Head 1", "Head 2", "Head 3", "Head 4", "Head 5"],
+            Body: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"]
+          });
+          break;
       default:
         setOptions([""]);
     }
@@ -79,6 +85,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
     { value: "Likert Scale", label: "Likert Scale" },
     { value: "Linear Scale", label: "Linear Scale" },
     { value: "star_rating", label: "Star Rating" },
+    { value: "Matrix", label: "Matrix" },
   ];
 
   return (
@@ -109,7 +116,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 
         {questionType !== "Comment" && (
           <div>
-            {options.map((option, index) => (
+            {options.map((option:any, index:any) => (
               <div key={index} className="flex items-center my-2">
                 <input
                   type="text"
@@ -158,3 +165,25 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 };
 
 export default AddQuestion;
+
+
+// demo usage
+
+
+// {
+//   addquestions && <IsLoadingModal
+//   openModal={addquestions} modalSize={"2xl"}
+//   >
+//      <AddQuestion onCancel={()=>setAddQuestions((prev)=>!prev)} onSave={(question, options, questionType)=>{
+//        const newQuestion = {
+//          Question: question,
+//          "Option type": questionType,
+//          Options:options,
+//      }
+//        dispatch(addQuestion(newQuestion));
+//        setAddQuestions((prev)=>!prev);
+     
+//      }} />
+//    </IsLoadingModal>
+//  }
+

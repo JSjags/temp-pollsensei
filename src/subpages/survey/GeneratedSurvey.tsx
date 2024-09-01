@@ -12,6 +12,11 @@ import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit
 import { useDispatch } from "react-redux";
 import { setQuestionObject } from "@/redux/slices/questions.slice";
 import { useRouter } from "next/navigation";
+import { FaEye } from "react-icons/fa6";
+import PaginationControls from "@/components/common/PaginationControls";
+import MatrixQuestion from "@/components/survey/MatrixQuestion";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface GeneratedSurveyProps {
   data: any;
@@ -25,9 +30,20 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   const [questions, setQuestions] = useState(data?.data?.response || []);
   const router = useRouter();
   const dispatch = useDispatch();
+  const [itemsPerPage, setItemsPerPage] = useState(4);
+  const [currentPage, setCurrentPage] = useState(1);
+  const surveyTitle = useSelector((state:RootState)=>state?.question?.title)
+  const surveyDescription = useSelector((state:RootState)=>state?.question?.description)
+
+  const currentResult = questions?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+const totalPages = Math.ceil(questions.length / itemsPerPage);
 
   console.log(data?.data);
   console.log(questions);
+  console.log(currentResult);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -55,9 +71,10 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   const handleEdit = () => {
     dispatch(
       setQuestionObject({
-        title: "Survey Title Goes Here",
+        title: surveyTitle,
         conversation_id: data?.data?.conversation_id,
         questions: questions,
+        description:surveyDescription,
       })
     );
     router.push("/surveys/edit-survey");
@@ -92,11 +109,11 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
         <div className="pb-10 w-2/3 flex flex-col">
           <div className="text-start pb-5">
             <p className="font-bold text-[#7A8699]">Survey Topic</p>
-            <h2 className="text-[1.5rem] font-normal">{data?.data.prompt}</h2>
+            <h2 className="text-[1.5rem] font-normal">{surveyTitle}</h2>
           </div>
           <div className="text-start">
             <p className="font-bold text-[#7A8699]">Survey description</p>
-            <h2>{data?.data.description}</h2>
+            <h2>{surveyDescription}</h2>
           </div>
           <div className="flex justify-between items-center pt-8 pb-5">
             <p className="text-sm">Question</p>
@@ -135,7 +152,17 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                               question={item.Question}
                               questionType={item["Option type"]}
                             />
-                          ) : null}
+                          ) :
+                          item["Option type"] === "Comment" ? (
+                            <MatrixQuestion
+                              key={index}
+                              index={index + 1}
+                              options={item.Options}
+                              question={item.Question}
+                              questionType={item["Option type"]}
+                            />
+                          ) :
+                           null}
                         </div>
                       )}
                     </Draggable>
@@ -145,9 +172,31 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
               )}
             </Droppable>
           </DragDropContext>
+
+          <div className="flex justify-between items-center pt-5 pb-10">
+            <div className="">
+            <button
+        className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
+        type="button"
+        onClick={handleEdit}
+      >
+        <FaEye className="inline-block mr-2" />
+         Preview
+      </button>
+            </div>
+            <div className="mt-6 sm:mt-8">
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setItemsPerPage={setItemsPerPage}
+            onPageChange={setCurrentPage}
+            itemsPerPage={itemsPerPage}
+          />
+        </div>
+          </div>
         </div>
 
-        <div
+        {/* <div
           className={`w-1/3 ${
             isSidebarOpen ? "flex flex-col" : "hidden"
           } gap-4`}
@@ -181,7 +230,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
               />
             </IsLoadingModal>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );
