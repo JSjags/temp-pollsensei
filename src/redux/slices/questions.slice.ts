@@ -6,7 +6,10 @@ const initialState = {
   conversation_id: '',
   questions: [],
   description:'',
+  survey_type:'',
   section:[],
+  sectionTopic:'',
+  sectionDescription:'',
 };
 
 const questionSlice = createSlice({
@@ -19,7 +22,10 @@ const questionSlice = createSlice({
         conversation_id: action.payload.conversation_id,
         questions: action.payload.questions,
         description: action.payload.description,
-        section: action.payload.section,
+        survey_type: action.payload.survey_type,
+        section: action.payload.section || [],
+        sectionTopic: action.payload.sectionTopic,
+        sectionDescription: action.payload.sectionDescription,
       };
     },
     updateTitle: (state, action) => {
@@ -27,6 +33,15 @@ const questionSlice = createSlice({
     },
     updateDescription: (state, action) => {
       state.description = action.payload;
+    },
+    updateSurveyType: (state, action) => {
+      state.survey_type = action.payload;
+    },
+    updateSectionDescription: (state, action) => {
+      state.sectionDescription = action.payload;
+    },
+    updateSectionTopic: (state, action) => {
+      state.sectionTopic = action.payload;
     },
     updateConversationId: (state, action) => {
       state.conversation_id = action.payload;
@@ -38,7 +53,12 @@ const questionSlice = createSlice({
       state.questions.push(action.payload as never);
     },
     addNewSection: (state, action) => {
+      // state.section.push(action.payload as never);
+      if (!state.section) {
+        state.section = [];
+      }
       state.section.push(action.payload as never);
+
     },
     deleteQuestion: (state, action) => {
       state.questions.splice(action.payload, 1);
@@ -55,6 +75,9 @@ export const {
   addNewSection,
   deleteQuestion,
   updateDescription,
+  updateSurveyType,
+  updateSectionDescription,
+  updateSectionTopic,
 } = questionSlice.actions;
 
 export default questionSlice.reducer;

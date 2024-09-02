@@ -6,7 +6,7 @@ import { defaultBg, neon, sparkly } from "@/assets/images";
 import { IoMdCloudUpload } from "react-icons/io";
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
-import { saveHeaderUrl, saveLogoUrl, saveTheme } from "@/redux/slices/theme.slice";
+import { saveBodyText, saveColorTheme, saveHeaderText, saveHeaderUrl, saveLogoUrl, saveQuestionText, saveTheme } from "@/redux/slices/theme.slice";
 import { useDispatch } from "react-redux";
 import { useAddSurveyHeaderMutation } from "@/services/survey.service";
 import { toast } from "react-toastify";
@@ -29,12 +29,12 @@ const StyleEditor = () => {
   const dispatch = useDispatch();
   const [addSurveyHeader, { data:response, isSuccess , isLoading}] = useAddSurveyHeaderMutation()
   const theme = useSelector((state: RootState) => state?.themes?.theme);
-  const [headerFont, setHeaderFont] = useState({ font: "Helvetica", size: 24 });
+  const [headerFont, setHeaderFont] = useState({ name: "Helvetica", size: 24 });
   const [questionFont, setQuestionFont] = useState({
-    font: "Helvetica",
+    name: "Helvetica",
     size: 18,
   });
-  const [bodyFont, setBodyFont] = useState({ font: "Helvetica", size: 16 });
+  const [bodyFont, setBodyFont] = useState({ name: "Helvetica", size: 16 });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
   const [color, setColor] = useState("#ff5722");
@@ -48,10 +48,18 @@ const StyleEditor = () => {
   
 
   const sizeOptions: SizeOption[] = [
+    { value: 32, label: 32 },
+    { value: 30, label: 30 },
+    { value: 28, label: 28 },
+    { value: 26, label: 26 },
     { value: 24, label: 24 },
+    { value: 22, label: 22 },
+    { value: 20, label: 20 },
     { value: 18, label: 18 },
     { value: 16, label: 16 },
-    // Add more sizes here...
+    { value: 14, label: 14 },
+    { value: 12, label: 12 },
+    { value: 10, label: 10 },
   ];
 
   const handleParentClick = (inputRef: React.RefObject<HTMLInputElement>) => {
@@ -136,19 +144,25 @@ const StyleEditor = () => {
           <div className="flex gap-2 items-center w-full">
             <Select
               options={fontOptions}
-              value={fontOptions.find((opt) => opt.value === headerFont.font)}
+              value={fontOptions.find((opt) => opt.value === headerFont.name)}
               onChange={(opt) =>
-                setHeaderFont({ ...headerFont, font: opt?.value || "Helvetica" })
-              }
+              {  
+                setHeaderFont({ ...headerFont, name: opt?.value || "Helvetica" })
+                dispatch(saveHeaderText(headerFont))
+              }}
               className="w-[80%]"
+              classNamePrefix={`header_font`}
             />
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === headerFont.size)}
               onChange={(opt) =>
+              {
                 setHeaderFont({ ...headerFont, size: opt?.value || 24 })
-              }
+                dispatch(saveHeaderText(headerFont))
+              }}
               className="w-[20%]"
+              classNamePrefix={`header_font`}
             />
           </div>
         </div>
@@ -157,19 +171,25 @@ const StyleEditor = () => {
           <div className="flex gap-2 items-center w-full">
             <Select
               options={fontOptions}
-              value={fontOptions.find((opt) => opt.value === questionFont.font)}
+              value={fontOptions.find((opt) => opt.value === questionFont.name)}
               onChange={(opt) =>
-                setQuestionFont({ ...questionFont, font: opt?.value || "Helvetica" })
-              }
+              {
+                setQuestionFont({ ...questionFont, name: opt?.value || "Helvetica" })
+                dispatch(saveQuestionText(questionFont))
+              }}
               className="w-[80%]"
+              classNamePrefix={`question_font`}
             />
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === questionFont.size)}
               onChange={(opt) =>
+              {
                 setQuestionFont({ ...questionFont, size: opt?.value || 18 })
-              }
+                dispatch(saveQuestionText(questionFont))
+              }}
               className="w-[20%]"
+              classNamePrefix={`question_font`}
             />
           </div>
         </div>
@@ -178,19 +198,26 @@ const StyleEditor = () => {
           <div className="flex gap-2 items-center w-full">
             <Select
               options={fontOptions}
-              value={fontOptions.find((opt) => opt.value === bodyFont.font)}
+              value={fontOptions.find((opt) => opt.value === bodyFont.name)}
               onChange={(opt) =>
-                setBodyFont({ ...bodyFont, font: opt?.value || "Helvetica" })
-              }
+              {
+                setBodyFont({ ...bodyFont, name: opt?.value || "Helvetica" })
+                dispatch(saveBodyText(bodyFont))
+              }}
               className="w-[80%]"
+              classNamePrefix={`body_font`}
+
             />
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === bodyFont.size)}
               onChange={(opt) =>
+              {
                 setBodyFont({ ...bodyFont, size: opt?.value || 16 })
-              }
+                dispatch(saveBodyText(bodyFont))
+              }}
               className="w-[20%]"
+              classNamePrefix={`body_font`}
             />
           </div>
         </div>
@@ -201,7 +228,10 @@ const StyleEditor = () => {
         <div className="pt-5">
           <TwitterPicker
             color={color}
-            onChangeComplete={(newColor) => setColor(newColor.hex)}
+            onChangeComplete={(newColor) =>{
+               setColor(newColor.hex)
+               dispatch(saveColorTheme(color))
+              }}
             className="w-full pt-4"
             width="100%"
             triangle="hide"

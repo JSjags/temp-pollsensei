@@ -4,7 +4,7 @@ import LinearScaleQuestion from "@/components/survey/LinearScaleQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
-import { addQuestion, deleteQuestion, updateQuestions,  addNewSection, setQuestionObject, } from "@/redux/slices/questions.slice";
+import { addQuestion, deleteQuestion, updateQuestions } from "@/redux/slices/questions.slice";
 import { RootState } from "@/redux/store";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -21,10 +21,9 @@ import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
 import { VscLayersActive } from "react-icons/vsc";
-import CreateNewSection from "./CreateNewSection";
 
 
-const EditSurvey = () => {
+const Preview = () => {
   const question = useSelector((state: RootState) => state.question);
   const headerUrl = useSelector((state: RootState) => state?.themes?.headerUrl);
   const logoUrl = useSelector((state: RootState) => state?.themes?.logoUrl);
@@ -37,7 +36,6 @@ const EditSurvey = () => {
   const surveyTitle = useSelector((state: RootState) => state?.question?.title);
   const surveyDescription = useSelector((state: RootState) => state?.question?.description);
   const survey_type = useSelector((state: RootState) => state?.question?.survey_type);
-  const section = useSelector((state: RootState) => state?.question?.section);
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -46,8 +44,7 @@ const EditSurvey = () => {
     generateSingleSurvey,
     { data: newSingleSurvey, isLoading: generatingSingleSurvey, isSuccess: newQuestionGenerate},
   ] = useGenerateSingleSurveyMutation();
-  const [isNewSection, setIsNewSection] = useState(true);
-
+  console.log(question);
 
   const EditQuestion = (index: number) => {
     setEditIndex(index);
@@ -97,7 +94,6 @@ const EditSurvey = () => {
     }
   };
   
-  console.log(section)
 
   useEffect(() => {
     if (newQuestionGenerate && newSingleSurvey?.data?.response) {
@@ -111,24 +107,6 @@ const EditSurvey = () => {
     }
   }, [dispatch, newQuestionGenerate, newSingleSurvey]);
   
-  const handleNewSection = () => {
-    const currentQuestions = question.questions;
-    
-    if (currentQuestions.length > 0) {
-      
-      dispatch(addNewSection({ questions: currentQuestions }));
-
-      // Reset the questions state
-      dispatch(setQuestionObject({
-        ...question,
-        questions: [],
-      }));
-      toast.success("New section created successfully");
-      setIsNewSection(false);
-    } else {
-      toast.warn("No questions to add to a new section");
-    }
-  };
   
   const handleSurveyCreation =async()=>{
     const surveyData = {
@@ -143,7 +121,7 @@ const EditSurvey = () => {
       logo_url: logoUrl,
       header_url: headerUrl,
       generated_by: generateBy,
-      sections:question.section,
+      sections:[]
     }
     try{
       console.log(surveyData)
@@ -152,13 +130,10 @@ const EditSurvey = () => {
     };
   }
 
-console.log(question)
-
   return (
-    <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
-      <div className={`${theme} flex justify-between gap-10 w-full`}>
-        <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
-       {isNewSection ? <>
+    <div className={` flex flex-col gap-5 pl-16`}>
+      <div className={`${theme} flex justify-center items-center mx-auto gap-10 w-[80%]`}>
+        <div className={` w- flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}>
           {logoUrl ? (
             <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
               <Image
@@ -199,9 +174,9 @@ console.log(question)
 
           <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
           <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${headerText?.size}px`, fontFamily:`${headerText?.name}` }}>{surveyTitle}</h2>
-          <p style={{fontSize:`${bodyText?.size}px`, fontFamily:`${bodyText?.name}` }}>{surveyDescription}</p>
+          <p>{surveyDescription}</p>
           <div className="flex justify-end">
-            {/* <button className="rounded-full border px-5 py-1" >Edit</button> */}
+            <button className="rounded-full border px-5 py-1" >Edit</button>
           </div>
           </div>
           {question?.questions?.map((item: any, index: number) => (
@@ -280,8 +255,8 @@ console.log(question)
               ) : null}
             </div>
           ))}
-          <div className="flex justify-between items-center">
-            <div className="flex gap-2 items-center">
+          <div className="flex justify-between items-center pb-10">
+            {/* <div className="flex gap-2 items-center">
               <button
                 className="bg-white rounded-full px-5 py-1"
                 onClick={handleGenerateSingleQuestion}
@@ -298,27 +273,18 @@ console.log(question)
                   )
                 }
               </button>
-              <div className="bg-white rounded-full px-5 py-1" onClick={handleNewSection}>
+              <div className="bg-white rounded-full px-5 py-1">
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
               </div>
-              {/* <div className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
+              <div className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
                 <VscLayersActive className="inline-block mr-2" />
                 Publish Survey
-              </div> */}
-            </div>
-            <div>Pagination</div>
+              </div>
+            </div> */}
+            <div className="flex justify-end">Pagination</div>
           </div>
    
-          <div className=" rounded-md flex flex-col justify-center w-[16rem] py-5 text-center">
-          <button
-            className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-            type="button"
-            onClick={handleSurveyCreation}
-          >
-            Continue
-          </button>
-          </div>
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
               <p>Form created by</p>
@@ -328,16 +294,11 @@ console.log(question)
               Remove watermark
             </span>
           </div>
-          </> : <CreateNewSection /> }
         </div>
-        <div
-          className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
-        >
-          {isSidebar ? <StyleEditor /> : <QuestionType />}
-        </div>
+
       </div>
     </div>
   );
 };
 
-export default EditSurvey;
+export default Preview;

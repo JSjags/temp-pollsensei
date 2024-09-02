@@ -5,6 +5,7 @@ import ReduxContext from "@/contexts/ReduxContext";
 import { cn } from "@/lib/utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AOSInit } from "@/components/ui/Aos";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <AOSInit />
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",

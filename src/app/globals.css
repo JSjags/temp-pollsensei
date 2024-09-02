@@ -418,3 +418,12 @@ background-position: center;
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   border-radius: 10px;
 }
+
+
+
+
+.header_font__indicator-separator, 
+.question_font__indicator-separator, 
+.body_font__indicator-separator{
+display: none !important;
+}

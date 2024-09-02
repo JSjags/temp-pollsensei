@@ -2,6 +2,8 @@ import { draggable } from "@/assets/images";
 import Image from "next/image";
 import React from "react";
 import { usePathname } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 
 interface MultiChoiceQuestionProps {
@@ -25,11 +27,13 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   index,
 }) => {
   const pathname = usePathname();
+  const questionText = useSelector((state:RootState)=>state?.themes?.questionText)
+
 
 
 
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded">
+    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded" style={{fontFamily:`${questionText?.name}`, fontSize:`${questionText?.size}px`}}>
       <Image src={draggable} alt="draggable icon" className={pathname === "/surveys/edit-survey" ? "invisible" : "visible"} />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">

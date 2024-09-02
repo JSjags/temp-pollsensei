@@ -22,7 +22,7 @@ import IsLoadingModal from "@/components/modals/IsLoadingModal";
 import GeneratedSurvey from "./GeneratedSurvey";
 import IsGenerating from "@/components/modals/IsGenerating";
 import { useDispatch } from "react-redux";
-import { updateDescription, updateTitle } from "@/redux/slices/questions.slice";
+import { updateDescription, updateSurveyType, updateTitle } from "@/redux/slices/questions.slice";
 import { saveGeneratedBy } from "@/redux/slices/theme.slice";
 
 const CreateSurveyPage = () => {
@@ -32,6 +32,7 @@ const CreateSurveyPage = () => {
   const [oneMoreThing, setOneMoreThing] = useState(false);
   const [promptForm, setPromptForm] = useState(false);
   const [isTopicModal, setIsTopicModal] = useState(false);
+  const [manualTopic, setManualTopic] = useState('');
   const navigate = useRouter();
   const dispatch = useDispatch();
   const [surveyType, setSurveyType] = useState("");
@@ -48,10 +49,19 @@ const CreateSurveyPage = () => {
     setSelectedDiv(userType);
   };
 
+  const maxCharacters = 3000;
+
+  // const handleSurveyType = (userType: any, prompt: string) => {
+  //   setSelectedDiv(userType);
+  //   setSelectedSurveyType(prompt);
+  // };
+
   const handleSurveyType = (userType: any, prompt: string) => {
     setSelectedDiv(userType);
     setSelectedSurveyType(prompt);
+    setSurveyType(prompt); 
   };
+  
 
   const handlePathClick = () => {
     if (selectedDiv) {
@@ -88,6 +98,7 @@ const CreateSurveyPage = () => {
       user_query: surveyPrompt,
       survey_type: selectedSurveyType,
     })
+
     try {
       await createAiSurvey({
         user_query: surveyPrompt,
@@ -115,6 +126,15 @@ const CreateSurveyPage = () => {
     setGenerated((prev) => !prev);
     setPromptForm(!promptForm);
   };
+
+  // const handleManualTopicSubmit = (e:any) => {
+  //   e.preventDefault();
+  //   if (manualTopic.trim()) {
+  //     dispatch(updateTitle(manualTopic));
+  //   }
+  //   setIsTopicModal(false);
+  //   handleGenerateQuestion();
+  // };
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center">
@@ -196,7 +216,9 @@ const CreateSurveyPage = () => {
               className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-6 text-center ${
                 selectedDiv === 3 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() => handleSurveyType(3, "qualitative")}
+              onClick={() => {
+                handleSurveyType(3, "qualitative")
+              }}
             >
               <Image
                 src={qualitative_survey}
@@ -232,6 +254,8 @@ const CreateSurveyPage = () => {
                 type="button"
                 onClick={() => {
                   setSurveyType("qualitative");
+                  // dispatch(updateSurveyType("qualitative"))
+                  dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
                   setPromptForm(true);
@@ -278,6 +302,8 @@ const CreateSurveyPage = () => {
                 type="button"
                 onClick={() => {
                   setSurveyType("quantitative");
+                  // dispatch(updateSurveyType("quantitative"))
+                  dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
                   setPromptForm(true);
@@ -290,7 +316,7 @@ const CreateSurveyPage = () => {
               className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 relative ${
                 selectedDiv === 5 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() => handleSurveyType(5, "both")}
+              onClick={() => handleSurveyType(5, "Qualitative & Quantitative")}
             >
               <Image
                 src={quantitative_qualitative_survey}
@@ -325,6 +351,8 @@ const CreateSurveyPage = () => {
                 type="button"
                 onClick={() => {
                   setSurveyType("Qualitative & Quantitative");
+                  // dispatch(updateSurveyType("Qualitative & Quantitative"))
+                  dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
                   setPromptForm(true);
@@ -354,10 +382,14 @@ const CreateSurveyPage = () => {
             className={`flex flex-col mx-auto w-full md:w-2/3 lg:w-1/2 text-start justify-start gap-2`}
             onSubmit={(e) => {
               e.preventDefault();
+              if (manualTopic.trim()) {
+                dispatch(updateTitle(manualTopic));
+              }
               handleGenerateTopics();
             }}
           >
             <label htmlFor="Your Prompt">Your Prompt</label>
+            <div className="flex flex-col gap-2 relative">
             <textarea
               value={surveyPrompt}
               name=""
@@ -365,8 +397,20 @@ const CreateSurveyPage = () => {
               placeholder="Write your prompt"
               className="rounded-md py-2 px-3 border w-full h-36 border-[#BDBDBD]"
               style={{ border: "2px  solid #BDBDBD" }}
-              onChange={(e) => setSurveyPrompt(e.target.value)}
+              onChange={(e) =>{ 
+                if (e.target.value.length === 3000) {
+                  toast.warning(
+                      "Prompt shouldn't exceed 3000 characters"
+                  );
+              }
+                setSurveyPrompt(e.target.value)}}
+              maxLength={3000}
             ></textarea>
+             <div className="text-sm text-gray-500 mt-1 absolute bottom-2 right-4">
+        {surveyPrompt.length}/{maxCharacters} characters
+      </div>
+
+            </div>
             <button
               className="gradient-border gradient-text px-6 py-3 w-1/3 rounded-lg flex items-center space-x-2"
               disabled={!surveyPrompt ? true : false}
@@ -468,6 +512,8 @@ const CreateSurveyPage = () => {
                 Manually Enter your preferred topic below:
               </label>
               <input
+                value={manualTopic}
+                onChange={(e) => setManualTopic(e.target.value)}
                 type="text"
                 placeholder="Input your survey topic"
                 className="w-full px-3 py-3 border border-[#BDBDBD] rounded-md"

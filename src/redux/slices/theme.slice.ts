@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface TextStyle {
   name: string;
-  size: number;
+  size: string | number;
 }
 
 
@@ -22,7 +22,7 @@ interface SurveyState {
 
 const initialState: SurveyState = {
   theme: 'default',
-  headerText: null,
+  headerText: {name:"Helvetica", size:"18"},
   questionText: null,
   bodyText: null,
   colorTheme: null,

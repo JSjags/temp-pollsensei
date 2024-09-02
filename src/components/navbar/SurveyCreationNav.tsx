@@ -1,6 +1,11 @@
 "use client";
 
-import { IoArrowBackSharp, IoCheckmarkDoneCircle, IoSettingsOutline } from "react-icons/io5";
+import {
+  IoArrowBackSharp,
+  IoCheckmarkDoneCircle,
+  IoSettingsOutline,
+  IoEyeOutline,
+} from "react-icons/io5";
 import Link from "next/link";
 import BreadcrumsIcon from "../ui/BreadcrumsIcon";
 import Image from "next/image";
@@ -28,7 +33,11 @@ const SurveyCreationNav = () => {
 
       <nav className="flex justify-between flex-wrap items-center">
         <Link href={""} className="flex items-center">
-          <BreadcrumsIcon icon={<IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />} />
+          <BreadcrumsIcon
+            icon={
+              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+            }
+          />
           <span className="ml-3 text-sm ">Design</span>
         </Link>
         <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
@@ -54,9 +63,21 @@ const SurveyCreationNav = () => {
         <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
       </nav>
 
-      <button className="border-none flex items-center">
-        <IoSettingsOutline className="mr-3" /> Survey Settings
-      </button>
+      <div className="flex justify-between items-center gap-3">
+        <button
+          className={`border-none flex items-center ${
+            path === "/surveys/preview-survey" ? "invisible" : "visible"
+          }`}
+          onClick={() => {
+            router.push("/surveys/preview-survey");
+          }}
+        >
+          <IoEyeOutline className="mr-1" /> Preview
+        </button>
+        <button className="border-none flex items-center">
+          <IoSettingsOutline className="mr-1" /> Survey Settings
+        </button>
+      </div>
     </div>
   );
 };

@@ -17,6 +17,7 @@ import PaginationControls from "@/components/common/PaginationControls";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
 
 interface GeneratedSurveyProps {
   data: any;
@@ -33,6 +34,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const surveyTitle = useSelector((state:RootState)=>state?.question?.title)
+  const headerText = useSelector((state:RootState)=>state?.themes?.headerText)
   const surveyDescription = useSelector((state:RootState)=>state?.question?.description)
 
   const currentResult = questions?.slice(
@@ -109,7 +111,7 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
         <div className="pb-10 w-2/3 flex flex-col">
           <div className="text-start pb-5">
             <p className="font-bold text-[#7A8699]">Survey Topic</p>
-            <h2 className="text-[1.5rem] font-normal">{surveyTitle}</h2>
+            <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${headerText?.size}px`, fontFamily:`${headerText?.name}` }}>{surveyTitle}</h2>
           </div>
           <div className="text-start">
             <p className="font-bold text-[#7A8699]">Survey description</p>
@@ -120,7 +122,7 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
             <p className="text-sm">Question Type</p>
           </div>
           <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="questions">
+            <StrictModeDroppable droppableId="questions">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {questions.map((item: any, index: any) => (
@@ -170,7 +172,7 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
                   {provided.placeholder}
                 </div>
               )}
-            </Droppable>
+            </StrictModeDroppable>
           </DragDropContext>
 
           <div className="flex justify-between items-center pt-5 pb-10">
