@@ -23,7 +23,7 @@ import settingsActive from "../../assets/images/settingsActive.svg";
 import help from "../../assets/images/help.svg";
 import helpActive from "../../assets/images/helpActive.svg";
 import "./styles.css";
-import { generateInitials } from "@/lib/utils";
+import { cn, generateInitials } from "@/lib/utils";
 import { pollsensei_new_logo } from "@/assets/images";
 import MilestoneCTA from "@/subpages/milestone/MilestoneCTA";
 import DesktopNavigation from "./DesktopNavigation";
@@ -64,8 +64,13 @@ const Navbar = () => {
   };
 
   return (
-    <div className="w-full bg-white">
-      <div className="border-b-2">
+    <div
+      className={cn(
+        "w-full bg-white shadow-md drop-shadow-sm sticky top-0 z-[1000]",
+        isSidebarOpen && "h-screen lg:h-auto"
+      )}
+    >
+      <div className="border-b-[0.5px]">
         <header className="container flex items-center justify-between py-5 px-5">
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
             <Image src={pollsensei_new_logo} alt="Logo" />
@@ -191,7 +196,7 @@ const Navbar = () => {
             </svg>
           </button>
         </div>
-        <nav className="mt-4">
+        <nav className="mt-4 bg-white">
           <ul className="space-y-2">
             {[
               {

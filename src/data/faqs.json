@@ -1,0 +1,20 @@
+{
+  "faqs": [
+    {
+      "question": "How do I create a survey?",
+      "answer": "To create a survey, simply click on the 'Create Survey' button, enter a title and brief description, and then add questions using our intuitive drag-and-drop interface. Choose from various question types, and customize your survey as needed!"
+    },
+    {
+      "question": "Can I customize the survey design and layout?",
+      "answer": "Yes, you can customize the survey design and layout. Our platform offers a range of customization options including color schemes, fonts, and layout templates. You can also add your logo and brand elements to create a personalized look that matches your organization's style."
+    },
+    {
+      "question": "How do I share my survey with respondents (e.g., link, email, social media)?",
+      "answer": "Sharing your survey is easy and flexible. Once your survey is ready, you can share it via a unique link, embed it on your website, or use our integrated email system to send invitations. For social media, you can directly share the survey link on platforms like Facebook, Twitter, or LinkedIn. We also provide QR codes for easy mobile access."
+    },
+    {
+      "question": "Is my survey data kept confidential and secure?",
+      "answer": "Yes, we take data security and confidentiality very seriously. All survey data is encrypted both in transit and at rest. We use industry-standard security protocols and regularly update our systems to protect against vulnerabilities. Your data is stored in secure servers, and we never share or sell your information to third parties. You have full control over your data and can delete it at any time."
+    }
+  ]
+}

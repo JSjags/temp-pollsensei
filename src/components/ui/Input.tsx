@@ -2,12 +2,14 @@ import React from "react";
 import { Field, FieldRenderProps } from "react-final-form";
 import "./style.css";
 import { FormApi } from "final-form";
+import { cn } from "@/lib/utils";
 
 interface InputProps {
   label: string;
   name: string;
   type: string;
   placeholder?: string;
+  className?: string;
   form: FormApi<any, Partial<any>>;
 }
 
@@ -16,6 +18,7 @@ const Input: React.FC<InputProps> = ({
   name,
   type,
   placeholder,
+  className,
   form,
 }) => {
   return (
@@ -28,7 +31,10 @@ const Input: React.FC<InputProps> = ({
           <input
             {...input}
             type={type}
-            className="auth-input focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground"
+            className={cn(
+              "auth-input focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground placeholder:text-foreground/40",
+              className
+            )}
             placeholder={placeholder}
           />
         )}

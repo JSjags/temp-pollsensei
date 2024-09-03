@@ -278,19 +278,19 @@ const ProfilePage: React.FC = () => {
 
                   <div className="w-full flex gap-3 pt-3">
                     <button
-                      className="text-[#898989] border-[#898989] border-2 rounded w-full justify-center"
+                      className="text-[#898989] border-border border w-full justify-center rounded-lg hover:bg-gray-100"
                       type="button"
                       onClick={toggleEdit}
                     >
                       Cancel
                     </button>
                     <button
-                      className="auth-btn w-full justify-center"
+                      className="auth-btn w-full justify-center items-center"
                       type="submit"
                       disabled={submitting || isLoading}
                     >
                       {submitting || isLoading ? (
-                        <ClipLoader size={20} />
+                        <ClipLoader size={20} color="white" />
                       ) : (
                         "Save"
                       )}

@@ -14,6 +14,8 @@ import MembersTable from "./MembersTable";
 import ModalComponent from "../../components/ui/ModalComponent";
 import MultiSelectField from "../../components/ui/MultipleSelect";
 import InviteSuccess from "../../components/ui/InviteSuccess";
+import { RiMailSendLine } from "react-icons/ri";
+import { Fade, Slide } from "react-awesome-reveal";
 
 import {
   useGetTeamMembersQuery,
@@ -21,6 +23,9 @@ import {
 } from "../../services/team.service";
 import { toggle } from "../../redux/slices/invite.slice";
 import Input from "@/components/ui/Input";
+import { Loader2 } from "lucide-react";
+import { multiSelectCustomStyles } from "@/constants/multi-select";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface FormValues {
   name: string;
@@ -49,6 +54,7 @@ const customStyles = {
     color: "#CC9BFD4D",
     outline: "none",
     padding: "12px 0 12px 1.3rem",
+    zIndex: "10000",
   }),
 };
 
@@ -98,32 +104,58 @@ const TeamMembersPage: React.FC = () => {
 
   return (
     <>
-      <div className="container">
-        <div className="px-5 lg:px-0">
-          <div className="flex my-10 items-center justify-between">
-            <div className="flex gap-5 items-center">
-              <h2 className="text-[#333333] font-normal text-[1.5rem]">
-                Team Members
-              </h2>
-              <div className="flex justify-center items-center gap-2 bg-[#828282] rounded-[8px] border-[1px] px- border-[#d9d9d9] w-[40px] h-[40px]">
-                0
+      <div className="container px-2 sm:px-4">
+        <div className="px-0 lg:px-0">
+          <div className="flex my-10 gap-2 sm:gap-6 flex-wrap items-center justify-between">
+            <Fade cascade>
+              <div className="flex gap-5 items-center">
+                <h2 className="text-[#333333] font-normal text-[1.5rem]">
+                  Team Members
+                </h2>
+                <div className="flex justify-center items-center gap-2 bg-border rounded-[8px] border-[1px] bg-[#EAEAEA] size-6 w-fit px-2 text-sm text-[#828282]">
+                  {data?.data?.data === undefined ? (
+                    <Slide direction="left" className="p-0">
+                      <Loader2 className="size-4 animate-spin p-0" />
+                    </Slide>
+                  ) : (
+                    <Slide direction="right">{data?.data?.data.length}</Slide>
+                  )}
+                </div>
               </div>
-            </div>
+            </Fade>
             {data?.data?.data.length > 1 && (
-              <Button label="Invite Member" onClick={handleToggle} />
+              <Slide direction="right" duration={500} triggerOnce>
+                <Button
+                  label={
+                    <div className="flex justify-center items-center">
+                      <span className="hidden sm:inline-block">
+                        Invite Member
+                      </span>{" "}
+                      <span className="sm:hidden">
+                        <RiMailSendLine />
+                      </span>
+                    </div>
+                  }
+                  onClick={handleToggle}
+                  className="h-10 sm:h-12 min-w-fit sm:min-w-[188px]"
+                />
+              </Slide>
             )}
           </div>
           {data?.data?.data.length === 1 && <NoTeam />}
           {data?.data?.data.length > 1 && (
-            <MembersTable
-              members={data?.data?.data}
-              tableState={memberTableState}
-            />
+            <Slide direction="up" duration={500} triggerOnce>
+              <MembersTable
+                members={data?.data?.data}
+                tableState={memberTableState}
+              />
+            </Slide>
           )}
 
-          {isToggled && (
+          <Slide direction="up" duration={200}>
             <ModalComponent
-              title="Add members"
+              title="Add member"
+              titleClassName={"pl-0"}
               openModal={isToggled}
               onClose={handleToggle}
             >
@@ -131,51 +163,69 @@ const TeamMembersPage: React.FC = () => {
                 onSubmit={onSubmit}
                 validate={validateForm}
                 render={({ handleSubmit, form, submitting }) => (
-                  <form onSubmit={handleSubmit} className="w-full">
-                    <Field name="name">
-                      {({ input, meta }) => (
-                        <Input
-                          label="Name"
-                          type="text"
-                          placeholder="Enter your Name"
-                          form={form}
-                          {...input}
-                          // error={meta.touched && meta.error}
-                        />
-                      )}
-                    </Field>
+                  <form onSubmit={handleSubmit} className="w-full relative">
+                    <Fade duration={1000} cascade damping={0.05} triggerOnce>
+                      <Slide
+                        direction="up"
+                        cascade
+                        damping={0.05}
+                        className="[animation-fill-mode:backwards] relative"
+                        triggerOnce
+                      >
+                        <Field name="name">
+                          {({ input, meta }) => (
+                            <Input
+                              label="Name"
+                              type="text"
+                              placeholder="Enter your Name"
+                              form={form}
+                              className="h-12 z-10"
+                              {...input}
+                              // error={meta.touched && meta.error}
+                            />
+                          )}
+                        </Field>
 
-                    <Field name="email">
-                      {({ input, meta }) => (
-                        <Input
-                          label="Email"
-                          type="text"
-                          placeholder="Enter your Email"
-                          form={form}
-                          {...input}
-                          // error={meta.touched && meta.error}
-                        />
-                      )}
-                    </Field>
+                        <Field name="email">
+                          {({ input, meta }) => (
+                            <Input
+                              label="Email"
+                              type="text"
+                              placeholder="Enter your Email"
+                              form={form}
+                              className="h-12 z-10"
+                              {...input}
+                              // error={meta.touched && meta.error}
+                            />
+                          )}
+                        </Field>
 
-                    <Field name="role">
-                      {({ input, meta }) => (
-                        <MultiSelectField
-                          input={input}
-                          meta={{ ...meta, touched: !!meta.touched }}
-                          options={options}
-                          isMulti
-                          styles={customStyles}
-                          placeholder="Select role"
-                          closeMenuOnSelect={false}
-                          className="basic-multi-select rounded-full"
-                          classNamePrefix="role"
-                          label={"Role"}
-                        />
-                      )}
-                    </Field>
+                        <div style={{ zIndex: 100 }}>
+                          <Field name="role">
+                            {({ input, meta }) => (
+                              <MultiSelectField
+                                input={input}
+                                meta={{ ...meta, touched: !!meta.touched }}
+                                options={options}
+                                isMulti
+                                styles={customStyles}
+                                placeholder="Select role"
+                                closeMenuOnSelect={false}
+                                className="basic-multi-select z-20"
+                                classNamePrefix="role"
+                                label={"Role"}
+                                customStyles={multiSelectCustomStyles}
+                              />
+                            )}
+                          </Field>
+                        </div>
+                      </Slide>
+                    </Fade>
 
-                    <div className="flex gap-5 mt-5">
+                    <div
+                      style={{ zIndex: 10 }}
+                      className="flex gap-5 mt-10 z-10"
+                    >
                       <button
                         className="auth-btn w-[1/2] justify-center"
                         type="submit"
@@ -189,14 +239,13 @@ const TeamMembersPage: React.FC = () => {
                       </button>
 
                       <button
-                        className="text-[#5B03B2] border-none "
+                        className="text-[#5B03B2] border-none hover:bg-border px-6 rounded-lg"
                         type="button"
-                        onClick={() => dispatch(toggle())}
+                        onClick={() => setIsToggled((prev) => !prev)}
                       >
                         Cancel
                       </button>
                     </div>
-
                     {isSuccess && (
                       <p className="text-green-600">
                         User invited successfully!
@@ -213,7 +262,8 @@ const TeamMembersPage: React.FC = () => {
                 )}
               />
             </ModalComponent>
-          )}
+          </Slide>
+
           {inviteSucc && (
             <InviteSuccess
               email={email}
