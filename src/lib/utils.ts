@@ -23,3 +23,13 @@ export function generateInitials(name: string): string {
 
   return initials;
 }
+
+export function handleAccountStatus(status: string) {
+  if (status === "Pending") {
+    return "Invited";
+  } else if (status === "Active") {
+    return "Active";
+  } else {
+    return "Removed";
+  }
+}

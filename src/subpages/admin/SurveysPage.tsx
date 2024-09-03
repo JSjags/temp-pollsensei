@@ -9,10 +9,18 @@ import { useState } from "react";
 import search from "../../assets/images/search.svg";
 import { Milestone } from "lucide-react";
 import Milestones from "@/components/survey/Milestones";
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface Props {
+  isVisible: boolean;
+  stage: string;
+}
 
 const SurveysPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isVisible, setIsVisible] = useState(true);
 
   const result = Array.from({ length: 6 }, (_, index) => `Item ${index}`);
 
@@ -25,10 +33,23 @@ const SurveysPage = () => {
 
   return (
     <div>
-      <div className="bg-[url(/assets/milestones-bg.svg)] w-full h-[calc(100vh-150px)]">
-        <div className="">
-          <Milestones stage="2" />
-        </div>
+      <div className="bg-[url(/assets/milestones-bg.svg)] w-full h-[calc(100vh-72px)] lg:h-[calc(100vh-150px)]">
+        <AnimatePresence>
+          {isVisible && (
+            <motion.div
+              initial={{ opacity: 0, scale: 1, y: 100 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1, y: 100 }}
+              transition={{
+                duration: 0.5,
+                ease: [0.43, 0.13, 0.23, 0.96], // Custom easing function for a bouncy effect
+              }}
+              className="p-0 m-0 bg-transparent rounded-lg shadow-lg"
+            >
+              <Milestones stage={"1"} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       {/* <div className="container px-4 sm:px-6 lg:px-8 pb-20">
         <div className="my-6 sm:my-10">

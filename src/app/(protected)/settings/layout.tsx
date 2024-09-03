@@ -8,7 +8,7 @@ export default function ProfileLayout({
 }) {
   return (
     <div className="bg-[#F4F4F4] px-0 lg:px-10 py-6 min-h-screen">
-      <div className="px-5 lg:px-0 lg:flex justify-between gap-3 items-start">
+      <div className="px-2 sm:px-5 lg:px-0 lg:flex justify-between gap-3 items-start">
         <aside className="">
           <SettingsSidebar />
         </aside>

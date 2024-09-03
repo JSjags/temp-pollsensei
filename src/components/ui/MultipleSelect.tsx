@@ -20,6 +20,7 @@ interface MetaProps {
 interface MultiSelectFieldProps {
   input: InputProps;
   meta: MetaProps;
+  customStyles?: object;
   label: string;
   [key: string]: any;
 }
@@ -28,6 +29,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   input,
   meta,
   label,
+  customStyles,
   ...rest
 }) => {
   const handleChange = (
@@ -43,13 +45,15 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
       <Select<Option, true>
         {...input}
         {...rest}
+        styles={customStyles}
         value={input.value}
         onChange={handleChange}
         components={makeAnimated()}
+        className="mt-2"
         isMulti
       />
       {meta.touched && meta.error && (
-        <span className="text-red-600">{meta.error}</span>
+        <span className="text-red-600 text-sm">{meta.error}</span>
       )}
     </div>
   );

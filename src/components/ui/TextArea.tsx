@@ -27,7 +27,7 @@ const TextArea: React.FC<TextAreaProps> = ({
         name={name}
         type={type}
         component="textarea"
-        className="auth-text-area capitalize px-5 pt-5 pb-14 focus:outline-none focus:ring-focus focus:ring-1 font-sans border border-[#E0E0E0]"
+        className="auth-text-area px-5 pt-5 pb-14 focus:outline-none focus:ring-focus focus:ring-1 font-sans border border-[#E0E0E0]"
         placeholder={placeholder}
       />
       {form.getState().submitFailed && form.getState().errors?.[name] && (

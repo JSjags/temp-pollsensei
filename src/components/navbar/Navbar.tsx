@@ -23,7 +23,7 @@ import settingsActive from "../../assets/images/settingsActive.svg";
 import help from "../../assets/images/help.svg";
 import helpActive from "../../assets/images/helpActive.svg";
 import "./styles.css";
-import { generateInitials } from "@/lib/utils";
+import { cn, generateInitials } from "@/lib/utils";
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -37,8 +37,6 @@ const Navbar = () => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
   };
-
-  console.log(user);
 
   useEffect(() => {
     if (path && path.includes("/surveys")) {
@@ -59,8 +57,13 @@ const Navbar = () => {
   };
 
   return (
-    <div className="w-full bg-white">
-      <div className="border-b-2">
+    <div
+      className={cn(
+        "w-full bg-white shadow-md drop-shadow-sm sticky top-0 z-[1000]",
+        isSidebarOpen && "h-screen lg:h-auto"
+      )}
+    >
+      <div className="border-b-[0.5px]">
         <header className="container flex items-center justify-between py-5 px-5">
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
             <Image src={logo} alt="Logo" />
@@ -158,7 +161,7 @@ const Navbar = () => {
 
       {/* Sidebar for mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
+        className={`fixed inset-y-0 left-0 z-[1000000] w-64 h-screen bg-white shadow-lg transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out lg:hidden`}
       >
@@ -187,7 +190,7 @@ const Navbar = () => {
             </svg>
           </button>
         </div>
-        <nav className="mt-4">
+        <nav className="mt-4 bg-white">
           <ul className="space-y-2">
             {[
               {
@@ -241,126 +244,130 @@ const Navbar = () => {
       </div>
 
       {/* Desktop navigation */}
-      <div className="hidden lg:block border-b-2 shadow-md">
-        <nav className="container pt-5 px-5">
-          <ul className="flex items-center gap-10">
-            <Link href="/dashboard">
-              <li
-                onClick={() => handleSetActiveTab("dashboard")}
-                className={`flex flex-col items-center cursor-pointer ${
-                  activeTab == "dashboard"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "dashboard" ? homeActive : homeIcon}
-                    alt="Dashboard Icon"
+      <div className="hidden lg:block border-b-[0.5px]">
+        {!["help-centre"].some((p) => path.includes(p)) && (
+          <nav className="container pt-5 px-5">
+            <ul className="flex items-center gap-10">
+              <Link href="/dashboard">
+                <li
+                  onClick={() => handleSetActiveTab("dashboard")}
+                  className={`flex flex-col items-center cursor-pointer ${
+                    activeTab == "dashboard"
+                      ? "text-[#9D50BB]"
+                      : "text-[#4F5B67] pb-[17px]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src={activeTab == "dashboard" ? homeActive : homeIcon}
+                      alt="Dashboard Icon"
+                    />
+                    <p className={`lg:text-[16px] text-[14px] `}>Dashboard</p>
+                  </div>
+                  <div
+                    className={`${
+                      activeTab == "dashboard" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                   />
-                  <p className={`lg:text-[16px] text-[14px] `}>Dashboard</p>
-                </div>
-                <div
-                  className={`${
-                    activeTab == "dashboard" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/surveys">
-              <li
-                onClick={() => handleSetActiveTab("surveys")}
-                className={`flex flex-col items-center cursor-pointer ${
-                  activeTab == "surveys"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "surveys" ? pieChartActive : pieChartLogo}
-                    alt="Survey Icon"
+                </li>
+              </Link>
+              <Link href="/surveys">
+                <li
+                  onClick={() => handleSetActiveTab("surveys")}
+                  className={`flex flex-col items-center cursor-pointer ${
+                    activeTab == "surveys"
+                      ? "text-[#9D50BB]"
+                      : "text-[#4F5B67] pb-[17px]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src={
+                        activeTab == "surveys" ? pieChartActive : pieChartLogo
+                      }
+                      alt="Survey Icon"
+                    />
+                    <p className="lg:text-[16px] text-[14px]">Surveys</p>
+                  </div>
+                  <div
+                    className={`${
+                      activeTab == "surveys" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                   />
-                  <p className="lg:text-[16px] text-[14px]">Surveys</p>
-                </div>
-                <div
-                  className={`${
-                    activeTab == "surveys" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/team-members">
-              <li
-                onClick={() => handleSetActiveTab("team-members")}
-                className={`flex items-center flex-col cursor-pointer ${
-                  activeTab == "team-members"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "team-members" ? usersActive : users}
-                    alt="Team Icon"
+                </li>
+              </Link>
+              <Link href="/team-members">
+                <li
+                  onClick={() => handleSetActiveTab("team-members")}
+                  className={`flex items-center flex-col cursor-pointer ${
+                    activeTab == "team-members"
+                      ? "text-[#9D50BB]"
+                      : "text-[#4F5B67] pb-[17px]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src={activeTab == "team-members" ? usersActive : users}
+                      alt="Team Icon"
+                    />
+                    <p className="lg:text-[16px] text-[14px]">Team members</p>
+                  </div>
+                  <div
+                    className={`${
+                      activeTab == "team-members" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                   />
-                  <p className="lg:text-[16px] text-[14px]">Team members</p>
-                </div>
-                <div
-                  className={`${
-                    activeTab == "team-members" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/settings/profile">
-              <li
-                onClick={() => handleSetActiveTab("settings")}
-                className={`flex items-center flex-col cursor-pointer ${
-                  activeTab == "settings"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "settings" ? settingsActive : settings}
-                    alt="Settings Icon"
+                </li>
+              </Link>
+              <Link href="/settings/profile">
+                <li
+                  onClick={() => handleSetActiveTab("settings")}
+                  className={`flex items-center flex-col cursor-pointer ${
+                    activeTab == "settings"
+                      ? "text-[#9D50BB]"
+                      : "text-[#4F5B67] pb-[17px]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src={activeTab == "settings" ? settingsActive : settings}
+                      alt="Settings Icon"
+                    />
+                    <p className="lg:text-[16px] text-[14px]">Settings</p>
+                  </div>
+                  <div
+                    className={`${
+                      activeTab == "settings" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                   />
-                  <p className="lg:text-[16px] text-[14px]">Settings</p>
-                </div>
-                <div
-                  className={`${
-                    activeTab == "settings" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-            <Link href="/help-centre">
-              <li
-                onClick={() => handleSetActiveTab("help-centre")}
-                className={`flex flex-col items-center cursor-pointer ${
-                  activeTab == "help-centre"
-                    ? "text-[#9D50BB]"
-                    : "text-[#4F5B67] pb-[17px]"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={activeTab == "help-centre" ? helpActive : help}
-                    alt="Help Icon"
+                </li>
+              </Link>
+              <Link href="/help-centre">
+                <li
+                  onClick={() => handleSetActiveTab("help-centre")}
+                  className={`flex flex-col items-center cursor-pointer ${
+                    activeTab == "help-centre"
+                      ? "text-[#9D50BB]"
+                      : "text-[#4F5B67] pb-[17px]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src={activeTab == "help-centre" ? helpActive : help}
+                      alt="Help Icon"
+                    />
+                    <p className="lg:text-[16px] text-[14px]">Help Centre</p>
+                  </div>
+                  <div
+                    className={`${
+                      activeTab == "help-centre" ? "block" : "hidden"
+                    } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
                   />
-                  <p className="lg:text-[16px] text-[14px]">Help Centre</p>
-                </div>
-                <div
-                  className={`${
-                    activeTab == "help-centre" ? "block" : "hidden"
-                  } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-                />
-              </li>
-            </Link>
-          </ul>
-        </nav>
+                </li>
+              </Link>
+            </ul>
+          </nav>
+        )}
       </div>
     </div>
   );

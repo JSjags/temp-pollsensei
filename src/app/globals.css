@@ -180,7 +180,7 @@ a.support {
 }
 .auth-btn {
   background: linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
-  border-radius: 6px;
+  border-radius: 10px;
   padding: 14px 20px !important;
   /* font-family: Inter; */
   font-size: 16px;
@@ -256,6 +256,13 @@ input[type="number"] {
   line-height: 24px;
   color: #333333;
 }
+.auth-text-area {
+  /* padding: 40px; */
+  border-radius: 6px;
+  /* opacity: 0px; */
+  color: #333333;
+  padding: 20px;
+}
 .auth-input {
   padding: 20px;
   border-radius: 6px;
@@ -263,6 +270,7 @@ input[type="number"] {
 }
 .auth-text-area {
   /* padding: 40px; */
+  padding: 20px;
   border-radius: 6px;
   color: #333333;
 }
