@@ -16,12 +16,14 @@ import { pollsensei_new_logo, sparkly, stars } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { IoDocumentOutline } from "react-icons/io5";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
-import { useGenerateSingleSurveyMutation } from "@/services/survey.service";
+import { useCreateSurveyMutation, useGenerateSingleSurveyMutation } from "@/services/survey.service";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
 import { VscLayersActive } from "react-icons/vsc";
 import CreateNewSection from "./CreateNewSection";
+import { useRouter } from "next/navigation";
+
 
 
 const EditSurvey = () => {
@@ -40,6 +42,8 @@ const EditSurvey = () => {
   const section = useSelector((state: RootState) => state?.question?.section);
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
+  const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation()
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [
@@ -90,7 +94,7 @@ const EditSurvey = () => {
       await generateSingleSurvey({
         conversation_id: question.conversation_id,
       });
-      toast.success("Survey created successfully");
+      toast.success("Single survey added successfully");
     } catch (e) {
       toast.error("Failed to create survey");
       console.error(e);
@@ -132,7 +136,8 @@ const EditSurvey = () => {
   
   const handleSurveyCreation =async()=>{
     const surveyData = {
-      survey_type: survey_type,
+      survey_type: "quantitative",
+      // survey_type: survey_type,
       topic:surveyTitle,
       theme:theme,
       description: surveyDescription,
@@ -143,14 +148,29 @@ const EditSurvey = () => {
       logo_url: logoUrl,
       header_url: headerUrl,
       generated_by: generateBy,
-      sections:question.section,
+      // sections:question.section,
+      sections:question.section.length === 0 ? ({questions:question.questions }): question.section,
     }
     try{
       console.log(surveyData)
+      await createSurvey(
+        surveyData
+      );
     }catch(e){
       console.log(e)
     };
   }
+
+  useEffect(()=>{
+    if(isSuccess){
+      toast.success("Survey created successfully")
+      router.push('/surveys')
+    }
+
+    if(isError || error){
+      toast.error("Failed to create survey")
+    }
+  }, [isSuccess, isError, error]);
 
 console.log(question)
 
