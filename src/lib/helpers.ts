@@ -27,7 +27,7 @@ export const useIsLoggedIn = ({ message }: UseIsLoggedInProps) => {
 
   const isLogin = expiresIn ? Date.now() < expiresIn * 1000 : false;
 
-  if (!isLogin) {
+  if (!isLogin || token === null) {
     dispatch(logoutUser());
     return { isLoggedIn: false, message };
   }

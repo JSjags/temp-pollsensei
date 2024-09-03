@@ -33,7 +33,7 @@ const constraints = {
 };
 
 const LoginPage = () => {
-  const [loginUser] = useLoginUserMutation();
+  const [loginUser, {data}] = useLoginUserMutation();
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(true);
   const [state, setState] = useState(false);
@@ -64,6 +64,7 @@ const LoginPage = () => {
     setEyeState((prev) => !prev);
   };
 
+  console.log(data)
   return (
     <section className="min-h-screen flex flex-col md:flex-row">
       <div className="auth-bg md:hidden flex items-center justify-center p-4">

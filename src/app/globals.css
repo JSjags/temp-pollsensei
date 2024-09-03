@@ -304,3 +304,126 @@ input[type="number"] {
   line-height: 18.4px;
   color: #333333;
 }
+
+@keyframes fadeExpand {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes fadeExpand {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes fadeExpandAlt {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-expand {
+  animation: fadeExpand 4s ease-in-out infinite;
+}
+
+.animate-fade-expand-alt {
+  animation: fadeExpandAlt 4s ease-in-out infinite;
+}
+
+.gradient-border {
+  border: 2px solid;
+  border-image:linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
+  border-image-slice: 1;
+}
+
+.gradient-text {
+  background: linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+.twitter-picker span div{
+  width: 4rem !important;
+  height: 4rem !important;
+}
+
+.default{
+  background-image: url(../assets/images/default.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.neon{
+background-image: url(../assets/images/neon.svg);
+background-repeat: no-repeat;
+background-size: cover;
+background-position: center;
+}
+
+.sparkly{
+  background-image: url(../assets/images/Sparkly.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.custom-scrollbar {
+  scrollbar-width: 0; /* Firefox */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+}
+
+
+
+
+.header_font__indicator-separator, 
+.question_font__indicator-separator, 
+.body_font__indicator-separator{
+display: none !important;
+}

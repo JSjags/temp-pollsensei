@@ -4,25 +4,32 @@ import PaginationControls from "../../components/common/PaginationControls";
 import FilterButton from "../../components/filter/FilterButton";
 import Button from "../../components/common/Button";
 import Image from "next/image";
-import { useState } from "react";
+import { Key, useState } from "react";
 
 import search from "../../assets/images/search.svg";
+import SurveyEmptyPage from "@/components/ui/SurveyEmptyPage";
+import { useFetchSurveysQuery } from "@/services/survey.service";
 
 const SurveysPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
+  const { data } = useFetchSurveysQuery(currentPage)
 
-  const result = Array.from({ length: 6 }, (_, index) => `Item ${index}`);
+  console.log(data)
+  console.log(data?.data)
 
-  const currentResult = result?.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // const result = Array.from({ length: 6 }, (_, index) => `Item ${index}`);
 
-  const totalPages = Math.ceil(result.length / itemsPerPage);
+
+  const totalPages = data?.data.total
 
   return (
-    <div className="container px-4 sm:px-6 lg:px-8 pb-20">
+    <div className="container px-4 sm:px-6 lg:px-8 pb-2">
+      {
+        data?.data.total === 0? (
+          <SurveyEmptyPage />
+        ) : (
+
       <div className="my-6 sm:my-10">
         <div className="md:flex my-10 items-center justify-between">
           <div className="flex gap-5 items-center">
@@ -30,7 +37,7 @@ const SurveysPage = () => {
               Your Surveys
             </h2>
             <div className="block md:hidden mt-2 md:mt-0">
-              <Button label="Create new survey +" />
+              <Button label="Create new survey +"  />
             </div>
             <div className="hidden lg:flex items-center pl-4 gap-2 rounded-[8px] border-[1px] px- border-[#d9d9d9] w-[292px] h-[40px]">
               <Image src={search} alt="Search icon" width={20} height={20} />
@@ -52,9 +59,9 @@ const SurveysPage = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6">
-          {currentResult.map((it) => (
+          {/* {data && data?.data.map((it) => (
             <SurveyCard key={it} />
-          ))}
+          ))} */}
         </div>
         <div className="mt-6 sm:mt-8">
           <PaginationControls
@@ -66,6 +73,8 @@ const SurveysPage = () => {
           />
         </div>
       </div>
+        )
+      }
     </div>
   );
 };
