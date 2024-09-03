@@ -22,6 +22,7 @@ import { FaUserCheck } from "react-icons/fa6";
 import { FaCheckCircle } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import CustomEdge from "../milestone/customEdge";
+import { useRouter } from "next/navigation";
 
 // icons paths
 const start = "/assets/milestones/Start.svg";
@@ -40,7 +41,8 @@ const edgeTypes = {
   "custom-edge": CustomEdge,
 };
 
-export default function App({ stage }: { stage: string }) {
+export default function Milestones({ stage }: { stage: string }) {
+  const router = useRouter();
   const [currentStage] = useState(parseInt(stage) + 1);
 
   const initialNodes: Node[] = [
@@ -258,8 +260,10 @@ export default function App({ stage }: { stage: string }) {
             <img
               src={start}
               className={cn(
-                "size-16",
-                currentStage >= parseInt(id) ? "opacity-100" : "opacity-40"
+                "size-16 hover:scale-125  transition-all",
+                currentStage >= parseInt(id)
+                  ? "opacity-100 hover:animate-pulse"
+                  : "opacity-40"
               )}
             />
           );
@@ -268,8 +272,10 @@ export default function App({ stage }: { stage: string }) {
             <img
               src={admin}
               className={cn(
-                "size-10",
-                currentStage >= parseInt(id) ? "opacity-100" : "opacity-40"
+                "size-10 hover:scale-125  transition-all",
+                currentStage >= parseInt(id)
+                  ? "opacity-100 hover:animate-pulse"
+                  : "opacity-40"
               )}
             />
           );
@@ -278,8 +284,10 @@ export default function App({ stage }: { stage: string }) {
             <img
               src={validate}
               className={cn(
-                "size-10",
-                currentStage >= parseInt(id) ? "opacity-100" : "opacity-40"
+                "size-10 hover:scale-125  transition-all",
+                currentStage >= parseInt(id)
+                  ? "opacity-100 hover:animate-pulse"
+                  : "opacity-40"
               )}
             />
           );
@@ -288,8 +296,10 @@ export default function App({ stage }: { stage: string }) {
             <img
               src={report}
               className={cn(
-                "size-10",
-                currentStage >= parseInt(id) ? "opacity-100" : "opacity-40"
+                "size-10 hover:scale-125  transition-all",
+                currentStage >= parseInt(id)
+                  ? "opacity-100 hover:animate-pulse"
+                  : "opacity-40"
               )}
             />
           );
@@ -298,8 +308,10 @@ export default function App({ stage }: { stage: string }) {
             <img
               src={close}
               className={cn(
-                "size-20 -translate-y-14 translate-x-12",
-                currentStage >= parseInt(id) ? "opacity-100" : "opacity-40"
+                "size-20 hover:scale-125  transition-all -translate-y-14 translate-x-12",
+                currentStage >= parseInt(id)
+                  ? "opacity-100 hover:animate-pulse"
+                  : "opacity-40"
               )}
             />
           );
@@ -392,7 +404,7 @@ export default function App({ stage }: { stage: string }) {
 
     const handleAction = (id: string, label: string) => {
       if (id === "1") {
-        return;
+        router.push("/surveys/create-survey");
       }
       if (id === "2") {
         if (label === "Design Survey") {
@@ -471,6 +483,7 @@ export default function App({ stage }: { stage: string }) {
           className={cn(
             "absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 bg-white z-10",
             currentStage === parseInt(id) &&
+              currentStage !== 1 &&
               "border-4  border-[#9C27B0] hover:bg-[#fbe5ff] transition-all",
             handleLabelPosition(data.label)
           )}
@@ -495,6 +508,11 @@ export default function App({ stage }: { stage: string }) {
               boxShadow: "0 0 0 10px #5B03B210, 0 0 0 20px #5B03B205",
             }}
             className="rounded-full"
+            onClick={() =>
+              currentStage === parseInt(id)
+                ? handleAction(id, data.label)
+                : () => {}
+            }
           >
             {data.icon ? (
               <CircularProgressbarWithChildren

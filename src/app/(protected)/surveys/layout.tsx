@@ -11,12 +11,16 @@ export default function SurveyLayout({
 }) {
   const pathname = usePathname();
 
-
-
   return (
     <div className="">
       <SurveyCreationNav />
-      <div className={`px-0 ${pathname === '/surveys/edit-survey' ? "px-0" : "lg:px-10"}`}>{children}</div>
+      <div
+        className={`px-0 ${
+          pathname === "/surveys/edit-survey" ? "px-0" : "lg:px-0"
+        }`}
+      >
+        {children}
+      </div>
     </div>
   );
 }

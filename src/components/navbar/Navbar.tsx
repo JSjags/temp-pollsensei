@@ -66,8 +66,9 @@ const Navbar = () => {
   return (
     <div
       className={cn(
-        "w-full bg-white shadow-md drop-shadow-sm sticky top-0 z-[1000]",
-        isSidebarOpen && "h-screen lg:h-auto"
+        "w-full bg-white sticky top-0 z-[1000]",
+        isSidebarOpen && "h-screen lg:h-auto",
+        path.includes("survey") ? "" : "shadow-md shadow-black/5"
       )}
     >
       <div className="border-b-[0.5px]">
@@ -168,8 +169,9 @@ const Navbar = () => {
 
       {/* Sidebar for mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 ease-in-out lg:hidden`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out lg:hidden`}
       >
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
@@ -229,10 +231,11 @@ const Navbar = () => {
                 <Link href={item.href}>
                   <div
                     onClick={() => handleSetActiveTab(item.name.toLowerCase())}
-                    className={`flex items-center px-4 py-2 text-sm ${activeTab === item.name.toLowerCase()
+                    className={`flex items-center px-4 py-2 text-sm ${
+                      activeTab === item.name.toLowerCase()
                         ? "text-[#9D50BB] bg-purple-100"
                         : "text-[#4F5B67]"
-                      }`}
+                    }`}
                   >
                     <Image
                       src={item.icon}
@@ -249,10 +252,10 @@ const Navbar = () => {
       </div>
 
       {/* Desktop navigation */}
-      <div className="hidden lg:block border-b-2 shadow-md">
-      <DesktopNavigation />
+      <div className="hidden lg:block shadow-md shadow-black/0">
+        <DesktopNavigation />
         <div className="flex justify-end items-center px-5">
-         <MilestoneCTA />
+          <MilestoneCTA />
         </div>
       </div>
     </div>
