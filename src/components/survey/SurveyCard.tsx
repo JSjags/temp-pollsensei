@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import StatusTag from "./StatusTag";
+import StatusTag, { StatusTagProps } from "./StatusTag";
 import ellipses from "../../assets/images/ellipsisVertical.svg";
 import eyes from "../../assets/images/eyes.svg";
 import share from "../../assets/images/share.svg";
@@ -8,10 +8,21 @@ import RenameSurvey from "./RenameSurvey";
 import DeleteSurvey from "./DeleteSurvey";
 import DuplicateSurvey from "./DuplicateSurvey";
 import { Switch } from "../ui/switch";
+import { formatDate } from "@/lib/helpers";
 
-interface SurveyCardProps {}
+interface SurveyCardProps {
+  topic:string,
+  createdAt:string,
+  status: StatusTagProps,
+  number_of_responses:number,
+}
 
-const SurveyCard: React.FC<SurveyCardProps> = () => {
+const SurveyCard: React.FC<SurveyCardProps> = ({
+  topic,
+  createdAt,
+  status,
+  number_of_responses,
+}) => {
   const options = [
     "Rename",
     "Edit Survey",
@@ -61,23 +72,23 @@ const SurveyCard: React.FC<SurveyCardProps> = () => {
       <div>
         <div className="flex justify-between items-center mb-1">
           <h3 className="text-[16px] sm:text-[20px] text-[#333333] truncate">
-            CareConnect: Your Voice Matters
+            {topic}
           </h3>
           <div onClick={handleViewOption} className="cursor-pointer">
             <Image src={ellipses} alt="Options" width={24} height={24} />
           </div>
         </div>
         <p className="text-[12px] sm:text-[14px] text-[#838383]">
-          Created: 12th June, 2024
+          Created: {formatDate(createdAt)}
         </p>
       </div>
 
       <div className="mt-3 sm:mt-4">
-        <StatusTag type="current" />
+        <StatusTag type={status.type} />
       </div>
 
       <div className="mt-6 sm:mt-10 flex items-center gap-2">
-        <span className="text-[24px] sm:text-[32px]">0</span>
+        <span className="text-[24px] sm:text-[32px]">{number_of_responses}</span>
         <p className="text-[#333333] text-[14px] sm:text-[16px]">responses</p>
       </div>
 

@@ -64,6 +64,7 @@ const Preview = () => {
         Question: updatedQuestion,
         Options: updatedOptions,
         "Option type": updatedQuestionType,
+        is_required: false,
       };
       dispatch(updateQuestions(updatedQuestions));
       setEditIndex(null);
@@ -102,6 +103,8 @@ const Preview = () => {
         Question: newSingleSurvey.data.response.Question,
         Options: newSingleSurvey.data.response.Options,
         "Option type": newSingleSurvey.data.response["Option type"],
+        is_required: false,
+
       };
       dispatch(addQuestion(newQuestion));
     }

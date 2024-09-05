@@ -25,10 +25,10 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
-    (state: RootState) => state?.themes?.questionText
+    (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector((state: RootState) => state?.themes?.colorTheme)
-
+  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme)
+  console.log(`border-[${colorTheme}]`)
   return (
     <div
       className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
@@ -63,7 +63,8 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                 className="mr-2 text-[#5B03B2] radio hidden peer"
               />
               <span
-                className={`w-5 h-5 border border-[${colorTheme}] rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
+                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
+                style={{borderColor: colorTheme}}
               ></span>
               <span className="ml-2">{option}</span>
             </label>

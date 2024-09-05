@@ -22,8 +22,9 @@ import IsLoadingModal from "@/components/modals/IsLoadingModal";
 import GeneratedSurvey from "./GeneratedSurvey";
 import IsGenerating from "@/components/modals/IsGenerating";
 import { useDispatch } from "react-redux";
-import { updateDescription, updateSurveyType, updateTitle } from "@/redux/slices/questions.slice";
-import { saveGeneratedBy } from "@/redux/slices/theme.slice";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { addSection, saveGeneratedBy, updateConversationId, updateDescription, updateSurveyType, updateTopic } from "@/redux/slices/survey.slice";
 
 const CreateSurveyPage = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
@@ -51,10 +52,6 @@ const CreateSurveyPage = () => {
 
   const maxCharacters = 3000;
 
-  // const handleSurveyType = (userType: any, prompt: string) => {
-  //   setSelectedDiv(userType);
-  //   setSelectedSurveyType(prompt);
-  // };
 
   const handleSurveyType = (userType: any, prompt: string) => {
     setSelectedDiv(userType);
@@ -84,7 +81,6 @@ const CreateSurveyPage = () => {
   useEffect(() => {
     if (isTopicSuccess) {
       toast.success("Survey topic created successfully");
-      dispatch(updateDescription(surveyPrompt))
       setIsTopicModal((prev) => !prev);
       setPromptForm(!promptForm);
     }
@@ -104,7 +100,6 @@ const CreateSurveyPage = () => {
         user_query: surveyPrompt,
         survey_type: selectedSurveyType,
       });
-      toast.success("Survey created successfully");
     } catch (e) {
       toast.error("Failed to create survey");
       console.error(e);
@@ -112,29 +107,43 @@ const CreateSurveyPage = () => {
   };
 
   useEffect(() => {
-    // if(isLoading){
-    //   setIsTopicModal(false);
-    // }
-
     if (isSuccess) {
+      const refactoredQuestions = data?.data?.response?.map((question: any) => {
+        const optionType = question["Option type"]?.trim();
+
+        return {
+          question: question.Question,
+          options: question.Options,
+          question_type:
+            optionType === "Multi-choice"
+              ? "multiple_choice"
+              : optionType === "Comment"
+              ? "long_text"
+              : "matrix_checkbox",
+          is_required: false,
+          description:'',
+        };
+      });
+      dispatch(addSection({questions:refactoredQuestions}))
+      dispatch(updateConversationId(data?.data?.conversation_id))
+      dispatch(updateDescription(surveyPrompt))
+      toast.success("Survey created successfully");
       setGenerated((prev) => !prev);
       setPromptForm(false);
     }
-  }, [isSuccess]);
+  }, [data?.data?.conversation_id, data?.data?.response, data?.data.topic, dispatch, isSuccess, surveyPrompt]);
+
 
   const UseAnotherPrompt = () => {
     setGenerated((prev) => !prev);
     setPromptForm(!promptForm);
   };
 
-  // const handleManualTopicSubmit = (e:any) => {
-  //   e.preventDefault();
-  //   if (manualTopic.trim()) {
-  //     dispatch(updateTitle(manualTopic));
-  //   }
-  //   setIsTopicModal(false);
-  //   handleGenerateQuestion();
-  // };
+  const survey = useSelector((state:RootState)=>state?.survey)
+  console.log(survey)
+  console.log(data)
+  console.log(survey.sections)
+
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center">
@@ -217,7 +226,7 @@ const CreateSurveyPage = () => {
                 selectedDiv === 3 ? "border-[#CC9BFD] border-2" : ""
               }`}
               onClick={() => {
-                handleSurveyType(3, "qualitative")
+                handleSurveyType(3, "Qualitative")
               }}
             >
               <Image
@@ -253,7 +262,7 @@ const CreateSurveyPage = () => {
                 }`}
                 type="button"
                 onClick={() => {
-                  setSurveyType("qualitative");
+                  setSurveyType("Qualitative");
                   // dispatch(updateSurveyType("qualitative"))
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
@@ -268,7 +277,7 @@ const CreateSurveyPage = () => {
               className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 ${
                 selectedDiv === 4 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() => handleSurveyType(4, "quantitative")}
+              onClick={() => handleSurveyType(4, "Quantitative")}
             >
               <Image
                 src={Quantitative_survey}
@@ -301,7 +310,7 @@ const CreateSurveyPage = () => {
                 }`}
                 type="button"
                 onClick={() => {
-                  setSurveyType("quantitative");
+                  setSurveyType("Quantitative");
                   // dispatch(updateSurveyType("quantitative"))
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
@@ -316,7 +325,7 @@ const CreateSurveyPage = () => {
               className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 relative ${
                 selectedDiv === 5 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() => handleSurveyType(5, "Qualitative & Quantitative")}
+              onClick={() => handleSurveyType(5, "Both")}
             >
               <Image
                 src={quantitative_qualitative_survey}
@@ -350,7 +359,7 @@ const CreateSurveyPage = () => {
                 }`}
                 type="button"
                 onClick={() => {
-                  setSurveyType("Qualitative & Quantitative");
+                  setSurveyType("Both");
                   // dispatch(updateSurveyType("Qualitative & Quantitative"))
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
@@ -383,7 +392,7 @@ const CreateSurveyPage = () => {
             onSubmit={(e) => {
               e.preventDefault();
               if (manualTopic.trim()) {
-                dispatch(updateTitle(manualTopic));
+                dispatch(updateTopic(manualTopic));
               }
               handleGenerateTopics();
             }}
@@ -494,7 +503,7 @@ const CreateSurveyPage = () => {
                 <div className="border py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md " key=
                 {index} onClick={(e)=>{
                   // @ts-ignore
-                  dispatch(updateTitle(e.target.innerHTML))
+                  dispatch(updateTopic(e.target.innerHTML))
                 }}>
                   {topic}
                 </div>
@@ -537,7 +546,7 @@ const CreateSurveyPage = () => {
       )}
       {isLoadingTopics && <IsGenerating isGeneratingSurveyLoading={isLoadingTopics} />}
       {isLoading && <IsGenerating isGeneratingSurveyLoading={isLoading} />}
-      {generated && <GeneratedSurvey data={data} onClick={UseAnotherPrompt} />}
+      {generated && <GeneratedSurvey data={survey?.sections} onClick={UseAnotherPrompt} />}
     </div>
   );
 };

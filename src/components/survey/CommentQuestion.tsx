@@ -1,7 +1,9 @@
 import { draggable } from "@/assets/images";
+import { RootState } from "@/redux/store";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React from "react";
+import { useSelector } from "react-redux";
 
 interface ComponentQuestionProps {
   question: string;
@@ -21,17 +23,29 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   index,
 }) => {
   const pathname = usePathname();
+  const questionText = useSelector(
+    (state: RootState) => state?.survey?.question_text
+  );
+  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme)
 
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded ">
+    <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded "
+    style={{
+      fontFamily: `${questionText?.name}`,
+      fontSize: `${questionText?.size}px`,
+    }}
+    >
       <Image src={draggable} alt="draggable icon" className={pathname === "/surveys/edit-survey" ? "invisible" : "visible"} />
       <div className="w-full">
-        <div>
-          <h3 className="text-lg font-semibold"><span>{index}. </span>{question}</h3>
+      <div className="flex justify-between w-full items-center">
+          <h3 className="text-lg font-semibold text-start"><span>{index}. </span>{question}</h3>
          {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>}
+      </div>
+        <div >
           <textarea
             className="w-full border-none rounded-md p-2"
             placeholder="Type your response here..."
+            style={{borderColor: colorTheme}}
           />
         </div>
         {pathname === "/surveys/edit-survey" && (

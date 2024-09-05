@@ -12,7 +12,7 @@ interface SurveyState {
   headerText: TextStyle | null;
   questionText: TextStyle | null;
   bodyText: TextStyle | null;
-  colorTheme: string | null;
+  colorTheme: string;
   logoUrl: File | string | null;
   headerUrl: File | string | null;
   generatedBy: string | null;

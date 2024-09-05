@@ -16,34 +16,32 @@ import { pollsensei_new_logo, sparkly, stars } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { IoDocumentOutline } from "react-icons/io5";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
-import { useCreateSurveyMutation, useGenerateSingleSurveyMutation } from "@/services/survey.service";
+import { useCreateSurveyMutation, useGenerateSingleSurveyMutation, useSaveProgressMutation } from "@/services/survey.service";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
 import { VscLayersActive } from "react-icons/vsc";
 import CreateNewSection from "./CreateNewSection";
 import { useRouter } from "next/navigation";
+import { resetSurvey } from "@/redux/slices/survey.slice";
 
 
 
 const EditSurvey = () => {
-  const question = useSelector((state: RootState) => state.question);
-  const headerUrl = useSelector((state: RootState) => state?.themes?.headerUrl);
-  const logoUrl = useSelector((state: RootState) => state?.themes?.logoUrl);
-  const theme = useSelector((state: RootState) => state?.themes?.theme);
-  const headerText = useSelector((state:RootState)=>state.themes.headerText)
-  const questionText = useSelector((state:RootState)=>state.themes.questionText)
-  const bodyText = useSelector((state:RootState)=>state.themes.bodyText)
-  const colorTheme = useSelector((state:RootState)=>state.themes.colorTheme)
-  const generateBy = useSelector((state:RootState)=>state.themes.generatedBy)
-  const surveyTitle = useSelector((state: RootState) => state?.question?.title);
-  const surveyDescription = useSelector((state: RootState) => state?.question?.description);
-  const survey_type = useSelector((state: RootState) => state?.question?.survey_type);
-  const section = useSelector((state: RootState) => state?.question?.section);
+  // const question = useSelector((state: RootState) => state.question);
+  const survey = useSelector((state: RootState) => state.survey);
+  const [questions, setQuestions] = useState(survey.sections || []);
+  const headerUrl = useSelector((state: RootState) => state?.survey?.header_url);
+  const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
+  const theme = useSelector((state: RootState) => state?.survey?.theme);
+  const headerText = useSelector((state:RootState)=>state.survey.header_text)
+  const bodyText = useSelector((state:RootState)=>state.survey.body_text);
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
-  const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation()
+  const [currentSection, setCurrentSection] = useState(0);
+  const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
+  const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [
@@ -59,25 +57,26 @@ const EditSurvey = () => {
     setIsSidebarOpen(false);
   };
 
-  const handleSave = (
-    updatedQuestion: string,
-    updatedOptions: string[],
-    updatedQuestionType: string
-  ) => {
-    const updatedQuestions = [...question.questions];
-    if (editIndex !== null) {
-      // @ts-ignore
-      updatedQuestions[editIndex] = {...updatedQuestions[editIndex],
-        Question: updatedQuestion,
-        Options: updatedOptions,
-        "Option type": updatedQuestionType,
-      };
-      dispatch(updateQuestions(updatedQuestions));
-      setEditIndex(null);
-      setIsEdit(false);
-    }
-    setIsSidebarOpen((prev) => !prev);
-  };
+  // const handleSave = (
+  //   updatedQuestion: string,
+  //   updatedOptions: string[],
+  //   updatedQuestionType: string
+  // ) => {
+  //   const updatedQuestions = [...questions];
+  //   if (editIndex !== null) {
+  //     // @ts-ignore
+  //     updatedQuestions[editIndex] = {...updatedQuestions[editIndex],
+  //       questions: updatedQuestion,
+  //       options: updatedOptions,
+  //      question_type: updatedQuestionType,
+  //       is_required: false,
+  //     };
+  //     dispatch(updateQuestions(updatedQuestions));
+  //     setEditIndex(null);
+  //     setIsEdit(false);
+  //   }
+  //   setIsSidebarOpen((prev) => !prev);
+  // };
 
   const handleDeleteQuestion = (index:number) => {
     dispatch(deleteQuestion(index));
@@ -92,7 +91,7 @@ const EditSurvey = () => {
   const handleGenerateSingleQuestion = async () => {
     try {
       await generateSingleSurvey({
-        conversation_id: question.conversation_id,
+        conversation_id: survey.conversation_id,
       });
       toast.success("Single survey added successfully");
     } catch (e) {
@@ -101,7 +100,7 @@ const EditSurvey = () => {
     }
   };
   
-  console.log(section)
+
 
   useEffect(() => {
     if (newQuestionGenerate && newSingleSurvey?.data?.response) {
@@ -109,70 +108,59 @@ const EditSurvey = () => {
       const newQuestion = {
         Question: newSingleSurvey.data.response.Question,
         Options: newSingleSurvey.data.response.Options,
-        "Option type": newSingleSurvey.data.response["Option type"],
+        question_type: newSingleSurvey.data.response.question_type === 'Multi-choice' ? 'multiple_choice' : newSingleSurvey.data.response.question_type === "Comment" ? "comment" : "matrix_checkbox",
+        is_required: false,
       };
       dispatch(addQuestion(newQuestion));
     }
   }, [dispatch, newQuestionGenerate, newSingleSurvey]);
   
-  const handleNewSection = () => {
-    const currentQuestions = question.questions;
-    
-    if (currentQuestions.length > 0) {
-      
-      dispatch(addNewSection({ questions: currentQuestions }));
 
-      // Reset the questions state
-      dispatch(setQuestionObject({
-        ...question,
-        questions: [],
-      }));
-      toast.success("New section created successfully");
-      setIsNewSection(false);
-    } else {
-      toast.warn("No questions to add to a new section");
-    }
-  };
   
   const handleSurveyCreation =async()=>{
-    const surveyData = {
-      survey_type: "quantitative",
-      // survey_type: survey_type,
-      topic:surveyTitle,
-      theme:theme,
-      description: surveyDescription,
-      header_text: headerText,
-      question_text:questionText,
-      body_text: bodyText,
-      color_theme: colorTheme,
-      logo_url: logoUrl,
-      header_url: headerUrl,
-      generated_by: generateBy,
-      // sections:question.section,
-      sections:question.section.length === 0 ? ({questions:question.questions }): question.section,
-    }
     try{
-      console.log(surveyData)
+      console.log(survey)
       await createSurvey(
-        surveyData
+        survey
       );
     }catch(e){
       console.log(e)
     };
   }
 
+
+
   useEffect(()=>{
     if(isSuccess){
       toast.success("Survey created successfully")
+      dispatch(resetSurvey())
       router.push('/surveys')
     }
 
     if(isError || error){
-      toast.error("Failed to create survey")
+      const SaveProgress=async()=>{
+        try{
+          await saveprogress(survey);
+        }catch(e){
+          console.error(e)
+        }
+      }
+      SaveProgress()
+      toast.error("Failed to create survey, Don't panic, your progress was saved")
     }
-  }, [isSuccess, isError, error]);
+  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
 
-console.log(question)
+  useEffect(()=>{
+    if(progressSuccess){
+      router.push('/surveys')
+    }
+    if(progressIsError || progressError){
+      toast.error("Failed to save progress, please try again later")
+    }
+  }, [progressError, progressIsError])
+
+  console.log(survey)
+  console.log(questions[currentSection].questions)
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
@@ -200,7 +188,12 @@ console.log(question)
               <p>LOGO GOES HERE</p>
             </div>
           )}
-
+            <button type="reset" onClick={()=>{
+              dispatch(resetSurvey())
+              router.push('/surveys')
+            }}>
+              Reset
+            </button>
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
               src={
@@ -218,82 +211,82 @@ console.log(question)
           </div>
 
           <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-          <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${headerText?.size}px`, fontFamily:`${headerText?.name}` }}>{surveyTitle}</h2>
-          <p style={{fontSize:`${bodyText?.size}px`, fontFamily:`${bodyText?.name}` }}>{surveyDescription}</p>
+          <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${headerText?.size}px`, fontFamily:`${headerText?.name}` }}>{survey?.topic}</h2>
+          <p style={{fontSize:`${bodyText?.size}px`, fontFamily:`${bodyText?.name}` }}>{survey?.description}</p>
           <div className="flex justify-end">
             {/* <button className="rounded-full border px-5 py-1" >Edit</button> */}
           </div>
           </div>
-          {question?.questions?.map((item: any, index: number) => (
+          {questions[currentSection].questions.map((item: any, index: number) => (
             <div key={index} className="mb-4">
-              {isEdit && editIndex === index && item["Option type"] === "Matrix" ? (
+              {isEdit && editIndex === index && item.question_type === "matrix_checkbox" ? (
                 <MatrixQuestionEdit
-                  question={item.Question}
-                  options={item.Options}
-                  questionType={item["Option type"]}
-                  onSave={handleSave}
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
+                  // onSave={handleSave}
                   onCancel={handleCancel}
                 />
               ) :
               isEdit && editIndex === index ? (
                 <MultiChoiceQuestionEdit
-                  question={item.Question}
-                  options={item.Options}
-                  questionType={item["Option type"]}
-                  onSave={handleSave}
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
+                  // onSave={handleSave}
                   onCancel={handleCancel}
                 />
               )
-               : item["Option type"] === "Multi-choice" ? (
+               : item.question_type === "multiple_choice" || item.question_type === "multi_choice" ? (
                 <MultiChoiceQuestion
-                  question={item.Question}
-                  options={item.Options}
-                  questionType={item["Option type"]}
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
                   EditQuestion={() => EditQuestion(index)}
                   index={index + 1}
                   DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item["Option type"] === "Comment" ? (
+              ) : item.question_type === "comment" || item.question_type === "long_text" ? (
                 <CommentQuestion
                   key={index}
                   index={index + 1}
-                  questionType={item["Option type"]}
-                  question={item.Question}
+                  questionType={item.question_type}
+                  question={item.question}
                   EditQuestion={() => EditQuestion(index)}
                   DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item["Option type"] === "Linear Scale" ? (
+              ) : item.question_type === "linear_Scale" ? (
                 <LinearScaleQuestion
-                  question={item.Question}
+                  question={item.question}
                   scaleStart={item.scaleStart}
                   scaleEnd={item.scaleEnd}
-                  questionType={item["Option type"]}
+                  questionType={item.question_type}
                   EditQuestion={() => EditQuestion(index)}
                   DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item["Option type"] === "Likert Scale" ? (
+              ) : item.question_type === "likert_Scale" ? (
                 <LikertScaleQuestion
-                  question={item.Question}
-                  options={item.Options}
-                  questionType={item["Option type"]}
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
                   EditQuestion={() => EditQuestion(index)}
                   DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item["Option type"] === "star_rating" ? (
+              ) : item.question_type === "star_rating" ? (
                 <StarRatingQuestion
-                  question={item.Question}
+                  question={item.question}
                   maxRating={5}
-                  questionType={item["Option type"]}
+                  questionType={item.question_type}
                   EditQuestion={() => EditQuestion(index)}
                   DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item["Option type"] === "Matrix" ? (
+              ) : item.question_type === "matrix_checkbox" ? (
                 <MatrixQuestion
                   key={index}
                   index={index + 1}
-                  options={item.Options}
-                  questionType={item["Option type"]}
-                  question={item.Question}
+                  options={item.options}
+                  questionType={item.question_type}
+                  question={item.question}
                   EditQuestion={() => EditQuestion(index)}
                   DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
@@ -318,7 +311,9 @@ console.log(question)
                   )
                 }
               </button>
-              <div className="bg-white rounded-full px-5 py-1" onClick={handleNewSection}>
+              <div className="bg-white rounded-full px-5 py-1" 
+              // onClick={handleNewSection}
+              >
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
               </div>
@@ -336,7 +331,7 @@ console.log(question)
             type="button"
             onClick={handleSurveyCreation}
           >
-            Continue
+            {isLoading ? "Submitting" : "Continue"}
           </button>
           </div>
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">

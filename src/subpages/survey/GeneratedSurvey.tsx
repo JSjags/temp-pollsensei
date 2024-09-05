@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { FiEdit2 } from "react-icons/fi";
 import Image from "next/image";
 import { stars } from "@/assets/images";
 import CommentQuestion from "@/components/survey/CommentQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import SurveySettings from "./SurveySettings";
-import IsLoadingModal from "@/components/modals/IsLoadingModal";
-import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { useDispatch } from "react-redux";
 import { setQuestionObject } from "@/redux/slices/questions.slice";
 import { useRouter } from "next/navigation";
@@ -25,27 +22,22 @@ interface GeneratedSurveyProps {
 }
 
 const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
-  const [questions, setQuestions] = useState(data?.data?.response || []);
+  const [questions, setQuestions] = useState(data);
   const router = useRouter();
   const dispatch = useDispatch();
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
-  const surveyTitle = useSelector((state:RootState)=>state?.question?.title)
-  const headerText = useSelector((state:RootState)=>state?.themes?.headerText)
-  const surveyDescription = useSelector((state:RootState)=>state?.question?.description)
-
-  const currentResult = questions?.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  const surveyTitle = useSelector((state: RootState) => state?.survey.topic);
+  const headerText = useSelector(
+    (state: RootState) => state?.survey?.header_text
   );
-const totalPages = Math.ceil(questions.length / itemsPerPage);
-
-  console.log(data?.data);
-  console.log(questions);
-  console.log(currentResult);
+  const surveyDescription = useSelector(
+    (state: RootState) => state?.survey?.description
+  );
+  const survey = useSelector((state: RootState) => state?.survey);
+  const totalPages = questions.length
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -55,10 +47,6 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
     items.splice(result.destination.index, 0, reorderedItem);
 
     setQuestions(items);
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const EditQuestion = async (id: any) => {
@@ -76,11 +64,15 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
         title: surveyTitle,
         conversation_id: data?.data?.conversation_id,
         questions: questions,
-        description:surveyDescription,
+        description: surveyDescription,
       })
     );
     router.push("/surveys/edit-survey");
   };
+
+
+
+  console.log(questions);
 
   return (
     <div className="py-10 px-2 w-full">
@@ -111,7 +103,15 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
         <div className="pb-10 w-2/3 flex flex-col">
           <div className="text-start pb-5">
             <p className="font-bold text-[#7A8699]">Survey Topic</p>
-            <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${headerText?.size}px`, fontFamily:`${headerText?.name}` }}>{surveyTitle}</h2>
+            <h2
+              className="text-[1.5rem] font-normal"
+              style={{
+                fontSize: `${headerText?.size}px`,
+                fontFamily: `${headerText?.name}`,
+              }}
+            >
+              {surveyTitle}
+            </h2>
           </div>
           <div className="text-start">
             <p className="font-bold text-[#7A8699]">Survey description</p>
@@ -125,7 +125,7 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {questions.map((item: any, index: any) => (
+                  {questions[0]?.questions.map((item: any, index: any) => (
                     <Draggable
                       key={index + 1}
                       draggableId={index.toString()}
@@ -137,34 +137,31 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className="mb-4"
-                          // key={index}
                         >
-                          {item["Option type"] === "Multi-choice" ? (
+                          {item.question_type === "multiple_choice" || item.question_type === "multi_choice"  ? (
                             <MultiChoiceQuestion
-                            index={index + 1}
-                              question={item.Question}
-                              options={item.Options}
-                              questionType={item["Option type"]}
+                              index={index + 1}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
                               EditQuestion={() => EditQuestion(index)}
                             />
-                          ) : item["Option type"] === "Comment" ? (
+                          ) : item.question_type === "comment" ||  item.question_type === "long_text" ? (
                             <CommentQuestion
                               key={index}
                               index={index + 1}
-                              question={item.Question}
-                              questionType={item["Option type"]}
+                              question={item.question}
+                              questionType={item.question_type}
                             />
-                          ) :
-                          item["Option type"] === "Comment" ? (
+                          ) : item.question_type === "matrix_checkbox" ? (
                             <MatrixQuestion
                               key={index}
                               index={index + 1}
-                              options={item.Options}
-                              question={item.Question}
-                              questionType={item["Option type"]}
+                              options={item.options}
+                              question={item.question}
+                              questionType={item.question_type}
                             />
-                          ) :
-                           null}
+                          ) : null}
                         </div>
                       )}
                     </Draggable>
@@ -177,62 +174,26 @@ const totalPages = Math.ceil(questions.length / itemsPerPage);
 
           <div className="flex justify-between items-center pt-5 pb-10">
             <div className="">
-            <button
-        className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-        type="button"
-        onClick={handleEdit}
-      >
-        <FaEye className="inline-block mr-2" />
-         Preview
-      </button>
+              <button
+                className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
+                type="button"
+                onClick={handleEdit}
+              >
+                <FaEye className="inline-block mr-2" />
+                Preview
+              </button>
             </div>
             <div className="mt-6 sm:mt-8">
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            setItemsPerPage={setItemsPerPage}
-            onPageChange={setCurrentPage}
-            itemsPerPage={itemsPerPage}
-          />
-        </div>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                setItemsPerPage={setItemsPerPage}
+                onPageChange={setCurrentPage}
+                itemsPerPage={itemsPerPage}
+              />
+            </div>
           </div>
         </div>
-
-        {/* <div
-          className={`w-1/3 ${
-            isSidebarOpen ? "flex flex-col" : "hidden"
-          } gap-4`}
-        >
-          {isSidebarOpen && (
-            <SurveySettings
-              isSidebarOpen={isSidebarOpen}
-              onClick={toggleSidebar}
-            />
-          )}
-          {isEdit && (
-            <IsLoadingModal openModal={isEdit} modalSize={"lg"}>
-              <MultiChoiceQuestionEdit
-                question={questions[editIndex].Question}
-                options={questions[editIndex].Options}
-                questionType={questions[editIndex]["Option type"]}
-                onSave={(updatedQuestion, updatedOptions) => {
-                  const updatedQuestions = [...questions];
-
-                  updatedQuestions[editIndex] = {
-                    ...updatedQuestions[editIndex],
-                    Question: updatedQuestion,
-                    Options: updatedOptions,
-                  };
-
-                  setQuestions(updatedQuestions);
-
-                  setIsEdit(false);
-                }}
-                onCancel={() => setIsEdit(false)}
-              />
-            </IsLoadingModal>
-          )}
-        </div> */}
       </div>
     </div>
   );
