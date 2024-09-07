@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { pollsensei_new_logo } from "@/assets/images";
+import { pollsensei_new_logo, sparkly, stars } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { HiOutlineMinusSmall } from "react-icons/hi2";
 import { IoDocumentOutline } from "react-icons/io5";
@@ -16,6 +16,7 @@ import {
   updateSectionTopic,
   updateSectionDescription,
 } from "@/redux/slices/questions.slice";
+import { useCreateAiSurveyMutation } from "@/services/survey.service";
 import { toast } from "react-toastify";
 import CommentQuestion from "@/components/survey/CommentQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
@@ -23,43 +24,68 @@ import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
 import { FaEye } from "react-icons/fa6";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
-import StyleEditor from "./StyleEditor";
 import QuestionType from "./QuestionType";
-import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
-import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
+import StyleEditor from "./StyleEditor";
+import IsLoadingModal from "@/components/modals/IsLoadingModal";
 import AddQuestion from "./AddQuestion";
 import { addSection, resetSurvey } from "@/redux/slices/survey.slice";
-import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/survey.service";
 import { useRouter } from "next/navigation";
+import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
+import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
+import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/survey.service";
 import store from '@/redux/store';
 
 
-const CreateNewSection = () => {
+const AddQuestionPage = () => {
   const dispatch = useDispatch();
-  const router = useRouter();
-  const [sectionTitle, setSectionTitle] = useState("");
-  const [sDescription, setsDescription] = useState("");
-  const [isEditing, setIsEditing] = useState(true);
+  const router  = useRouter();
+  const sectionTopic = useSelector((state: RootState) => state?.survey?.topic);
+  const theme = useSelector((state: RootState) => state?.survey?.theme);
+  const sectionDescription = useSelector(
+    (state: RootState) => state?.survey?.description
+  );
+  const selectedSurveyType = useSelector(
+    (state: RootState) => state?.survey?.survey_type
+  );
+  const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
+  const [sectionTitle, setSectionTitle] = useState(sectionTopic || "");
+  const [sDescription, setsDescription] = useState(sectionDescription || "");
+  const [isEditing, setIsEditing] = useState(false);
   const [aiChatbot, setAiChatbot] = useState(false);
   const [surveyPrompt, setSurveyPrompt] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
-  const theme = useSelector((state: RootState) => state?.survey?.theme);
+  const [sections, setSections] = useState([]);
   const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
   const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
   const survey = useSelector((state: RootState) => state?.survey);
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [addquestions, setAddQuestions] = useState(false);
-  const logoUrl = useSelector((state:RootState)=>state.survey.logo_url)
   const headerUrl = useSelector((state:RootState)=>state.survey.header_url)
 
   const handleSave = () => {
     dispatch(updateSectionTopic(sectionTitle));
     dispatch(updateSectionDescription(sDescription));
-    setIsEditing((prev)=> !prev);
+    setIsEditing(false);
     setAiChatbot(true);
   };
+
+  // const handleGenerateQuestion = async () => {
+  //   console.log({
+  //     user_query: surveyPrompt,
+  //     survey_type: selectedSurveyType,
+  //   });
+  //   try {
+  //     await createAiSurvey({
+  //       user_query: surveyPrompt,
+  //       survey_type: 'quantittaive',
+  //     });
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
+
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -81,6 +107,7 @@ const CreateNewSection = () => {
     setIsSidebarOpen(false);
   };
 
+
   const handleSurveyCreation =async()=>{
     if(logoUrl === '' || headerUrl === ''){
       toast.warning("Header image and logo can not be empty")
@@ -97,9 +124,7 @@ const CreateNewSection = () => {
         questions:questions
       }))
     }
-
     try{
-    
       const updatedSurvey = store.getState().survey;
     
       await createSurvey(
@@ -140,13 +165,42 @@ const CreateNewSection = () => {
     }
   }, [progressError, progressIsError])
 
-  console.log(questions);
-  console.log(survey);
-
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     toast.success("Survey new section created successfully");
+  //     setQuestions(data?.data?.response);
+  //   }
+  //   if(error || isError){
+  //     toast.error("Failed: Something went wrong");
+  //   }
+  // }, [isSuccess]);
+  console.log(questions)
   return (
     <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
-        <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar relative">
+        <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
+        {logoUrl ? (
+            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
+              <Image
+                src={
+                  logoUrl instanceof File
+                    ? URL.createObjectURL(logoUrl)
+                    : typeof logoUrl === "string"
+                    ? logoUrl
+                    : sparkly
+                }
+                alt=""
+                className="w-full object-cover bg-no-repeat h-16 rounded-full"
+                width={"100"}
+                height={"200"}
+              />
+            </div>
+          ) : (
+            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white py-3 flex items-center flex-col ">
+              <p>LOGO GOES HERE</p>
+            </div>
+          )}
+
           {isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
               <textarea
@@ -180,10 +234,10 @@ const CreateNewSection = () => {
             </div>
           )}
 
-          {!isEditing  && (
+          {!isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <h2 className="text-[1.5rem] font-normal">{sectionTitle}</h2>
-              <p>{sDescription}</p>
+              <h2 className="text-[1.5rem] font-normal">{sectionTopic}</h2>
+              <p>{sectionDescription}</p>
               <div className="flex justify-end">
                 <button
                   className="rounded-full border px-5 py-1"
@@ -199,7 +253,7 @@ const CreateNewSection = () => {
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {questions.map((item: any, index: any) => (
+                  {questions?.map((item: any, index: any) => (
                     <Draggable
                       key={index + 1}
                       draggableId={index.toString()}
@@ -228,7 +282,8 @@ const CreateNewSection = () => {
                               question={item.question}
                               questionType={item.question_type}
                             />
-                          ) : item.question_type === "likert_Scale" ? (
+                          )
+                          : item.question_type === "likert_Scale" ? (
                             <LikertScaleQuestion
                               question={item.question}
                               options={item.options}
@@ -244,11 +299,12 @@ const CreateNewSection = () => {
                               EditQuestion={() => EditQuestion(index)}
                               // DeleteQuestion={()=>handleDeleteQuestion(index)}
                             />
-                          ) : item.question_type === "long_text" ? (
+                          )
+                           : item.question_type === "long_text" ? (
                             <MatrixQuestion
                               key={index}
                               index={index + 1}
-                              options={item.options}
+                              options={item.objectptions}
                               question={item.question}
                               questionType={item.question_type}
                             />
@@ -264,20 +320,20 @@ const CreateNewSection = () => {
           </DragDropContext>
 
           {addquestions && (
-            <AddQuestion
-              onCancel={() => setAddQuestions((prev) => !prev)}
-              onSave={(question, options, questionType, is_required) => {
-                const newQuestion = {
-                  question: question,
-                  "Option type": questionType,
-                  options: options,
-                  is_required: is_required,
-                };
-                console.log(newQuestion);
-                questions.push(newQuestion);
-                setAddQuestions((prev) => !prev);
-              }}
-            />
+              <AddQuestion
+                onCancel={() => setAddQuestions((prev) => !prev)}
+                onSave={(question, options, questionType, is_required) => {
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                  };
+                   console.log(newQuestion);
+                  questions.push(newQuestion)
+                  setAddQuestions((prev) => !prev);
+                }}
+              />
           )}
 
           <div className="flex justify-between items-center pt-5 pb-10">
@@ -295,25 +351,16 @@ const CreateNewSection = () => {
 
           <div className="flex justify-between items-center pb-10">
             <div className="flex gap-2 items-center">
-              <button
-                className="bg-white rounded-full px-5 py-1"
-                onClick={() => setAddQuestions((prev) => !prev)}
-              >
-                <HiOutlinePlus className="inline-block mr-2" /> Add Question
+              <button className="bg-white rounded-full px-5 py-1" onClick={()=>setAddQuestions((prev) => !prev)}>
+                    <HiOutlinePlus className="inline-block mr-2" /> Add Question
               </button>
-              <div className="bg-white rounded-full px-5 py-1" 
-              onClick={()=>{
-                dispatch(addSection({
-                  section_topic:sectionTitle,
-                  section_description:sDescription,
-                  questions:questions
-                }))
-                setQuestions([])
-              }}
-               >
+              <button className="bg-white rounded-full px-5 py-1" onClick={()=>{
+                dispatch(addSection({questions: questions}))
+                router.push('/surveys/add-new-section')
+              }}>
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
-              </div>
+              </button>
               <button disabled={isLoading} className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
                 <VscLayersActive className="inline-block mr-2" />
                 Publish Survey
@@ -332,44 +379,45 @@ const CreateNewSection = () => {
             </span>
           </div>
 
-          {aiChatbot && (
-            <div
-              className="w-[20rem] rounded-md flex flex-col absolute top-14 right-0 z-50"
-              data-aos="fade-left"
-              data-aos-offset="300"
-              data-aos-easing="ease-in-sine"
-            >
-              <div className=" bg-gradient-to-r from-[#5b03b2] px-4 py-2 rounded-t-md to-[#9d50bb]  text-white ">
-                <div className="flex justify-end gap-2">
-                  <HiOutlineMinusSmall />
-                  <BsFillPinAngleFill />
-                  <LiaTimesSolid
-                    className=""
-                    onClick={() => setAiChatbot(false)}
-                  />
-                </div>
-                <h2 className=" text-white ">Sensei</h2>
-              </div>
-              <div className="flex flex-col ">
-                <div className="flex border py-2 px-3 bg-[#FAFAFA] ">
-                  <input
-                    value={surveyPrompt}
-                    type="text"
-                    onChange={(e) => setSurveyPrompt(e.target.value)}
-                    placeholder="Enter prompt here."
-                    className="border-none focus:border-none outline-none focus:outline-none active:border-0 ring-0 w-[90%]"
-                  />
-                  <button
-                    disabled={!surveyPrompt}
-                    className="rounded-full flex flex-col items-center justify-center bg-[#5b03b2] w-[10%] "
-                    // onClick={handleGenerateQuestion}
-                  >
-                    <IoIosArrowForward />
-                  </button>
-                </div>
-              </div>
+
+
+          {/* Poll master chatbot */}
+
+          {/* {aiChatbot && (
+        <div
+          className="w-[20rem] rounded-md flex flex-col absolute top-14 right-0 z-50"
+          data-aos="fade-left"
+          data-aos-offset="300"
+          data-aos-easing="ease-in-sine"
+        >
+          <div className=" bg-gradient-to-r from-[#5b03b2] px-4 py-2 rounded-t-md to-[#9d50bb]  text-white ">
+            <div className="flex justify-end gap-2">
+              <HiOutlineMinusSmall />
+              <BsFillPinAngleFill />
+              <LiaTimesSolid className="" onClick={() => setAiChatbot(false)} />
             </div>
-          )}
+            <h2 className=" text-white ">Sensei</h2>
+          </div>
+          <div className="flex flex-col ">
+            <div className="flex border py-2 px-3 bg-[#FAFAFA] ">
+              <input
+                value={surveyPrompt}
+                type="text"
+                onChange={(e) => setSurveyPrompt(e.target.value)}
+                placeholder="Enter prompt here."
+                className="border-none focus:border-none outline-none focus:outline-none active:border-0 ring-0 w-[90%]"
+              />
+              <button
+                disabled={!surveyPrompt}
+                className="rounded-full flex flex-col items-center justify-center bg-[#5b03b2] w-[10%] "
+                onClick={handleGenerateQuestion}
+              >
+                <IoIosArrowForward />
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
         </div>
         <div
           className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
@@ -381,4 +429,4 @@ const CreateNewSection = () => {
   );
 };
 
-export default CreateNewSection;
+export default AddQuestionPage;

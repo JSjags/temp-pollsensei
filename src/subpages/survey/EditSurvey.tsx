@@ -160,7 +160,7 @@ const EditSurvey = () => {
   }, [progressError, progressIsError])
 
   console.log(survey)
-  console.log(questions[currentSection].questions)
+  console.log(questions[currentSection]?.questions)
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
@@ -217,7 +217,7 @@ const EditSurvey = () => {
             {/* <button className="rounded-full border px-5 py-1" >Edit</button> */}
           </div>
           </div>
-          {questions[currentSection].questions.map((item: any, index: number) => (
+          {questions[currentSection]?.questions.map((item: any, index: number) => (
             <div key={index} className="mb-4">
               {isEdit && editIndex === index && item.question_type === "matrix_checkbox" ? (
                 <MatrixQuestionEdit

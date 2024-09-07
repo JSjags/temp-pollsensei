@@ -25,6 +25,8 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { addSection, saveGeneratedBy, updateConversationId, updateDescription, updateSurveyType, updateTopic } from "@/redux/slices/survey.slice";
+import store from '@/redux/store';
+
 
 const CreateSurveyPage = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
@@ -34,6 +36,7 @@ const CreateSurveyPage = () => {
   const [promptForm, setPromptForm] = useState(false);
   const [isTopicModal, setIsTopicModal] = useState(false);
   const [manualTopic, setManualTopic] = useState('');
+  const generated_by = useSelector((state:RootState)=>state.survey.generated_by)
   const navigate = useRouter();
   const dispatch = useDispatch();
   const [surveyType, setSurveyType] = useState("");
@@ -139,7 +142,7 @@ const CreateSurveyPage = () => {
     setPromptForm(!promptForm);
   };
 
-  const survey = useSelector((state:RootState)=>state?.survey)
+  const survey = store.getState().survey
   console.log(survey)
   console.log(data)
   console.log(survey.sections)
@@ -267,7 +270,11 @@ const CreateSurveyPage = () => {
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
-                  setPromptForm(true);
+                  if(generated_by === 'ai'){
+                    setPromptForm(true);
+                  }else{
+                    navigate.push('/surveys/create-manual')
+                  }
                 }}
               >
                 Proceed
@@ -315,7 +322,11 @@ const CreateSurveyPage = () => {
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
-                  setPromptForm(true);
+                  if(generated_by === 'ai'){
+                    setPromptForm(true);
+                  }else{
+                    navigate.push('/surveys/create-manual')
+                  }
                 }}
               >
                 Proceed
@@ -364,7 +375,11 @@ const CreateSurveyPage = () => {
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
-                  setPromptForm(true);
+                  if(generated_by === 'ai'){
+                    setPromptForm(true);
+                  }else{
+                    navigate.push('/surveys/create-manual')
+                  }
                 }}
               >
                 Proceed
