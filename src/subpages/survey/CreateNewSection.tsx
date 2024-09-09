@@ -15,6 +15,8 @@ import { useDispatch } from "react-redux";
 import {
   updateSectionTopic,
   updateSectionDescription,
+  addQuestion,
+  resetQuestion,
 } from "@/redux/slices/questions.slice";
 import { toast } from "react-toastify";
 import CommentQuestion from "@/components/survey/CommentQuestion";
@@ -32,19 +34,22 @@ import { addSection, resetSurvey } from "@/redux/slices/survey.slice";
 import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/survey.service";
 import { useRouter } from "next/navigation";
 import store from '@/redux/store';
+import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
+// import Sensei from "@/components/ui/Sensei";
 
 
 const CreateNewSection = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const newSectionTopic = useSelector((state:RootState)=>state.question.sectionTopic)
+  const newSectionDesc = useSelector((state:RootState)=>state.question.sectionDescription)
   const [sectionTitle, setSectionTitle] = useState("");
   const [sDescription, setsDescription] = useState("");
   const [isEditing, setIsEditing] = useState(true);
-  const [aiChatbot, setAiChatbot] = useState(false);
-  const [surveyPrompt, setSurveyPrompt] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
-  const [questions, setQuestions] = useState([]);
+  const questions = useSelector((state: RootState) => state?.question?.questions);
+  // const [questions, setQuestions] = useState([]);
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
   const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
@@ -58,7 +63,6 @@ const CreateNewSection = () => {
     dispatch(updateSectionTopic(sectionTitle));
     dispatch(updateSectionDescription(sDescription));
     setIsEditing((prev)=> !prev);
-    setAiChatbot(true);
   };
 
   const handleDragEnd = (result: any) => {
@@ -67,8 +71,8 @@ const CreateNewSection = () => {
     const items = Array.from(questions);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-
-    setQuestions(items);
+    dispatch(addQuestion(items))
+    // setQuestions(items);
   };
 
   const EditQuestion = async (id: any) => {
@@ -149,18 +153,18 @@ const CreateNewSection = () => {
         <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar relative">
           {isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <textarea
+              <AutosizeTextarea
                 value={sectionTitle}
                 onChange={(e) => setSectionTitle(e.target.value)}
                 placeholder="Untitled Section"
                 className="border-b-2 border-[#5B03B2]"
-              ></textarea>
-              <textarea
+              ></AutosizeTextarea>
+              <AutosizeTextarea
                 value={sDescription}
                 onChange={(e) => setsDescription(e.target.value)}
                 placeholder="Describe section (optional)"
                 className="border-b-2 border-[#D9D9D9]"
-              ></textarea>
+              ></AutosizeTextarea>
 
               <div className="flex justify-end gap-5 mt-creat">
                 <button
@@ -182,8 +186,8 @@ const CreateNewSection = () => {
 
           {!isEditing  && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <h2 className="text-[1.5rem] font-normal">{sectionTitle}</h2>
-              <p>{sDescription}</p>
+              <h2 className="text-[1.5rem] font-normal">{newSectionTopic || sectionTitle}</h2>
+              <p>{newSectionDesc || sDescription}</p>
               <div className="flex justify-end">
                 <button
                   className="rounded-full border px-5 py-1"
@@ -269,12 +273,12 @@ const CreateNewSection = () => {
               onSave={(question, options, questionType, is_required) => {
                 const newQuestion = {
                   question: question,
-                  "Option type": questionType,
+                  question_type: questionType,
                   options: options,
                   is_required: is_required,
                 };
                 console.log(newQuestion);
-                questions.push(newQuestion);
+                dispatch(addQuestion(newQuestion))
                 setAddQuestions((prev) => !prev);
               }}
             />
@@ -308,7 +312,7 @@ const CreateNewSection = () => {
                   section_description:sDescription,
                   questions:questions
                 }))
-                setQuestions([])
+                dispatch(resetQuestion())
               }}
                >
                 <IoDocumentOutline className="inline-block mr-2" />
@@ -331,45 +335,6 @@ const CreateNewSection = () => {
               Remove watermark
             </span>
           </div>
-
-          {aiChatbot && (
-            <div
-              className="w-[20rem] rounded-md flex flex-col absolute top-14 right-0 z-50"
-              data-aos="fade-left"
-              data-aos-offset="300"
-              data-aos-easing="ease-in-sine"
-            >
-              <div className=" bg-gradient-to-r from-[#5b03b2] px-4 py-2 rounded-t-md to-[#9d50bb]  text-white ">
-                <div className="flex justify-end gap-2">
-                  <HiOutlineMinusSmall />
-                  <BsFillPinAngleFill />
-                  <LiaTimesSolid
-                    className=""
-                    onClick={() => setAiChatbot(false)}
-                  />
-                </div>
-                <h2 className=" text-white ">Sensei</h2>
-              </div>
-              <div className="flex flex-col ">
-                <div className="flex border py-2 px-3 bg-[#FAFAFA] ">
-                  <input
-                    value={surveyPrompt}
-                    type="text"
-                    onChange={(e) => setSurveyPrompt(e.target.value)}
-                    placeholder="Enter prompt here."
-                    className="border-none focus:border-none outline-none focus:outline-none active:border-0 ring-0 w-[90%]"
-                  />
-                  <button
-                    disabled={!surveyPrompt}
-                    className="rounded-full flex flex-col items-center justify-center bg-[#5b03b2] w-[10%] "
-                    // onClick={handleGenerateQuestion}
-                  >
-                    <IoIosArrowForward />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
         <div
           className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}

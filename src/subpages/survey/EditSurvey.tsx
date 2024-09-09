@@ -4,7 +4,6 @@ import LinearScaleQuestion from "@/components/survey/LinearScaleQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
-import { addQuestion, deleteQuestion, updateQuestions,  addNewSection, setQuestionObject, } from "@/redux/slices/questions.slice";
 import { RootState } from "@/redux/store";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -23,14 +22,22 @@ import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
 import { VscLayersActive } from "react-icons/vsc";
 import CreateNewSection from "./CreateNewSection";
 import { useRouter } from "next/navigation";
-import { resetSurvey } from "@/redux/slices/survey.slice";
+import { deleteQuestionFromSection, resetSurvey, updateSection } from "@/redux/slices/survey.slice";
+import store from '@/redux/store';
+import Sensei from "@/components/ui/Sensei";
+import { HiOutlineMinusSmall } from "react-icons/hi2";
+import { BsFillPinAngleFill } from "react-icons/bs";
+import { LiaTimesSolid } from "react-icons/lia";
+import { IoIosArrowForward } from "react-icons/io";
+import PaginationBtn from "@/components/common/PaginationBtn";
+
 
 
 
 const EditSurvey = () => {
   // const question = useSelector((state: RootState) => state.question);
   const survey = useSelector((state: RootState) => state.survey);
-  const [questions, setQuestions] = useState(survey.sections || []);
+  const questions = useSelector((state: RootState) => state?.survey?.sections);
   const headerUrl = useSelector((state: RootState) => state?.survey?.header_url);
   const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
   const theme = useSelector((state: RootState) => state?.survey?.theme);
@@ -39,6 +46,7 @@ const EditSurvey = () => {
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
+  const [aiChatbot, setAiChatbot] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
   const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
@@ -49,43 +57,68 @@ const EditSurvey = () => {
     { data: newSingleSurvey, isLoading: generatingSingleSurvey, isSuccess: newQuestionGenerate},
   ] = useGenerateSingleSurveyMutation();
   const [isNewSection, setIsNewSection] = useState(true);
+  const [selectIndex, setSelectIndex] = useState(null);
 
 
-  const EditQuestion = (index: number) => {
+  const EditQuestion = (index: any) => {
     setEditIndex(index);
     setIsEdit(true);
     setIsSidebarOpen(false);
+    setAiChatbot(true);
+    console.log(index)
+    setSelectIndex(index)
   };
 
-  // const handleSave = (
-  //   updatedQuestion: string,
-  //   updatedOptions: string[],
-  //   updatedQuestionType: string
-  // ) => {
-  //   const updatedQuestions = [...questions];
-  //   if (editIndex !== null) {
-  //     // @ts-ignore
-  //     updatedQuestions[editIndex] = {...updatedQuestions[editIndex],
-  //       questions: updatedQuestion,
-  //       options: updatedOptions,
-  //      question_type: updatedQuestionType,
-  //       is_required: false,
-  //     };
-  //     dispatch(updateQuestions(updatedQuestions));
-  //     setEditIndex(null);
-  //     setIsEdit(false);
-  //   }
-  //   setIsSidebarOpen((prev) => !prev);
-  // };
+  const navigatePage = (direction: any) => {
+    setCurrentSection((prevIndex) => {
+      if (direction === "next") {
+        return prevIndex < questions.length - 1 ? prevIndex + 1 : prevIndex;
+      } else {
+        return prevIndex > 0 ? prevIndex - 1 : prevIndex;
+      }
+    });
+  };
+
+  const handleSave = (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string
+  ) => {
+    const updatedSections = [...questions];
+      const currentSectionData = updatedSections[currentSection];
+  
+    if (editIndex !== null && currentSectionData) {
+      const updatedQuestionData = {
+        ...currentSectionData.questions[editIndex],
+        question: updatedQuestion,
+        options: updatedOptions,
+        question_type: updatedQuestionType,
+        is_required: currentSectionData.questions[editIndex].is_required || false, 
+      };
+        const updatedSection = {
+        ...currentSectionData,
+        questions: currentSectionData.questions.map((q, idx) =>
+          idx === editIndex ? updatedQuestionData : q
+        ),
+      };
+        dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
+        setEditIndex(null);
+      setIsEdit(false);
+    }
+      setIsSidebarOpen((prev) => !prev);
+      setAiChatbot((prev) => !prev);
+  };
+  
 
   const handleDeleteQuestion = (index:number) => {
-    dispatch(deleteQuestion(index));
+    dispatch(deleteQuestionFromSection({ sectionIndex: currentSection, questionIndex: index }));
   };
 
   const handleCancel = () => {
     setEditIndex(null);
     setIsEdit(false);
     setIsSidebarOpen((prev) => !prev);
+    setAiChatbot(false);
   };
 
   const handleGenerateSingleQuestion = async () => {
@@ -101,27 +134,54 @@ const EditSurvey = () => {
   };
   
 
+  const TestIng=()=>{
+    const updatedSections = [...questions];
+    const currentSectionData = updatedSections[currentSection];
+    console.log(currentSectionData)
+  }
+  TestIng()
+
+  console.log(newSingleSurvey?.data)
 
   useEffect(() => {
     if (newQuestionGenerate && newSingleSurvey?.data?.response) {
       console.log(newSingleSurvey)
+      const updatedSections = [...questions];
+      const currentSectionData = updatedSections[currentSection];
+      const optionType = newSingleSurvey.data.response["Option type"]?.trim();
+
       const newQuestion = {
-        Question: newSingleSurvey.data.response.Question,
-        Options: newSingleSurvey.data.response.Options,
-        question_type: newSingleSurvey.data.response.question_type === 'Multi-choice' ? 'multiple_choice' : newSingleSurvey.data.response.question_type === "Comment" ? "comment" : "matrix_checkbox",
+        question: newSingleSurvey.data.response.Question,
+        options: newSingleSurvey.data.response.Options,
+        question_type: optionType === "Multi-choice"
+        ? "multiple_choice"
+        : optionType === "Comment"
+        ? "long_text"
+        : "matrix_checkbox",
         is_required: false,
       };
-      dispatch(addQuestion(newQuestion));
+      const updatedQuestions = [...currentSectionData.questions, newQuestion];
+      const updatedSection = {
+        ...currentSectionData,  
+        questions: updatedQuestions
+      };
+
+      dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
     }
-  }, [dispatch, newQuestionGenerate, newSingleSurvey]);
+  }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, questions[currentSection]?.questions]);
   
 
   
   const handleSurveyCreation =async()=>{
+    if(logoUrl === '' || headerUrl === ''){
+      toast.warning("Header image and logo can not be empty")
+      return null
+    }
     try{
       console.log(survey)
+      const updatedSurvey = store.getState().survey;
       await createSurvey(
-        survey
+        updatedSurvey
       );
     }catch(e){
       console.log(e)
@@ -163,7 +223,7 @@ const EditSurvey = () => {
   console.log(questions[currentSection]?.questions)
 
   return (
-    <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
+    <div className={`${theme} flex flex-col gap-5 w-full pl-16 relative`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
        {isNewSection ? <>
@@ -224,7 +284,7 @@ const EditSurvey = () => {
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
-                  // onSave={handleSave}
+                  onSave={handleSave}
                   onCancel={handleCancel}
                 />
               ) :
@@ -233,7 +293,7 @@ const EditSurvey = () => {
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
-                  // onSave={handleSave}
+                  onSave={handleSave}
                   onCancel={handleCancel}
                 />
               )
@@ -322,8 +382,19 @@ const EditSurvey = () => {
                 Publish Survey
               </div> */}
             </div>
-            <div>Pagination</div>
+            {questions?.length > 1 && (
+            <div className="flex justify-end items-center pb-10">
+              <PaginationBtn
+                currentSection={currentSection}
+                totalSections={questions.length}
+                onNavigate={navigatePage}
+              />
+            </div>
+          )}
           </div>
+          {aiChatbot && (
+            <Sensei isOpen={aiChatbot} setIsOpen={()=>setAiChatbot(!aiChatbot)} questionIndex={selectIndex} />
+          )}
    
           <div className=" rounded-md flex flex-col justify-center w-[16rem] py-5 text-center">
           <button
@@ -351,6 +422,7 @@ const EditSurvey = () => {
           {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>
       </div>
+
     </div>
   );
 };

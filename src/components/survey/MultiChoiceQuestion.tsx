@@ -28,7 +28,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
     (state: RootState) => state?.survey?.question_text
   );
   const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme)
-  console.log(`border-[${colorTheme}]`)
+
   return (
     <div
       className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
@@ -41,7 +41,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
         src={draggable}
         alt="draggable icon"
         className={
-          pathname === "/surveys/edit-survey" ? "invisible" : "visible"
+          pathname === "/surveys/edit-survey" || pathname ==='surveys/preview-survey' ? "invisible" : "visible"
         }
       />
       <div className="w-full">

@@ -125,6 +125,17 @@ const surveySlice = createSlice({
     resetSurvey: (_state) => {
       return initialState;  
     },
+    deleteQuestionFromSection: (
+      state,
+      action: PayloadAction<{ sectionIndex: number; questionIndex: number }>
+    ) => {
+      const { sectionIndex, questionIndex } = action.payload;
+      const section = state.sections[sectionIndex];
+
+      if (section && section.questions[questionIndex]) {
+        section.questions.splice(questionIndex, 1);
+      }
+    },
   },
 });
 
@@ -146,6 +157,7 @@ export const {
   setQuestionObject,
   updateDescription,
   resetSurvey,
+  deleteQuestionFromSection
 } = surveySlice.actions;
 
 export default surveySlice.reducer;

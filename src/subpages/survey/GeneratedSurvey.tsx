@@ -180,7 +180,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                 onClick={handleEdit}
               >
                 <FaEye className="inline-block mr-2" />
-                Preview
+                Continue
               </button>
             </div>
             <div className="mt-6 sm:mt-8">

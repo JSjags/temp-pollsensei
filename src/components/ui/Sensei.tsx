@@ -1,12 +1,21 @@
-import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react'
-import { SheetHeader, SheetTitle } from './sheet'
-import { Button } from './button'
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { SheetHeader, SheetTitle } from "./sheet";
+import { Button } from "./button";
 import { Brain, X, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, generateInitials } from "@/lib/utils";
-import { RootState } from '@/redux/store';
-import { useSelector } from 'react-redux';
-
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { HiOutlinePlus } from "react-icons/hi";
+import { LiaTimesSolid } from "react-icons/lia";
+import { BsFillPinAngleFill } from "react-icons/bs";
+import { HiOutlineMinusSmall } from "react-icons/hi2";
 
 type Message = {
   id: number;
@@ -16,12 +25,18 @@ type Message = {
 };
 
 const initialMessages: Message[] = [
-  { id: 1, text: "Hello there", sender: "ai", timestamp: "08:16 AM" },
+  { id: 1, text: "Hello there", sender: "ai", timestamp: new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  }) },
   {
     id: 2,
     text: "I'm an automated chatbot here to answer your questions.\n\nPlease pick the best option below or feel free to ask me anything to get started.",
     sender: "ai",
-    timestamp: "08:16 AM",
+    timestamp: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
   },
 ];
 
@@ -33,10 +48,11 @@ const suggestedQuestions = [
 
 type Props = {
   isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
+  setIsOpen: () => void;
+  questionIndex: null | number;
 };
 
-const Sensei:React.FC<Props> = ({setIsOpen}) => {
+const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex  }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -79,28 +95,21 @@ const Sensei:React.FC<Props> = ({setIsOpen}) => {
 
   return (
     <div
-    className="w-[20rem] rounded-md flex flex-col absolute top-14 right-0 z-50"
-    data-aos="fade-left"
-    data-aos-offset="300"
-    data-aos-easing="ease-in-sine"
+      className="w-[20rem] rounded-md flex flex-col bg-white absolute top-24 right-48 z-50"
+      data-aos="fade-left"
+      data-aos-offset="300"
+      data-aos-easing="ease-in-sine"
     >
-      <SheetHeader className="bg-[#3F51B5] text-white p-4 pt-10">
-        <SheetTitle className="text-2xl font-bold text-white text-left">
-          Poll Professor
-        </SheetTitle>
-        <p className="text-sm mt-2 text-left">
-          Hi, I'm your PollSensei's assistant but you can call me Poll
-          Professor. I'm here to provide quick and accurate support.
-        </p>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-4 top-0 size-8 text-white rounded-full bg-white/10 hover:bg-white hover:text-black"
-          onClick={() => setIsOpen(false)}
-        >
-          <X className="h-6 w-6" />
-        </Button>
-      </SheetHeader>
+      <div className="bg-[#3F51B5] text-white">
+        <div className=" bg-gradient-to-r from-[#5b03b2] px-4 py-2 rounded-t-md to-[#9d50bb]  text-white ">
+          <div className="flex justify-end gap-2">
+            <HiOutlineMinusSmall />
+            <BsFillPinAngleFill />
+            <LiaTimesSolid className="" onClick={setIsOpen} />
+          </div>
+          <h2 className=" text-white ">Sensei</h2>
+        </div>
+      </div>
       <div className="flex-1 overflow-y-auto p-4 px-0 space-y-4">
         <AnimatePresence>
           {messages.map((message) => (
@@ -173,7 +182,7 @@ const Sensei:React.FC<Props> = ({setIsOpen}) => {
               onClick={() => setInput(question)}
               className="text-purple-600 border-purple-600 hover:bg-purple-100 text-wrap min-h-10 h-fit text-left py-2"
             >
-              {question}
+              {question} {questionIndex}
             </Button>
           ))}
         </div>
@@ -188,7 +197,7 @@ const Sensei:React.FC<Props> = ({setIsOpen}) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Sensei
+export default Sensei;

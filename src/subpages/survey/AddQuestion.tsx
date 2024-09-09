@@ -180,23 +180,3 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 export default AddQuestion;
 
 
-// demo usage
-
-
-// {
-//   addquestions && <IsLoadingModal
-//   openModal={addquestions} modalSize={"2xl"}
-//   >
-//      <AddQuestion onCancel={()=>setAddQuestions((prev)=>!prev)} onSave={(question, options, questionType)=>{
-//        const newQuestion = {
-//          Question: question,
-//          "Option type": questionType,
-//          Options:options,
-//      }
-//        dispatch(addQuestion(newQuestion));
-//        setAddQuestions((prev)=>!prev);
-     
-//      }} />
-//    </IsLoadingModal>
-//  }
-

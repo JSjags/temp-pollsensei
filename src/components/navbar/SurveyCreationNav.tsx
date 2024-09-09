@@ -64,6 +64,8 @@ const SurveyCreationNav = () => {
       </nav>
 
       <div className="flex justify-between items-center gap-3">
+        {
+          path === "/surveys/create-survey" || path ==="/surveys/add-question-m" ? " " : (
         <button
           className={`border-none flex items-center ${
             path === "/surveys/preview-survey" ? "invisible" : "visible"
@@ -74,6 +76,8 @@ const SurveyCreationNav = () => {
         >
           <IoEyeOutline className="mr-1" /> Preview
         </button>
+          )
+        }
         <button className="border-none flex items-center">
           <IoSettingsOutline className="mr-1" /> Survey Settings
         </button>

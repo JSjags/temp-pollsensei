@@ -1,22 +1,18 @@
 import Image from "next/image";
-import { pollsensei_new_logo, sparkly, stars } from "@/assets/images";
+import { pollsensei_new_logo, sparkly, } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
-import { HiOutlineMinusSmall } from "react-icons/hi2";
 import { IoDocumentOutline } from "react-icons/io5";
-import { IoIosArrowForward } from "react-icons/io";
-import { ClipLoader } from "react-spinners";
 import { VscLayersActive } from "react-icons/vsc";
 import { useEffect, useState } from "react";
-import { LiaTimesSolid } from "react-icons/lia";
-import { BsFillPinAngleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import {
   updateSectionTopic,
   updateSectionDescription,
+  addQuestion,
+  resetQuestion,
 } from "@/redux/slices/questions.slice";
-import { useCreateAiSurveyMutation } from "@/services/survey.service";
 import { toast } from "react-toastify";
 import CommentQuestion from "@/components/survey/CommentQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
@@ -26,7 +22,6 @@ import { FaEye } from "react-icons/fa6";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import QuestionType from "./QuestionType";
 import StyleEditor from "./StyleEditor";
-import IsLoadingModal from "@/components/modals/IsLoadingModal";
 import AddQuestion from "./AddQuestion";
 import { addSection, resetSurvey } from "@/redux/slices/survey.slice";
 import { useRouter } from "next/navigation";
@@ -34,6 +29,7 @@ import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
 import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/survey.service";
 import store from '@/redux/store';
+import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 
 
 const AddQuestionPage = () => {
@@ -47,16 +43,14 @@ const AddQuestionPage = () => {
   const selectedSurveyType = useSelector(
     (state: RootState) => state?.survey?.survey_type
   );
+  const questions = useSelector((state: RootState) => state?.question?.questions);
   const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
   const [sectionTitle, setSectionTitle] = useState(sectionTopic || "");
   const [sDescription, setsDescription] = useState(sectionDescription || "");
   const [isEditing, setIsEditing] = useState(false);
-  const [aiChatbot, setAiChatbot] = useState(false);
-  const [surveyPrompt, setSurveyPrompt] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [sections, setSections] = useState([]);
+  // const [questions, setQuestions] = useState(questionState || []);
   const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
   const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
   const survey = useSelector((state: RootState) => state?.survey);
@@ -68,33 +62,16 @@ const AddQuestionPage = () => {
     dispatch(updateSectionTopic(sectionTitle));
     dispatch(updateSectionDescription(sDescription));
     setIsEditing(false);
-    setAiChatbot(true);
   };
 
-  // const handleGenerateQuestion = async () => {
-  //   console.log({
-  //     user_query: surveyPrompt,
-  //     survey_type: selectedSurveyType,
-  //   });
-  //   try {
-  //     await createAiSurvey({
-  //       user_query: surveyPrompt,
-  //       survey_type: 'quantittaive',
-  //     });
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
 
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-
     const items = Array.from(questions);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-
-    setQuestions(items);
+    dispatch(addQuestion(items))
   };
 
   const EditQuestion = async (id: any) => {
@@ -165,15 +142,7 @@ const AddQuestionPage = () => {
     }
   }, [progressError, progressIsError])
 
-  // useEffect(() => {
-  //   if (isSuccess) {
-  //     toast.success("Survey new section created successfully");
-  //     setQuestions(data?.data?.response);
-  //   }
-  //   if(error || isError){
-  //     toast.error("Failed: Something went wrong");
-  //   }
-  // }, [isSuccess]);
+
   console.log(questions)
   return (
     <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
@@ -203,18 +172,18 @@ const AddQuestionPage = () => {
 
           {isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <textarea
+              <AutosizeTextarea
                 value={sectionTitle}
                 onChange={(e) => setSectionTitle(e.target.value)}
                 placeholder="Untitled Section"
                 className="border-b-2 border-[#5B03B2]"
-              ></textarea>
-              <textarea
+              ></AutosizeTextarea>
+              <AutosizeTextarea
                 value={sDescription}
                 onChange={(e) => setsDescription(e.target.value)}
                 placeholder="Describe section (optional)"
                 className="border-b-2 border-[#D9D9D9]"
-              ></textarea>
+              ></AutosizeTextarea>
 
               <div className="flex justify-end gap-5 mt-creat">
                 <button
@@ -249,6 +218,10 @@ const AddQuestionPage = () => {
             </div>
           )}
 
+          {/* <button type="reset" onClick={()=>dispatch(resetQuestion())}>
+            Reset
+          </button> */}
+
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
@@ -265,7 +238,6 @@ const AddQuestionPage = () => {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className="mb-4"
-                          // key={index}
                         >
                           {item.question_type === "multiple_choice" ? (
                             <MultiChoiceQuestion
@@ -330,13 +302,13 @@ const AddQuestionPage = () => {
                     is_required: is_required,
                   };
                    console.log(newQuestion);
-                  questions.push(newQuestion)
+                  dispatch(addQuestion(newQuestion))
                   setAddQuestions((prev) => !prev);
                 }}
               />
           )}
 
-          <div className="flex justify-between items-center pt-5 pb-10">
+          {/* <div className="flex justify-between items-center pt-5 pb-10">
             <div className="">
               <button
                 className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
@@ -347,7 +319,7 @@ const AddQuestionPage = () => {
                 Preview
               </button>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-between items-center pb-10">
             <div className="flex gap-2 items-center">
@@ -356,6 +328,7 @@ const AddQuestionPage = () => {
               </button>
               <button className="bg-white rounded-full px-5 py-1" onClick={()=>{
                 dispatch(addSection({questions: questions}))
+                dispatch(resetQuestion())
                 router.push('/surveys/add-new-section')
               }}>
                 <IoDocumentOutline className="inline-block mr-2" />
@@ -366,7 +339,11 @@ const AddQuestionPage = () => {
                 Publish Survey
               </button>
             </div>
-            <div>Pagination</div>
+            {
+              survey.sections.length > 0 && (
+                <div>Pagination</div>
+              )
+            }
           </div>
 
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
@@ -378,46 +355,6 @@ const AddQuestionPage = () => {
               Remove watermark
             </span>
           </div>
-
-
-
-          {/* Poll master chatbot */}
-
-          {/* {aiChatbot && (
-        <div
-          className="w-[20rem] rounded-md flex flex-col absolute top-14 right-0 z-50"
-          data-aos="fade-left"
-          data-aos-offset="300"
-          data-aos-easing="ease-in-sine"
-        >
-          <div className=" bg-gradient-to-r from-[#5b03b2] px-4 py-2 rounded-t-md to-[#9d50bb]  text-white ">
-            <div className="flex justify-end gap-2">
-              <HiOutlineMinusSmall />
-              <BsFillPinAngleFill />
-              <LiaTimesSolid className="" onClick={() => setAiChatbot(false)} />
-            </div>
-            <h2 className=" text-white ">Sensei</h2>
-          </div>
-          <div className="flex flex-col ">
-            <div className="flex border py-2 px-3 bg-[#FAFAFA] ">
-              <input
-                value={surveyPrompt}
-                type="text"
-                onChange={(e) => setSurveyPrompt(e.target.value)}
-                placeholder="Enter prompt here."
-                className="border-none focus:border-none outline-none focus:outline-none active:border-0 ring-0 w-[90%]"
-              />
-              <button
-                disabled={!surveyPrompt}
-                className="rounded-full flex flex-col items-center justify-center bg-[#5b03b2] w-[10%] "
-                onClick={handleGenerateQuestion}
-              >
-                <IoIosArrowForward />
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
         </div>
         <div
           className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}

@@ -11,11 +11,11 @@ interface IsGeneratingProps{
 
 const IsGenerating:React.FC<IsGeneratingProps> = ({isGeneratingSurveyLoading}) => {
   return (
-    <div>
+    <div className='custom-scrollbar'>
       {
         isGeneratingSurveyLoading && (
           <IsLoadingModal openModal={isGeneratingSurveyLoading} modalSize={"lg"}>
-          <div className="flex flex-col text-center gap-2">
+          <div className="flex flex-col text-center gap-2 custom-scrollbar">
             <Image src={stars} alt="stars" className={`h-8 w-auto animate-spin-slow`} />
             <h2 className="text-lg">Generating Questions for you</h2>
             <p className="text-sm">Hold on while we do the hard work for you.</p>

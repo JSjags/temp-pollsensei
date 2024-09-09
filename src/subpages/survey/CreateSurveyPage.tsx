@@ -31,6 +31,7 @@ import store from '@/redux/store';
 const CreateSurveyPage = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
   const [selectedSurveyType, setSelectedSurveyType] = useState("");
+  const [isSelected, setIsSelected] = useState<number | null>(null);
   const [whatDoYouWant, setWhatDoYouWant] = useState(true);
   const [oneMoreThing, setOneMoreThing] = useState(false);
   const [promptForm, setPromptForm] = useState(false);
@@ -515,10 +516,13 @@ const CreateSurveyPage = () => {
 
             {topics &&
               topics?.data.topics.map((topic: string[], index: number) => (
-                <div className="border py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md " key=
+                <div className={`border ${
+                  isSelected === index ? "border-2 border-red-500" : ""
+                } py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md `} key=
                 {index} onClick={(e)=>{
                   // @ts-ignore
                   dispatch(updateTopic(e.target.innerHTML))
+                  setIsSelected(index)
                 }}>
                   {topic}
                 </div>

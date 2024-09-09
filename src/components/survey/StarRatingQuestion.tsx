@@ -34,7 +34,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 
   return (
     <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3">
-      <Image src={draggable} alt="draggable icon" />
+      <Image src={draggable} alt="draggable icon"  className={ pathname === "/surveys/edit-survey" || pathname ==='surveys/preview-survey' ? "invisible" : "visible"} />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start">{question}</h3>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useSelector } from "react-redux";
+import { AutosizeTextarea } from "../ui/autosize-textarea";
 
 interface ComponentQuestionProps {
   question: string;
@@ -35,14 +36,14 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
       fontSize: `${questionText?.size}px`,
     }}
     >
-      <Image src={draggable} alt="draggable icon" className={pathname === "/surveys/edit-survey" ? "invisible" : "visible"} />
+      <Image src={draggable} alt="draggable icon" className={ pathname === "/surveys/edit-survey" || pathname ==='surveys/preview-survey' ? "invisible" : "visible"} />
       <div className="w-full">
       <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start"><span>{index}. </span>{question}</h3>
          {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>}
       </div>
         <div >
-          <textarea
+          <AutosizeTextarea
             className="w-full border-none rounded-md p-2"
             placeholder="Type your response here..."
             style={{borderColor: colorTheme}}
