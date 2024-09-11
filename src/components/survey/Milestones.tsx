@@ -41,7 +41,7 @@ const edgeTypes = {
   "custom-edge": CustomEdge,
 };
 
-export default function Milestones({ stage }: { stage: string }) {
+export default function Milestones({ stage, onClick }: { stage: string, onClick?: () => void}) {
   const router = useRouter();
   const [currentStage] = useState(parseInt(stage) + 1);
 

@@ -47,6 +47,7 @@ const CommentQuestionEdit: React.FC<CommentQuestionEditProps> = ({
 
   const handleSave = () => {
     if (onSave) {
+      // @ts-ignore
       onSave(editedQuestion, editedOptions, editedQuestionType);
       // onSave(editedQuestion, editedQuestionType, editedOptions);
     }

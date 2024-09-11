@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import Select from "react-select";
 import { MdDeleteOutline } from "react-icons/md";
+import { Switch } from "@/components/ui/switch";
 
 interface AddQuestionProps {
-  onSave?: (question: string, options: string[], questionType: string) => void;
+  onSave?: (question: string, options: string[], questionType: string, is_required:boolean) => void;
   onCancel?: () => void;
 }
 
@@ -25,8 +26,9 @@ const customStyles = {
 
 const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [question, setQuestion] = useState<string>("");
-  const [questionType, setQuestionType] = useState<string>("Multi-choice");
+  const [questionType, setQuestionType] = useState<string>("multiple_choice");
   const [options, setOptions] = useState<string[] | any>([""]);
+  const [is_required, setIsRequired] = useState<boolean>(false)
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -46,7 +48,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 
   const handleSave = () => {
     if (onSave) {
-      onSave(question, options, questionType);
+      onSave(question, options, questionType, is_required);
     }
   };
 
@@ -62,13 +64,13 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           "Strongly Agree",
         ]);
         break;
-      case "Multi-choice":
+      case "multiple_choice":
         setOptions([""]);
         break;
-      case "Comment":
+      case "long_text":
         setOptions([]);
         break;
-      case "Matrix":
+      case "matrix_checkbox":
         setOptions({
             Head: ["Head 1", "Head 2", "Head 3", "Head 4", "Head 5"],
             Body: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"]
@@ -80,18 +82,20 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   };
 
   const selectOptions = [
-    { value: "Multi-choice", label: "Multiple Choice" },
-    { value: "Comment", label: "Comment" },
-    { value: "Likert Scale", label: "Likert Scale" },
-    { value: "Linear Scale", label: "Linear Scale" },
+    { value: "multiple_choice", label: "Multiple Choice" },
+    { value: "long_text", label: "Comment" },
+    { value: "likert_scale", label: "Likert Scale" },
+    // { value: "linear_scale", label: "Linear Scale" },
     { value: "star_rating", label: "Star Rating" },
-    { value: "Matrix", label: "Matrix" },
+    { value: "matrix_checkbox", label: "Matrix" },
   ];
 
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded">
+    <div className="mb-4 bg-[#fff] flex items-center w-full py-4 px-11 gap-3 rounded"  data-aos="fade-up"
+    data-aos-duration="3000">
       <div className="w-full flex flex-col">
-        <div className="flex justify-between w-full items-center">
+        <label htmlFor="question">Question</label>
+        <div className="flex justify-between w-full items-center mt-2">
           <input
             type="text"
             placeholder="Enter your question here"
@@ -101,11 +105,11 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           />
         </div>
         <div className="flex justify-between py-4 items-center">
-          <small>Option Type</small>
+          <p>Option</p>
           <Select
             className="select-container border-2 rounded mx-4 my-4"
             classNamePrefix="questionType"
-            defaultValue={selectOptions.find((opt) => opt.value === "Multi-choice")}
+            defaultValue={selectOptions.find((opt) => opt.value === "multiple_choice")}
             value={selectOptions.find((opt) => opt.value === questionType)}
             name="questionType"
             options={selectOptions}
@@ -114,7 +118,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           />
         </div>
 
-        {questionType !== "Comment" && (
+        {questionType !== "long_text" && (
           <div>
             {options.map((option:any, index:any) => (
               <div key={index} className="flex items-center my-2">
@@ -122,7 +126,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
                   type="text"
                   value={option}
                   onChange={(e) => handleOptionChange(index, e.target.value)}
-                  className="mr-2 w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  className="mr-2 w-full bg-transparent border-b py-2 border-gray-300 focus:outline-none focus:border-blue-500"
                 />
                 {options.length > 1 && (
                   <button
@@ -134,10 +138,10 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
                 )}
               </div>
             ))}
-            {questionType === "Multi-choice" && (
+            {questionType === "multiple_choice" && (
               <button
                 onClick={handleAddOption}
-                className="text-blue-500 mt-2 text-start"
+                className="text-blue-500 mt-2 border py-2 px-4 rounded-full text-start"
               >
                 Add Option
               </button>
@@ -145,7 +149,14 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           </div>
         )}
 
-        <div className="flex justify-end gap-4 mt-4">
+        <div className="flex justify-between items-center gap-4 mt-4">
+        <div className="flex justify-between items-center gap-4">
+          <span>Required</span>
+            <Switch checked={is_required} onCheckedChange={()=>setIsRequired((prev)=> !prev)} className="bg-[#9D50BB] " />
+          </div>
+        
+
+          <div className="flex items-center gap-5">
           <button
             className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
             onClick={onCancel}
@@ -158,6 +169,8 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           >
             Save
           </button>
+
+          </div>
         </div>
       </div>
     </div>
@@ -166,24 +179,4 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 
 export default AddQuestion;
 
-
-// demo usage
-
-
-// {
-//   addquestions && <IsLoadingModal
-//   openModal={addquestions} modalSize={"2xl"}
-//   >
-//      <AddQuestion onCancel={()=>setAddQuestions((prev)=>!prev)} onSave={(question, options, questionType)=>{
-//        const newQuestion = {
-//          Question: question,
-//          "Option type": questionType,
-//          Options:options,
-//      }
-//        dispatch(addQuestion(newQuestion));
-//        setAddQuestions((prev)=>!prev);
-     
-//      }} />
-//    </IsLoadingModal>
-//  }
 
