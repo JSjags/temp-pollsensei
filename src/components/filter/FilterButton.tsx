@@ -4,11 +4,11 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion"; // Import motion from framer-motion
 
 interface FilterButtonProps {
-  text: string;
+  text?: string;
   buttonClassName?: string;
   onClick?: (val: string) => void;
   icon?: React.ReactNode;
-  setFilter: React.Dispatch<React.SetStateAction<string>>;
+  setFilter?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const roles = [
@@ -36,7 +36,9 @@ const FilterButton: React.FC<FilterButtonProps> = ({
 
   const handleClearFilter = () => {
     setFilterArray([]);
-    setFilter("");
+    if (setFilter) {
+      setFilter("");
+    }
     setShowFilter(false);
   };
 
