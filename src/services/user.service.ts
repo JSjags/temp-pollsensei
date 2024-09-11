@@ -13,7 +13,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
       onQueryStarted: async (credentials, { dispatch, queryFulfilled }) => {
         try {
           const data = await queryFulfilled;
-          console.log("GULAG");
           console.log(data);
           const accessToken = data?.data?.data?.access_token;
           const user = data?.data?.data?.user;
@@ -43,11 +42,42 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body: newUser,
       }),
     }),
+    completeInvitedMemberSetup: builder.mutation({
+      query: (credentials) => ({
+        url: "/team/auth",
+        method: "POST",
+        body: credentials,
+      }),
+      onQueryStarted: async (credentials, { dispatch, queryFulfilled }) => {
+        try {
+          const data = await queryFulfilled;
+          console.log(data);
+          const accessToken = data?.data?.data?.access_token;
+          const user = data?.data?.data?.user;
+
+          console.log(accessToken);
+          console.log(user);
+
+          dispatch(
+            updateUser({
+              token: accessToken,
+              user,
+            })
+          );
+        } catch (error) {
+          console.log(error);
+          return;
+        }
+      },
+      transformResponse: (response) => {
+        return response;
+      },
+    }),
     verifyOTP: builder.mutation({
-      query: (credientials) => ({
+      query: (credentials) => ({
         url: "/auth/verify-otp",
         method: "POST",
-        body: credientials,
+        body: credentials,
       }),
     }),
     resetPassword: builder.mutation({
@@ -96,6 +126,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useRegisterUserMutation,
+  useCompleteInvitedMemberSetupMutation,
   useVerifyOTPMutation,
   useResetPasswordMutation,
   useForgetPasswordMutation,

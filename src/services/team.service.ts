@@ -6,17 +6,17 @@ export const teamApiSlice = apiSlice.injectEndpoints({
     getTeamMembers: builder.query({
       query: (page) => ({
         url: `/team/members?page=1&page_size=${page}`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
     invite: builder.mutation({
       query: (invitee) => ({
-        url: '/team/invite',
-        method: 'POST',
+        url: "/team/invite",
+        method: "POST",
         body: invitee,
       }),
     }),
   }),
 });
 
-export const { useGetTeamMembersQuery, useInviteMutation } = teamApiSlice
+export const { useGetTeamMembersQuery, useInviteMutation } = teamApiSlice;

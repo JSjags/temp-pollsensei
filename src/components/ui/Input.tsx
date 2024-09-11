@@ -9,6 +9,7 @@ interface InputProps {
   name: string;
   type: string;
   placeholder?: string;
+  disabled?: boolean;
   className?: string;
   form: FormApi<any, Partial<any>>;
 }
@@ -20,6 +21,7 @@ const Input: React.FC<InputProps> = ({
   placeholder,
   className,
   form,
+  disabled = false,
 }) => {
   return (
     <div className="mb-3 flex flex-col w-full">
@@ -31,6 +33,7 @@ const Input: React.FC<InputProps> = ({
           <input
             {...input}
             type={type}
+            disabled={disabled}
             className={cn(
               "auth-input focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground placeholder:text-foreground/40",
               className
