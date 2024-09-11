@@ -1,21 +1,18 @@
 import React, {
-  Dispatch,
-  SetStateAction,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { SheetHeader, SheetTitle } from "./sheet";
 import { Button } from "./button";
 import { Brain, X, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn, generateInitials } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
-import { HiOutlinePlus } from "react-icons/hi";
 import { LiaTimesSolid } from "react-icons/lia";
 import { BsFillPinAngleFill } from "react-icons/bs";
 import { HiOutlineMinusSmall } from "react-icons/hi2";
+import { AutosizeTextarea } from "./autosize-textarea";
 
 type Message = {
   id: number;
@@ -31,7 +28,7 @@ const initialMessages: Message[] = [
   }) },
   {
     id: 2,
-    text: "I'm an automated chatbot here to answer your questions.\n\nPlease pick the best option below or feel free to ask me anything to get started.",
+    text: "I'm an automated chatbot here to answer your questions.\n\nPlease pick the best option below to get started.",
     sender: "ai",
     timestamp: new Date().toLocaleTimeString([], {
       hour: "2-digit",
@@ -49,11 +46,13 @@ const suggestedQuestions = [
 type Props = {
   isOpen: boolean;
   setIsOpen: () => void;
-  questionIndex: null | number;
+  questionIndex: number | null;
+  currentSection: number
 };
 
-const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex  }) => {
+const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex, currentSection  }) => {
   const user = useSelector((state: RootState) => state.user.user);
+  const questions = useSelector((state: RootState) => state?.survey?.sections);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -90,12 +89,21 @@ const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex  }) => {
         };
         setMessages((prev) => [...prev, aiResponse]);
       }, 1000);
+
+      const updatedSections = [...questions];
+      const currentSectionData = updatedSections[currentSection];
+      if (questionIndex !== null) {
+        console.log(currentSectionData.questions[questionIndex]);
+      } else {
+        console.log("No question selected");
+      }
+
     }
   };
 
   return (
     <div
-      className="w-[20rem] rounded-md flex flex-col bg-white absolute top-24 right-48 z-50"
+      className="w-[20rem] h-[70vh] rounded-md flex flex-col bg-white absolute top-24 right-48 z-50"
       data-aos="fade-left"
       data-aos-offset="300"
       data-aos-easing="ease-in-sine"
@@ -110,7 +118,7 @@ const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex  }) => {
           <h2 className=" text-white ">Sensei</h2>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 px-0 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 px-0 space-y-4 custom-scrollbar">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -131,12 +139,12 @@ const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex  }) => {
               >
                 <div
                   className={cn(
-                    "flex justify-center items-center size-6 sm:size-10 shrink-0 bg-[#EAD6FF30] rounded-full shadow-md",
+                    "flex justify-center items-center size-5 sm:size-7 shrink-0 bg-[#EAD6FF30] rounded-full shadow-md",
                     message.sender === "user" ? "bg-[#EAD6FF30]" : "bg-white"
                   )}
                 >
                   {message.sender === "ai" ? (
-                    <Brain className="inline-block size-4 sm:size-5 text-purple-600 shrink-0" />
+                    <Brain className="inline-block size-3 sm:size-5 text-purple-600 shrink-0" />
                   ) : (
                     <div className="font-semibold size-8 rounded-full flex items-center justify-center cursor-pointer">
                       {generateInitials((user as any)?.name ?? "")}
@@ -187,6 +195,14 @@ const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex  }) => {
           ))}
         </div>
         <div className="flex items-center space-x-2 border-t border-border px-2">
+        <AutosizeTextarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Reply"
+            // onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            className="flex-1 border-none py-2 h-8 p-2 outline-transparent custom-scrollbar outline-offset-0 focus:outline-none focus-visible:outline-none resize-none"
+            maxHeight={200}
+          />
           <Button
             onClick={handleSend}
             size="icon"

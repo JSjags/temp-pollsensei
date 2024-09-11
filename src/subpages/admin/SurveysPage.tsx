@@ -120,7 +120,7 @@ const SurveysPage = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6">
             {data && data?.data?.data?.map((item:any, it: Key | null | undefined) => (
-            <SurveyCard key={it} {...item} />
+            <SurveyCard key={it} {...item}  />
           ))}
           </div>
           <div className="mt-6 sm:mt-8">

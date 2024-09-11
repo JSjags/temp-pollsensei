@@ -25,10 +25,6 @@ import { useRouter } from "next/navigation";
 import { deleteQuestionFromSection, resetSurvey, updateSection } from "@/redux/slices/survey.slice";
 import store from '@/redux/store';
 import Sensei from "@/components/ui/Sensei";
-import { HiOutlineMinusSmall } from "react-icons/hi2";
-import { BsFillPinAngleFill } from "react-icons/bs";
-import { LiaTimesSolid } from "react-icons/lia";
-import { IoIosArrowForward } from "react-icons/io";
 import PaginationBtn from "@/components/common/PaginationBtn";
 
 
@@ -57,7 +53,7 @@ const EditSurvey = () => {
     { data: newSingleSurvey, isLoading: generatingSingleSurvey, isSuccess: newQuestionGenerate},
   ] = useGenerateSingleSurveyMutation();
   const [isNewSection, setIsNewSection] = useState(true);
-  const [selectIndex, setSelectIndex] = useState(null);
+  const [selectIndex, setSelectIndex] = useState<number | null >(null);
 
 
   const EditQuestion = (index: any) => {
@@ -134,14 +130,11 @@ const EditSurvey = () => {
   };
   
 
-  const TestIng=()=>{
-    const updatedSections = [...questions];
-    const currentSectionData = updatedSections[currentSection];
-    console.log(currentSectionData)
-  }
-  TestIng()
 
-  console.log(newSingleSurvey?.data)
+    // const updatedSections = [...questions];
+    // const currentSectionData = updatedSections[currentSection];
+    // console.log(currentSectionData.questions[0])
+
 
   useEffect(() => {
     if (newQuestionGenerate && newSingleSurvey?.data?.response) {
@@ -393,7 +386,7 @@ const EditSurvey = () => {
           )}
           </div>
           {aiChatbot && (
-            <Sensei isOpen={aiChatbot} setIsOpen={()=>setAiChatbot(!aiChatbot)} questionIndex={selectIndex} />
+            <Sensei isOpen={aiChatbot} setIsOpen={()=>setAiChatbot(!aiChatbot)} currentSection={currentSection} questionIndex={selectIndex} />
           )}
    
           <div className=" rounded-md flex flex-col justify-center w-[16rem] py-5 text-center">

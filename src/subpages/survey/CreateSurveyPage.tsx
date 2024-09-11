@@ -24,20 +24,30 @@ import IsGenerating from "@/components/modals/IsGenerating";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { addSection, saveGeneratedBy, updateConversationId, updateDescription, updateSurveyType, updateTopic } from "@/redux/slices/survey.slice";
-import store from '@/redux/store';
-
+import {
+  addSection,
+  saveGeneratedBy,
+  updateConversationId,
+  updateDescription,
+  updateSurveyType,
+  updateTopic,
+} from "@/redux/slices/survey.slice";
+import store from "@/redux/store";
+import Milestones from "@/components/survey/Milestones";
 
 const CreateSurveyPage = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
   const [selectedSurveyType, setSelectedSurveyType] = useState("");
   const [isSelected, setIsSelected] = useState<number | null>(null);
+  const [milestone, setMilestones] = useState(true);
   const [whatDoYouWant, setWhatDoYouWant] = useState(true);
   const [oneMoreThing, setOneMoreThing] = useState(false);
   const [promptForm, setPromptForm] = useState(false);
   const [isTopicModal, setIsTopicModal] = useState(false);
-  const [manualTopic, setManualTopic] = useState('');
-  const generated_by = useSelector((state:RootState)=>state.survey.generated_by)
+  const [manualTopic, setManualTopic] = useState("");
+  const generated_by = useSelector(
+    (state: RootState) => state.survey.generated_by
+  );
   const navigate = useRouter();
   const dispatch = useDispatch();
   const [surveyType, setSurveyType] = useState("");
@@ -46,7 +56,13 @@ const CreateSurveyPage = () => {
     useCreateAiSurveyMutation();
   const [
     generateTopics,
-    { data: topics, isLoading: isLoadingTopics, isSuccess: isTopicSuccess, isError:isTpoicError, error:topicError },
+    {
+      data: topics,
+      isLoading: isLoadingTopics,
+      isSuccess: isTopicSuccess,
+      isError: isTpoicError,
+      error: topicError,
+    },
   ] = useGenerateTopicsMutation();
   const [generated, setGenerated] = useState(false);
 
@@ -56,13 +72,11 @@ const CreateSurveyPage = () => {
 
   const maxCharacters = 3000;
 
-
   const handleSurveyType = (userType: any, prompt: string) => {
     setSelectedDiv(userType);
     setSelectedSurveyType(prompt);
-    setSurveyType(prompt); 
+    setSurveyType(prompt);
   };
-  
 
   const handlePathClick = () => {
     if (selectedDiv) {
@@ -88,7 +102,7 @@ const CreateSurveyPage = () => {
       setIsTopicModal((prev) => !prev);
       setPromptForm(!promptForm);
     }
-    if(isTpoicError || topicError){
+    if (isTpoicError || topicError) {
       toast.error("Failed to generate survey topic");
     }
   }, [isTopicSuccess, isTpoicError, topicError]);
@@ -97,7 +111,7 @@ const CreateSurveyPage = () => {
     console.log({
       user_query: surveyPrompt,
       survey_type: selectedSurveyType,
-    })
+    });
 
     try {
       await createAiSurvey({
@@ -125,32 +139,44 @@ const CreateSurveyPage = () => {
               ? "long_text"
               : "matrix_checkbox",
           is_required: false,
-          description:'',
+          description: "",
         };
       });
-      dispatch(addSection({questions:refactoredQuestions}))
-      dispatch(updateConversationId(data?.data?.conversation_id))
-      dispatch(updateDescription(surveyPrompt))
+      dispatch(addSection({ questions: refactoredQuestions }));
+      dispatch(updateConversationId(data?.data?.conversation_id));
+      dispatch(updateDescription(surveyPrompt));
       toast.success("Survey created successfully");
       setGenerated((prev) => !prev);
       setPromptForm(false);
     }
-  }, [data?.data?.conversation_id, data?.data?.response, data?.data.topic, dispatch, isSuccess, surveyPrompt]);
-
+  }, [
+    data?.data?.conversation_id,
+    data?.data?.response,
+    data?.data.topic,
+    dispatch,
+    isSuccess,
+    surveyPrompt,
+  ]);
 
   const UseAnotherPrompt = () => {
     setGenerated((prev) => !prev);
     setPromptForm(!promptForm);
   };
 
-  const survey = store.getState().survey
-  console.log(survey)
-  console.log(data)
-  console.log(survey.sections)
-
+  const survey = store.getState().survey;
+  console.log(survey);
+  console.log(data);
+  console.log(survey.sections);
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center">
+      {/* {milestone && <Milestones stage="0" 
+      onClick={()=>{
+        setMilestones(false)
+        console.log('milestone clicked')
+        // setMilestones((prev)=>!prev)
+        setWhatDoYouWant(true)
+        }} />} */}
       {whatDoYouWant && (
         <div className="flex flex-col justify-center items-center gap-10 ">
           <h1 className="text-2xl mt-10 md:mt-0">
@@ -162,9 +188,9 @@ const CreateSurveyPage = () => {
               className={`flex flex-col items-center pb-20 justify-center gap-5 border rounded-md px-10 pt-10 text-center ${
                 selectedDiv === 1 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() =>{ 
-                handleDivClick(1)
-                dispatch(saveGeneratedBy("ai"))
+              onClick={() => {
+                handleDivClick(1);
+                dispatch(saveGeneratedBy("ai"));
               }}
             >
               <Image src={chatbot} alt="Logo" className="h-8 w-auto" />
@@ -188,10 +214,10 @@ const CreateSurveyPage = () => {
               className={`flex flex-col items-center pb-20 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 ${
                 selectedDiv === 2 ? "border-[#CC9BFD] border-2" : ""
               }`}
-              onClick={() =>{
-                 handleDivClick(2)
-                dispatch(saveGeneratedBy("manually"))
-                }}
+              onClick={() => {
+                handleDivClick(2);
+                dispatch(saveGeneratedBy("manually"));
+              }}
             >
               <Image src={User_Setting} alt="Logo" className="h-8 w-auto" />
               <h1 className="text-lg">Create Manually</h1>
@@ -230,7 +256,7 @@ const CreateSurveyPage = () => {
                 selectedDiv === 3 ? "border-[#CC9BFD] border-2" : ""
               }`}
               onClick={() => {
-                handleSurveyType(3, "Qualitative")
+                handleSurveyType(3, "Qualitative");
               }}
             >
               <Image
@@ -271,10 +297,10 @@ const CreateSurveyPage = () => {
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
-                  if(generated_by === 'ai'){
+                  if (generated_by === "ai") {
                     setPromptForm(true);
-                  }else{
-                    navigate.push('/surveys/create-manual')
+                  } else {
+                    navigate.push("/surveys/create-manual");
                   }
                 }}
               >
@@ -323,10 +349,10 @@ const CreateSurveyPage = () => {
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
-                  if(generated_by === 'ai'){
+                  if (generated_by === "ai") {
                     setPromptForm(true);
-                  }else{
-                    navigate.push('/surveys/create-manual')
+                  } else {
+                    navigate.push("/surveys/create-manual");
                   }
                 }}
               >
@@ -376,10 +402,10 @@ const CreateSurveyPage = () => {
                   dispatch(updateSurveyType(surveyType));
                   setWhatDoYouWant(false);
                   setOneMoreThing(false);
-                  if(generated_by === 'ai'){
+                  if (generated_by === "ai") {
                     setPromptForm(true);
-                  }else{
-                    navigate.push('/surveys/create-manual')
+                  } else {
+                    navigate.push("/surveys/create-manual");
                   }
                 }}
               >
@@ -415,34 +441,30 @@ const CreateSurveyPage = () => {
           >
             <label htmlFor="Your Prompt">Your Prompt</label>
             <div className="flex flex-col gap-2 relative">
-            <textarea
-              value={surveyPrompt}
-              name=""
-              id=""
-              placeholder="Write your prompt"
-              className="rounded-md py-2 px-3 border w-full h-36 border-[#BDBDBD]"
-              style={{ border: "2px  solid #BDBDBD" }}
-              onChange={(e) =>{ 
-                if (e.target.value.length === 3000) {
-                  toast.warning(
-                      "Prompt shouldn't exceed 3000 characters"
-                  );
-              }
-                setSurveyPrompt(e.target.value)}}
-              maxLength={3000}
-            ></textarea>
-             <div className="text-sm text-gray-500 mt-1 absolute bottom-2 right-4">
-        {surveyPrompt.length}/{maxCharacters} characters
-      </div>
-
+              <textarea
+                value={surveyPrompt}
+                name=""
+                id=""
+                placeholder="Write your prompt"
+                className="rounded-md py-2 px-3 border w-full h-36 border-[#BDBDBD]"
+                style={{ border: "2px  solid #BDBDBD" }}
+                onChange={(e) => {
+                  if (e.target.value.length === 3000) {
+                    toast.warning("Prompt shouldn't exceed 3000 characters");
+                  }
+                  setSurveyPrompt(e.target.value);
+                }}
+                maxLength={3000}
+              ></textarea>
+              <div className="text-sm text-gray-500 mt-1 absolute bottom-2 right-4">
+                {surveyPrompt.length}/{maxCharacters} characters
+              </div>
             </div>
             <button
               className="gradient-border gradient-text px-6 py-3 w-1/3 rounded-lg flex items-center space-x-2"
               disabled={!surveyPrompt ? true : false}
             >
-              <span
-                className={!surveyPrompt ? "text-gray-300" : ""}
-              >
+              <span className={!surveyPrompt ? "text-gray-300" : ""}>
                 Generate
               </span>
               <Image src={stars} alt="stars" className={``} />
@@ -516,14 +538,17 @@ const CreateSurveyPage = () => {
 
             {topics &&
               topics?.data.topics.map((topic: string[], index: number) => (
-                <div className={`border ${
-                  isSelected === index ? "border-2 border-red-500" : ""
-                } py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md `} key=
-                {index} onClick={(e)=>{
-                  // @ts-ignore
-                  dispatch(updateTopic(e.target.innerHTML))
-                  setIsSelected(index)
-                }}>
+                <div
+                  className={`border ${
+                    isSelected === index ? "border-2 border-red-500" : ""
+                  } py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md `}
+                  key={index}
+                  onClick={(e) => {
+                    // @ts-ignore
+                    dispatch(updateTopic(e.target.innerHTML));
+                    setIsSelected(index);
+                  }}
+                >
                   {topic}
                 </div>
               ))}
@@ -555,7 +580,7 @@ const CreateSurveyPage = () => {
                     !surveyPrompt && !surveyType ? "text-gray-300" : ""
                   }
                 >
-                 {isLoading ? "Generating..." : "Generate Survey"}
+                  {isLoading ? "Generating..." : "Generate Survey"}
                 </span>
                 <Image src={stars} alt="stars" className={``} />
               </button>
@@ -563,9 +588,13 @@ const CreateSurveyPage = () => {
           </div>
         </IsLoadingModal>
       )}
-      {isLoadingTopics && <IsGenerating isGeneratingSurveyLoading={isLoadingTopics} />}
+      {isLoadingTopics && (
+        <IsGenerating isGeneratingSurveyLoading={isLoadingTopics} />
+      )}
       {isLoading && <IsGenerating isGeneratingSurveyLoading={isLoading} />}
-      {generated && <GeneratedSurvey data={survey?.sections} onClick={UseAnotherPrompt} />}
+      {generated && (
+        <GeneratedSurvey data={survey?.sections} onClick={UseAnotherPrompt} />
+      )}
     </div>
   );
 };
