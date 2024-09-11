@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import StatusTag from "./StatusTag";
+import StatusTag, { StatusTagProps } from "./StatusTag";
 import ellipses from "../../assets/images/ellipsisVertical.svg";
 import eyes from "../../assets/images/eyes.svg";
 import share from "../../assets/images/share.svg";
@@ -8,10 +8,26 @@ import RenameSurvey from "./RenameSurvey";
 import DeleteSurvey from "./DeleteSurvey";
 import DuplicateSurvey from "./DuplicateSurvey";
 import { Switch } from "../ui/switch";
+import { formatDate } from "@/lib/helpers";
+import Button from "../common/Button";
+import { IoEyeOutline } from "react-icons/io5";
+import Link from "next/link";
 
-interface SurveyCardProps {}
+interface SurveyCardProps {
+  topic: string;
+  createdAt: string;
+  status: StatusTagProps;
+  number_of_responses: number;
+  _id: string;
+}
 
-const SurveyCard: React.FC<SurveyCardProps> = () => {
+const SurveyCard: React.FC<SurveyCardProps> = ({
+  topic,
+  createdAt,
+  status,
+  number_of_responses,
+  _id,
+}) => {
   const options = [
     "Rename",
     "Edit Survey",
@@ -56,29 +72,43 @@ const SurveyCard: React.FC<SurveyCardProps> = () => {
     setToggle(!toggle);
   };
 
+  // const 
+
   return (
     <div className="relative rounded-[12px] p-4 sm:p-5 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px]">
       <div>
         <div className="flex justify-between items-center mb-1">
           <h3 className="text-[16px] sm:text-[20px] text-[#333333] truncate">
-            CareConnect: Your Voice Matters
+            {topic}
           </h3>
           <div onClick={handleViewOption} className="cursor-pointer">
             <Image src={ellipses} alt="Options" width={24} height={24} />
           </div>
         </div>
         <p className="text-[12px] sm:text-[14px] text-[#838383]">
-          Created: 12th June, 2024
+          Created: {formatDate(createdAt)}
         </p>
       </div>
 
       <div className="mt-3 sm:mt-4">
-        <StatusTag type="current" />
+        <StatusTag type={status.type} />
       </div>
 
-      <div className="mt-6 sm:mt-10 flex items-center gap-2">
-        <span className="text-[24px] sm:text-[32px]">0</span>
-        <p className="text-[#333333] text-[14px] sm:text-[16px]">responses</p>
+      <div className="mt-6 sm:mt-10 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-[24px] sm:text-[32px]">
+            {number_of_responses}
+          </span>
+          <p className="text-[#333333] text-[14px] sm:text-[16px]">responses</p>
+        </div>
+        <div>
+          <Link href={`/surveys/${_id}`}>
+            <button className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-[3rem] py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]">
+              View
+              <IoEyeOutline size={30} />
+            </button>
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 sm:mt-[42px]">

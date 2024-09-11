@@ -15,6 +15,12 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    fetchASurvey: builder.query({
+      query: (id) => ({
+        url: `survey/${id}`,
+        method: 'GET',
+      }),
+    }),
     generateTopics: builder.mutation({
       query: (body) => ({
         url: 'survey/ai/generate-topics',
@@ -25,6 +31,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     generateSingleSurvey: builder.mutation({
       query: (body) => ({
         url: 'survey/ai/generate-single-question',
+        method: 'POST',
+        body: body,
+      }),
+    }),
+    saveProgress: builder.mutation({
+      query: (body) => ({
+        url: 'progress',
         method: 'POST',
         body: body,
       }),
@@ -48,4 +61,4 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
 
 
-export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation } = surveyApiSlice
+export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery } = surveyApiSlice

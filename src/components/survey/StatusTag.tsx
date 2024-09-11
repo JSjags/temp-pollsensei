@@ -1,7 +1,7 @@
 import React from "react";
 
-interface StatusTagProps {
-  type: "close" | "current" | "draft";
+export interface StatusTagProps {
+  type: "close" | "on going" | "draft";
 }
 
 const StatusTag: React.FC<StatusTagProps> = ({ type }) => {
@@ -13,7 +13,7 @@ const StatusTag: React.FC<StatusTagProps> = ({ type }) => {
     text = "Closed";
     bg = "#FFE8D7";
     color = "#931222";
-  } else if (type === "current") {
+  } else if (type === "on going") {
     text = "On going";
     bg = "#E6FBD9";
     color = "#0F5B1D";

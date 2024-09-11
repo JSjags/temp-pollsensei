@@ -33,7 +33,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
         <Image
           src={draggable}
           alt="draggable icon"
-          className={pathname === "/surveys/edit-survey" ? "invisible" : "visible"}
+          className={ pathname === "/surveys/edit-survey" || pathname ==='surveys/preview-survey' ? "invisible" : "visible"}
         />
         <div className="w-full">
           <div className="flex justify-between items-center">
@@ -46,7 +46,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
             <thead>
               <tr>
                 <th className="border-b border-gray-300 text-start"></th> {/* Empty top-left corner */}
-                {options.Head.map((header, headerIndex) => (
+                {options?.Head?.map((header, headerIndex) => (
                   <th key={headerIndex} className="border-b border-gray-300 text-center px-4 py-2">
                     {header}
                   </th>
@@ -54,12 +54,12 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
               </tr>
             </thead>
             <tbody>
-              {options.Body.map((rowLabel, rowIndex) => (
+              {options?.Body?.map((rowLabel, rowIndex) => (
                 <tr key={rowIndex}>
                   <td className="border-b border-gray-300 text-start px-4 py-2">
                     {rowLabel}
                   </td>
-                  {options.Head.map((_, columnIndex) => (
+                  {options?.Head?.map((_, columnIndex) => (
                     <td key={columnIndex} className="border-b border-gray-300 text-center">
                       <input
                         type="radio"

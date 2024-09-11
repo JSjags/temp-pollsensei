@@ -81,8 +81,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   };
 
   const selectOptions = [
-    { value: "Multi-choice", label: "Multiple Choice" },
-    { value: "Comment", label: "Comment" },
+    { value: "multiple_choice", label: "Multiple Choice" },
+    { value: "long_text", label: "Long Text" },
     { value: "Likert Scale", label: "Likert Scale" },
     { value: "Linear Scale", label: "Linear Scale" },
     { value: "star_rating", label: "Star Rating" },
@@ -114,7 +114,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           />
         </div>
 
-        {editedQuestionType !== "Comment" && (
+        {editedQuestionType !== "long_text" && (
           <div>
             {editedOptions.map((option, index) => (
               <div key={index} className="flex items-center my-2">
@@ -134,7 +134,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 )}
               </div>
             ))}
-            {editedQuestionType === "Multi-choice" && (
+            {editedQuestionType === "multiple_choice" && (
               <button
                 onClick={handleAddOption}
                 className="text-blue-500 mt-2 text-start"

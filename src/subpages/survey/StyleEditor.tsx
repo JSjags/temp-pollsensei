@@ -6,10 +6,10 @@ import { defaultBg, neon, sparkly } from "@/assets/images";
 import { IoMdCloudUpload } from "react-icons/io";
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
-import { saveBodyText, saveColorTheme, saveHeaderText, saveHeaderUrl, saveLogoUrl, saveQuestionText, saveTheme } from "@/redux/slices/theme.slice";
 import { useDispatch } from "react-redux";
 import { useAddSurveyHeaderMutation } from "@/services/survey.service";
 import { toast } from "react-toastify";
+import { saveBodyText, saveColorTheme, saveHeaderText, saveHeaderUrl, saveLogoUrl, saveQuestionText, saveTheme } from "@/redux/slices/survey.slice";
 
 // Types for font options
 interface FontOption {
@@ -25,10 +25,10 @@ interface SizeOption {
 const StyleEditor = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileLogoRef = useRef<HTMLInputElement>(null);
-  const headerUrl = useSelector((state: RootState) => state?.themes?.headerUrl);
+  const headerUrl = useSelector((state: RootState) => state?.survey?.header_url);
   const dispatch = useDispatch();
   const [addSurveyHeader, { data:response, isSuccess , isLoading}] = useAddSurveyHeaderMutation()
-  const theme = useSelector((state: RootState) => state?.themes?.theme);
+  const theme = useSelector((state: RootState) => state?.survey?.theme);
   const [headerFont, setHeaderFont] = useState({ name: "Helvetica", size: 24 });
   const [questionFont, setQuestionFont] = useState({
     name: "Helvetica",
@@ -37,7 +37,8 @@ const StyleEditor = () => {
   const [bodyFont, setBodyFont] = useState({ name: "Helvetica", size: 16 });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
-  const [color, setColor] = useState("#ff5722");
+  const colorTheme = useSelector((state:RootState)=>state?.survey?.color_theme)
+  const [color, setColor] = useState(colorTheme || "#ff5722");
 
   const fontOptions: FontOption[] = [
     { value: "Helvetica", label: "Helvetica" },
@@ -111,7 +112,7 @@ const StyleEditor = () => {
     }
   }, [isSuccess, response, dispatch]);
   
-
+console.log(color)
 
   return (
     <div className="style-editor bg-white h-full flex flex-col transform transition-transform duration-300 ease-in-out">
@@ -230,7 +231,7 @@ const StyleEditor = () => {
             color={color}
             onChangeComplete={(newColor) =>{
                setColor(newColor.hex)
-               dispatch(saveColorTheme(color))
+               dispatch(saveColorTheme(newColor.hex))
               }}
             className="w-full pt-4"
             width="100%"

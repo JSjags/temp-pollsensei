@@ -27,6 +27,7 @@ import { PersistPartial } from "redux-persist/es/persistReducer";
 import { createPersistStorage } from "./storage";
 import questionReducer from "./slices/questions.slice";
 import themeReducer from './slices/theme.slice'
+import surveyReducer from './slices/survey.slice'
 
 // At the top of the file, after imports
 export type RootState = {
@@ -35,6 +36,7 @@ export type RootState = {
   form: ReturnType<typeof formReducer>;
   question: ReturnType<typeof questionReducer>;
   themes: ReturnType<typeof themeReducer>;
+  survey: ReturnType<typeof surveyReducer>;
   [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
 };
 
@@ -44,6 +46,7 @@ const rootReducer = combineReducers({
   form: formReducer,
   question: questionReducer,
   themes: themeReducer,
+  survey:surveyReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 

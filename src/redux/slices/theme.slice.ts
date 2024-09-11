@@ -12,7 +12,7 @@ interface SurveyState {
   headerText: TextStyle | null;
   questionText: TextStyle | null;
   bodyText: TextStyle | null;
-  colorTheme: string | null;
+  colorTheme: string;
   logoUrl: File | string | null;
   headerUrl: File | string | null;
   generatedBy: string | null;
@@ -25,7 +25,7 @@ const initialState: SurveyState = {
   headerText: {name:"Helvetica", size:"18"},
   questionText: null,
   bodyText: null,
-  colorTheme: null,
+  colorTheme: '#EB144C',
   logoUrl: null,
   headerUrl: null,
   generatedBy: null,
