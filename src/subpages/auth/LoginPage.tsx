@@ -33,7 +33,7 @@ const constraints = {
 };
 
 const LoginPage = () => {
-  const [loginUser, {data}] = useLoginUserMutation();
+  const [loginUser, { data }] = useLoginUserMutation();
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(true);
   const [state, setState] = useState(false);
@@ -42,7 +42,6 @@ const LoginPage = () => {
   const onSubmit = async (values: { email: string; password: string }) => {
     try {
       const userData = await loginUser(values).unwrap();
-
       dispatch(updateUser(userData.data));
       toast.success("Login success");
       setState(true);
@@ -64,7 +63,7 @@ const LoginPage = () => {
     setEyeState((prev) => !prev);
   };
 
-  console.log(data)
+  console.log(data);
   return (
     <section className="min-h-screen flex flex-col md:flex-row">
       <div className="auth-bg md:hidden flex items-center justify-center p-4">

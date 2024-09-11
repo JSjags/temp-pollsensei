@@ -56,6 +56,7 @@ export interface User {
 interface UserState {
   user: User | null;
   token: string | null;
+  access_token?: string | null;
 }
 
 const initialState: UserState = {

@@ -6,37 +6,72 @@ import { AnimatePresence, motion } from "framer-motion"; // Import motion from f
 interface FilterButtonProps {
   text: string;
   buttonClassName?: string;
-  onClick?: () => void;
+  onClick?: (val: string) => void;
   icon?: React.ReactNode;
+  setFilter: React.Dispatch<React.SetStateAction<string>>;
 }
+
+const roles = [
+  "Admin",
+  "Data Collector",
+  "Data Validator",
+  "Data Analyst",
+  "Data Editor",
+];
 
 const FilterButton: React.FC<FilterButtonProps> = ({
   onClick,
   text,
   icon,
   buttonClassName,
+  setFilter,
 }) => {
-  const [count, setCount] = useState<number>(0);
   const [filterArray, setFilterArray] = useState<string[]>([]);
   const [showFilter, setShowFilter] = useState<boolean>(false);
 
   const handleShowFilter = () => {
-    console.log("filtering");
     setShowFilter(!showFilter);
     // onClick();
   };
 
   const handleClearFilter = () => {
+    setFilterArray([]);
+    setFilter("");
     setShowFilter(false);
-    setCount(0);
   };
 
-  const handleFilterArray = () => {
-    setCount(count + 1);
+  // For multiple filters
+  // const handleFilterArray = (role: string) => {
+  //   setFilterArray((prevArray) =>
+  //     prevArray.includes(role)
+  //       ? prevArray.filter((r) => r !== role)
+  //       : [...prevArray, role]
+  //   );
+  // };
+
+  const handleFilterArray = (role: string) => {
+    setFilterArray((prevArray) => (prevArray.includes(role) ? [] : [role]));
   };
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement; // Cast target to HTMLElement
+      if (!target.closest(".filter-button-container")) {
+        setShowFilter(false);
+      }
+    };
+
+    if (showFilter) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [showFilter]);
 
   return (
-    <div className="relative">
+    <div className="relative filter-button-container">
       <motion.button
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -44,7 +79,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
         onClick={handleShowFilter}
         className={cn(
           `flex items-center justify-center text-[16px] rounded-[6px] px-[10px] py-[11px] h-[40px] border-[1px] border-[#9D50BB] ${
-            count > 0 ? "text-[#9D50BB]" : "text-[#333]"
+            filterArray.length > 0 ? "text-[#9D50BB]" : "text-[#333]"
           }`,
           buttonClassName
         )}
@@ -65,14 +100,14 @@ const FilterButton: React.FC<FilterButtonProps> = ({
         >
           {icon}
         </motion.span>
-        {count > 0 && (
+        {filterArray.length > 0 && (
           <motion.span
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             className="ml-2 w-[28px] h-[28px] text-white font-semibold flex items-center justify-center rounded-full bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
           >
-            {count}
+            {filterArray.length}
           </motion.span>
         )}
       </motion.button>
@@ -83,7 +118,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
-            className="absolute shadow-lg z-[50] top-[60px] left-0 w-[95vw] max-w-[344px] h-[307px] rounded-[20px] border-[#D9D9D9] border-[1px] bg-white"
+            className="absolute shadow-lg z-[50] top-[60px] left-0 w-[95vw] max-w-[344px] h-fit rounded-[20px] border-[#D9D9D9] border-[1px] bg-white"
           >
             <motion.div
               initial={{ y: -10, opacity: 0 }}
@@ -98,8 +133,9 @@ const FilterButton: React.FC<FilterButtonProps> = ({
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="ml-2 w-[28px] h-[28px] text-[#333333] font-semibold flex items-center justify-center rounded-full bg-[#f2f2f2]"
               >
-                {count}
+                {filterArray.length}
               </motion.span>
+              <p className="pl-2">{"   "}roles</p>
             </motion.div>
             <motion.div
               initial={{ y: 10, opacity: 0 }}
@@ -107,58 +143,31 @@ const FilterButton: React.FC<FilterButtonProps> = ({
               transition={{ duration: 0.5, delay: 0.3 }}
               className="px-[30px] py-[20px] flex flex-col gap-5"
             >
-              <motion.div
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="flex items-center gap-3"
-              >
-                <input
-                  onClick={handleFilterArray}
-                  className="accent-[#9D50BB] accent-text-red-300"
-                  type="checkbox"
-                  defaultChecked
-                />
-                <label className="text-[16px] text-[#333333] font-normal">
-                  Drafts
-                </label>
-              </motion.div>
-              <motion.div
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-                className="flex items-center gap-3"
-              >
-                <input
-                  onClick={handleFilterArray}
-                  className="accent-[#9D50BB] accent-text-red-300"
-                  type="checkbox"
-                />
-                <label className="text-[16px] text-[#333333] font-normal">
-                  Ongoing
-                </label>
-              </motion.div>
-              <motion.div
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="flex items-center gap-3"
-              >
-                <input
-                  onClick={handleFilterArray}
-                  className="accent-[#9D50BB] accent-text-red-300"
-                  type="checkbox"
-                />
-                <label className="text-[16px] text-[#333333] font-normal">
-                  Closed
-                </label>
-              </motion.div>
+              {roles.map((role, i) => (
+                <motion.div
+                  key={role}
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                  className="flex items-center gap-3"
+                >
+                  <input
+                    onClick={() => handleFilterArray(role)}
+                    className="accent-[#9D50BB] accent-text-red-300 cursor-pointer"
+                    type="checkbox"
+                    checked={filterArray.includes(role)}
+                  />
+                  <label className="text-[16px] text-[#333333] font-normal">
+                    {role}
+                  </label>
+                </motion.div>
+              ))}
             </motion.div>
             <motion.div
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.7 }}
-              className="flex items-center gap-3 mt-[25px]"
+              className="flex items-center gap-3 mt-4 mb-2"
             >
               <button
                 onClick={handleClearFilter}
@@ -167,7 +176,13 @@ const FilterButton: React.FC<FilterButtonProps> = ({
                 Clear
               </button>
 
-              <ButtonAuto label="Filter" onClick={onClick} />
+              <ButtonAuto
+                label="Filter"
+                onClick={() => {
+                  onClick && onClick(filterArray[0]);
+                  setShowFilter(false);
+                }}
+              />
               {/* <button
                 onClick={onClick}
                 className="flex items-center justify-center text-white text-[16px] rounded-[6px] px-[24px] py-[16px] h-[40px] bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"

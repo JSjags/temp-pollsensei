@@ -1,9 +1,4 @@
 import React, { useState } from "react";
-import Image from "next/image";
-import FilterButton from "../../components/filter/FilterButton";
-import search from "../../assets/images/search.svg";
-import { IoFilterOutline } from "react-icons/io5";
-import { PiDotsThreeBold } from "react-icons/pi";
 import { formatDate } from "../../lib/helpers";
 import { cn, handleAccountStatus } from "@/lib/utils";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
@@ -17,13 +12,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { removeMember } from "@/services/admin";
+import { toast } from "react-toastify";
+import { ClipLoader } from "react-spinners";
+import { useGetTeamMembersQuery } from "@/services/team.service";
 
 interface Role {
   _id: string;
   role: string[];
 }
 
-interface Member {
+export interface Member {
   resetCode: { created: string };
   _id: string;
   name: string;
@@ -83,11 +93,19 @@ interface Member {
 interface MembersTableProps {
   members: Member[];
   tableState: boolean;
+  setMember: any;
 }
 
-const MembersTable: React.FC<MembersTableProps> = ({ members, tableState }) => {
-  const [showModal, setShowModal] = useState(false);
+const MembersTable: React.FC<MembersTableProps> = ({
+  members,
+  tableState,
+  setMember,
+}) => {
+  const queryClient = useQueryClient();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>();
+
+  const { refetch } = useGetTeamMembersQuery({});
 
   const columns: ColumnDef<Member>[] = [
     {
@@ -228,7 +246,7 @@ const MembersTable: React.FC<MembersTableProps> = ({ members, tableState }) => {
             className="px-0"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Invoice Status
+            Status
             {column.getIsSorted() && <ArrowUpDown className="ml-2 h-4 w-4" />}
           </Button>
         );
@@ -274,19 +292,20 @@ const MembersTable: React.FC<MembersTableProps> = ({ members, tableState }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                // onClick={() =>
-                //   router.push(
-                //     `/plazas/edit?plaza_id=${info.row.original._id}`
-                //   )
-                // }
+                  onClick={() => {
+                    setMember(
+                      members.find((m) => m._id === info.row.original._id!)
+                    );
+                  }}
                 >
                   Edit Member
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  // onClick={() => {
-                  //   setCurrentId(info.row.original._id!), setShowModal(true);
-                  // }}
-                  className=""
+                  onClick={() => {
+                    setCurrentId(info.row.original._id!),
+                      setShowDeleteModal(true);
+                  }}
+                  className="text-red-500"
                 >
                   Remove member
                 </DropdownMenuItem>
@@ -298,45 +317,69 @@ const MembersTable: React.FC<MembersTableProps> = ({ members, tableState }) => {
     },
   ];
 
+  const deleteMemberMutation = useMutation({
+    mutationKey: ["remove member"],
+    mutationFn: (id: string) => removeMember(id),
+    onSuccess: () => {
+      toast.success("Member removed successfully");
+      setShowDeleteModal(false);
+      setCurrentId(null);
+      refetch();
+      queryClient.invalidateQueries({
+        queryKey: ["team-members"],
+      });
+    },
+    onError: (error: any) => {
+      console.log(error);
+
+      toast.error(
+        error?.response?.data?.msg ??
+          error?.response?.data?.message ??
+          error?.message ??
+          "Error encountered while deleting plaza."
+      );
+    },
+  });
+
+  const handleDelete = () => {
+    deleteMemberMutation.mutate(currentId!);
+  };
+
   return (
     <div>
       {tableState && (
         <>
-          <div className="flex my-10 items-center justify-between w-full">
-            <div className="flex gap-2 sm:gap-5 items-center w-full">
-              <FilterButton
-                text="Filter by"
-                icon={<IoFilterOutline />}
-                buttonClassName="rounded-full border-[#d9d9d9]"
-              />
-
-              <div className="flex flex-1 items-center px-4 gap-2 rounded-[2rem] border-[1px] border-[#d9d9d9] w-full max-w-[420px] h-[40px]">
-                <input
-                  className="ring-0 text-[#838383] flex-1 outline-none"
-                  type="text"
-                  placeholder="Search team members by name, email address"
-                />
-                <Image src={search} alt="Search" width={24} height={24} />
-              </div>
-            </div>
-          </div>
           <div className="mt-10">
             <DataTable columns={columns} data={members} />
           </div>
-          {showModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md z-10">
-              <div className="bg-background border border-border p-6 rounded shadow-lg max-w-[480px]">
-                <h2 className="text-left text-xl font-bold leading-tight tracking-tighter md:text-2xl lg:leading-[1.1]">
-                  Delete Plaza
-                </h2>
-                <p className="mt-4 text-foreground/70">
-                  Are you sure you want to delete this plaza? This action is
-                  irreversible.
-                </p>
-                <div className="flex justify-end space-x-4 mt-4"></div>
-              </div>
-            </div>
-          )}
+
+          <AlertDialog open={showDeleteModal}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  this member's account and remove their data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setShowDeleteModal(false)}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-red-500 hover:bg-red-600"
+                  disabled={deleteMemberMutation.isPending}
+                >
+                  {deleteMemberMutation.isPending ? (
+                    <ClipLoader size={20} className="text-white" />
+                  ) : (
+                    "Continue"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </>
       )}
     </div>
