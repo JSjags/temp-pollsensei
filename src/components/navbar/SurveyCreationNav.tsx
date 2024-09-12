@@ -19,13 +19,14 @@ const SurveyCreationNav = () => {
   const router = useRouter();
   const isExactSurveyPath = path === "/surveys";
   const isSurveySubpath = path.startsWith("/surveys") && isExactSurveyPath;
+  const params = useParams();
+  const { data } = useFetchASurveyQuery(params.id);
 
   if (isSurveySubpath) {
     return null;
   }
 
-  const params = useParams();
-  const { data } = useFetchASurveyQuery(params.id);
+
 
   console.log(data?.data);
 
