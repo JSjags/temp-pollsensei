@@ -10,7 +10,9 @@ import Link from "next/link";
 import BreadcrumsIcon from "../ui/BreadcrumsIcon";
 import Image from "next/image";
 import { hypen } from "@/assets/images";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { useFetchASurveyQuery } from "@/services/survey.service";
+import { color } from "framer-motion";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -21,6 +23,11 @@ const SurveyCreationNav = () => {
   if (isSurveySubpath) {
     return null;
   }
+
+  const params = useParams();
+  const { data } = useFetchASurveyQuery(params.id);
+
+  console.log(data?.data);
 
   return (
     <div className="px-5 md:px-20 py-3 border-b-2 md:flex justify-between items-center">
@@ -41,8 +48,22 @@ const SurveyCreationNav = () => {
           <span className="ml-3 text-sm ">Design</span>
         </Link>
         <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-        <Link href={""} className="flex items-center">
-          <BreadcrumsIcon color="#B0A5BB" />
+        <Link
+          href={
+            data?.data.sections.length > 0
+              ? `/surveys/${data?.data._id}/survey-reponse-upload`
+              : ""
+          }
+          className="flex items-center"
+        >
+          <BreadcrumsIcon
+            icon={
+              data?.data.sections.length > 0 && (
+                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+              )
+            }
+            color={data?.data.sections === undefined ? "#B0A5BB" : ""}
+          />
           <span className="ml-3 text-sm ">Reponses</span>
         </Link>
         <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
@@ -63,25 +84,32 @@ const SurveyCreationNav = () => {
         <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
       </nav>
 
-      <div className="flex justify-between items-center gap-3">
-        {
-          path === "/surveys/create-survey" || path ==="/surveys/add-question-m" ? " " : (
-        <button
-          className={`border-none flex items-center ${
-            path === "/surveys/preview-survey" ? "invisible" : "visible"
-          }`}
-          onClick={() => {
-            router.push("/surveys/preview-survey");
-          }}
-        >
-          <IoEyeOutline className="mr-1" /> Preview
+      {path.includes("survey-reponse-upload") ? (
+        <button className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-[3rem] py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]">
+          Upload Results
         </button>
-          )
-        }
-        <button className="border-none flex items-center">
-          <IoSettingsOutline className="mr-1" /> Survey Settings
-        </button>
-      </div>
+      ) : (
+        <div className="flex justify-between items-center gap-3">
+          {path === "/surveys/create-survey" ||
+          path === "/surveys/add-question-m" ? (
+            " "
+          ) : (
+            <button
+              className={`border-none flex items-center ${
+                path === "/surveys/preview-survey" ? "invisible" : "visible"
+              }`}
+              onClick={() => {
+                router.push("/surveys/preview-survey");
+              }}
+            >
+              <IoEyeOutline className="mr-1" /> Preview
+            </button>
+          )}
+          <button className="border-none flex items-center">
+            <IoSettingsOutline className="mr-1" /> Survey Settings
+          </button>
+        </div>
+      )}
     </div>
   );
 };

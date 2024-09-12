@@ -23,7 +23,7 @@ const Preview = () => {
   const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const headerText = useSelector(
-    (state: RootState) => state.survey.header_text
+    (state: RootState) => state?.survey?.header_text
   );
   const surveyTitle = useSelector((state: RootState) => state?.survey?.topic);
   const [currentSection, setCurrentSection] = useState(0);
@@ -106,7 +106,7 @@ const Preview = () => {
             <button className="rounded-full border px-5 py-1" >Edit</button>
           </div> */}
           </div>
-          {questions[currentSection]?.questions?.map(
+          {questions && questions[currentSection]?.questions?.map(
             (item: any, index: number) => (
               <div key={index} className="mb-4">
                 {isEdit &&

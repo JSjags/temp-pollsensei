@@ -85,32 +85,67 @@ const AddQuestionPage = () => {
   };
 
 
-  const handleSurveyCreation =async()=>{
-    if(logoUrl === '' || headerUrl === ''){
-      toast.warning("Header image and logo can not be empty")
-      return null
-    }
-    if(survey.sections.length === 0){
-      dispatch(addSection({
-        questions:questions
-      }))
-    }else{
-      dispatch(addSection({
-        section_topic:sectionTitle,
-        section_description:sDescription,
-        questions:questions
-      }))
-    }
-    try{
-      const updatedSurvey = store.getState().survey;
+  // const handleSurveyCreation =async()=>{
+  //   if(logoUrl === '' || headerUrl === ''){
+  //     toast.warning("Header image and logo can not be empty")
+  //     return null
+  //   }
+  //   if(survey.sections.length === 0){
+  //     dispatch(addSection({
+  //       questions:questions
+  //     }))
+  //   }else{
+  //     dispatch(addSection({
+  //       section_topic:sectionTitle,
+  //       section_description:sDescription,
+  //       questions:questions
+  //     }))
+  //   }
+  //   try{
+  //     const updatedSurvey = store.getState().survey;
     
-      await createSurvey(
-        updatedSurvey
-      );
-    }catch(e){
-      console.log(e)
-    };
-  }
+  //     await createSurvey(
+  //       updatedSurvey
+  //     );
+  //   }catch(e){
+  //     console.log(e)
+  //   };
+  // }
+
+  const handleSurveyCreation = async () => {
+    if (logoUrl === '' || headerUrl === '') {
+      toast.warning("Header image and logo cannot be empty");
+      return null;
+    }
+  
+    const sectionExists = survey.sections.some((section) => 
+      section.section_topic === sectionTitle &&
+      section.section_description === sDescription &&
+      JSON.stringify(section.questions) === JSON.stringify(questions)
+    );
+  
+    if (!sectionExists) {
+      if (survey.sections.length === 0) {
+        dispatch(addSection({
+          questions: questions
+        }));
+      } else {
+        dispatch(addSection({
+          section_topic: sectionTitle,
+          section_description: sDescription,
+          questions: questions
+        }));
+      }
+    }
+  
+    try {
+      const updatedSurvey = store.getState().survey;
+      await createSurvey(updatedSurvey);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  
 
 
   useEffect(()=>{

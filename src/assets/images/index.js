@@ -20,6 +20,7 @@ import draggable from './draggable.svg'
 import neon from './neon.svg'
 import sparkly from './Sparkly.svg'
 import defaultBg from './default.svg'
+import paper_1 from './paper_1.svg'
 
 
 
@@ -46,5 +47,6 @@ export {
     draggable,
     neon,
     sparkly,
-    defaultBg
+    defaultBg,
+    paper_1
 }
