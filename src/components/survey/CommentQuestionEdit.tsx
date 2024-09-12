@@ -8,7 +8,11 @@ interface CommentQuestionEditProps {
   question: string;
   options: string[] | undefined;
   questionType: string;
-  onSave?: (updatedQuestion: string, editedQuestionType: string, updatedOptions?: string[]) => void;
+  onSave?: (
+    updatedQuestion: string,
+    editedQuestionType: string,
+    updatedOptions?: string[]
+  ) => void;
   onCancel?: () => void;
 }
 
@@ -32,7 +36,8 @@ const CommentQuestionEdit: React.FC<CommentQuestionEditProps> = ({
 }) => {
   const [editedQuestion, setEditedQuestion] = useState<string>(question);
   const [editedOptions, setEditedOptions] = useState<string[]>(options || [""]);
-  const [editedQuestionType, setEditedQuestionType] = useState<string>(questionType);
+  const [editedQuestionType, setEditedQuestionType] =
+    useState<string>(questionType);
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...editedOptions];

@@ -1,3 +1,4 @@
+import { Background } from "@xyflow/react";
 import { CustomStyles } from "../../types";
 
 export const multiSelectCustomStyles: CustomStyles = {
@@ -5,7 +6,7 @@ export const multiSelectCustomStyles: CustomStyles = {
     ...provided,
     backgroundColor: "transparent",
     borderColor: state.isFocused ? "#ffffff" : "hsla(214.3 31.8% 91.4%)",
-    height: "48px",
+    height: "fit-content",
     zIndex: 100000,
     boxShadow: state.isFocused ? "0 0 0 2px #6b21a8" : null,
     "&:hover": {
@@ -27,12 +28,25 @@ export const multiSelectCustomStyles: CustomStyles = {
     ...provided,
     color: "#495057",
   }),
+  multiValue: (provided) => ({
+    ...provided,
+    background: "#CC9BFD30",
+    borderRadius: "20px",
+  }),
   menu: (provided) => ({
     ...provided,
     borderRadius: "4px",
     boxShadow: "0 4px 10px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.1)",
     marginTop: "4px",
     zIndex: 100000,
+  }),
+  multiValueRemove: (provided) => ({
+    ...provided,
+    background: "#CC9BFD00",
+    borderRadius: "0 20px 20px 0",
+    "&:hover": {
+      background: "#CC9BFD60",
+    },
   }),
   menuList: (provided) => ({
     ...provided,

@@ -87,8 +87,8 @@ const PollProfessor = ({ setIsOpen }: Props) => {
           Poll Professor
         </SheetTitle>
         <p className="text-sm mt-2 text-left">
-          Hi, I'm your PollSensei's assistant but you can call me Poll
-          Professor. I'm here to provide quick and accurate support.
+          Hi, I&apos;m your PollSensei&apos;s assistant but you can call me Poll
+          Professor. I&apos;m here to provide quick and accurate support.
         </p>
         <Button
           variant="ghost"

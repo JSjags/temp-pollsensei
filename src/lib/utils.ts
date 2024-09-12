@@ -33,3 +33,18 @@ export function handleAccountStatus(status: string) {
     return "Removed";
   }
 }
+
+/**
+ * Utility function to calculate the number of pages.
+ *
+ * @param totalItems - The total number of items.
+ * @param pageSize - The number of items per page.
+ * @returns The number of pages required to display all items.
+ */
+export function getNumberOfPages(totalItems: number, pageSize: number): number {
+  if (pageSize <= 0) {
+    throw new Error("Page size must be greater than 0");
+  }
+
+  return Math.ceil(totalItems / pageSize);
+}

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AOSInit } from "@/components/ui/Aos";
+import { TanstackProvider } from "@/providers/TanstackProvider";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -33,8 +34,10 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <ToastContainer/>
-        <ReduxContext>{children}</ReduxContext>
+        <TanstackProvider>
+          <ToastContainer className={cn(fontSans.variable)} />
+          <ReduxContext>{children}</ReduxContext>
+        </TanstackProvider>
       </body>
     </html>
   );
