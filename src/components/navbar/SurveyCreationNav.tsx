@@ -13,10 +13,15 @@ import { hypen } from "@/assets/images";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useFetchASurveyQuery } from "@/services/survey.service";
 import { color } from "framer-motion";
+import { useDispatch } from "react-redux";
+import { closeUpload, openUpload, toggleUpload } from "@/redux/slices/upload.slice";
+
+
 
 const SurveyCreationNav = () => {
   const path = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch()
   const isExactSurveyPath = path === "/surveys";
   const isSurveySubpath = path.startsWith("/surveys") && isExactSurveyPath;
   const params = useParams();
@@ -86,7 +91,9 @@ const SurveyCreationNav = () => {
       </nav>
 
       {path.includes("survey-reponse-upload") ? (
-        <button className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-[3rem] py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]">
+        <button className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-[3rem] py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]" onClick={()=>{
+          dispatch(openUpload())
+        }}>
           Upload Results
         </button>
       ) : (

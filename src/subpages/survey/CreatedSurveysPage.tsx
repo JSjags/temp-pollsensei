@@ -26,8 +26,8 @@ const CreatedSurveysPage = () => {
   const totalPages = data?.data.total;
   return (
     <div>
-      {/* Created survey page */}
-        {data?.data.total > 0 && !isLoading && (
+      Created survey page
+        {/* {data?.data.total > 0 && !isLoading && (
         <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
           <div className="md:flex my-10 items-center justify-between">
             <div className="flex gap-5 items-center">
@@ -71,7 +71,7 @@ const CreatedSurveysPage = () => {
             />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

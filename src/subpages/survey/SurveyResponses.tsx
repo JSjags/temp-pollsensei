@@ -1,16 +1,21 @@
 import NoResponse from "@/components/survey/NoResponse";
 import ModalComponent from "@/components/ui/ModalComponent";
 import UploadedItem from "@/components/ui/UploadedItem";
+import { closeUpload, openUpload, toggleUpload } from "@/redux/slices/upload.slice";
+import { RootState } from "@/redux/store";
 import { useFetchASurveyQuery } from "@/services/survey.service";
 import { useParams } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { Slide } from "react-awesome-reveal";
 import { SlCloudUpload } from "react-icons/sl";
+import { useSelector, useDispatch } from "react-redux";
 
 const SurveyResponses = () => {
   const params = useParams();
+  const dispatch = useDispatch();
+  const uploadState = useSelector((state:RootState)=>state?.upload?.isUploadOpen)
   const { data } = useFetchASurveyQuery(params.id);
-  const [isToggled, setIsToggled] = useState<boolean>(true);
+  // const [isToggled, setIsToggled] = useState<boolean>(true);
   const [selectedItem, setSelectedItem] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,7 +27,7 @@ const SurveyResponses = () => {
   };
 
   const handleToggle = () => {
-    setIsToggled((prev) => !prev);
+    dispatch(closeUpload())
     setSelectedFiles([]);
   };
 
@@ -41,13 +46,14 @@ const SurveyResponses = () => {
 
   console.log(selectedItem);
   console.log(selectedFiles);
+  console.log(uploadState);
 
   console.log(data?.data);
   return (
     <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10 flex flex-col justify-center min-h-[60vh]">
       <NoResponse />
       <Slide direction="up" duration={200}>
-        <ModalComponent titleClassName={"pl-0"} openModal={isToggled}>
+        <ModalComponent titleClassName={"pl-0"} openModal={uploadState}>
           <div className="flex flex-col items-center w-full">
             <h2 className="text-[1.25rem] font-normal ">
               Please Upload your result
