@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Fade, Slide } from "react-awesome-reveal";
 
 interface ModalComponentProps {
-  onClose: () => void;
+  onClose?: () => void;
   openModal: boolean;
   children: ReactNode;
   title?: string;
@@ -40,7 +40,7 @@ interface ModalsProps {
   titleClassName?: string;
   openModal: boolean;
   modalSize: string;
-  onClose: () => void;
+  onClose?: () => void;
   children: ReactNode;
 }
 
@@ -89,12 +89,14 @@ const Modals: React.FC<ModalsProps> = ({
                   </p>
                 </Fade>
               </Slide>
-              <button
-                className="hover:bg-[#f9f9f9] rounded-full ring-0"
-                onClick={onClose}
-              >
-                <X />
-              </button>
+            {
+              onClose ?   <button
+              className="hover:bg-[#f9f9f9] rounded-full ring-0"
+              onClick={onClose}
+            >
+              <X />
+            </button> : ''
+            }
             </div>
             <>{children}</>
           </div>

@@ -23,6 +23,7 @@ import userReducer from "./slices/user.slice";
 import hardSet from "redux-persist/es/stateReconciler/hardSet";
 import toggleReducer from "./slices/invite.slice";
 import formReducer from "./slices/form.slice";
+import uploadReducer from "./slices/upload.slice";
 import { PersistPartial } from "redux-persist/es/persistReducer";
 import { createPersistStorage } from "./storage";
 import questionReducer from "./slices/questions.slice";
@@ -34,6 +35,7 @@ export type RootState = {
   user: ReturnType<typeof userReducer>;
   toggle: ReturnType<typeof toggleReducer>;
   form: ReturnType<typeof formReducer>;
+  upload: ReturnType<typeof uploadReducer>;
   question: ReturnType<typeof questionReducer>;
   themes: ReturnType<typeof themeReducer>;
   survey: ReturnType<typeof surveyReducer>;
@@ -44,6 +46,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   toggle: toggleReducer,
   form: formReducer,
+  upload: uploadReducer,
   question: questionReducer,
   themes: themeReducer,
   survey:surveyReducer,
