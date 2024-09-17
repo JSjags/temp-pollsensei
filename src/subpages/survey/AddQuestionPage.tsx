@@ -18,7 +18,6 @@ import CommentQuestion from "@/components/survey/CommentQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
-import { FaEye } from "react-icons/fa6";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import QuestionType from "./QuestionType";
 import StyleEditor from "./StyleEditor";
@@ -50,7 +49,6 @@ const AddQuestionPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
-  // const [questions, setQuestions] = useState(questionState || []);
   const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
   const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
   const survey = useSelector((state: RootState) => state?.survey);
@@ -84,33 +82,6 @@ const AddQuestionPage = () => {
     setIsSidebarOpen(false);
   };
 
-
-  // const handleSurveyCreation =async()=>{
-  //   if(logoUrl === '' || headerUrl === ''){
-  //     toast.warning("Header image and logo can not be empty")
-  //     return null
-  //   }
-  //   if(survey.sections.length === 0){
-  //     dispatch(addSection({
-  //       questions:questions
-  //     }))
-  //   }else{
-  //     dispatch(addSection({
-  //       section_topic:sectionTitle,
-  //       section_description:sDescription,
-  //       questions:questions
-  //     }))
-  //   }
-  //   try{
-  //     const updatedSurvey = store.getState().survey;
-    
-  //     await createSurvey(
-  //       updatedSurvey
-  //     );
-  //   }catch(e){
-  //     console.log(e)
-  //   };
-  // }
 
   const handleSurveyCreation = async () => {
     if (logoUrl === '' || headerUrl === '') {
@@ -253,9 +224,9 @@ const AddQuestionPage = () => {
             </div>
           )}
 
-          {/* <button type="reset" onClick={()=>dispatch(resetQuestion())}>
+          <button type="reset" onClick={()=>dispatch(resetQuestion())}>
             Reset
-          </button> */}
+          </button> 
 
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
@@ -342,19 +313,6 @@ const AddQuestionPage = () => {
                 }}
               />
           )}
-
-          {/* <div className="flex justify-between items-center pt-5 pb-10">
-            <div className="">
-              <button
-                className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-                type="button"
-                // onClick={handleEdit}
-              >
-                <FaEye className="inline-block mr-2" />
-                Preview
-              </button>
-            </div>
-          </div> */}
 
           <div className="flex justify-between items-center pb-10">
             <div className="flex gap-2 items-center">

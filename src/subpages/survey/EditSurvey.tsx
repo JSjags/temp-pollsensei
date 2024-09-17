@@ -136,34 +136,60 @@ const EditSurvey = () => {
     // console.log(currentSectionData.questions[0])
 
 
+  // useEffect(() => {
+  //   if (newQuestionGenerate && newSingleSurvey?.data?.response) {
+  //     console.log(newSingleSurvey)
+  //     const updatedSections = [...questions];
+  //     const currentSectionData = updatedSections[currentSection];
+  //     const optionType = newSingleSurvey.data.response["Option type"]?.trim();
+
+  //     const newQuestion = {
+  //       question: newSingleSurvey.data.response.Question,
+  //       options: newSingleSurvey.data.response.Options,
+  //       question_type: optionType === "Multi-choice"
+  //       ? "multiple_choice"
+  //       : optionType === "Comment"
+  //       ? "long_text"
+  //       : "matrix_checkbox",
+  //       is_required: false,
+  //     };
+  //     const updatedQuestions = [...currentSectionData.questions, newQuestion];
+  //     const updatedSection = {
+  //       ...currentSectionData,  
+  //       questions: updatedQuestions
+  //     };
+
+  //     dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
+  //   }
+  // }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, questions[currentSection]?.questions]);
+  
   useEffect(() => {
     if (newQuestionGenerate && newSingleSurvey?.data?.response) {
-      console.log(newSingleSurvey)
+      console.log(newSingleSurvey);
       const updatedSections = [...questions];
       const currentSectionData = updatedSections[currentSection];
       const optionType = newSingleSurvey.data.response["Option type"]?.trim();
-
       const newQuestion = {
         question: newSingleSurvey.data.response.Question,
         options: newSingleSurvey.data.response.Options,
         question_type: optionType === "Multi-choice"
-        ? "multiple_choice"
-        : optionType === "Comment"
-        ? "long_text"
-        : "matrix_checkbox",
+          ? "multiple_choice"
+          : optionType === "Comment"
+          ? "long_text"
+          : "matrix_checkbox",
         is_required: false,
       };
+  
       const updatedQuestions = [...currentSectionData.questions, newQuestion];
       const updatedSection = {
-        ...currentSectionData,  
-        questions: updatedQuestions
+        ...currentSectionData,
+        questions: updatedQuestions,
       };
-
+  
       dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
     }
-  }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, questions[currentSection]?.questions]);
+  }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, currentSection]);
   
-
   
   const handleSurveyCreation =async()=>{
     if(logoUrl === '' || headerUrl === ''){
@@ -187,7 +213,7 @@ const EditSurvey = () => {
     if(isSuccess){
       toast.success("Survey created successfully")
       dispatch(resetSurvey())
-      router.push('/surveys')
+      router.push('/surveys/survey-list')
     }
 
     if(isError || error){
@@ -370,10 +396,6 @@ const EditSurvey = () => {
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
               </div>
-              {/* <div className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
-                <VscLayersActive className="inline-block mr-2" />
-                Publish Survey
-              </div> */}
             </div>
             {questions?.length > 1 && (
             <div className="flex justify-end items-center pb-10">

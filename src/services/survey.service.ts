@@ -21,6 +21,24 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: 'GET',
       }),
     }),
+  downloadPDF: builder.query({
+      query: (id) => ({
+        url: `survey/download/${id}`,
+        method: 'GET',
+      }),
+    }),
+  shareSurvey: builder.query({
+      query: (id) => ({
+        url: `survey/share/${id}`,
+        method: 'GET',
+      }),
+    }),
+  deleteSurvey: builder.mutation({
+      query: (id) => ({
+        url: `survey/${id}`,
+        method: 'DELETE',
+      }),
+    }),
     generateTopics: builder.mutation({
       query: (body) => ({
         url: 'survey/ai/generate-topics',
@@ -61,4 +79,4 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
 
 
-export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery } = surveyApiSlice
+export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation } = surveyApiSlice
