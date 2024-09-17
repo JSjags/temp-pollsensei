@@ -6,6 +6,8 @@ import Draggable from "react-draggable";
 import { useRive } from "@rive-app/react-canvas";
 import { Button } from "@/components/ui/button"; // Your custom button component
 import { cn } from "@/lib/utils";
+import PollProfessor from "../ai/PollProfessor";
+import SenseiMasterChat from "../ai/SenseiMasterChat";
 
 const SenseiMaster = () => {
   const [count, setCount] = useState<number>(0);
@@ -31,6 +33,33 @@ const SenseiMaster = () => {
         setCount(0);
       } else {
         setCount((prev) => prev + 1);
+      }
+    }
+  };
+
+  const senseiStateSetter = (
+    state: "sleep" | "be idle" | "start talking" | "stop talking"
+  ) => {
+    if (rive) {
+      if (state === "sleep") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "sleep");
+        trigger?.fire();
+      }
+      if (state === "be idle") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "be idle");
+        trigger?.fire();
+      }
+      if (state === "start talking") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "start talking");
+        trigger?.fire();
+      }
+      if (state === "stop talking") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "stop talking");
+        trigger?.fire();
       }
     }
   };
@@ -89,24 +118,37 @@ const SenseiMaster = () => {
           className={cn(
             `fixed z-50 shadow-none bg-transparent rounded-full
           transition-all duration-300`,
-            isCollapsed ? "size-24" : "w-[300px] h-[400px] rounded-md"
+            isCollapsed
+              ? "size-24"
+              : "w-[300px] h-[calc(100vh-100px)] rounded-md"
           )}
           style={{
             willChange: "transform",
           }}
         >
           {/* Header with Rive Animation and Collapse Button */}
-          <div className="flex items-center justify-between bg-transparent cursor-move w-fit h-fit bg-white">
-            <div className="rive-animation w-full h-full bg-white">
+          <div className="flex items-center justify-between bg-transparent cursor-move w-fit h-fit relative">
+            <div
+              className={cn(
+                "rive-animation size-24 max-w-24 max-h-24 transition-all bg-white rounded-full shadow-lg",
+                !isCollapsed
+                  ? "absolute top-[calc(40vh-30px)] -right-[420px] -translate-y-1/2 transition-all"
+                  : "transition-all"
+              )}
+            >
               <RiveComponent
-                className="absolute inset-0 w-full h-full object-cover shadow-none bg-white rounded-full"
+                onClick={() => {
+                  if (!isCollapsed) return;
+                  setIsCollapsed(!isCollapsed);
+                }}
+                className="absolute inset-0 size-[90%] object-cover rounded-full cursor-pointer flex justify-center items-center mx-auto"
                 //   onMouseEnter={() => rive && rive.play()}
                 //   onMouseLeave={() => rive && rive.pause()}
               />
             </div>
             <Button
               onClick={toggleStates}
-              className="ml-auto bg-blue-500 h-6 auth-btn text-white px-2 py-1 rounded-full absolute -bottom-8 left-0 w-full !text-xs"
+              className="ml-auto w-fit bg-blue-500 h-6 auth-btn text-white px-2 py-1 rounded-full absolute -bottom-8 left-0 !text-xs"
             >
               {animationState}
             </Button>
@@ -114,9 +156,12 @@ const SenseiMaster = () => {
 
           {/* Chat Box Content (shown if not collapsed) */}
           {!isCollapsed && (
-            <div className="chat-content p-3 overflow-auto h-[calc(100%-60px)]">
-              <div className="chat-message">Welcome to the chat!</div>
-              {/* Add your chat messages and input field here */}
+            <div className="chat-content overflow-auto h-[calc(80%-60px)] shadow-lg rounded-md relative bg-white">
+              <SenseiMasterChat
+                isOpen={isCollapsed}
+                setIsOpen={setIsCollapsed}
+                senseiStateSetter={senseiStateSetter}
+              />
             </div>
           )}
         </div>
