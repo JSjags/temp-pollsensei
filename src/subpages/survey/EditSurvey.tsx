@@ -242,9 +242,9 @@ const EditSurvey = () => {
   console.log(questions[currentSection]?.questions)
 
   return (
-    <div className={`${theme} flex flex-col gap-5 w-full pl-16 relative`}>
+    <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
-        <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
+        <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
        {isNewSection ? <>
           {logoUrl ? (
             <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
@@ -372,7 +372,7 @@ const EditSurvey = () => {
               ) : null}
             </div>
           ))}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
             <div className="flex gap-2 items-center">
               <button
                 className="bg-white rounded-full px-5 py-1"
@@ -398,7 +398,7 @@ const EditSurvey = () => {
               </div>
             </div>
             {questions?.length > 1 && (
-            <div className="flex justify-end items-center pb-10">
+            <div className="flex w-full md:w-auto md:justify-end items-center">
               <PaginationBtn
                 currentSection={currentSection}
                 totalSections={questions.length}
@@ -411,7 +411,7 @@ const EditSurvey = () => {
             <Sensei isOpen={aiChatbot} setIsOpen={()=>setAiChatbot(!aiChatbot)} currentSection={currentSection} questionIndex={selectIndex} />
           )}
    
-          <div className=" rounded-md flex flex-col justify-center w-[16rem] py-5 text-center">
+          <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
           <button
             className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
             type="button"
@@ -432,7 +432,7 @@ const EditSurvey = () => {
           </> : <CreateNewSection /> }
         </div>
         <div
-          className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
+          className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
           {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>
