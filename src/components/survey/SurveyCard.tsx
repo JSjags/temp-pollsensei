@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react";
 import Image from "next/image";
 import StatusTag, { StatusTagProps } from "./StatusTag";
@@ -12,6 +14,12 @@ import { formatDate } from "@/lib/helpers";
 import Button from "../common/Button";
 import { IoEyeOutline } from "react-icons/io5";
 import Link from "next/link";
+import ShareSurvey from "./ShareSurvey";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useParams, useRouter } from "next/navigation";
+import { useDeleteSurveyMutation, useShareSurveyQuery } from "@/services/survey.service";
+import ShareSurveyModal from "./ShareSurveyModal";
+
 
 interface SurveyCardProps {
   topic: string;
@@ -42,6 +50,14 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [showRename, setShowRename] = useState(false);
   const [showDuplicate, setShowDuplicate] = useState(false);
   const [toggle, setToggle] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [shareSurvey, setShareSurvey] = useState(false);
+  const params = useParams();
+  const [deleteSurvey] = useDeleteSurveyMutation();
+  const router = useRouter();
+  const {data, isSuccess:shareSuccess } = useShareSurveyQuery(params.id)
+  const shareLink = data?.data?.link
+
 
   const handleViewOption = () => {
     setViewOptions(!viewOptions);
@@ -60,6 +76,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     if (choice.includes("delete")) {
       setShowDelete(true);
     }
+    if (choice.includes("share")) {
+    setShareSurvey(true)
+    }
+    if (choice.includes("preview")) {
+    router.push(`/surveys/question/${_id}`)
+    }
   };
 
   const handleCloseAll = () => {
@@ -72,7 +94,14 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setToggle(!toggle);
   };
 
-  // const 
+  const handleDeleteSurvey = async(id:any) => {
+    try{
+      await deleteSurvey(id)
+      handleCloseAll();
+    }catch(e){
+      console.log(e);
+    }
+  };
 
   return (
     <div className="relative rounded-[12px] p-4 sm:p-5 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px]">
@@ -114,6 +143,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       <div className="mt-6 sm:mt-[42px]">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 sm:gap-4">
+          <Link href={`/surveys/question/${_id}`}>
             <Image
               className="cursor-pointer"
               src={eyes}
@@ -121,13 +151,22 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
               width={24}
               height={24}
             />
+            </Link>
+            <div className="relative">
             <Image
               className="cursor-pointer"
               src={share}
               alt="Share"
               width={24}
               height={24}
+              onClick={()=>setShareSurvey((prev)=>!prev)}
             />
+              {shareSurvey && (
+                <div className="absolute right-0 z-50">
+                  {/* <ShareSurvey onClick={()=>setShareSurvey((prev)=>!prev)} /> */}
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <Switch checked={toggle} onCheckedChange={handleSetToggle} />
@@ -154,13 +193,16 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         </div>
       )}
       {showDelete && (
-        <DeleteSurvey openModal={showDelete} onClose={handleCloseAll} />
+        <DeleteSurvey openModal={showDelete} onClose={handleCloseAll} onDelete={()=>handleDeleteSurvey(_id)} />
       )}
       {showRename && (
         <RenameSurvey openModal={showRename} onClose={handleCloseAll} />
       )}
       {showDuplicate && (
         <DuplicateSurvey openModal={showDuplicate} onClose={handleCloseAll} />
+      )}
+      {shareSurvey && (
+        <ShareSurveyModal openModal={shareSurvey} onClose={handleCloseAll} _id={_id} />
       )}
     </div>
   );

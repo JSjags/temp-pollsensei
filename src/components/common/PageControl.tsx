@@ -1,44 +1,41 @@
-import React from 'react'
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 interface PaginationProps {
-  currentSection: number;
-  totalSections: number;
+  currentPage: number;
+  totalPages: number;
   onNavigate: (direction: "next" | "prev") => void;
 }
+// THIS WORKS FINE FOR PAGES CONTROL
 
-const PaginationBtn:React.FC<PaginationProps>  = ({
-  currentSection,
-  totalSections,
+const PageControl: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
   onNavigate,
 }) => {
-
-  // THIS WORKS FINE FOR QUESTION SECTION CONTROLS
-  
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
         <button
           className="flex items-center border rounded-md px-3 bg-[#D9D9D999] py-2"
           onClick={() => onNavigate("prev")}
-          disabled={currentSection === 0}
+          disabled={currentPage === 1}
         >
           <MdKeyboardArrowLeft size={20} />
           Prev
         </button>
         <span>
-          {currentSection + 1}/{totalSections}
+          {currentPage}/{totalPages}
         </span>
         <button
           className="flex items-center border rounded-md px-3 bg-[#D9D9D999] py-2"
           onClick={() => onNavigate("next")}
-          disabled={currentSection === totalSections - 1}
+          disabled={currentPage === totalPages}
         >
           Next <MdKeyboardArrowRight size={20} />
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PaginationBtn
+export default PageControl;

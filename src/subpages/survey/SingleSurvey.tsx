@@ -13,9 +13,6 @@ export default function SingleSurvey () {
   console.log(data?.data)
 
   return (
-    <div>
       <Milestones stage='0' />
-    </div>
   )
 }
-
