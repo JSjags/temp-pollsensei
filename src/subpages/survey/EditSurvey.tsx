@@ -267,12 +267,12 @@ const EditSurvey = () => {
               <p>LOGO GOES HERE</p>
             </div>
           )}
-            <button type="reset" onClick={()=>{
+            {/* <button type="reset" onClick={()=>{
               dispatch(resetSurvey())
               router.push('/surveys')
             }}>
               Reset
-            </button>
+            </button> */}
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
               src={

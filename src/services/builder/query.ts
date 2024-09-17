@@ -44,9 +44,14 @@ const customBaseQuery: BaseQueryFn<
         "Error: " + (result.error.data as { message: string })?.message
       );
     } else if (status === 400) {
-      api.dispatch(logoutUser());
+      // api.dispatch(logoutUser());
       toast.error(
         "Something went wrong " +
+          (result.error.data as { message: string })?.message
+      );
+    }else if (status === 404) {
+      toast.error(
+        "Page not found" +
           (result.error.data as { message: string })?.message
       );
     }
