@@ -31,11 +31,13 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
   const {data:share, isSuccess:shareSuccess } = useShareSurveyQuery(params.id || _id)
 
 
-  const domain = process.env.NEXT_PUBLIC_DOMAIN || "http://localhost:3000";
+  const domain = process.env.VITE_NEXT_PUBLIC_DOMAIN || 'https://pollsensei.vercel.app';
   const [currentUrl, setCurrentUrl] = useState("");
   const shareLink = share?.data?.link
   const share_embed_link = share?.data?.embed_link
   console.log(currentUrl)
+  console.log(shareLink)
+  console.log(domain)
 
   useEffect(() => {
     const fullUrl = `${domain}${pathname}`;
@@ -45,21 +47,21 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
   const embedLink = `<iframe src="${share_embed_link}" width="600" height="400"></iframe>`;
 
   const socialMediaShareUrls = {
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(shareLink)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(currentUrl)}`,
     twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-      shareLink
+      currentUrl
     )}&text=Check+out+this+survey!`,
     linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
-      shareLink
+      currentUrl
     )}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-      shareLink
+      currentUrl
     )}`,
     telegram: `https://t.me/share/url?url=${encodeURIComponent(
-      shareLink
+      currentUrl
     )}&text=Check+out+this+survey!`,
     gmail: `mailto:?subject=Check%20this%20survey&body=${encodeURIComponent(
-      shareLink
+      currentUrl
     )}`,
   };
 
@@ -75,11 +77,11 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
         <div className="mb-6 w-full flex border rounded">
           <input
             type="text"
-            value={shareLink}
+            value={currentUrl}
             readOnly
             className="p-2 border-0 ring-0 rounded w-3/4"
           />
-          <CopyToClipboard text={shareLink} onCopy={() => setLinkCopied(true)}>
+          <CopyToClipboard text={currentUrl} onCopy={() => setLinkCopied(true)}>
             <button
               className={`rounded w-1/4 transition font-normal text-sm ${
                 linkCopied ? "text-red-500" : "text-[#5B03B2]"
