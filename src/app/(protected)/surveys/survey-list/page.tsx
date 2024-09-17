@@ -5,9 +5,7 @@ import CreatedSurveysPage from "@/subpages/survey/CreatedSurveysPage";
 type Props = {};
 
 const Page = (props: Props) => {
-  return(
-    <CreatedSurveysPage />
-  );
+  return <CreatedSurveysPage />;
 };
 
 export default Page;

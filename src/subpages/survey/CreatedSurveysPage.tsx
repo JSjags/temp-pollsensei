@@ -1,16 +1,13 @@
-import PaginationControls from '@/components/common/PaginationControls'
-import SurveyCard from '@/components/survey/SurveyCard'
+import PaginationControls from "@/components/common/PaginationControls";
+import SurveyCard from "@/components/survey/SurveyCard";
 import { Key, useState } from "react";
 // import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/common/Button";
 // import { Button as ShadButton } from "@/components/ui/button";
 import { useFetchSurveysQuery } from "@/services/survey.service";
 import Image from "next/image";
-import FilterButton from '@/components/filter/FilterButton';
+import FilterButton from "@/components/filter/FilterButton";
 import search from "../../assets/images/search.svg";
-
-
-
 
 const CreatedSurveysPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(6);
@@ -26,8 +23,8 @@ const CreatedSurveysPage = () => {
   const totalPages = data?.data.total;
   return (
     <div>
-      Created survey page
-        {/* {data?.data.total > 0 && !isLoading && (
+      Created survey page fixed
+      {/* {data?.data.total > 0 && !isLoading && (
         <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
           <div className="md:flex my-10 items-center justify-between">
             <div className="flex gap-5 items-center">
@@ -73,7 +70,7 @@ const CreatedSurveysPage = () => {
         </div>
       )} */}
     </div>
-  )
-}
+  );
+};
 
-export default CreatedSurveysPage
+export default CreatedSurveysPage;
