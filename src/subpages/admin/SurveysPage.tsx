@@ -15,32 +15,36 @@ import Milestones from "@/components/survey/Milestones";
 import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/common/Button";
 import { Button as ShadButton } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const SurveysPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const [showMilestones, setShowMilestones] = useState(true);
   const { data, isLoading } = useFetchSurveysQuery(currentPage);
+  const router = useRouter()
 
-  console.log(data);
-  console.log(data?.data);
-  console.log(data?.data?.data);
+  // console.log(data);
+  // console.log(data?.data);
+  // console.log(data?.data?.data);
 
   // const result = Array.from({ length: 6 }, (_, index) => `Item ${index}`);
 
-  const totalPages = data?.data.total;
+  // const totalPages = data?.data.total;
 
   return (
     <div>
       {showMilestones && (
         <div className="bg-white py-3 shadow-md shadow-black/5">
           <div className="container px:2 sm:px-4 flex justify-end gap-4">
-            <ShadButton className="auth-btn">Create Survey</ShadButton>
+            <ShadButton className="auth-btn" onClick={()=>{router.push('/surveys/create-survey')}}>Create Survey</ShadButton>
             <ShadButton
-              onClick={() => setShowMilestones(!showMilestones)}
+              // onClick={() => setShowMilestones(!showMilestones)}
+              onClick={() => router.push('/surveys/survey-list')}
               className="border rounded-lg border-[#5b03b2] text-[#5b03b2] hover:bg-[#5b03b210] bg-white"
             >
-              {showMilestones ? "Created Surveys" : "Milestones"}
+              {/* {showMilestones && "Created Surveys" : "Milestones"} */}
+              {showMilestones && "Created Surveys" }
             </ShadButton>
           </div>
         </div>
@@ -50,11 +54,13 @@ const SurveysPage = () => {
           <Loading />
         </div>
       )}
-      {data?.data.total === 0 && !isLoading && showMilestones && (
+      {!isLoading && showMilestones && (
+      // {data?.data.total === 0 && !isLoading && showMilestones && (
         // <SurveyEmptyPage />
         <div className="bg-[url(/assets/milestones-bg.svg)] w-full h-[calc(100vh-72px)] lg:h-[calc(100vh-150px)] mx-auto">
           <AnimatePresence>
-            {data?.data.total === 0 && !isLoading && (
+            {!isLoading && (
+            // {data?.data.total === 0 && !isLoading && (
               <motion.div
                 initial={{ opacity: 0, scale: 1, y: 100 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -89,7 +95,7 @@ const SurveysPage = () => {
           )}
         </AnimatePresence>
       )}
-      {data?.data.total > 0 && !isLoading && (
+      {/* {data?.data.total > 0 && !isLoading && (
         <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
           <div className="md:flex my-10 items-center justify-between">
             <div className="flex gap-5 items-center">
@@ -133,7 +139,7 @@ const SurveysPage = () => {
             />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

@@ -1,14 +1,10 @@
 import Image from "next/image";
 import { pollsensei_new_logo } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
-import { HiOutlineMinusSmall } from "react-icons/hi2";
 import { IoDocumentOutline } from "react-icons/io5";
-import { IoIosArrowForward } from "react-icons/io";
-import { ClipLoader } from "react-spinners";
+
 import { VscLayersActive } from "react-icons/vsc";
 import { useEffect, useState } from "react";
-import { LiaTimesSolid } from "react-icons/lia";
-import { BsFillPinAngleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -35,7 +31,7 @@ import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/sur
 import { useRouter } from "next/navigation";
 import store from '@/redux/store';
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
-// import Sensei from "@/components/ui/Sensei";
+
 
 
 const CreateNewSection = () => {
@@ -49,7 +45,6 @@ const CreateNewSection = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const questions = useSelector((state: RootState) => state?.question?.questions);
-  // const [questions, setQuestions] = useState([]);
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
   const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
@@ -85,34 +80,6 @@ const CreateNewSection = () => {
     setIsSidebarOpen(false);
   };
 
-  // const handleSurveyCreation =async()=>{
-  //   if(logoUrl === '' || headerUrl === ''){
-  //     toast.warning("Header image and logo can not be empty")
-  //     return null
-  //   }
-  //   if(survey.sections.length === 0){
-  //     dispatch(addSection({
-  //       questions:questions
-  //     }))
-  //   }else{
-  //     dispatch(addSection({
-  //       section_topic:sectionTitle,
-  //       section_description:sDescription,
-  //       questions:questions
-  //     }))
-  //   }
-
-  //   try{
-    
-  //     const updatedSurvey = store.getState().survey;
-    
-  //     await createSurvey(
-  //       updatedSurvey
-  //     );
-  //   }catch(e){
-  //     console.log(e)
-  //   };
-  // }
 
   const handleSurveyCreation = async () => {
     if (logoUrl === '' || headerUrl === '') {
@@ -130,14 +97,27 @@ const CreateNewSection = () => {
         dispatch(addSection({
           questions: questions
         }));
+        console.log(
+    
+          {  questions: questions}
+       
+        )
       } else {
         dispatch(addSection({
-          section_topic: sectionTitle,
-          section_description: sDescription,
+          section_topic: newSectionTopic,
+          section_description: newSectionDesc,
           questions: questions
         }));
+        console.log({
+          section_topic: newSectionTopic,
+          section_description: newSectionDesc,
+          questions: questions
+        })
       }
     }
+
+       const updatedSurvey = store.getState().survey;
+       console.log(updatedSurvey.sections)
   
     try {
       const updatedSurvey = store.getState().survey;

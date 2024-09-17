@@ -84,10 +84,10 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const selectOptions = [
     { value: "multiple_choice", label: "Multiple Choice" },
     { value: "long_text", label: "Comment" },
-    { value: "likert_scale", label: "Likert Scale" },
+    // { value: "likert_scale", label: "Likert Scale" },
     // { value: "linear_scale", label: "Linear Scale" },
     { value: "star_rating", label: "Star Rating" },
-    { value: "matrix_checkbox", label: "Matrix" },
+    // { value: "matrix_checkbox", label: "Matrix" },
   ];
 
   return (

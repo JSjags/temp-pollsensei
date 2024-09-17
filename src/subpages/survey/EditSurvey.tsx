@@ -136,34 +136,60 @@ const EditSurvey = () => {
     // console.log(currentSectionData.questions[0])
 
 
+  // useEffect(() => {
+  //   if (newQuestionGenerate && newSingleSurvey?.data?.response) {
+  //     console.log(newSingleSurvey)
+  //     const updatedSections = [...questions];
+  //     const currentSectionData = updatedSections[currentSection];
+  //     const optionType = newSingleSurvey.data.response["Option type"]?.trim();
+
+  //     const newQuestion = {
+  //       question: newSingleSurvey.data.response.Question,
+  //       options: newSingleSurvey.data.response.Options,
+  //       question_type: optionType === "Multi-choice"
+  //       ? "multiple_choice"
+  //       : optionType === "Comment"
+  //       ? "long_text"
+  //       : "matrix_checkbox",
+  //       is_required: false,
+  //     };
+  //     const updatedQuestions = [...currentSectionData.questions, newQuestion];
+  //     const updatedSection = {
+  //       ...currentSectionData,  
+  //       questions: updatedQuestions
+  //     };
+
+  //     dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
+  //   }
+  // }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, questions[currentSection]?.questions]);
+  
   useEffect(() => {
     if (newQuestionGenerate && newSingleSurvey?.data?.response) {
-      console.log(newSingleSurvey)
+      console.log(newSingleSurvey);
       const updatedSections = [...questions];
       const currentSectionData = updatedSections[currentSection];
       const optionType = newSingleSurvey.data.response["Option type"]?.trim();
-
       const newQuestion = {
         question: newSingleSurvey.data.response.Question,
         options: newSingleSurvey.data.response.Options,
         question_type: optionType === "Multi-choice"
-        ? "multiple_choice"
-        : optionType === "Comment"
-        ? "long_text"
-        : "matrix_checkbox",
+          ? "multiple_choice"
+          : optionType === "Comment"
+          ? "long_text"
+          : "matrix_checkbox",
         is_required: false,
       };
+  
       const updatedQuestions = [...currentSectionData.questions, newQuestion];
       const updatedSection = {
-        ...currentSectionData,  
-        questions: updatedQuestions
+        ...currentSectionData,
+        questions: updatedQuestions,
       };
-
+  
       dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
     }
-  }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, questions[currentSection]?.questions]);
+  }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, currentSection]);
   
-
   
   const handleSurveyCreation =async()=>{
     if(logoUrl === '' || headerUrl === ''){
@@ -187,7 +213,7 @@ const EditSurvey = () => {
     if(isSuccess){
       toast.success("Survey created successfully")
       dispatch(resetSurvey())
-      router.push('/surveys')
+      router.push('/surveys/survey-list')
     }
 
     if(isError || error){
@@ -216,9 +242,9 @@ const EditSurvey = () => {
   console.log(questions[currentSection]?.questions)
 
   return (
-    <div className={`${theme} flex flex-col gap-5 w-full pl-16 relative`}>
+    <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
-        <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
+        <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
        {isNewSection ? <>
           {logoUrl ? (
             <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
@@ -241,12 +267,12 @@ const EditSurvey = () => {
               <p>LOGO GOES HERE</p>
             </div>
           )}
-            <button type="reset" onClick={()=>{
+            {/* <button type="reset" onClick={()=>{
               dispatch(resetSurvey())
               router.push('/surveys')
             }}>
               Reset
-            </button>
+            </button> */}
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
               src={
@@ -346,7 +372,7 @@ const EditSurvey = () => {
               ) : null}
             </div>
           ))}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
             <div className="flex gap-2 items-center">
               <button
                 className="bg-white rounded-full px-5 py-1"
@@ -370,13 +396,9 @@ const EditSurvey = () => {
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
               </div>
-              {/* <div className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
-                <VscLayersActive className="inline-block mr-2" />
-                Publish Survey
-              </div> */}
             </div>
             {questions?.length > 1 && (
-            <div className="flex justify-end items-center pb-10">
+            <div className="flex w-full md:w-auto md:justify-end items-center">
               <PaginationBtn
                 currentSection={currentSection}
                 totalSections={questions.length}
@@ -389,7 +411,7 @@ const EditSurvey = () => {
             <Sensei isOpen={aiChatbot} setIsOpen={()=>setAiChatbot(!aiChatbot)} currentSection={currentSection} questionIndex={selectIndex} />
           )}
    
-          <div className=" rounded-md flex flex-col justify-center w-[16rem] py-5 text-center">
+          <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
           <button
             className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
             type="button"
@@ -410,7 +432,7 @@ const EditSurvey = () => {
           </> : <CreateNewSection /> }
         </div>
         <div
-          className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
+          className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
           {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>

@@ -12,13 +12,13 @@ import {
   updateSectionDescription,
   addQuestion,
   resetQuestion,
+  deleteQuestion,
 } from "@/redux/slices/questions.slice";
 import { toast } from "react-toastify";
 import CommentQuestion from "@/components/survey/CommentQuestion";
 import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
-import { FaEye } from "react-icons/fa6";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import QuestionType from "./QuestionType";
 import StyleEditor from "./StyleEditor";
@@ -30,6 +30,8 @@ import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
 import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/survey.service";
 import store from '@/redux/store';
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
+import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
+import MultiChoiceQuestionEdit from "../milestone/Test";
 
 
 const AddQuestionPage = () => {
@@ -50,7 +52,6 @@ const AddQuestionPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
-  // const [questions, setQuestions] = useState(questionState || []);
   const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
   const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
   const survey = useSelector((state: RootState) => state?.survey);
@@ -84,33 +85,6 @@ const AddQuestionPage = () => {
     setIsSidebarOpen(false);
   };
 
-
-  // const handleSurveyCreation =async()=>{
-  //   if(logoUrl === '' || headerUrl === ''){
-  //     toast.warning("Header image and logo can not be empty")
-  //     return null
-  //   }
-  //   if(survey.sections.length === 0){
-  //     dispatch(addSection({
-  //       questions:questions
-  //     }))
-  //   }else{
-  //     dispatch(addSection({
-  //       section_topic:sectionTitle,
-  //       section_description:sDescription,
-  //       questions:questions
-  //     }))
-  //   }
-  //   try{
-  //     const updatedSurvey = store.getState().survey;
-    
-  //     await createSurvey(
-  //       updatedSurvey
-  //     );
-  //   }catch(e){
-  //     console.log(e)
-  //   };
-  // }
 
   const handleSurveyCreation = async () => {
     if (logoUrl === '' || headerUrl === '') {
@@ -147,7 +121,6 @@ const AddQuestionPage = () => {
   };
   
 
-
   useEffect(()=>{
     if(isSuccess){
       toast.success("Survey created successfully")
@@ -178,11 +151,27 @@ const AddQuestionPage = () => {
   }, [progressError, progressIsError])
 
 
+  const handleCancel = () => {
+    // setEditIndex(null);
+    setIsEdit(false);
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+
+  const handleDeleteQuestion = (id:number) => {
+    const questionIndex = questions?.findIndex(
+      (_question: any, index: any) => index === id
+    );
+    setEditIndex(questionIndex);
+    dispatch(deleteQuestion({ questions, editIndex }));
+  };
+
+
   console.log(questions)
   return (
-    <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
+    <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
-        <div className="w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
+        <div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
         {logoUrl ? (
             <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
               <Image
@@ -255,7 +244,7 @@ const AddQuestionPage = () => {
 
           {/* <button type="reset" onClick={()=>dispatch(resetQuestion())}>
             Reset
-          </button> */}
+          </button>  */}
 
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
@@ -263,7 +252,7 @@ const AddQuestionPage = () => {
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {questions?.map((item: any, index: any) => (
                     <Draggable
-                      key={index + 1}
+                      key={index}
                       draggableId={index.toString()}
                       index={index}
                     >
@@ -274,13 +263,33 @@ const AddQuestionPage = () => {
                           {...provided.dragHandleProps}
                           className="mb-4"
                         >
-                          {item.question_type === "multiple_choice" ? (
+                          {
+                            isEdit && editIndex === index && item.question_type === "matrix_checkbox" ? (
+                              <MatrixQuestionEdit
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                onSave={handleSave}
+                                onCancel={handleCancel}
+                              />
+                            ) :
+                            isEdit && editIndex === index ? (
+                              <MultiChoiceQuestionEdit
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                onSave={handleSave}
+                                onCancel={handleCancel}
+                              />
+                            ) :
+                          item.question_type === "multiple_choice" ? (
                             <MultiChoiceQuestion
                               index={index + 1}
                               question={item.question}
                               options={item.options}
                               questionType={item.question_type}
                               EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={()=>{}}
                             />
                           ) : item.question_type === "long_text" ? (
                             <CommentQuestion
@@ -288,6 +297,7 @@ const AddQuestionPage = () => {
                               index={index + 1}
                               question={item.question}
                               questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
                             />
                           )
                           : item.question_type === "likert_Scale" ? (
@@ -304,7 +314,7 @@ const AddQuestionPage = () => {
                               maxRating={5}
                               questionType={item.question_type}
                               EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                              DeleteQuestion={()=>handleDeleteQuestion(index)}
                             />
                           )
                            : item.question_type === "long_text" ? (
@@ -343,25 +353,12 @@ const AddQuestionPage = () => {
               />
           )}
 
-          {/* <div className="flex justify-between items-center pt-5 pb-10">
-            <div className="">
-              <button
-                className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-                type="button"
-                // onClick={handleEdit}
-              >
-                <FaEye className="inline-block mr-2" />
-                Preview
-              </button>
-            </div>
-          </div> */}
-
-          <div className="flex justify-between items-center pb-10">
-            <div className="flex gap-2 items-center">
-              <button className="bg-white rounded-full px-5 py-1" onClick={()=>setAddQuestions((prev) => !prev)}>
+          <div className="md:flex justify-between items-center pb-10">
+            <div className="flex-col md:flex-row flex w-full gap-2 items-center">
+              <button className="bg-white inline-block rounded-full px-5 py-1" onClick={()=>setAddQuestions((prev) => !prev)}>
                     <HiOutlinePlus className="inline-block mr-2" /> Add Question
               </button>
-              <button className="bg-white rounded-full px-5 py-1" onClick={()=>{
+              <button className="bg-white inline-block rounded-full px-5 py-1" onClick={()=>{
                 dispatch(addSection({questions: questions}))
                 dispatch(resetQuestion())
                 router.push('/surveys/add-new-section')
@@ -369,7 +366,7 @@ const AddQuestionPage = () => {
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
               </button>
-              <button disabled={isLoading} className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
+              <button disabled={isLoading} className="bg-white inline-block rounded-full px-5 py-1" onClick={handleSurveyCreation}>
                 <VscLayersActive className="inline-block mr-2" />
                 Publish Survey
               </button>
@@ -392,7 +389,7 @@ const AddQuestionPage = () => {
           </div>
         </div>
         <div
-          className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
+          className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
           {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>
