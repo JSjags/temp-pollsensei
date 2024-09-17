@@ -26,6 +26,7 @@ const DashboardPage = () => {
   const { data: surveys } = useSurveyQuery("year");
 
   console.log(surveyCount);
+  console.log(surveyLeaderboard);
   return (
     <>
       <div className="container mx-auto px-4">
@@ -134,12 +135,12 @@ const DashboardPage = () => {
 
               <div className="p-4 w-full flex flex-col gap-4">
                 {surveyLeaderboard?.data.length > 0 ? (
-                  surveyLeaderboard?.data.map((row: any, index: number) => (
+                  surveyLeaderboard?.data?.map((row: any, index: number) => (
                     <TopResponse
                       key={index}
-                      id={row.id}
-                      title={row.title}
-                      value={row.value}
+                      id={index + 1}
+                      title={row?.topic.slice(0, 20)}
+                      value={row?.number_of_responses}
                     />
                   ))
                 ) : (

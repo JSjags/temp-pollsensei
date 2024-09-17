@@ -14,7 +14,7 @@ const TopResponse: React.FC<TopResponseProps> = ({ id, title, value }) => {
       <div className="flex items-center gap-3">
         <div className="flex justify-center items-center rate-id">{id}</div>
         <div className="flex flex-col gap-1">
-          <p className="rate-title">{title}</p>
+          <p className="rate-title">{title}...</p>
           <p className="rate-value">{`${value} responses`}</p>
         </div>
       </div>
