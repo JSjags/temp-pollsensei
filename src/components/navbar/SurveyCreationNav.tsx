@@ -245,6 +245,7 @@ const SurveyCreationNav = () => {
           {path === "/surveys/create-survey" ||
           path === "/surveys/add-question-m" ||
           path === "/surveys/survey-list" ||
+          path.includes('validate-response') ||
           path.includes("/surveys/question") ? (
             " "
           ) : (

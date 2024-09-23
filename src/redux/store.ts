@@ -29,6 +29,7 @@ import { createPersistStorage } from "./storage";
 import questionReducer from "./slices/questions.slice";
 import themeReducer from './slices/theme.slice'
 import surveyReducer from './slices/survey.slice'
+import answerReducer from "./slices/answer.slice";
 
 // At the top of the file, after imports
 export type RootState = {
@@ -39,6 +40,7 @@ export type RootState = {
   question: ReturnType<typeof questionReducer>;
   themes: ReturnType<typeof themeReducer>;
   survey: ReturnType<typeof surveyReducer>;
+  answer: ReturnType<typeof answerReducer>;
   [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
 };
 
@@ -50,6 +52,7 @@ const rootReducer = combineReducers({
   question: questionReducer,
   themes: themeReducer,
   survey:surveyReducer,
+  answer:answerReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 
