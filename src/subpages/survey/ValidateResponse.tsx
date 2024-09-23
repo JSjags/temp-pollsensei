@@ -25,6 +25,7 @@ interface Answer {
 
 interface OCRResponse {
   extracted_answers: Answer[];
+  survey: any
 }
 
 const ValidateResponse = () => {
@@ -64,14 +65,14 @@ const ValidateResponse = () => {
   };
   return (
     <div
-      className={`${OCRresponses?.survey?.theme} flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}
+      className={`${(OCRresponses as any)?.survey?.theme} flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}
     >
-      <div className={`${OCRresponses?.survey?.theme} flex justify-between gap-10 w-full`}>
+      <div className={`${(OCRresponses as any)?.survey?.theme} flex justify-between gap-10 w-full`}>
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
         <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col "> 
               <Image
                 src={
-                  OCRresponses?.survey?.logo_url
+                  (OCRresponses as any)?.survey?.logo_url
                 }
                 alt=""
                 className="w-full object-cover bg-no-repeat h-16 rounded-full"
@@ -83,7 +84,7 @@ const ValidateResponse = () => {
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
               src={
-                OCRresponses?.survey?.header_url
+                (OCRresponses as any)?.survey?.header_url
               }
               alt=""
               className="w-full object-cover bg-no-repeat h-24 rounded-lg"
@@ -92,8 +93,8 @@ const ValidateResponse = () => {
             />
           </div> 
           <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-            <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${OCRresponses?.header_text?.size}px`, fontFamily:`${OCRresponses?.header_text?.name}` }}>{OCRresponses?.survey?.topic}</h2>
-            <p style={{fontSize:`${OCRresponses?.body_text?.size}px`, fontFamily:`${OCRresponses?.body_text?.name}` }}>{OCRresponses?.survey?.description}</p>
+            <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${(OCRresponses as any)?.header_text?.size}px`, fontFamily:`${(OCRresponses as any)?.header_text?.name}` }}>{(OCRresponses as any)?.survey?.topic}</h2>
+            <p style={{fontSize:`${(OCRresponses as any)?.body_text?.size}px`, fontFamily:`${(OCRresponses as any)?.body_text?.name}` }}>{(OCRresponses as any)?.survey?.description}</p>
           </div>
           
           {OCRresponses[currentSection]?.extracted_answers?.map(
