@@ -74,9 +74,41 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    uploadResponseOCR: builder.mutation({
+      query: (body) => ({
+        url: "response/submit-ocr",
+        method: "POST",
+        body,
+      }),
+    }),
+    submitPublicResponse: builder.mutation({
+      query: (body) => ({
+        url: "ps/survey/respond",
+        method: "POST",
+        body,
+      }),
+    }),
+    getSingleResponseFolder: builder.query({
+      query: (id) => ({
+        url: `response/folder/${id}`,
+        method: "GET",
+      }),
+    }),
+    getPublicSurveyById: builder.query({
+      query: (id) => ({
+        url: `ps/survey/${id}`,
+        method: "GET",
+      }),
+    }),
+    getPublicSurveyByShortUrl: builder.query({
+      query: (id) => ({
+        url: `ps/survey/${id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
 
 
-export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation } = surveyApiSlice
+export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation, useUploadResponseOCRMutation, useGetSingleResponseFolderQuery, useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation } = surveyApiSlice

@@ -47,21 +47,21 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
   const embedLink = `<iframe src="${share_embed_link}" width="600" height="400"></iframe>`;
 
   const socialMediaShareUrls = {
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(currentUrl)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(shareLink)}`,
     twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-      currentUrl
+      shareLink
     )}&text=Check+out+this+survey!`,
     linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
-      currentUrl
+      shareLink
     )}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-      currentUrl
+      shareLink
     )}`,
     telegram: `https://t.me/share/url?url=${encodeURIComponent(
-      currentUrl
+      shareLink
     )}&text=Check+out+this+survey!`,
     gmail: `mailto:?subject=Check%20this%20survey&body=${encodeURIComponent(
-      currentUrl
+      shareLink
     )}`,
   };
 
@@ -77,11 +77,11 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
         <div className="mb-6 w-full flex border rounded">
           <input
             type="text"
-            value={currentUrl}
+            value={shareLink}
             readOnly
             className="p-2 border-0 ring-0 rounded w-3/4"
           />
-          <CopyToClipboard text={currentUrl} onCopy={() => setLinkCopied(true)}>
+          <CopyToClipboard text={shareLink} onCopy={() => setLinkCopied(true)}>
             <button
               className={`rounded w-1/4 transition font-normal text-sm ${
                 linkCopied ? "text-red-500" : "text-[#5B03B2]"

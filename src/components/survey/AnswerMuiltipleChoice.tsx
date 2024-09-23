@@ -1,28 +1,30 @@
 import { draggable } from "@/assets/images";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
-interface MultiChoiceQuestionProps {
+interface AnswerMultiChoiceQuestionProps {
   question: string;
   questionType: string;
-  options: string[] | undefined;
-  onChange?: (value: string) => void;
+  options: string[];
+  selectedOptions: string[];
+  onChange?: (selected: string[]) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
 }
 
-const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
+const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   question,
   options,
+  selectedOptions,
   questionType,
+  onChange,
   EditQuestion,
   DeleteQuestion,
   index,
-  onChange,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -30,15 +32,23 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   );
   const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme);
 
-  // State to store the selected option
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [localSelectedOptions, setLocalSelectedOptions] = useState<string[]>(selectedOptions);
 
-  // Handle option selection
+ 
+  useEffect(() => {
+    setLocalSelectedOptions(selectedOptions);
+  }, [selectedOptions]);
+
   const handleOptionChange = (option: string) => {
-    setSelectedOption(option); // Set the selected option
-    console.log(`Selected option for question ${question}:`, option); // Log the selected option
+    const isSelected = localSelectedOptions.includes(option);
+    const updatedOptions = isSelected
+      ? localSelectedOptions.filter((item) => item !== option) 
+      : [...localSelectedOptions, option];
+
+    setLocalSelectedOptions(updatedOptions);
+    
     if (onChange) {
-      onChange(option); // Trigger external onChange callback if provided
+      onChange(updatedOptions);
     }
   };
 
@@ -55,8 +65,8 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
         alt="draggable icon"
         className={
           pathname === "/surveys/create-survey"
-          ? "visible"
-          : "invisible"
+            ? "visible"
+            : "invisible"
         }
       />
       <div className="w-full">
@@ -64,22 +74,21 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           <h3 className="text-lg font-semibold text-start">
             <span>{index}. </span> {question}
           </h3>
-          {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') ? "" : <p>{questionType}</p>}
+          {pathname === "/surveys/edit-survey" || pathname.includes('validate-response') ? "" : <p>{questionType}</p>}
         </div>
-        {options?.map((option, optionIndex) => (
+        {options.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
             <label className="relative flex items-center cursor-pointer">
               <input
-                type="radio"
+                type="checkbox"
                 id={`option-${optionIndex}`}
                 name={question}
-                value={option}
-                className="mr-2 text-[#5B03B2] radio hidden peer"
-                checked={selectedOption === option}
+                checked={localSelectedOptions?.includes(option)} 
                 onChange={() => handleOptionChange(option)}
+                className="mr-2 text-[#5B03B2] hidden peer"
               />
               <span
-                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
+                className={`w-5 h-5 border-2  shadow-inner flex flex-col peer-checked:before:bg-black peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
                 style={{ borderColor: colorTheme }}
               ></span>
               <span className="ml-2">{option}</span>
@@ -89,13 +98,13 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
         {pathname === "/surveys/edit-survey" && (
           <div className="flex justify-end gap-4">
             <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
+              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
               onClick={EditQuestion}
             >
               Edit
             </button>
             <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
+              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
             >
               Delete
@@ -107,4 +116,4 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   );
 };
 
-export default MultiChoiceQuestion;
+export default AnswerMultiChoiceQuestion;

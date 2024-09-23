@@ -33,7 +33,11 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
         <Image
           src={draggable}
           alt="draggable icon"
-          className={ pathname === "/surveys/edit-survey" || pathname ==='surveys/preview-survey' ? "invisible" : "visible"}
+          className={ 
+            pathname === "/surveys/create-survey"
+            ? "visible"
+            : "invisible"
+          }
         />
         <div className="w-full">
           <div className="flex justify-between items-center">
