@@ -26,11 +26,16 @@ const SenseiMaster = () => {
   // Toggle collapse/expand state
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
-  const toggleStates = () => {
+  const toggleStates = (stage?: number) => {
     if (rive) {
       const statesLength = rive?.animationNames.length;
       if (count >= statesLength - 1) {
-        setCount(0);
+        setCount(stage ?? 1);
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "stop talking");
+        console.log(trigger);
+
+        trigger!.fire();
       } else {
         setCount((prev) => prev + 1);
       }
@@ -38,7 +43,12 @@ const SenseiMaster = () => {
   };
 
   const senseiStateSetter = (
-    state: "sleep" | "be idle" | "start talking" | "stop talking"
+    state:
+      | "sleep"
+      | "be idle"
+      | "start thinking"
+      | "start talking"
+      | "stop talking"
   ) => {
     if (rive) {
       if (state === "sleep") {
@@ -49,6 +59,11 @@ const SenseiMaster = () => {
       if (state === "be idle") {
         const inputs = rive?.stateMachineInputs("sensei-states");
         const trigger = inputs.find((i) => i.name === "be idle");
+        trigger?.fire();
+      }
+      if (state === "start thinking") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "start talking");
         trigger?.fire();
       }
       if (state === "start talking") {
@@ -67,14 +82,20 @@ const SenseiMaster = () => {
   useEffect(() => {
     if (rive) {
       const statesLength = rive?.animationNames.length;
+
+      console.log(statesLength);
+      console.log(count);
+
       if (count >= statesLength) {
         const inputs = rive?.stateMachineInputs("sensei-states");
         const trigger = inputs.find((i) => i.name === "sleep");
         trigger?.fire();
       } else {
         const inputs = rive?.stateMachineInputs("sensei-states");
+        console.log(inputs);
+
         if (count === 0) {
-          const trigger = inputs.find((i) => i.name === "stop talking");
+          const trigger = inputs.find((i) => i.name === "sleep");
 
           trigger!.fire();
           if (animationState) {
@@ -91,6 +112,11 @@ const SenseiMaster = () => {
           trigger!.fire();
         }
         if (count === 2) {
+          const trigger = inputs.find((i) => i.name === "start thinking");
+          console.log(trigger);
+          trigger!.fire();
+        }
+        if (count === 3) {
           const trigger = inputs.find((i) => i.name === "start talking");
           console.log(trigger);
           trigger!.fire();
@@ -130,7 +156,7 @@ const SenseiMaster = () => {
           <div className="flex items-center justify-between bg-transparent cursor-move w-fit h-fit relative">
             <div
               className={cn(
-                "rive-animation size-24 max-w-24 max-h-24 transition-all bg-white rounded-full shadow-lg",
+                "rive-animation size-24 max-w-24 max-h-24 transition-all rounded-full",
                 !isCollapsed
                   ? "absolute top-[calc(40vh-30px)] -right-[420px] -translate-y-1/2 transition-all"
                   : "transition-all"
@@ -147,7 +173,7 @@ const SenseiMaster = () => {
               />
             </div>
             <Button
-              onClick={toggleStates}
+              onClick={() => toggleStates()}
               className="ml-auto w-fit bg-blue-500 h-6 auth-btn text-white px-2 py-1 rounded-full absolute -bottom-8 left-0 !text-xs"
             >
               {animationState}
