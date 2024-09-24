@@ -25,7 +25,8 @@ interface Answer {
 
 interface OCRResponse {
   extracted_answers: Answer[];
-  survey: any
+  survey: any;
+  uploaded_files:any
 }
 
 const ValidateResponse = () => {
@@ -196,7 +197,7 @@ const ValidateResponse = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          <PreviewFile data={[]} />
+          <PreviewFile data={OCRresponses[currentSection]?.uploaded_files} />
         </div>
       </div>
     </div>

@@ -17,9 +17,9 @@ const PreviewFile:React.FC<PreviewFileProps> = ({data}) => {
     setActiveImage(image);
   };
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full mt-5">
       {/* Active Image Display */}
-      <div className="border-2 border-purple-400 p-2 mb-4">
+      <div className="border-2 border-purple-400 p-2 mb-4 w-full min-h-[50vh]">
         <Image
           src={activeImage?.src}
           alt={activeImage?.alt}
