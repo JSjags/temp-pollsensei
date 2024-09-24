@@ -62,7 +62,9 @@ const CreatedSurveysPage = () => {
               </div>
             </div>
             <div className="hidden md:block mt-2 md:mt-0">
-              <Button label="Create new survey +" />
+              <Button label="Create new survey +" onClick={()=>{
+                 router.push("/surveys/create-survey");
+              }} />
             </div>
             <div className="block md:hidden">
               <FilterButton text="Add filter" />

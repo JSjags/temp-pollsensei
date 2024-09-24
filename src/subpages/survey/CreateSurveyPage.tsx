@@ -135,6 +135,7 @@ const CreateSurveyPage = () => {
           question_type:
             optionType === "Multi-choice"
               ? "multiple_choice"
+              // ? "single_choice"
               : optionType === "Comment"
               ? "long_text"
               : "matrix_checkbox",
