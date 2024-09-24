@@ -29,7 +29,7 @@ function IsLoadingModal({
       // backdropStyle={{ zIndex: 20 }}
       style={{
         borderRadius: "5.489px",
-        background: "rgba(0, 0, 0, 0.5)",
+        // background: "rgba(0, 0, 0, 0.5)",
         padding: "0",
         zIndex: "100",
         display: "flex",

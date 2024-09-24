@@ -12,8 +12,8 @@ import { pollsensei_new_logo } from "@/assets/images";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import PreviewFile from "@/components/survey/PreviewFile";
-import { useGetSingleResponseFolderQuery } from "@/services/survey.service";
 import AnswerMultiChoiceQuestion from "@/components/survey/AnswerMuiltipleChoice";
+import { toast } from "react-toastify";
 
 
 interface Answer {
@@ -36,7 +36,6 @@ const ValidateResponse = () => {
   console.log(params.id);
   console.log(OCRresponses);
   const [currentSection, setCurrentSection] = useState(0);
-  // const { data: responseFolderS } = useGetSingleResponseFolderQuery(params.id);
 
   console.log(OCRresponses);
 
@@ -51,11 +50,11 @@ const ValidateResponse = () => {
   };
 
   const handleSubmitResponse = () => {
+    toast.error("Somethiingwent wrong")
     dispatch(resetAnswers());
     router.push("/surveys/survey-list")
   };
 
-  // console.log(responseFolderS?.data);
   // <button type="reset" onClick={handleReset}>Resent</button>
 
   // TODO: Check why the last option is not piked

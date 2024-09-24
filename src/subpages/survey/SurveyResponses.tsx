@@ -6,7 +6,7 @@ import { closeUpload, openUpload, toggleUpload } from "@/redux/slices/upload.sli
 import { RootState } from "@/redux/store";
 import { useFetchASurveyQuery, useUploadResponseOCRMutation } from "@/services/survey.service";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Slide } from "react-awesome-reveal";
 import { SlCloudUpload } from "react-icons/sl";
 import { useSelector, useDispatch } from "react-redux";
@@ -20,7 +20,7 @@ const SurveyResponses = () => {
   const uploadState = useSelector((state:RootState)=>state?.upload?.isUploadOpen)
   const { data } = useFetchASurveyQuery(params.id);
   const [isToggled, setIsToggled] = useState<boolean>(false);
-  const [uploadResponseOCR, {data: uploadOCR, isSuccess:successOCRUpload, isLoading:OCRloading}] = useUploadResponseOCRMutation()
+  const [uploadResponseOCR, {data: uploadOCR, isSuccess:successOCRUpload, isLoading:OCRloading, error:OCRerror}] = useUploadResponseOCRMutation()
   const [selectedItem, setSelectedItem] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,10 +31,10 @@ const SurveyResponses = () => {
     }
   };
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     dispatch(closeUpload())
     setSelectedFiles([]);
-  };
+  }, [dispatch]);
 
   const handleRemove = (item: File) => {
     setSelectedFiles((prevFiles) => prevFiles.filter((file) => file !== item));
@@ -100,7 +100,11 @@ const SurveyResponses = () => {
       handleToggle()
       router.push("validate-response")
     }
-  }, [successOCRUpload, OCRloading]);
+
+    if(OCRerror){
+      toast.error("Failed to process OCR. Please try again.")
+    }
+  }, [successOCRUpload, OCRloading, dispatch, uploadOCR?.data, handleToggle, router, OCRerror]);
 
   
 
