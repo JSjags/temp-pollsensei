@@ -461,7 +461,7 @@ const CreateSurveyPage = () => {
               </div>
             </div>
             <button
-              className="gradient-border gradient-text px-6 py-3 w-1/3 rounded-lg flex items-center space-x-2"
+              className="gradient-border gradient-text px-6 py-3 w-2/3 rounded-lg flex items-center space-x-2"
               disabled={!surveyPrompt ? true : false}
             >
               <span className={!surveyPrompt ? "text-gray-300" : ""}>
@@ -572,7 +572,7 @@ const CreateSurveyPage = () => {
                 className="w-full px-3 py-3 border border-[#BDBDBD] rounded-md"
               />
               <button
-                className="gradient-border gradient-text px-6 py-3 w-1/3 mx-auto rounded-md flex items-center space-x-2"
+                className="gradient-border gradient-text px-6 py-3 w-2/3 mx-auto rounded-md flex items-center space-x-2"
                 disabled={!surveyPrompt && !surveyType ? true : false}
               >
                 <span

@@ -6,8 +6,8 @@ import MultiChoiceQuestion from '@/components/survey/MultiChoiceQuestion';
 import StarRatingQuestion from '@/components/survey/StarRatingQuestion';
 import { useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation } from '@/services/survey.service';
 import Image from 'next/image';
-import { useParams } from 'next/navigation'
-import React, { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 import { toast } from "react-toastify";
 
 
@@ -15,20 +15,28 @@ const PublicResponse = () => {
   const params = useParams();
   const {data:psId, isLoading:psIdLoading} = useGetPublicSurveyByIdQuery(params.id)
   const {data:psShortUrl, isLoading:psShUrLoading} = useGetPublicSurveyByShortUrlQuery(params.id)
-  const [submitPublicResponse] = useSubmitPublicResponseMutation();
+  const [submitPublicResponse, {isSuccess:submitSuccess, isLoading:submitting, error: errorSubmitting}] = useSubmitPublicResponseMutation();
   const [currentSection, setCurrentSection] = useState(0);
   const OCRresponses: string | any[] =[]
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [textResponses, setTextResponses] = useState<string[]>([]);
   const [ respondent_name, setRespondent_name] = useState('') 
   const [ respondent_phone, setRespondent_phone] = useState('') 
   const [ respondent_country, setRespondent_country] = useState('') 
   const [ respondent_email, setRespondent_email] = useState('') 
+  const router = useRouter();
 
-  const handleOptionChange = (index: number, value: string) => {
-    console.log(`Question ${index + 1} selected option:`, value);
-    const updatedOptions = [...selectedOptions];
-    updatedOptions[index] = value;
-    setSelectedOptions(updatedOptions);
+  const handleOptionChange = (index: number, value: string, question_type: string) => {
+    if (question_type === 'multiple_choice' || question_type === 'single_choice') {
+      const updatedOptions = [...selectedOptions];
+      updatedOptions[index] = value;
+      setSelectedOptions(updatedOptions);
+    } else if (question_type === 'comment' || question_type === 'long_text' || question_type === 'short_text') {
+      const updatedTextResponses = [...textResponses];
+      updatedTextResponses[index] = value;
+      setTextResponses(updatedTextResponses);
+      console.log(updatedTextResponses)
+    }
   };
 
   
@@ -48,7 +56,7 @@ const PublicResponse = () => {
         return {
           question: item.question,
           question_type: item.question_type,
-          text: selectedOptions[index] || ''
+           text: textResponses[index] || 'something'
         };
       }
       return null;
@@ -60,7 +68,7 @@ const PublicResponse = () => {
     }
   
     const responsePayload = {
-      survey_id: question?.data?.conversation_id,
+      survey_id: question?.data?._id,
       respondent_name: respondent_name,
       // respondent_phone: respondent_phone,
       // respondent_country: respondent_country,
@@ -79,11 +87,19 @@ const PublicResponse = () => {
   };
   
 
+  useEffect(()=>{
+    if(submitSuccess){
+      toast.success("Your response was saved successfully")
+      router.push('/')
+    }
+    if(errorSubmitting){
+      toast.error("An error occurred while submitting your response")
+    }
+
+  }, [submitSuccess, errorSubmitting, router])
+
   console.log(question)
 
-  // const handleQuestionChange = (index: number, selectedOptions: string[]) => {
-  //   console.log(`Question ${index} selected options:`, selectedOptions);
-  // };
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
@@ -163,7 +179,7 @@ const PublicResponse = () => {
                        questionType={item.questionType}
                        options={item.options}
                        index={index + 1}
-                       onChange={(value: string) => handleOptionChange(index, value)} 
+                       onChange={(value: string) => handleOptionChange(index, value, item.question_type)}
                      />
                 ) : item.question_type === "comment" ||
                   item.question_type === "long_text" ? (
@@ -172,6 +188,8 @@ const PublicResponse = () => {
                     index={index + 1}
                     questionType={item.question_type}
                     question={item.question}
+                    onChange={(value: string) => handleOptionChange(index, value, item.question_type)}
+
                   
                   />
                 ) : item.question_type === "star_rating" ? (

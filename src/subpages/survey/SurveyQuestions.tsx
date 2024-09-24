@@ -30,14 +30,14 @@ const SurveyQuestions = () => {
   };
 
   return (
-    <div className={` flex flex-col gap-5 lg:px-16`}>
+    <div className={` flex flex-col gap-5 lg:px-16 w-full`}>
    {
     data && data?.data && (
       <div
       className={`${data?.data?.theme} flex justify-center items-center px-5 mx-auto gap-10 lg:w-[80%]`}
     >
       <div
-        className={` w- flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
+        className={` w-full flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
       >
         {data && !isLoading && data?.data?.logo_url && (
           <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
