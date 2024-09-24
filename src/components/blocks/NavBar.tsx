@@ -3,9 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import logo from "@/assets/auth/logo.svg"; // Adjust the path as needed
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsLoggedIn } from "@/lib/helpers";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const NavBar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { isLoggedIn } = useIsLoggedIn({ message: "" });
+  const state = useSelector((state: RootState) => state.user);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -37,6 +42,8 @@ const NavBar = () => {
         </div>
 
         {/* Login Button */}
+        {
+          !isLoggedIn || state.user === null || state.token === null ? (
         <div className="hidden md:block">
           <Link
             href="/login"
@@ -45,6 +52,18 @@ const NavBar = () => {
             Login
           </Link>
         </div>
+
+          ) : (
+            <div className="hidden md:block">
+              <Link
+                href="/dashboard"
+                className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-full"
+              >
+                Dashboard
+              </Link>
+            </div>
+          )
+        }
 
         {/* Mobile Menu Button */}
         <button className="md:hidden" onClick={toggleSidebar}>

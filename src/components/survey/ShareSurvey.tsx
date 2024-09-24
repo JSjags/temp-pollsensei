@@ -31,11 +31,13 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
   const {data:share, isSuccess:shareSuccess } = useShareSurveyQuery(params.id || _id)
 
 
-  const domain = process.env.NEXT_PUBLIC_DOMAIN || "http://localhost:3000";
+  const domain = process.env.VITE_NEXT_PUBLIC_DOMAIN || 'https://pollsensei.vercel.app';
   const [currentUrl, setCurrentUrl] = useState("");
   const shareLink = share?.data?.link
   const share_embed_link = share?.data?.embed_link
   console.log(currentUrl)
+  console.log(shareLink)
+  console.log(domain)
 
   useEffect(() => {
     const fullUrl = `${domain}${pathname}`;

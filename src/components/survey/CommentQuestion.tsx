@@ -36,11 +36,15 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
       fontSize: `${questionText?.size}px`,
     }}
     >
-      <Image src={draggable} alt="draggable icon" className={ pathname === "/surveys/edit-survey" || pathname ==='surveys/preview-survey' ? "invisible" : "visible"} />
+      <Image src={draggable} alt="draggable icon" className={ 
+             pathname === "/surveys/create-survey"
+             ? "visible"
+             : "invisible"
+        } />
       <div className="w-full">
       <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start"><span>{index}. </span>{question}</h3>
-         {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>}
+         {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') ? "" : <p>{questionType}</p>}
       </div>
         <div >
           <AutosizeTextarea
