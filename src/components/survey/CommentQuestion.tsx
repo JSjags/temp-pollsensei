@@ -2,7 +2,7 @@ import { draggable } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { AutosizeTextarea } from "../ui/autosize-textarea";
 
@@ -27,7 +27,18 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme)
+  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme);
+  const [response, setResponse] = useState("");
+
+  const handleResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setResponse(value); // Update the state
+    console.log(`Response for question ${index}:`, value); 
+    // if (onChange) {
+    //   onChange(value); 
+    // }
+  };
+
 
   return (
     <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded "
@@ -51,6 +62,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             className="w-full border-none rounded-md p-2"
             placeholder="Type your response here..."
             style={{borderColor: colorTheme}}
+            onChange={handleResponseChange}
           />
         </div>
         {pathname === "/surveys/edit-survey" && (
