@@ -210,7 +210,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/shadcn-input";
-import { Brain, X, Send } from "lucide-react";
+import { Brain, X, Send, Pin, PinOff } from "lucide-react";
 import { cn, generateInitials } from "@/lib/utils";
 import { AutosizeTextarea } from "../ui/autosize-textarea";
 import { useSelector } from "react-redux";
@@ -242,16 +242,66 @@ const suggestedQuestions = [
 type Props = {
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
+  setDefaultPosition: React.Dispatch<
+    React.SetStateAction<{
+      x: number;
+      y: number;
+    }>
+  >;
+  isPinned: boolean;
+  setIsPinned: Dispatch<SetStateAction<boolean>>;
+  pinToSide: () => void;
   senseiStateSetter: (
     state: "sleep" | "be idle" | "start talking" | "stop talking"
   ) => void;
 };
 
-const SenseiMasterChat = ({ setIsOpen, isOpen, senseiStateSetter }: Props) => {
+const SenseiMasterChat = ({
+  setIsOpen,
+  isOpen,
+  senseiStateSetter,
+  setDefaultPosition,
+  isPinned,
+  pinToSide,
+  setIsPinned,
+}: Props) => {
   const user = useSelector((state: RootState) => state.user.user);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+
+  const handleMouseDown = (event: React.MouseEvent) => {
+    // Capture the initial position when the mouse button is pressed
+    setStartPos({ x: event.clientX, y: event.clientY });
+    setIsDragging(false); // Reset dragging state
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    // Calculate the distance the mouse has moved since the mouse was pressed down
+    const distanceMoved = Math.sqrt(
+      Math.pow(event.clientX - startPos.x, 2) +
+        Math.pow(event.clientY - startPos.y, 2)
+    );
+
+    // If the distance moved is greater than a threshold (e.g., 5px), consider it a drag
+    if (distanceMoved > 5) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleMouseUp = (event: React.MouseEvent) => {
+    // If no dragging occurred, treat it as a click
+    alert("Dropped");
+    setDefaultPosition({
+      x: event.clientX - (isOpen ? 40 : 400),
+      y: event.clientY - (isOpen ? 150 : 540),
+    });
+    if (!isDragging) {
+      setIsOpen(!isOpen);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -372,14 +422,43 @@ const SenseiMasterChat = ({ setIsOpen, isOpen, senseiStateSetter }: Props) => {
     <div className="flex flex-col h-full">
       <div className="bg-gradient-to-r from-[#5b03b2] rounded-t-md to-[#9d50bb] text-white p-4 pt-10 cursor-move">
         <p className="text-xl font-bold text-white text-left">Sensei</p>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-4 top-3 size-8 text-white rounded-full bg-white/10 hover:bg-white hover:text-black"
-          onClick={() => setIsOpen(!isOpen)}
+        <div
+          className="absolute right-4 top-3 p-0 flex justify-end gap-2"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
         >
-          <X className="h-6 w-6" />
-        </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-0 size-8 text-white rounded-full hover:bg-white/20 hover:text-white"
+            onClick={() => {
+              if (isPinned) {
+                // Pin logic
+                setIsPinned(false);
+              } else {
+                pinToSide();
+              }
+            }}
+          >
+            {isPinned ? (
+              <PinOff className="size-5 rotate-45" />
+            ) : (
+              <Pin className="size-5 rotate-45" />
+            )}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-0 size-8 text-white rounded-full hover:bg-white/20 hover:text-white"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+          >
+            <X className="size-5" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 px-0 space-y-4">
@@ -454,7 +533,7 @@ const SenseiMasterChat = ({ setIsOpen, isOpen, senseiStateSetter }: Props) => {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Reply"
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 border-none py-2 h-8 p-2 outline-transparent outline-offset-0 focus:outline-none focus-visible:outline-none resize-none"
+            className="flex-1 border-none py-2 pt-10 h-8 p-2 outline-transparent outline-offset-0 focus:outline-none focus-visible:outline-none resize-none"
             maxHeight={200}
             onKeyDown={() => senseiStateSetter("be idle")}
           />
