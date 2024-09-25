@@ -390,12 +390,12 @@ const EditSurvey = () => {
                   )
                 }
               </button>
-              <div className="bg-white rounded-full px-5 py-1" 
+              {/* <div className="bg-white rounded-full px-5 py-1" 
               // onClick={handleNewSection}
               >
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
-              </div>
+              </div> */}
             </div>
             {questions?.length > 1 && (
             <div className="flex w-full md:w-auto md:justify-end items-center">

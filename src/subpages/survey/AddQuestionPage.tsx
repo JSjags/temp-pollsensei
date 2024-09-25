@@ -65,6 +65,7 @@ const AddQuestionPage = () => {
     setIsEditing(false);
   };
 
+  console.log(survey)
 
 
   const handleDragEnd = (result: any) => {
@@ -192,7 +193,21 @@ const AddQuestionPage = () => {
             <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white py-3 flex items-center flex-col ">
               <p>LOGO GOES HERE</p>
             </div>
-          )}
+          )}       <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+          <Image
+            src={
+              headerUrl instanceof File
+                ? URL.createObjectURL(headerUrl)
+                : typeof headerUrl === "string"
+                ? headerUrl
+                : sparkly
+            }
+            alt=""
+            className="w-full object-cover bg-no-repeat h-24 rounded-lg"
+            width={"100"}
+            height={"200"}
+          />
+        </div>
 
           {isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
@@ -242,11 +257,14 @@ const AddQuestionPage = () => {
             </div>
           )}
 
-          {/* <button type="reset" onClick={()=>dispatch(resetQuestion())}>
+          <button type="reset" onClick={()=>{
+            dispatch(resetQuestion());
+            dispatch(resetSurvey());
+          }}>
             Reset
-          </button>  */}
+          </button> 
 
-          <DragDropContext onDragEnd={handleDragEnd}>
+          {/* <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
@@ -334,7 +352,79 @@ const AddQuestionPage = () => {
                 </div>
               )}
             </StrictModeDroppable>
-          </DragDropContext>
+          </DragDropContext> */}
+
+<DragDropContext onDragEnd={handleDragEnd}>
+  <StrictModeDroppable droppableId="questions">
+    {(provided) => (
+      <div {...provided.droppableProps} ref={provided.innerRef}>
+        {questions?.map((item: any, index: any) => (
+          <Draggable
+            key={index}  // Using the index as key to map questions
+            draggableId={index.toString()}  // Draggable identifier based on index
+            index={index}
+          >
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                className="mb-4"
+              >
+                {
+                  // Conditionally render based on question type
+                  item.question_type === "multiple_choice" ? (
+                    <MultiChoiceQuestion
+                      index={index + 1}  // Ensure question number starts from 1
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                    />
+                  ) : item.question_type === "long_text" ? (
+                    <CommentQuestion
+                      key={index}
+                      index={index + 1}  // Ensure question number starts from 1
+                      question={item.question}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                    />
+                  ) : item.question_type === "likert_Scale" ? (
+                    <LikertScaleQuestion
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                    />
+                  ) : item.question_type === "star_rating" ? (
+                    <StarRatingQuestion
+                      question={item.question}
+                      maxRating={5}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                    />
+                  ) : item.question_type === "matrix_checkbox" ? (
+                    <MatrixQuestion
+                      key={index}
+                      index={index + 1}  // Ensure question number starts from 1
+                      options={item.options}
+                      question={item.question}
+                      questionType={item.question_type}
+                    />
+                  ) : null
+                }
+              </div>
+            )}
+          </Draggable>
+        ))}
+        {provided.placeholder}
+      </div>
+    )}
+  </StrictModeDroppable>
+</DragDropContext>
+
 
           {addquestions && (
               <AddQuestion

@@ -225,7 +225,10 @@ const PublicResponse = () => {
               type="button"
               onClick={handleSubmitResponse}
             >
-              Submit
+              {
+                submitting ? "Submitting..." : "Submit"
+              }
+              
             </button>
           </div>
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
