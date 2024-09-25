@@ -171,7 +171,7 @@ const SenseiMaster = () => {
       }
       if (state === "start thinking") {
         const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "start talking");
+        const trigger = inputs.find((i) => i.name === "start thinking");
         trigger?.fire();
       }
       if (state === "start talking") {
@@ -296,9 +296,9 @@ const SenseiMaster = () => {
               "chat-content overflow-auto h-[calc(80%-60px)] shadow-lg rounded-md relative bg-white",
               !isCollapsed ? "block" : "hidden"
             )}
-            onMouseDown={handleChatOpenMouseDown}
-            onMouseMove={handleChatOpenMouseMove}
-            onMouseUp={handleChatOpenMouseUp}
+            // onMouseDown={handleChatOpenMouseDown}
+            // onMouseMove={handleChatOpenMouseMove}
+            // onMouseUp={handleChatOpenMouseUp}
           >
             <SenseiMasterChat
               isOpen={isCollapsed}
