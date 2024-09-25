@@ -55,7 +55,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
       <div className="w-full">
       <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start"><span>{index}. </span>{question}</h3>
-         {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') ? "" : <p>{questionType}</p>}
+         {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') || pathname.includes('survey-public-response') ? "" : <p>{questionType}</p>}
       </div>
         <div >
           <AutosizeTextarea
