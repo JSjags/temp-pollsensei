@@ -31,6 +31,7 @@ import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/sur
 import { useRouter } from "next/navigation";
 import store from '@/redux/store';
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
+import { GiCardDiscard } from "react-icons/gi";
 
 
 
@@ -332,6 +333,18 @@ const CreateNewSection = () => {
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
               </div>
+              <button
+                disabled={isLoading}
+                className="bg-white inline-block rounded-full px-5 py-1"
+                onClick={() => {
+                  dispatch(resetQuestion());
+                  dispatch(resetSurvey());
+                  router.push('/surveys/create-manual');
+                }}
+              >
+                <GiCardDiscard className="inline-block mr-2" />
+                Discard
+              </button>
               <button disabled={isLoading} className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
                 <VscLayersActive className="inline-block mr-2" />
                 Publish Survey

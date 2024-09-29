@@ -1,0 +1,52 @@
+import React from 'react';
+import { Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+interface PieChartProps {
+  data: {
+    labels: string[];
+    datasets: {
+      data: number[];
+      backgroundColor: string[];
+    }[];
+  };
+  title: string;
+  question: string;
+}
+
+const Piechart: React.FC<PieChartProps> = ({ data, title, question }) => {
+  return (
+    <div className="border rounded-lg shadow-md p-6 bg-white">
+      <h3 className="text-gray-700 text-lg font-semibold mb-4">{title}</h3>
+      <p className="text-gray-600 mb-4">{question}</p>
+      
+      <div className="flex gap-5 items-start">
+      <div className="flex flex-col justify-around mt-4">
+        {data.labels.map((label, index) => (
+          <div key={label} className="flex items-center space-x-2">
+            <span
+              className={`inline-block w-3 h-3 rounded-full`}
+              style={{ backgroundColor: data.datasets[0].backgroundColor[index] }}
+            ></span>
+            <span className="text-gray-700 font-bold">
+              {label} {data.datasets[0].data[index]}%
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center h-48">
+        <Doughnut data={data} />
+      </div>
+      </div>
+    </div>
+  );
+};
+
+export default Piechart;

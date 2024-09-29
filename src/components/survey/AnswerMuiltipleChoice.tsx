@@ -74,9 +74,12 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
           <h3 className="text-lg font-semibold text-start">
             <span>{index}. </span> {question}
           </h3>
-          {pathname === "/surveys/edit-survey" || pathname.includes('validate-response') ? "" : <p>{questionType}</p>}
+          {pathname === "/surveys/edit-survey" || 
+          pathname.includes('survey-reponse-upload') ||
+          pathname.includes('validate-response') 
+          ? "" : <p>{questionType}</p>}
         </div>
-        {options.map((option, optionIndex) => (
+        {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
             <label className="relative flex items-center cursor-pointer">
               <input

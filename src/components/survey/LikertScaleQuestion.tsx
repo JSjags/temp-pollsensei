@@ -37,7 +37,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
           {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>}
         </div>
         <div className="flex justify-between my-2">
-          {options.map((option, index) => (
+          {options?.map((option, index) => (
             <div key={index} className="flex flex-col items-center">
               <input
                 type="radio"

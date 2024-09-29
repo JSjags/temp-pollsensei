@@ -88,9 +88,28 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    submitResponse: builder.mutation({
+      query: (body) => ({
+        url: "response/upload",
+        method: "POST",
+        body,
+      }),
+    }),
     getSingleResponseFolder: builder.query({
       query: (id) => ({
         url: `response/folder/${id}`,
+        method: "GET",
+      }),
+    }),
+    getUserSurveyResponse: builder.query({
+      query: (id) => ({
+        url: `response/individual/${id}?page=1&page_size=1`,
+        method: "GET",
+      }),
+    }),
+    getSurveySummary: builder.query({
+      query: (id) => ({
+        url: `response/individual/${id}?page=1&page_size=1`, 
         method: "GET",
       }),
     }),
@@ -111,4 +130,4 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
 
 
-export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation, useUploadResponseOCRMutation, useGetSingleResponseFolderQuery, useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation } = surveyApiSlice
+export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation, useUploadResponseOCRMutation, useGetSingleResponseFolderQuery, useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation, useSubmitResponseMutation, useGetUserSurveyResponseQuery, useGetSurveySummaryQuery } = surveyApiSlice

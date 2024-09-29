@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { AutosizeTextarea } from "../ui/autosize-textarea";
+import VoiceRecorder from "../ui/VoiceRecorder";
 
 interface ComponentQuestionProps {
   question: string;
@@ -27,57 +28,76 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme);
+  const colorTheme = useSelector(
+    (state: RootState) => state?.survey?.color_theme
+  );
   const [response, setResponse] = useState("");
 
   const handleResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setResponse(value); // Update the state
-    console.log(`Response for question ${index}:`, value); 
+    console.log(`Response for question ${index}:`, value);
     // if (onChange) {
-    //   onChange(value); 
+    //   onChange(value);
     // }
   };
 
-
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded "
-    style={{
-      fontFamily: `${questionText?.name}`,
-      fontSize: `${questionText?.size}px`,
-    }}
+    <div
+      className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded "
+      style={{
+        fontFamily: `${questionText?.name}`,
+        fontSize: `${questionText?.size}px`,
+      }}
     >
-      <Image src={draggable} alt="draggable icon" className={ 
-             pathname === "/surveys/create-survey"
-             ? "visible"
-             : "invisible"
-        } />
+      <Image
+        src={draggable}
+        alt="draggable icon"
+        className={
+          pathname === "/surveys/create-survey" ? "visible" : "invisible"
+        }
+      />
       <div className="w-full">
-      <div className="flex justify-between w-full items-center">
-          <h3 className="text-lg font-semibold text-start"><span>{index}. </span>{question}</h3>
-         {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') || pathname.includes('survey-public-response') ? "" : <p>{questionType}</p>}
-      </div>
-        <div >
+        <div className="flex justify-between w-full items-center">
+          <h3 className="text-lg font-semibold text-start">
+            <span>{index}. </span>
+            {question}
+          </h3>
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ||
+          pathname.includes("validate-response") ||
+          pathname.includes("survey-reponse-upload") ||
+          pathname.includes("survey-public-response") ? (
+            ""
+          ) : (
+            <p>{questionType}</p>
+          )}
+        </div>
+        <div>
           <AutosizeTextarea
             className="w-full border-none rounded-md p-2"
             placeholder="Type your response here..."
-            style={{borderColor: colorTheme}}
+            style={{ borderColor: colorTheme }}
             onChange={handleResponseChange}
           />
         </div>
         {pathname === "/surveys/edit-survey" && (
-        <div className="flex justify-end gap-4">
-          <button
-            className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-            onClick={EditQuestion}
-          >
-            Edit
-          </button>
-          <button className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full" onClick={DeleteQuestion}>
-            Delete
-          </button>
-        </div>
-      )}
+          <div className="flex justify-end gap-4">
+            <button
+              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
+              onClick={EditQuestion}
+            >
+              Edit
+            </button>
+            <button
+              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
+              onClick={DeleteQuestion}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+      <VoiceRecorder />
       </div>
     </div>
   );
