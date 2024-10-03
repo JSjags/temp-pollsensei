@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { BsExclamation } from "react-icons/bs";
+import { Check } from "lucide-react";
 
 interface MultiChoiceQuestionProps {
   question: string;
@@ -13,6 +15,7 @@ interface MultiChoiceQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
+  status?:string;
 }
 
 const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
@@ -23,6 +26,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   DeleteQuestion,
   index,
   onChange,
+  status
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -39,6 +43,26 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
     console.log(`Selected option for question ${question}:`, option); // Log the selected option
     if (onChange) {
       onChange(option); // Trigger external onChange callback if provided
+    }
+  };
+
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 mr-3">
+            <Check strokeWidth={1} className="text-xs text-white" />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
+            <BsExclamation />
+          </div>
+        );
+  
+      default:
+        return null;
     }
   };
 
@@ -64,7 +88,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           <h3 className="text-lg font-semibold text-start">
             <span>{index}. </span> {question}
           </h3>
-          {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') ? "" : <p>{questionType}</p>}
+          {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') ? "" : <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>}
         </div>
         {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
@@ -103,6 +127,9 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           </div>
         )}
       </div>
+      {
+        pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)
+      }
     </div>
   );
 };

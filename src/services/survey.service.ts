@@ -103,13 +103,25 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     }),
     getUserSurveyResponse: builder.query({
       query: (id) => ({
-        url: `response/individual/${id}?page=1&page_size=1`,
+        url: `response/individual/${id}?page=1&page_size=10`,
+        method: "GET",
+      }),
+    }),
+    getRespondentName: builder.query({
+      query: (id) => ({
+        url: `response/respondents-names/${id}`,
         method: "GET",
       }),
     }),
     getSurveySummary: builder.query({
       query: (id) => ({
-        url: `response/individual/${id}?page=1&page_size=1`, 
+        url: `response/individual/${id}?page=1&page_size=10`, 
+        method: "GET",
+      }),
+    }),
+    validateSurveyResponse: builder.query({
+      query: (id) => ({
+        url: `response/validate/${id}`, 
         method: "GET",
       }),
     }),
@@ -130,4 +142,4 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
 
 
-export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation, useUploadResponseOCRMutation, useGetSingleResponseFolderQuery, useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation, useSubmitResponseMutation, useGetUserSurveyResponseQuery, useGetSurveySummaryQuery } = surveyApiSlice
+export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation, useUploadResponseOCRMutation, useGetSingleResponseFolderQuery, useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation, useSubmitResponseMutation, useGetUserSurveyResponseQuery, useGetSurveySummaryQuery, useGetRespondentNameQuery, useValidateSurveyResponseQuery } = surveyApiSlice

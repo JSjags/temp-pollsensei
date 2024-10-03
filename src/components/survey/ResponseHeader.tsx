@@ -8,6 +8,11 @@ interface ResponseHeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   curerentSurvey: number;
+  valid_response?: number;
+  invalid_response?: number;
+  handleNext?: () => void;
+  handlePrev?: () => void;
+  respondent_data?:any[];
 }
 
 const ResponseHeader: React.FC<ResponseHeaderProps> = ({
@@ -15,7 +20,12 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   tabs,
   activeTab,
   setActiveTab,
-  curerentSurvey
+  curerentSurvey,
+  handleNext,
+  handlePrev,
+  respondent_data,
+  valid_response,
+  invalid_response
 }) => {
   return (
     <div className="border rounded-lg p-4 shadow-sm">
@@ -72,7 +82,17 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
         ))}
       </div>
 
-      {activeTab === "Individual Responses" && <ResponseActions curerentSurvey={curerentSurvey} totalSurveys={data?.response_count} />}
+      {activeTab === "Individual Responses" && (
+        <ResponseActions
+          curerentSurvey={curerentSurvey}
+          totalSurveys={data?.response_count}
+          handleNext={handleNext}
+          handlePrev={handlePrev}
+          respondent_data={respondent_data}
+          valid_response={valid_response}
+          invalid_response={invalid_response}
+        />
+      )}
 
       {activeTab === "Summary" && (
         <div className="mt-4">

@@ -23,6 +23,7 @@ interface UserResponseProps {
   index: number;
 }
 
+
 const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
   console.log(data);
   console.log(index);
@@ -43,6 +44,10 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
     });
   };
 
+  const handleQuestionChange = (index: number, selectedOptions: string[]) => {
+    console.log(`Question ${index} selected options:`, selectedOptions);
+  };
+
   return (
     <div className={`flex flex-col gap-5 w-full relative mt-4`}>
       <div className={`flex  flex-col justify-between gap-10 w-full`}>
@@ -60,6 +65,7 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
                   // handleQuestionChange(index, selected)
                 }}
                 index={index + 1}
+                status={item?.validation_result?.status}
               />
             ) : item.question_type === "comment" ||
               item.question_type === "long_text" ? (
@@ -68,6 +74,8 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
                 index={index + 1}
                 questionType={item.question_type}
                 question={item.question}
+                response={item.text}
+                status={item?.validation_result?.status}
                 // EditQuestion={() => EditQuestion(index)}
                 // DeleteQuestion={()=>handleDeleteQuestion(index)}
               />
@@ -109,18 +117,6 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
             ) : null}
           </div>
         ))}
-        {/* <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
-          <div className="flex gap-2 items-center"></div>
-          {data && data.answers && data?.answers?.length > 1 && (
-            <div className="flex w-full md:w-auto md:justify-end items-center">
-              <PaginationBtn
-                currentSection={currentSection}
-                totalSections={data?.answers.length}
-                onNavigate={navigatePage}
-              />
-            </div>
-          )}
-        </div> */}
       </div>
     </div>
   );

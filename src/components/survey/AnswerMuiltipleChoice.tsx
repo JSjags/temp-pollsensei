@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { BsExclamation } from "react-icons/bs";
+import { Check } from "lucide-react";
 
 interface AnswerMultiChoiceQuestionProps {
   question: string;
@@ -14,6 +16,7 @@ interface AnswerMultiChoiceQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
+  status?:string;
 }
 
 const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
@@ -25,6 +28,7 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   EditQuestion,
   DeleteQuestion,
   index,
+  status,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -49,6 +53,26 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
     
     if (onChange) {
       onChange(updatedOptions);
+    }
+  };
+
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 mr-3">
+            <Check strokeWidth={1} className="text-xs text-white" />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full text-white p-1 mr-3">
+            <BsExclamation />
+          </div>
+        );
+  
+      default:
+        return null;
     }
   };
 
@@ -115,6 +139,9 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
           </div>
         )}
       </div>
+      {
+        pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)
+      }
     </div>
   );
 };

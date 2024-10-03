@@ -247,7 +247,7 @@ const EditSurvey = () => {
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
        {isNewSection ? <>
           {logoUrl ? (
-            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
+            <div className="bg-[#9D50BB]  w-1/3 my-5 text-white flex items-center flex-col ">
               <Image
                 src={
                   logoUrl instanceof File
@@ -257,7 +257,7 @@ const EditSurvey = () => {
                     : sparkly
                 }
                 alt=""
-                className="w-full object-cover bg-no-repeat h-16 rounded-full"
+                className="w-full object-cover bg-no-repeat h-16 "
                 width={"100"}
                 height={"200"}
               />

@@ -211,9 +211,7 @@ const AddQuestionPage = () => {
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
               src={
-                headerUrl instanceof File
-                  ? URL.createObjectURL(headerUrl)
-                  : typeof headerUrl === "string"
+                headerUrl 
                   ? headerUrl
                   : sparkly
               }

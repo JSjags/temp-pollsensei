@@ -1,4 +1,6 @@
+import { default_header } from "@/assets/images";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
 
 interface TextStyle {
   name: string;
@@ -48,8 +50,8 @@ const initialState: SurveyState = {
   question_text: { name: "Helvetica", size: "18" },
   body_text: { name: "Helvetica", size: "18" },
   color_theme: "#EEE",
-  logo_url: "",
-  header_url: "",
+  logo_url: default_header,
+  header_url: default_header,
   generated_by: "",
 };
 

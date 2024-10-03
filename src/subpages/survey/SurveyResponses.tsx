@@ -241,9 +241,9 @@ const SurveyResponses = () => {
       <Slide direction="up" duration={200}>
         <ModalComponent titleClassName={"pl-0"} openModal={OCRloading}>
           <div className="flex flex-col items-center text-center min-h-[7.5rem]">
-            <BeatLoader color="c0d8f6" />
+            <BeatLoader  />
             <h2 className="font-normal text-lg">
-              Uploading. Please be patient
+              Uploading... Please be patient
             </h2>
           </div>
         </ModalComponent>

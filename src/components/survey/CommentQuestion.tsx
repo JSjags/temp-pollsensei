@@ -2,19 +2,24 @@ import { draggable } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, SetStateAction } from "react";
 import { useSelector } from "react-redux";
 import { AutosizeTextarea } from "../ui/autosize-textarea";
 import VoiceRecorder from "../ui/VoiceRecorder";
+import { BsExclamation } from "react-icons/bs";
+import { Check } from "lucide-react";
+
 
 interface ComponentQuestionProps {
   question: string;
-  name?: string;
+  response?: string;
+  // setResponse: SetStateAction<string>;
   questionType: string;
-  onChange?: (value: string) => void;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
+  status?:string;
 }
 
 const CommentQuestion: React.FC<ComponentQuestionProps> = ({
@@ -23,6 +28,9 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   EditQuestion,
   DeleteQuestion,
   index,
+  response,
+  onChange,
+  status
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -31,15 +39,34 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   const colorTheme = useSelector(
     (state: RootState) => state?.survey?.color_theme
   );
-  const [response, setResponse] = useState("");
+  // const [response, setResponse] = useState("");
 
-  const handleResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setResponse(value); // Update the state
-    console.log(`Response for question ${index}:`, value);
-    // if (onChange) {
-    //   onChange(value);
-    // }
+  // const handleResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  //   // const value = e.target.value;
+  //   // setResponse(value); // Update the state
+  //   // console.log(`Response for question ${index}:`, value);
+  //   setResponse(value);
+  // };
+
+
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 mr-3">
+            <Check strokeWidth={1} className="text-xs text-white" />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
+            <BsExclamation />
+          </div>
+        );
+  
+      default:
+        return null;
+    }
   };
 
   return (
@@ -70,7 +97,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           pathname.includes("survey-public-response") ? (
             ""
           ) : (
-            <p>{questionType}</p>
+            <p>{questionType === "long_text" ? "Comment" : ""}</p>
           )}
         </div>
         <div>
@@ -78,7 +105,8 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             className="w-full border-none rounded-md p-2"
             placeholder="Type your response here..."
             style={{ borderColor: colorTheme }}
-            onChange={handleResponseChange}
+            onChange={onChange}
+            value={response}
           />
         </div>
         {pathname === "/surveys/edit-survey" && (
@@ -99,6 +127,9 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
         )}
       <VoiceRecorder />
       </div>
+      {
+        pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)
+      }
     </div>
   );
 };

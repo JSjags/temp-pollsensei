@@ -227,6 +227,7 @@ const ValidateResponse = () => {
                     index={index + 1}
                     questionType={item.question_type}
                     question={item.question}
+                    response={item.text}
                     // EditQuestion={() => EditQuestion(index)}
                     // DeleteQuestion={()=>handleDeleteQuestion(index)}
                   />
@@ -286,7 +287,14 @@ const ValidateResponse = () => {
             <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
               type="button"
-              onClick={handleSubmitResponse}
+              onClick={()=>{
+                setTimeout(()=>{
+                  router.push("/surveys")
+                  toast.success("Successful")
+                  dispatch(resetAnswers());
+                }, 3000)
+              }}
+              // onClick={handleSubmitResponse}
             >
               {isLoading ? "Submitting..." : "Submit"}
             </button>
