@@ -27,9 +27,10 @@ import uploadReducer from "./slices/upload.slice";
 import { PersistPartial } from "redux-persist/es/persistReducer";
 import { createPersistStorage } from "./storage";
 import questionReducer from "./slices/questions.slice";
-import themeReducer from './slices/theme.slice'
-import surveyReducer from './slices/survey.slice'
+import themeReducer from "./slices/theme.slice";
+import surveyReducer from "./slices/survey.slice";
 import answerReducer from "./slices/answer.slice";
+import senseiMasterReducer from "./slices/sensei-master.slice"; // Correct import here
 
 // At the top of the file, after imports
 export type RootState = {
@@ -41,6 +42,7 @@ export type RootState = {
   themes: ReturnType<typeof themeReducer>;
   survey: ReturnType<typeof surveyReducer>;
   answer: ReturnType<typeof answerReducer>;
+  senseiMaster: ReturnType<typeof senseiMasterReducer>;
   [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
 };
 
@@ -51,8 +53,9 @@ const rootReducer = combineReducers({
   upload: uploadReducer,
   question: questionReducer,
   themes: themeReducer,
-  survey:surveyReducer,
-  answer:answerReducer,
+  survey: surveyReducer,
+  answer: answerReducer,
+  senseiMaster: senseiMasterReducer, // Ensure this is added here
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 
@@ -69,7 +72,7 @@ const persistConfig = {
     }),
   ],
   stateReconciler: hardSet,
-  blacklist: [apiSlice.reducerPath],
+  blacklist: ["senseiMaster", apiSlice.reducerPath],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

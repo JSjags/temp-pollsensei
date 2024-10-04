@@ -8,6 +8,8 @@ import { Brain, X, Send, Pin, PinOff } from "lucide-react";
 import { cn, generateInitials } from "@/lib/utils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { ActionCreatorWithoutPayload } from "@reduxjs/toolkit";
 
 type Message = {
   id: number;
@@ -35,16 +37,11 @@ const suggestedQuestions = [
 
 type Props = {
   isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-  setDefaultPosition: React.Dispatch<
-    React.SetStateAction<{
-      x: number;
-      y: number;
-    }>
-  >;
+  toggleCollapse: ActionCreatorWithoutPayload<"senseiMaster/toggleCollapse">;
   isPinned: boolean;
-  setIsPinned: Dispatch<SetStateAction<boolean>>;
+  setIsPinned: (isPinned: boolean) => void;
   pinToSide: () => void;
+  setDefaultPosition: (position: { x: number; y: number }) => void;
   senseiStateSetter: (
     state:
       | "sleep"
@@ -56,7 +53,7 @@ type Props = {
 };
 
 const SenseiMasterChat = ({
-  setIsOpen,
+  toggleCollapse,
   isOpen,
   senseiStateSetter,
   setDefaultPosition,
@@ -65,6 +62,7 @@ const SenseiMasterChat = ({
   setIsPinned,
 }: Props) => {
   // State variables
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const [messages, setMessages] = useState<Message[]>(initialMessages); // Message array
   const [input, setInput] = useState(""); // User input
@@ -143,7 +141,7 @@ const SenseiMasterChat = ({
         setTimeout(() => {
           senseiStateSetter("stop talking");
         }, totalTime);
-      }, 1000); // Simulated delay before AI starts responding
+      }, 5000); // Simulated delay before AI starts responding
     }
   };
 
@@ -169,7 +167,7 @@ const SenseiMasterChat = ({
           }}
           onMouseUp={() => {
             // Toggle chat if not dragging
-            if (!isDragging) setIsOpen(!isOpen);
+            if (!isDragging) dispatch(toggleCollapse());
           }}
         >
           {/* Pin Button */}
@@ -179,9 +177,9 @@ const SenseiMasterChat = ({
             className="p-0 size-8 text-white rounded-full hover:bg-white/20 hover:text-white"
             onClick={() => {
               if (isPinned) {
-                setIsPinned(false);
+                setIsPinned && setIsPinned(false);
               } else {
-                pinToSide();
+                pinToSide && pinToSide();
               }
             }}
           >

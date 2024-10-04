@@ -1,3 +1,4 @@
+import { Test, Variable } from "@/components/analysis/page";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -47,4 +48,15 @@ export function getNumberOfPages(totalItems: number, pageSize: number): number {
   }
 
   return Math.ceil(totalItems / pageSize);
+}
+
+export function getUniqueVariables(tests: Test[]): Variable[] {
+  const allVariables = tests.flatMap((test) => test.variables);
+
+  // Remove duplicates by id
+  const uniqueVariables = Array.from(
+    new Map(allVariables.map((variable) => [variable.id, variable])).values()
+  );
+
+  return uniqueVariables;
 }

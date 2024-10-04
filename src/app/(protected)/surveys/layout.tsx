@@ -3,7 +3,6 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import SurveyCreationNav from "@/components/navbar/SurveyCreationNav";
-import SenseiMaster from "@/components/sensei-master/SenseiMaster";
 
 export default function SurveyLayout({
   children,
@@ -14,7 +13,6 @@ export default function SurveyLayout({
 
   return (
     <div className="">
-      <SenseiMaster />
       <SurveyCreationNav />
       <div
         className={`px-0 ${

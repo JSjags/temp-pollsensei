@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { Button } from "../ui/button";
+import { stars } from "@/assets/images";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 
 interface MultiChoiceQuestionProps {
   question: string;
@@ -13,6 +16,7 @@ interface MultiChoiceQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
+  canUseAI?: boolean;
 }
 
 const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
@@ -23,12 +27,15 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   DeleteQuestion,
   index,
   onChange,
+  canUseAI = false,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme);
+  const colorTheme = useSelector(
+    (state: RootState) => state?.survey?.color_theme
+  );
 
   // State to store the selected option
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -54,17 +61,30 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
         src={draggable}
         alt="draggable icon"
         className={
-          pathname === "/surveys/create-survey"
-          ? "visible"
-          : "invisible"
+          pathname === "/surveys/create-survey" ? "visible" : "invisible"
         }
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start">
-            <span>{index}. </span> {question}
+            <div className="group flex justify-between gap-2 items-start">
+              <p>
+                <span>{index}. </span> {question}
+              </p>
+              <PollsenseiTriggerButton
+                imageUrl={stars}
+                tooltipText="Rephrase question"
+                className={"group-hover:inline-block hidden"}
+                triggerType="rephrase"
+              />
+            </div>
           </h3>
-          {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') ? "" : <p>{questionType}</p>}
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ? (
+            ""
+          ) : (
+            <p>{questionType}</p>
+          )}
         </div>
         {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
