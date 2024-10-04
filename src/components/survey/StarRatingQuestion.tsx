@@ -1,14 +1,14 @@
-import { draggable } from "@/assets/images";
 import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaStar } from "react-icons/fa";
+import { draggable } from "@/assets/images";
 
 interface StarRatingQuestionProps {
   question: string;
   questionType: string;
-  maxRating: number; 
-  currentRating?: number; 
+  maxRating?: number; 
+  currentRating?: number;
   onRate?: (value: number) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
@@ -17,28 +17,35 @@ interface StarRatingQuestionProps {
 const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   question,
   questionType,
-  maxRating,
-  currentRating = 0,
+  maxRating = 5, 
+  currentRating = 0, 
   onRate,
   EditQuestion,
-  DeleteQuestion
+  DeleteQuestion,
 }) => {
   const pathname = usePathname();
-  const [hoveredRating, setHoveredRating] = useState<number | null>(null);
+  const [hoveredRating, setHoveredRating] = useState<number | null>(null); 
+  const [selectedRating, setSelectedRating] = useState<number>(currentRating); 
 
+  // Handle rating selection
   const handleRate = (rating: number) => {
+    setSelectedRating(rating); 
     if (onRate) {
-      onRate(rating);
+      onRate(rating); 
     }
   };
 
   return (
     <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3">
-      <Image src={draggable} alt="draggable icon"  className={ pathname === "/surveys/edit-survey" || pathname ==='surveys/preview-survey' ? "invisible" : "visible"} />
+      <Image
+        src={draggable}
+        alt="draggable icon"
+        className={pathname === "/surveys/edit-survey" || pathname === "surveys/preview-survey" ? "invisible" : "visible"}
+      />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start">{question}</h3>
-          {pathname === "/surveys/edit-survey" || pathname.includes('surveys/question') ? "" : <p>{questionType}</p>}
+          {pathname === "/surveys/edit-survey" || pathname.includes("surveys/question") ? "" : <p>{questionType}</p>}
         </div>
         <div className="flex items-center my-2">
           {Array.from({ length: maxRating }, (_, index) => (
@@ -46,13 +53,13 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
               key={index}
               size={24}
               className={`mr-1 cursor-pointer ${
-                (hoveredRating !== null ? hoveredRating : currentRating) > index
-                  ? "text-[#5B03B2]"
-                  : "text-gray-300"
+                (hoveredRating !== null ? hoveredRating : selectedRating) > index
+                  ? "text-[#5B03B2]" 
+                  : "text-gray-300" 
               }`}
-              onMouseEnter={() => setHoveredRating(index + 1)}
-              onMouseLeave={() => setHoveredRating(null)}
-              onClick={() => handleRate(index + 1)}
+              onMouseEnter={() => setHoveredRating(index + 1)} 
+              onMouseLeave={() => setHoveredRating(null)} 
+              onClick={() => handleRate(index + 1)} 
             />
           ))}
         </div>
@@ -64,8 +71,9 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             >
               Edit
             </button>
-            <button className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-            onClick={DeleteQuestion}
+            <button
+              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
+              onClick={DeleteQuestion}
             >
               Delete
             </button>
@@ -77,6 +85,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 };
 
 export default StarRatingQuestion;
+
 
 
 

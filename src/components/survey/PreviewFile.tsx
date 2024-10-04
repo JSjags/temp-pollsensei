@@ -1,54 +1,161 @@
-import Image from 'next/image';
-import React, { useState } from 'react'
+// import { pdf_svgrepo_com } from "@/assets/images";
+// import Image from "next/image";
+// import Link from "next/link";
+// import React, { useState } from "react";
+// import { FaFilePdf } from "react-icons/fa6";
 
-interface ImageData {
-  src: string;
-  alt: string;
-}
+// interface PreviewFileProps {
+//   data: any;
+// }
+
+// const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
+//   const [activeImage, setActiveImage] = useState(data[0]);
+
+//   console.log(activeImage);
+
+//   const handleThumbnailClick = (image: any) => {
+//     setActiveImage(image);
+//   };
+//   return (
+//     <div className="flex flex-col items-center w-full mt-5">
+//       {/* Active Image Display */}
+//       {activeImage?.includes("pdf") ? (
+//         <div className="relative border-2 border-purple-400 flex items-center justify-center text-center p-2 mb-4 w-full min-h-[50vh] group">
+//   {/* Image */}
+//   <Image
+//     src={pdf_svgrepo_com}
+//     alt="image preview"
+//     className="w-full h-auto"
+//   />
+//   <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity"></div>
+//   <p className="absolute inset-0 flex items-center justify-center text-white text-xl transition-opacity duration-300 group-hover:opacity-100 opacity-0">
+//     PDF file detected
+//   </p>
+// </div>
+
+//       ) : (
+//         <div className="border-2 border-purple-400 p-2 mb-4 w-full min-h-[50vh]">
+//           <Image
+//             src={activeImage?.src}
+//             alt={"image preview"}
+//             className="w-full h-auto max-w-md"
+//           />
+//         </div>
+//       )}
+
+//       {/* Thumbnail List */}
+//       <div className="flex space-x-4">
+//         {data.map((image: any, index: any) => {
+//           if (data.includes("pdf")) {
+//             return (
+//               <Link
+//                 key={index}
+//                 href={activeImage}
+//                 target="_blank"
+//                 rel="noopener noreferrer"
+//               >
+//                 <FaFilePdf/>
+//               </Link>
+//             );
+//           } else {
+//             return (
+//               <button
+//                 key={index}
+//                 onClick={() => handleThumbnailClick(image)}
+//                 className={`border-2 p-1 ${
+//                   activeImage?.src === image?.src
+//                     ? "border-purple-600"
+//                     : "border-gray-300"
+//                 }`}
+//               >
+//                 <Image
+//                   src={image?.src}
+//                   alt={image?.src}
+//                   className="w-16 h-16 object-cover"
+//                 />
+//               </button>
+//             );
+//           }
+//         })}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default PreviewFile;
+
+
+import { pdf_svgrepo_com } from "@/assets/images";
+import Image from "next/image";
+import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { FaFilePdf } from "react-icons/fa6";
 
 interface PreviewFileProps {
-  data: ImageData[];
+  data: any[];
 }
 
-const PreviewFile:React.FC<PreviewFileProps> = ({data}) => {
-  const [activeImage, setActiveImage] = useState<ImageData>(data[0]);
+const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
+  const [activeImage, setActiveImage] = useState<any>(null);
 
-  const handleThumbnailClick = (image: ImageData) => {
+  // Set the first available item in data as the active image when the component mounts
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setActiveImage(data[0]);
+    }
+  }, [data]);
+
+  const handleThumbnailClick = (image: any) => {
     setActiveImage(image);
   };
+
+  if (!data || data.length === 0) {
+    return <p>No files to preview.</p>; // Handle empty data case
+  }
+
   return (
     <div className="flex flex-col items-center w-full mt-5">
       {/* Active Image Display */}
-      <div className="border-2 border-purple-400 p-2 mb-4 w-full min-h-[50vh]">
-        <Image
-          src={activeImage?.src}
-          alt={activeImage?.alt}
-          className="w-full h-auto max-w-md"
-        />
-      </div>
+      {activeImage?.includes("pdf") ? (
+        <div className="relative border-2 border-purple-400 flex items-center justify-center text-center p-2 mb-4 w-full min-h-[50vh] group">
+          {/* PDF Image */}
+          <Image src={pdf_svgrepo_com} alt="PDF preview" className="w-full h-auto" />
+          <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity"></div>
+          <p className="absolute inset-0 flex items-center justify-center text-white text-xl transition-opacity duration-300 group-hover:opacity-100 opacity-0">
+            PDF file detected
+          </p>
+        </div>
+      ) : (
+        <div className="border-2 border-purple-400 p-2 mb-4 w-full min-h-[50vh]">
+          <Image src={activeImage?.src} alt="Image preview" className="w-full h-auto max-w-md" />
+        </div>
+      )}
 
       {/* Thumbnail List */}
       <div className="flex space-x-4">
-        {data.map((image, index) => (
-          <button
-            key={index}
-            onClick={() => handleThumbnailClick(image)}
-            className={`border-2 p-1 ${
-              activeImage?.src === image?.src
-                ? 'border-purple-600'
-                : 'border-gray-300'
-            }`}
-          >
-            <Image
-              src={image?.src}
-              alt={image?.alt}
-              className="w-16 h-16 object-cover"
-            />
-          </button>
-        ))}
+        {data.map((file: any, index: number) => {
+          if (file.includes("pdf")) {
+            return (
+              <Link key={index} href={file} target="_blank" rel="noopener noreferrer">
+                <FaFilePdf size={32} />
+              </Link>
+            );
+          } else {
+            return (
+              <button
+                key={index}
+                onClick={() => handleThumbnailClick(file)}
+                className={`border-2 p-1 ${activeImage?.src === file?.src ? "border-purple-600" : "border-gray-300"}`}
+              >
+                <Image src={file?.src} alt="Thumbnail" className="w-16 h-16 object-cover" />
+              </button>
+            );
+          }
+        })}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PreviewFile
+export default PreviewFile;
+

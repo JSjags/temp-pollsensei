@@ -81,3 +81,23 @@ export const  formatDateOption = (dateString: string | number | Date) => {
   return `${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
 }
 
+export const formatTo12Hour = (isoString: string): string => {
+  const date = new Date(isoString);
+
+  let hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const isAM = hours < 12;
+
+  // Convert to 12-hour format
+  hours = hours % 12 || 12; 
+
+  // Format minutes to always be two digits
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  // Combine the formatted time with AM/PM
+  const ampm = isAM ? 'am' : 'pm';
+  
+  return `${hours}:${formattedMinutes}${ampm}`;
+};
+
+

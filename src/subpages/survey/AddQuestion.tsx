@@ -91,8 +91,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   ];
 
   return (
-    <div className="mb-4 bg-[#fff] flex items-center w-full py-4 px-11 gap-3 rounded"  data-aos="fade-up"
-    data-aos-duration="3000">
+    <div className="mb-4 bg-[#fff] flex items-center w-full py-4 px-11 gap-3 rounded">
       <div className="w-full flex flex-col">
         <label htmlFor="question">Question</label>
         <div className="flex justify-between w-full items-center mt-2">
