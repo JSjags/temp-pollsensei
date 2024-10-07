@@ -98,7 +98,7 @@ interface PreviewFileProps {
 const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
   const [activeImage, setActiveImage] = useState<any>(null);
 
-  // Set the first available item in data as the active image when the component mounts
+  
   useEffect(() => {
     if (data && data.length > 0) {
       setActiveImage(data[0]);
@@ -110,7 +110,7 @@ const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
   };
 
   if (!data || data.length === 0) {
-    return <p>No files to preview.</p>; // Handle empty data case
+    return <p>No files to preview.</p>; 
   }
 
   return (

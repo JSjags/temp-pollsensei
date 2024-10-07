@@ -1,6 +1,6 @@
 import { draggable } from "@/assets/images";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -16,7 +16,7 @@ interface AnswerMultiChoiceQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
-  status?:string;
+  status?: string;
 }
 
 const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
@@ -34,29 +34,55 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme);
+  const colorTheme = useSelector(
+    (state: RootState) => state?.survey?.color_theme
+  );
 
-  const [localSelectedOptions, setLocalSelectedOptions] = useState<string[]>(selectedOptions);
+  const [localSelectedOptions, setLocalSelectedOptions] = useState<string[]>(
+    selectedOptions || []
+  );
+  
 
- 
   useEffect(() => {
-    setLocalSelectedOptions(selectedOptions);
+    if (selectedOptions !== localSelectedOptions) {
+      setLocalSelectedOptions(selectedOptions);
+    }
   }, [selectedOptions]);
 
   const handleOptionChange = (option: string) => {
     const isSelected = localSelectedOptions.includes(option);
     const updatedOptions = isSelected
-      ? localSelectedOptions.filter((item) => item !== option) 
+      ? localSelectedOptions.filter((item) => item !== option)
       : [...localSelectedOptions, option];
 
     setLocalSelectedOptions(updatedOptions);
-    
+
     if (onChange) {
       onChange(updatedOptions);
     }
+
+
+
+  //   const updatedSelected = selected.includes(option)
+  //   ? selected.filter((o) => o !== option)
+  //   : [...selected, option];
+  //   setLocalSelectedOptions(updatedSelected);
+  // onChange(updatedSelected); 
   };
 
-  const getStatus = (status: string) => {
+
+
+
+  // const handleOptionChange = (option: string) => {
+  //   const updatedSelected = selected.includes(option)
+  //     ? selected.filter((o) => o !== option)
+  //     : [...selected, option];
+  //   setSelected(updatedSelected);
+  //   onChange(updatedSelected); // Notify the parent of the change
+  // };
+
+
+  const getStatus = useMemo(() => {
     switch (status) {
       case "passed":
         return (
@@ -70,11 +96,10 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
             <BsExclamation />
           </div>
         );
-  
       default:
         return null;
     }
-  };
+  }, [status]);
 
   return (
     <div
@@ -87,32 +112,32 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
       <Image
         src={draggable}
         alt="draggable icon"
-        className={
-          pathname === "/surveys/create-survey"
-            ? "visible"
-            : "invisible"
-        }
+        className={pathname === "/surveys/create-survey" ? "visible" : "invisible"}
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start">
             <span>{index}. </span> {question}
           </h3>
-          {pathname === "/surveys/edit-survey" || 
-          pathname.includes('survey-reponse-upload') ||
-          pathname.includes('validate-response') 
-          ? "" : <p>{questionType}</p>}
+          {!(pathname === "/surveys/edit-survey" || pathname.includes('survey-reponse-upload') || pathname.includes('validate-response')) && (
+            <p>{questionType}</p>
+          )}
         </div>
         {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
-            <label className="relative flex items-center cursor-pointer">
+            <label
+              className="relative flex items-center cursor-pointer"
+              htmlFor={`option-${optionIndex}`}
+              aria-label={option}
+            >
               <input
                 type="checkbox"
                 id={`option-${optionIndex}`}
                 name={question}
-                checked={localSelectedOptions?.includes(option)} 
+                checked={localSelectedOptions?.includes(option)}
                 onChange={() => handleOptionChange(option)}
                 className="mr-2 text-[#5B03B2] hidden peer"
+                aria-checked={localSelectedOptions?.includes(option)}
               />
               <span
                 className={`w-5 h-5 border-2  shadow-inner flex flex-col peer-checked:before:bg-black peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
@@ -139,9 +164,9 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
           </div>
         )}
       </div>
-      {
-        pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)
-      }
+      {pathname.includes("survey-reponse-upload") && status && (
+        <div>{getStatus}</div>
+      )}
     </div>
   );
 };

@@ -23,10 +23,13 @@ interface Answer {
   selected_options: string[];
 }
 
-interface OCRResponse {
+interface DataProps {
   extracted_answers: Answer[];
   survey: any;
   uploaded_files: any;
+}
+interface OCRResponse {
+ data : DataProps[];
 }
 
 const ValidateResponse = () => {
@@ -53,7 +56,7 @@ const ValidateResponse = () => {
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < OCRresponses.length - 1 ? prevIndex + 1 : prevIndex;
+        return prevIndex < OCRresponses?.data?.survey?.length - 1 ? prevIndex + 1 : prevIndex;
       } else {
         return prevIndex > 0 ? prevIndex - 1 : prevIndex;
       }
@@ -62,7 +65,7 @@ const ValidateResponse = () => {
 
   const handleSubmitResponse = async () => {
     // lets log the selected options and the provided text response to the console
-    const answers = OCRresponses[currentSection]?.extracted_answers
+    const answers = OCRresponses?.data?.survey?.extracted_answers
       ?.map((item: any) => {
         if (
           item.question_type === "multiple_choice" ||
@@ -104,6 +107,8 @@ const ValidateResponse = () => {
     }
   };
 
+ 
+
   useEffect(() => {
     if (isSuccess) {
       toast.success("Your response was saved successfully");
@@ -123,18 +128,18 @@ const ValidateResponse = () => {
   return (
     <div
       className={`${
-        (OCRresponses as any)[currentSection]?.survey?.theme
+        (OCRresponses as any)?.data?.survey?.theme
       } flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}
     >
       <div
         className={`${
-          (OCRresponses as any)[currentSection]?.survey?.theme
+          (OCRresponses as any)?.data?.survey?.theme
         } flex justify-between gap-10 w-full`}
       >
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
           <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
             <Image
-              src={(OCRresponses as any)[currentSection]?.survey?.logo_url}
+              src={(OCRresponses as any)?.data?.survey?.logo_url}
               alt=""
               className="w-full object-cover bg-no-repeat h-16 rounded-full"
               width={"100"}
@@ -144,7 +149,7 @@ const ValidateResponse = () => {
 
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
-              src={(OCRresponses as any)[currentSection]?.survey?.header_url}
+              src={(OCRresponses as any)?.data?.survey?.header_url}
               alt=""
               className="w-full object-cover bg-no-repeat h-24 rounded-lg"
               width={"100"}
@@ -155,24 +160,24 @@ const ValidateResponse = () => {
             <h2
               className="text-[1.5rem] font-normal"
               style={{
-                fontSize: `${(OCRresponses as any)[currentSection]?.survey?.header_text?.size}px`,
-                fontFamily: `${(OCRresponses as any)[currentSection]?.survey?.header_text?.name}`,
+                fontSize: `${(OCRresponses as any)?.data?.survey?.header_text?.size}px`,
+                fontFamily: `${(OCRresponses as any)?.data?.survey?.header_text?.name}`,
               }}
             >
-              {(OCRresponses as any)[currentSection]?.survey?.topic}
+              {(OCRresponses as any)?.data?.survey?.topic}
             </h2>
             <p
               style={{
-                fontSize: `${(OCRresponses as any)[currentSection]?.survey?.body_text?.size}px`,
-                fontFamily: `${(OCRresponses as any)[currentSection]?.survey?.body_text?.name}`,
+                fontSize: `${(OCRresponses as any)?.data?.survey?.body_text?.size}px`,
+                fontFamily: `${(OCRresponses as any)?.data?.survey?.body_text?.name}`,
               }}
             >
-              {(OCRresponses as any)[currentSection]?.survey?.description}
+              {(OCRresponses as any)?.data?.survey?.description}
             </p>
           </div>
 
           <div className="flex flex-col gap-2 w-full bg-white px-11 py-4 rounded-lg mb-4">
-            {(OCRresponses as any)[currentSection]?.survey?.settings
+            {(OCRresponses as any)?.data?.survey?.settings
               ?.collect_email_addresses && (
               <div className="flex flex-col w-full">
                 <label htmlFor="full name" className="pl-5">
@@ -187,7 +192,7 @@ const ValidateResponse = () => {
                 />
               </div>
             )}
-            {(OCRresponses as any)[currentSection]?.survey?.settings
+            {(OCRresponses as any)?.data?.survey?.settings
               ?.collect_name_of_respondents && (
               <div className="flex flex-col w-full">
                 <label htmlFor="full name" className="pl-5">
@@ -204,7 +209,7 @@ const ValidateResponse = () => {
             )}
           </div>
 
-          {OCRresponses[currentSection]?.extracted_answers?.map(
+          {OCRresponses[0]?.data?.extracted_answers?.map(
             (item: any, index: number) => (
               <div key={index} className="mb-4">
                 {item.question_type === "multiple_choice" ||
@@ -216,7 +221,8 @@ const ValidateResponse = () => {
                     questionType={item.question_type}
                     selectedOptions={item.selected_options}
                     onChange={(selected) =>
-                      handleQuestionChange(index, selected)
+                      // handleQuestionChange(index, selected)
+                      console.log(selected)
                     }
                     index={index + 1}
                   />
@@ -312,7 +318,7 @@ const ValidateResponse = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          <PreviewFile data={OCRresponses[currentSection]?.uploaded_files} />
+          <PreviewFile data={OCRresponses[0]?.data?.uploaded_files} />
         </div>
       </div>
     </div>

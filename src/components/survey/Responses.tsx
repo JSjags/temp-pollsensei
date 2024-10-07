@@ -13,6 +13,9 @@ import {
 import Summary from "./Summary";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { toast } from "react-toastify";
+import { resetAnswers } from "@/redux/slices/answer.slice";
+import { useDispatch } from "react-redux";
 
 const calculateValidationCounts = (data:any) => {
   let validCount = 0;
@@ -91,6 +94,10 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
       setCurrentUserResponse((prev) => prev - 1);
     }
   };
+
+
+
+
   return (
     <div className="lg:px-24">
       <ResponseHeader
