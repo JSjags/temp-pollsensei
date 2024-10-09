@@ -34,6 +34,32 @@ import {
 } from "@/redux/slices/survey.slice";
 import store from "@/redux/store";
 import Milestones from "@/components/survey/Milestones";
+import { AnimatePresence, motion } from "framer-motion";
+import SenseiMaster from "@/components/sensei-master/SenseiMaster";
+
+// Springy Animation Variants for the mascot
+const mascotVariants = {
+  hidden: { opacity: 0, scale: 0.3, y: 0 }, // Start small and slightly off-screen
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring", // Springy effect
+      stiffness: 300, // Controls the "bounciness"
+      damping: 20, // Controls how fast the spring comes to rest
+      duration: 0.8, // Duration of the animation
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    y: 0, // Exit with downward movement
+    transition: {
+      duration: 0.3, // Slightly faster exit
+    },
+  },
+};
 
 const CreateSurveyPage = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
@@ -135,8 +161,8 @@ const CreateSurveyPage = () => {
           question_type:
             optionType === "Multi-choice"
               ? "multiple_choice"
-              // ? "single_choice"
-              : optionType === "Comment"
+              : // ? "single_choice"
+              optionType === "Comment"
               ? "long_text"
               : "matrix_checkbox",
           is_required: false,
@@ -241,7 +267,6 @@ const CreateSurveyPage = () => {
           </div>
         </div>
       )}
-
       {oneMoreThing && (
         <div className="flex flex-col justify-center items-center gap-10 ">
           <div>
@@ -267,7 +292,7 @@ const CreateSurveyPage = () => {
               />
               <h1 className="text-lg">Qualitative Survey</h1>
               <p>
-                Give us a prompt and our AI we will do the hard{" "}
+                Give us a prompt and our AI we will do the hard work{" "}
                 <br className="hidden lg:block" /> for you. We will create a
                 survey tailored for your <br className="hidden lg:block" />{" "}
                 needs
@@ -412,11 +437,171 @@ const CreateSurveyPage = () => {
               >
                 Proceed
               </button>
-              <div className="bg-[#F70A0A] text-white py-2 absolute top-0 right-0 rounded-tr px-4 ">
+              <div className="bg-gradient-to-r from-[#F70A0A] to-[#BE0707] text-white py-2 absolute top-0 right-0 rounded-tr px-4 ">
                 Most Preferred
               </div>
             </div>
           </div>
+
+          {/* Alternative cards */}
+          {/* <div className="grid md:grid-cols-3 gap-5 items-stretch justify-center">
+
+  <div
+    className={`flex flex-col items-center pb-4 justify-between border rounded-md px-6 pt-6 text-center ${
+      selectedDiv === 3 ? "border-[#CC9BFD] border-2" : ""
+    }`}
+    onClick={() => handleSurveyType(3, "Qualitative")}
+  >
+    <Image
+      src={qualitative_survey}
+      alt="Qualitative Survey"
+      className="h-12 w-auto"
+    />
+    <h1 className="text-lg font-semibold">Qualitative Survey</h1>
+    <p className="text-sm leading-relaxed">
+      Give us a prompt and our AI will do the hard work
+      <br className="hidden lg:block" />
+      for you. We will create a survey tailored for your
+      <br className="hidden lg:block" /> needs.
+    </p>
+    <Tooltip
+      content={`Lorem ipsum dolor sit amet consectetur. Tempus duis viverra etiam sagittis scelerisque. Et cursus cursus sodales convallis amet. Vitae mattis quis tellus tortor quis sit. Sem nibh leo lorem mi.`}
+      animation="duration-1000"
+      style="light"
+      className="w-[20rem]"
+    >
+      <Image
+        src={tooltip_icon}
+        alt="Tooltip Icon"
+        className={`h-8 w-auto ${selectedDiv === 3 ? "visible" : "invisible"}`}
+      />
+    </Tooltip>
+    <button
+      className={`bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-3 py-2 text-white text-[16px] font-medium text-center font-inter ${
+        selectedDiv === 3 ? "visible" : "invisible"
+      }`}
+      type="button"
+      onClick={() => {
+        setSurveyType("Qualitative");
+        dispatch(updateSurveyType(surveyType));
+        setWhatDoYouWant(false);
+        setOneMoreThing(false);
+        if (generated_by === "ai") {
+          setPromptForm(true);
+        } else {
+          navigate.push("/surveys/create-manual");
+        }
+      }}
+    >
+      Proceed
+    </button>
+  </div>
+
+  <div
+    className={`flex flex-col items-center pb-4 justify-between border rounded-md px-6 pt-6 text-center ${
+      selectedDiv === 4 ? "border-[#CC9BFD] border-2" : ""
+    }`}
+    onClick={() => handleSurveyType(4, "Quantitative")}
+  >
+    <Image
+      src={Quantitative_survey}
+      alt="Quantitative Survey"
+      className="h-12 w-auto"
+    />
+    <h1 className="text-lg font-semibold">Quantitative Survey</h1>
+    <p className="text-sm leading-relaxed">
+      Create your own survey on a blank canvas and
+      <br className="hidden lg:block" />
+      customize it according to your taste.
+    </p>
+    <Tooltip
+      content={`Lorem ipsum dolor sit amet consectetur. Tempus duis viverra etiam sagittis scelerisque. Et cursus cursus sodales convallis amet. Vitae mattis quis tellus tortor quis sit. Sem nibh leo lorem mi.`}
+      animation="duration-1000"
+      style="light"
+      className="w-[20rem]"
+    >
+      <Image
+        src={tooltip_icon}
+        alt="Tooltip Icon"
+        className={`h-8 w-auto ${selectedDiv === 4 ? "visible" : "invisible"}`}
+      />
+    </Tooltip>
+    <button
+      className={`bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-3 py-2 text-white text-[16px] font-medium text-center font-inter ${
+        selectedDiv === 4 ? "visible" : "invisible"
+      }`}
+      type="button"
+      onClick={() => {
+        setSurveyType("Quantitative");
+        dispatch(updateSurveyType(surveyType));
+        setWhatDoYouWant(false);
+        setOneMoreThing(false);
+        if (generated_by === "ai") {
+          setPromptForm(true);
+        } else {
+          navigate.push("/surveys/create-manual");
+        }
+      }}
+    >
+      Proceed
+    </button>
+  </div>
+
+  <div
+    className={`flex flex-col items-center pb-4 justify-between border rounded-md px-6 pt-6 text-center relative ${
+      selectedDiv === 5 ? "border-[#CC9BFD] border-2" : ""
+    }`}
+    onClick={() => handleSurveyType(5, "Both")}
+  >
+    <Image
+      src={quantitative_qualitative_survey}
+      alt="Both Surveys"
+      className="h-12 w-auto"
+    />
+    <h1 className="text-lg font-semibold">
+      Both (Qualitative & Quantitative)
+    </h1>
+    <p className="text-sm leading-relaxed">
+      Create your own survey on a blank canvas and
+      <br className="hidden lg:block" />
+      customize it according to your taste.
+    </p>
+    <Tooltip
+      content={`Lorem ipsum dolor sit amet consectetur. Tempus duis viverra etiam sagittis scelerisque. Et cursus cursus sodales convallis amet. Vitae mattis quis tellus tortor quis sit. Sem nibh leo lorem mi.`}
+      animation="duration-1000"
+      style="light"
+      className="w-[20rem]"
+    >
+      <Image
+        src={tooltip_icon}
+        alt="Tooltip Icon"
+        className={`h-8 w-auto ${selectedDiv === 5 ? "visible" : "invisible"}`}
+      />
+    </Tooltip>
+    <button
+      className={`bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-3 py-2 text-white text-[16px] font-medium text-center font-inter ${
+        selectedDiv === 5 ? "visible" : "invisible"
+      }`}
+      type="button"
+      onClick={() => {
+        setSurveyType("Both");
+        dispatch(updateSurveyType(surveyType));
+        setWhatDoYouWant(false);
+        setOneMoreThing(false);
+        if (generated_by === "ai") {
+          setPromptForm(true);
+        } else {
+          navigate.push("/surveys/create-manual");
+        }
+      }}
+    >
+      Proceed
+    </button>
+    <div className="bg-gradient-to-r from-[#F70A0A] to-[#BE0707] text-white py-2 absolute top-0 right-0 rounded-tr px-4">
+      Most Preferred
+    </div>
+  </div>
+</div> */}
         </div>
       )}
       {promptForm && (
@@ -594,7 +779,9 @@ const CreateSurveyPage = () => {
       )}
       {isLoading && <IsGenerating isGeneratingSurveyLoading={isLoading} />}
       {generated && (
-        <GeneratedSurvey data={survey?.sections} onClick={UseAnotherPrompt} />
+        <>
+          <GeneratedSurvey data={survey?.sections} onClick={UseAnotherPrompt} />
+        </>
       )}
     </div>
   );
