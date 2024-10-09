@@ -7,6 +7,8 @@ import { RootState } from "@/redux/store";
 import { Button } from "../ui/button";
 import { stars } from "@/assets/images";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { BsExclamation } from "react-icons/bs";
+import { Check } from "lucide-react";
 
 interface MultiChoiceQuestionProps {
   question: string;
@@ -17,6 +19,7 @@ interface MultiChoiceQuestionProps {
   DeleteQuestion?: () => void;
   index: number;
   canUseAI?: boolean;
+  status?: string;
 }
 
 const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
@@ -28,6 +31,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   index,
   onChange,
   canUseAI = false,
+  status,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -46,6 +50,26 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
     console.log(`Selected option for question ${question}:`, option); // Log the selected option
     if (onChange) {
       onChange(option); // Trigger external onChange callback if provided
+    }
+  };
+
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 mr-3">
+            <Check strokeWidth={1} className="text-xs text-white" />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
+            <BsExclamation />
+          </div>
+        );
+
+      default:
+        return null;
     }
   };
 
@@ -83,7 +107,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           pathname.includes("surveys/question") ? (
             ""
           ) : (
-            <p>{questionType}</p>
+            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
           )}
         </div>
         {options?.map((option, optionIndex) => (
@@ -123,6 +147,9 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           </div>
         )}
       </div>
+      {pathname.includes("survey-reponse-upload") && status && (
+        <div>{getStatus(status)}</div>
+      )}
     </div>
   );
 };

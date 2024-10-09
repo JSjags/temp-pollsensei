@@ -14,7 +14,7 @@ export default function Component({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background">
       {!["tutorials"].some((p) => path.includes(p)) && (
         <Slide duration={500} direction="down">
-          <header className="bg-[url('/assets/help-centre/hero-bg.svg')] bg-no-repeat bg-cover p-6 md:p-10 px-0 md:px-0">
+          <header className="bg-[url('/assets/help-centre/hero-bg.svg')] bg-no-repeat bg-cover bg-center p-6 md:p-10 px-0 md:px-0">
             <div className="container mx-auto px-4">
               <button onClick={() => router.back()} className="text-white mb-4">
                 <ArrowLeft className="h-6 w-6" />

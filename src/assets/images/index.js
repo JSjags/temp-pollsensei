@@ -21,6 +21,10 @@ import neon from './neon.svg'
 import sparkly from './Sparkly.svg'
 import defaultBg from './default.svg'
 import paper_1 from './paper_1.svg'
+import pdf_svgrepo_com from './pdf-svgrepo-com.svg'
+import neon_header from './neon_header.svg'
+import default_header from './default_header.svg'
+import sparkly_header from './sparkly_header.svg'
 
 
 
@@ -48,5 +52,10 @@ export {
   neon,
   sparkly,
   defaultBg,
-    paper_1,
+  paper_1,
+  pdf_svgrepo_com,
+  neon_header,
+  default_header,
+  sparkly_header,
+ 
 };

@@ -31,6 +31,7 @@ import themeReducer from "./slices/theme.slice";
 import surveyReducer from "./slices/survey.slice";
 import answerReducer from "./slices/answer.slice";
 import senseiMasterReducer from "./slices/sensei-master.slice"; // Correct import here
+import nameReducer from "./slices/name.slice";
 
 // At the top of the file, after imports
 export type RootState = {
@@ -43,6 +44,7 @@ export type RootState = {
   survey: ReturnType<typeof surveyReducer>;
   answer: ReturnType<typeof answerReducer>;
   senseiMaster: ReturnType<typeof senseiMasterReducer>;
+  name: ReturnType<typeof nameReducer>;
   [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
 };
 
@@ -56,6 +58,7 @@ const rootReducer = combineReducers({
   survey: surveyReducer,
   answer: answerReducer,
   senseiMaster: senseiMasterReducer, // Ensure this is added here
+  name: nameReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 

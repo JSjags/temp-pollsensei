@@ -459,3 +459,7 @@ input[type='radio'].radio:checked:before {
 .body_font__indicator-separator{
 display: none !important;
 }
+
+.select-container .select-name__indicator-separator{
+  display: none !important;
+  }

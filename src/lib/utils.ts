@@ -60,3 +60,9 @@ export function getUniqueVariables(tests: Test[]): Variable[] {
 
   return uniqueVariables;
 }
+
+export const extractMongoId = (pathname: string): string | undefined => {
+  const regex = /[a-f\d]{24}/i; // MongoDB ObjectID pattern (24 hex characters)
+  const match = pathname.match(regex);
+  return match ? match[0] : undefined;
+};
