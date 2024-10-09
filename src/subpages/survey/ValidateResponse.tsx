@@ -1,4 +1,4 @@
-import { addAnswers, replaceAnswers, resetAnswers } from "@/redux/slices/answer.slice";
+import { replaceAnswers, resetAnswers } from "@/redux/slices/answer.slice";
 import { RootState } from "@/redux/store";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
@@ -41,6 +41,7 @@ const ValidateResponse = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const OCRresponses = useSelector(
+    // @ts-ignore
     (state: RootState) => state.answer.answers as OCRResponse[]
   );
   console.log(params.id);
@@ -54,6 +55,7 @@ const ValidateResponse = () => {
   const [respondent_email, setRespondent_email] = useState(
     "" || "example@gmail.com"
   );
+  const [filteredData, setFilteredData] = useState([]);
 
   console.log(OCRresponses);
 
@@ -112,25 +114,7 @@ const ValidateResponse = () => {
     }
   };
 
-  function filterUniqueQuestions(data:any) {
-    const uniqueQuestions:any[] = [];
-    const seenQuestions = new Set();
-  
-    data?.forEach((item:any) => {
-      // Use question text to identify duplicates
-      if (!seenQuestions.has(item.question)) {
-        uniqueQuestions.push(item);
-        seenQuestions.add(item.question);
-      }
-    });
-  
-    return uniqueQuestions;
-  }
-  
-  
-  // @ts-ignore
-  const filteredData = filterUniqueQuestions(OCRresponses[currentSection]?.survey?.extracted_answers);
-  console.log(filteredData)
+ 
 
   
  
@@ -152,10 +136,28 @@ const ValidateResponse = () => {
     console.log(`Question ${index} selected options:`, selectedOptions);
   };
 
-  useEffect(()=>{
-    
+  useEffect(() => {
+    function filterUniqueQuestions(data: Answer[]) {
+      const uniqueQuestions: Answer[] = [];
+      const seenQuestions = new Set<string>();
 
-  }, [OCRresponses])
+      data?.forEach((item) => {
+        if (!seenQuestions.has(item.question)) {
+          uniqueQuestions.push(item);
+          seenQuestions.add(item.question);
+        }
+      });
+
+      return uniqueQuestions;
+    }
+
+    const currentExtractedAnswers = OCRresponses[currentSection]?.extracted_answers || [];
+    const uniqueFilteredData = filterUniqueQuestions(currentExtractedAnswers);
+    // @ts-ignore
+    setFilteredData(uniqueFilteredData); 
+  }, [OCRresponses, currentSection]);
+
+
   return (
     <div
       className={`${
@@ -241,7 +243,7 @@ const ValidateResponse = () => {
           </div>
 
           {/* @ts-ignore */}
-          {OCRresponses[currentSection]?.extracted_answers?.map(
+          {filteredData?.map(
             (item: any, index: number) => (
               <div key={index} className="mb-4">
                 {item.question_type === "multiple_choice" ||
@@ -328,6 +330,7 @@ const ValidateResponse = () => {
               type="button"
               onClick={()=>{
                 dispatch(replaceAnswers(filteredData));
+                console.log("You clicked me")
               }}
             >
               Remove duplicate questions
@@ -337,7 +340,7 @@ const ValidateResponse = () => {
               type="button"
               onClick={()=>{
                 setTimeout(()=>{
-                  router.push("/surveys")
+                  router.push("/surveys/survey-list")
                   toast.success("Successful")
                   dispatch(resetAnswers());
                 }, 3000)

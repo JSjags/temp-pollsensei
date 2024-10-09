@@ -24,8 +24,8 @@ const UploadedItem: React.FC<UploadedItemProps> = ({
 
   const isValidFileType =
     item.type === "image/jpeg" ||
-    item.type === "image/png" ||
-    item.type === "application/pdf";
+    item.type === "image/png";
+    // item.type === "application/pdf";
   const isValidFileSize = item.size <= fileSizeLimit;
 
   if (!isValidFileType || !isValidFileSize) {

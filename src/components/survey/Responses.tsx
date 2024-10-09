@@ -121,7 +121,7 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
       )}
       {activeTab === "Summary" && (
         <div className="mt-2 min-h-[50vh]">
-          <Summary />
+          <Summary result={summary_?.data} />
         </div>
       )}
       {activeTab === "Deleted" && (
