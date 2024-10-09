@@ -114,7 +114,7 @@ const SurveyResponses = () => {
     if (successOCRUpload) {
       toast.success("OCR processed successfully");
       setSelectedItem(null);
-      dispatch(addAnswers(uploadOCR));
+      dispatch(addAnswers(uploadOCR?.data));
       handleToggle();
       router.push("validate-response");
     }
