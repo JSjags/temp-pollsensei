@@ -16,6 +16,7 @@ import NoSurvey from "../../components/ui/NoSurvey";
 import Image from "next/image";
 import TopResponse from "@/components/ui/TopResponse";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -103,7 +104,9 @@ const DashboardPage = () => {
                 <div className="flex justify-between items-center">
                   <p className="survey-head text-lg font-semibold">Surveys</p>
                   <button className="survey-view-btn w-auto text-sm">
+                    <Link href={"/surveys/created-surveys"}>
                     View all
+                    </Link>
                   </button>
                 </div>
               </div>

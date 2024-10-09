@@ -1,7 +1,10 @@
+import { formatDate } from "@/lib/helpers";
+import { useSurveyLeaderboardQuery } from "@/services/dashboard.service";
 import React from "react";
 import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
 
 const SurveyTable: React.FC = () => {
+  const { data, isLoading } = useSurveyLeaderboardQuery(null);
   return (
     <div className="relative overflow-x-auto">
       <table className="w-full text-sm text-left rtl:text-right">
@@ -31,7 +34,15 @@ const SurveyTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          <tr className="bg-white border-b text-[calc(1rem-2px)] hover:bg-gray-50">
+        {
+          isLoading? (
+            <tr>
+              <td colSpan={5} className="py-4 text-center">
+                Loading...
+              </td>
+            </tr>
+          ) : ( data?.data?.map((items:any)=>(
+          <tr className="bg-white border-b text-[calc(1rem-2px)] hover:bg-gray-50" key={items?._id}>
             <td className="px-6 py-4 font-medium whitespace-nowrap">
               <input
                 type="checkbox"
@@ -39,16 +50,20 @@ const SurveyTable: React.FC = () => {
                 id="row-checkbox"
                 className="mr-4"
               />
-              Apple MacBook Pro 17
+             {items?.topic.length > 25 ? `${items?.topic.slice(0, 35)}...` : items?.topic}
             </td>
-            <td className="px-6 py-4">Silver</td>
-            <td className="px-6 py-4">Laptop</td>
-            <td className="px-6 py-4">$2999</td>
+            <td className="px-6 py-4">{formatDate(items?.createdAt)}</td>
+            <td className="px-6 text-center py-4">{items?.number_of_responses}</td>
+            <td className="px-6 py-4">{items?.status}</td>
             <td className="px-6 py-4 text-right">
               <PiDotsThreeOutlineVerticalFill />
             </td>
           </tr>
+
+          ))
+          )}
         </tbody>
+
       </table>
     </div>
   );

@@ -125,7 +125,11 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             </button>
           </div>
         )}
-      <VoiceRecorder />
+        {
+        pathname.includes('survey-public-response') && (  <VoiceRecorder />)
+
+        }
+    
       </div>
       {
         pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)

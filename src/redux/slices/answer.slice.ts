@@ -14,13 +14,17 @@ const answerSlice = createSlice({
     },
     resetAnswers:(_state)=>{
       return initialState
-    }
+    },
+    replaceAnswers: (state, action) => {
+      state.answers = action.payload; 
+    },
   },
 });
 
 export const {
   addAnswers,
-  resetAnswers
+  resetAnswers, 
+  replaceAnswers
 } = answerSlice.actions;
 
 export default answerSlice.reducer;

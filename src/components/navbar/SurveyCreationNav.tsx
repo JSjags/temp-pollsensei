@@ -453,16 +453,17 @@ const SurveyCreationNav = () => {
             path.includes("/surveys/question") ? (
               " "
             ) : (
-              <button
-                className={`border-none flex items-center ${
-                  path === "/surveys/preview-survey" ? "invisible" : "visible"
-                }`}
-                onClick={() => {
-                  router.push("/surveys/preview-survey");
-                }}
-              >
-                <IoEyeOutline className="mr-1" /> Preview
-              </button>
+              " "
+              // <button
+              //   className={`border-none flex items-center ${
+              //     path === "/surveys/preview-survey" ? "invisible" : "visible"
+              //   }`}
+              //   onClick={() => {
+              //     router.push("/surveys/preview-survey");
+              //   }}
+              // >
+              //   <IoEyeOutline className="mr-1" /> Preview
+              // </button>
             )}
             {!path.includes("/surveys/question") && (
               <button className="border-none flex items-center">

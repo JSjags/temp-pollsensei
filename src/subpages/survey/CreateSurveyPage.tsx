@@ -334,58 +334,6 @@ const CreateSurveyPage = () => {
               </button>
             </div>
             <div
-              className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 ${
-                selectedDiv === 4 ? "border-[#CC9BFD] border-2" : ""
-              }`}
-              onClick={() => handleSurveyType(4, "Quantitative")}
-            >
-              <Image
-                src={Quantitative_survey}
-                alt="Logo"
-                className="h-8 w-auto"
-              />
-              <h1 className="text-lg">Quantitative Survey</h1>
-              <p>
-                Create your own survey on a blank canvas and{" "}
-                <br className="hidden lg:block" /> customize it according to
-                your taste.
-              </p>
-              <Tooltip
-                content={`Lorem ipsum dolor sit amet consectetur. Tempus duis viverra etiam sagittis scelerisque. Et cursus cursus sodales convallis amet. Vitae mattis quis tellus tortor quis sit. Sem nibh leo lorem mi.`}
-                animation="duration-1000"
-                style="light"
-                className={`w-[20rem]`}
-              >
-                <Image
-                  src={tooltip_icon}
-                  alt="Logo"
-                  className={`h-8 w-auto ${
-                    selectedDiv === 4 ? "visible" : "invisible"
-                  }`}
-                />
-              </Tooltip>
-              <button
-                className={`bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-3 py-2 text-white text-[1rem] font-medium text-center font-inter justify-center ${
-                  selectedDiv === 4 ? "visible" : "invisible"
-                }`}
-                type="button"
-                onClick={() => {
-                  setSurveyType("Quantitative");
-                  // dispatch(updateSurveyType("quantitative"))
-                  dispatch(updateSurveyType(surveyType));
-                  setWhatDoYouWant(false);
-                  setOneMoreThing(false);
-                  if (generated_by === "ai") {
-                    setPromptForm(true);
-                  } else {
-                    navigate.push("/surveys/create-manual");
-                  }
-                }}
-              >
-                Proceed
-              </button>
-            </div>
-            <div
               className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 relative ${
                 selectedDiv === 5 ? "border-[#CC9BFD] border-2" : ""
               }`}
@@ -437,9 +385,61 @@ const CreateSurveyPage = () => {
               >
                 Proceed
               </button>
-              <div className="bg-gradient-to-r from-[#F70A0A] to-[#BE0707] text-white py-2 absolute top-0 right-0 rounded-tr px-4 ">
-                Most Preferred
+              <div className="bg-[#F70A0A] text-white py-2 absolute top-0 right-0 rounded-tr px-4 ">
+                Not sure
               </div>
+            </div>
+            <div
+              className={`flex flex-col items-center pb-4 justify-center gap-5 border rounded-md px-10 pt-10 text-center mt-4 md:mt-0 ${
+                selectedDiv === 4 ? "border-[#CC9BFD] border-2" : ""
+              }`}
+              onClick={() => handleSurveyType(4, "Quantitative")}
+            >
+              <Image
+                src={Quantitative_survey}
+                alt="Logo"
+                className="h-8 w-auto"
+              />
+              <h1 className="text-lg">Quantitative Survey</h1>
+              <p>
+                Create your own survey on a blank canvas and{" "}
+                <br className="hidden lg:block" /> customize it according to
+                your taste.
+              </p>
+              <Tooltip
+                content={`Lorem ipsum dolor sit amet consectetur. Tempus duis viverra etiam sagittis scelerisque. Et cursus cursus sodales convallis amet. Vitae mattis quis tellus tortor quis sit. Sem nibh leo lorem mi.`}
+                animation="duration-1000"
+                style="light"
+                className={`w-[20rem]`}
+              >
+                <Image
+                  src={tooltip_icon}
+                  alt="Logo"
+                  className={`h-8 w-auto ${
+                    selectedDiv === 4 ? "visible" : "invisible"
+                  }`}
+                />
+              </Tooltip>
+              <button
+                className={`bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-3 py-2 text-white text-[1rem] font-medium text-center font-inter justify-center ${
+                  selectedDiv === 4 ? "visible" : "invisible"
+                }`}
+                type="button"
+                onClick={() => {
+                  setSurveyType("Quantitative");
+                  // dispatch(updateSurveyType("quantitative"))
+                  dispatch(updateSurveyType(surveyType));
+                  setWhatDoYouWant(false);
+                  setOneMoreThing(false);
+                  if (generated_by === "ai") {
+                    setPromptForm(true);
+                  } else {
+                    navigate.push("/surveys/create-manual");
+                  }
+                }}
+              >
+                Proceed
+              </button>
             </div>
           </div>
 

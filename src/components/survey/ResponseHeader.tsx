@@ -59,9 +59,9 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
           <button className="text-gray-500 hover:text-gray-700">
             <FaDownload size={25} />
           </button>
-          <button className="text-gray-500 hover:text-gray-700">
+          {/* <button className="text-gray-500 hover:text-gray-700">
             <FaExpand size={25} />
-          </button>
+          </button> */}
         </div>
       </div>
 

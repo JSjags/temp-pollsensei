@@ -26,7 +26,7 @@ const IsGenerating: React.FC<IsGeneratingProps> = ({
               loading
               margin={4}
               size={20}
-              speedMultiplier={2}
+              speedMultiplier={1}
               className=" mx-auto"
             />
             <h2 className="text-lg">Generating Questions for you</h2>

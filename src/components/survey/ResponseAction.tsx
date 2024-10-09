@@ -72,7 +72,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
             Add filter
           </button>
           <Select
-            className="select-container border-2 border-gray-300 text-gray-700 rounded-md focus:outline-none"
+            className="select-container border-2 border-gray-300 text-gray-700 min-w-[15rem] rounded-md focus:outline-none"
             classNamePrefix="select-name"
             defaultValue={'Filter by name'}
             name="category"
