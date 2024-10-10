@@ -28,7 +28,13 @@ const Spinner = () => (
   </div>
 );
 
-const LoadingOverlay = () => (
+export const LoadingOverlay = ({
+  title,
+  subtitle,
+}: {
+  title?: string;
+  subtitle?: string;
+}) => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -47,10 +53,10 @@ const LoadingOverlay = () => (
         <Spinner />
       </motion.div>
       <h2 className="mt-6 text-xl font-semibold text-gray-800">
-        Extracting Variables
+        {title ?? "Extracting Variables"}
       </h2>
       <p className="mt-2 text-sm text-gray-500 text-center">
-        Hold on while we do the hard work for you.
+        {subtitle ?? "Hold on while we do the hard work for you."}
       </p>
     </motion.div>
   </motion.div>
