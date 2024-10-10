@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import update from "immutability-helper";
@@ -8,11 +8,20 @@ import { Checkbox } from "../ui/shadcn-checkbox";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { cn, extractMongoId, getUniqueVariables } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { getSurveyVariableNames } from "@/services/analysis";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  createTests,
+  getSurveyTestsLibrary,
+  getSurveyVariableNames,
+  runTest,
+} from "@/services/analysis";
 import { usePathname } from "next/navigation";
-import AnalysisLoadingScreen from "../loaders/page-loaders/AnalysisPageLoader";
+import AnalysisLoadingScreen, {
+  LoadingOverlay,
+} from "../loaders/page-loaders/AnalysisPageLoader";
 import AnalysisErrorComponent from "../loaders/page-loaders/AnalysisError";
+import Loading from "../primitives/Loader";
+import { toast } from "react-toastify";
 
 export interface Variable {
   id: string;
@@ -24,6 +33,21 @@ export interface Test {
   name: string;
   variables: Variable[];
   category: String;
+}
+
+export interface TVariableType {
+  question: string;
+  slug: string;
+  display_name: string;
+  type: string;
+}
+
+export interface TestLibraryFormatted {
+  survey_id: string;
+  data: {
+    test_name: string;
+    test_variables: string[];
+  }[];
 }
 
 const VARIABLE_TYPE = "VARIABLE";
@@ -45,107 +69,120 @@ const initialVariables: Variable[] = [
   { id: "15", name: "Employment Status" },
 ];
 
-const testLibrary: Test[] = [
-  { id: "tTest", name: "T-Tests", variables: [], category: "Parametric Test" },
-  {
-    id: "oneSampleTTest",
-    name: "One-sample t-test",
-    variables: [],
-    category: "Parametric Test",
-  },
-  {
-    id: "independentTTest",
-    name: "Independent t-test (two-sample t-test)",
-    variables: [],
-    category: "Parametric Test",
-  },
-  {
-    id: "pairedTTest",
-    name: "Paired T-Test",
-    variables: [],
-    category: "Parametric Test",
-  },
-  {
-    id: "oneWayANOVA",
-    name: "One-way ANOVA",
-    variables: [],
-    category: "ANOVA (Analysis of Variance)",
-  },
-  {
-    id: "twoWayANOVA",
-    name: "Two-way ANOVA",
-    variables: [],
-    category: "ANOVA (Analysis of Variance)",
-  },
-  {
-    id: "manova",
-    name: "MANOVA (Multivariate Analysis of Variance)",
-    variables: [],
-    category: "ANOVA (Analysis of Variance)",
-  },
-  {
-    id: "ancova",
-    name: "ANCOVA (Analysis of Covariance)",
-    variables: [],
-    category: "ANOVA (Analysis of Variance)",
-  },
-  {
-    id: "simpleLinearRegression",
-    name: "Simple Linear Regression",
-    variables: [],
-    category: "Regression Analysis",
-  },
-  {
-    id: "multipleLinearRegression",
-    name: "Multiple Linear Regression",
-    variables: [],
-    category: "Regression Analysis",
-  },
-  {
-    id: "polynomialRegression",
-    name: "Polynomial Regression",
-    variables: [],
-    category: "Regression Analysis",
-  },
-  {
-    id: "chiSquareTest",
-    name: "Chi-Square Tests*",
-    variables: [],
-    category: "Non-Parametric Tests",
-  },
-  {
-    id: "testForIndependence",
-    name: "Test for Independence",
-    variables: [],
-    category: "Non-Parametric Tests",
-  },
-  {
-    id: "goodnessOfFitTest",
-    name: "Goodness of Fit Test",
-    variables: [],
-    category: "Non-Parametric Tests",
-  },
-];
+const hasVariablesInTestsLibrary = (testsLibrary: Test[]) => {
+  return (
+    testsLibrary.length > 0 &&
+    testsLibrary.some((test) => test.variables.length > 0)
+  );
+};
 
-const initialTests: Test[] = [
-  {
-    id: "twoWayANOVA",
-    name: "Two-way ANOVA",
-    variables: [],
-    category: "ANOVA (Analysis of Variance)",
-  },
-  {
-    id: "chiSquareTest",
-    name: "Chi-Square Tests*",
-    variables: [],
-    category: "Non-Parametric Tests",
-  },
-];
+const formatTestsLibrary = (
+  testsLibrary: Test[],
+  surveyId: string
+): TestLibraryFormatted => {
+  return {
+    survey_id: surveyId,
+    data: testsLibrary.map((test) => ({
+      test_name: test.name,
+      test_variables: test.variables.map((variable) => variable.id), // Assuming each variable has a 'name' field
+    })),
+  };
+};
+
+// const testLibrary: Test[] = [
+//   { id: "tTest", name: "T-Tests", variables: [], category: "Parametric Test" },
+//   {
+//     id: "oneSampleTTest",
+//     name: "One-sample t-test",
+//     variables: [],
+//     category: "Parametric Test",
+//   },
+//   {
+//     id: "independentTTest",
+//     name: "Independent t-test (two-sample t-test)",
+//     variables: [],
+//     category: "Parametric Test",
+//   },
+//   {
+//     id: "pairedTTest",
+//     name: "Paired T-Test",
+//     variables: [],
+//     category: "Parametric Test",
+//   },
+//   {
+//     id: "oneWayANOVA",
+//     name: "One-way ANOVA",
+//     variables: [],
+//     category: "ANOVA (Analysis of Variance)",
+//   },
+//   {
+//     id: "twoWayANOVA",
+//     name: "Two-way ANOVA",
+//     variables: [],
+//     category: "ANOVA (Analysis of Variance)",
+//   },
+//   {
+//     id: "manova",
+//     name: "MANOVA (Multivariate Analysis of Variance)",
+//     variables: [],
+//     category: "ANOVA (Analysis of Variance)",
+//   },
+//   {
+//     id: "ancova",
+//     name: "ANCOVA (Analysis of Covariance)",
+//     variables: [],
+//     category: "ANOVA (Analysis of Variance)",
+//   },
+//   {
+//     id: "simpleLinearRegression",
+//     name: "Simple Linear Regression",
+//     variables: [],
+//     category: "Regression Analysis",
+//   },
+//   {
+//     id: "multipleLinearRegression",
+//     name: "Multiple Linear Regression",
+//     variables: [],
+//     category: "Regression Analysis",
+//   },
+//   {
+//     id: "polynomialRegression",
+//     name: "Polynomial Regression",
+//     variables: [],
+//     category: "Regression Analysis",
+//   },
+//   {
+//     id: "chiSquareTest",
+//     name: "Chi-Square Tests*",
+//     variables: [],
+//     category: "Non-Parametric Tests",
+//   },
+//   {
+//     id: "testForIndependence",
+//     name: "Test for Independence",
+//     variables: [],
+//     category: "Non-Parametric Tests",
+//   },
+//   {
+//     id: "goodnessOfFitTest",
+//     name: "Goodness of Fit Test",
+//     variables: [],
+//     category: "Non-Parametric Tests",
+//   },
+// ];
+
+// Utility function to convert a test name to camelCase (for the 'id' field)
+const toCamelCase = (str: string): string => {
+  return str
+    .replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+    .replace(/^./, (chr) => chr.toLowerCase());
+};
 
 export default function DragAndDropPage() {
   const path = usePathname();
   const [variables, setVariables] = useState(initialVariables);
-  const [testsLibrary, setTestsLibrary] = useState(initialTests);
+  const [testsLibrary, setTestsLibrary] = useState<Test[]>([]);
+  const [testLibrary, setTestLibrary] = useState<Test[]>([]);
 
   // AnalysisLoadingScreen
 
@@ -156,6 +193,32 @@ export default function DragAndDropPage() {
     queryKey: ["survey-variables"],
     queryFn: () => getSurveyVariableNames({ surveyId: surveyId! }),
     enabled: surveyId !== undefined,
+  });
+
+  const testsLibraryQuery = useQuery({
+    queryKey: ["tests-library"],
+    queryFn: () => getSurveyTestsLibrary(),
+    enabled: variablesQuery.isSuccess,
+  });
+
+  const createTestsQuery = useQuery({
+    queryKey: ["create-test"],
+    queryFn: () => createTests({ surveyId: surveyId! }),
+    enabled: testsLibraryQuery.isSuccess,
+  });
+
+  const runTestMutation = useMutation({
+    mutationKey: ["create-test"],
+    mutationFn: () =>
+      runTest({ testData: formatTestsLibrary(testsLibrary, surveyId!) }),
+    onSuccess: (data) => {
+      console.log(data);
+      toast.success("Analysis conducted successfully");
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error("Error conducting analysis");
+    },
   });
 
   // Drag and Drop Handlers
@@ -187,18 +250,22 @@ export default function DragAndDropPage() {
   };
 
   const toggleTest = (testId: string) => {
-    console.log(testId);
+    // console.log(testId);
     const test = testLibrary.find((t) => t.id === testId);
     if (!test) return;
-
-    console.log("Got here");
 
     setTestsLibrary((prev) => {
       const isSelected = prev.some((t) => t.id === testId);
       if (isSelected) {
         const removedTest = prev.find((t) => t.id === testId);
         if (removedTest) {
-          setVariables([...variables, ...removedTest.variables]);
+          setVariables((prevVariables) => {
+            const newVariables = removedTest.variables.filter(
+              (newVar) =>
+                !prevVariables.some((prevVar) => prevVar.id === newVar.id)
+            );
+            return [...prevVariables, ...newVariables];
+          });
         }
         return prev.filter((t) => t.id !== testId);
       } else {
@@ -207,95 +274,166 @@ export default function DragAndDropPage() {
     });
   };
 
+  useEffect(() => {
+    if (variablesQuery.isSuccess) {
+      setVariables(
+        variablesQuery.data?.data.map((v: TVariableType) => ({
+          id: v.slug,
+          name: v.display_name,
+        }))
+      );
+    }
+  }, [variablesQuery.isSuccess]);
+
+  useEffect(() => {
+    if (testsLibraryQuery.isSuccess) {
+      // Function to format the data
+      const formatTests = () => {
+        const formattedData: Test[] = [];
+
+        for (const category in testsLibraryQuery.data) {
+          const tests = testsLibraryQuery.data[category];
+          tests.forEach((testName: string) => {
+            const formattedTest = {
+              id: toCamelCase(testName),
+              name: testName,
+              variables: [],
+              category,
+            };
+            formattedData.push(formattedTest);
+          });
+        }
+
+        // Set the formatted data into the state
+        setTestLibrary(formattedData);
+      };
+
+      // Call the function on component mount
+      formatTests();
+    }
+  }, [testsLibraryQuery.isSuccess]);
+
+  // useEffect(() => {
+  //   if (createTestsQuery.isSuccess) {
+  //     console.log(createTestsQuery.data);
+  //   }
+  // }, [createTestsQuery.isSuccess]);
+
   return (
     <Fragment>
       {variablesQuery.isLoading && <AnalysisLoadingScreen />}
       {variablesQuery.isError && <AnalysisErrorComponent />}
       {variablesQuery.isSuccess && (
-        <DndProvider backend={HTML5Backend}>
-          <div className="p-4">
-            <div className="px-6">
-              <div className="flex border border-border rounded-lg p-4 gap-10">
-                <div className="bg-[#F5EDF8] rounded-md p-4">
-                  <p className="text-4xl text-center font-bold">
-                    {variables.length}
-                  </p>
-                  <p className="text-center mt-2 text-sm">
-                    Total variables found
-                  </p>
-                </div>
-                <div className="block">
-                  <h2 className="text-xl font-semibold">Variables Found</h2>
-                  <div className="flex flex-wrap mb-4 gap-2 gap-x-2 mt-2">
-                    {variables.map((variable) => (
-                      <VariableItem
-                        key={variable.id}
-                        variable={variable}
-                        testsLibrary={testsLibrary}
-                      />
-                    ))}
+        <>
+          {runTestMutation.isPending && (
+            <>
+              <LoadingOverlay
+                title="Analyzing Survey"
+                subtitle="Hold on! Let PollSensei cook."
+              />
+            </>
+          )}
+          <DndProvider backend={HTML5Backend}>
+            <div className="p-4">
+              <div className="px-6">
+                <div className="flex border border-border rounded-lg p-4 gap-10">
+                  <div className="bg-[#F5EDF8] rounded-md p-4">
+                    <p className="text-4xl text-center font-bold">
+                      {variables.length}
+                    </p>
+                    <p className="text-center mt-2 text-sm">
+                      Total variables found
+                    </p>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-8 flex gap-4 items-center mt-8">
-              <h2 className="text-xl font-semibold">Possible Tests</h2>
-              <Button className="auth-btn !rounded-md"> Start Analysis</Button>
-            </div>
-            <div className="flex gap-4 justify-between p-6 flex-1">
-              <div className="grid grid-cols-2 gap-6 space-x-4 mb-4 p-8 bg-[#F6F3F7] flex-[0.9] min-h-screen border rounded-lg border-dashed border-[#5B03B2]">
-                {testsLibrary.map((test) => (
-                  <TestZone
-                    key={test.id}
-                    test={test}
-                    onDrop={(variable: Variable) =>
-                      handleDrop(variable, test.id)
-                    }
-                    onRemoveVariable={handleRemoveVariable}
-                    toggleTest={toggleTest}
-                    // onRemoveTest={removeTest}
-                  />
-                ))}
-              </div>
-              <div className="bg-white border border-border rounded-lg max-w-[280px]">
-                <h2 className="text-xl font-bold mb-4 p-4 border-b border-border">
-                  Tests Library
-                </h2>
-                {Object.entries(
-                  testLibrary.reduce((acc, test) => {
-                    if (!acc[test.category as any])
-                      acc[test.category as any] = [];
-                    acc[test.category as any].push(test);
-                    return acc;
-                  }, {} as Record<string, typeof testLibrary>)
-                ).map(([category, tests]) => (
-                  <div
-                    key={category}
-                    className="mb-4 px-4 border-b border-border"
-                  >
-                    <h3 className="font-bold mb-2">{category}</h3>
-                    {tests.map((test) => (
-                      <div key={test.id} className="flex items-start mb-2">
-                        <Checkbox
-                          id={test.id}
-                          checked={testsLibrary.some((t) => t.id === test.id)}
-                          onCheckedChange={() => {
-                            toggleTest(test.id);
-                          }}
-                          className="mr-2 mt-1 data-[state='checked']:bg-purple-800 data-[state='checked']:border-purple-800 border-gray-400"
+                  <div className="block">
+                    <h2 className="text-xl font-semibold">Variables Found</h2>
+                    <div className="flex flex-wrap mb-4 gap-2 gap-x-2 mt-2">
+                      {variables.map((variable) => (
+                        <VariableItem
+                          key={variable.id}
+                          variable={variable}
+                          testsLibrary={testsLibrary}
                         />
-                        <label htmlFor={test.id} className="text-[0.925rem]">
-                          {test.name}
-                        </label>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                ))}
+                </div>
+              </div>
+
+              <div className="px-8 flex gap-4 items-center mt-8">
+                <h2 className="text-xl font-semibold">Possible Tests</h2>
+                <Button
+                  disabled={!hasVariablesInTestsLibrary(testsLibrary)}
+                  className="auth-btn !rounded-md"
+                  onClick={() => runTestMutation.mutate()}
+                >
+                  {" "}
+                  Start Analysis
+                </Button>
+              </div>
+              <div className="flex gap-4 justify-between p-6 flex-1">
+                <div className="grid grid-cols-2 gap-6 space-x-4 mb-4 p-8 bg-[#F6F3F7] flex-[0.9] min-h-screen border rounded-lg border-dashed border-[#5B03B2]">
+                  {testsLibrary.map((test) => (
+                    <TestZone
+                      key={test.id}
+                      test={test}
+                      onDrop={(variable: Variable) =>
+                        handleDrop(variable, test.id)
+                      }
+                      onRemoveVariable={handleRemoveVariable}
+                      toggleTest={toggleTest}
+                      // onRemoveTest={removeTest}
+                    />
+                  ))}
+                </div>
+                <div className="bg-white border border-border rounded-lg max-w-[280px] min-w-[280px] max-h-fit">
+                  <h2 className="text-xl font-bold p-4 border-b border-border">
+                    Tests Library
+                  </h2>
+                  {testsLibraryQuery.isLoading && (
+                    <div className="flex items-center py-10 flex-col gap-2">
+                      <Loading size={20} />
+                      <p className="px-4">Fetching tests library</p>
+                    </div>
+                  )}
+                  {Object.entries(
+                    testLibrary.reduce((acc, test) => {
+                      if (!acc[test.category as any])
+                        acc[test.category as any] = [];
+                      acc[test.category as any].push(test);
+                      return acc;
+                    }, {} as Record<string, typeof testLibrary>)
+                  ).map(([category, tests], i, arr) => (
+                    <div
+                      key={category}
+                      className={cn(
+                        "pt-4 pb-2 px-4",
+                        i !== arr.length - 1 && "border-b border-border"
+                      )}
+                    >
+                      <h3 className="font-bold mb-2">{category}</h3>
+                      {tests.map((test) => (
+                        <div key={test.id} className="flex items-start mb-2">
+                          <Checkbox
+                            id={test.id}
+                            checked={testsLibrary.some((t) => t.id === test.id)}
+                            onCheckedChange={() => {
+                              toggleTest(test.id);
+                            }}
+                            className="mr-2 mt-1 data-[state='checked']:bg-purple-800 data-[state='checked']:border-purple-800 border-gray-400"
+                          />
+                          <label htmlFor={test.id} className="text-[0.925rem]">
+                            {test.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </DndProvider>
+          </DndProvider>
+        </>
       )}
     </Fragment>
   );
