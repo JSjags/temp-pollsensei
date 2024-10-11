@@ -39,6 +39,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: 'DELETE',
       }),
     }),
+  closeSurveyStatus: builder.mutation({
+      query: ({id, body}) => ({
+        url: `survey/status/${id} `,
+        method: 'PATCH',
+        body: body,
+      }),
+    }),
     generateTopics: builder.mutation({
       query: (body) => ({
         url: 'survey/ai/generate-topics',
@@ -148,4 +155,4 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
 
 
-export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation, useUploadResponseOCRMutation, useGetSingleResponseFolderQuery, useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation, useSubmitResponseMutation, useGetUserSurveyResponseQuery, useGetSurveySummaryQuery, useGetRespondentNameQuery, useValidateSurveyResponseQuery, useValidateIndividualResponseQuery } = surveyApiSlice
+export const { useFetchSurveysQuery, useCreateSurveyMutation, useCreateAiSurveyMutation, useGenerateSingleSurveyMutation, useAddSurveyHeaderMutation, useGenerateTopicsMutation, useSaveProgressMutation, useFetchASurveyQuery, useDownloadPDFQuery, useShareSurveyQuery, useDeleteSurveyMutation, useUploadResponseOCRMutation, useGetSingleResponseFolderQuery, useGetPublicSurveyByIdQuery, useGetPublicSurveyByShortUrlQuery, useSubmitPublicResponseMutation, useSubmitResponseMutation, useGetUserSurveyResponseQuery, useGetSurveySummaryQuery, useGetRespondentNameQuery, useValidateSurveyResponseQuery, useValidateIndividualResponseQuery, useCloseSurveyStatusMutation } = surveyApiSlice
