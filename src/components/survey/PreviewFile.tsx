@@ -98,7 +98,8 @@ interface PreviewFileProps {
 const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
   const [activeImage, setActiveImage] = useState<any>(null);
 
-  // Set the first available item in data as the active image when the component mounts
+  console.log(activeImage)
+  
   useEffect(() => {
     if (data && data.length > 0) {
       setActiveImage(data[0]);
@@ -110,7 +111,7 @@ const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
   };
 
   if (!data || data.length === 0) {
-    return <p>No files to preview.</p>; // Handle empty data case
+    return <p>No files to preview.</p>; 
   }
 
   return (
@@ -127,7 +128,7 @@ const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
         </div>
       ) : (
         <div className="border-2 border-purple-400 p-2 mb-4 w-full min-h-[50vh]">
-          <Image src={activeImage?.src} alt="Image preview" className="w-full h-auto max-w-md" />
+          <Image src={activeImage !== null ? activeImage : ""} alt="Image preview" className="w-full h-auto max-w-md" width={100} height={100} />
         </div>
       )}
 
@@ -147,7 +148,7 @@ const PreviewFile: React.FC<PreviewFileProps> = ({ data }) => {
                 onClick={() => handleThumbnailClick(file)}
                 className={`border-2 p-1 ${activeImage?.src === file?.src ? "border-purple-600" : "border-gray-300"}`}
               >
-                <Image src={file?.src} alt="Thumbnail" className="w-16 h-16 object-cover" />
+                <Image src={file} alt="Thumbnail" className="w-16 h-16 object-cover" width={16} height={16} />
               </button>
             );
           }

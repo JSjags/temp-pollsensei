@@ -320,7 +320,7 @@ const CreateNewSection = () => {
               >
                 <HiOutlinePlus className="inline-block mr-2" /> Add Question
               </button>
-              <div className="bg-white rounded-full px-5 py-1" 
+              {/* <div className="bg-white rounded-full px-5 py-1" 
               onClick={()=>{
                 dispatch(addSection({
                   section_topic:sectionTitle,
@@ -332,14 +332,14 @@ const CreateNewSection = () => {
                >
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
-              </div>
+              </div> */}
               <button
                 disabled={isLoading}
                 className="bg-white inline-block rounded-full px-5 py-1"
                 onClick={() => {
                   dispatch(resetQuestion());
                   dispatch(resetSurvey());
-                  router.push('/surveys/create-manual');
+                  router.push('/surveys/create-survey');
                 }}
               >
                 <GiCardDiscard className="inline-block mr-2" />

@@ -1,4 +1,4 @@
-import { resetAnswers } from "@/redux/slices/answer.slice";
+import { replaceAnswers, resetAnswers } from "@/redux/slices/answer.slice";
 import { RootState } from "@/redux/store";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
@@ -23,17 +23,25 @@ interface Answer {
   selected_options: string[];
 }
 
-interface OCRResponse {
+interface DataProps {
   extracted_answers: Answer[];
   survey: any;
   uploaded_files: any;
 }
+interface OCRResponse {
+
+  extracted_answers: Answer[];
+  survey: any;
+  uploaded_files: any;
+ }
+
 
 const ValidateResponse = () => {
   const params = useParams();
   const dispatch = useDispatch();
   const router = useRouter();
   const OCRresponses = useSelector(
+    // @ts-ignore
     (state: RootState) => state.answer.answers as OCRResponse[]
   );
   console.log(params.id);
@@ -47,13 +55,15 @@ const ValidateResponse = () => {
   const [respondent_email, setRespondent_email] = useState(
     "" || "example@gmail.com"
   );
+  const [filteredData, setFilteredData] = useState([]);
 
   console.log(OCRresponses);
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < OCRresponses.length - 1 ? prevIndex + 1 : prevIndex;
+        // @ts-ignore
+        return prevIndex < OCRresponses[currentSection]?.survey?.length - 1 ? prevIndex + 1 : prevIndex;
       } else {
         return prevIndex > 0 ? prevIndex - 1 : prevIndex;
       }
@@ -61,8 +71,8 @@ const ValidateResponse = () => {
   };
 
   const handleSubmitResponse = async () => {
-    // lets log the selected options and the provided text response to the console
-    const answers = OCRresponses[currentSection]?.extracted_answers
+    // @ts-ignore
+    const answers = OCRresponses[currentSection]?.survey?.extracted_answers
       ?.map((item: any) => {
         if (
           item.question_type === "multiple_choice" ||
@@ -71,7 +81,7 @@ const ValidateResponse = () => {
           return {
             question: item.question,
             question_type: item.question_type,
-            selected_options: item.selected_options || [], // Use the selected options from the response
+            selected_options: item.selected_options || [], 
           };
         } else if (
           item.question_type === "comment" ||
@@ -104,6 +114,11 @@ const ValidateResponse = () => {
     }
   };
 
+ 
+
+  
+ 
+
   useEffect(() => {
     if (isSuccess) {
       toast.success("Your response was saved successfully");
@@ -120,6 +135,29 @@ const ValidateResponse = () => {
   const handleQuestionChange = (index: number, selectedOptions: string[]) => {
     console.log(`Question ${index} selected options:`, selectedOptions);
   };
+
+  useEffect(() => {
+    function filterUniqueQuestions(data: Answer[]) {
+      const uniqueQuestions: Answer[] = [];
+      const seenQuestions = new Set<string>();
+
+      data?.forEach((item) => {
+        if (!seenQuestions.has(item.question)) {
+          uniqueQuestions.push(item);
+          seenQuestions.add(item.question);
+        }
+      });
+
+      return uniqueQuestions;
+    }
+
+    const currentExtractedAnswers = OCRresponses[currentSection]?.extracted_answers || [];
+    const uniqueFilteredData = filterUniqueQuestions(currentExtractedAnswers);
+    // @ts-ignore
+    setFilteredData(uniqueFilteredData); 
+  }, [OCRresponses, currentSection]);
+
+
   return (
     <div
       className={`${
@@ -204,7 +242,8 @@ const ValidateResponse = () => {
             )}
           </div>
 
-          {OCRresponses[currentSection]?.extracted_answers?.map(
+          {/* @ts-ignore */}
+          {filteredData?.map(
             (item: any, index: number) => (
               <div key={index} className="mb-4">
                 {item.question_type === "multiple_choice" ||
@@ -214,9 +253,10 @@ const ValidateResponse = () => {
                     question={item.question}
                     options={item.options}
                     questionType={item.question_type}
-                    selectedOptions={item.selected_options}
+                    selectedOptions={item.selected_options || []}
                     onChange={(selected) =>
-                      handleQuestionChange(index, selected)
+                      // handleQuestionChange(index, selected)
+                      console.log(selected)
                     }
                     index={index + 1}
                   />
@@ -283,13 +323,24 @@ const ValidateResponse = () => {
             )}
           </div>
 
-          <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
+          <div className=" rounded-md flex  items-center w-full md:min-w-[16rem] py-5 text-center">
+
+            <button
+              className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
+              type="button"
+              onClick={()=>{
+                dispatch(replaceAnswers(filteredData));
+                console.log("You clicked me")
+              }}
+            >
+              Remove duplicate questions
+            </button>
             <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
               type="button"
               onClick={()=>{
                 setTimeout(()=>{
-                  router.push("/surveys")
+                  router.push("/surveys/survey-list")
                   toast.success("Successful")
                   dispatch(resetAnswers());
                 }, 3000)

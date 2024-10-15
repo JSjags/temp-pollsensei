@@ -7,11 +7,15 @@ import {
   useGetRespondentNameQuery,
   useGetSurveySummaryQuery,
   useGetUserSurveyResponseQuery,
+  useValidateIndividualResponseQuery,
   useValidateSurveyResponseQuery,
 } from "@/services/survey.service";
 import Summary from "./Summary";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { toast } from "react-toastify";
+import { resetAnswers } from "@/redux/slices/answer.slice";
+import { useDispatch } from "react-redux";
 
 const calculateValidationCounts = (data:any) => {
   let validCount = 0;
@@ -51,26 +55,30 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
   const tabs = ["Summary", "Individual Responses", "Deleted"];
   const [activeTab, setActiveTab] = useState("Individual Responses");
   const [currentUserResponse, setCurrentUserResponse] = useState(0);
+  const [pagesNumber, setPagesNumber] = useState(1);
   const { data: response_ } = useGetUserSurveyResponseQuery(params.id);
   const { data: summary_ } = useGetSurveySummaryQuery(params.id);
 
   const path_params = new URLSearchParams();
   path_params.set("name", name);
 
-  const filterData = name ? `${params.id}?${path_params}` : params.id
+
   const { data:respondent_name } = useGetRespondentNameQuery(params.id);
   const { data:validate_ } = useValidateSurveyResponseQuery(params.id);
-  // const { data:validate_ } = useValidateSurveyResponseQuery(filterData);
-  const { validCount, invalidCount } = calculateValidationCounts2(validate_?.data[currentUserResponse]);
+  const { data:validate_individual_response } = useValidateIndividualResponseQuery({
+    id: params.id, pagesNumber:pagesNumber, path_params:path_params.toString()
+  });
+  console.log(validate_individual_response)
+  const { validCount, invalidCount } = calculateValidationCounts2(validate_individual_response?.data?.data[currentUserResponse]);
 
 
 
  
   const totalResponses = response_?.data?.total || 0;
-  console.log(totalResponses)
+  console.log(summary_)
 
  
-  console.log(validate_?.data);
+  // console.log(validate_individual_response?.data?.data);
 
 
 
@@ -86,6 +94,10 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
       setCurrentUserResponse((prev) => prev - 1);
     }
   };
+
+
+
+
   return (
     <div className="lg:px-24">
       <ResponseHeader
@@ -100,16 +112,16 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
         valid_response={validCount}
         invalid_response={invalidCount}
       />
-      <RespondentDetails data={response_?.data?.data[currentUserResponse]} />
+      <RespondentDetails data={validate_individual_response?.data?.data[currentUserResponse]} />
       {activeTab === "Individual Responses" && (
         <UserResponses
-          data={validate_?.data[currentUserResponse]}
+          data={validate_individual_response?.data?.data[currentUserResponse]}
           index={currentUserResponse}
         />
       )}
       {activeTab === "Summary" && (
         <div className="mt-2 min-h-[50vh]">
-          <Summary />
+          <Summary result={summary_?.data} />
         </div>
       )}
       {activeTab === "Deleted" && (

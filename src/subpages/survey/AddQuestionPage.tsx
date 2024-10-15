@@ -454,7 +454,7 @@ const AddQuestionPage = () => {
               >
                 <HiOutlinePlus className="inline-block mr-2" /> Add Question
               </button>
-              <button
+              {/* <button
                 className="bg-white inline-block rounded-full px-5 py-1"
                 onClick={() => {
                   dispatch(addSection({ questions: questions }));
@@ -464,14 +464,14 @@ const AddQuestionPage = () => {
               >
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
-              </button>
+              </button> */}
               <button
                 disabled={isLoading}
                 className="bg-white inline-block rounded-full px-5 py-1"
                 onClick={() => {
                   dispatch(resetQuestion());
                   dispatch(resetSurvey());
-                  router.push('/surveys/create-manual');
+                  router.push('/surveys/create-survey');
                 }}
               >
                 <GiCardDiscard className="inline-block mr-2" />

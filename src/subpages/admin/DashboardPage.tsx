@@ -16,6 +16,8 @@ import NoSurvey from "../../components/ui/NoSurvey";
 import Image from "next/image";
 import TopResponse from "@/components/ui/TopResponse";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import SocketIOTester from "@/contexts/SocketIOTester";
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -35,7 +37,6 @@ const DashboardPage = () => {
             <div className="chart w-full h-[300px] sm:h-[321px] radius flex justify-center">
               <LineChart data={item?.data.data} xKey="date" yKey="value" />
             </div>
-
             <div className="stat w-full lg:max-w-[305px] flex flex-col gap-4">
               <div className="radius w-full h-auto sm:h-[211px] p-4">
                 <div className="flex flex-col gap-4">
@@ -97,13 +98,15 @@ const DashboardPage = () => {
             </div>
           </div>
 
+          <SocketIOTester />
+
           <div className="flex w-full gap-4 flex-col lg:flex-row">
             <div className="w-full flex flex-col gap-4">
               <div className="w-full">
                 <div className="flex justify-between items-center">
                   <p className="survey-head text-lg font-semibold">Surveys</p>
                   <button className="survey-view-btn w-auto text-sm">
-                    View all
+                    <Link href={"/surveys/created-surveys"}>View all</Link>
                   </button>
                 </div>
               </div>
@@ -111,9 +114,7 @@ const DashboardPage = () => {
                 {surveys?.data?.length > 0 ? (
                   <SurveyTable />
                 ) : (
-                  <NoSurvey
-                    onCreateSurvey={() => router.push("/surveys")}
-                  />
+                  <NoSurvey onCreateSurvey={() => router.push("/surveys")} />
                 )}
               </div>
             </div>

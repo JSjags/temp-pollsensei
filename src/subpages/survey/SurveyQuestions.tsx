@@ -40,22 +40,22 @@ const SurveyQuestions = () => {
         className={` w-full flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
       >
         {data && !isLoading && data?.data?.logo_url && (
-          <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
+          <div className="bg-[#9D50BB]  w-1/3 my-3 text-white flex items-center flex-col ">
             <Image
               src={data?.data?.logo_url}
               alt=""
-              className="w-full object-cover bg-no-repeat h-16 rounded-full"
+              className="w-full object-cover bg-no-repeat h-16 "
               width={"100"}
               height={"200"}
             />
           </div>
         )}
 
-        <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+        <div className="bg-[#9D50BB]  w-full my-2 text-white h-24 flex items-center flex-col ">
           <Image
             src={data && data?.data?.header_url}
             alt=""
-            className="w-full object-cover bg-no-repeat h-24 rounded-lg"
+            className="w-full object-cover bg-no-repeat h-24 "
             width={"100"}
             height={"200"}
           />

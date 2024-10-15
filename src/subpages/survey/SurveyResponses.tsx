@@ -2,7 +2,7 @@ import NoResponse from "@/components/survey/NoResponse";
 import Responses from "@/components/survey/Responses";
 import ModalComponent from "@/components/ui/ModalComponent";
 import UploadedItem from "@/components/ui/UploadedItem";
-import { addAnswers } from "@/redux/slices/answer.slice";
+import { setSurvey } from "@/redux/slices/answer.slice";
 import {
   closeUpload,
   openUpload,
@@ -114,7 +114,11 @@ const SurveyResponses = () => {
     if (successOCRUpload) {
       toast.success("OCR processed successfully");
       setSelectedItem(null);
-      dispatch(addAnswers(uploadOCR?.data));
+      dispatch(setSurvey({
+        survey: uploadOCR?.data.survey,
+        extracted_answers:uploadOCR?.data.extracted_answers,
+        uploaded_files:uploadOCR?.data.uploaded_files,
+      }));
       handleToggle();
       router.push("validate-response");
     }
@@ -177,7 +181,7 @@ const SurveyResponses = () => {
                   Select a file or drag and drop here
                   <br />
                   <span className={`text-xs`}>
-                    JPG, PNG or PDF, file size no more than 10MB
+                    JPG, PNG, file size no more than 10MB
                   </span>{" "}
                 </label>
                 <input
@@ -185,7 +189,7 @@ const SurveyResponses = () => {
                   id="header_image"
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  accept=".jpg, .jpeg, .png, .pdf,"
+                  accept=".jpg, .jpeg, .png,"
                   className="hidden"
                   multiple
                 />
