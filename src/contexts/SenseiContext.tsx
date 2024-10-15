@@ -18,7 +18,7 @@ interface SenseiContextProps {
 
 const SenseiContext = createContext<SenseiContextProps | undefined>(undefined);
 
-const SOCKET_URL = "ws://4.152.139.177"; // Replace with your actual WebSocket URL
+const SOCKET_URL = "https://ai-api-staging.pollsensei.ai"; // Replace with your actual WebSocket URL
 
 interface ServerToClientEvents {
   ai_trigger: (data: { message: string }) => void;
