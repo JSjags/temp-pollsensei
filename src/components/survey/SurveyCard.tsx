@@ -61,7 +61,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [shareSurvey, setShareSurvey] = useState(false);
   const params = useParams();
   const [deleteSurvey] = useDeleteSurveyMutation();
-  const [closeSurveyStatus] = useCloseSurveyStatusMutation();
+  const [closeSurveyStatus, {isLoading: isClosing }] = useCloseSurveyStatusMutation();
   const router = useRouter();
   const { data, isSuccess: shareSuccess } = useShareSurveyQuery(params.id);
   const shareLink = data?.data?.link;
@@ -121,15 +121,16 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         body: { status: "Closed" },
       }).unwrap(); 
       toast.success('Survey closed successfully')
-      setToggle(!toggle);
+      handleCloseAll();
       console.log("Success:", result);
+      setToggle(!toggle);
     } catch (err) {
       toast.error('Failed to close survey')
       console.error("Error:", err);
     }
   };
 
-  console.log(status)
+  // console.log(status)
 
   let bg = "";
   let text = "";
@@ -268,6 +269,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         <ChangeSurveyStatus
           openModal={closeSurvey}
           onClose={handleCloseAll}
+          isClosing={isClosing}
           onCloseSurvey={() => {
             handleCloseSurvey(_id);
           }}

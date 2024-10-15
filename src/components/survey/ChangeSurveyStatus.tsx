@@ -8,10 +8,11 @@ import close from "./close.svg";
 interface ChangeSurveyStatusProps {
   onClose: () => void;
   openModal: boolean;
+  isClosing?: boolean;
   onCloseSurvey?:()=>void;
 }
 
-const ChangeSurveyStatus: React.FC<ChangeSurveyStatusProps> = ({ onClose, openModal, onCloseSurvey }) => {
+const ChangeSurveyStatus: React.FC<ChangeSurveyStatusProps> = ({ onClose, openModal, onCloseSurvey, isClosing }) => {
   return (
     <Modals title="" openModal={openModal} modalSize="lg" onClose={onClose}>
       <div className="flex flex-col items-center gap-2">
@@ -22,7 +23,7 @@ const ChangeSurveyStatus: React.FC<ChangeSurveyStatusProps> = ({ onClose, openMo
         </p>
         <div className="mt-3 flex items-center justify-between w-full">
           <ButtonOutline label="No, cancel" />
-          <ButtonDelete label="Close Survey" onclick={onCloseSurvey}/>
+          <ButtonDelete label={isClosing ? "Waiting..." : "Close Survey"} onclick={onCloseSurvey}/>
         </div>
       </div>
     </Modals>
