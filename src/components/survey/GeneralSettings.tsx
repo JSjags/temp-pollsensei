@@ -73,7 +73,7 @@ const FormToggle: React.FC<FormToggleProps> = ({
         <p className="text-gray-500 w-3/4 text-sm">{description}</p>
       </div>
         <Switch
-              className="data-[state=checked]:bg-purple-500"
+              className="data-[state=checked]:bg-purple-500 "
               checked={status}
               onCheckedChange={()=>setEnabled(!enabled)}
             />
