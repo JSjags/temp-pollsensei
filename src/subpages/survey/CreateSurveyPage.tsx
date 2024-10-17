@@ -118,12 +118,12 @@ const CreateSurveyPage = () => {
         dispatch(resetSurvey());
       }
     };
-  }, [dispatch, surveyData, shouldPrompt]);
+  }, [dispatch, shouldPrompt]);
 
   const handleUserDecision = () => {
     if (window.confirm('Do you want to continue with the old survey data?')) {
       if(generated_by === "ai"){
-        console.log("/surveys/edit-survey")
+        navigate.push("/surveys/edit-survey")
       }else{
         navigate.push("/surveys/add-question-m")
       }
