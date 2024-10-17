@@ -82,7 +82,7 @@ const CreateSurveyPage = () => {
   const dispatch = useDispatch();
   const [surveyType, setSurveyType] = useState("");
   const [surveyPrompt, setSurveyPrompt] = useState("");
-  const [createAiSurvey, { data, isLoading, isSuccess }] =
+  const [createAiSurvey, { data, isLoading, isSuccess, isError, error }] =
     useCreateAiSurveyMutation();
   const [
     generateTopics,
@@ -156,6 +156,26 @@ const CreateSurveyPage = () => {
       console.error(e);
     }
   };
+
+  // const handleGenerateTopics = async () => {
+  //   let retries = 3;
+  //   let success = false;
+  
+  //   while (retries > 0 && !success) {
+  //     try {
+  //       await generateTopics({
+  //         user_query: surveyPrompt,
+  //       });
+  //       success = true;
+  //     } catch (e) {
+  //       retries -= 1;
+  //       console.error(`Attempt failed. Retries left: ${retries}`, e);
+  //       if (retries === 0) {
+  //         toast.error("Failed to create survey after 3 attempts");
+  //       }
+  //     }
+  //   }
+  // };  
 
   useEffect(() => {
     if (isTopicSuccess) {

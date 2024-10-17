@@ -26,6 +26,7 @@ import { deleteQuestionFromSection, resetSurvey, updateSection } from "@/redux/s
 import store from '@/redux/store';
 import Sensei from "@/components/ui/Sensei";
 import PaginationBtn from "@/components/common/PaginationBtn";
+import { resetQuestion } from "@/redux/slices/questions.slice";
 
 
 
@@ -235,6 +236,9 @@ const EditSurvey = () => {
     }
     if(progressIsError || progressError){
       toast.error("Failed to save progress, please try again later")
+      dispatch(resetSurvey())
+      dispatch(resetQuestion());
+      router.push('/surveys')
     }
   }, [progressError, progressIsError])
 
