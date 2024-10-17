@@ -26,6 +26,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import {
   addSection,
+  resetSurvey,
   saveGeneratedBy,
   updateConversationId,
   updateDescription,
@@ -36,6 +37,8 @@ import store from "@/redux/store";
 import Milestones from "@/components/survey/Milestones";
 import { AnimatePresence, motion } from "framer-motion";
 import SenseiMaster from "@/components/sensei-master/SenseiMaster";
+import ModalComponent from "@/components/ui/ModalComponent";
+import { resetQuestion } from "@/redux/slices/questions.slice";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -98,6 +101,37 @@ const CreateSurveyPage = () => {
   };
 
   const maxCharacters = 3000;
+
+  const surveyData = useSelector((state:RootState) => state?.survey?.sections);
+  const manualSurveyData = useSelector((state:RootState) => state?.question?.questions)
+  // const generated_by = useSelector((state:RootState) => state?.survey?.generated_by)
+  const [shouldPrompt, setShouldPrompt] = useState(false);
+
+  useEffect(() => {
+    if (surveyData && surveyData.length > 0 || manualSurveyData && manualSurveyData.length > 0) {
+      setShouldPrompt(true);
+    }
+
+    return () => {
+      // Ask user before clearing data on unmount
+      if (shouldPrompt && window.confirm("You have unsaved survey data. Do you want to discard it?")) {
+        dispatch(resetSurvey());
+      }
+    };
+  }, [dispatch, surveyData, shouldPrompt]);
+
+  const handleUserDecision = () => {
+    if (window.confirm('Do you want to continue with the old survey data?')) {
+      if(generated_by === "ai"){
+        console.log("/surveys/edit-survey")
+      }else{
+        navigate.push("/surveys/add-question-m")
+      }
+    } else {
+      dispatch(resetSurvey()); 
+    }
+    setShouldPrompt(false); 
+  };
 
   const handleSurveyType = (userType: any, prompt: string) => {
     setSelectedDiv(userType);
@@ -222,13 +256,26 @@ const CreateSurveyPage = () => {
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center">
-      {/* {milestone && <Milestones stage="0" 
-      onClick={()=>{
-        setMilestones(false)
-        console.log('milestone clicked')
-        // setMilestones((prev)=>!prev)
-        setWhatDoYouWant(true)
-        }} />} */}
+          {shouldPrompt && (
+        <ModalComponent
+        title=""
+        openModal={shouldPrompt}
+        // onClose={() => setShouldPrompt((prev)=> !prev)}
+        >
+          <div className="flex flex-col justify-center items-center text-center">
+          <p>You have unsaved survey data. Do you want to continue?</p>
+          <div className="flex justify-between items-center w-full gap-4">
+            
+          <button className="w-full border py-2 rounded" onClick={handleUserDecision}>Yes, Continue</button>
+          <button className="w-full border py-2 rounded" onClick={() =>{
+            dispatch(resetSurvey())
+            dispatch(resetQuestion());
+            setShouldPrompt(false)
+            }}>No, Start Fresh</button>
+          </div>
+          </div>
+        </ModalComponent>
+      )}
       {whatDoYouWant && (
         <div className="flex flex-col justify-center items-center gap-10 ">
           <h1 className="text-2xl mt-10 md:mt-0">

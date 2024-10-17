@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 import Input from "./Input";
 import MultiSelectField from "./MultipleSelect";
 import InviteSuccess from "./InviteSuccess";
+import { MdKeyboardBackspace } from "react-icons/md";
+import { closeSurveySettings } from "@/redux/slices/survey_settings.slice";
 
 interface FormValues {
   name: string;
@@ -95,6 +97,9 @@ const CollaboratorsList: React.FC = () => {
   };
   return (
     <div className="bg-white p-6 rounded-lg shadow-md  mx-auto">
+      <div onClick={()=>{
+        dispatch(closeSurveySettings());
+      }} className="text-xl font-semibold mb-4"> <MdKeyboardBackspace /></div>
       {data?.data?.map((user:any, index:number) => (
         <div key={index} className="flex items-center justify-between mb-4">
           {/* User Info */}
