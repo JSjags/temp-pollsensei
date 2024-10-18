@@ -42,7 +42,7 @@ const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   };
 
   return (
-    <div>
+    <div className="relative z-50">
       <label htmlFor="">{label}</label>
       <Select<Option, true>
         {...input}
