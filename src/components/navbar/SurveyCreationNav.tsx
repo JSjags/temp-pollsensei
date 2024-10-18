@@ -331,6 +331,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSurveyResponses } from "@/services/analysis";
 import { extractMongoId } from "@/lib/utils";
+import { openSurveySettings } from "@/redux/slices/survey_settings.slice";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -465,8 +466,10 @@ const SurveyCreationNav = () => {
               //   <IoEyeOutline className="mr-1" /> Preview
               // </button>
             )}
-            {!path.includes("/surveys/question") && (
-              <button className="border-none flex items-center">
+            {path.includes("/surveys/question") && (
+              <button className="border-none flex items-center" 
+              onClick={()=>{ dispatch(openSurveySettings()) }}
+              >
                 <IoSettingsOutline className="mr-1" />
                 <span className="hidden xl:flex"> Survey Settings </span>
               </button>

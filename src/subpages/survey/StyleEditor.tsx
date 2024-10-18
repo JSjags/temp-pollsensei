@@ -9,7 +9,15 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { useAddSurveyHeaderMutation } from "@/services/survey.service";
 import { toast } from "react-toastify";
-import { saveBodyText, saveColorTheme, saveHeaderText, saveHeaderUrl, saveLogoUrl, saveQuestionText, saveTheme } from "@/redux/slices/survey.slice";
+import {
+  saveBodyText,
+  saveColorTheme,
+  saveHeaderText,
+  saveHeaderUrl,
+  saveLogoUrl,
+  saveQuestionText,
+  saveTheme,
+} from "@/redux/slices/survey.slice";
 
 // Types for font options
 interface FontOption {
@@ -25,9 +33,13 @@ interface SizeOption {
 const StyleEditor = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileLogoRef = useRef<HTMLInputElement>(null);
-  const headerUrl = useSelector((state: RootState) => state?.survey?.header_url);
+  const headerUrl = useSelector(
+    (state: RootState) => state?.survey?.header_url
+  );
+  const logo_url = useSelector((state: RootState) => state?.survey?.logo_url);
   const dispatch = useDispatch();
-  const [addSurveyHeader, { data:response, isSuccess , isLoading}] = useAddSurveyHeaderMutation()
+  const [addSurveyHeader, { data: response, isSuccess, isLoading }] =
+    useAddSurveyHeaderMutation();
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const [headerFont, setHeaderFont] = useState({ name: "Helvetica", size: 24 });
   const [questionFont, setQuestionFont] = useState({
@@ -37,7 +49,9 @@ const StyleEditor = () => {
   const [bodyFont, setBodyFont] = useState({ name: "Helvetica", size: 16 });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
-  const colorTheme = useSelector((state:RootState)=>state?.survey?.color_theme)
+  const colorTheme = useSelector(
+    (state: RootState) => state?.survey?.color_theme
+  );
   const [color, setColor] = useState(colorTheme || "#ff5722");
 
   const fontOptions: FontOption[] = [
@@ -46,7 +60,6 @@ const StyleEditor = () => {
     { value: "Times New Roman", label: "Times New Roman" },
     // Add more fonts here...
   ];
-  
 
   const sizeOptions: SizeOption[] = [
     { value: 32, label: 32 },
@@ -69,29 +82,28 @@ const StyleEditor = () => {
     }
   };
 
-  
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    file_type: string,
+    file_type: string
   ) => {
     const file = event.target.files?.[0];
     if (file) {
       setFile(file);
-  
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("file_type", file_type);
-  
+
       try {
         const response = await addSurveyHeader(formData).unwrap();
-  
-        if (file_type === 'logo') {
-          dispatch(saveLogoUrl(response?.data.url)); 
+
+        if (file_type === "logo") {
+          dispatch(saveLogoUrl(response?.data.url));
         } else {
           dispatch(saveHeaderUrl(response?.data.url));
         }
-  
+
         toast.success("Image uploaded successfully");
       } catch (err: any) {
         toast.error(
@@ -100,19 +112,18 @@ const StyleEditor = () => {
       }
     }
   };
-  
 
   useEffect(() => {
     if (isSuccess && response?.data) {
-      if (response.data.file_type === 'logo') {
+      if (response.data.file_type === "logo") {
         dispatch(saveLogoUrl(response.data.url));
-      } else if (response.data.file_type === 'header_image') {
+      } else if (response.data.file_type === "header_image") {
         dispatch(saveHeaderUrl(response.data.url));
       }
     }
   }, [isSuccess, response, dispatch]);
-  
-console.log(color)
+
+  console.log(logoFile);
 
   return (
     <div className="style-editor bg-white h-full flex flex-col transform transition-transform duration-300 ease-in-out">
@@ -123,16 +134,53 @@ console.log(color)
       <div className="theme-selector px-10 border-b py-5">
         <h4 className="font-bold">Theme</h4>
         <div className="flex w-full justify-between gap-2 items-center pt-3 ">
-          <div className="flex-1 flex flex-col w-1/3 h-24" onClick={()=>{dispatch(saveTheme('default'))}}>
-            <Image src={defaultBg} alt="" className={`${theme === 'default' ? "border-2 rounded-lg border-[#9D50BB]" : ""} w-full`} />
+          <div
+            className="flex-1 flex flex-col w-1/3 h-24"
+            onClick={() => {
+              dispatch(saveTheme("default"));
+            }}
+          >
+            <Image
+              src={defaultBg}
+              alt=""
+              className={`${
+                theme === "default"
+                  ? "border-2 rounded-lg border-[#9D50BB]"
+                  : ""
+              } w-full`}
+            />
             <span className="text-sm font-normal">Default</span>
           </div>
-          <div className="flex-1 flex flex-col w-1/3 h-24" onClick={()=>{dispatch(saveTheme('neon'))}}>
-            <Image src={neon} alt="" className={`${theme === 'neon' ? "border-2 rounded-lg border-[#9D50BB]" : ""} w-full`} />
+          <div
+            className="flex-1 flex flex-col w-1/3 h-24"
+            onClick={() => {
+              dispatch(saveTheme("neon"));
+            }}
+          >
+            <Image
+              src={neon}
+              alt=""
+              className={`${
+                theme === "neon" ? "border-2 rounded-lg border-[#9D50BB]" : ""
+              } w-full`}
+            />
             <span className="text-sm font-normal">Neon</span>
           </div>
-          <div className="flex-1 flex flex-col w-1/3 h-24" onClick={()=>{dispatch(saveTheme('sparkly'))}}>
-            <Image src={sparkly} alt="" className={`${theme === 'sparkly' ? "border-2 rounded-lg border-[#9D50BB]" : ""} w-full`} />
+          <div
+            className="flex-1 flex flex-col w-1/3 h-24"
+            onClick={() => {
+              dispatch(saveTheme("sparkly"));
+            }}
+          >
+            <Image
+              src={sparkly}
+              alt=""
+              className={`${
+                theme === "sparkly"
+                  ? "border-2 rounded-lg border-[#9D50BB]"
+                  : ""
+              } w-full`}
+            />
             <span className="text-sm font-normal">Sparkly</span>
           </div>
         </div>
@@ -146,10 +194,12 @@ console.log(color)
             <Select
               options={fontOptions}
               value={fontOptions.find((opt) => opt.value === headerFont.name)}
-              onChange={(opt) =>
-              {  
-                setHeaderFont({ ...headerFont, name: opt?.value || "Helvetica" })
-                dispatch(saveHeaderText(headerFont))
+              onChange={(opt) => {
+                setHeaderFont({
+                  ...headerFont,
+                  name: opt?.value || "Helvetica",
+                });
+                dispatch(saveHeaderText(headerFont));
               }}
               className="w-[80%]"
               classNamePrefix={`header_font`}
@@ -157,10 +207,9 @@ console.log(color)
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === headerFont.size)}
-              onChange={(opt) =>
-              {
-                setHeaderFont({ ...headerFont, size: opt?.value || 24 })
-                dispatch(saveHeaderText(headerFont))
+              onChange={(opt) => {
+                setHeaderFont({ ...headerFont, size: opt?.value || 24 });
+                dispatch(saveHeaderText(headerFont));
               }}
               className="w-[20%]"
               classNamePrefix={`header_font`}
@@ -173,10 +222,12 @@ console.log(color)
             <Select
               options={fontOptions}
               value={fontOptions.find((opt) => opt.value === questionFont.name)}
-              onChange={(opt) =>
-              {
-                setQuestionFont({ ...questionFont, name: opt?.value || "Helvetica" })
-                dispatch(saveQuestionText(questionFont))
+              onChange={(opt) => {
+                setQuestionFont({
+                  ...questionFont,
+                  name: opt?.value || "Helvetica",
+                });
+                dispatch(saveQuestionText(questionFont));
               }}
               className="w-[80%]"
               classNamePrefix={`question_font`}
@@ -184,10 +235,9 @@ console.log(color)
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === questionFont.size)}
-              onChange={(opt) =>
-              {
-                setQuestionFont({ ...questionFont, size: opt?.value || 18 })
-                dispatch(saveQuestionText(questionFont))
+              onChange={(opt) => {
+                setQuestionFont({ ...questionFont, size: opt?.value || 18 });
+                dispatch(saveQuestionText(questionFont));
               }}
               className="w-[20%]"
               classNamePrefix={`question_font`}
@@ -200,22 +250,19 @@ console.log(color)
             <Select
               options={fontOptions}
               value={fontOptions.find((opt) => opt.value === bodyFont.name)}
-              onChange={(opt) =>
-              {
-                setBodyFont({ ...bodyFont, name: opt?.value || "Helvetica" })
-                dispatch(saveBodyText(bodyFont))
+              onChange={(opt) => {
+                setBodyFont({ ...bodyFont, name: opt?.value || "Helvetica" });
+                dispatch(saveBodyText(bodyFont));
               }}
               className="w-[80%]"
               classNamePrefix={`body_font`}
-
             />
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === bodyFont.size)}
-              onChange={(opt) =>
-              {
-                setBodyFont({ ...bodyFont, size: opt?.value || 16 })
-                dispatch(saveBodyText(bodyFont))
+              onChange={(opt) => {
+                setBodyFont({ ...bodyFont, size: opt?.value || 16 });
+                dispatch(saveBodyText(bodyFont));
               }}
               className="w-[20%]"
               classNamePrefix={`body_font`}
@@ -229,10 +276,10 @@ console.log(color)
         <div className="pt-5">
           <TwitterPicker
             color={color}
-            onChangeComplete={(newColor) =>{
-               setColor(newColor.hex)
-               dispatch(saveColorTheme(newColor.hex))
-              }}
+            onChangeComplete={(newColor) => {
+              setColor(newColor.hex);
+              dispatch(saveColorTheme(newColor.hex));
+            }}
             className="w-full pt-4"
             width="100%"
             triangle="hide"
@@ -255,24 +302,35 @@ console.log(color)
                 className="small py-2 px-2"
                 role="button"
               >
-                <span className="text-decoration-underline">
-                  click to upload your image
-                </span>{" "}
-                <br />
-                Or drag and drop
+                {logoFile === null ? (
+                  <>
+                    {" "}
+                    <span className="text-decoration-underline">
+                      click to upload your image
+                    </span>{" "}
+                    <br />
+                    Or drag and drop{" "}
+                  </>
+                ) : (
+                  <img
+                  // @ts-ignore
+                    src={logoFile !== null && logo_url ? logo_url : ""}
+                    alt="Logo"
+                  />
+                  // <img src={logoFile ? URL.createObjectURL(logoFile) : logo_url || ""} alt="Logo" />
+                )}
               </label>
               <input
                 type="file"
                 id="logoFileInput"
                 ref={fileLogoRef}
-                onChange={(e) => handleFileChange(e, setLogoFile, 'logo')}
+                onChange={(e) => handleFileChange(e, setLogoFile, "logo")}
                 accept=".jpg, .jpeg, .png"
                 className="hidden"
                 role="button"
               />
             </div>
           </div>
-          {logoFile && <p>{logoFile.name}</p>}
         </div>
       </div>
 
@@ -291,25 +349,38 @@ console.log(color)
                 className="small py-2 px-2"
                 role="button"
               >
-                <span className="text-decoration-underline">
-                  click to upload your image
-                </span>{" "}
-                <br />
-                Or drag and drop
+                {headerImageFile === null ? (
+                  <>
+                    <span className="text-decoration-underline">
+                      click to upload your image
+                    </span>{" "}
+                    <br />
+                    Or drag and drop
+                  </>
+                ) : (
+                  <img
+                  // @ts-ignore
+                    src={headerImageFile !== null && headerUrl ? headerUrl : ""}
+                    alt="Logo"
+                  />
+                  // <img src={logoFile ? URL.createObjectURL(logoFile) : logo_url || ""} alt="Logo" />
+                )}
               </label>
               <input
                 type="file"
                 id="header_image"
                 ref={fileInputRef}
                 // onChange={handleAddHeaderImg}
-                onChange={(e) => handleFileChange(e, setHeaderImageFile, 'header_image')}
+                onChange={(e) =>
+                  handleFileChange(e, setHeaderImageFile, "header_image")
+                }
                 accept=".jpg, .jpeg, .png"
                 className="hidden"
                 role="button"
               />
             </div>
           </div>
-          {headerImageFile && <p>{headerImageFile?.name}</p>}
+          {/* {headerImageFile && <p>{headerImageFile?.name}</p>} */}
         </div>
       </div>
     </div>

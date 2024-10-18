@@ -4,13 +4,14 @@ import {
   BaseQueryFn,
   FetchArgs,
   FetchBaseQueryError,
+  retry,
 } from "@reduxjs/toolkit/query/react";
 import environment from "../config/base";
 import { logoutUser } from "../../redux/slices/user.slice";
 import { toast } from "react-toastify";
 import { RootState } from "../../redux/store";
 
-const baseQuery = fetchBaseQuery({
+const baseQuery = retry(fetchBaseQuery({
   baseUrl: environment.API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
@@ -20,7 +21,7 @@ const baseQuery = fetchBaseQuery({
     }
     return headers;
   },
-});
+}), { maxRetries: 3 });
 
 const customBaseQuery: BaseQueryFn<
   string | FetchArgs,

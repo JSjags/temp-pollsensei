@@ -18,15 +18,18 @@ import ShareSurvey from "./ShareSurvey";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useParams, useRouter } from "next/navigation";
 import {
+  useCloseSurveyStatusMutation,
   useDeleteSurveyMutation,
   useShareSurveyQuery,
 } from "@/services/survey.service";
 import ShareSurveyModal from "./ShareSurveyModal";
+import ChangeSurveyStatus from "./ChangeSurveyStatus";
+import { toast } from "react-toastify";
 
 interface SurveyCardProps {
   topic: string;
   createdAt: string;
-  status: StatusTagProps;
+  status: string;
   number_of_responses: number;
   _id: string;
 }
@@ -46,9 +49,11 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     "Make a copy",
     "Close survey",
     "Delete",
+    "Close Survey",
   ];
   const [viewOptions, setViewOptions] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [closeSurvey, setCloseSurvey] = useState(false);
   const [showRename, setShowRename] = useState(false);
   const [showDuplicate, setShowDuplicate] = useState(false);
   const [toggle, setToggle] = useState(false);
@@ -56,6 +61,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [shareSurvey, setShareSurvey] = useState(false);
   const params = useParams();
   const [deleteSurvey] = useDeleteSurveyMutation();
+  const [closeSurveyStatus, {isLoading: isClosing }] = useCloseSurveyStatusMutation();
   const router = useRouter();
   const { data, isSuccess: shareSuccess } = useShareSurveyQuery(params.id);
   const shareLink = data?.data?.link;
@@ -80,6 +86,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     if (choice.includes("share")) {
       setShareSurvey(true);
     }
+    if (choice.includes("close")) {
+      setCloseSurvey(true);
+    }
     if (choice.includes("preview")) {
       router.push(`/surveys/question/${_id}`);
     }
@@ -89,10 +98,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setShowDelete(false);
     setShowDuplicate(false);
     setShowRename(false);
+    setCloseSurvey(false);
   };
 
-  const handleSetToggle = () => {
-    setToggle(!toggle);
+  const handleSetToggle = (op:any) => {
+    handleSelectOption(op)
+    // setToggle(!toggle);
   };
 
   const handleDeleteSurvey = async (id: any) => {
@@ -103,6 +114,41 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       console.log(e);
     }
   };
+  const handleCloseSurvey = async (id:string) => {
+    try {
+      const result = await closeSurveyStatus({
+        id: id,
+        body: { status: "Closed" },
+      }).unwrap(); 
+      toast.success('Survey closed successfully')
+      handleCloseAll();
+      console.log("Success:", result);
+      setToggle(!toggle);
+    } catch (err) {
+      toast.error('Failed to close survey')
+      console.error("Error:", err);
+    }
+  };
+
+  // console.log(status)
+
+  let bg = "";
+  let text = "";
+  let color = "";
+
+  if (status === "Closed") {
+    text = "Closed";
+    bg = "#FFE8D7";
+    color = "#931222";
+  } else if (status === "On going") {
+    text = "On going";
+    bg = "#E6FBD9";
+    color = "#0F5B1D";
+  } else if (status === "Draft") {
+    text = "Draft";
+    bg = "#fafafa";
+    color = "#242D35";
+  }
 
   return (
     <div className="relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px]">
@@ -131,7 +177,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       </div>
 
       <div className="mt-3 sm:mt-4">
-        <StatusTag type={status.type} />
+      <div
+      style={{ backgroundColor: bg, color }}
+      className={`text-[12px] rounded-[12px] w-[69px] h-[24px] flex items-center justify-center px-[10px] pt-[5px] pb-[7px] whitespace-nowrap`}
+    >
+      {text}
+    </div>
       </div>
 
       <div className="mt-6 sm:mt-10 flex justify-between items-center">
@@ -181,9 +232,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
           </div>
           <div>
             <Switch
-              className="data-[state=checked]:bg-purple-500"
-              checked={toggle}
-              onCheckedChange={handleSetToggle}
+              className="data-[state=checked]:bg-gray-400 data-[state=unchecked]:bg-purple-500"
+              checked={status === "Closed" && true}
+              onCheckedChange={()=> handleSetToggle('Close')}
             />
           </div>
         </div>
@@ -212,6 +263,16 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
           openModal={showDelete}
           onClose={handleCloseAll}
           onDelete={() => handleDeleteSurvey(_id)}
+        />
+      )}
+      {closeSurvey && (
+        <ChangeSurveyStatus
+          openModal={closeSurvey}
+          onClose={handleCloseAll}
+          isClosing={isClosing}
+          onCloseSurvey={() => {
+            handleCloseSurvey(_id);
+          }}
         />
       )}
       {showRename && (

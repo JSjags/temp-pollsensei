@@ -165,6 +165,8 @@ const AddQuestionPage = () => {
     }
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
+      dispatch(resetSurvey());
+      dispatch(resetQuestion());
     }
   }, [progressError, progressIsError]);
 
@@ -210,11 +212,7 @@ const AddQuestionPage = () => {
           )}{" "}
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
-              src={
-                headerUrl 
-                  ? headerUrl
-                  : sparkly
-              }
+              src={headerUrl ? headerUrl : sparkly}
               alt=""
               className="w-full object-cover bg-no-repeat h-24 rounded-lg"
               width={"100"}
@@ -267,95 +265,6 @@ const AddQuestionPage = () => {
               </div>
             </div>
           )}
-          {/* <DragDropContext onDragEnd={handleDragEnd}>
-            <StrictModeDroppable droppableId="questions">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {questions?.map((item: any, index: any) => (
-                    <Draggable
-                      key={index}
-                      draggableId={index.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-4"
-                        >
-                          {
-                            isEdit && editIndex === index && item.question_type === "matrix_checkbox" ? (
-                              <MatrixQuestionEdit
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                              />
-                            ) :
-                            isEdit && editIndex === index ? (
-                              <MultiChoiceQuestionEdit
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                              />
-                            ) :
-                          item.question_type === "multiple_choice" ? (
-                            <MultiChoiceQuestion
-                              index={index + 1}
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              DeleteQuestion={()=>{}}
-                            />
-                          ) : item.question_type === "long_text" ? (
-                            <CommentQuestion
-                              key={index}
-                              index={index + 1}
-                              question={item.question}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                            />
-                          )
-                          : item.question_type === "likert_Scale" ? (
-                            <LikertScaleQuestion
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          ) : item.question_type === "star_rating" ? (
-                            <StarRatingQuestion
-                              question={item.question}
-                              maxRating={5}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          )
-                           : item.question_type === "long_text" ? (
-                            <MatrixQuestion
-                              key={index}
-                              index={index + 1}
-                              options={item.objectptions}
-                              question={item.question}
-                              questionType={item.question_type}
-                            />
-                          ) : null}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </StrictModeDroppable>
-          </DragDropContext> */}
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
@@ -471,7 +380,7 @@ const AddQuestionPage = () => {
                 onClick={() => {
                   dispatch(resetQuestion());
                   dispatch(resetSurvey());
-                  router.push('/surveys/create-survey');
+                  router.push("/surveys/create-survey");
                 }}
               >
                 <GiCardDiscard className="inline-block mr-2" />
