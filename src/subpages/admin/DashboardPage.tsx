@@ -98,7 +98,7 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <SocketIOTester />
+          {/* <SocketIOTester /> */}
 
           <div className="flex w-full gap-4 flex-col lg:flex-row">
             <div className="w-full flex flex-col gap-4">

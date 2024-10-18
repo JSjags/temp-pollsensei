@@ -1,4 +1,4 @@
-import AnalysisPage from "@/components/analysis/page";
+import AnalysisPage from "@/components/analysis/AnalysisTests";
 import React from "react";
 
 type Props = {};

@@ -17,6 +17,13 @@ interface MultiChoiceQuestionProps {
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
+  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
   index: number;
   canUseAI?: boolean;
   status?: string;
@@ -28,8 +35,10 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   questionType,
   EditQuestion,
   DeleteQuestion,
+  setEditId,
   index,
   onChange,
+  onSave,
   canUseAI = false,
   status,
 }) => {
@@ -96,10 +105,17 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                 <span>{index}. </span> {question}
               </p>
               <PollsenseiTriggerButton
+                key={index}
                 imageUrl={stars}
                 tooltipText="Rephrase question"
                 className={"group-hover:inline-block hidden"}
                 triggerType="rephrase"
+                question={question}
+                optionType={questionType}
+                options={options}
+                setEditId={setEditId}
+                onSave={onSave!}
+                index={index}
               />
             </div>
           </h3>

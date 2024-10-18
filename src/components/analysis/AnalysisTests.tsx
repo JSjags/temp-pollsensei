@@ -22,6 +22,7 @@ import AnalysisLoadingScreen, {
 import AnalysisErrorComponent from "../loaders/page-loaders/AnalysisError";
 import Loading from "../primitives/Loader";
 import { toast } from "react-toastify";
+import AnalysisReport from "./AnalysisReport";
 
 export interface Variable {
   id: string;
@@ -183,6 +184,7 @@ export default function DragAndDropPage() {
   const [variables, setVariables] = useState(initialVariables);
   const [testsLibrary, setTestsLibrary] = useState<Test[]>([]);
   const [testLibrary, setTestLibrary] = useState<Test[]>([]);
+  const [showReport, setShowReport] = useState<boolean>(false);
 
   // AnalysisLoadingScreen
 
@@ -214,10 +216,12 @@ export default function DragAndDropPage() {
     onSuccess: (data) => {
       console.log(data);
       toast.success("Analysis conducted successfully");
+      setShowReport(true);
     },
     onError: (error) => {
       console.log(error);
       toast.error("Error conducting analysis");
+      setShowReport(true);
     },
   });
 
@@ -316,10 +320,22 @@ export default function DragAndDropPage() {
   // useEffect(() => {
   //   if (createTestsQuery.isSuccess) {
   //     console.log(createTestsQuery.data);
+  //     const value = createTestsQuery.data.data.map((tC: any) => ({
+  //       id: toCamelCase(Object.keys(tC)[0]),
+  //       name: toCamelCase(Object.keys(tC)[0]),
+  //       variables: Object.values(tC).map((c) => ({
+  //         id: c,
+  //         name: c,
+  //       })),
+  //       category: testLibrary.find((item) => item.id === Object.keys(tC)[0])
+  //         ?.category,
+  //     }));
+
+  //     setTestLibrary(value);
   //   }
   // }, [createTestsQuery.isSuccess]);
 
-  return (
+  return !showReport ? (
     <Fragment>
       {variablesQuery.isLoading && <AnalysisLoadingScreen />}
       {variablesQuery.isError && <AnalysisErrorComponent />}
@@ -436,6 +452,8 @@ export default function DragAndDropPage() {
         </>
       )}
     </Fragment>
+  ) : (
+    <AnalysisReport testData={runTestMutation?.data?.data ?? []} />
   );
 }
 
