@@ -50,8 +50,8 @@ const initialState: SurveyState = {
   question_text: { name: "Helvetica", size: "18" },
   body_text: { name: "Helvetica", size: "18" },
   color_theme: "#EEE",
-  logo_url: default_header,
-  header_url: default_header,
+  logo_url: "https://firebasestorage.googleapis.com/v0/b/pollsensei.appspot.com/o/Isaac's%20Organization_668bd242587ad115db5868ca_survey%2FFrame%201618873905.svg?alt=media&token=6b1cd848-d247-4e87-ac39-ed294201b57a",
+  header_url: "https://firebasestorage.googleapis.com/v0/b/pollsensei.appspot.com/o/Isaac's%20Organization_668bd242587ad115db5868ca_survey%2FFrame%201618873905.svg?alt=media&token=6b1cd848-d247-4e87-ac39-ed294201b57a",
   generated_by: "",
 };
 

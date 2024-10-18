@@ -331,6 +331,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSurveyResponses } from "@/services/analysis";
 import { extractMongoId } from "@/lib/utils";
+import { openSurveySettings } from "@/redux/slices/survey_settings.slice";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
