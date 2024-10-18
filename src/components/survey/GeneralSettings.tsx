@@ -309,7 +309,6 @@ const FormToggle: React.FC<FormToggleProps> = ({
   status,
   toggle,
 }) => {
-  const [enabled, setEnabled] = useState(false);
 
   return (
     <label htmlFor="toggle" className="flex justify-between items-center py-4">
@@ -350,7 +349,7 @@ const GeneralSettings = () => {
     email_notification: true,
   });
 
-  // Update state once data is available
+
   useEffect(() => {
     if (data) {
       setSettings({
@@ -411,7 +410,7 @@ const GeneralSettings = () => {
       <Form
         onSubmit={onSubmit}
         validate={validateForm}
-        initialValues={settings} // Use initialValues here to set default form values
+        initialValues={settings}
         render={({ handleSubmit, form, submitting }) => (
           <form onSubmit={handleSubmit} className="w-full relative">
             <Slide direction="up" cascade damping={0.05} className="[animation-fill-mode:backwards] relative" triggerOnce>
