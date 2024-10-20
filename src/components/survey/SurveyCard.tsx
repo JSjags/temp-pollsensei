@@ -83,6 +83,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     if (choice.includes("delete")) {
       setShowDelete(true);
     }
+    if (choice.includes("edit")) {
+      router.push(`/surveys/edit-submitted-survey/${_id}`);
+    }
     if (choice.includes("share")) {
       setShareSurvey(true);
     }
