@@ -232,8 +232,8 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
           </div>
           <div>
             <Switch
-              className="data-[state=checked]:bg-gray-400 data-[state=unchecked]:bg-purple-500"
-              checked={status === "Closed" && true}
+              className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-400"
+              checked={status === "On going" && true}
               onCheckedChange={()=> handleSetToggle('Close')}
             />
           </div>
