@@ -8,6 +8,7 @@ import { AutosizeTextarea } from "../ui/autosize-textarea";
 import VoiceRecorder from "../ui/VoiceRecorder";
 import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
+import { Switch } from "../ui/switch";
 
 
 interface ComponentQuestionProps {
@@ -20,6 +21,8 @@ interface ComponentQuestionProps {
   DeleteQuestion?: () => void;
   index: number;
   status?:string;
+  is_required?:boolean;
+  setIsRequired?: (value: boolean) => void;
 }
 
 const CommentQuestion: React.FC<ComponentQuestionProps> = ({
@@ -30,7 +33,9 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   index,
   response,
   onChange,
-  status
+  status,
+  is_required,
+  setIsRequired,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -86,9 +91,10 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
-          <h3 className="text-lg font-semibold text-start">
+          <h3 className="text-lg font-semibold text-start relative">
             <span>{index}. </span>
             {question}
+            {is_required === true && <span className="text-2xl ml-2 text-red-500">*</span>}
           </h3>
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ||
@@ -107,6 +113,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             style={{ borderColor: colorTheme }}
             onChange={onChange}
             value={response}
+            required={is_required}
           />
         </div>
         {pathname === "/surveys/edit-survey" && (
@@ -125,11 +132,24 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             </button>
           </div>
         )}
-        {
+        {/* {
         pathname.includes('survey-public-response') && (  <VoiceRecorder />)
 
-        }
-    
+        } */}
+       {
+        pathname.includes('edit-survey') && (
+          <div className="flex items-center gap-4">
+          <span>Required</span>
+           <Switch checked={is_required} 
+            onCheckedChange={
+             setIsRequired
+               ? (checked: boolean) => setIsRequired(checked)
+               : undefined
+           }
+           className="bg-[#9D50BB] " />
+         </div>
+        )
+       }
       </div>
       {
         pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)

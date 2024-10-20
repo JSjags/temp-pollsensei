@@ -302,7 +302,7 @@ const StyleEditor = () => {
                 className="small py-2 px-2"
                 role="button"
               >
-                {logoFile === null ? (
+                {!logo_url ? (
                   <>
                     {" "}
                     <span className="text-decoration-underline">
@@ -314,7 +314,7 @@ const StyleEditor = () => {
                 ) : (
                   <img
                   // @ts-ignore
-                    src={logoFile !== null && logo_url ? logo_url : ""}
+                    src={logo_url !== null && logo_url ? logo_url : ""}
                     alt="Logo"
                   />
                   // <img src={logoFile ? URL.createObjectURL(logoFile) : logo_url || ""} alt="Logo" />
@@ -349,7 +349,7 @@ const StyleEditor = () => {
                 className="small py-2 px-2"
                 role="button"
               >
-                {headerImageFile === null ? (
+                {headerUrl === null ? (
                   <>
                     <span className="text-decoration-underline">
                       click to upload your image
@@ -360,7 +360,7 @@ const StyleEditor = () => {
                 ) : (
                   <img
                   // @ts-ignore
-                    src={headerImageFile !== null && headerUrl ? headerUrl : ""}
+                    src={headerUrl !== null && headerUrl ? headerUrl : ""}
                     alt="Logo"
                   />
                   // <img src={logoFile ? URL.createObjectURL(logoFile) : logo_url || ""} alt="Logo" />

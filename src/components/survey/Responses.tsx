@@ -68,11 +68,19 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
   const { data:validate_individual_response } = useValidateIndividualResponseQuery({
     id: params.id, pagesNumber:pagesNumber, path_params:path_params.toString()
   });
-  console.log(validate_individual_response)
-  const { validCount, invalidCount } = calculateValidationCounts2(validate_individual_response?.data?.data[currentUserResponse]);
+  // console.log(validate_individual_response)
+  // const { validCount, invalidCount } = calculateValidationCounts2(validate_individual_response?.data?.data[currentUserResponse]);
 
 
-
+  let validCount = 0;
+  let invalidCount = 0;
+  
+  if (validate_individual_response?.data?.data?.length > 0 && currentUserResponse < validate_individual_response.data.data.length) {
+    const counts = calculateValidationCounts2(validate_individual_response.data.data[currentUserResponse]);
+    validCount = counts.validCount;
+    invalidCount = counts.invalidCount;
+  }
+  
  
   const totalResponses = response_?.data?.total || 0;
   console.log(summary_)

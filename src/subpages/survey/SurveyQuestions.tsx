@@ -21,7 +21,7 @@ const SurveyQuestions = () => {
   const [currentSection, setCurrentSection] = useState(0);
   // const [isSettings, setIsSettings] = useState(true);
   const isSettings = useSelector((state:RootState)=>state.survey_settings.isSettings)
-console.log(isSettings);
+console.log(data);
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
@@ -92,6 +92,7 @@ console.log(isSettings);
                           options={item.options}
                           questionType={item.question_type}
                           index={index + 1}
+                          is_required={item.is_required}
                         />
                       ) : item.question_type === "long_text" ? (
                         <CommentQuestion
@@ -99,6 +100,7 @@ console.log(isSettings);
                           index={index + 1}
                           questionType={item.question_type}
                           question={item.question}
+                          is_required={item.is_required}
                         />
                       ) : item.question_type === "likert_scale" ? (
                         <LikertScaleQuestion

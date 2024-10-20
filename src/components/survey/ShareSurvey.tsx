@@ -35,9 +35,7 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
   const [currentUrl, setCurrentUrl] = useState("");
   const shareLink = share?.data?.link
   const share_embed_link = share?.data?.embed_link
-  console.log(currentUrl)
-  console.log(shareLink)
-  console.log(domain)
+
 
   useEffect(() => {
     const fullUrl = `${domain}${pathname}`;

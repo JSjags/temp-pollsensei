@@ -94,7 +94,8 @@ const PublicResponse = () => {
       ? psId
       : psShortUrl;
 
-  const handleSubmitResponse = async () => {
+  const handleSubmitResponse = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
     // const formattedAnswers = question?.data?.sections[currentSection]?.questions
     //   .map((item: any, index: number) => {
     //     if (
@@ -230,19 +231,24 @@ const PublicResponse = () => {
         <div
           className={`${question?.data?.theme} flex justify-center  items-center px-5 mx-auto gap-10 lg:w-[80%]`}
         >
-          <div
+          <form onSubmit={handleSubmitResponse}
             className={` flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
           >
-            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
+            {
+              question?.data?.logo_url && (
+            <div className="bg-[#9D50BB] w-16 rounded my-5 text-white flex items-center flex-col ">
               <Image
                 src={question?.data?.logo_url}
                 alt=""
-                className="w-full object-cover bg-no-repeat h-16 rounded-full"
+                className="w-full object-cover rounded bg-no-repeat h-16"
                 width={"100"}
                 height={"200"}
               />
             </div>
-
+              )
+            }
+            {
+              question?.data?.header_url && (
             <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
               <Image
                 src={question?.data?.header_url}
@@ -252,6 +258,8 @@ const PublicResponse = () => {
                 height={"200"}
               />
             </div>
+              )
+            }
 
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
               <h2
@@ -317,6 +325,7 @@ const PublicResponse = () => {
                       onChange={(value: string) =>
                         handleOptionChange(index, value, item.question_type)
                       }
+                      is_required={item.is_required}
                     />
                   ) : item.question_type === "comment" ||
                     item.question_type === "long_text" ? (
@@ -329,6 +338,7 @@ const PublicResponse = () => {
                       onChange={(e) =>
                         handleOptionChange(index, e.target.value, item.question_type)
                       }
+                      is_required={item.is_required}
                     />
                   ) : item.question_type === "star_rating" ? (
                     <StarRatingQuestion
@@ -357,8 +367,8 @@ const PublicResponse = () => {
             <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
               <button
                 className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-                type="button"
-                onClick={handleSubmitResponse}
+                type="submit"
+                // onClick={handleSubmitResponse}
               >
                 {submitting ? "Submitting..." : "Submit"}
               </button>
@@ -372,7 +382,7 @@ const PublicResponse = () => {
                 Remove watermark
               </span>
             </div>
-          </div>
+          </form>
         </div>
       )}
           </div>
