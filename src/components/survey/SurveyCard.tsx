@@ -18,7 +18,6 @@ import ShareSurvey from "./ShareSurvey";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useParams, useRouter } from "next/navigation";
 import {
-  useCloseSurveyStatusMutation,
   useDeleteSurveyMutation,
   useDuplicateSurveyMutation,
   useEditSurveyMutation,
@@ -26,13 +25,11 @@ import {
   useShareSurveyQuery,
 } from "@/services/survey.service";
 import ShareSurveyModal from "./ShareSurveyModal";
-import ChangeSurveyStatus from "./ChangeSurveyStatus";
-import { toast } from "react-toastify";
 
 interface SurveyCardProps {
   topic: string;
   createdAt: string;
-  status: string;
+  status: StatusTagProps;
   number_of_responses: number;
   _id: string;
 }
@@ -55,7 +52,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   ];
   const [viewOptions, setViewOptions] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const [closeSurvey, setCloseSurvey] = useState(false);
   const [showRename, setShowRename] = useState(false);
   const [showDuplicate, setShowDuplicate] = useState(false);
   const [toggle, setToggle] = useState(false);
@@ -66,8 +62,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [closeSurveyStatus, { isLoading: isClosing }] =
     useCloseSurveyStatusMutation();
   const [editSurvey, { isLoading: isEditing }] = useEditSurveyMutation();
-  const [duplicateSurvey, { isLoading: isDuplicating }] = useDuplicateSurveyMutation();
-  const { refetch } = useFetchSurveysQuery(1)
+  const [duplicateSurvey, { isLoading: isDuplicating }] =
+    useDuplicateSurveyMutation();
+  const { refetch } = useFetchSurveysQuery(1);
   const [surveyName, setSurveyName] = useState<string>("");
 
   const router = useRouter();
@@ -97,9 +94,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     if (choice.includes("share")) {
       setShareSurvey(true);
     }
-    if (choice.includes("close")) {
-      setCloseSurvey(true);
-    }
     if (choice.includes("preview")) {
       router.push(`/surveys/question/${_id}`);
     }
@@ -109,7 +103,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setShowDelete(false);
     setShowDuplicate(false);
     setShowRename(false);
-    setCloseSurvey(false);
   };
 
   const handleSetToggle = (op: any) => {
@@ -122,7 +115,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       await deleteSurvey(id).unwrap();
       toast.success("Survey deleted successfully");
       handleCloseAll();
-      refetch()
+      refetch();
     } catch (e) {
       console.log(e);
       toast.error("Error deleting survey");
@@ -136,7 +129,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       }).unwrap();
       toast.success("Survey closed successfully");
       handleCloseAll();
-      refetch()
+      refetch();
       console.log("Success:", result);
       setToggle(!toggle);
     } catch (err) {
@@ -152,7 +145,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         body: { topic: surveyName },
       }).unwrap();
       toast.success("Survey renamed successfully");
-      refetch()
+      refetch();
       handleCloseAll();
       console.log("Success:", result);
     } catch (err) {
@@ -167,7 +160,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         survey_id: id,
       }).unwrap();
       toast.success("Survey duplicated successfully");
-      refetch()
+      refetch();
       handleCloseAll();
       console.log("Success:", result);
     } catch (err) {
@@ -175,7 +168,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       console.error("Error:", err);
     }
   };
-
 
   // console.log(status)
 
@@ -335,7 +327,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         />
       )}
       {showDuplicate && (
-        <DuplicateSurvey openModal={showDuplicate} onClose={handleCloseAll} isDuplicating={isDuplicating} onDuplicatingSurvey={()=>handleDuplicate(_id)} />
+        <DuplicateSurvey
+          openModal={showDuplicate}
+          onClose={handleCloseAll}
+          isDuplicating={isDuplicating}
+          onDuplicatingSurvey={() => handleDuplicate(_id)}
+        />
       )}
       {shareSurvey && (
         <ShareSurveyModal

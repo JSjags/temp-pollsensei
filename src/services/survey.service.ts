@@ -15,7 +15,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
-   duplicateSurvey: builder.mutation({
+    duplicateSurvey: builder.mutation({
       query: (body) => ({
         url: "survey/duplicate",
         method: "POST",
@@ -130,7 +130,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     }),
     editSurvey: builder.mutation({
       query: ({ id, body }) => ({
-        url: `survey/update/${id}`, 
+        url: `survey/update/${id}`,
         method: "PATCH",
         body: body,
       }),

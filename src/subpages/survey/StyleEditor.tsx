@@ -36,7 +36,6 @@ const StyleEditor = () => {
   const headerUrl = useSelector(
     (state: RootState) => state?.survey?.header_url
   );
-  const logo_url = useSelector((state: RootState) => state?.survey?.logo_url);
   const dispatch = useDispatch();
   const [addSurveyHeader, { data: response, isSuccess, isLoading }] =
     useAddSurveyHeaderMutation();
@@ -123,7 +122,7 @@ const StyleEditor = () => {
     }
   }, [isSuccess, response, dispatch]);
 
-  console.log(logoFile);
+  console.log(color);
 
   return (
     <div className="style-editor bg-white h-full flex flex-col transform transition-transform duration-300 ease-in-out">
@@ -313,7 +312,7 @@ const StyleEditor = () => {
                   </>
                 ) : (
                   <img
-                  // @ts-ignore
+                    // @ts-ignore
                     src={logo_url !== null && logo_url ? logo_url : ""}
                     alt="Logo"
                   />
@@ -331,6 +330,7 @@ const StyleEditor = () => {
               />
             </div>
           </div>
+          {logoFile && <p>{logoFile.name}</p>}
         </div>
       </div>
 
@@ -359,7 +359,7 @@ const StyleEditor = () => {
                   </>
                 ) : (
                   <img
-                  // @ts-ignore
+                    // @ts-ignore
                     src={headerUrl !== null && headerUrl ? headerUrl : ""}
                     alt="Logo"
                   />
@@ -380,7 +380,7 @@ const StyleEditor = () => {
               />
             </div>
           </div>
-          {/* {headerImageFile && <p>{headerImageFile?.name}</p>} */}
+          {headerImageFile && <p>{headerImageFile?.name}</p>}
         </div>
       </div>
     </div>
