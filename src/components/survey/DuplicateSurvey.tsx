@@ -8,11 +8,15 @@ import Button from "../common/Button";
 interface DuplicateSurveyProps {
   openModal: boolean;
   onClose: () => void;
+  isDuplicating?: boolean;
+  onDuplicatingSurvey?:()=>void;
 }
 
 const DuplicateSurvey: React.FC<DuplicateSurveyProps> = ({
   openModal,
   onClose,
+  isDuplicating,
+  onDuplicatingSurvey 
 }) => {
   return (
     <Modals title="" openModal={openModal} modalSize="lg" onClose={onClose}>
@@ -23,8 +27,8 @@ const DuplicateSurvey: React.FC<DuplicateSurveyProps> = ({
           created.
         </p>
         <div className="mt-3 flex items-center justify-between w-full">
-          <ButtonOutline label="No, cancel" />
-          <Button label="Duplicate" />
+          <ButtonOutline onclick={onClose} label="No, cancel" />
+          <Button label={isDuplicating ? "Duplicating..." : "Duplicate"} onClick={onDuplicatingSurvey} />
         </div>
       </div>
     </Modals>

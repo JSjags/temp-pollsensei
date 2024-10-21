@@ -8,7 +8,7 @@ import { AutosizeTextarea } from "../ui/autosize-textarea";
 import VoiceRecorder from "../ui/VoiceRecorder";
 import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
-
+import { Switch } from "../ui/switch";
 
 interface ComponentQuestionProps {
   question: string;
@@ -19,7 +19,9 @@ interface ComponentQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
-  status?:string;
+  status?: string;
+  is_required?: boolean;
+  setIsRequired?: (value: boolean) => void;
 }
 
 const CommentQuestion: React.FC<ComponentQuestionProps> = ({
@@ -30,7 +32,9 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   index,
   response,
   onChange,
-  status
+  status,
+  is_required,
+  setIsRequired,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -48,7 +52,6 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   //   setResponse(value);
   // };
 
-
   const getStatus = (status: string) => {
     switch (status) {
       case "passed":
@@ -63,7 +66,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             <BsExclamation />
           </div>
         );
-  
+
       default:
         return null;
     }
@@ -86,19 +89,14 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
-          <h3 className="text-lg font-semibold text-start">
+          <h3 className="text-lg font-semibold text-start relative">
             <span>{index}. </span>
             {question}
+            {is_required === true && (
+              <span className="text-2xl ml-2 text-red-500">*</span>
+            )}
           </h3>
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ||
-          pathname.includes("validate-response") ||
-          pathname.includes("survey-reponse-upload") ||
-          pathname.includes("survey-public-response") ? (
-            ""
-          ) : (
-            <p>{questionType === "long_text" ? "Comment" : ""}</p>
-          )}
+          <span></span>
         </div>
         <div>
           <AutosizeTextarea
@@ -107,6 +105,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             style={{ borderColor: colorTheme }}
             onChange={onChange}
             value={response}
+            required={is_required}
           />
         </div>
         {pathname === "/surveys/edit-survey" && (
@@ -125,15 +124,40 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             </button>
           </div>
         )}
-        {
+        {/* {
         pathname.includes('survey-public-response') && (  <VoiceRecorder />)
 
-        }
-    
+        } */}
+        {pathname.includes("edit-survey") && (
+          <div className="flex items-center gap-4">
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ||
+          pathname.includes("validate-response") ||
+          pathname.includes("survey-reponse-upload") ||
+          pathname.includes("survey-public-response") ? (
+            ""
+          ) : (
+            <p>{questionType === "long_text" ? "Comment" : ""}</p>
+          )}
+        </div>
       </div>
-      {
-        pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)
-      }
+      {pathname.includes("survey-reponse-upload") && status && (
+        <div>{getStatus(status)}</div>
+      )}
     </div>
   );
 };

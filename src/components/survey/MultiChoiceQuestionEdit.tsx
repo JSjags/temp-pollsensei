@@ -1,4 +1,5 @@
 import { draggable } from "@/assets/images";
+import { Switch } from "@radix-ui/react-switch";
 import Image from "next/image";
 import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
@@ -8,8 +9,10 @@ interface MultiChoiceQuestionEditProps {
   question: string;
   questionType: string;
   options: string[] | undefined;
-  onSave?: (updatedQuestion: string, updatedOptions: string[], editedQuestionType:string) => void;
+  onSave?: (updatedQuestion: string, updatedOptions: string[], editedQuestionType:string, is_required: boolean) => void;
   onCancel?: () => void;
+  setIsRequired?: (value: boolean) => void;
+  is_required: boolean,
 }
 
 const customStyles = {
@@ -34,6 +37,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   questionType,
   onSave,
   onCancel,
+  is_required,
+  setIsRequired
 }) => {
   const [editedQuestion, setEditedQuestion] = useState<string>(question);
   const [editedQuestionType, setEditedQuestionType] = useState<string>(questionType);
@@ -59,7 +64,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
 
   const handleSave = () => {
     if (onSave) {
-      onSave(editedQuestion, editedOptions, editedQuestionType);
+      onSave(editedQuestion, editedOptions, editedQuestionType, is_required);
     }
   };
 
@@ -158,6 +163,18 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           >
             Save
           </button>
+        </div>
+        <div className="flex items-center gap-4">
+          <span>Required</span>
+          <Switch
+            checked={is_required}
+            onCheckedChange={
+              setIsRequired
+                ? (checked: boolean) => setIsRequired(checked)
+                : undefined
+            }
+            className="bg-[#9D50BB]"
+          />
         </div>
       </div>
     </div>
