@@ -26,6 +26,8 @@ const customStyles = {
 interface ResponseActionsProps {
   handleNext?: () => void;
   handlePrev?: () => void;
+  setName?: () => void;
+  deleteAResponse?: () => void;
   totalSurveys?: number;
   curerentSurvey?: number;
   respondent_data?:any[];
@@ -41,6 +43,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   respondent_data,
   valid_response,
   invalid_response,
+  deleteAResponse,
 }) => {
   // const [name, setName ] = useState('')
   const name = useSelector((state:RootState)=>state?.name?.name)
@@ -68,9 +71,9 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
           </button>
         </div>
         <div className="flex flex-wrap items-center justify-between space-x-4">
-          <button className="border border-gray-300 text-gray-700 rounded-md px-4 py-2 hover:bg-gray-50">
+          {/* <button className="border border-gray-300 text-gray-700 rounded-md px-4 py-2 hover:bg-gray-50">
             Add filter
-          </button>
+          </button> */}
           <Select
             className="select-container border-2 border-gray-300 text-gray-700 min-w-[15rem] rounded-md focus:outline-none"
             classNamePrefix="select-name"
@@ -111,7 +114,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
           </div>
         </div>
 
-        <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">
+        <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600" onClick={deleteAResponse}>
           Delete response
         </button>
       </div>

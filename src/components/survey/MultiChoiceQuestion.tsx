@@ -109,12 +109,6 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
               />
             </div>
           </h3>
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
-          )}
         </div>
         {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
@@ -167,6 +161,14 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
          </div>
         )
        }
+       <div className="flex justify-e">
+       {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ? (
+            ""
+          ) : (
+            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
+          )}
+       </div>
       </div>
       {pathname.includes("survey-reponse-upload") && status && (
         <div>{getStatus(status)}</div>

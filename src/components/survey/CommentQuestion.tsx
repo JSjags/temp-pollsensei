@@ -10,7 +10,6 @@ import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
 import { Switch } from "../ui/switch";
 
-
 interface ComponentQuestionProps {
   question: string;
   response?: string;
@@ -20,8 +19,8 @@ interface ComponentQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
-  status?:string;
-  is_required?:boolean;
+  status?: string;
+  is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
 }
 
@@ -53,7 +52,6 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   //   setResponse(value);
   // };
 
-
   const getStatus = (status: string) => {
     switch (status) {
       case "passed":
@@ -68,7 +66,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             <BsExclamation />
           </div>
         );
-  
+
       default:
         return null;
     }
@@ -94,17 +92,11 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           <h3 className="text-lg font-semibold text-start relative">
             <span>{index}. </span>
             {question}
-            {is_required === true && <span className="text-2xl ml-2 text-red-500">*</span>}
+            {is_required === true && (
+              <span className="text-2xl ml-2 text-red-500">*</span>
+            )}
           </h3>
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ||
-          pathname.includes("validate-response") ||
-          pathname.includes("survey-reponse-upload") ||
-          pathname.includes("survey-public-response") ? (
-            ""
-          ) : (
-            <p>{questionType === "long_text" ? "Comment" : ""}</p>
-          )}
+          <span></span>
         </div>
         <div>
           <AutosizeTextarea
@@ -136,24 +128,36 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
         pathname.includes('survey-public-response') && (  <VoiceRecorder />)
 
         } */}
-       {
-        pathname.includes('edit-survey') && (
+        {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
-          <span>Required</span>
-           <Switch checked={is_required} 
-            onCheckedChange={
-             setIsRequired
-               ? (checked: boolean) => setIsRequired(checked)
-               : undefined
-           }
-           className="bg-[#9D50BB] " />
-         </div>
-        )
-       }
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ||
+          pathname.includes("validate-response") ||
+          pathname.includes("survey-reponse-upload") ||
+          pathname.includes("survey-public-response") ? (
+            ""
+          ) : (
+            <p>{questionType === "long_text" ? "Comment" : ""}</p>
+          )}
+        </div>
       </div>
-      {
-        pathname.includes('survey-reponse-upload') && status && (<div>{getStatus(status)}</div>)
-      }
+      {pathname.includes("survey-reponse-upload") && status && (
+        <div>{getStatus(status)}</div>
+      )}
     </div>
   );
 };
