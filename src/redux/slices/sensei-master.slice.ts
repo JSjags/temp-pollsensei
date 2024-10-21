@@ -11,7 +11,15 @@ interface SenseiMasterState {
   animationState: any;
   isCollapsed: boolean;
   triggerType?: string;
+  actionMessage?: string;
   question?: string;
+  currentQuestion?: {
+    question: {
+      Question: string;
+      "Option type": string;
+      Options: string[];
+    };
+  };
   isPinned: boolean;
   isDragging: boolean;
   startPos: { x: number; y: number };
@@ -23,6 +31,7 @@ interface SenseiMasterState {
 const initialState: SenseiMasterState = {
   count: 0,
   animationState: "Sleeping",
+  actionMessage: "",
   isCollapsed: true,
   triggerType: "",
   question: "",
@@ -44,8 +53,14 @@ export const senseiMasterSlice = createSlice({
     setAnimationState: (state, action: PayloadAction<any>) => {
       state.animationState = action.payload;
     },
+    setActionMessage: (state, action: PayloadAction<any>) => {
+      state.actionMessage = action.payload;
+    },
     toggleCollapse: (state) => {
       state.isCollapsed = !state.isCollapsed;
+    },
+    setCurrentQuestion: (state, action: PayloadAction<any>) => {
+      state.currentQuestion = action.payload;
     },
     setIsPinned: (state, action: PayloadAction<boolean>) => {
       state.isPinned = action.payload;
@@ -78,8 +93,10 @@ export const {
   setCount,
   setAnimationState,
   toggleCollapse,
+  setActionMessage,
   setIsPinned,
   setIsCollapsed,
+  setCurrentQuestion,
   setIsDragging,
   setStartPos,
   setDefaultPosition,

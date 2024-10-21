@@ -228,7 +228,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
         </div>
       </div>
       {/* Sensei Master */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         <motion.div
           key="senseiMaster"
           initial="hidden"
@@ -239,9 +239,13 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
         >
           <SenseiMaster />
         </motion.div>
+<<<<<<< HEAD
       </AnimatePresence>
 
 
+=======
+      </AnimatePresence> */}
+>>>>>>> sensei-master
     </div>
   );
 };

@@ -12,11 +12,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { AutosizeTextarea } from "../ui/autosize-textarea";
 import { Brain, X, Send, Pin, PinOff } from "lucide-react";
-import { cn, formatString, generateInitials } from "@/lib/utils";
+import {
+  cn,
+  extractMongoId,
+  formatString,
+  generateInitials,
+} from "@/lib/utils";
 import { useSelector, useDispatch } from "react-redux";
 import store, { RootState } from "@/redux/store";
 import { ActionCreatorWithoutPayload } from "@reduxjs/toolkit";
 import { useSensei } from "@/contexts/SenseiContext";
+import { usePathname } from "next/navigation";
+import { setActionMessage } from "@/redux/slices/sensei-master.slice";
 
 // The AI message is being added twice because:
 // 1. It's added once in the `addAiMessage` function
@@ -26,8 +33,11 @@ import { useSensei } from "@/contexts/SenseiContext";
 type Message = {
   id: number;
   text: string;
+  actions?: string[];
+  question_id?: number;
   sender: "user" | "ai";
   timestamp: string;
+  trigger_type?: "single-regen" | "option";
 };
 
 const getCurrentTimestamp = () =>
@@ -64,6 +74,19 @@ type Props = {
   setIsPinned: (isPinned: boolean) => void;
   pinToSide: () => void;
   setDefaultPosition: (position: { x: number; y: number }) => void;
+  type: "analysis" | "generation";
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
+  aiSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
   senseiStateSetter: (
     state:
       | "sleep"
@@ -72,6 +95,7 @@ type Props = {
       | "start thinking"
       | "stop talking"
   ) => void;
+  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
 const SenseiMasterChat: React.FC<Props> = ({
@@ -82,7 +106,12 @@ const SenseiMasterChat: React.FC<Props> = ({
   isPinned,
   pinToSide,
   setIsPinned,
+  type,
+  onSave,
+  aiSave,
+  setEditId,
 }) => {
+  const path = usePathname();
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -92,6 +121,10 @@ const SenseiMasterChat: React.FC<Props> = ({
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const conversation_id = store.getState().survey.conversation_id;
   // const survey_id = store.getState().survey.id; // Changed from 'i' to 'id'
+
+  const { actionMessage, currentQuestion } = useSelector((state: RootState) => {
+    return state.senseiMaster || {};
+  });
 
   const { aiResponse, loading, isConnected, emitEvent, socketIo, setLoading } =
     useSensei();
@@ -105,7 +138,14 @@ const SenseiMasterChat: React.FC<Props> = ({
   const handleEvent = (eventName: string, ...args: any[]) => {
     switch (eventName) {
       case "ai_message":
-        handleAiMessage(args[0].response);
+        console.log(args[0]);
+
+        handleAiMessage(args[0]?.reply_text ?? args[0]?.response);
+        break;
+      case "ai_trigger":
+        console.log(args[0]);
+
+        handleAiMessage(args[0]?.reply_text ?? args[0]?.response, args[0]);
         break;
       // Add more cases for different events here
       default:
@@ -113,16 +153,16 @@ const SenseiMasterChat: React.FC<Props> = ({
     }
   };
 
-  const handleAiMessage = (aiResponseText: string) => {
+  const handleAiMessage = (aiResponseText: string, obj?: any) => {
     setLoading(false);
     const formattedResponse = formatString(aiResponseText);
-    addAiMessage(formattedResponse);
+    addAiMessage(formattedResponse, obj);
   };
 
-  const addUserMessage = () => {
+  const addUserMessage = (actionMessage?: string) => {
     const userMessage: Message = {
       id: Date.now(),
-      text: input.trim(),
+      text: actionMessage ? actionMessage.trim() : input.trim(),
       sender: "user",
       timestamp: getCurrentTimestamp(),
     };
@@ -130,23 +170,36 @@ const SenseiMasterChat: React.FC<Props> = ({
     setInput("");
   };
 
-  const addAiMessage = (text: string) => {
+  const addAiMessage = (text: string, obj: any) => {
+    if (!text.trim()) return; // Filter out empty messages
+
+    console.log(obj);
+
     const aiMessageId = Date.now() + Math.floor(Math.random() * 1000000);
     const aiMessage: Message = {
       id: aiMessageId,
-      text: text,
+      text: text.trim(),
       sender: "ai",
       timestamp: getCurrentTimestamp(),
+      ...(obj
+        ? {
+            actions: obj?.actions ?? [],
+            question_id: obj?.question_id ?? null,
+            trigger_type: obj?.trigger_type ?? null,
+          }
+        : {}),
     };
     setMessages((prevMessages) => {
       // Check if the message already exists
-      const messageExists = prevMessages.some((msg) => msg.text === text);
+      const messageExists = prevMessages.some(
+        (msg) => msg.text === text.trim()
+      );
       if (!messageExists) {
         return [...prevMessages, aiMessage];
       }
       return prevMessages;
     });
-    simulateTyping(text, aiMessageId);
+    simulateTyping(text.trim(), aiMessageId);
   };
 
   const simulateTyping = (text: string, messageId: number) => {
@@ -195,13 +248,63 @@ const SenseiMasterChat: React.FC<Props> = ({
       const payload = {
         conversation_id,
         query: input.trim(),
-        survey_id: "66c5fe26ee8565ca5ffc732a",
-        survey_stage: "generation",
+        ...(type === "analysis" ? { survey_id: surveyId } : {}),
+        survey_stage: type === "analysis" ? "analysis" : "generation",
       };
       console.log("user_message", payload);
       emitEvent("user_message", payload);
     }
   };
+
+  const handleActionSend = async (actionInput: string) => {
+    if (actionInput.trim()) {
+      senseiStateSetter("start thinking");
+      addUserMessage(actionInput);
+
+      if (actionInput.toLowerCase().includes("rephrase")) {
+        const index = Number(actionInput[actionInput.length - 1]);
+        console.log(index);
+
+        // setEditId(index - 1);
+        const payload = {
+          question_id: index,
+          conversation_id,
+          data: currentQuestion,
+          trigger_type: "single-regen",
+        };
+        emitEvent("user_trigger", payload);
+
+        // const optionsPayload = {
+        //   conversation_id,
+        //   data: {
+        //     question: {
+        //       Question: question,
+        //       "Option type": optionType,
+        //       Options: options,
+        //     },
+        //   },
+        //   trigger_type: "option",
+        // };
+        // emitEvent("user_trigger", optionsPayload);
+      }
+
+      // const payload = {
+      //   conversation_id,
+      //   query: actionInput.trim(),
+      //   ...(type === "analysis" ? { survey_id: surveyId } : {}),
+      //   survey_stage: type === "analysis" ? "analysis" : "generation",
+      // };
+      // console.log("user_message", payload);
+      // emitEvent("user_message", payload);
+      dispatch(setActionMessage(""));
+    }
+  };
+
+  useEffect(() => {
+    if (actionMessage && Boolean(actionMessage?.length)) {
+      handleActionSend(actionMessage);
+    }
+  }, [actionMessage]);
 
   useEffect(() => {
     senseiStateSetter(loading ? "start thinking" : "be idle");
@@ -212,6 +315,25 @@ const SenseiMasterChat: React.FC<Props> = ({
       hour: "2-digit",
       minute: "2-digit",
     });
+
+  const surveyId = extractMongoId(path);
+
+  const handleClick = (message: Message, index: number) => {
+    if (message.trigger_type === "single-regen") {
+      if (aiSave) {
+        aiSave(
+          message.actions![index],
+          currentQuestion?.question.Options || [],
+          currentQuestion?.question["Option type"]!,
+          message.question_id! - 1
+        );
+        // if() {
+        // }
+        // else {
+        // }
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -310,6 +432,18 @@ const SenseiMasterChat: React.FC<Props> = ({
                   >
                     {message.text}
                   </p>
+                  <div className="mt-2 space-y-2">
+                    {message.actions &&
+                      message.actions.map((a, i) => (
+                        <Button
+                          onClick={() => handleClick(message, i)}
+                          key={a}
+                          className="block max-w-[200px] text-xs text-wrap text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-black h-fit"
+                        >
+                          {a}
+                        </Button>
+                      ))}
+                  </div>
                   <p
                     className={cn(
                       "text-[0.65rem] mt-0.5 opacity-70",
