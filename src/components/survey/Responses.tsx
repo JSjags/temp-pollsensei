@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ResponseHeader from "./ResponseHeader";
 import RespondentDetails from "./RespondentDetails";
 import UserResponses from "./UserResponses";
@@ -16,6 +16,8 @@ import { RootState } from "@/redux/store";
 import { toast } from "react-toastify";
 import { resetAnswers } from "@/redux/slices/answer.slice";
 import { useDispatch } from "react-redux";
+import { resetName } from "@/redux/slices/name.slice";
+import FeatureComing from "../common/FeatureComing";
 
 const calculateValidationCounts = (data:any) => {
   let validCount = 0;
@@ -52,6 +54,7 @@ const calculateValidationCounts2 = (survey:any) => {
 const Responses: React.FC<{ data: any, }> = ({ data }) => {
   const name = useSelector((state:RootState)=>state?.name?.name)
   const params = useParams();
+  const dispatch  = useDispatch()
   const tabs = ["Summary", "Individual Responses", "Deleted"];
   const [activeTab, setActiveTab] = useState("Individual Responses");
   const [currentUserResponse, setCurrentUserResponse] = useState(0);
@@ -65,13 +68,23 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
 
   const { data:respondent_name } = useGetRespondentNameQuery(params.id);
   const { data:validate_ } = useValidateSurveyResponseQuery(params.id);
-  const { data:validate_individual_response } = useValidateIndividualResponseQuery({
+  const { data:validate_individual_response, isLoading } = useValidateIndividualResponseQuery({
     id: params.id, pagesNumber:pagesNumber, path_params:path_params.toString()
   });
   console.log(validate_individual_response)
-  const { validCount, invalidCount } = calculateValidationCounts2(validate_individual_response?.data?.data[currentUserResponse]);
+  const validateSource = validate_individual_response?.data?.data && validate_individual_response?.data?.data?.length > 0 ? validate_individual_response?.data?.data[currentUserResponse] : validate_individual_response?.data
+  const { validCount, invalidCount } = calculateValidationCounts2(validateSource);
+  console.log(validateSource)
 
-
+  // let validCount = 0;
+  // let invalidCount = 0;
+  
+  // if (validate_individual_response?.data?.data?.length > 0 && currentUserResponse < validate_individual_response.data.data.length) {
+  //   const counts = calculateValidationCounts2(validate_individual_response.data.data[currentUserResponse]);
+  //   validCount = counts.validCount;
+  //   invalidCount = counts.invalidCount;
+  // }
+  
 
  
   const totalResponses = response_?.data?.total || 0;
@@ -95,8 +108,22 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
     }
   };
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      dispatch(resetName());
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
-
+const handleDeleteAResponse=async()=>{
+  try{
+    console.log("Delete")
+  }catch(err){
+    console.log(err)
+  }
+}
 
   return (
     <div className="lg:px-24">
@@ -111,12 +138,14 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
         respondent_data={respondent_name?.data}
         valid_response={validCount}
         invalid_response={invalidCount}
+        deleteAResponse={handleDeleteAResponse}
       />
-      <RespondentDetails data={validate_individual_response?.data?.data[currentUserResponse]} />
+      <RespondentDetails data={validateSource} validCount={validCount} />
       {activeTab === "Individual Responses" && (
         <UserResponses
-          data={validate_individual_response?.data?.data[currentUserResponse]}
+          data={validateSource}
           index={currentUserResponse}
+          isLoading={isLoading}
         />
       )}
       {activeTab === "Summary" && (
@@ -125,7 +154,9 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
         </div>
       )}
       {activeTab === "Deleted" && (
-        <div className="mt-2 min-h-[50vh]">Delete component goes here</div>
+        <div className="mt-2 min-h-[50vh]">
+          <FeatureComing height="h-[20vh]" />
+        </div>
       )}
     </div>
   );

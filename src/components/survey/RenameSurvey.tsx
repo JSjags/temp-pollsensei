@@ -8,10 +8,14 @@ import Button from "../common/Button";
 interface RenameSurveyProps {
   onClose: () => void;
   openModal: boolean;
+  isEditing?: boolean;
+  onRenameSurvey?:()=>void;
+  surveyName?:string;
+  setSurveyName:(event: React.ChangeEvent<HTMLInputElement>)=>void;
 }
 
-const RenameSurvey: React.FC<RenameSurveyProps> = ({ onClose, openModal }) => {
-  const [surveyName, setSurveyName] = useState<string>("");
+const RenameSurvey: React.FC<RenameSurveyProps> = ({ onClose, openModal, isEditing, onRenameSurvey, surveyName, setSurveyName }) => {
+  const [] = useState<string>("");
 
   return (
     <Modals title={""} openModal={openModal} modalSize="lg" onClose={onClose}>
@@ -23,14 +27,14 @@ const RenameSurvey: React.FC<RenameSurveyProps> = ({ onClose, openModal }) => {
 
         <input
           value={surveyName}
-          onChange={(e) => setSurveyName(e.target.value)}
+          onChange={setSurveyName}
           type="text"
           placeholder="Please give this survey a new name"
-          className="mt-3 border-[1px] w-full rounded-[6px] text-[#E0E0E0] px-[20px] py-[9px]"
+          className="mt-3 border-[1px] w-full rounded-[6px] px-[20px] py-[9px]"
         />
         <div className="mt-3 flex items-center justify-between w-full">
           <ButtonOutline label="No, cancel" />
-          <Button label="Rename" />
+          <Button label={isEditing ? "Editing..." : "Rename"} onClick={onRenameSurvey} />
         </div>
       </div>
     </Modals>

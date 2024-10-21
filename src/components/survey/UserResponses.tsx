@@ -21,10 +21,11 @@ interface UserResponseProps {
     answers: Answer[];
   };
   index: number;
+  isLoading?:boolean;
 }
 
 
-const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
+const UserResponses: React.FC<UserResponseProps> = ({ data, index, isLoading }) => {
   console.log(data);
   console.log(index);
   const [currentSection, setCurrentSection] = useState(0);
@@ -48,9 +49,25 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
     console.log(`Question ${index} selected options:`, selectedOptions);
   };
 
+  if(isLoading){
+    return         <div className="w-full h-100 flex justify-center items-center">
+    <div className="spinner-border text-primary" role="status">
+      <span className="sr-only">Loading...</span>
+    </div>
+  </div>
+  }
+
   return (
     <div className={`flex flex-col gap-5 w-full relative mt-4`}>
-      <div className={`flex  flex-col justify-between gap-10 w-full`}>
+     {
+      isLoading ? (
+        <div className="w-full h-100 flex justify-center items-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+      ) : (
+        <div className={`flex  flex-col justify-between gap-10 w-full`}>
         {data?.answers?.map((item: any, index: number) => (
           <div key={index} className="mb-4">
             {item.question_type === "multiple_choice" ||
@@ -118,6 +135,8 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index }) => {
           </div>
         ))}
       </div>
+      )
+     }
     </div>
   );
 };

@@ -27,6 +27,8 @@ import store from '@/redux/store';
 import Sensei from "@/components/ui/Sensei";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import { resetQuestion } from "@/redux/slices/questions.slice";
+import ModalComponent from "@/components/ui/ModalComponent";
+import WaitingMessagesModal from "@/components/modals/WaitingModal";
 
 
 
@@ -55,6 +57,11 @@ const EditSurvey = () => {
   ] = useGenerateSingleSurveyMutation();
   const [isNewSection, setIsNewSection] = useState(true);
   const [selectIndex, setSelectIndex] = useState<number | null >(null);
+  const [question_count, setQuestionCount] = useState<number>(0);
+  const [addMoreQuestion, setAddMoreQuestion] = useState(false)
+  const [openModal, setOpenModal] = useState(false);
+  const [is_requied, setIsRequired] = useState(false);
+  
 
 
   const EditQuestion = (index: any) => {
@@ -79,7 +86,8 @@ const EditSurvey = () => {
   const handleSave = (
     updatedQuestion: string,
     updatedOptions: string[],
-    updatedQuestionType: string
+    updatedQuestionType: string,
+    isRequired: boolean
   ) => {
     const updatedSections = [...questions];
       const currentSectionData = updatedSections[currentSection];
@@ -90,7 +98,8 @@ const EditSurvey = () => {
         question: updatedQuestion,
         options: updatedOptions,
         question_type: updatedQuestionType,
-        is_required: currentSectionData.questions[editIndex].is_required || false, 
+        // is_required: currentSectionData.questions[editIndex].is_required || false, 
+        is_required: isRequired,
       };
         const updatedSection = {
         ...currentSectionData,
@@ -122,81 +131,60 @@ const EditSurvey = () => {
     try {
       await generateSingleSurvey({
         conversation_id: survey.conversation_id,
-      });
+        question_count: question_count,
+      }).unwrap();
       toast.success("Single survey added successfully");
+      setOpenModal(false)
     } catch (e) {
-      toast.error("Failed to create survey");
+      toast.error("Failed to generate more survey questions");
+      setOpenModal(false)
       console.error(e);
     }
   };
   
-
-
-    // const updatedSections = [...questions];
-    // const currentSectionData = updatedSections[currentSection];
-    // console.log(currentSectionData.questions[0])
-
-
-  // useEffect(() => {
-  //   if (newQuestionGenerate && newSingleSurvey?.data?.response) {
-  //     console.log(newSingleSurvey)
-  //     const updatedSections = [...questions];
-  //     const currentSectionData = updatedSections[currentSection];
-  //     const optionType = newSingleSurvey.data.response["Option type"]?.trim();
-
-  //     const newQuestion = {
-  //       question: newSingleSurvey.data.response.Question,
-  //       options: newSingleSurvey.data.response.Options,
-  //       question_type: optionType === "Multi-choice"
-  //       ? "multiple_choice"
-  //       : optionType === "Comment"
-  //       ? "long_text"
-  //       : "matrix_checkbox",
-  //       is_required: false,
-  //     };
-  //     const updatedQuestions = [...currentSectionData.questions, newQuestion];
-  //     const updatedSection = {
-  //       ...currentSectionData,  
-  //       questions: updatedQuestions
-  //     };
-
-  //     dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
-  //   }
-  // }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, questions[currentSection]?.questions]);
   
   useEffect(() => {
-    if (newQuestionGenerate && newSingleSurvey?.data?.response) {
+    if (newQuestionGenerate && Array.isArray(newSingleSurvey?.data?.response)) {
       console.log(newSingleSurvey);
       const updatedSections = [...questions];
       const currentSectionData = updatedSections[currentSection];
-      const optionType = newSingleSurvey.data.response["Option type"]?.trim();
-      const newQuestion = {
-        question: newSingleSurvey.data.response.Question,
-        options: newSingleSurvey.data.response.Options,
-        question_type: optionType === "Multi-choice"
-          ? "multiple_choice"
-          : optionType === "Comment"
-          ? "long_text"
-          : "matrix_checkbox",
-        is_required: false,
-      };
   
-      const updatedQuestions = [...currentSectionData.questions, newQuestion];
+      // Iterate over each question in the array and add it to the current section
+      const newQuestions = newSingleSurvey.data.response.map((questionData: any) => {
+        const optionType = questionData["Option type"]?.trim();
+        return {
+          question: questionData.Question,
+          options: questionData.Options || [], // Default to an empty array if options are not provided
+          question_type: optionType === "Multi-choice"
+            ? "multiple_choice"
+            : optionType === "Comment"
+            ? "long_text"
+            : "matrix_checkbox",
+          is_required: false,
+        };
+      });
+  
+      // Append new questions to the current section
+      const updatedQuestions = [...currentSectionData.questions, ...newQuestions];
       const updatedSection = {
         ...currentSectionData,
         questions: updatedQuestions,
       };
   
+      // Dispatch the updated section
       dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
+  
+      console.log(updatedQuestions);
     }
   }, [dispatch, newQuestionGenerate, newSingleSurvey?.data?.response, currentSection]);
   
   
+  
   const handleSurveyCreation =async()=>{
-    if(logoUrl === '' || headerUrl === ''){
-      toast.warning("Header image and logo can not be empty")
-      return null
-    }
+    // if(logoUrl === '' || headerUrl === ''){
+    //   toast.warning("Header image and logo can not be empty")
+    //   return null
+    // }
     try{
       console.log(survey)
       const updatedSurvey = store.getState().survey;
@@ -244,14 +232,16 @@ const EditSurvey = () => {
 
   console.log(survey)
   console.log(questions[currentSection]?.questions)
+  console.log(logoUrl)
+  console.log(headerUrl)
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
        {isNewSection ? <>
-          {logoUrl ? (
-            <div className="bg-[#9D50BB]  w-1/3 my-5 text-white flex items-center flex-col ">
+          {logoUrl && (
+            <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
               <Image
                 src={
                   logoUrl instanceof File
@@ -261,14 +251,10 @@ const EditSurvey = () => {
                     : sparkly
                 }
                 alt=""
-                className="w-full object-cover bg-no-repeat h-16 "
+                className="w-full object-cover rounded  bg-no-repeat h-16 "
                 width={"100"}
                 height={"200"}
               />
-            </div>
-          ) : (
-            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white py-3 flex items-center flex-col ">
-              <p>LOGO GOES HERE</p>
             </div>
           )}
             {/* <button type="reset" onClick={()=>{
@@ -277,6 +263,9 @@ const EditSurvey = () => {
             }}>
               Reset
             </button> */}
+
+            {
+              headerUrl && (
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
               src={
@@ -292,6 +281,7 @@ const EditSurvey = () => {
               height={"200"}
             />
           </div>
+              )}
 
           <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
           <h2 className="text-[1.5rem] font-normal" style={{fontSize:`${headerText?.size}px`, fontFamily:`${headerText?.name}` }}>{survey?.topic}</h2>
@@ -306,6 +296,7 @@ const EditSurvey = () => {
                 <MatrixQuestionEdit
                   question={item.question}
                   options={item.options}
+                  is_required={item.is_required}
                   questionType={item.question_type}
                   onSave={handleSave}
                   onCancel={handleCancel}
@@ -316,6 +307,7 @@ const EditSurvey = () => {
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
+                  is_required={item.is_required}
                   onSave={handleSave}
                   onCancel={handleCancel}
                 />
@@ -324,6 +316,22 @@ const EditSurvey = () => {
                 <MultiChoiceQuestion
                   question={item.question}
                   options={item.options}
+                  is_required={item.is_required}
+                  setIsRequired={() => {
+                    const updatedSections = [...questions]; 
+                    const updatedSection = { ...updatedSections[currentSection] }; 
+                    const updatedQuestions = [...updatedSection.questions]; 
+                  
+                   
+                    updatedQuestions[index] = {
+                      ...updatedQuestions[index], 
+                      is_required: !item.is_required, 
+                    };
+                  
+                    updatedSection.questions = updatedQuestions; 
+                    updatedSections[currentSection] = updatedSection; 
+                    dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
+                  }}
                   questionType={item.question_type}
                   EditQuestion={() => EditQuestion(index)}
                   index={index + 1}
@@ -335,6 +343,22 @@ const EditSurvey = () => {
                   index={index + 1}
                   questionType={item.question_type}
                   question={item.question}
+                  is_required={item.is_requied}
+                  setIsRequired={() => {
+                    const updatedSections = [...questions]; 
+                    const updatedSection = { ...updatedSections[currentSection] }; 
+                    const updatedQuestions = [...updatedSection.questions]; 
+                  
+                   
+                    updatedQuestions[index] = {
+                      ...updatedQuestions[index], 
+                      is_required: !item.is_required, 
+                    };
+                  
+                    updatedSection.questions = updatedQuestions; 
+                    updatedSections[currentSection] = updatedSection; 
+                    dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
+                  }}
                   EditQuestion={() => EditQuestion(index)}
                   DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
@@ -380,7 +404,7 @@ const EditSurvey = () => {
             <div className="flex gap-2 items-center">
               <button
                 className="bg-white rounded-full px-5 py-1"
-                onClick={handleGenerateSingleQuestion}
+                onClick={()=>setAddMoreQuestion((prev)=> !prev)}
                 disabled={generatingSingleSurvey}
               >
                 {
@@ -411,6 +435,9 @@ const EditSurvey = () => {
             </div>
           )}
           </div>
+          <WaitingMessagesModal otherPossibleCondition={generatingSingleSurvey}  openModal={openModal}
+        setOpenModal={generatingSingleSurvey === false ? () => setOpenModal(false) : () => setOpenModal(true)} 
+         />
           {aiChatbot && (
             <Sensei isOpen={aiChatbot} setIsOpen={()=>setAiChatbot(!aiChatbot)} currentSection={currentSection} questionIndex={selectIndex} />
           )}
@@ -441,6 +468,30 @@ const EditSurvey = () => {
           {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>
       </div>
+
+      <ModalComponent
+        title="How many more question would you like the Sensei to add?"
+        openModal={addMoreQuestion}
+        // onClose={() => setAddMoreQuestion((prev)=> !prev)}
+        >
+          <div className="flex flex-col w-full gap-4 px-4">
+           <label>Enter a number between 1 and 5</label>
+          <input type="number" min="1" max="5" placeholder="Enter a number between 1 and 5" className="w-full py-1 px-2 my-1" onChange={(e)=>setQuestionCount(Number(e.target.value))} />
+          
+          <button
+      className={`w-full border py-2 rounded ${
+        question_count >= 1 && question_count <= 5 ? 'bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center' : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+      }`}
+      disabled={!(question_count >= 1 && question_count <= 5)}
+      onClick={() => {
+        setAddMoreQuestion((prev) => !prev);
+        handleGenerateSingleQuestion();
+      }}
+    >
+      Add
+    </button>
+          </div>  
+        </ModalComponent>
 
     </div>
   );

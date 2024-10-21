@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { setQuestionObject } from "@/redux/slices/questions.slice";
 import { usePathname, useRouter } from "next/navigation";
 import { FaEye } from "react-icons/fa6";
-import PaginationControls from "@/components/common/PaginationControls";
+// import PaginationControls from "@/components/common/PaginationControls";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -101,8 +101,8 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   };
 
   return (
-    <div className="">
-      <div className="py-10 px-2 w-full">
+    <div className="w-full">
+      <div className="py-10 px-16 w-full">
         <div className="flex justify-between items-center">
           <div className="flex flex-col text-start">
             <h2 className="text-[1.5rem] font-normal">
@@ -214,7 +214,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                   Continue
                 </button>
               </div>
-              <div className="mt-6 sm:mt-8">
+              {/* <div className="mt-6 sm:mt-8">
                 <PaginationControls
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -222,7 +222,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                   onPageChange={setCurrentPage}
                   itemsPerPage={itemsPerPage}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -240,6 +240,8 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
           <SenseiMaster />
         </motion.div>
       </AnimatePresence>
+
+
     </div>
   );
 };

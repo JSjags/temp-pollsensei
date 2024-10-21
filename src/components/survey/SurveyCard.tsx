@@ -20,6 +20,9 @@ import { useParams, useRouter } from "next/navigation";
 import {
   useCloseSurveyStatusMutation,
   useDeleteSurveyMutation,
+  useDuplicateSurveyMutation,
+  useEditSurveyMutation,
+  useFetchSurveysQuery,
   useShareSurveyQuery,
 } from "@/services/survey.service";
 import ShareSurveyModal from "./ShareSurveyModal";
@@ -49,7 +52,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     "Make a copy",
     "Close survey",
     "Delete",
-    "Close Survey",
   ];
   const [viewOptions, setViewOptions] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -61,7 +63,13 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [shareSurvey, setShareSurvey] = useState(false);
   const params = useParams();
   const [deleteSurvey] = useDeleteSurveyMutation();
-  const [closeSurveyStatus, {isLoading: isClosing }] = useCloseSurveyStatusMutation();
+  const [closeSurveyStatus, { isLoading: isClosing }] =
+    useCloseSurveyStatusMutation();
+  const [editSurvey, { isLoading: isEditing }] = useEditSurveyMutation();
+  const [duplicateSurvey, { isLoading: isDuplicating }] = useDuplicateSurveyMutation();
+  const { refetch } = useFetchSurveysQuery(1)
+  const [surveyName, setSurveyName] = useState<string>("");
+
   const router = useRouter();
   const { data, isSuccess: shareSuccess } = useShareSurveyQuery(params.id);
   const shareLink = data?.data?.link;
@@ -83,6 +91,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     if (choice.includes("delete")) {
       setShowDelete(true);
     }
+    if (choice.includes("edit")) {
+      router.push(`/surveys/edit-submitted-survey/${_id}`);
+    }
     if (choice.includes("share")) {
       setShareSurvey(true);
     }
@@ -101,34 +112,70 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setCloseSurvey(false);
   };
 
-  const handleSetToggle = (op:any) => {
-    handleSelectOption(op)
+  const handleSetToggle = (op: any) => {
+    handleSelectOption(op);
     // setToggle(!toggle);
   };
 
   const handleDeleteSurvey = async (id: any) => {
     try {
-      await deleteSurvey(id);
+      await deleteSurvey(id).unwrap();
+      toast.success("Survey deleted successfully");
       handleCloseAll();
+      refetch()
     } catch (e) {
       console.log(e);
+      toast.error("Error deleting survey");
     }
   };
-  const handleCloseSurvey = async (id:string) => {
+  const handleCloseSurvey = async (id: string) => {
     try {
       const result = await closeSurveyStatus({
         id: id,
         body: { status: "Closed" },
-      }).unwrap(); 
-      toast.success('Survey closed successfully')
+      }).unwrap();
+      toast.success("Survey closed successfully");
       handleCloseAll();
+      refetch()
       console.log("Success:", result);
       setToggle(!toggle);
     } catch (err) {
-      toast.error('Failed to close survey')
+      toast.error("Failed to close survey");
       console.error("Error:", err);
     }
   };
+
+  const handleRename = async (id: string) => {
+    try {
+      const result = await editSurvey({
+        id: id,
+        body: { topic: surveyName },
+      }).unwrap();
+      toast.success("Survey renamed successfully");
+      refetch()
+      handleCloseAll();
+      console.log("Success:", result);
+    } catch (err) {
+      toast.error("Failed to rename survey");
+      console.error("Error:", err);
+    }
+  };
+
+  const handleDuplicate = async (id: string) => {
+    try {
+      const result = await duplicateSurvey({
+        survey_id: id,
+      }).unwrap();
+      toast.success("Survey duplicated successfully");
+      refetch()
+      handleCloseAll();
+      console.log("Success:", result);
+    } catch (err) {
+      toast.error("Failed to duplicate survey");
+      console.error("Error:", err);
+    }
+  };
+
 
   // console.log(status)
 
@@ -177,12 +224,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       </div>
 
       <div className="mt-3 sm:mt-4">
-      <div
-      style={{ backgroundColor: bg, color }}
-      className={`text-[12px] rounded-[12px] w-[69px] h-[24px] flex items-center justify-center px-[10px] pt-[5px] pb-[7px] whitespace-nowrap`}
-    >
-      {text}
-    </div>
+        <div
+          style={{ backgroundColor: bg, color }}
+          className={`text-[12px] rounded-[12px] w-[69px] h-[24px] flex items-center justify-center px-[10px] pt-[5px] pb-[7px] whitespace-nowrap`}
+        >
+          {text}
+        </div>
       </div>
 
       <div className="mt-6 sm:mt-10 flex justify-between items-center">
@@ -232,9 +279,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
           </div>
           <div>
             <Switch
-              className="data-[state=checked]:bg-gray-400 data-[state=unchecked]:bg-purple-500"
-              checked={status === "Closed" && true}
-              onCheckedChange={()=> handleSetToggle('Close')}
+              className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-400"
+              checked={status === "On going" && true}
+              onCheckedChange={() => handleSetToggle("Close")}
             />
           </div>
         </div>
@@ -276,10 +323,19 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         />
       )}
       {showRename && (
-        <RenameSurvey openModal={showRename} onClose={handleCloseAll} />
+        <RenameSurvey
+          openModal={showRename}
+          onClose={handleCloseAll}
+          isEditing={isEditing}
+          onRenameSurvey={() => {
+            handleRename(_id);
+          }}
+          surveyName={surveyName}
+          setSurveyName={(e) => setSurveyName(e.target.value)}
+        />
       )}
       {showDuplicate && (
-        <DuplicateSurvey openModal={showDuplicate} onClose={handleCloseAll} />
+        <DuplicateSurvey openModal={showDuplicate} onClose={handleCloseAll} isDuplicating={isDuplicating} onDuplicatingSurvey={()=>handleDuplicate(_id)} />
       )}
       {shareSurvey && (
         <ShareSurveyModal
