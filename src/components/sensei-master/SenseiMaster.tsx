@@ -362,7 +362,27 @@ import { RootState } from "@/redux/store";
 import SenseiMasterChat from "../ai/SenseiMasterChat";
 import { useSensei } from "@/contexts/SenseiContext";
 
-const SenseiMaster = () => {
+const SenseiMaster = ({
+  type = "generation",
+  onSave,
+  aiSave,
+  setEditId,
+}: {
+  type: "analysis" | "generation";
+  onSave: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
+  aiSave: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
+  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
+}) => {
   const dispatch = useDispatch();
 
   const {
@@ -602,6 +622,10 @@ const SenseiMaster = () => {
             setIsPinned={setIsPinned}
             pinToSide={pinToSide}
             setDefaultPosition={setDefaultPosition}
+            type={type}
+            onSave={onSave}
+            aiSave={aiSave}
+            setEditId={setEditId}
           />
         </div>
       </div>

@@ -183,6 +183,66 @@ const EditSurvey = () => {
     setAiChatbot((prev) => !prev);
   };
 
+  const handleAISave = (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => {
+    const updatedSections = [...questions];
+    const currentSectionData = updatedSections[currentSection];
+
+    if (aiEditIndex !== null && currentSectionData) {
+      console.log(aiEditIndex);
+
+      const updatedQuestionData = {
+        ...currentSectionData.questions[aiEditIndex!],
+        question: updatedQuestion,
+        options: updatedOptions,
+        question_type: updatedQuestionType,
+        is_required:
+          currentSectionData.questions[aiEditIndex!].is_required || false,
+      };
+      const updatedSection = {
+        ...currentSectionData,
+        questions: currentSectionData.questions.map((q, idx) =>
+          idx === aiEditIndex ? updatedQuestionData : q
+        ),
+      };
+      dispatch(
+        updateSection({ index: currentSection, newSection: updatedSection })
+      );
+      setIsEdit(false);
+    }
+
+    if (aiEditIndex && currentSectionData) {
+      console.log(currentSectionData);
+
+      const updatedQuestionData = {
+        ...currentSectionData.questions[aiEditIndex],
+        question: updatedQuestion,
+        options: updatedOptions,
+        question_type: updatedQuestionType,
+        is_required:
+          currentSectionData.questions[aiEditIndex]?.is_required || false,
+      };
+
+      const updatedSection = {
+        ...currentSectionData,
+        questions: currentSectionData.questions.map((q, idx) =>
+          idx === aiEditIndex ? updatedQuestionData : q
+        ),
+      };
+      dispatch(
+        updateSection({ index: currentSection, newSection: updatedSection })
+      );
+      setIsEdit(false);
+    }
+
+    setIsSidebarOpen((prev) => !prev);
+    setAiChatbot((prev) => !prev);
+  };
+
   const handleDeleteQuestion = (index: number) => {
     dispatch(
       deleteQuestionFromSection({
@@ -559,7 +619,11 @@ const EditSurvey = () => {
           variants={mascotVariants}
           className="bg-blue-500 z-[1000000] fixed top-0 left-0"
         >
-          <SenseiMaster />
+          <SenseiMaster
+            type="generation"
+            onSave={handleAISave}
+            setEditId={setEditIndex}
+          />
         </motion.div>
       </AnimatePresence>
     </div>

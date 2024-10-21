@@ -13,7 +13,13 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useDispatch } from "react-redux";
 import { useSensei } from "@/contexts/SenseiContext";
-import store from "@/redux/store";
+import store, { RootState } from "@/redux/store";
+import {
+  setActionMessage,
+  setCurrentQuestion,
+  setIsCollapsed,
+} from "@/redux/slices/sensei-master.slice";
+import { useSelector } from "react-redux";
 
 interface CustomButtonProps {
   imageUrl: string;
@@ -52,19 +58,30 @@ export default function PollsenseiTriggerButton({
     useSensei();
 
   const handleClick = () => {
-    setEditId(index - 1);
-    const payload = {
-      conversation_id,
-      data: {
+    dispatch(setActionMessage(`Rephrase question ${index}`));
+    dispatch(setIsCollapsed(false));
+    dispatch(
+      setCurrentQuestion({
         question: {
           Question: question,
           "Option type": optionType,
           Options: options,
         },
-      },
-      trigger_type: "single-regen",
-    };
-    emitEvent("user_trigger", payload);
+      })
+    );
+    // setEditId(index - 1);
+    // const payload = {
+    //   conversation_id,
+    //   data: {
+    //     question: {
+    //       Question: question,
+    //       "Option type": optionType,
+    //       Options: options,
+    //     },
+    //   },
+    //   trigger_type: "single-regen",
+    // };
+    // emitEvent("user_trigger", payload);
 
     // const optionsPayload = {
     //   conversation_id,
@@ -83,12 +100,13 @@ export default function PollsenseiTriggerButton({
   const handleEvent = useCallback(
     (eventName: string, ...args: any[]) => {
       if (eventName === "ai_trigger") {
-        // if (onSave) {
-        //   if() {
-        //     onSave(args[0].actions[0], options || [], optionType, index);
-        //   } else {
-        //   }
-        // }
+        if (onSave) {
+          onSave(args[0].actions[0], options || [], optionType, index);
+          // if() {
+          // }
+          // else {
+          // }
+        }
       }
     },
     [onSave, options, optionType, index]
@@ -110,7 +128,7 @@ export default function PollsenseiTriggerButton({
           <Button
             onClick={handleClick}
             className={cn(
-              "size-6 bg-transparent rounded-full hover:bg-gray-200 flex justify-center items-center p-0 transition-colors duration-200 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent",
+              "size-6 bg-transparent rounded-full hover:bg-gray-200 flex justify-center items-center p-0 transition-colors duration-200 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent shrink-0",
               className
             )}
             aria-label={tooltipText}
