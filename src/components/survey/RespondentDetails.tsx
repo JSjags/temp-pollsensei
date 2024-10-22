@@ -1,6 +1,8 @@
 import { formatDate, formatTo12Hour } from '@/lib/helpers';
 import React from 'react';
-import Skeleton from 'react-loading-skeleton'
+// import Skeleton from 'react-loading-skeleton'
+// import 'react-loading-skeleton/dist/skeleton.css'
+
 
 
 interface UserDetails {
@@ -57,27 +59,27 @@ const RespondentDetails: React.FC<RespondentDetailsProps> = ({
     <div className="grid grid-cols-2 gap-y-4 text-sm">
       <div className="flex gap-5">
         <span className="font-semibold text-gray-600">Respondent:</span>
-        <span>{isLoading ? <Skeleton width={150} /> : data?.respondent_name}</span>
+        <span>{isLoading ? (<span className='text-xs'>Loading...</span>) : data?.respondent_name}</span>
       </div>
       <div className="flex gap-5">
         <span className="font-semibold text-gray-600">Status:</span>
-        <span>{isLoading ? <Skeleton width={50} /> : `${validCount} / ${data?.answers?.length}`}</span>
+        <span>{isLoading ? (<span className='text-xs'>Loading...</span>): `${validCount} / ${data?.answers?.length}`}</span>
       </div>
       <div className="flex gap-5">
         <span className="font-semibold text-gray-600">Date:</span>
-        <span>{isLoading ? <Skeleton width={100} /> : data?.createdAt && formatDate(data.createdAt)}</span>
+        <span>{isLoading ? (<span className='text-xs'>Loading...</span>) : data?.createdAt && formatDate(data.createdAt)}</span>
       </div>
       <div className="flex gap-5">
         <span className="font-semibold text-gray-600">Time:</span>
-        <span>{isLoading ? <Skeleton width={80} /> : data?.createdAt && formatTo12Hour(data.createdAt)}</span>
+        <span>{isLoading ? (<span className='text-xs'>Loading...</span>) : data?.createdAt && formatTo12Hour(data.createdAt)}</span>
       </div>
       <div className="flex gap-5">
         <span className="font-semibold text-gray-600">Country:</span>
-        <span>{isLoading ? <Skeleton width={100} /> : data?.country ? data?.country : "Not provided"}</span>
+        <span>{isLoading ? (<span className='text-xs'>Loading...</span>) : data?.country ? data?.country : "Not provided"}</span>
       </div>
       <div className="flex gap-5">
         <span className="font-semibold text-gray-600">Email:</span>
-        <span>{isLoading ? <Skeleton width={180} /> : data?.respondent_email}</span>
+        <span>{isLoading ? (<span className='text-xs'>Loading...</span>) : data?.respondent_email}</span>
       </div>
     </div>
   </div>

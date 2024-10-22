@@ -26,6 +26,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import {
   addSection,
+  resetSurvey,
   saveGeneratedBy,
   updateConversationId,
   updateDescription,
@@ -36,6 +37,7 @@ import store from "@/redux/store";
 import Milestones from "@/components/survey/Milestones";
 import { AnimatePresence, motion } from "framer-motion";
 import SenseiMaster from "@/components/sensei-master/SenseiMaster";
+import { resetQuestion } from "@/redux/slices/questions.slice";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -74,6 +76,7 @@ const CreateSurveyPage = () => {
   const generated_by = useSelector(
     (state: RootState) => state.survey.generated_by
   );
+  // const surveyData = useSelector((state:RootState)=>state.survey.sections)
   const navigate = useRouter();
   const dispatch = useDispatch();
   const [surveyType, setSurveyType] = useState("");
@@ -194,6 +197,11 @@ const CreateSurveyPage = () => {
   console.log(survey);
   console.log(data);
   console.log(survey.sections);
+
+  useEffect(()=>{
+    dispatch(resetQuestion());
+    dispatch(resetSurvey());
+  }, [])
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center">

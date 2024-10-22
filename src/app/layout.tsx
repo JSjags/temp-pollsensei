@@ -7,7 +7,6 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AOSInit } from "@/components/ui/Aos";
 import { TanstackProvider } from "@/providers/TanstackProvider";
-import 'react-loading-skeleton/dist/skeleton.css'
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
