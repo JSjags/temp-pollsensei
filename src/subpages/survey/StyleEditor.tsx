@@ -52,6 +52,7 @@ const StyleEditor = () => {
     (state: RootState) => state?.survey?.color_theme
   );
   const [color, setColor] = useState(colorTheme || "#ff5722");
+  const [logo_url, setLogoUrl] = useState<string | null>(null);
 
   const fontOptions: FontOption[] = [
     { value: "Helvetica", label: "Helvetica" },

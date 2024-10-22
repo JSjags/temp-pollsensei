@@ -12,6 +12,7 @@ interface SenseiMasterState {
   isCollapsed: boolean;
   triggerType?: string;
   actionMessage?: string;
+  currentQuestionType?: string | null;
   question?: string;
   currentQuestion?: {
     question: {
@@ -32,6 +33,7 @@ const initialState: SenseiMasterState = {
   count: 0,
   animationState: "Sleeping",
   actionMessage: "",
+  currentQuestionType: null,
   isCollapsed: true,
   triggerType: "",
   question: "",
@@ -55,6 +57,9 @@ export const senseiMasterSlice = createSlice({
     },
     setActionMessage: (state, action: PayloadAction<any>) => {
       state.actionMessage = action.payload;
+    },
+    setCurrentQuestionType: (state, action: PayloadAction<any>) => {
+      state.currentQuestionType = action.payload;
     },
     toggleCollapse: (state) => {
       state.isCollapsed = !state.isCollapsed;
@@ -102,6 +107,7 @@ export const {
   setDefaultPosition,
   setWindowWidth,
   setWindowHeight,
+  setCurrentQuestionType,
 } = senseiMasterSlice.actions;
 
 export default senseiMasterSlice.reducer;

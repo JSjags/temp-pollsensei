@@ -27,10 +27,16 @@ interface CustomButtonProps {
   className: string;
   triggerType: "rephrase";
   question: string;
-  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   optionType: string;
   index: number;
-  options: string[] | undefined;
+  options:
+    | string[]
+    | undefined
+    | {
+        Head: string[];
+        Body: string[];
+      };
   onSave: (
     updatedQuestion: string,
     updatedOptions: string[],
@@ -97,29 +103,35 @@ export default function PollsenseiTriggerButton({
     // emitEvent("user_trigger", optionsPayload);
   };
 
-  const handleEvent = useCallback(
-    (eventName: string, ...args: any[]) => {
-      if (eventName === "ai_trigger") {
-        if (onSave) {
-          onSave(args[0].actions[0], options || [], optionType, index);
-          // if() {
-          // }
-          // else {
-          // }
-        }
-      }
-    },
-    [onSave, options, optionType, index]
-  );
+  // const handleEvent = useCallback(
+  //   (eventName: string, ...args: any[]) => {
+  //     if (eventName === "ai_trigger") {
+  //       if (onSave) {
+  //         // onSave(args[0].actions[0], options || [], optionType, index);
+  //         onSave(
+  //           args[0].actions[0],
+  //           Array.isArray(options) ? options : [],
+  //           optionType,
+  //           index
+  //         );
+  //         // if() {
+  //         // }
+  //         // else {
+  //         // }
+  //       }
+  //     }
+  //   },
+  //   [onSave, options, optionType, index]
+  // );
 
-  useEffect(() => {
-    socketIo?.onAny(handleEvent);
+  // useEffect(() => {
+  //   socketIo?.onAny(handleEvent);
 
-    // Cleanup function to remove the event listener
-    return () => {
-      socketIo?.offAny(handleEvent);
-    };
-  }, [socketIo, handleEvent]);
+  //   // Cleanup function to remove the event listener
+  //   return () => {
+  //     socketIo?.offAny(handleEvent);
+  //   };
+  // }, [socketIo, handleEvent]);
 
   return (
     <TooltipProvider>

@@ -373,6 +373,7 @@ const SenseiMaster = ({
     updatedQuestion: string,
     updatedOptions: string[],
     updatedQuestionType: string,
+    isRequired: boolean,
     aiEditIndex?: number
   ) => void;
   aiSave?: (
@@ -625,7 +626,7 @@ const SenseiMaster = ({
             type={type}
             onSave={onSave}
             aiSave={aiSave}
-            setEditId={setEditId}
+            setEditId={setEditId!}
           />
         </div>
       </div>

@@ -18,7 +18,7 @@ interface MultiChoiceQuestionProps {
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
-  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   onSave?: (
     updatedQuestion: string,
     updatedOptions: string[],
@@ -107,8 +107,10 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           <h3 className="text-lg font-semibold text-start">
             <div className="group flex justify-between gap-2 items-start">
               <p>
-                <span>{index}. </span> {question} 
-                {is_required === true && <span className="text-2xl ml-2 text-red-500">*</span>}
+                <span>{index}. </span> {question}
+                {is_required === true && (
+                  <span className="text-2xl ml-2 text-red-500">*</span>
+                )}
               </p>
               <PollsenseiTriggerButton
                 key={index}
@@ -163,28 +165,28 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             </button>
           </div>
         )}
-           {
-        pathname.includes('edit-survey') && (
+        {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
-          <span>Required</span>
-           <Switch checked={is_required} 
-            onCheckedChange={
-             setIsRequired
-               ? (checked: boolean) => setIsRequired(checked)
-               : undefined
-           }
-           className="bg-[#9D50BB] " />
-         </div>
-        )
-       }
-       <div className="flex justify-e">
-       {pathname === "/surveys/edit-survey" ||
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+        <div className="flex justify-e">
+          {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (
             <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
           )}
-       </div>
+        </div>
       </div>
       {pathname.includes("survey-reponse-upload") && status && (
         <div>{getStatus(status)}</div>
