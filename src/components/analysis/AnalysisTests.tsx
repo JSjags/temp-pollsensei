@@ -231,7 +231,7 @@ export default function DragAndDropPage() {
 
   const createTestsQuery = useQuery({
     queryKey: ["create-test"],
-    queryFn: () => createTests({ surveyId: surveyId! }),
+    queryFn: () => createTests({ surveyId: variablesQuery.data.variable_id! }),
     enabled: testsLibraryQuery.isSuccess,
   });
 
