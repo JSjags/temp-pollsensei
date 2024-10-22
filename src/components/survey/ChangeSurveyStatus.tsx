@@ -9,21 +9,29 @@ interface ChangeSurveyStatusProps {
   onClose: () => void;
   openModal: boolean;
   isClosing?: boolean;
-  onCloseSurvey?:()=>void;
+  onCloseSurvey?: () => void;
 }
 
-const ChangeSurveyStatus: React.FC<ChangeSurveyStatusProps> = ({ onClose, openModal, onCloseSurvey, isClosing }) => {
+const ChangeSurveyStatus: React.FC<ChangeSurveyStatusProps> = ({
+  onClose,
+  openModal,
+  onCloseSurvey,
+  isClosing,
+}) => {
   return (
     <Modals title="" openModal={openModal} modalSize="lg" onClose={onClose}>
       <div className="flex flex-col items-center gap-2">
         <h2 className="text-[#54595E] font-[700]">Close survey?</h2>
         <p className="text-center text-[#838383] text-[14px]">
-          Are you sure you want to stop this survey from receiving response? Note that this cannot
-          be undone.
+          Are you sure you want to stop this survey from receiving response?
+          Note that this cannot be undone.
         </p>
         <div className="mt-3 flex items-center justify-between w-full">
           <ButtonOutline label="No, cancel" />
-          <ButtonDelete label={isClosing ? "Waiting..." : "Close Survey"} onclick={onCloseSurvey}/>
+          <ButtonDelete
+            label={isClosing ? "Waiting..." : "Close Survey"}
+            onclick={onCloseSurvey}
+          />
         </div>
       </div>
     </Modals>

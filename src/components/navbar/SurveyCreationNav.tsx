@@ -331,7 +331,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSurveyResponses } from "@/services/analysis";
 import { extractMongoId } from "@/lib/utils";
-import { openSurveySettings } from "@/redux/slices/survey_settings.slice";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -357,6 +356,8 @@ const SurveyCreationNav = () => {
     ? "Preview"
     : path.includes("validation")
     ? "Validation"
+    : path.includes("analysis")
+    ? "Analysis"
     : "Design";
 
   const isExactSurveyPath = path === "/surveys";
@@ -419,29 +420,46 @@ const SurveyCreationNav = () => {
             <span className="ml-3 text-sm">Reponses</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link
-            href={
+          <Link   href={
               path.includes("survey-reponse-upload?tab=Individual+Responses")
                 ? `/surveys/${data?.data._id}/survey-reponse-upload?tab=Individual+Responses`
                 : ""
-            }
-            className="flex items-center"
-          >
-            <BreadcrumsIcon
+            } className="flex items-center">
+          <BreadcrumsIcon
               icon={
-                path.includes("survey-reponse-upload?tab=Individual+Responses") && (
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0 && (
                   <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
                 )
               }
               color={
-                path.includes("survey-reponse-upload?tab=") ? "#B0A5BB" : ""
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0
+                  ? ""
+                  : "#B0A5BB"
               }
             />
             <span className="ml-3 text-sm">Validation</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link href={""} className="flex items-center">
-            <BreadcrumsIcon color="#B0A5BB" />
+          <Link
+            href={`/surveys/${params.id}/analysis`}
+            className="flex items-center"
+          >
+            <BreadcrumsIcon
+              icon={
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0 && (
+                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                )
+              }
+              color={
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0
+                  ? ""
+                  : "#B0A5BB"
+              }
+            />
             <span className="ml-3 text-sm">Analysis</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
@@ -449,7 +467,7 @@ const SurveyCreationNav = () => {
             <BreadcrumsIcon color="#B0A5BB" />
             <span className="ml-3 text-sm">Report</span>
           </Link>
-          <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+          {/* <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " /> */}
         </nav>
 
         {path.includes("survey-reponse-upload") ? (

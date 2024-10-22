@@ -33,7 +33,7 @@ export function useSocket() {
 
     // On successful connection, alert success and stop loading
     socketIo.on("connect", () => {
-      alert("WebSocket connected successfully!");
+      // alert("WebSocket connected successfully!");
       setLoading(false); // Stop loading when connected
     });
 

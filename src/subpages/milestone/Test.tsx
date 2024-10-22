@@ -89,7 +89,6 @@
 
 // export default Milestone;
 
-
 import { draggable } from "@/assets/images";
 import Image from "next/image";
 import React, { useState } from "react";
@@ -100,7 +99,12 @@ interface MultiChoiceQuestionEditProps {
   question: string;
   questionType: string;
   options: any;
-  onSave?: (updatedQuestion: string, updatedOptions: any, editedQuestionType:string) => void;
+  is_required: boolean;
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: any,
+    editedQuestionType: string
+  ) => void;
   onCancel?: () => void;
 }
 
@@ -128,14 +132,19 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   onCancel,
 }) => {
   const [editedQuestion, setEditedQuestion] = useState<string>(question);
-  const [editedQuestionType, setEditedQuestionType] = useState<string>(questionType);
+  const [editedQuestionType, setEditedQuestionType] =
+    useState<string>(questionType);
   const [editedOptions, setEditedOptions] = useState<any>(
     options || { Head: [""], Body: [""] }
   );
 
-  const handleOptionChange = (section: "Head" | "Body", index: number, value: string) => {
+  const handleOptionChange = (
+    section: "Head" | "Body",
+    index: number,
+    value: string
+  ) => {
     const newOptions = { ...editedOptions };
-    console.log(newOptions[section])
+    console.log(newOptions[section]);
     newOptions[section] = [...newOptions[section]];
     newOptions[section][index] = value;
     setEditedOptions(newOptions);
@@ -174,21 +183,27 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
 
     switch (selectedOption.value) {
       case "Likert Scale":
-        setEditedOptions(["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]);
+        setEditedOptions([
+          "Strongly Disagree",
+          "Disagree",
+          "Neutral",
+          "Agree",
+          "Strongly Agree",
+        ]);
         break;
-        
+
       case "Multi-choice":
-        setEditedOptions([""]); 
+        setEditedOptions([""]);
         break;
-        
+
       case "Comment":
-        setEditedOptions([]); 
+        setEditedOptions([]);
         break;
 
       case "Matrix":
         setEditedOptions({
           Head: ["Head 1", "Head 2", "Head 3", "Head 4", "Head 5"],
-          Body: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"]
+          Body: ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"],
         });
         break;
 
@@ -223,8 +238,12 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           <Select
             className="select-container border-2 rounded mx-4 my-4"
             classNamePrefix="questionType"
-            defaultValue={selectOptions.find(opt => opt.value === questionType)}
-            value={selectOptions.find(opt => opt.value === editedQuestionType)}
+            defaultValue={selectOptions.find(
+              (opt) => opt.value === questionType
+            )}
+            value={selectOptions.find(
+              (opt) => opt.value === editedQuestionType
+            )}
             name="questionType"
             options={selectOptions}
             styles={customStyles}
@@ -242,7 +261,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                   <input
                     type="text"
                     value={option}
-                    onChange={(e) => handleOptionChange("Head", index, e.target.value)}
+                    onChange={(e) =>
+                      handleOptionChange("Head", index, e.target.value)
+                    }
                     className="mr-2 w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                   />
                   {editedOptions.Head.length > 1 && (
@@ -270,7 +291,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                   <input
                     type="text"
                     value={option}
-                    onChange={(e) => handleOptionChange("Body", index, e.target.value)}
+                    onChange={(e) =>
+                      handleOptionChange("Body", index, e.target.value)
+                    }
                     className="mr-2 w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                   />
                   {editedOptions.Body.length > 1 && (
@@ -293,36 +316,39 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           </div>
         )}
 
-        {editedQuestionType !== "Matrix" && editedQuestionType !== "Comment" && (
-          <div>
-            {editedOptions.map((option: string, index: number) => (
-              <div key={index} className="flex items-center my-2">
-                <input
-                  type="text"
-                  value={option}
-                  onChange={(e) => handleOptionChange("Head", index, e.target.value)}
-                  className="mr-2 w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                />
-                {editedOptions.length > 1 && (
-                  <button
-                    onClick={() => handleRemoveOption("Head", index)}
-                    className="text-red-500 ml-2"
-                  >
-                    <MdDeleteOutline />
-                  </button>
-                )}
-              </div>
-            ))}
-            {editedQuestionType === "Multi-choice" && (
-              <button
-                onClick={() => handleAddOption("Head")}
-                className="text-blue-500 mt-2 text-start"
-              >
-                Add Option
-              </button>
-            )}
-          </div>
-        )}
+        {editedQuestionType !== "Matrix" &&
+          editedQuestionType !== "Comment" && (
+            <div>
+              {editedOptions.map((option: string, index: number) => (
+                <div key={index} className="flex items-center my-2">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) =>
+                      handleOptionChange("Head", index, e.target.value)
+                    }
+                    className="mr-2 w-full bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                  />
+                  {editedOptions.length > 1 && (
+                    <button
+                      onClick={() => handleRemoveOption("Head", index)}
+                      className="text-red-500 ml-2"
+                    >
+                      <MdDeleteOutline />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {editedQuestionType === "Multi-choice" && (
+                <button
+                  onClick={() => handleAddOption("Head")}
+                  className="text-blue-500 mt-2 text-start"
+                >
+                  Add Option
+                </button>
+              )}
+            </div>
+          )}
 
         <div className="flex justify-end gap-4 mt-4">
           <button
@@ -344,4 +370,3 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
 };
 
 export default MultiChoiceQuestionEdit;
-

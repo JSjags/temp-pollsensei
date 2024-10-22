@@ -1,7 +1,6 @@
 import { default_header } from "@/assets/images";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-
 interface TextStyle {
   name: string;
   size: string | number;
@@ -33,7 +32,7 @@ interface SurveyState {
   header_text: TextStyle | null;
   question_text: TextStyle | null;
   body_text: TextStyle | null;
-  color_theme: string ;
+  color_theme: string;
   logo_url: File | string | null;
   header_url: File | string | null;
   generated_by: string | null;
@@ -60,7 +59,15 @@ const surveySlice = createSlice({
   initialState,
   reducers: {
     setQuestionObject: (state, action: PayloadAction<Question>) => {
-      const { question, description, question_type, options, is_required, rows, columns } = action.payload;
+      const {
+        question,
+        description,
+        question_type,
+        options,
+        is_required,
+        rows,
+        columns,
+      } = action.payload;
       const newQuestion: Question = {
         question,
         description,
@@ -91,7 +98,10 @@ const surveySlice = createSlice({
     addSection: (state, action: PayloadAction<Section>) => {
       state.sections.push(action.payload);
     },
-    updateSection: (state, action: PayloadAction<{ index: number; newSection: Section }>) => {
+    updateSection: (
+      state,
+      action: PayloadAction<{ index: number; newSection: Section }>
+    ) => {
       const { index, newSection } = action.payload;
       if (state.sections[index]) {
         state.sections[index] = newSection;
@@ -125,7 +135,7 @@ const surveySlice = createSlice({
       state.generated_by = action.payload;
     },
     resetSurvey: (_state) => {
-      return initialState;  
+      return initialState;
     },
     deleteQuestionFromSection: (
       state,
@@ -159,7 +169,7 @@ export const {
   setQuestionObject,
   updateDescription,
   resetSurvey,
-  deleteQuestionFromSection
+  deleteQuestionFromSection,
 } = surveySlice.actions;
 
 export default surveySlice.reducer;

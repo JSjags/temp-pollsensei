@@ -106,68 +106,71 @@ const Preview = () => {
             <button className="rounded-full border px-5 py-1" >Edit</button>
           </div> */}
           </div>
-          {questions && questions[currentSection]?.questions?.map(
-            (item: any, index: number) => (
-              <div key={index} className="mb-4">
-                {isEdit &&
-                editIndex === index &&
-                item.question_type === "matrix_checkbox" ? (
-                  <MatrixQuestionEdit
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                  />
-                ) : isEdit && editIndex === index ? (
-                  <MultiChoiceQuestionEdit
-                    question={item.Question}
-                    options={item.Options}
-                    questionType={item.question_type}
-                  />
-                ) : item.question_type === "multiple_choice" ? (
-                  <MultiChoiceQuestion
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    index={index + 1}
-                  />
-                ) : item.question_type === "long_text" ? (
-                  <CommentQuestion
-                    key={index}
-                    index={index + 1}
-                    questionType={item.question_type}
-                    question={item.question}
-                  />
-                ) : item.question_type === "linear_Scale" ? (
-                  <LinearScaleQuestion
-                    question={item.question}
-                    scaleStart={item.scaleStart}
-                    scaleEnd={item.scaleEnd}
-                    questionType={item.question_type}
-                  />
-                ) : item.question_type === "likert_scale" ? (
-                  <LikertScaleQuestion
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                  />
-                ) : item.question_type === "star_rating" ? (
-                  <StarRatingQuestion
-                    question={item.question}
-                    maxRating={5}
-                    questionType={item.question_type}
-                  />
-                ) : item.question_type === "matrix_checkbox" ? (
-                  <MatrixQuestion
-                    key={index}
-                    index={index + 1}
-                    options={item.options}
-                    questionType={item.question_type}
-                    question={item.question}
-                  />
-                ) : null}
-              </div>
-            )
-          )}
+          {questions &&
+            questions[currentSection]?.questions?.map(
+              (item: any, index: number) => (
+                <div key={index} className="mb-4">
+                  {isEdit &&
+                  editIndex === index &&
+                  item.question_type === "matrix_checkbox" ? (
+                    <MatrixQuestionEdit
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      is_required={item.is_required}
+                    />
+                  ) : isEdit && editIndex === index ? (
+                    <MultiChoiceQuestionEdit
+                      question={item.Question}
+                      options={item.Options}
+                      questionType={item.question_type}
+                      is_required={item.is_required}
+                    />
+                  ) : item.question_type === "multiple_choice" ? (
+                    <MultiChoiceQuestion
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      index={index + 1}
+                    />
+                  ) : item.question_type === "long_text" ? (
+                    <CommentQuestion
+                      key={index}
+                      index={index + 1}
+                      questionType={item.question_type}
+                      question={item.question}
+                    />
+                  ) : item.question_type === "linear_Scale" ? (
+                    <LinearScaleQuestion
+                      question={item.question}
+                      scaleStart={item.scaleStart}
+                      scaleEnd={item.scaleEnd}
+                      questionType={item.question_type}
+                    />
+                  ) : item.question_type === "likert_scale" ? (
+                    <LikertScaleQuestion
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                    />
+                  ) : item.question_type === "star_rating" ? (
+                    <StarRatingQuestion
+                      question={item.question}
+                      maxRating={5}
+                      questionType={item.question_type}
+                    />
+                  ) : item.question_type === "matrix_checkbox" ? (
+                    <MatrixQuestion
+                      key={index}
+                      index={index + 1}
+                      options={item.options}
+                      questionType={item.question_type}
+                      question={item.question}
+                    />
+                  ) : null}
+                </div>
+              )
+            )}
 
           {questions?.length > 1 && (
             <div className="flex justify-end items-center pb-10">

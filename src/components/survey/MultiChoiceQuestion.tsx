@@ -18,6 +18,13 @@ interface MultiChoiceQuestionProps {
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
   index: number;
   canUseAI?: boolean;
   status?: string;
@@ -31,8 +38,10 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   questionType,
   EditQuestion,
   DeleteQuestion,
+  setEditId,
   index,
   onChange,
+  onSave,
   canUseAI = false,
   status,
   is_required,
@@ -98,14 +107,23 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           <h3 className="text-lg font-semibold text-start">
             <div className="group flex justify-between gap-2 items-start">
               <p>
-                <span>{index}. </span> {question} 
-                {is_required === true && <span className="text-2xl ml-2 text-red-500">*</span>}
+                <span>{index}. </span> {question}
+                {is_required === true && (
+                  <span className="text-2xl ml-2 text-red-500">*</span>
+                )}
               </p>
               <PollsenseiTriggerButton
+                key={index}
                 imageUrl={stars}
                 tooltipText="Rephrase question"
                 className={"group-hover:inline-block hidden"}
                 triggerType="rephrase"
+                question={question}
+                optionType={questionType}
+                options={options}
+                setEditId={setEditId}
+                onSave={onSave!}
+                index={index}
               />
             </div>
           </h3>
@@ -147,8 +165,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             </button>
           </div>
         )}
-           {
-        pathname.includes('edit-survey') && (
+        {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
           <span>Required</span>
            <Switch checked={is_required} 
@@ -168,7 +185,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           ) : (
             <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
           )}
-       </div>
+        </div>
       </div>
       {pathname.includes("survey-reponse-upload") && status && (
         <div>{getStatus(status)}</div>

@@ -124,8 +124,7 @@ const SurveyResponses = () => {
     }
 
     if (OCRerror) {
-      toast.error("Failed to process request: Ai Service not available.");
-      console.log(OCRerror)
+      toast.error("Failed to process OCR. Please try again.");
     }
   }, [
     successOCRUpload,

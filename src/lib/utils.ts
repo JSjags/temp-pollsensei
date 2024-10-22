@@ -1,4 +1,4 @@
-import { Test, Variable } from "@/components/analysis/page";
+import { Test, Variable } from "@/components/analysis/AnalysisTests";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -65,4 +65,12 @@ export const extractMongoId = (pathname: string): string | undefined => {
   const regex = /[a-f\d]{24}/i; // MongoDB ObjectID pattern (24 hex characters)
   const match = pathname.match(regex);
   return match ? match[0] : undefined;
+};
+
+export const formatString = (input: string = ""): string => {
+  // Break the input into lines and then process each one
+  return input
+    .replace(/(\d+)\.\s/g, "\n$1.\n\t") // Match numbered questions like 1., 2., etc. and add new lines and tabs
+    .replace(/-\s/g, "\t- ") // Match list items starting with '-' and indent them
+    .replace(/(Please let me know.*)/, "\n$1"); // Move any closing sentence that starts with 'Please let me know' to a new line
 };

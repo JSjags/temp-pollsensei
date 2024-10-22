@@ -362,27 +362,29 @@ import { RootState } from "@/redux/store";
 import SenseiMasterChat from "../ai/SenseiMasterChat";
 import { useSensei } from "@/contexts/SenseiContext";
 
-const SenseiMaster = () => {
+const SenseiMaster = ({
+  type = "generation",
+  onSave,
+  aiSave,
+  setEditId,
+}: {
+  type: "analysis" | "generation";
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    isRequired: boolean,
+    aiEditIndex?: number
+  ) => void;
+  aiSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
+}) => {
   const dispatch = useDispatch();
-
-  const { emitUserTrigger, aiResponse, loading, isConnected } = useSensei();
-
-  const handleSendMessage = () => {
-    const payload = {
-      conversation_id: "6670d06bc27f42043dfbf3f9",
-      data: {
-        question: {
-          Question:
-            "How would you rate the overall quality of the campus facilities?",
-          "Option type": "Multi-choice",
-          Options: ["Excellent", "Good", "Average", "Poor", "Very Poor"],
-        },
-      },
-      trigger_type: "single-regen",
-    };
-
-    emitUserTrigger(payload);
-  };
 
   const {
     count = 0, // Fallback to 0 if undefined
@@ -593,14 +595,14 @@ const SenseiMaster = () => {
               onMouseUp={handleMouseUp}
             />
           </div>
-          <Button
+          {/* <Button
             onClick={() => {
               toggleStates();
             }}
             className="ml-auto w-fit bg-blue-500 h-6 auth-btn text-white px-2 py-1 rounded-full absolute -bottom-8 left-0 !text-xs"
           >
             {animationState}
-          </Button>
+          </Button> */}
         </div>
 
         {/* Chat Box Content (shown if not collapsed) */}
@@ -621,6 +623,10 @@ const SenseiMaster = () => {
             setIsPinned={setIsPinned}
             pinToSide={pinToSide}
             setDefaultPosition={setDefaultPosition}
+            type={type}
+            onSave={onSave}
+            aiSave={aiSave}
+            setEditId={setEditId!}
           />
         </div>
       </div>

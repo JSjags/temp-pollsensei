@@ -227,21 +227,6 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
           </div>
         </div>
       </div>
-      {/* Sensei Master */}
-      <AnimatePresence>
-        <motion.div
-          key="senseiMaster"
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          variants={mascotVariants}
-          className="bg-blue-500 z-[1000000] fixed top-0 left-0"
-        >
-          <SenseiMaster />
-        </motion.div>
-      </AnimatePresence>
-
-
     </div>
   );
 };

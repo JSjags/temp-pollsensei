@@ -24,5 +24,6 @@ const surveySettingsSlice = createSlice({
   },
 });
 
-export const { toggleSurveySettings, openSurveySettings, closeSurveySettings } = surveySettingsSlice.actions;
+export const { toggleSurveySettings, openSurveySettings, closeSurveySettings } =
+  surveySettingsSlice.actions;
 export default surveySettingsSlice.reducer;

@@ -1,64 +1,51 @@
-import React, { useState } from "react";
-import { useParams } from "next/navigation";
-import {
-  useGetSurveySummaryQuery,
-  useGetUserSurveyResponseQuery,
-  useValidateIndividualResponseQuery,
-} from "@/services/survey.service";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import Collaborators from "@/components/survey/Collaborators";
-import GeneralSettings from "@/components/survey/GeneralSettings";
 
-const SurveySettings: React.FC<{ data?: any }> = ({ data }) => {
-  const name = useSelector((state: RootState) => state?.name?.name);
-  const params = useParams();
-  const tabs = ["General Settings", "Collaborators",];
-  const [activeTab, setActiveTab] = useState("General Settings");
-  const [pagesNumber, setPagesNumber] = useState(1);
-  const { data: response_ } = useGetUserSurveyResponseQuery(params.id);
-  const { data: summary_ } = useGetSurveySummaryQuery(params.id);
 
-  const path_params = new URLSearchParams();
-  path_params.set("name", name);
+interface SurveySettingsProps{
+  isSidebarOpen: boolean;
+  onClick?: () => void;
+}
 
-  const { data: validate_individual_response } =
-    useValidateIndividualResponseQuery({
-      id: params.id,
-      pagesNumber: pagesNumber,
-      path_params: path_params.toString(),
-    });
-  console.log(validate_individual_response);
-
-  const totalResponses = response_?.data?.total || 0;
-  console.log(summary_);
+const SurveySettings:React.FC<SurveySettingsProps> = ({isSidebarOpen, onClick}) => {
 
   return (
-    <div className="lg:px-24 mt-10">
-      <div className="flex justify-center  border-gray-300 overflow-x-auto">
-        {tabs.map((tab: any) => (
+    <div>
+            {/* Sidebar for mobile */}
+            <div
+        className={`inset-y-0 right-0 z-50 bg-white shadow-lg transform h-full flex flex-col ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out`}
+      >
+        {/* <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl text-[#5B03B2]">PollSensei</h2>
+          </div>
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 transition-colors duration-200 ${
-              activeTab === tab
-                ? "text-purple-600 border-b-2 border-purple-600"
-                : "text-gray-500"
-            }`}
+            onClick={onClick}
+            className="text-gray-500 hover:text-gray-700"
           >
-            {tab}
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
           </button>
-        ))}
+        </div> */}
+        <aside className="mt-4">
+          <div className="space-y-2">
+           Lorem, ipsum dolor sit amet consectetur adipisicing elit. Corrupti eveniet at odio neque dolorem officia doloremque temporibus officiis, dignissimos voluptate accusamus corporis, maxime voluptatibus ad aliquid architecto sequi quibusdam sit.
+          </div>
+        </aside>
       </div>
-
-      {activeTab === "General Settings" && <GeneralSettings />}
-      {activeTab === "Collaborators" && (
-        <div className="mt-2 min-h-[50vh]">
-          <Collaborators />
-        </div>
-      )}
     </div>
-  );
-};
+  )
+}
 
-export default SurveySettings;
+export default SurveySettings
