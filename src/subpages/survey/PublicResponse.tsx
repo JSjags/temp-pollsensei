@@ -10,6 +10,7 @@ import {
   useSubmitPublicResponseMutation,
 } from "@/services/survey.service";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
@@ -34,7 +35,7 @@ const PublicResponse = () => {
   const [respondent_phone, setRespondent_phone] = useState("");
   const [respondent_country, setRespondent_country] = useState("");
   const [respondent_email, setRespondent_email] = useState("");
-  const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
+  const [submitSurveySuccess, setSubmitSurveySuccess] = useState(true);
   const router = useRouter();
 
   // const handleOptionChange = (
@@ -206,19 +207,24 @@ const PublicResponse = () => {
           <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
           <div className="bg-white p-6 rounded-lg flex flex-col  my-auto items-center justify-center shadow-md text-center max-w-md w-full">
             <div className="flex flex-col items-center">
-              <FaCheckCircle className="text-green-500 text-6xl mb-4" />
+              <FaCheckCircle className="text-[#9D50BB] text-6xl mb-4" />
               <h1 className="text-2xl font-semibold mb-2 text-gray-800">
                 Thank You!
               </h1>
               <p className="text-gray-600 mb-4">
                 Your response has been submitted successfully.
               </p>
+              <div className="flex justify-between items-center gap-4">
+              <Link href="/dashboard" className="hover:bg-[#9D50BB] hover:text-white transition py-2 px-4 rounded-md">Home</Link>
               <button
-                // onClick={handleRedirect}
-                className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+                onClick={()=>{
+                  setSubmitSurveySuccess((prev)=>!prev)
+                }}
+                className="px-6 py-2 bg- hover:text-white rounded-md hover:bg-[#9D50BB] transition"
               >
                 Take survey again
               </button>
+              </div>
             </div>
           </div>
           </div>

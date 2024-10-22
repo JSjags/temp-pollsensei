@@ -27,12 +27,12 @@ const QuestionType = () => {
           </div>
           <label className="font-normal">Dropdown (one answer)</label>
         </div> */}
-        <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
+        {/* <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
           <div className="">
             <RiToggleLine size={25} />
           </div>
           <label className="font-normal">Boolean (Yes/No)</label>
-        </div>
+        </div> */}
         <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
           <div className="">
             <MdShortText size={25} />

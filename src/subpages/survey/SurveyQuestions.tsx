@@ -45,7 +45,7 @@ const SurveyQuestions = () => {
             className={` w-full flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
           >
             {data && !isLoading && data?.data?.logo_url && (
-              <div className="bg-[#9D50BB]  w-1/3 my-3 text-white flex items-center flex-col ">
+              <div className="bg-[#9D50BB]  w-16 my-3 text-white flex items-center flex-col ">
                 <Image
                   src={data?.data?.logo_url}
                   alt=""
@@ -55,16 +55,19 @@ const SurveyQuestions = () => {
                 />
               </div>
             )}
-
+              {
+                data && !isLoading && data?.data?.header_url && (
             <div className="bg-[#9D50BB]  w-full my-2 text-white h-24 flex items-center flex-col ">
               <Image
-                src={data && data?.data?.header_url}
+                src={data && !isLoading && data?.data?.header_url}
                 alt=""
                 className="w-full object-cover bg-no-repeat h-24 "
                 width={"100"}
                 height={"200"}
               />
             </div>
+                )
+              }
 
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
               <h2
