@@ -35,7 +35,7 @@ const PublicResponse = () => {
   const [respondent_phone, setRespondent_phone] = useState("");
   const [respondent_country, setRespondent_country] = useState("");
   const [respondent_email, setRespondent_email] = useState("");
-  const [submitSurveySuccess, setSubmitSurveySuccess] = useState(true);
+  const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
   const router = useRouter();
 
   // const handleOptionChange = (
