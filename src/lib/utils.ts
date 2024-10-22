@@ -74,3 +74,38 @@ export const formatString = (input: string = ""): string => {
     .replace(/-\s/g, "\t- ") // Match list items starting with '-' and indent them
     .replace(/(Please let me know.*)/, "\n$1"); // Move any closing sentence that starts with 'Please let me know' to a new line
 };
+
+[
+  "Design Survey",
+  "Assign Roles",
+  "Collect Data",
+  "Validate Data",
+  "Analyse Survey",
+  "Generate Report",
+  "Close Survey",
+];
+
+export const generateMilestoneStage = (stage: string): string => {
+  if (stage === "Design Survey") {
+    return "1";
+  }
+  if (stage === "Assign Roles") {
+    return "2";
+  }
+  if (stage === "Collect Data") {
+    return "3";
+  }
+  if (stage === "Validate Data") {
+    return "4";
+  }
+  if (stage === "Analyse Survey") {
+    return "5";
+  }
+  if (stage === "Generate Report") {
+    return "6";
+  }
+  if (stage === "Close Survey") {
+    return "7";
+  }
+  return "0";
+};
