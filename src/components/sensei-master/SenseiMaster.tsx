@@ -369,19 +369,19 @@ const SenseiMaster = ({
   setEditId,
 }: {
   type: "analysis" | "generation";
-  onSave: (
+  onSave?: (
     updatedQuestion: string,
     updatedOptions: string[],
     updatedQuestionType: string,
     aiEditIndex?: number
   ) => void;
-  aiSave: (
+  aiSave?: (
     updatedQuestion: string,
     updatedOptions: string[],
     updatedQuestionType: string,
     aiEditIndex?: number
   ) => void;
-  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
   const dispatch = useDispatch();
 

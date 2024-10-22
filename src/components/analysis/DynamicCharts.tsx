@@ -163,7 +163,7 @@ const DynamicCharts: React.FC<DynamicChartsProps> = ({ data }) => {
                   <h3 className="text-lg font-semibold mb-2">
                     {theme.replace(/_/g, " ")}
                   </h3>
-                  <p>{content}</p>
+                  <p>{content as any}</p>
                 </div>
               ))}
             </div>

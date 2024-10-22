@@ -95,7 +95,7 @@ type Props = {
       | "start thinking"
       | "stop talking"
   ) => void;
-  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
 const SenseiMasterChat: React.FC<Props> = ({
