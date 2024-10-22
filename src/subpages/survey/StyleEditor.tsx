@@ -317,7 +317,7 @@ const StyleEditor = () => {
                     src={logo_url !== null && logo_url ? logo_url : ""}
                     alt="Logo"
                   />
-                  // <img src={logoFile ? URL.createObjectURL(logoFile) : logo_url || ""} alt="Logo" />
+              
                 )}
               </label>
               <input

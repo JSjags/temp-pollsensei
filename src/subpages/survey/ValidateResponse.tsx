@@ -345,7 +345,6 @@ const ValidateResponse = () => {
                   dispatch(resetAnswers());
                 }, 3000)
               }}
-              // onClick={handleSubmitResponse}
             >
               {isLoading ? "Submitting..." : "Submit"}
             </button>
