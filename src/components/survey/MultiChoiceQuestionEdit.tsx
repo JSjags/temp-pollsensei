@@ -137,8 +137,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   const selectOptions = [
     { value: "multiple_choice", label: "Multiple Choice" },
     { value: "long_text", label: "Long Text" },
-    { value: "Likert Scale", label: "Likert Scale" },
-    { value: "Linear Scale", label: "Linear Scale" },
+    // { value: "Likert Scale", label: "Likert Scale" },
+    // { value: "Linear Scale", label: "Linear Scale" },
     { value: "star_rating", label: "Star Rating" },
   ];
 

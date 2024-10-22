@@ -21,12 +21,12 @@ const QuestionType = () => {
           </div>
           <label className="font-normal">Multiple Choice</label>
         </div>
-        <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
+        {/* <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
           <div className="">
             <PiCaretUpDown size={25} />
           </div>
           <label className="font-normal">Dropdown (one answer)</label>
-        </div>
+        </div> */}
         <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
           <div className="">
             <RiToggleLine size={25} />
@@ -45,13 +45,13 @@ const QuestionType = () => {
           </div>
           <label className="font-normal">Long text</label>
         </div>
-        <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
+        {/* <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
           <div className="">
           <RxDotFilled size={25} />
           </div>
           <label className="font-normal">Slider</label>
-        </div>
-        <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
+        </div> */}
+        {/* <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
           <div className="">
           <RxDotFilled size={25} className="invisible" />
           </div>
@@ -80,13 +80,13 @@ const QuestionType = () => {
           <RxDotFilled size={25} className="invisible" />
           </div>
           <label className="font-normal">Matrix Multiple Choice</label>
-        </div>
-        <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
+        </div> */}
+        {/* <div className="flex w-full gap-2 items-center font-normal text-[1rem]">
           <div className="">
           <RxDotFilled size={25} className="invisible" />
           </div>
           <label className="font-normal">Matrix Checkbox</label>
-        </div>
+        </div> */}
       </div>
     </div>
   );

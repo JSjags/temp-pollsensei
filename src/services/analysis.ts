@@ -1,6 +1,27 @@
 import { TestLibraryFormatted } from "@/components/analysis/AnalysisTests";
 import axiosInstance from "@/lib/axios-instance";
 
+export const getLatestSurveyMilestone = async () => {
+  const { data } = await axiosInstance.get(`/survey/milestone/last`);
+  return data;
+};
+
+export const getSurveyMilestoneById = async (surveyId: string) => {
+  const { data } = await axiosInstance.get(`/survey/milestone/${surveyId}`);
+  return data;
+};
+
+export const getSingleSurvey = async ({
+  surveyId,
+}: {
+  page?: number;
+  page_size?: number;
+  surveyId: string;
+}) => {
+  const { data } = await axiosInstance.get(`/survey/${surveyId}`);
+  return data;
+};
+
 export const getSurveyVariableNames = async ({
   page = 1,
   page_size = 10,

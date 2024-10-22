@@ -89,8 +89,8 @@ const CommentQuestionEdit: React.FC<CommentQuestionEditProps> = ({
   const selectOptions = [
     { value: "Comment", label: "Comment" },
     { value: "Multi-choice", label: "Multiple Choice" },
-    { value: "Likert Scale", label: "Likert Scale" },
-    { value: "Linear Scale", label: "Linear Scale" },
+    // { value: "Likert Scale", label: "Likert Scale" },
+    // { value: "Linear Scale", label: "Linear Scale" },
     { value: "star_rating", label: "Star Rating" },
   ];
 

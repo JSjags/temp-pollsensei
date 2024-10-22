@@ -55,13 +55,14 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
         </div>
 
         {/* Icons */}
+
         <div className="flex space-x-3">
-          <button className="text-gray-500 hover:text-gray-700">
+          {/* <button className="text-gray-500 hover:text-gray-700">
             <FaPrint size={25} />
           </button>
           <button className="text-gray-500 hover:text-gray-700">
             <FaDownload size={25} />
-          </button>
+          </button> */}
           {/* <button className="text-gray-500 hover:text-gray-700">
             <FaExpand size={25} />
           </button> */}

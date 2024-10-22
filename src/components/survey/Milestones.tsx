@@ -41,7 +41,15 @@ const edgeTypes = {
   "custom-edge": CustomEdge,
 };
 
-export default function Milestones({ stage, onClick }: { stage: string, onClick?: () => void}) {
+export default function Milestones({
+  stage,
+  onClick,
+  surveyId = "",
+}: {
+  stage: string;
+  onClick?: () => void;
+  surveyId?: string;
+}) {
   const router = useRouter();
   const [currentStage] = useState(parseInt(stage) + 1);
 
@@ -408,55 +416,65 @@ export default function Milestones({ stage, onClick }: { stage: string, onClick?
       }
       if (id === "2") {
         if (label === "Design Survey") {
-          alert(label);
+          router.push(`/surveys/question/${surveyId}`);
+          // alert(label);
         }
         if (label === "Generate with AI") {
-          alert(label);
+          // router.push("/surveys/create-survey");
+          // alert(label);
         }
         if (label === "Create Manually") {
-          alert(label);
+          // router.push("/surveys/create-survey");
+          // alert(label);
         }
       }
       if (id === "3") {
         if (label === "Assign Roles") {
-          alert(label);
+          router.push("/team-members");
+          // alert(label);
         }
       }
       if (id === "4") {
         if (label === "Collect Data") {
-          alert(label);
+          router.push(`surveys/${surveyId}/survey-reponse-upload`);
+          // alert(label);
         }
         if (label === "Buy Respondents") {
-          alert(label);
+          // alert(label);
         }
-        if (label === "Validate Response") {
-          alert(label);
+        if (label === "Share Survey") {
+          router.push(`/surveys/question/${surveyId}`);
         }
       }
       if (id === "5") {
         if (label === "Validate Response") {
-          alert(label);
+          router.push(`/surveys/${surveyId}/validate-response`);
+          // alert(label);
         }
       }
       if (id === "6") {
         if (label === "Analyze Survey") {
-          alert(label);
+          router.push(`/surveys/${surveyId}/analysis`);
+          // alert(label);
         }
         if (label === "Qualitative Analysis") {
-          alert(label);
+          // alert(label);
         }
         if (label === "Quantitative Analysis") {
-          alert(label);
+          router.push("/surveys/create-survey");
+          // alert(label);
         }
       }
       if (id === "7") {
         if (label === "Generate Report") {
-          alert(label);
+          // router.push("/surveys/create-survey");
+          // alert(label);
         }
       }
       if (id === "8") {
         if (label === "Close Survey") {
-          alert(label);
+          // router.push("/surveys/create-survey");
+          // alert(label);
         }
       }
     };

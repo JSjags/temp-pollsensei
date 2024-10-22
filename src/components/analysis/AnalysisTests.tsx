@@ -11,6 +11,7 @@ import { cn, extractMongoId, getUniqueVariables } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   createTests,
+  getSingleSurvey,
   getSurveyTestsLibrary,
   getSurveyVariableNames,
   runTest,
@@ -18,6 +19,7 @@ import {
 import { usePathname } from "next/navigation";
 import AnalysisLoadingScreen, {
   LoadingOverlay,
+  Spinner,
 } from "../loaders/page-loaders/AnalysisPageLoader";
 import AnalysisErrorComponent from "../loaders/page-loaders/AnalysisError";
 import Loading from "../primitives/Loader";
@@ -25,6 +27,7 @@ import { toast } from "react-toastify";
 import AnalysisReport from "./AnalysisReport";
 import { AnimatePresence, motion } from "framer-motion";
 import SenseiMaster from "../sensei-master/SenseiMaster";
+import DataVisualizationComponent from "../charts/DataVisualization";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -71,6 +74,7 @@ export interface TVariableType {
 
 export interface TestLibraryFormatted {
   survey_id: string;
+  variable_id: string;
   data: {
     test_name: string;
     test_variables: string[];
@@ -105,10 +109,12 @@ const hasVariablesInTestsLibrary = (testsLibrary: Test[]) => {
 
 const formatTestsLibrary = (
   testsLibrary: Test[],
-  surveyId: string
+  surveyId: string,
+  variableId: string
 ): TestLibraryFormatted => {
   return {
     survey_id: surveyId,
+    variable_id: variableId,
     data: testsLibrary.map((test) => ({
       test_name: test.name,
       test_variables: test.variables.map((variable) => variable.id), // Assuming each variable has a 'name' field
@@ -217,6 +223,11 @@ export default function DragAndDropPage() {
   // Extract surveyId regardless of path
   const surveyId = extractMongoId(path);
 
+  const getSurvey = useQuery({
+    queryKey: ["get-survey"],
+    queryFn: () => getSingleSurvey({ surveyId: surveyId! }),
+  });
+
   const variablesQuery = useQuery({
     queryKey: ["survey-variables"],
     queryFn: () => getSurveyVariableNames({ surveyId: surveyId! }),
@@ -238,7 +249,13 @@ export default function DragAndDropPage() {
   const runTestMutation = useMutation({
     mutationKey: ["create-test"],
     mutationFn: () =>
-      runTest({ testData: formatTestsLibrary(testsLibrary, surveyId!) }),
+      runTest({
+        testData: formatTestsLibrary(
+          testsLibrary,
+          surveyId!,
+          variablesQuery.data.variable_id!
+        ),
+      }),
     onSuccess: (data) => {
       console.log(data);
       toast.success("Analysis conducted successfully");
@@ -324,7 +341,7 @@ export default function DragAndDropPage() {
           "Sentiment Analysis",
           "Thematic Analysis",
           "Word Frequency Analysis",
-          "Mann-Whitney U Test",
+          // "Mann-Whitney U Test",
         ];
 
         for (const category in testsLibraryQuery.data) {
@@ -351,23 +368,44 @@ export default function DragAndDropPage() {
     }
   }, [testsLibraryQuery.isSuccess]);
 
-  // useEffect(() => {
-  //   if (createTestsQuery.isSuccess) {
-  //     console.log(createTestsQuery.data);
-  //     const value = createTestsQuery.data.data.map((tC: any) => ({
-  //       id: toCamelCase(Object.keys(tC)[0]),
-  //       name: toCamelCase(Object.keys(tC)[0]),
-  //       variables: Object.values(tC).map((c) => ({
-  //         id: c,
-  //         name: c,
-  //       })),
-  //       category: testLibrary.find((item) => item.id === Object.keys(tC)[0])
-  //         ?.category,
-  //     }));
+  useEffect(() => {
+    if (createTestsQuery.isSuccess) {
+      console.log(createTestsQuery.data);
+      const allowedTests = [
+        "Sentiment Analysis",
+        "Thematic Analysis",
+        "Word Frequency Analysis",
+        // "Mann-Whitney U Test",
+      ];
 
-  //     setTestLibrary(value);
-  //   }
-  // }, [createTestsQuery.isSuccess]);
+      const updatedTestLibrary = createTestsQuery.data.data
+        .filter((tC: any) => allowedTests.includes(Object.keys(tC)[0]))
+        .map((tC: any) => {
+          const testName = Object.keys(tC)[0];
+          return {
+            id: toCamelCase(testName),
+            name: testName,
+            variables: (Object as any).values(tC)[0].map((c: string) => ({
+              id: c,
+              name: c,
+            })),
+            category: testLibrary.find(
+              (item) => item.id === toCamelCase(testName)
+            )?.category,
+          };
+        });
+
+      setTestLibrary(updatedTestLibrary);
+      setTestsLibrary(updatedTestLibrary);
+
+      // Update variables
+      const allVariables = updatedTestLibrary.flatMap(
+        (test: any) => test.variables
+      );
+
+      console.log(allVariables);
+    }
+  }, [createTestsQuery.isSuccess]);
 
   return !showReport ? (
     <Fragment>
@@ -422,7 +460,47 @@ export default function DragAndDropPage() {
                 </Button>
               </div>
               <div className="flex gap-4 justify-between p-6 flex-1">
-                <div className="grid grid-cols-2 gap-6 space-x-4 mb-4 p-8 bg-[#F6F3F7] flex-[0.9] min-h-screen border rounded-lg border-dashed border-[#5B03B2]">
+                <div
+                  className={cn(
+                    "grid gap-6 space-x-4 mb-4 p-8 bg-[#F6F3F7] flex-[1] min-h-screen border rounded-lg border-dashed border-[#5B03B2]",
+                    createTestsQuery.fetchStatus === "paused" ||
+                      createTestsQuery.isLoading
+                      ? "grid-cols-1"
+                      : "grid-cols-2"
+                  )}
+                >
+                  {(createTestsQuery.fetchStatus === "paused" ||
+                    createTestsQuery.isLoading) && (
+                    <div className="min-w-[200px] max-w-[360px] flex justify-center items-center mx-auto">
+                      <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 260,
+                          damping: 20,
+                        }}
+                        className="bg-white rounded-lg p-8 flex flex-col items-center max-w-sm w-full shadow-lg mx-auto"
+                      >
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                        >
+                          <Spinner />
+                        </motion.div>
+                        <h2 className="mt-6 text-xl font-semibold text-gray-800">
+                          {"Generating Tests"}
+                        </h2>
+                        <p className="mt-2 text-sm text-gray-500 text-center">
+                          {"Hold on! Tests are being generated."}
+                        </p>
+                      </motion.div>
+                    </div>
+                  )}
                   {testsLibrary.map((test) => (
                     <TestZone
                       key={test.id}
@@ -470,7 +548,7 @@ export default function DragAndDropPage() {
                             onCheckedChange={() => {
                               toggleTest(test.id);
                             }}
-                            className="mr-2 mt-1 data-[state='checked']:bg-purple-800 data-[state='checked']:border-purple-800 border-gray-400"
+                            className="mr-2 mt-1 data-[state=checked]:bg-purple-800 data-[state=checked]:border-purple-800 border-gray-400"
                           />
                           <label htmlFor={test.id} className="text-[0.925rem]">
                             {test.name}
@@ -501,7 +579,22 @@ export default function DragAndDropPage() {
       )}
     </Fragment>
   ) : (
-    <AnalysisReport testData={runTestMutation?.data?.data ?? []} />
+    <>
+      {runTestMutation.isPending && (
+        <>
+          <LoadingOverlay
+            title="Regenerating analysis"
+            subtitle="Hold on! Let PollSensei cook."
+          />
+        </>
+      )}
+      <DataVisualizationComponent
+        data={runTestMutation?.data?.data ?? []}
+        survey={getSurvey.data}
+        rerunTests={() => runTestMutation.mutate()}
+      />
+    </>
+    // <AnalysisReport testData={runTestMutation?.data?.data ?? []} />
   );
 }
 
@@ -523,7 +616,7 @@ function VariableItem({
       ref={drag as any}
       className={cn(
         "px-4 py-1 bg-purple-500 text-[#5B03B2] text-sm cursor-pointer rounded-full bg-[#7D83981F] hover:bg-[#7D83982F]",
-        getUniqueVariables(testsLibrary).includes(variable)
+        getUniqueVariables(testsLibrary).some((v) => v.id === variable.id)
           ? "bg-[#5B03B2] hover:bg-[#490390] text-white"
           : "bg-[#7D83981F] hover:bg-[#7D83982F]"
       )}
@@ -553,7 +646,7 @@ function TestZone({
   return (
     <div
       ref={drop as any}
-      className="p-4 rounded-lg border border-[#BDBDBD] bg-white max-h-[370px] min-h-[240px] sm:min-h-[370px]"
+      className="p-4 w-full rounded-lg border border-[#BDBDBD] bg-white max-h-[370px] min-h-[240px] sm:min-h-[370px] !m-0"
     >
       <div className="flex justify-between items-center mb-2">
         <h3 className="font-semibold">{test.name}</h3>

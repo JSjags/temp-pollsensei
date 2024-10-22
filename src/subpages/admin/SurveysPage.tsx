@@ -16,13 +16,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/common/Button";
 import { Button as ShadButton } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { getLatestSurveyMilestone, getSingleSurvey } from "@/services/analysis";
+import { generateMilestoneStage } from "@/lib/utils";
 
 const SurveysPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const [showMilestones, setShowMilestones] = useState(true);
   const { data, isLoading } = useFetchSurveysQuery(currentPage);
-  const router = useRouter()
+  const router = useRouter();
 
   // console.log(data);
   // console.log(data?.data);
@@ -32,20 +35,42 @@ const SurveysPage = () => {
 
   // const totalPages = data?.data.total;
 
+  const latestMilestone = useQuery({
+    queryKey: ["latest-milestone"],
+    queryFn: () => getLatestSurveyMilestone(),
+  });
+
+  const getSurvey = useQuery({
+    queryKey: ["get-single-survey"],
+    queryFn: () =>
+      getSingleSurvey({ surveyId: latestMilestone.data?.survey_id! }),
+    enabled: latestMilestone.isSuccess,
+  });
+
   return (
     <div>
       {showMilestones && (
         <div className="bg-white py-3 shadow-md shadow-black/5">
-          <div className="container px:2 sm:px-4 flex justify-end gap-4">
-            <ShadButton className="auth-btn" onClick={()=>{router.push('/surveys/create-survey')}}>Create Survey</ShadButton>
-            <ShadButton
-              // onClick={() => setShowMilestones(!showMilestones)}
-              onClick={() => router.push('/surveys/survey-list')}
-              className="border rounded-lg border-[#5b03b2] text-[#5b03b2] hover:bg-[#5b03b210] bg-white"
-            >
-              {/* {showMilestones && "Created Surveys" : "Milestones"} */}
-              {showMilestones && "Created Surveys" }
-            </ShadButton>
+          <div className="container px:2 sm:px-4 flex justify-between items-center gap-4">
+            <div className="text-black/60">{getSurvey.data?.topic ?? ""}</div>
+            <div className="flex justify-between items-center gap-4">
+              <ShadButton
+                className="auth-btn"
+                onClick={() => {
+                  router.push("/surveys/create-survey");
+                }}
+              >
+                Create Survey
+              </ShadButton>
+              <ShadButton
+                // onClick={() => setShowMilestones(!showMilestones)}
+                onClick={() => router.push("/surveys/survey-list")}
+                className="border rounded-lg border-[#5b03b2] text-[#5b03b2] hover:bg-[#5b03b210] bg-white"
+              >
+                {/* {showMilestones && "Created Surveys" : "Milestones"} */}
+                {showMilestones && "Created Surveys"}
+              </ShadButton>
+            </div>
           </div>
         </div>
       )}
@@ -55,12 +80,12 @@ const SurveysPage = () => {
         </div>
       )}
       {!isLoading && showMilestones && (
-      // {data?.data.total === 0 && !isLoading && showMilestones && (
+        // {data?.data.total === 0 && !isLoading && showMilestones && (
         // <SurveyEmptyPage />
         <div className="bg-[url(/assets/milestones-bg.svg)] w-full h-[calc(100vh-72px)] lg:h-[calc(100vh-150px)] mx-auto">
           <AnimatePresence>
             {!isLoading && (
-            // {data?.data.total === 0 && !isLoading && (
+              // {data?.data.total === 0 && !isLoading && (
               <motion.div
                 initial={{ opacity: 0, scale: 1, y: 100 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -71,7 +96,12 @@ const SurveysPage = () => {
                 }}
                 className="p-0 m-0 bg-transparent rounded-lg shadow-lg"
               >
-                <Milestones stage={"0"} />
+                <Milestones
+                  stage={generateMilestoneStage(
+                    latestMilestone.data?.current_stage ?? "0"
+                  )}
+                  surveyId={latestMilestone.data?.survey_id!}
+                />
               </motion.div>
             )}
           </AnimatePresence>
