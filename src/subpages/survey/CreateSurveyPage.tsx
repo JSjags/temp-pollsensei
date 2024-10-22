@@ -220,7 +220,7 @@ const CreateSurveyPage = () => {
               optionType === "Comment"
               ? "long_text"
               : "matrix_checkbox",
-          is_required: false,
+          is_required: true,
           description: "",
         };
       });

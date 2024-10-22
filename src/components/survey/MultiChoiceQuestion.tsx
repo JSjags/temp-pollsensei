@@ -161,7 +161,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
          </div>
         )
        }
-       <div className="flex justify-e">
+       <div className="flex justify-end">
        {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""

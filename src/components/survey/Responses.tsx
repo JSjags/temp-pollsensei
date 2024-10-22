@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ResponseHeader from "./ResponseHeader";
 import RespondentDetails from "./RespondentDetails";
 import UserResponses from "./UserResponses";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation"; 
 import {
   useGetRespondentNameQuery,
   useGetSurveySummaryQuery,
@@ -54,9 +54,15 @@ const calculateValidationCounts2 = (survey:any) => {
 const Responses: React.FC<{ data: any, }> = ({ data }) => {
   const name = useSelector((state:RootState)=>state?.name?.name)
   const params = useParams();
+  const searchParams = useSearchParams(); 
+  const router = useRouter();
   const dispatch  = useDispatch()
   const tabs = ["Summary", "Individual Responses", "Deleted"];
-  const [activeTab, setActiveTab] = useState("Individual Responses");
+  // const [activeTab, setActiveTab] = useState("Individual Responses");
+  const [activeTab, setActiveTab] = useState(() => {
+    const urlTab = searchParams.get("tab");
+    return urlTab ? urlTab : "Individual Responses";
+  });
   const [currentUserResponse, setCurrentUserResponse] = useState(0);
   const [pagesNumber, setPagesNumber] = useState(1);
   const { data: response_ } = useGetUserSurveyResponseQuery(params.id);
@@ -93,6 +99,12 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
  
   // console.log(validate_individual_response?.data?.data);
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("tab", activeTab);
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    router.replace(newUrl); // Update the URL without reloading the page
+  }, [activeTab, router]);
 
 
 
@@ -140,7 +152,7 @@ const handleDeleteAResponse=async()=>{
         invalid_response={invalidCount}
         deleteAResponse={handleDeleteAResponse}
       />
-      <RespondentDetails data={validateSource} validCount={validCount} />
+      <RespondentDetails data={validateSource} validCount={validCount} isLoading={isLoading} />
       {activeTab === "Individual Responses" && (
         <UserResponses
           data={validateSource}
@@ -155,7 +167,7 @@ const handleDeleteAResponse=async()=>{
       )}
       {activeTab === "Deleted" && (
         <div className="mt-2 min-h-[50vh]">
-          <FeatureComing height="h-[20vh]" />
+          <FeatureComing height="min-h-[20vh]" />
         </div>
       )}
     </div>

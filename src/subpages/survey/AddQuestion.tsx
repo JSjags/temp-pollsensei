@@ -28,7 +28,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [question, setQuestion] = useState<string>("");
   const [questionType, setQuestionType] = useState<string>("multiple_choice");
   const [options, setOptions] = useState<string[] | any>([""]);
-  const [is_required, setIsRequired] = useState<boolean>(false)
+  const [is_required, setIsRequired] = useState<boolean>(true)
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];

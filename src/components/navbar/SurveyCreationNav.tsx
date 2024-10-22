@@ -419,8 +419,24 @@ const SurveyCreationNav = () => {
             <span className="ml-3 text-sm">Reponses</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link href={""} className="flex items-center">
-            <BreadcrumsIcon color="#B0A5BB" />
+          <Link
+            href={
+              path.includes("survey-reponse-upload?tab=Individual+Responses")
+                ? `/surveys/${data?.data._id}/survey-reponse-upload?tab=Individual+Responses`
+                : ""
+            }
+            className="flex items-center"
+          >
+            <BreadcrumsIcon
+              icon={
+                path.includes("survey-reponse-upload?tab=Individual+Responses") && (
+                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                )
+              }
+              color={
+                path.includes("survey-reponse-upload?tab=") ? "#B0A5BB" : ""
+              }
+            />
             <span className="ml-3 text-sm">Validation</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
@@ -451,24 +467,26 @@ const SurveyCreationNav = () => {
             path === "/surveys/add-question-m" ||
             path === "/surveys/survey-list" ||
             path.includes("validate-response") ||
-            path.includes("/surveys/question") ? (
-              " "
-            ) : (
-              " "
-              // <button
-              //   className={`border-none flex items-center ${
-              //     path === "/surveys/preview-survey" ? "invisible" : "visible"
-              //   }`}
-              //   onClick={() => {
-              //     router.push("/surveys/preview-survey");
-              //   }}
-              // >
-              //   <IoEyeOutline className="mr-1" /> Preview
-              // </button>
-            )}
+            path.includes("/surveys/question")
+              ? " "
+              : " "
+                // <button
+                //   className={`border-none flex items-center ${
+                //     path === "/surveys/preview-survey" ? "invisible" : "visible"
+                //   }`}
+                //   onClick={() => {
+                //     router.push("/surveys/preview-survey");
+                //   }}
+                // >
+                //   <IoEyeOutline className="mr-1" /> Preview
+                // </button>
+            }
             {path.includes("/surveys/question") && (
-              <button className="border-none flex items-center" 
-              onClick={()=>{ dispatch(openSurveySettings()) }}
+              <button
+                className="border-none flex items-center"
+                onClick={() => {
+                  dispatch(openSurveySettings());
+                }}
               >
                 <IoSettingsOutline className="mr-1" />
                 <span className="hidden xl:flex"> Survey Settings </span>
