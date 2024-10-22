@@ -35,32 +35,9 @@ const PublicResponse = () => {
   const [respondent_phone, setRespondent_phone] = useState("");
   const [respondent_country, setRespondent_country] = useState("");
   const [respondent_email, setRespondent_email] = useState("");
-  const [submitSurveySuccess, setSubmitSurveySuccess] = useState(true);
+  const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
   const router = useRouter();
 
-  // const handleOptionChange = (
-  //   index: number,
-  //   value: string,
-  //   question_type: string
-  // ) => {
-  //   if (
-  //     question_type === "multiple_choice" ||
-  //     question_type === "single_choice"
-  //   ) {
-  //     const updatedOptions = [...selectedOptions];
-  //     updatedOptions[index] = value;
-  //     setSelectedOptions(updatedOptions);
-  //   } else if (
-  //     question_type === "comment" ||
-  //     question_type === "long_text" ||
-  //     question_type === "short_text"
-  //   ) {
-  //     const updatedTextResponses = [...textResponses];
-  //     updatedTextResponses[index] = value;
-  //     setTextResponses(updatedTextResponses);
-  //     console.log(updatedTextResponses);
-  //   }
-  // };
 
   const handleOptionChange = (
     index: number,
@@ -97,31 +74,7 @@ const PublicResponse = () => {
 
   const handleSubmitResponse = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-    // const formattedAnswers = question?.data?.sections[currentSection]?.questions
-    //   .map((item: any, index: number) => {
-    //     if (
-    //       item.question_type === "multiple_choice" ||
-    //       item.question_type === "single_choice"
-    //     ) {
-    //       return {
-    //         question: item.question,
-    //         question_type: item.question_type,
-    //         selected_options: [selectedOptions[index]],
-    //       };
-    //     } else if (
-    //       item.question_type === "comment" ||
-    //       item.question_type === "long_text" ||
-    //       item.question_type === "short_text"
-    //     ) {
-    //       return {
-    //         question: item.question,
-    //         question_type: item.question_type,
-    //         text: textResponses[index] || "something",
-    //       };
-    //     }
-    //     return null;
-    //   })
-    //   .filter(Boolean);
+ 
 
     const formattedAnswers = question?.data?.sections[currentSection]?.questions
   .map((item: any, index: number) => {
