@@ -10,7 +10,7 @@ const ContentBlock = ({ className }: { className?: string }) => (
   </div>
 );
 
-const Spinner = () => (
+export const Spinner = () => (
   <div className="inline-block size-20 relative">
     {[...Array(12)].map((_, i) => (
       <div
