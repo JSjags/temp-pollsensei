@@ -18,6 +18,7 @@ import ShareSurvey from "./ShareSurvey";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { useParams, useRouter } from "next/navigation";
 import {
+  useCloseSurveyStatusMutation,
   useDeleteSurveyMutation,
   useDuplicateSurveyMutation,
   useEditSurveyMutation,
@@ -25,11 +26,13 @@ import {
   useShareSurveyQuery,
 } from "@/services/survey.service";
 import ShareSurveyModal from "./ShareSurveyModal";
+import ChangeSurveyStatus from "./ChangeSurveyStatus";
+import { toast } from "react-toastify";
 
 interface SurveyCardProps {
   topic: string;
   createdAt: string;
-  status: StatusTagProps;
+  status: string;
   number_of_responses: number;
   _id: string;
 }
@@ -52,6 +55,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   ];
   const [viewOptions, setViewOptions] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [closeSurvey, setCloseSurvey] = useState(false);
   const [showRename, setShowRename] = useState(false);
   const [showDuplicate, setShowDuplicate] = useState(false);
   const [toggle, setToggle] = useState(false);
@@ -94,6 +98,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     if (choice.includes("share")) {
       setShareSurvey(true);
     }
+    if (choice.includes("close")) {
+      setCloseSurvey(true);
+    }
     if (choice.includes("preview")) {
       router.push(`/surveys/question/${_id}`);
     }
@@ -103,6 +110,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setShowDelete(false);
     setShowDuplicate(false);
     setShowRename(false);
+    setCloseSurvey(false);
   };
 
   const handleSetToggle = (op: any) => {

@@ -222,18 +222,18 @@ const TestAnalysisReport: React.FC<Props> = ({ data }) => {
                               ).map(([label, value], idx) => (
                                 <tr key={idx} className="border-b">
                                   <td className="p-2">{label}</td>
-                                  <td className="p-2">{value}</td>
+                                  <td className="p-2">{value as any}</td>
                                   <td className="p-2">
                                     {(
                                       ((value as number) /
-                                        Object.values(
+                                        (Object.values(
                                           item.test_results?.overall_quality ||
                                             item.test_results?.age_range ||
                                             {}
                                         ).reduce(
-                                          (a, b) => a + (b as number),
+                                          (a, b) => a + (b as any),
                                           0
-                                        )) *
+                                        ) as any)) *
                                       100
                                     ).toFixed(2)}
                                     %
@@ -245,11 +245,13 @@ const TestAnalysisReport: React.FC<Props> = ({ data }) => {
                               <tr className="font-semibold">
                                 <td className="p-2">Total</td>
                                 <td className="p-2">
-                                  {Object.values(
-                                    item.test_results?.overall_quality ||
-                                      item.test_results?.age_range ||
-                                      {}
-                                  ).reduce((a, b) => a + (b as number), 0)}
+                                  {
+                                    Object.values(
+                                      item.test_results?.overall_quality ||
+                                        item.test_results?.age_range ||
+                                        {}
+                                    ).reduce((a, b) => a + (b as any), 0) as any
+                                  }
                                 </td>
                                 <td className="p-2">100%</td>
                               </tr>

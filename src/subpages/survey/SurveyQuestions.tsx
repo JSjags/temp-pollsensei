@@ -11,6 +11,8 @@ import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import { useFetchASurveyQuery } from "@/services/survey.service";
 import { useParams } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const SurveyQuestions = () => {
   const params = useParams();
