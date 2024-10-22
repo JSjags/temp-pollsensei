@@ -112,19 +112,21 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                   <span className="text-2xl ml-2 text-red-500">*</span>
                 )}
               </p>
-              <PollsenseiTriggerButton
-                key={index}
-                imageUrl={stars}
-                tooltipText="Rephrase question"
-                className={"group-hover:inline-block hidden"}
-                triggerType="rephrase"
-                question={question}
-                optionType={questionType}
-                options={options}
-                setEditId={setEditId}
-                onSave={onSave!}
-                index={index}
-              />
+              {!pathname.includes("survey-public-response") && (
+                <PollsenseiTriggerButton
+                  key={index}
+                  imageUrl={stars}
+                  tooltipText="Rephrase question"
+                  className={"group-hover:inline-block hidden"}
+                  triggerType="rephrase"
+                  question={question}
+                  optionType={questionType}
+                  options={options}
+                  setEditId={setEditId}
+                  onSave={onSave!}
+                  index={index}
+                />
+              )}
             </div>
           </h3>
         </div>
@@ -167,19 +169,20 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
         )}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
-          <span>Required</span>
-           <Switch checked={is_required} 
-            onCheckedChange={
-             setIsRequired
-               ? (checked: boolean) => setIsRequired(checked)
-               : undefined
-           }
-           className="bg-[#9D50BB] " />
-         </div>
-        )
-       }
-       <div className="flex justify-end">
-       {pathname === "/surveys/edit-survey" ||
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+        <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (

@@ -65,19 +65,21 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
         <div className="flex justify-between w-full items-center">
           <h3 className="group text-lg font-semibold text-start">
             {question}{" "}
-            <PollsenseiTriggerButton
-              key={index}
-              imageUrl={stars}
-              tooltipText="Rephrase question"
-              className={"group-hover:inline-block hidden"}
-              triggerType="rephrase"
-              question={question}
-              optionType={questionType!}
-              options={options}
-              setEditId={setEditId}
-              onSave={onSave!}
-              index={index!}
-            />
+            {!pathname.includes("survey-public-response") && (
+              <PollsenseiTriggerButton
+                key={index}
+                imageUrl={stars}
+                tooltipText="Rephrase question"
+                className={"group-hover:inline-block hidden"}
+                triggerType="rephrase"
+                question={question}
+                optionType={questionType!}
+                options={options}
+                setEditId={setEditId}
+                onSave={onSave!}
+                index={index!}
+              />
+            )}
           </h3>
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (

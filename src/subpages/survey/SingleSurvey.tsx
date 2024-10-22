@@ -27,7 +27,8 @@ export default function SingleSurvey() {
           <Loading />
         </div>
       )}
-      {surveyMilestone.isSuccess && (
+      {console.log(surveyMilestone.data?.current_stage)}
+      {surveyMilestone.isSuccess && surveyMilestone.data?.current_stage && (
         <Milestones
           stage={generateMilestoneStage(
             surveyMilestone.data?.current_stage ?? "0"
