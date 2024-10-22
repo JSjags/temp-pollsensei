@@ -1,15 +1,31 @@
 import { draggable } from "@/assets/images";
+import {
+  setActionMessage,
+  setCurrentQuestion,
+  setCurrentQuestionType,
+  setIsCollapsed,
+} from "@/redux/slices/sensei-master.slice";
+import { Switch } from "@radix-ui/react-switch";
 import Image from "next/image";
 import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
+import { useDispatch } from "react-redux";
 import Select from "react-select";
 
 interface MultiChoiceQuestionEditProps {
   question: string;
   questionType: string;
   options: string[] | undefined;
-  onSave?: (updatedQuestion: string, updatedOptions: string[], editedQuestionType:string) => void;
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    editedQuestionType: string,
+    is_required: boolean
+  ) => void;
   onCancel?: () => void;
+  setIsRequired?: (value: boolean) => void;
+  is_required: boolean;
+  index?: number;
 }
 
 const customStyles = {
@@ -34,12 +50,15 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   questionType,
   onSave,
   onCancel,
+  is_required,
+  setIsRequired,
+  index,
 }) => {
+  const dispatch = useDispatch();
   const [editedQuestion, setEditedQuestion] = useState<string>(question);
-  const [editedQuestionType, setEditedQuestionType] = useState<string>(questionType);
-  const [editedOptions, setEditedOptions] = useState<string[]>(
-    options || [""]
-  );
+  const [editedQuestionType, setEditedQuestionType] =
+    useState<string>(questionType);
+  const [editedOptions, setEditedOptions] = useState<string[]>(options || [""]);
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...editedOptions];
@@ -48,6 +67,19 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   };
 
   const handleAddOption = () => {
+    dispatch(
+      setActionMessage(`Can you suggest an extra option for question ${index}`)
+    );
+    dispatch(setIsCollapsed(false));
+    dispatch(
+      setCurrentQuestion({
+        question: {
+          Question: question,
+          "Option type": questionType,
+          Options: options,
+        },
+      })
+    );
     setEditedOptions([...editedOptions, ""]);
   };
 
@@ -59,7 +91,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
 
   const handleSave = () => {
     if (onSave) {
-      onSave(editedQuestion, editedOptions, editedQuestionType);
+      onSave(editedQuestion, editedOptions, editedQuestionType, is_required);
     }
   };
 
@@ -67,17 +99,39 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     setEditedQuestionType(selectedOption.value);
     switch (selectedOption.value) {
       case "Likert Scale":
-        setEditedOptions(["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]);
+        setEditedOptions([
+          "Strongly Disagree",
+          "Disagree",
+          "Neutral",
+          "Agree",
+          "Strongly Agree",
+        ]);
         break;
       case "Multi-choice":
-        setEditedOptions([""]); 
+        setEditedOptions([""]);
         break;
       case "Comment":
-        setEditedOptions([]); 
+        setEditedOptions([]);
         break;
       default:
         setEditedOptions([""]);
     }
+    dispatch(setCurrentQuestionType(selectedOption.value));
+    dispatch(
+      setActionMessage(
+        `Check the compatibility of the question type for question ${index}`
+      )
+    );
+    dispatch(setIsCollapsed(false));
+    dispatch(
+      setCurrentQuestion({
+        question: {
+          Question: question,
+          "Option type": questionType,
+          Options: options,
+        },
+      })
+    );
   };
 
   const selectOptions = [
@@ -105,8 +159,12 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           <Select
             className="select-container border-2 rounded mx-4 my-4"
             classNamePrefix="questionType"
-            defaultValue={selectOptions.find(opt => opt.value === questionType)}
-            value={selectOptions.find(opt => opt.value === editedQuestionType)}
+            defaultValue={selectOptions.find(
+              (opt) => opt.value === questionType
+            )}
+            value={selectOptions.find(
+              (opt) => opt.value === editedQuestionType
+            )}
             name="questionType"
             options={selectOptions}
             styles={customStyles}
@@ -158,6 +216,18 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           >
             Save
           </button>
+        </div>
+        <div className="flex items-center gap-4">
+          <span>Required</span>
+          <Switch
+            checked={is_required}
+            onCheckedChange={
+              setIsRequired
+                ? (checked: boolean) => setIsRequired(checked)
+                : undefined
+            }
+            className="bg-[#9D50BB]"
+          />
         </div>
       </div>
     </div>

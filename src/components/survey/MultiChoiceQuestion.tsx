@@ -9,6 +9,7 @@ import { stars } from "@/assets/images";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
+import { Switch } from "../ui/switch";
 
 interface MultiChoiceQuestionProps {
   question: string;
@@ -17,7 +18,7 @@ interface MultiChoiceQuestionProps {
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
-  setEditId: React.Dispatch<React.SetStateAction<number | null>>;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   onSave?: (
     updatedQuestion: string,
     updatedOptions: string[],
@@ -27,6 +28,8 @@ interface MultiChoiceQuestionProps {
   index: number;
   canUseAI?: boolean;
   status?: string;
+  is_required?: boolean;
+  setIsRequired?: (value: boolean) => void;
 }
 
 const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
@@ -41,6 +44,8 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   onSave,
   canUseAI = false,
   status,
+  is_required,
+  setIsRequired,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -103,6 +108,9 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             <div className="group flex justify-between gap-2 items-start">
               <p>
                 <span>{index}. </span> {question}
+                {is_required === true && (
+                  <span className="text-2xl ml-2 text-red-500">*</span>
+                )}
               </p>
               <PollsenseiTriggerButton
                 key={index}
@@ -119,12 +127,6 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
               />
             </div>
           </h3>
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
-          )}
         </div>
         {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
@@ -136,6 +138,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                 value={option}
                 className="mr-2 text-[#5B03B2] radio hidden peer"
                 checked={selectedOption === option}
+                required={is_required}
                 onChange={() => handleOptionChange(option)}
               />
               <span
@@ -162,6 +165,28 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             </button>
           </div>
         )}
+        {pathname.includes("edit-survey") && (
+          <div className="flex items-center gap-4">
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+        <div className="flex justify-e">
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ? (
+            ""
+          ) : (
+            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
+          )}
+        </div>
       </div>
       {pathname.includes("survey-reponse-upload") && status && (
         <div>{getStatus(status)}</div>

@@ -37,7 +37,7 @@ type Message = {
   question_id?: number;
   sender: "user" | "ai";
   timestamp: string;
-  trigger_type?: "single-regen" | "option";
+  trigger_type?: "single-regen" | "option" | "check-compatibility";
 };
 
 const getCurrentTimestamp = () =>
@@ -79,6 +79,7 @@ type Props = {
     updatedQuestion: string,
     updatedOptions: string[],
     updatedQuestionType: string,
+    isRequired: boolean,
     aiEditIndex?: number
   ) => void;
   aiSave?: (
@@ -122,9 +123,11 @@ const SenseiMasterChat: React.FC<Props> = ({
   const conversation_id = store.getState().survey.conversation_id;
   // const survey_id = store.getState().survey.id; // Changed from 'i' to 'id'
 
-  const { actionMessage, currentQuestion } = useSelector((state: RootState) => {
-    return state.senseiMaster || {};
-  });
+  const { actionMessage, currentQuestion, currentQuestionType } = useSelector(
+    (state: RootState) => {
+      return state.senseiMaster || {};
+    }
+  );
 
   const { aiResponse, loading, isConnected, emitEvent, socketIo, setLoading } =
     useSensei();
@@ -138,13 +141,10 @@ const SenseiMasterChat: React.FC<Props> = ({
   const handleEvent = (eventName: string, ...args: any[]) => {
     switch (eventName) {
       case "ai_message":
-        console.log(args[0]);
-
         handleAiMessage(args[0]?.reply_text ?? args[0]?.response);
         break;
       case "ai_trigger":
-        console.log(args[0]);
-
+        console.log(args);
         handleAiMessage(args[0]?.reply_text ?? args[0]?.response, args[0]);
         break;
       // Add more cases for different events here
@@ -287,6 +287,63 @@ const SenseiMasterChat: React.FC<Props> = ({
         // };
         // emitEvent("user_trigger", optionsPayload);
       }
+      if (actionInput.toLowerCase().includes("option")) {
+        const index = Number(actionInput[actionInput.length - 1]);
+        console.log(index);
+
+        // setEditId(index - 1);
+        const payload = {
+          question_id: index,
+          conversation_id,
+          data: currentQuestion,
+          trigger_type: "option",
+        };
+        emitEvent("user_trigger", payload);
+
+        // const optionsPayload = {
+        //   conversation_id,
+        //   data: {
+        //     question: {
+        //       Question: question,
+        //       "Option type": optionType,
+        //       Options: options,
+        //     },
+        //   },
+        //   trigger_type: "option",
+        // };
+        // emitEvent("user_trigger", optionsPayload);
+      }
+      if (actionInput.toLowerCase().includes("compatibility")) {
+        const index = Number(actionInput[actionInput.length - 1]);
+        console.log(index);
+
+        console.log(currentQuestionType);
+
+        // setEditId(index - 1);
+        const payload = {
+          question_id: index,
+          conversation_id,
+          data: {
+            option_type: currentQuestionType,
+            question: currentQuestion?.question.Question,
+          },
+          trigger_type: "check-compatibility",
+        };
+        emitEvent("user_trigger", payload);
+
+        // const optionsPayload = {
+        //   conversation_id,
+        //   data: {
+        //     question: {
+        //       Question: question,
+        //       "Option type": optionType,
+        //       Options: options,
+        //     },
+        //   },
+        //   trigger_type: "option",
+        // };
+        // emitEvent("user_trigger", optionsPayload);
+      }
 
       // const payload = {
       //   conversation_id,
@@ -333,8 +390,55 @@ const SenseiMasterChat: React.FC<Props> = ({
         // }
       }
     }
-  };
+    if (message.trigger_type === "option") {
+      if (aiSave) {
+        aiSave(
+          currentQuestion?.question.Question!,
+          [
+            ...(currentQuestion?.question.Options
+              ? currentQuestion.question.Options
+              : []),
+            ...message.actions!,
+          ],
+          currentQuestion?.question["Option type"] || "", // Fallback to an empty string
+          message.question_id! - 1
+        );
+        // if() {
+        // }
+        // else {
+        // }
+      }
+    }
+    if (message.trigger_type === "check-compatibility") {
+      if (aiSave) {
+        aiSave(
+          currentQuestion?.question.Question!,
+          [
+            ...(currentQuestion?.question.Options
+              ? currentQuestion.question.Options
+              : []),
+          ],
+          message.actions![index], // Fallback to an empty string
+          message.question_id! - 1
+        );
+        // if() {
+        // }
+        // else {
+        // }
+      }
+    }
+    // if (message.trigger_type === "option") {
+    //   console.log(message);
 
+    // if (aiSave) {
+    //   aiSave(
+    //     message.actions![index],
+    //     currentQuestion?.question.Options || [],
+    //     currentQuestion?.question["Option type"]!,
+    //     message.question_id! - 1
+    //   );
+    // }
+  };
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -440,7 +544,7 @@ const SenseiMasterChat: React.FC<Props> = ({
                           key={a}
                           className="block max-w-[200px] text-xs text-wrap text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-black h-fit"
                         >
-                          {a}
+                          {a.split("_").join(" ")}
                         </Button>
                       ))}
                   </div>

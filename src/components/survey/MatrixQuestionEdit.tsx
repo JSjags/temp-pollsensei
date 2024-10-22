@@ -8,8 +8,9 @@ interface MatrixQuestionEditProps {
   question: string;
   questionType: string;
   options: any;
-  onSave?: (updatedQuestion: string, updatedOptions: any, editedQuestionType:string) => void;
+  onSave?: (updatedQuestion: string, updatedOptions: any, editedQuestionType:string, is_required:boolean) => void;
   onCancel?: () => void;
+  is_required: boolean;
 }
 
 const customStyles = {
@@ -34,6 +35,7 @@ const MatrixQuestionEdit: React.FC<MatrixQuestionEditProps> = ({
   questionType,
   onSave,
   onCancel,
+  is_required,
 }) => {
   const [editedQuestion, setEditedQuestion] = useState<string>(question);
   const [editedQuestionType, setEditedQuestionType] = useState<string>(questionType);
@@ -73,7 +75,7 @@ const MatrixQuestionEdit: React.FC<MatrixQuestionEditProps> = ({
 
   const handleSave = () => {
     if (onSave) {
-      onSave(editedQuestion, editedOptions, editedQuestionType);
+      onSave(editedQuestion, editedOptions, editedQuestionType, is_required);
     }
   };
 

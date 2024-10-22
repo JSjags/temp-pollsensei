@@ -35,7 +35,7 @@ export default function RootLayout({
         )}
       >
         <TanstackProvider>
-          <ToastContainer className={cn(fontSans.variable)} />
+          <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
           <ReduxContext>{children}</ReduxContext>
         </TanstackProvider>
       </body>

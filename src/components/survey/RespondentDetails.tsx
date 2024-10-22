@@ -8,14 +8,17 @@ interface UserDetails {
     time: string;
     country: string;
     respondent_email: string;
+    answers: any[]; 
 }
 
 interface RespondentDetailsProps {
   data? : UserDetails;
+  validCount?:number; 
 }
 
 const RespondentDetails: React.FC<RespondentDetailsProps> = ({
-  data
+  data,
+  validCount,
 }) => {
   return (
     <div className="border rounded-lg p-4 shadow-sm bg-white mt-4">
@@ -26,7 +29,7 @@ const RespondentDetails: React.FC<RespondentDetailsProps> = ({
         </div>
         <div className="flex gap-5">
           <span className="font-semibold text-gray-600">Status:</span>
-          <span>{data?.status}</span>
+          <span>{`${validCount} / ${data?.answers?.length}`}</span>
         </div>
         <div className="flex gap-5">
           <span className="font-semibold text-gray-600">Date:</span>
@@ -38,7 +41,7 @@ const RespondentDetails: React.FC<RespondentDetailsProps> = ({
         </div>
         <div className="flex gap-5">
           <span className="font-semibold text-gray-600">Country:</span>
-          <span>{data?.country}</span>
+          <span>{data?.country ? data?.country : "Not provided"}</span>
         </div>
         <div className="flex gap-5">
           <span className="font-semibold text-gray-600">Email:</span>

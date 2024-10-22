@@ -12,6 +12,7 @@ interface ResponseHeaderProps {
   invalid_response?: number;
   handleNext?: () => void;
   handlePrev?: () => void;
+  deleteAResponse?: () => void;
   respondent_data?:any[];
 }
 
@@ -25,8 +26,10 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   handlePrev,
   respondent_data,
   valid_response,
-  invalid_response
+  invalid_response,
+  deleteAResponse
 }) => {
+  console.log(curerentSurvey)
   return (
     <div className="border rounded-lg p-4 shadow-sm">
       <div className="flex justify-between items-center mb-4">
@@ -91,14 +94,15 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
           respondent_data={respondent_data}
           valid_response={valid_response}
           invalid_response={invalid_response}
+          deleteAResponse={deleteAResponse}
         />
       )}
 
       {activeTab === "Summary" && (
         <div className="mt-4">
-          <button className="bg-white border border-gray-300 text-gray-700 rounded-md px-4 py-2 hover:bg-gray-50">
+          {/* <button className="bg-white border border-gray-300 text-gray-700 rounded-md px-4 py-2 hover:bg-gray-50">
             Add filter
-          </button>
+          </button> */}
         </div>
       )}
     </div>

@@ -15,6 +15,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+   duplicateSurvey: builder.mutation({
+      query: (body) => ({
+        url: "survey/duplicate",
+        method: "POST",
+        body: body,
+      }),
+    }),
     fetchASurvey: builder.query({
       query: (id) => ({
         url: `survey/${id}`,
@@ -36,6 +43,12 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     deleteSurvey: builder.mutation({
       query: (id) => ({
         url: `survey/${id}`,
+        method: "DELETE",
+      }),
+    }),
+    deleteSurveyResponse: builder.mutation({
+      query: (id) => ({
+        url: `response/delete/${id} `,
         method: "DELETE",
       }),
     }),
@@ -111,6 +124,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     editSurveySettings: builder.mutation({
       query: ({ id, body }) => ({
         url: `survey/setting/${id}`,
+        method: "PATCH",
+        body: body,
+      }),
+    }),
+    editSurvey: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `survey/update/${id}`, 
         method: "PATCH",
         body: body,
       }),
@@ -209,4 +229,7 @@ export const {
   useEditSurveySettingsMutation,
   useInviteCollaboratorMutation,
   useGetCollaboratorsListQuery,
+  useEditSurveyMutation,
+  useDuplicateSurveyMutation,
+  useDeleteSurveyResponseMutation,
 } = surveyApiSlice;
