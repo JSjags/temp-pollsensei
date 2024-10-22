@@ -1,4 +1,4 @@
-import { draggable } from "@/assets/images";
+import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -9,6 +9,7 @@ import VoiceRecorder from "../ui/VoiceRecorder";
 import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
 import { Switch } from "../ui/switch";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 
 interface ComponentQuestionProps {
   question: string;
@@ -22,6 +23,14 @@ interface ComponentQuestionProps {
   status?: string;
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
+  options?: string[] | undefined;
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
 }
 
 const CommentQuestion: React.FC<ComponentQuestionProps> = ({
@@ -31,10 +40,14 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   DeleteQuestion,
   index,
   response,
+
+  options,
   onChange,
   status,
   is_required,
   setIsRequired,
+  onSave,
+  setEditId,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -88,7 +101,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
         }
       />
       <div className="w-full">
-        <div className="flex justify-between w-full items-center">
+        <div className="group flex justify-between gap-2 w-full items-center">
           <h3 className="text-lg font-semibold text-start relative">
             <span>{index}. </span>
             {question}
@@ -97,6 +110,19 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             )}
           </h3>
           <span></span>
+          <PollsenseiTriggerButton
+            key={index}
+            imageUrl={stars}
+            tooltipText="Rephrase question"
+            className={"group-hover:inline-block hidden"}
+            triggerType="rephrase"
+            question={question}
+            optionType={questionType}
+            options={options}
+            setEditId={setEditId}
+            onSave={onSave!}
+            index={index}
+          />
         </div>
         <div>
           <AutosizeTextarea

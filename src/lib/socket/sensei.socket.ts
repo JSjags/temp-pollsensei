@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 // Replace this with your actual WebSocket URL
-const SOCKET_URL = "ws://4.152.139.177";
+const SOCKET_URL = "https://ai-api-staging.pollsensei.ai";
 
 interface ServerToClientEvents {
   ai_trigger: (data: { message: string }) => void;
@@ -33,7 +33,7 @@ export function useSocket() {
 
     // On successful connection, alert success and stop loading
     socketIo.on("connect", () => {
-      alert("WebSocket connected successfully!");
+      // alert("WebSocket connected successfully!");
       setLoading(false); // Stop loading when connected
     });
 

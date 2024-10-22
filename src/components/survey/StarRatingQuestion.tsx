@@ -2,36 +2,50 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaStar } from "react-icons/fa";
-import { draggable } from "@/assets/images";
+import { draggable, stars } from "@/assets/images";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 
 interface StarRatingQuestionProps {
   question: string;
   questionType: string;
-  maxRating?: number; 
+  maxRating?: number;
   currentRating?: number;
   onRate?: (value: number) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
+  index?: number;
+  options?: string[];
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
 }
 
 const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   question,
   questionType,
-  maxRating = 5, 
-  currentRating = 0, 
+  maxRating = 5,
+  currentRating = 0,
   onRate,
   EditQuestion,
   DeleteQuestion,
+  index,
+  setEditId,
+  options,
+  onSave,
 }) => {
   const pathname = usePathname();
-  const [hoveredRating, setHoveredRating] = useState<number | null>(null); 
-  const [selectedRating, setSelectedRating] = useState<number>(currentRating); 
+  const [hoveredRating, setHoveredRating] = useState<number | null>(null);
+  const [selectedRating, setSelectedRating] = useState<number>(currentRating);
 
   // Handle rating selection
   const handleRate = (rating: number) => {
-    setSelectedRating(rating); 
+    setSelectedRating(rating);
     if (onRate) {
-      onRate(rating); 
+      onRate(rating);
     }
   };
 
@@ -40,12 +54,37 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
       <Image
         src={draggable}
         alt="draggable icon"
-        className={pathname === "/surveys/edit-survey" || pathname === "surveys/preview-survey" ? "invisible" : "visible"}
+        className={
+          pathname === "/surveys/edit-survey" ||
+          pathname === "surveys/preview-survey"
+            ? "invisible"
+            : "visible"
+        }
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
-          <h3 className="text-lg font-semibold text-start">{question}</h3>
-          {pathname === "/surveys/edit-survey" || pathname.includes("surveys/question") ? "" : <p>{questionType}</p>}
+          <h3 className="group text-lg font-semibold text-start">
+            {question}{" "}
+            <PollsenseiTriggerButton
+              key={index}
+              imageUrl={stars}
+              tooltipText="Rephrase question"
+              className={"group-hover:inline-block hidden"}
+              triggerType="rephrase"
+              question={question}
+              optionType={questionType!}
+              options={options}
+              setEditId={setEditId}
+              onSave={onSave!}
+              index={index!}
+            />
+          </h3>
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ? (
+            ""
+          ) : (
+            <p>{questionType}</p>
+          )}
         </div>
         <div className="flex items-center my-2">
           {Array.from({ length: maxRating }, (_, index) => (
@@ -53,13 +92,14 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
               key={index}
               size={24}
               className={`mr-1 cursor-pointer ${
-                (hoveredRating !== null ? hoveredRating : selectedRating) > index
-                  ? "text-[#5B03B2]" 
-                  : "text-gray-300" 
+                (hoveredRating !== null ? hoveredRating : selectedRating) >
+                index
+                  ? "text-[#5B03B2]"
+                  : "text-gray-300"
               }`}
-              onMouseEnter={() => setHoveredRating(index + 1)} 
-              onMouseLeave={() => setHoveredRating(null)} 
-              onClick={() => handleRate(index + 1)} 
+              onMouseEnter={() => setHoveredRating(index + 1)}
+              onMouseLeave={() => setHoveredRating(null)}
+              onClick={() => handleRate(index + 1)}
             />
           ))}
         </div>
@@ -85,9 +125,6 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 };
 
 export default StarRatingQuestion;
-
-
-
 
 // import { draggable } from "@/assets/images";
 // import Image from "next/image";

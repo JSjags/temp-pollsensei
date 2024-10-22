@@ -1,4 +1,4 @@
-import { TestLibraryFormatted } from "@/components/analysis/page";
+import { TestLibraryFormatted } from "@/components/analysis/AnalysisTests";
 import axiosInstance from "@/lib/axios-instance";
 
 export const getSurveyVariableNames = async ({

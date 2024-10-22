@@ -1,7 +1,8 @@
-import { draggable } from "@/assets/images";
+import { draggable, stars } from "@/assets/images";
 import Image from "next/image";
 import React from "react";
 import { usePathname } from "next/navigation";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 
 interface MatrixQuestionProps {
   question: string;
@@ -14,6 +15,13 @@ interface MatrixQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
+  setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
+  onSave?: (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    aiEditIndex?: number
+  ) => void;
 }
 
 const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
@@ -23,7 +31,9 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
   EditQuestion,
   index,
   onChange,
-  DeleteQuestion
+  DeleteQuestion,
+  onSave,
+  setEditId,
 }) => {
   const pathname = usePathname();
 
@@ -33,25 +43,40 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
         <Image
           src={draggable}
           alt="draggable icon"
-          className={ 
-            pathname === "/surveys/create-survey"
-            ? "visible"
-            : "invisible"
+          className={
+            pathname === "/surveys/create-survey" ? "visible" : "invisible"
           }
         />
         <div className="w-full">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-start">
-              <span>{index}. </span> {question}
+            <h3 className="group text-lg font-semibold text-start">
+              <span>{index}. </span> {question}{" "}
+              <PollsenseiTriggerButton
+                key={index}
+                imageUrl={stars}
+                tooltipText="Rephrase question"
+                className={"group-hover:inline-block hidden"}
+                triggerType="rephrase"
+                question={question}
+                optionType={questionType!}
+                options={options}
+                setEditId={setEditId}
+                onSave={onSave!}
+                index={index!}
+              />
             </h3>
             {pathname !== "/surveys/edit-survey" && <p>{questionType}</p>}
           </div>
           <table className="w-full mt-4 border-collapse">
             <thead>
               <tr>
-                <th className="border-b border-gray-300 text-start"></th> {/* Empty top-left corner */}
+                <th className="border-b border-gray-300 text-start"></th>{" "}
+                {/* Empty top-left corner */}
                 {options?.Head?.map((header, headerIndex) => (
-                  <th key={headerIndex} className="border-b border-gray-300 text-center px-4 py-2">
+                  <th
+                    key={headerIndex}
+                    className="border-b border-gray-300 text-center px-4 py-2"
+                  >
                     {header}
                   </th>
                 ))}
@@ -64,12 +89,17 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                     {rowLabel}
                   </td>
                   {options?.Head?.map((_, columnIndex) => (
-                    <td key={columnIndex} className="border-b border-gray-300 text-center">
+                    <td
+                      key={columnIndex}
+                      className="border-b border-gray-300 text-center"
+                    >
                       <input
                         type="radio"
                         name={`matrix-${index}-${rowIndex}`}
                         className="text-[#5B03B2]"
-                        onChange={() => onChange && onChange(rowIndex, columnIndex)}
+                        onChange={() =>
+                          onChange && onChange(rowIndex, columnIndex)
+                        }
                       />
                     </td>
                   ))}
@@ -85,8 +115,9 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
               >
                 Edit
               </button>
-              <button className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion} 
+              <button
+                className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
+                onClick={DeleteQuestion}
               >
                 Delete
               </button>

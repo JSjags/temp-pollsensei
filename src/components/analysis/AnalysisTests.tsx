@@ -22,6 +22,33 @@ import AnalysisLoadingScreen, {
 import AnalysisErrorComponent from "../loaders/page-loaders/AnalysisError";
 import Loading from "../primitives/Loader";
 import { toast } from "react-toastify";
+import AnalysisReport from "./AnalysisReport";
+import { AnimatePresence, motion } from "framer-motion";
+import SenseiMaster from "../sensei-master/SenseiMaster";
+
+// Springy Animation Variants for the mascot
+const mascotVariants = {
+  hidden: { opacity: 0, scale: 0.3, y: 0 }, // Start small and slightly off-screen
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring", // Springy effect
+      stiffness: 300, // Controls the "bounciness"
+      damping: 20, // Controls how fast the spring comes to rest
+      duration: 0.8, // Duration of the animation
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    y: 0, // Exit with downward movement
+    transition: {
+      duration: 0.3, // Slightly faster exit
+    },
+  },
+};
 
 export interface Variable {
   id: string;
@@ -183,6 +210,7 @@ export default function DragAndDropPage() {
   const [variables, setVariables] = useState(initialVariables);
   const [testsLibrary, setTestsLibrary] = useState<Test[]>([]);
   const [testLibrary, setTestLibrary] = useState<Test[]>([]);
+  const [showReport, setShowReport] = useState<boolean>(false);
 
   // AnalysisLoadingScreen
 
@@ -214,10 +242,12 @@ export default function DragAndDropPage() {
     onSuccess: (data) => {
       console.log(data);
       toast.success("Analysis conducted successfully");
+      setShowReport(true);
     },
     onError: (error) => {
       console.log(error);
       toast.error("Error conducting analysis");
+      setShowReport(true);
     },
   });
 
@@ -290,17 +320,25 @@ export default function DragAndDropPage() {
       // Function to format the data
       const formatTests = () => {
         const formattedData: Test[] = [];
+        const allowedTests = [
+          "Sentiment Analysis",
+          "Thematic Analysis",
+          "Word Frequency Analysis",
+          "Mann-Whitney U Test",
+        ];
 
         for (const category in testsLibraryQuery.data) {
           const tests = testsLibraryQuery.data[category];
           tests.forEach((testName: string) => {
-            const formattedTest = {
-              id: toCamelCase(testName),
-              name: testName,
-              variables: [],
-              category,
-            };
-            formattedData.push(formattedTest);
+            if (allowedTests.includes(testName)) {
+              const formattedTest = {
+                id: toCamelCase(testName),
+                name: testName,
+                variables: [],
+                category,
+              };
+              formattedData.push(formattedTest);
+            }
           });
         }
 
@@ -316,10 +354,22 @@ export default function DragAndDropPage() {
   // useEffect(() => {
   //   if (createTestsQuery.isSuccess) {
   //     console.log(createTestsQuery.data);
+  //     const value = createTestsQuery.data.data.map((tC: any) => ({
+  //       id: toCamelCase(Object.keys(tC)[0]),
+  //       name: toCamelCase(Object.keys(tC)[0]),
+  //       variables: Object.values(tC).map((c) => ({
+  //         id: c,
+  //         name: c,
+  //       })),
+  //       category: testLibrary.find((item) => item.id === Object.keys(tC)[0])
+  //         ?.category,
+  //     }));
+
+  //     setTestLibrary(value);
   //   }
   // }, [createTestsQuery.isSuccess]);
 
-  return (
+  return !showReport ? (
     <Fragment>
       {variablesQuery.isLoading && <AnalysisLoadingScreen />}
       {variablesQuery.isError && <AnalysisErrorComponent />}
@@ -433,9 +483,25 @@ export default function DragAndDropPage() {
               </div>
             </div>
           </DndProvider>
+
+          {/* Sensei Master */}
+          <AnimatePresence>
+            <motion.div
+              key="senseiMaster"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={mascotVariants}
+              className="bg-blue-500 z-[1000000] fixed top-0 left-0"
+            >
+              <SenseiMaster type={"analysis"} />
+            </motion.div>
+          </AnimatePresence>
         </>
       )}
     </Fragment>
+  ) : (
+    <AnalysisReport testData={runTestMutation?.data?.data ?? []} />
   );
 }
 

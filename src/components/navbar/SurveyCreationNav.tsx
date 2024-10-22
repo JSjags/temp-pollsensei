@@ -357,6 +357,8 @@ const SurveyCreationNav = () => {
     ? "Preview"
     : path.includes("validation")
     ? "Validation"
+    : path.includes("analysis")
+    ? "Analysis"
     : "Design";
 
   const isExactSurveyPath = path === "/surveys";
@@ -419,13 +421,45 @@ const SurveyCreationNav = () => {
             <span className="ml-3 text-sm">Reponses</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link href={""} className="flex items-center">
-            <BreadcrumsIcon color="#B0A5BB" />
+          <Link
+            href={`/surveys/${params.id}/validate-response`}
+            className="flex items-center"
+          >
+            <BreadcrumsIcon
+              icon={
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0 && (
+                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                )
+              }
+              color={
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0
+                  ? ""
+                  : "#B0A5BB"
+              }
+            />
             <span className="ml-3 text-sm">Validation</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link href={""} className="flex items-center">
-            <BreadcrumsIcon color="#B0A5BB" />
+          <Link
+            href={`/surveys/${params.id}/analysis`}
+            className="flex items-center"
+          >
+            <BreadcrumsIcon
+              icon={
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0 && (
+                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                )
+              }
+              color={
+                surveyResponses.isSuccess &&
+                surveyResponses.data?.data?.length > 0
+                  ? ""
+                  : "#B0A5BB"
+              }
+            />
             <span className="ml-3 text-sm">Analysis</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
@@ -433,7 +467,7 @@ const SurveyCreationNav = () => {
             <BreadcrumsIcon color="#B0A5BB" />
             <span className="ml-3 text-sm">Report</span>
           </Link>
-          <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+          {/* <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " /> */}
         </nav>
 
         {path.includes("survey-reponse-upload") ? (
@@ -447,14 +481,14 @@ const SurveyCreationNav = () => {
           </button>
         ) : (
           <div className="flex justify-between items-center gap-3">
-            {path === "/surveys/create-survey" ||
-            path === "/surveys/add-question-m" ||
-            path === "/surveys/survey-list" ||
-            path.includes("validate-response") ||
-            path.includes("/surveys/question") ? (
-              " "
-            ) : (
-              " "
+            {
+              path === "/surveys/create-survey" ||
+              path === "/surveys/add-question-m" ||
+              path === "/surveys/survey-list" ||
+              path.includes("validate-response") ||
+              path.includes("/surveys/question")
+                ? " "
+                : " "
               // <button
               //   className={`border-none flex items-center ${
               //     path === "/surveys/preview-survey" ? "invisible" : "visible"
@@ -465,11 +499,9 @@ const SurveyCreationNav = () => {
               // >
               //   <IoEyeOutline className="mr-1" /> Preview
               // </button>
-            )}
-            {path.includes("/surveys/question") && (
-              <button className="border-none flex items-center" 
-              onClick={()=>{ dispatch(openSurveySettings()) }}
-              >
+            }
+            {!path.includes("/surveys/question") && (
+              <button className="border-none flex items-center">
                 <IoSettingsOutline className="mr-1" />
                 <span className="hidden xl:flex"> Survey Settings </span>
               </button>
