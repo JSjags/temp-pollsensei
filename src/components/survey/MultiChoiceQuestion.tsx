@@ -167,20 +167,19 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
         )}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB] "
-            />
-          </div>
-        )}
-        <div className="flex justify-e">
-          {pathname === "/surveys/edit-survey" ||
+          <span>Required</span>
+           <Switch checked={is_required} 
+            onCheckedChange={
+             setIsRequired
+               ? (checked: boolean) => setIsRequired(checked)
+               : undefined
+           }
+           className="bg-[#9D50BB] " />
+         </div>
+        )
+       }
+       <div className="flex justify-end">
+       {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (

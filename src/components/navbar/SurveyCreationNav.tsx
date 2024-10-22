@@ -331,6 +331,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSurveyResponses } from "@/services/analysis";
 import { extractMongoId } from "@/lib/utils";
+import { openSurveySettings } from "@/redux/slices/survey_settings.slice";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -420,11 +421,12 @@ const SurveyCreationNav = () => {
             <span className="ml-3 text-sm">Reponses</span>
           </Link>
           <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link
-            href={`/surveys/${params.id}/validate-response`}
-            className="flex items-center"
-          >
-            <BreadcrumsIcon
+          <Link   href={
+              path.includes("survey-reponse-upload?tab=Individual+Responses")
+                ? `/surveys/${data?.data._id}/survey-reponse-upload?tab=Individual+Responses`
+                : ""
+            } className="flex items-center">
+          <BreadcrumsIcon
               icon={
                 surveyResponses.isSuccess &&
                 surveyResponses.data?.data?.length > 0 && (
@@ -480,27 +482,31 @@ const SurveyCreationNav = () => {
           </button>
         ) : (
           <div className="flex justify-between items-center gap-3">
-            {
-              path === "/surveys/create-survey" ||
-              path === "/surveys/add-question-m" ||
-              path === "/surveys/survey-list" ||
-              path.includes("validate-response") ||
-              path.includes("/surveys/question")
-                ? " "
-                : " "
-              // <button
-              //   className={`border-none flex items-center ${
-              //     path === "/surveys/preview-survey" ? "invisible" : "visible"
-              //   }`}
-              //   onClick={() => {
-              //     router.push("/surveys/preview-survey");
-              //   }}
-              // >
-              //   <IoEyeOutline className="mr-1" /> Preview
-              // </button>
+            {path === "/surveys/create-survey" ||
+            path === "/surveys/add-question-m" ||
+            path === "/surveys/survey-list" ||
+            path.includes("validate-response") ||
+            path.includes("/surveys/question")
+              ? " "
+              : " "
+                // <button
+                //   className={`border-none flex items-center ${
+                //     path === "/surveys/preview-survey" ? "invisible" : "visible"
+                //   }`}
+                //   onClick={() => {
+                //     router.push("/surveys/preview-survey");
+                //   }}
+                // >
+                //   <IoEyeOutline className="mr-1" /> Preview
+                // </button>
             }
-            {!path.includes("/surveys/question") && (
-              <button className="border-none flex items-center">
+            {path.includes("/surveys/question") && (
+              <button
+                className="border-none flex items-center"
+                onClick={() => {
+                  dispatch(openSurveySettings());
+                }}
+              >
                 <IoSettingsOutline className="mr-1" />
                 <span className="hidden xl:flex"> Survey Settings </span>
               </button>

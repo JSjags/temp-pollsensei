@@ -286,23 +286,20 @@ const EditSurvey = () => {
       const currentSectionData = updatedSections[currentSection];
 
       // Iterate over each question in the array and add it to the current section
-      const newQuestions = newSingleSurvey.data.response.map(
-        (questionData: any) => {
-          const optionType = questionData["Option type"]?.trim();
-          return {
-            question: questionData.Question,
-            options: questionData.Options || [], // Default to an empty array if options are not provided
-            question_type:
-              optionType === "Multi-choice"
-                ? "multiple_choice"
-                : optionType === "Comment"
-                ? "long_text"
-                : "matrix_checkbox",
-            is_required: false,
-          };
-        }
-      );
-
+      const newQuestions = newSingleSurvey.data.response.map((questionData: any) => {
+        const optionType = questionData["Option type"]?.trim();
+        return {
+          question: questionData.Question,
+          options: questionData.Options || [], // Default to an empty array if options are not provided
+          question_type: optionType === "Multi-choice"
+            ? "multiple_choice"
+            : optionType === "Comment"
+            ? "long_text"
+            : "matrix_checkbox",
+          is_required: true,
+        };
+      });
+  
       // Append new questions to the current section
       const updatedQuestions = [
         ...currentSectionData.questions,

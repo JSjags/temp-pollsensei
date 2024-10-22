@@ -22,13 +22,14 @@ const DonutChart: React.FC<DonutChartProps> = ({ seriesData }) => {
     },
     legend: {
       position: "left",
+      // show: false,
     },
     colors: ["#3D7100", "#FFC327", "#D9D9D9"],
     labels: seriesData.map((dataPoint) => dataPoint.label),
     plotOptions: {
       pie: {
         donut: {
-          size: "50%",
+          size: "100%",
         },
       },
     },

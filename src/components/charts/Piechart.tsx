@@ -17,13 +17,20 @@ interface PieChartProps {
 }
 
 const Piechart: React.FC<PieChartProps> = ({ data, title, question }) => {
+  const options = {
+    plugins: {
+      legend: {
+        display: false, // Hide the legend
+      },
+    },
+  };
   return (
     <div className="border rounded-lg shadow-md p-6 bg-white mt-4">
       <h3 className="text-gray-700 text-lg font-semibold mb-4">{title}</h3>
       <p className="text-gray-600 mb-4">{question}</p>
 
-      <div className="flex gap-5 items-start">
-        <div className="flex flex-col justify-around mt-4">
+      <div className="flex justify-between gap-5 items-start">
+        <div className="flex flex-1 flex-col justify-around mt-4">
           {data.labels.map((label, index) => (
             <div key={label} className="flex items-center space-x-2">
               <span
@@ -38,10 +45,10 @@ const Piechart: React.FC<PieChartProps> = ({ data, title, question }) => {
             </div>
           ))}
         </div>
-      </div>
-        <div className="flex justify-center h-48">
-          <Doughnut data={data} />
+        <div className="flex flex-1  h-56">
+          <Doughnut data={data} options={options} />
         </div>
+      </div>
     </div>
   );
 };
