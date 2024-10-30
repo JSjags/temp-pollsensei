@@ -19,6 +19,10 @@ import { useLoginUserMutation } from "../../services/user.service";
 import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 
+const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
+console.log(Client_Id);
+
+
 const constraints = {
   email: {
     presence: true,
@@ -169,7 +173,7 @@ const LoginPage = () => {
             </div>
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5">
-              <Link href="">
+              <Link href="#" >
                 <Image
                   src={google}
                   alt="Google"

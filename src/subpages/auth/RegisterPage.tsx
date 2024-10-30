@@ -1,5 +1,5 @@
 "use client";
-
+import { useGoogleLogin } from "@react-oauth/google";
 import { Form, Field } from "react-final-form";
 import validate from "validate.js";
 import Link from "next/link";
@@ -12,7 +12,11 @@ import facebook from "../../assets/auth/facebook.svg";
 import chat from "../../assets/auth/chat.svg";
 import { toast } from "react-toastify";
 import { useState } from "react";
-import { useRegisterUserMutation } from "../../services/user.service";
+import {
+  useRegisterUserMutation,
+  useFacebookRegisterMutation,
+  useGooleRegisterMutation,
+} from "../../services/user.service";
 import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import { FaTimesCircle } from "react-icons/fa";
@@ -55,9 +59,16 @@ const constraints = {
   },
 };
 
+const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
+console.log(Client_Id);
+
 const RegisterPage = () => {
   const [registerUser, { isSuccess, isError, error, isLoading }] =
     useRegisterUserMutation();
+
+  const [gooleRegister, { data: register, error: registerError }] =
+    useGooleRegisterMutation();
+  const [facebookRegister] = useFacebookRegisterMutation();
 
   const [eyeState, setEyeState] = useState({
     password: false,
@@ -93,6 +104,41 @@ const RegisterPage = () => {
 
   const validateForm = (values: any) => {
     return validate(values, constraints) || {};
+  };
+
+  const googleSignUp = useGoogleLogin({
+    onSuccess: async (response) => {
+      const authCode = response.code;
+      const requestData = {
+        code: authCode,
+      };
+
+      try {
+        await gooleRegister(requestData).unwrap();
+        toast.success("Register success");
+      } catch (err: any) {
+        toast.error(
+          "Failed to register user " + (err?.data?.message || err.message)
+        );
+        console.error("Failed to sign up user", err);
+      }
+    },
+    onError: () => console.log("Google Sign-In Failed"),
+    flow: "auth-code",
+  });
+
+  const facebookSignUp = async () => {
+    try {
+      await facebookRegister({
+        code: "EAAqHE480eNQBO01LHQi2UVuVsM70hdqIztRyMEOjZAphhhb8litk6x0ieDNHHFdvIDFopfgdVmY41fnnQZCm3bianzwKaZCvl0MXE0jVyFBY9eVwuFSa6wZBZAu4EdZCqM4gNwZA8MLoiT65S0neVPwL5xbPvgTu1EcFHAOO0xfXueJgs5zogrnrEcmyOopAwIUM4iMHdTKX9R0uezvKwZDZD",
+      }).unwrap();
+      toast.success("Register success");
+    } catch (err: any) {
+      toast.error(
+        "Failed to register user " + (err?.data?.message || err.message)
+      );
+      console.error("Failed to sign up user", err);
+    }
   };
 
   return (
@@ -303,7 +349,7 @@ const RegisterPage = () => {
           </div>
 
           <div className="social-icons flex justify-center items-center gap-4 pt-5">
-            <Link href="">
+            <span onClick={googleSignUp}>
               <Image
                 src={google}
                 alt="Google"
@@ -311,8 +357,8 @@ const RegisterPage = () => {
                 height={24}
                 className="size-10"
               />
-            </Link>
-            <Link href="">
+            </span>
+            <span onClick={facebookSignUp}>
               <Image
                 src={facebook}
                 alt="Facebook"
@@ -320,7 +366,7 @@ const RegisterPage = () => {
                 height={24}
                 className="size-10"
               />
-            </Link>
+            </span>
           </div>
 
           <div className="flex justify-end items-center mt-4">
