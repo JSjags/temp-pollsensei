@@ -99,10 +99,10 @@ const AddQuestionPage = () => {
   };
 
   const handleSurveyCreation = async () => {
-    if (logoUrl === "" || headerUrl === "") {
-      toast.warning("Header image and logo cannot be empty");
-      return null;
-    }
+    // if (logoUrl === "" || headerUrl === "") {
+    //   toast.warning("Header image and logo cannot be empty");
+    //   return null;
+    // }
 
     const sectionExists = survey.sections.some(
       (section) =>
@@ -404,7 +404,7 @@ const AddQuestionPage = () => {
                             ) : item.question_type === "star_rating" ? (
                               <StarRatingQuestion
                                 question={item.question}
-                                maxRating={5}
+                                // maxRating={5}
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                                 DeleteQuestion={() =>

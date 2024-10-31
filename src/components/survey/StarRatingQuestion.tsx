@@ -137,11 +137,9 @@ import { draggable, stars } from "@/assets/images";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 
 interface StarRatingQuestionProps {
-  questionData: {
-    question: string;
-    options: string[];
-    question_type: string;
-  };
+  question: string;
+  questionType: string;
+  options?: string[];
   currentRating?: number;
   onRate?: (value: number) => void;
   EditQuestion?: () => void;
@@ -157,7 +155,9 @@ interface StarRatingQuestionProps {
 }
 
 const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
-  questionData,
+  question,
+  options = ["1 star", "2 star", "3 star", "4 star", "5 star"], // default 1-5 star options
+  questionType,
   currentRating = 0,
   onRate,
   EditQuestion,
@@ -166,7 +166,6 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   setEditId,
   onSave,
 }) => {
-  const { question, options, question_type } = questionData;
   const pathname = usePathname();
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
   const [selectedRating, setSelectedRating] = useState<number>(currentRating);
@@ -202,7 +201,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
               className={"group-hover:inline-block hidden"}
               triggerType="rephrase"
               question={question}
-              optionType={question_type}
+              optionType={questionType}
               options={options}
               setEditId={setEditId}
               onSave={onSave!}
@@ -213,7 +212,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
           pathname.includes("surveys/question") ? (
             ""
           ) : (
-            <p>{question_type}</p>
+            <p>{questionType}</p>
           )}
         </div>
         <div className="flex items-center my-2">
@@ -255,6 +254,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 };
 
 export default StarRatingQuestion;
+
 
 
 
