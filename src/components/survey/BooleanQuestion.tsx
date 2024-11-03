@@ -11,7 +11,7 @@ import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
 import { Switch } from "../ui/switch";
 
-interface MultiChoiceQuestionProps {
+interface BooleanQuestionProps {
   question: string;
   questionType: string;
   options: string[] | undefined;
@@ -32,9 +32,9 @@ interface MultiChoiceQuestionProps {
   setIsRequired?: (value: boolean) => void;
 }
 
-const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
+const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
   question,
-  options,
+  options = ["Yes", "No"],
   questionType,
   EditQuestion,
   DeleteQuestion,
@@ -121,6 +121,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                 question={question}
                 optionType={questionType}
                 options={options}
+                // options={options ?? ["Yes", "No"]}
                 setEditId={setEditId}
                 onSave={onSave!}
                 index={index}
@@ -128,7 +129,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             </div>
           </h3>
         </div>
-        {options?.map((option, optionIndex) => (
+        {(options ?? ["Yes", "No"]).map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
             <label className="relative flex items-center cursor-pointer">
               <input
@@ -167,24 +168,23 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
         )}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB] "
-            />
-          </div>
-        )}
-        <div className="flex justify-end">
-          {pathname === "/surveys/edit-survey" ||
+          <span>Required</span>
+           <Switch checked={is_required} 
+            onCheckedChange={
+             setIsRequired
+               ? (checked: boolean) => setIsRequired(checked)
+               : undefined
+           }
+           className="bg-[#9D50BB] " />
+         </div>
+        )
+       }
+       <div className="flex justify-end">
+       {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (
-            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
+            <p>{questionType === "boolean" ? "Boolean" : ""}</p>
           )}
         </div>
       </div>
@@ -195,4 +195,4 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   );
 };
 
-export default MultiChoiceQuestion;
+export default BooleanQuestion;

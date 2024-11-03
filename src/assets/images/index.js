@@ -25,7 +25,19 @@ import pdf_svgrepo_com from './pdf-svgrepo-com.svg'
 import neon_header from './neon_header.svg'
 import default_header from './default_header.svg'
 import sparkly_header from './sparkly_header.svg'
-
+import hero_icon_1 from './hero-icon-1.svg'
+import hero_icon_2 from './hero-icon-2.svg'
+import hero_bg from './hero-bg.svg'
+import landing_img from './landing-img.svg'
+import pie_chart from './pie_chart.svg'
+import bar_chart from './bar_chart.svg'
+import chart from './chart.svg'
+import oaks from './Oaks_intelligence.svg'
+import carbonible from './Carbonible.svg'
+import escrotech from './Escro_tech.svg'
+import invEmt from './InvEmt.svg'
+import gidiOaks from './gidiOaks.svg'
+import dark_theme_logo from './logo_white_bg.svg'
 
 
 
@@ -57,5 +69,17 @@ export {
   neon_header,
   default_header,
   sparkly_header,
- 
+  hero_icon_1,
+  hero_icon_2,
+  hero_bg,
+  landing_img,
+  pie_chart,
+  bar_chart,
+  chart,
+  oaks,
+  carbonible,
+  escrotech,
+  invEmt,
+  gidiOaks,
+  dark_theme_logo
 };

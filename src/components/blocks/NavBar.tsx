@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useIsLoggedIn } from "@/lib/helpers";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { pollsensei_new_logo } from "@/assets/images";
+// import { ThemeToggle } from "../theme-toggle";
 
 const NavBar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,19 +19,17 @@ const NavBar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-md">
+    <header className="sticky top-0 z-50 shadow-md bg-white">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="flex gap-5 items-center">
         {/* Logo */}
-        <Link href={"/"} className="flex items-center gap-2 cursor-pointer">
-          <Image src={logo} alt="Logo" className="h-8 w-auto" />
-          <h2 className="text-lg text-[#5B03B2] bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 font-semibold">
-            PollSensei
-          </h2>
+        <Link href={"/dashboard"} className="flex items-center gap-2 cursor-pointer lg:mr-16">
+          <Image src={pollsensei_new_logo} alt="Logo" className="h-8 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          {["Features", "Pricing", "About Us", "Contact"].map((item) => (
+          {[ "About Us", "Benefits" , "Features", "Pricing", "FAQs"].map((item) => (
             <Link
               key={item}
               href={`/${item.toLowerCase().replace(" ", "-")}`}
@@ -41,15 +41,20 @@ const NavBar = () => {
           ))}
         </div>
 
+        </div>
+
+
+        {/* Mobile Menu Button */}
+        <div className="flex gap-5 items-center">
         {/* Login Button */}
         {
           !isLoggedIn || state.user === null || state.token === null ? (
         <div className="hidden md:block">
           <Link
             href="/login"
-            className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-full"
+            className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-md"
           >
-            Login
+            Get Started
           </Link>
         </div>
 
@@ -57,15 +62,15 @@ const NavBar = () => {
             <div className="hidden md:block">
               <Link
                 href="/dashboard"
-                className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-full"
+                className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-md"
               >
                 Dashboard
               </Link>
             </div>
           )
         }
-
-        {/* Mobile Menu Button */}
+          {/* <ThemeToggle /> */}
+        </div>
         <button className="md:hidden" onClick={toggleSidebar}>
           <svg
             className="w-6 h-6"
@@ -138,7 +143,7 @@ const NavBar = () => {
                   </button>
                 </div>
                 <div className="flex flex-col space-y-4">
-                  {["Features", "Pricing", "About Us", "Contact"].map(
+                  {[ "About Us", "Benefits" , "Features", "Pricing", "FAQs"].map(
                     (item) => (
                       <Link
                         key={item}

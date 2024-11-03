@@ -135,6 +135,8 @@ import { usePathname } from "next/navigation";
 import { FaStar } from "react-icons/fa";
 import { draggable, stars } from "@/assets/images";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { Check } from "lucide-react";
+import { BsExclamation } from "react-icons/bs";
 
 interface StarRatingQuestionProps {
   question: string;
@@ -145,6 +147,10 @@ interface StarRatingQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index?: number;
+  canUseAI?: boolean;
+  status?: string;
+  is_required?: boolean;
+  setIsRequired?: (value: boolean) => void;
   setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   onSave?: (
     updatedQuestion: string,
@@ -156,7 +162,7 @@ interface StarRatingQuestionProps {
 
 const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   question,
-  options = ["1 star", "2 star", "3 star", "4 star", "5 star"], // default 1-5 star options
+  options = ["1 star", "2 star", "3 star", "4 star", "5 star"], 
   questionType,
   currentRating = 0,
   onRate,
@@ -165,6 +171,10 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   index,
   setEditId,
   onSave,
+  canUseAI = false,
+  status,
+  is_required,
+  setIsRequired,
 }) => {
   const pathname = usePathname();
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
@@ -178,9 +188,29 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
     }
   };
 
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 mr-3">
+            <Check strokeWidth={1} className="text-xs text-white" />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
+            <BsExclamation />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3">
-      <Image
+      {/* <Image
         src={draggable}
         alt="draggable icon"
         className={
@@ -189,11 +219,23 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             ? "invisible"
             : "visible"
         }
+      /> */}
+        <Image
+        src={draggable}
+        alt="draggable icon"
+        className={
+          pathname === "/surveys/create-survey" ? "visible" : "invisible"
+        }
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="group text-lg font-semibold text-start">
-            {question}{" "}
+          <p>
+                <span>{index}. </span> {question}
+                {is_required === true && (
+                  <span className="text-2xl ml-2 text-red-500">*</span>
+                )}
+              </p>
             <PollsenseiTriggerButton
               key={index}
               imageUrl={stars}
@@ -208,12 +250,12 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
               index={index!}
             />
           </h3>
-          {pathname === "/surveys/edit-survey" ||
+          {/* {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (
             <p>{questionType}</p>
-          )}
+          )} */}
         </div>
         <div className="flex items-center my-2">
           {options.map((_, idx) => (
@@ -248,7 +290,18 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             </button>
           </div>
         )}
+          <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ? (
+            ""
+          ) : (
+            <p>{questionType === "star_rating" ? "Star Rating" : ""}</p>
+          )}
+        </div>
       </div>
+      {pathname.includes("survey-reponse-upload") && status && (
+        <div>{getStatus(status)}</div>
+      )}
     </div>
   );
 };

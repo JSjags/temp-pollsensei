@@ -36,6 +36,9 @@ import store from "@/redux/store";
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
 import MultiChoiceQuestionEdit from "../milestone/Test";
+import BooleanQuestion from "@/components/survey/BooleanQuestion";
+import ShortTextQuestion from "@/components/survey/LongTextQuestion";
+import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -377,6 +380,7 @@ const AddQuestionPage = () => {
                             // Conditionally render based on question type
                             item.question_type === "multiple_choice" ? (
                               <MultiChoiceQuestion
+                                key={index} 
                                 index={index + 1}
                                 question={item.question}
                                 options={item.options}
@@ -386,7 +390,20 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
-                            ) : item.question_type === "long_text" ? (
+                            ) :  item.question_type === "single_choice" ? (
+                              <SingleChoiceQuestion
+                                index={index + 1}
+                                key={index}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
+                              />
+                            )
+                             : item.question_type === "long_text" ? (
                               <CommentQuestion
                                 key={index}
                                 index={index + 1}
@@ -394,8 +411,19 @@ const AddQuestionPage = () => {
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                               />
-                            ) : item.question_type === "likert_Scale" ? (
+                            ) : item.question_type === "short_text" ? (
+                              <ShortTextQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) 
+                             : item.question_type === "likert_scale" ? (
                               <LikertScaleQuestion
+                                key={index}
+                                index={index + 1}
                                 question={item.question}
                                 options={item.options}
                                 questionType={item.question_type}
@@ -405,6 +433,7 @@ const AddQuestionPage = () => {
                               <StarRatingQuestion
                                 question={item.question}
                                 // maxRating={5}
+                                index={index + 1}
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                                 DeleteQuestion={() =>
@@ -418,6 +447,18 @@ const AddQuestionPage = () => {
                                 options={item.options}
                                 question={item.question}
                                 questionType={item.question_type}
+                              />
+                            ) : item.question_type === "boolean" ? (
+                              <BooleanQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
                               />
                             ) : null
                           }
