@@ -56,22 +56,37 @@ axiosInstance.interceptors.response.use(
       return window.location.assign("/login");
     }
 
-    toast.error(
-      error?.response?.data?.errors
-        ? (
-            error?.response?.data?.errors as { [key: string]: unknown }[]
-          ).reduce(
-            (prev, curr, i, arr) =>
-              i < arr.length - 1
-                ? prev + `${i === 0 ? "" : ", "}${curr.msg}`
-                : `${prev}, ${curr.msg}.`,
-            ""
-          )
-        : error?.response?.data?.msg ??
-            error?.response?.data?.message ??
-            error?.message ??
-            "You are not Authorized. Log in to continue"
-    );
+    if (
+      (error?.response?.data?.msg ||
+        error?.response?.data?.message ||
+        error?.message) &&
+      error?.response?.data?.message.includes("Survey milestone not found")
+    ) {
+    }
+
+    if (
+      (error?.response?.data?.msg ||
+        error?.response?.data?.message ||
+        error?.message) &&
+      !error?.response?.data?.message.includes("Survey milestone not found")
+    ) {
+      toast.error(
+        error?.response?.data?.errors
+          ? (
+              error?.response?.data?.errors as { [key: string]: unknown }[]
+            ).reduce(
+              (prev, curr, i, arr) =>
+                i < arr.length - 1
+                  ? prev + `${i === 0 ? "" : ", "}${curr.msg}`
+                  : `${prev}, ${curr.msg}.`,
+              ""
+            )
+          : error?.response?.data?.msg ??
+              error?.response?.data?.message ??
+              error?.message ??
+              "You are not Authorized. Log in to continue"
+      );
+    }
 
     return Promise.reject(error);
   }

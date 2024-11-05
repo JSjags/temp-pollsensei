@@ -9,7 +9,7 @@ import { logoutUser } from "../../redux/slices/user.slice";
 import { RootState } from "@/redux/store";
 import logo from "../../assets/images/pollsensei-logo.png";
 import hamburger from "../../assets/images/hamburger-menu.png";
-import notification from "../../assets/images/notifications-none.png";
+import notification from "../../assets/images/notification.svg";
 import mobileNotification from "../../assets/images/mobile-notification.png";
 import mobileUserIcon from "../../assets/images/mobile-user.png";
 import homeIcon from "../../assets/images/home-none.png";
@@ -27,6 +27,19 @@ import { cn, generateInitials } from "@/lib/utils";
 import { pollsensei_new_logo } from "@/assets/images";
 import MilestoneCTA from "@/subpages/milestone/MilestoneCTA";
 import DesktopNavigation from "./DesktopNavigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { HelpCircle, LogOut, Settings, User } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -36,6 +49,7 @@ const Navbar = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const path = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleSetActiveTab = (tab: string) => {
     setActiveTab(tab);
@@ -76,15 +90,13 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
             <Image src={pollsensei_new_logo} alt="Logo" />
             {/* <h2 className="text-xl text-[#5B03B2]">PollSensei</h2> */}
-         {
-          path.includes('/surveys') && (
-            <div className="hidden lg:flex items-center gap-2 space-x-1 text-xs mt-[10px] font-semibold ml-2">
-            <Link href={'/dashboard'}>Dashboard</Link>
-            <Link href={'/dashboard'}>Pricing</Link>
-            <Link href={'/dashboard'}>Upgrade to pro</Link>
-          </div>
-          )
-         }
+            {path.includes("/surveys") && (
+              <div className="hidden lg:flex items-center gap-2 space-x-1 text-xs mt-[10px] font-semibold ml-2">
+                <Link href={"/dashboard"}>Dashboard</Link>
+                <Link href={"/dashboard"}>Pricing</Link>
+                <Link href={"/dashboard"}>Upgrade to pro</Link>
+              </div>
+            )}
           </div>
           <div
             className="lg:hidden flex items-center gap-2 cursor-pointer"
@@ -96,12 +108,13 @@ const Navbar = () => {
             <Image src={logo} alt="Logo" className="h-8 w-auto" />
             <h2 className="text-lg text-[#5B03B2]">PollSensei</h2>
           </div>
-          <div className="hidden lg:flex items-center gap-5">
+
+          <div className="flex gap-4">
             <div
               // onClick={() => {
               //   alert("Clicked");
               // }}
-              className="h-[48px] w-[48px] rounded-full bg-[#fafafa] flex items-center justify-center cursor-pointer p-[12px]"
+              className="h-[48px] w-[48px] rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px]"
             >
               <Image
                 className="object-contain"
@@ -111,36 +124,83 @@ const Navbar = () => {
                 alt="Notification"
               />
             </div>
-            <div
-              onClick={() => {
-                dispatch(logoutUser());
-                router.push("/");
-              }}
-              className="size-[42px] font-semibold rounded-full bg-[#d9d9d9] flex items-center justify-center cursor-pointer p-[12px]"
-            >
-              {generateInitials((user as any)?.name ?? "")}
-            </div>
-            <div>
-              <h2 className="text-sm">{(user as any)?.name}</h2>
-              <p className="text-xs">Admin</p>
-            </div>
-            <div className="w-[15px] h-[15px]">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-6"
+
+            <DropdownMenu open={open} onOpenChange={setOpen}>
+              <DropdownMenuTrigger asChild className="cursor-pointer">
+                <Avatar className="size-12">
+                  <AvatarImage
+                    src={(user as any)?.photo_url ?? ""}
+                    alt="@johndoe"
+                  />
+                  <AvatarFallback className="font-semibold">
+                    {generateInitials((user as any)?.name ?? "")}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-56 z-[10000000]"
+                align="end"
+                forceMount
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                />
-              </svg>
-            </div>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {(user as any)?.name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {(user as any)?.email}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      Admin
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      router.push("/settings/profile");
+                    }}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                    {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      router.push("/settings/account-security");
+                    }}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                    {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      router.push("/help-centre");
+                    }}
+                  >
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    <span>Help</span>
+                    {/* <DropdownMenuShortcut>⌘H</DropdownMenuShortcut> */}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    dispatch(logoutUser());
+                    router.push("/");
+                  }}
+                  className="text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                  {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+
           <div className="lg:hidden flex items-center gap-3">
             <div
               // onClick={() => {
