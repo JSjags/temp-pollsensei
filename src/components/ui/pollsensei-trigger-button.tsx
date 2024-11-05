@@ -140,7 +140,7 @@ export default function PollsenseiTriggerButton({
           <Button
             onClick={handleClick}
             className={cn(
-              "size-6 bg-transparent rounded-full hover:bg-gray-200 flex justify-center items-center p-0 transition-colors duration-200 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent shrink-0",
+              "size-6 bg-transparent mt-1 rounded-full hover:bg-transparent flex justify-center items-center p-0 transition-colors duration-200 focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent shrink-0",
               className
             )}
             aria-label={tooltipText}

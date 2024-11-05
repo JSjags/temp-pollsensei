@@ -101,6 +101,8 @@ const SurveysPage = () => {
                     latestMilestone.data?.current_stage ?? "0"
                   )}
                   surveyId={latestMilestone.data?.survey_id!}
+                  generated_by={latestMilestone.data?.generated_by}
+                  survey_type={latestMilestone.data?.survey_type}
                 />
               </motion.div>
             )}

@@ -76,15 +76,13 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
             <Image src={pollsensei_new_logo} alt="Logo" />
             {/* <h2 className="text-xl text-[#5B03B2]">PollSensei</h2> */}
-         {
-          path.includes('/surveys') && (
-            <div className="hidden lg:flex items-center gap-2 space-x-1 text-xs mt-[10px] font-semibold ml-2">
-            <Link href={'/dashboard'}>Dashboard</Link>
-            <Link href={'/dashboard'}>Pricing</Link>
-            <Link href={'/dashboard'}>Upgrade to pro</Link>
-          </div>
-          )
-         }
+            {path.includes("/surveys") && (
+              <div className="hidden lg:flex items-center gap-2 space-x-1 text-xs mt-[10px] font-semibold ml-2">
+                <Link href={"/dashboard"}>Dashboard</Link>
+                <Link href={"/dashboard"}>Pricing</Link>
+                <Link href={"/dashboard"}>Upgrade to pro</Link>
+              </div>
+            )}
           </div>
           <div
             className="lg:hidden flex items-center gap-2 cursor-pointer"
@@ -141,6 +139,7 @@ const Navbar = () => {
               </svg>
             </div>
           </div>
+
           <div className="lg:hidden flex items-center gap-3">
             <div
               // onClick={() => {

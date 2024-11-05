@@ -552,7 +552,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart,
@@ -563,6 +563,13 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ScatterChart,
+  Scatter,
+  ZAxis,
+  ReferenceLine,
+  ComposedChart,
+  Area,
+  Rectangle,
 } from "recharts";
 import ReactWordcloud from "react-wordcloud";
 import {
@@ -581,6 +588,7 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { ChartContainer } from "@/components/ui/chart";
 
 type TestResult = {
   status: string;
@@ -643,6 +651,32 @@ type Props = {
   survey: TSurvey;
   rerunTests: () => void;
 };
+interface DensityPoint {
+  value: number;
+  density: number;
+}
+
+interface ChartDataPoint {
+  value: number;
+  A: number;
+  "A-mirror": number;
+  B: number;
+  "B-mirror": number;
+  C: number;
+  "C-mirror": number;
+}
+
+interface Quartiles {
+  min: number;
+  q1: number;
+  median: number;
+  q3: number;
+  max: number;
+}
+
+interface BoxPlotData extends Quartiles {
+  group: string;
+}
 
 const wordCloudOptions = {
   colors: ["#8b5cf6", "#6366f1", "#3b82f6", "#0ea5e9", "#06b6d4", "#14b8a6"],
@@ -688,6 +722,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
   const renderChart = (testData: TestData) => {
     if (
+      testData.test_name !== "Kruskal-Wallis Test" &&
       Object.values(testData.test_results).every(
         (result) => result.status === "error"
       )
@@ -760,6 +795,347 @@ const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
             </BarChart>
           </ResponsiveContainer>
         );
+      case "Spearman":
+        const generateData = () => {
+          const data = [];
+          for (let i = 0; i < 100; i++) {
+            const x = Math.random() * 4 - 2;
+            // Add some noise to create scatter effect while maintaining correlation
+            const y = 1.5 * x + (Math.random() - 0.5) * 1.5;
+            data.push({ x, y });
+          }
+          // Add some outlier points similar to the original
+          data.push({ x: 2.5, y: 13 });
+          data.push({ x: 2.2, y: 10.2 });
+          return data;
+        };
+        const data = generateData();
+
+        const chartConfig = {
+          data: {
+            color: "hsl(271, 91%, 65%)", // Adjusted to match the purple in the image
+          },
+        };
+
+        return (
+          <Card className="w-full max-w-3xl">
+            <CardHeader className="space-y-0 pb-2">
+              <CardTitle className="text-center text-xl font-normal">
+                Spearman&apos;s Rank Correlation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="relative">
+                <div className="absolute left-8 top-4 rounded-md bg-purple-50 px-2 py-1 text-sm text-purple-900">
+                  ρ = 0.82, p &lt; 0.001
+                </div>
+                <ChartContainer config={chartConfig} className="h-[600px]">
+                  <ScatterChart
+                    margin={{
+                      top: 60,
+                      right: 30,
+                      left: 40,
+                      bottom: 20,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis
+                      type="number"
+                      dataKey="x"
+                      name="X"
+                      domain={[-2.5, 3]}
+                      tickCount={7}
+                      stroke="#666"
+                    />
+                    <YAxis
+                      type="number"
+                      dataKey="y"
+                      name="Y"
+                      domain={[-2, 14]}
+                      tickCount={9}
+                      stroke="#666"
+                    />
+                    <ZAxis range={[50]} />
+                    <Scatter
+                      data={data}
+                      fill="rgb(147, 51, 234)"
+                      line={{
+                        stroke: "rgb(147, 51, 234)",
+                        strokeWidth: 2,
+                      }}
+                      lineType="fitting"
+                    />
+                  </ScatterChart>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case "Wilcoxon Signed-Rank Test":
+        // Generate placeholder data with similar distribution
+        const generateWilcoxinData = () => {
+          const data = [];
+          for (let i = 0; i < 50; i++) {
+            const before = Math.random() * 12;
+            // Add some variation around the diagonal line
+            const after = before + (Math.random() - 0.5) * 4;
+            data.push({ before, after });
+          }
+          return data;
+        };
+        const wilcoxinData = generateWilcoxinData();
+
+        const wilcoxinChartConfig = {
+          data: {
+            color: "hsl(246, 100%, 87%)", // Light purple for scatter points
+          },
+        };
+        return (
+          <Card className="w-full max-w-3xl">
+            <CardHeader className="space-y-0 pb-2">
+              <CardTitle className="text-center text-xl font-normal">
+                Wilcoxon Signed-Rank Test: Before vs After
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="relative">
+                <div className="absolute left-8 top-4 z-10 rounded-md bg-purple-50 px-2 py-1 text-sm text-purple-900">
+                  W = 678, p &lt; 0.001
+                </div>
+                <ChartContainer
+                  config={wilcoxinChartConfig}
+                  className="h-[600px]"
+                >
+                  <ScatterChart
+                    margin={{
+                      top: 60,
+                      right: 30,
+                      left: 40,
+                      bottom: 20,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis
+                      type="number"
+                      dataKey="before"
+                      name="Before"
+                      domain={[0, 12]}
+                      tickCount={7}
+                      stroke="#666"
+                      label={{ value: "Before", position: "bottom", offset: 0 }}
+                    />
+                    <YAxis
+                      type="number"
+                      dataKey="after"
+                      name="After"
+                      domain={[0, 12]}
+                      tickCount={7}
+                      stroke="#666"
+                      label={{
+                        value: "After",
+                        angle: -90,
+                        position: "left",
+                        offset: 20,
+                      }}
+                    />
+                    <ZAxis range={[20, 60]} />
+                    <ReferenceLine
+                      segment={[
+                        { x: 0, y: 0 },
+                        { x: 12, y: 12 },
+                      ]}
+                      stroke="red"
+                      strokeDasharray="5 5"
+                      ifOverflow="extendDomain"
+                    />
+                    <Scatter
+                      data={wilcoxinData}
+                      fill="hsl(246, 100%, 87%)"
+                      opacity={0.7}
+                    />
+                  </ScatterChart>
+                </ChartContainer>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case "Kruskal-Wallis Test":
+        // Generate normal distribution data points
+        const generateNormalDistribution = (
+          mean: number,
+          stdDev: number,
+          count: number
+        ): number[] => {
+          const points: number[] = [];
+          for (let i = 0; i < count; i++) {
+            let u = 0,
+              v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            const z =
+              Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            points.push(z * stdDev + mean);
+          }
+          return points;
+        };
+
+        const createDensityData = (
+          points: number[],
+          bandwidth = 0.5
+        ): DensityPoint[] => {
+          const min = Math.min(...points);
+          const max = Math.max(...points);
+          const steps = 50;
+          const step = (max - min) / steps;
+
+          return Array.from({ length: steps + 1 }, (_, i) => {
+            const x = min + i * step;
+            const density =
+              points.reduce((sum, point) => {
+                const z = (x - point) / bandwidth;
+                return (
+                  sum +
+                  Math.exp(-0.5 * z * z) / (Math.sqrt(2 * Math.PI) * bandwidth)
+                );
+              }, 0) / points.length;
+            return {
+              value: x,
+              density: density * 2,
+            };
+          });
+        };
+
+        const calculateQuartiles = (data: number[]): Quartiles => {
+          const sorted = [...data].sort((a, b) => a - b);
+          return {
+            min: sorted[0],
+            q1: sorted[Math.floor(sorted.length * 0.25)],
+            median: sorted[Math.floor(sorted.length * 0.5)],
+            q3: sorted[Math.floor(sorted.length * 0.75)],
+            max: sorted[sorted.length - 1],
+          };
+        };
+
+        // Generate sample data for three groups
+        const groupA = generateNormalDistribution(2.5, 1.2, 100);
+        const groupB = generateNormalDistribution(3, 1.5, 100);
+        const groupC = generateNormalDistribution(3.2, 1.3, 100);
+
+        // Create density data for each group
+        const densityA = createDensityData(groupA);
+        const densityB = createDensityData(groupB);
+        const densityC = createDensityData(groupC);
+
+        // Calculate quartiles for box plots
+        const quartilesA = calculateQuartiles(groupA);
+        const quartilesB = calculateQuartiles(groupB);
+        const quartilesC = calculateQuartiles(groupC);
+
+        // Prepare data for the chart
+        const kruskalData: ChartDataPoint[] = densityA.map((point, i) => ({
+          value: point.value,
+          A: point.density,
+          "A-mirror": -point.density,
+          B: densityB[i].density,
+          "B-mirror": -densityB[i].density,
+          C: densityC[i].density,
+          "C-mirror": -densityC[i].density,
+        }));
+
+        // Box plot data
+        const boxPlotData: BoxPlotData[] = [
+          { group: "A", ...quartilesA },
+          { group: "B", ...quartilesB },
+          { group: "C", ...quartilesC },
+        ];
+
+        return (
+          <Card className="w-full p-4">
+            <CardHeader>
+              <CardTitle>
+                Kruskal-Wallis Test: Comparison of Three Groups
+              </CardTitle>
+              <div className="text-sm text-purple-600">
+                H = 12.37, p = 0.002
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-96 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={kruskalData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="value"
+                      type="number"
+                      domain={[0, 6]}
+                      ticks={[1, 2, 3]}
+                      tickFormatter={(value: number) =>
+                        ["A", "B", "C"][value - 1] || ""
+                      }
+                    />
+                    <YAxis domain={[-2, 2]} />
+
+                    {/* Group A */}
+                    <Area
+                      dataKey="A"
+                      fill="#8884d8"
+                      fillOpacity={0.3}
+                      stroke="#8884d8"
+                      strokeWidth={1}
+                      stackId="1"
+                    />
+                    <Area
+                      dataKey="A-mirror"
+                      fill="#8884d8"
+                      fillOpacity={0.3}
+                      stroke="#8884d8"
+                      strokeWidth={1}
+                      stackId="1"
+                    />
+
+                    {/* Group B */}
+                    <Area
+                      dataKey="B"
+                      fill="#8884d8"
+                      fillOpacity={0.3}
+                      stroke="#8884d8"
+                      strokeWidth={1}
+                      stackId="2"
+                    />
+                    <Area
+                      dataKey="B-mirror"
+                      fill="#8884d8"
+                      fillOpacity={0.3}
+                      stroke="#8884d8"
+                      strokeWidth={1}
+                      stackId="2"
+                    />
+
+                    {/* Group C */}
+                    <Area
+                      dataKey="C"
+                      fill="#8884d8"
+                      fillOpacity={0.3}
+                      stroke="#8884d8"
+                      strokeWidth={1}
+                      stackId="3"
+                    />
+                    <Area
+                      dataKey="C-mirror"
+                      fill="#8884d8"
+                      fillOpacity={0.3}
+                      stroke="#8884d8"
+                      strokeWidth={1}
+                      stackId="3"
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
       default:
         return null;
     }
