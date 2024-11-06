@@ -660,7 +660,9 @@ function TestZone({
             key={variable.id}
             className="flex justify-between items-center py-0.5 h-7 bg-[#5B03B2] rounded-full text-white px-4 w-fit gap-2"
           >
-            <span className="text-sm">{variable.name}</span>
+            <span className="text-sm">
+              {variable.name.split("_").join(" ")}
+            </span>
             <button
               onClick={() => onRemoveVariable(test.id, variable.id)}
               className="text-white"

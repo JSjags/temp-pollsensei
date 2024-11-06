@@ -112,19 +112,21 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                   <span className="text-2xl ml-2 text-red-500">*</span>
                 )}
               </p>
-              <PollsenseiTriggerButton
-                key={index}
-                imageUrl={stars}
-                tooltipText="Rephrase question"
-                className={"group-hover:inline-block hidden"}
-                triggerType="rephrase"
-                question={question}
-                optionType={questionType}
-                options={options}
-                setEditId={setEditId}
-                onSave={onSave!}
-                index={index}
-              />
+              {!pathname.includes("survey-public-response") && (
+                <PollsenseiTriggerButton
+                  key={index}
+                  imageUrl={stars}
+                  tooltipText="Rephrase question"
+                  className={"group-hover:inline-block hidden"}
+                  triggerType="rephrase"
+                  question={question}
+                  optionType={questionType}
+                  options={options}
+                  setEditId={setEditId}
+                  onSave={onSave!}
+                  index={index}
+                />
+              )}
             </div>
           </h3>
         </div>
