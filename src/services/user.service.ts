@@ -128,6 +128,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    googleLogin: builder.mutation({
+      query: (body) => ({
+        url: "/social/google/login",
+        method: "POST",
+        body,
+      }),
+    }),
     facebookRegister: builder.mutation({
       query: (body) => ({
         url: "/social/facebook/register",
@@ -152,4 +159,5 @@ export const {
   useUpdateProfileImageMutation,
   useGooleRegisterMutation,
   useFacebookRegisterMutation, 
+  useGoogleLoginMutation,
 } = userApiSlice;

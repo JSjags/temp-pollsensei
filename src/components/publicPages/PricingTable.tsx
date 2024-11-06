@@ -4,7 +4,7 @@ const PricingTable: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8 overflow-x-auto">
       <h2 className="text-2xl font-semibold text-center mb-8">Compare Our Plans</h2>
-      <table className="w-full border-collapse border border-gray-200">
+      <table className="w-full border-collapse border-gray-200">
         <thead>
           <tr className="bg-gray-100">
             <th className="w-1/4 p-4 border border-gray-200 font-semibold text-left"></th>

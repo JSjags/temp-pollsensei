@@ -358,7 +358,7 @@ const RegisterPage = () => {
                 className="size-10"
               />
             </span>
-            <span onClick={facebookSignUp}>
+            {/* <span onClick={facebookSignUp}>
               <Image
                 src={facebook}
                 alt="Facebook"
@@ -366,7 +366,7 @@ const RegisterPage = () => {
                 height={24}
                 className="size-10"
               />
-            </span>
+            </span> */}
           </div>
 
           <div className="flex justify-end items-center mt-4">

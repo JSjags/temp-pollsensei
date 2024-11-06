@@ -85,7 +85,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
     { value: "multiple_choice", label: "Multiple Choice" },
     { value: "single_choice", label: "Single Choice" },
     { value: "long_text", label: "Comment" },
-    { value: "likert_scale", label: "Likert Scale" },
+    // { value: "likert_scale", label: "Likert Scale" },
     { value: "short_text", label: "Short Text" },
     { value: "star_rating", label: "Star Rating" },
     { value: "boolean", label: "Boolean" },
