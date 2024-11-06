@@ -1,4 +1,4 @@
-import { dark_theme_logo } from "@/assets/images";
+import { dark_theme_logo, footer_logo, pollsensei_new_logo } from "@/assets/images";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -13,26 +13,26 @@ type Props = {};
 
 const Footer = (props: Props) => {
   return (
-    <footer className="bg-gray-900 text-white pt-12 pb-32 px-4 sm:px-6 lg:px-8 w-full relative">
+    <footer className="bg-gray-90 text-[#F9F9F9] pt-12 pb-32 px-4 sm:px-6 lg:px-8 w-full relative">
       <div className="container mx-auto w-full">
-        <div className="flex justify-between items-start gap-10 w-full">
+        <div className="md:flex justify-between items-start  w-full">
           <div className="w-full">
             {/* <h3 className="text-xl font-bold mb-4">PollSensei</h3>
-            <p className="text-gray-400 text-sm sm:text-base">
+            <p className="text-black text-sm sm:text-base">
               Revolutionizing surveys with AI-powered insights
             </p> */}
-            <Image src={dark_theme_logo} alt="Logo" />
+            <Image src={pollsensei_new_logo} alt="Logo" />
 
           </div>
 
-          <div className="flex justify-end gap-10 items-start w-full">
+          <div className="flex justify-en gap-10 items-start w-full">
             <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <h4 className="text-lg font-semibold text-[#606060] mb-4">Company</h4>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="/features"
-                    className="text-gray-400 hover:text-white"
+                    className="text-black hover:text-white"
                   >
                     Features
                   </Link>
@@ -40,7 +40,7 @@ const Footer = (props: Props) => {
                 <li>
                   <Link
                     href="/pricing"
-                    className="text-gray-400 hover:text-white"
+                    className="text-black hover:text-white"
                   >
                     Pricing
                   </Link>
@@ -48,7 +48,7 @@ const Footer = (props: Props) => {
                 <li>
                   <Link
                     href="/about-us"
-                    className="text-gray-400 hover:text-white"
+                    className="text-black hover:text-white"
                   >
                     About Us
                   </Link>
@@ -56,20 +56,20 @@ const Footer = (props: Props) => {
                 <li>
                   <Link
                     href="/contact"
-                    className="text-gray-400 hover:text-white"
+                    className="text-black hover:text-white"
                   >
-                    Contact
+                    Benefit
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4">Legal</h4>
+              <h4 className="text-lg font-semibold text-[#606060] mb-4">Legal</h4>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="/terms"
-                    className="text-gray-400 hover:text-white"
+                    className="text-black hover:text-white"
                   >
                     Terms of Service
                   </Link>
@@ -77,7 +77,7 @@ const Footer = (props: Props) => {
                 <li>
                   <Link
                     href="/privacy"
-                    className="text-gray-400 hover:text-white"
+                    className="text-black hover:text-white"
                   >
                     Privacy Policy
                   </Link>
@@ -85,29 +85,37 @@ const Footer = (props: Props) => {
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4">Connect</h4>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <FaTwitter />
+              <h4 className="text-lg font-semibold text-[#606060] mb-4">Socials</h4>
+              <div className="flex flex-col">
+                <a href="#" className="text-black hover:text-white">
+                  {/* <FaTwitter /> */}
+                  Twitter
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <FaFacebook />
+                <a href="#" className="text-black hover:text-white">
+                  {/* <FaFacebook /> */}
+                  Facebook
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <FaLinkedin />
+                <a href="#" className="text-black hover:text-white">
+                  {/* <FaLinkedin /> */}
+                  Linkedin
                 </a>
-                <a href="#" className="text-gray-400 hover:text-white">
-                  <FaInstagram />
+                <a href="#" className="text-black hover:text-white">
+                  {/* <FaInstagram /> */}
+                  Instagram
+                </a>
+                <a href="#" className="text-black hover:text-white">
+                  {/* <FaInstagram /> */}
+                  Contact Us
                 </a>
               </div>
             </div>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+        <div className="mt-8 pt-8 border-t border-gray-700 text-black">
           <p>&copy; 2024 PollSensei. All rights reserved.</p>
         </div>
       </div>
-      <Image src={dark_theme_logo} alt="Logo" className="w-full absolute -bottom-[125px] " />
+      <Image src={footer_logo} alt="Logo" className="w-full absolute -bottom-[125px] " />
     </footer>
   );
 };

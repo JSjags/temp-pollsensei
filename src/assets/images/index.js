@@ -28,7 +28,7 @@ import sparkly_header from './sparkly_header.svg'
 import hero_icon_1 from './hero-icon-1.svg'
 import hero_icon_2 from './hero-icon-2.svg'
 import hero_bg from './hero-bg.svg'
-import landing_img from './landing-img.svg'
+import landing_img from './landing_img.svg'
 import pie_chart from './pie_chart.svg'
 import bar_chart from './bar_chart.svg'
 import chart from './chart.svg'
@@ -38,7 +38,27 @@ import escrotech from './Escro_tech.svg'
 import invEmt from './InvEmt.svg'
 import gidiOaks from './gidiOaks.svg'
 import dark_theme_logo from './logo_white_bg.svg'
-
+import feature_img_1 from './feature_img_1.svg'
+import feature_img_2 from './feature_img_2.svg'
+import feature_img_4 from './feature_img_4.svg'
+import pollsensei from './PollSensei_avatar.svg'
+import built_for_u_1 from './built_for_you.svg'
+import ai_powered from './ai_powered.svg'
+import analysis from './analysis.svg'
+import surveyCreationIcon from './surveyCreationIcon.svg'
+import dataAnalysisIcon from './dataAnalysisIcon.svg'
+import voiceToTextIcon from './voiceToTextIcon.svg'
+import aiReportingIcon from './aiReportingIcon.svg'
+import offlinePrintingIcon from './offlinePrintingIcon.svg'
+import poll_video from './poll_video.svg'
+import integration_1 from './integration_1.svg'
+import integration_2 from './integration_2.svg'
+import integration_3 from './integration_3.svg'
+import get_ios from './get_ios.svg'
+import get_android from './get_android.svg'
+import phone_1 from "./phone_1.svg"
+import phone_2 from "./phone_2.svg"
+import footer_logo from './footer_logo.svg'
 
 
 export {
@@ -81,5 +101,26 @@ export {
   escrotech,
   invEmt,
   gidiOaks,
-  dark_theme_logo
+  dark_theme_logo,
+  feature_img_1,
+  feature_img_2,
+  feature_img_4,
+  pollsensei,
+  built_for_u_1,
+  ai_powered,
+  analysis, 
+  surveyCreationIcon,
+  dataAnalysisIcon,
+  voiceToTextIcon,
+  aiReportingIcon,
+  offlinePrintingIcon,
+  poll_video,
+  integration_1,
+  integration_2,
+  integration_3,
+  get_ios,
+  get_android,
+  phone_1,
+  phone_2,
+  footer_logo
 };
