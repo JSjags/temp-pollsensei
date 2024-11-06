@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Footer from "@/components/blocks/Footer";
+import Pricing from "@/components/publicPages/Pricing";
 
 const PricingPage: React.FC = () => {
   useEffect(() => {
@@ -147,6 +148,16 @@ const PricingPage: React.FC = () => {
             </div>
           ))}
         </div>
+        <section className="p- sm:p- bg-[#F5F5F5] text-black overflow-hidden">
+          <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
+            <h2 className="text-[calc(2rem+8px)] font-medium leading-[60px]">
+              Simple and Flexible Pricing Plans
+            </h2>
+          </div>
+          <div className="px-16 lg:px-24 text-[#99A0AD] mx-auto">
+            <Pricing />
+          </div>
+        </section>
         <div className="mt-16 text-center" data-aos="fade-up">
           <h2 className="text-2xl font-semibold mb-4">
             Not sure which plan is right for you?

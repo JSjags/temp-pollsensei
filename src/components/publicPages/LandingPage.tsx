@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import NavBar from "@/components/blocks/NavBar";
 import Footer from "@/components/blocks/Footer";
 import {
@@ -34,6 +34,7 @@ import { Play } from "lucide-react";
 import FeatureCard2 from "./FeatureCard2";
 import SeePricing from "./SeePricing";
 import GetAppSection from "./GetApp";
+import Subscribe from "../modals/Subsribe";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -68,6 +69,15 @@ const LandingPage: React.FC = () => {
   const testimonialsRef = useRef<HTMLDivElement>(null);
 
   const featureCardY = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const [subscribe, setSubscribe] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSubscribe(true);
+    }, 10000); 
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <main className="min-h-screen">
@@ -84,12 +94,7 @@ const LandingPage: React.FC = () => {
             style={{ y }}
             className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
           >
-            {/* <Image
-            src="/images/abstract-bg.svg"
-            alt="Abstract Background"
-            layout="fill"
-            objectFit="cover"
-          /> */}
+
           </motion.div>
 
           <motion.div
@@ -115,8 +120,7 @@ const LandingPage: React.FC = () => {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xs sm:text-sm md:text-lg mb-12 max-w-3xl mx-auto text-black"
             >
-              {/* Unleash the power of AI-driven surveys. Craft, analyze, and
-              innovate with unparalleled precision. */}
+
               Experience AI-powered surveys that make every response meaningful
               and <br className="hidden lg:block" /> every decision impactful.
             </motion.p>
@@ -353,112 +357,6 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* <section className="py-12 sm:py-24 px-12 lg:px-24 bg-[#F5F5F5] text-black overflow-hidden">
-          <div className="flex flex-col items- text-black mx-">
-            <div className="border-purple-500 border w-24 rounded-full py-2 px-5 text-purple-500">
-              Features
-            </div>
-            <h2 className="text-[calc(2rem+8px)] font-medium leading-[60px]">
-              Lorem ipsum dolor sit.
-            </h2>
-            <p>
-              Lorem ipsum dolor sit amet consectetur. Sed velit varius tempus
-              pellentesque sed <br /> maecenas. Nibh imperdiet sit aliquam elit
-              feugiat.
-            </p>
-          </div>
-
-        
-
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="container mx-auto px-4 sm:px-6 lg:px-8"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12">
-              {[
-                {
-                  icon: <FaRocket />,
-                  title: "AI-Powered Suggestions",
-                  description:
-                    "Never get stuck for a question again. Pollsensei's AI acts as your brainstorming partner, suggesting relevant questions based on your survey goals. This ensures you gather the most valuable information from your audience..",
-                  delay: 0.2,
-                },
-                {
-                  icon: <FaA />,
-                  title: "Intuitive Interface",
-                  description:
-                    "Pollsensei's user-friendly interface lets you create professional surveys in minutes. Simple UI features and clear prompts make crafting questions a breeze, even for beginners with no coding knowledge required.",
-                  delay: 0.4,
-                },
-                {
-                  icon: <FaChartLine />,
-                  title: "Save time and resources",
-                  description:
-                    "Streamline your survey process and free up valuable time. AI automates tedious tasks like question suggestion and data analysis, allowing you to focus on what matters most - interpreting results and making data-driven decisions.",
-                  delay: 0.6,
-                },
-                {
-                  icon: <FaChartLine />,
-                  title: "Sentiment Analysis",
-                  description:
-                    "Look beyond the words and understand the true feelings behind responses. Pollsensei's AI analyzes sentiment, revealing if your audience is happy, frustrated, or neutral, giving you a deeper understanding of their emotional response.",
-                  delay: 0.6,
-                },
-                {
-                  icon: <FaChartLine />,
-                  title: "Actionable Insights",
-                  description:
-                    "Don't get bogged down in raw data. Pollsensei transforms complex information into clear, actionable insights. Get easy-to-understand recommendations that empower you to make informed decisions and take strategic action.",
-                  delay: 0.6,
-                },
-                {
-                  icon: <FaChartLine />,
-                  title: "Reduce bias",
-                  description:
-                    "Unconscious bias can skew your survey results. Pollsensei's AI identifies potential bias within your questions, helping you craft fairer and more accurate surveys that capture genuine thoughts and feelings.",
-                  delay: 0.6,
-                },
-              ].map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: feature.delay }}
-                  whileHover={{ scale: 1.05, rotateY: 15, z: 50 }}
-                  style={{ perspective: 1000 }}
-                >
-                  <motion.div
-                    style={{
-                      y: featureCardY,
-                    }}
-                  >
-                    <FeatureCard
-                      icon={feature.icon}
-                      title={feature.title}
-                      description={feature.description}
-                      delay={feature.delay}
-                      y={featureCardY}
-                    />
-                  </motion.div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </section> */}
-
-        {/* <section className="p- sm:p- bg-[#F5F5F5] text-black overflow-hidden">
-          <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
-            <h2 className="text-[calc(2rem+8px)] font-medium leading-[60px]">
-              Simple and Flexible Pricing Plans
-            </h2>
-          </div>
-          <div className="px-16 lg:px-24 text-[#99A0AD] mx-auto">
-            <Pricing />
-          </div>
-        </section> */}
-
         <section className="py-12 sm:py-24 bg-[#F5F5F5] text-black overflow-hidden">
           <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
@@ -483,127 +381,11 @@ const LandingPage: React.FC = () => {
           {/* <ContactUsCard /> */}
           <GetAppSection />
         </section>
-
-        {/* Testimonials Section */}
-        {/* <section
-          ref={testimonialsRef}
-          className="py-16 sm:py-24 bg-white relative overflow-hidden"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center relative z-10 mb-12 px-4 sm:px-6 lg:px-8"
-          >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 sm:mb-8 text-purple-900">
-              What Our Users Say
-            </h2>
-            <p className="text-lg sm:text-xl mb-8 sm:mb-12 max-w-3xl mx-auto text-gray-700">
-              Discover how PollSensei has transformed survey experiences for
-              businesses worldwide.
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-8 px-4 sm:px-6 lg:px-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, staggerChildren: 0.2 }}
-          >
-            {[
-              {
-                name: "John Doe",
-                role: "Marketing Director",
-                company: "TechCorp",
-                testimonial:
-                  "PollSensei revolutionized our market research. The AI-powered insights are game-changing!",
-              },
-              {
-                name: "Jane Smith",
-                role: "HR Manager",
-                company: "Global Industries",
-                testimonial:
-                  "Employee feedback has never been easier to collect and analyze. PollSensei is a must-have tool.",
-              },
-              {
-                name: "Alex Johnson",
-                role: "Product Owner",
-                company: "InnovateTech",
-                testimonial:
-                  "The intuitive design and powerful analytics have significantly improved our product development process.",
-              },
-              {
-                name: "Sarah Lee",
-                role: "Customer Experience Lead",
-                company: "RetailGiant",
-                testimonial:
-                  "PollSensei helped us uncover crucial customer insights that drove our satisfaction scores through the roof.",
-              },
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                className="bg-purple-100 p-6 rounded-lg shadow-md w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)]"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <p className="text-gray-700 mb-4 text-sm sm:text-base">
-                  &ldquo;{testimonial.testimonial}&rdquo;
-                </p>
-                <p className="font-bold text-purple-900 text-sm sm:text-base">
-                  {testimonial.name}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  {testimonial.role}, {testimonial.company}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </section> */}
-
-        {/* CTA Section */}
-        {/* <section className="py-16 bg-gradient-to-r from-purple-700 to-indigo-800 px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 text-white">
-              Ready to Transform Your Survey Process?
-            </h2>
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <motion.div
-                className="w-full sm:w-auto"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  href="/signup"
-                  className="block w-full sm:w-auto bg-white text-purple-700 font-bold py-3 px-8 rounded-full hover:bg-purple-100 transition duration-300 text-base sm:text-lg shadow-md"
-                >
-                  Join PollSensei
-                </Link>
-              </motion.div>
-              <motion.div
-                className="w-full sm:w-auto"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  href="/login"
-                  className="block w-full sm:w-auto bg-transparent border-2 border-white text-white font-bold py-3 px-8 rounded-full hover:bg-white hover:text-purple-700 transition duration-300 text-base sm:text-lg"
-                >
-                  Log In
-                </Link>
-              </motion.div>
-            </div>
-          </motion.div>
-        </section> */}
-        {/* Footer */}
         <Footer />
       </div>
+      {
+        subscribe && <Subscribe openModal={subscribe} onClose={()=> setSubscribe((prev)=>!prev)} />
+      }
     </main>
   );
 };

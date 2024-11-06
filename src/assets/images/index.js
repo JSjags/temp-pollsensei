@@ -59,6 +59,7 @@ import get_android from './get_android.svg'
 import phone_1 from "./phone_1.svg"
 import phone_2 from "./phone_2.svg"
 import footer_logo from './footer_logo.svg'
+import mail_bag from './Mail.svg'
 
 
 export {
@@ -122,5 +123,6 @@ export {
   get_android,
   phone_1,
   phone_2,
-  footer_logo
+  footer_logo,
+  mail_bag,
 };
