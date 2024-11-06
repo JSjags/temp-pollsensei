@@ -9,6 +9,9 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import Footer from "@/components/blocks/Footer";
 import Pricing from "@/components/publicPages/Pricing";
+import ToggleMonth from "@/components/common/ToggleMonth";
+import SeePricing from "@/components/publicPages/SeePricing";
+import PricingTable from "@/components/publicPages/PricingTable";
 
 const PricingPage: React.FC = () => {
   useEffect(() => {
@@ -67,11 +70,15 @@ const PricingPage: React.FC = () => {
     },
   ];
 
+  const handleToggle = (isMonthly: boolean) => {
+    console.log(isMonthly ? "Monthly Plan" : "Yearly Plan");
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white text-gray-800">
+    <div className="min-h-screen bg-[gradient-to-b from-gray-100 to-white] text-gray-800 overflow-hidden">
       <NavBar />
       <main className="container mx-auto px-4 py-16">
-        <motion.h1
+        {/* <motion.h1
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -87,8 +94,8 @@ const PricingPage: React.FC = () => {
         >
           Unlock the full potential of your surveys with our flexible pricing
           options.
-        </motion.p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        </motion.p> */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {plans.map((plan, index) => (
             <div
               key={index}
@@ -147,14 +154,33 @@ const PricingPage: React.FC = () => {
               </Link>
             </div>
           ))}
-        </div>
-        <section className="p- sm:p- bg-[#F5F5F5] text-black overflow-hidden">
-          <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
-            <h2 className="text-[calc(2rem+8px)] font-medium leading-[60px]">
-              Simple and Flexible Pricing Plans
-            </h2>
+        </div> */}
+        <section className="p- sm:p- text-[#171725] overflow-hidden w-full">
+      
+          <div className="flex flex-col gap-3 justify-center text-center py-2 items-center text-black mx-auto">
+          <motion.p
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-xl text-center mb text-gray-600"
+        >
+       Simple Pricing, no hidden fees
+        </motion.p>
+            {/* <p>Simple Pricing, no hidden fees</p> */}
+            <motion.h2
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-[calc(4rem-4px)] leading-[50px] font-semibold"
+          >
+        
+              Start Small, Scale <br /> as you wish
+      
+
+          </motion.h2>
+            <ToggleMonth onToggle={handleToggle} />
           </div>
-          <div className="px-16 lg:px-24 text-[#99A0AD] mx-auto">
+          <div className="text-[#171725]  mt-12 w-full">
             <Pricing />
           </div>
         </section>
@@ -174,6 +200,13 @@ const PricingPage: React.FC = () => {
           </Link>
         </div>
       </main>
+        <section className=" bg-white text-black overflow-hidden">
+          <PricingTable />
+           </section>
+        <section className=" bg-white text-black overflow-hidden">
+          {/* <ContactUsCard /> */}
+          <SeePricing />
+        </section>
       {/* Footer */}
       <Footer />
     </div>
