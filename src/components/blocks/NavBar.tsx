@@ -29,7 +29,7 @@ const NavBar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          {[ "About Us", "Benefits" , "Features", "Pricing", "FAQs"].map((item) => (
+          {[ "Benefits" , "Features", "Pricing", "Resource Hub", "FAQs"].map((item) => (
             <Link
               key={item}
               href={`/${item.toLowerCase().replace(" ", "-")}`}
