@@ -19,6 +19,7 @@ import StateLoader from "../../components/common/StateLoader";
 import { useGoogleLoginMutation, useLoginUserMutation } from "../../services/user.service";
 import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
+import { dark_theme_logo } from "@/assets/images";
 
 const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
@@ -104,7 +105,7 @@ const LoginPage = () => {
       <div className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8">
         <div className="flex flex-col items-center max-w-md w-full">
           <div className="flex items-center justify-center gap-3 pb-10">
-            <Image src={logo} alt="Logo" width={32} height={32} />
+            <Image src={dark_theme_logo} alt="Logo" width={200} height={32} />
             <h1 className="auth-head">PollSensei</h1>
           </div>
 

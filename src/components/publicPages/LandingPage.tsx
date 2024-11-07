@@ -35,6 +35,7 @@ import FeatureCard2 from "./FeatureCard2";
 import SeePricing from "./SeePricing";
 import GetAppSection from "./GetApp";
 import Subscribe from "../modals/Subsribe";
+import { useRouter } from "next/navigation";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -67,21 +68,72 @@ const LandingPage: React.FC = () => {
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const testimonialsRef = useRef<HTMLDivElement>(null);
-
+  const router = useRouter();
   const featureCardY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const [subscribe, setSubscribe] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSubscribe(true);
-    }, 10000); 
+  const featuresRef = useRef<HTMLDivElement>(null);
+const faqsRef = useRef<HTMLDivElement>(null);
 
-    return () => clearTimeout(timer);
+
+const scrollToSection = (id: string) => {
+  if (id === "features" && featuresRef.current) {
+    featuresRef.current.scrollIntoView({ behavior: "smooth" });
+  } else if (id === "faqs" && faqsRef.current) {
+    faqsRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+};
+
+
+// Scroll to the section based on query parameter
+useEffect(() => {
+  const url = new URL(window.location.href);
+  const section = url.searchParams.get("section");
+  
+  if (section === "features" && featuresRef.current) {
+    featuresRef.current.scrollIntoView({ behavior: "smooth" });
+  } else if (section === "faqs" && faqsRef.current) {
+    faqsRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+}, []);
+
+
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setSubscribe(true);
+  //   }, 10000); 
+
+  //   return () => clearTimeout(timer);
+  // }, []);
+  
+
+  useEffect(() => {
+    // Helper function to check if it's a new day since the last modal display
+    const isNewDay = () => {
+      const lastShown = localStorage.getItem('modalLastShown');
+      if (!lastShown) return true;
+
+      const lastShownDate = new Date(lastShown);
+      const currentDate = new Date();
+      return (
+        lastShownDate.getDate() !== currentDate.getDate() ||
+        lastShownDate.getMonth() !== currentDate.getMonth() ||
+        lastShownDate.getFullYear() !== currentDate.getFullYear()
+      );
+    };
+
+    if (isNewDay()) {
+      const timer = setTimeout(() => {
+        setSubscribe(true);
+        localStorage.setItem('modalLastShown', new Date().toISOString());
+      }, 10000); 
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   return (
     <main className="min-h-screen">
-      <NavBar />
+      <NavBar  scrollToSection={scrollToSection} />
       <div className="min-h-screen dark:bg-gradient-to-br from-[#1a0b2e] to-[#4a2075] text-white overflow-hidden">
         {/* Hero Section */}
         <section className="relative min-h-screen flex-col gap-10 flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 hero_bg ">
@@ -203,8 +255,8 @@ const LandingPage: React.FC = () => {
           <MarqueSlider />
         </section>
 
-        {/* Features Section */}
-        <section className="pb-12 sm:pb-24 lg:px-24 bg-white overflow-hidden">
+  
+        <section id="" className="pb-12 sm:pb-24 lg:px-24 bg-white overflow-hidden">
           <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
               Built for you
@@ -272,7 +324,8 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
         </section>
-        <section className="py-12 sm:py-24 px-12 lg:px-24 bg-[#ffffff] text-black overflow-hidden">
+              {/* Features Section */}
+        <section id="features" ref={featuresRef} className="py-12 sm:py-24 px-12 lg:px-24 bg-[#ffffff] text-black overflow-hidden">
           <div className="flex flex-col gap-3 justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
               Key Features
@@ -357,7 +410,8 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="py-12 sm:py-24 bg-[#F5F5F5] text-black overflow-hidden">
+      {/* FAQs Section */}
+        <section id="faqs" ref={faqsRef} className="py-12 sm:py-24 bg-[#F5F5F5] text-black overflow-hidden">
           <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
               FAQs

@@ -27,15 +27,14 @@ const DashboardPage = () => {
   const { data: surveyLeaderboard } = useSurveyLeaderboardQuery("year");
   const { data: surveys } = useSurveyQuery("year");
 
-  console.log(surveyCount);
-  console.log(surveyLeaderboard);
+  console.log(item);
   return (
     <>
       <div className="container mx-auto px-4">
         <div className="dashboard-content flex flex-col justify-center gap-6 w-full pb-5">
           <div className="flex w-full mt-6 gap-4 flex-col lg:flex-row">
             <div className="chart w-full h-[300px] sm:h-[321px] radius flex justify-center">
-              <LineChart data={item?.data.data} xKey="date" yKey="value" />
+              <LineChart data={item?.data.data} xKey="date" yKey="response_count" />
             </div>
             <div className="stat w-full lg:max-w-[305px] flex flex-col gap-4">
               <div className="radius w-full h-auto sm:h-[211px] p-4">

@@ -1,7 +1,10 @@
+import { useGetPlanQuery } from "@/services/subscribtion.service";
 import Link from "next/link";
 import React from "react";
 
 const Pricing = () => {
+  const { data, isLoading } =useGetPlanQuery(null);
+  console.log(data)
   const plans = [
     {
       name: "Basic",

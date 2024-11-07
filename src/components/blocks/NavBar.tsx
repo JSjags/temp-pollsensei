@@ -7,15 +7,46 @@ import { useIsLoggedIn } from "@/lib/helpers";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { pollsensei_new_logo } from "@/assets/images";
+import { usePathname, useRouter } from "next/navigation";
 // import { ThemeToggle } from "../theme-toggle";
 
-const NavBar = () => {
+
+const NavBar = ({ scrollToSection }: { scrollToSection: (id: string) => void }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isLoggedIn } = useIsLoggedIn({ message: "" });
   const state = useSelector((state: RootState) => state.user);
-
+  const pathname = usePathname()
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const router = useRouter();
+
+  // const handleLinkClick = (item: string) => {
+  //   if (item === "Features" || item === "FAQs") {
+  //     scrollToSection(item.toLowerCase());
+  //   } else {
+  //     router.push(`/${item.toLowerCase().replace(" ", "-")}`);
+  //   }
+  // };
+
+  const handleLinkClick = (item: string) => {
+    const isLandingPage = pathname === "/"; 
+
+    if (item === "Features" || item === "FAQs") {
+      const sectionId = item.toLowerCase();
+
+      if (isLandingPage) {
+        // If already on the landing page, scroll to the section
+        scrollToSection(sectionId);
+      } else {
+        // If not on the landing page, navigate to the landing page with a query parameter
+        router.push(`/?section=${sectionId}`);
+      }
+    } else {
+      // For other links, navigate normally
+      router.push(`/${item.toLowerCase().replace(" ", "-")}`);
+    }
   };
 
   return (
@@ -28,7 +59,7 @@ const NavBar = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
+        {/* <div className="hidden md:flex items-center space-x-8">
           {[ "Benefits" , "Features", "Pricing", "Resource Hub", "FAQs"].map((item) => (
             <Link
               key={item}
@@ -39,7 +70,20 @@ const NavBar = () => {
               <span className="absolute left-0 bottom-0 w-full h-0.5 bg-[#5B03B2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
             </Link>
           ))}
-        </div>
+        </div> */}
+
+<div className="hidden md:flex items-center space-x-8">
+            {["Benefits", "Features", "Pricing", "Resource Hub", "FAQs"].map((item) => (
+              <span
+                key={item}
+                onClick={() => handleLinkClick(item)}
+                className="text-gray-600 hover:text-[#5B03B2] relative group cursor-pointer"
+              >
+                {item}
+                <span className="absolute left-0 bottom-0 w-full h-0.5 bg-[#5B03B2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+              </span>
+            ))}
+          </div>
 
         </div>
 

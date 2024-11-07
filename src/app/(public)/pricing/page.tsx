@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import NavBar from "@/components/blocks/NavBar";
 import { FaRocket, FaChartLine, FaBriefcase } from "react-icons/fa";
@@ -74,9 +74,21 @@ const PricingPage: React.FC = () => {
     console.log(isMonthly ? "Monthly Plan" : "Yearly Plan");
   };
 
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const faqsRef = useRef<HTMLDivElement>(null);
+
+
+  const scrollToSection = (id: string) => {
+    if (id === "features" && featuresRef.current) {
+      featuresRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (id === "faqs" && faqsRef.current) {
+      faqsRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[gradient-to-b from-gray-100 to-white] text-gray-800 overflow-hidden">
-      <NavBar />
+      <NavBar scrollToSection={scrollToSection} />
       <main className="container mx-auto px-4 py-16">
         {/* <motion.h1
           initial={{ opacity: 0, y: -50 }}
