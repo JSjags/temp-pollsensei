@@ -303,7 +303,7 @@ const PublicResponse = () => {
                     <StarRatingQuestion
                       key={index}
                       question={item.question}
-                      maxRating={5}
+                      // maxRating={5}
                       questionType={item.question_type}
                     />
                   ) : null}

@@ -14,6 +14,8 @@ import {
 import { userPlaceholder } from "../../assets/images";
 import TextArea from "../../components/ui/TextArea";
 import InputEdit from "../../components/ui/InputEdit";
+import { useDispatch } from "react-redux";
+import apiSlice from "@/services/config/apiSlice";
 
 interface UserData {
   name: string;
@@ -25,6 +27,7 @@ interface UserData {
 }
 
 const ProfilePage: React.FC = () => {
+  const dispatch = useDispatch();
   const { data, refetch } = useUserProfileQuery({});
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData>({
@@ -79,6 +82,8 @@ const ProfilePage: React.FC = () => {
       toast.success("User profile updated successfully");
       toggleEdit();
       refetch();
+      // Invalidate all queries and mutations in the cache
+      dispatch(apiSlice.util.resetApiState());
     } catch (err: any) {
       toast.error(
         "Failed to update user " + (err?.data?.message || err.message)
@@ -120,7 +125,7 @@ const ProfilePage: React.FC = () => {
       {!editProfile ? (
         <>
           <div className="flex justify-between items-center">
-            <div className="flex gap-3 items-center">
+            <div className="flex flex-1 gap-3 items-center size-28">
               <Image
                 src={
                   typeof profileImage === "string"
@@ -130,7 +135,7 @@ const ProfilePage: React.FC = () => {
                 alt="Profile image"
                 width={107}
                 height={107}
-                className="rounded-full"
+                className="rounded-full size-28 object-cover"
               />
               <div className="flex flex-col gap-2">
                 <p className="text-[#333333] font-semibold">Profile picture</p>

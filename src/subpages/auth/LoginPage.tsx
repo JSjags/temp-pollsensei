@@ -1,5 +1,6 @@
 "use client";
 
+import { useGoogleLogin } from "@react-oauth/google";
 import { Form, Field } from "react-final-form";
 import validate from "validate.js";
 import Link from "next/link";
@@ -15,9 +16,13 @@ import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useState } from "react";
 import StateLoader from "../../components/common/StateLoader";
-import { useLoginUserMutation } from "../../services/user.service";
+import { useGoogleLoginMutation, useLoginUserMutation } from "../../services/user.service";
 import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
+
+const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
+console.log(Client_Id);
+
 
 const constraints = {
   email: {
@@ -38,6 +43,8 @@ const LoginPage = () => {
   const [loginState, setLoginState] = useState(true);
   const [state, setState] = useState(false);
   const [eyeState, setEyeState] = useState(false);
+  const [googleLogin, { data: register, error: registerError }] =
+  useGoogleLoginMutation();
 
   const onSubmit = async (values: { email: string; password: string }) => {
     try {
@@ -62,6 +69,28 @@ const LoginPage = () => {
     e.preventDefault();
     setEyeState((prev) => !prev);
   };
+
+
+  const googleSignUp = useGoogleLogin({
+    onSuccess: async (response) => {
+      const authCode = response.code;
+      const requestData = {
+        code: authCode,
+      };
+
+      try {
+        await googleLogin(requestData).unwrap();
+        toast.success("Log in success");
+      } catch (err: any) {
+        toast.error(
+          "Failed to log in user " + (err?.data?.message || err.message)
+        );
+        console.error("Failed to sign in user", err);
+      }
+    },
+    onError: () => console.log("Google Sign-In Failed"),
+    flow: "auth-code",
+  });
 
   console.log(data);
   return (
@@ -169,7 +198,7 @@ const LoginPage = () => {
             </div>
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5">
-              <Link href="">
+              <span onClick={googleSignUp} >
                 <Image
                   src={google}
                   alt="Google"
@@ -177,8 +206,8 @@ const LoginPage = () => {
                   height={24}
                   className="size-10"
                 />
-              </Link>
-              <Link href="">
+              </span>
+              {/* <Link href="">
                 <Image
                   src={facebook}
                   alt="Facebook"
@@ -186,7 +215,7 @@ const LoginPage = () => {
                   height={24}
                   className="size-10"
                 />
-              </Link>
+              </Link> */}
             </div>
 
             <div className="flex justify-end items-center mt-4">

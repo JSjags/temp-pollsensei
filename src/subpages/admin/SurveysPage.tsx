@@ -19,10 +19,12 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getLatestSurveyMilestone, getSingleSurvey } from "@/services/analysis";
 import { generateMilestoneStage } from "@/lib/utils";
+import SurveyWelcomeAlertDialog from "@/components/survey/SurveyWelcomeAlertDialog";
 
 const SurveysPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showModal, setShowModal] = useState(true);
   const [showMilestones, setShowMilestones] = useState(true);
   const { data, isLoading } = useFetchSurveysQuery(currentPage);
   const router = useRouter();
@@ -46,6 +48,8 @@ const SurveysPage = () => {
       getSingleSurvey({ surveyId: latestMilestone.data?.survey_id! }),
     enabled: latestMilestone.isSuccess,
   });
+
+  console.log(latestMilestone);
 
   return (
     <div>
@@ -82,7 +86,13 @@ const SurveysPage = () => {
       {!isLoading && showMilestones && (
         // {data?.data.total === 0 && !isLoading && showMilestones && (
         // <SurveyEmptyPage />
+
         <div className="bg-[url(/assets/milestones-bg.svg)] w-full h-[calc(100vh-72px)] lg:h-[calc(100vh-150px)] mx-auto">
+          <SurveyWelcomeAlertDialog
+            showModal={showModal}
+            setShowModal={setShowModal}
+            type="b"
+          />
           <AnimatePresence>
             {!isLoading && (
               // {data?.data.total === 0 && !isLoading && (

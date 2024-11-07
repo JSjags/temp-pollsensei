@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AOSInit } from "@/components/ui/Aos";
 import { TanstackProvider } from "@/providers/TanstackProvider";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
   return (
     <html lang="en">
       <AOSInit />
@@ -34,10 +36,14 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <TanstackProvider>
-          <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
-          <ReduxContext>{children}</ReduxContext>
-        </TanstackProvider>
+        <GoogleOAuthProvider
+          clientId={googleClientId}
+        >
+          <TanstackProvider>
+            <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
+            <ReduxContext>{children}</ReduxContext>
+          </TanstackProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

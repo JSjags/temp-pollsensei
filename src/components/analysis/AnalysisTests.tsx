@@ -339,7 +339,7 @@ export default function DragAndDropPage() {
         const formattedData: Test[] = [];
         const allowedTests = [
           "Wilcoxon Signed-Rank Test",
-          "Kruskal-Wallis Test",
+          // "Kruskal-Wallis Test",
           "Sentiment Analysis",
           "Thematic Analysis",
           "Word Frequency Analysis",
@@ -375,7 +375,7 @@ export default function DragAndDropPage() {
       console.log(createTestsQuery.data);
       const allowedTests = [
         "Wilcoxon Signed-Rank Test",
-        "Kruskal-Wallis Test",
+        // "Kruskal-Wallis Test",
         "Sentiment Analysis",
         "Thematic Analysis",
         "Word Frequency Analysis",
