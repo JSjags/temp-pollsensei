@@ -66,9 +66,13 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({onClick, _id}) => {
 
   return (
     <div className="p-6 border border-gray-300 rounded-lg max-w-md mx-auto bg-white shadow-md">
+      {
+        onClick && (
       <div className="flex justify-end" onClick={onClick}>
         <FaTimes className="w-4 h-4 bg-[#E5E5E5] rounded-full" />
       </div>
+        )
+      }
       <h3 className="text-xl font-semibold mb-4">Share Survey</h3>
       <div className="flex flex-col gap-2 justify-start">
         <p className='text-[#838383] text-sm'>Copy Link</p>

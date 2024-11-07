@@ -11,7 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 // import { ThemeToggle } from "../theme-toggle";
 
 
-const NavBar = ({ scrollToSection }: { scrollToSection: (id: string) => void }) => {
+const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isLoggedIn } = useIsLoggedIn({ message: "" });
   const state = useSelector((state: RootState) => state.user);
@@ -38,7 +38,7 @@ const NavBar = ({ scrollToSection }: { scrollToSection: (id: string) => void }) 
 
       if (isLandingPage) {
         // If already on the landing page, scroll to the section
-        scrollToSection(sectionId);
+        scrollToSection ?  scrollToSection(sectionId) : null;
       } else {
         // If not on the landing page, navigate to the landing page with a query parameter
         router.push(`/?section=${sectionId}`);
@@ -54,7 +54,7 @@ const NavBar = ({ scrollToSection }: { scrollToSection: (id: string) => void }) 
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex gap-5 items-center">
         {/* Logo */}
-        <Link href={"/dashboard"} className="flex items-center gap-2 cursor-pointer lg:mr-16">
+        <Link href={"/"} className="flex items-center gap-2 cursor-pointer lg:mr-16">
           <Image src={pollsensei_new_logo} alt="Logo" className="h-8 w-auto" />
         </Link>
 
