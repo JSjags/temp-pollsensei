@@ -49,12 +49,12 @@ const ValidateResponse = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [submitResponse, { data, isLoading, isSuccess, isError, error }] =
     useSubmitResponseMutation();
-  const [respondent_name, setRespondent_name] = useState("" || "No provided");
+  const [respondent_name, setRespondent_name] = useState<string>("No provided");
   const [respondent_phone, setRespondent_phone] = useState("");
   const [respondent_country, setRespondent_country] = useState("");
-  const [respondent_email, setRespondent_email] = useState(
-    "" || "example@gmail.com"
-  );
+  // const [respondent_email, setRespondent_email] = useState( "" || "example@gmail.com");
+  const [respondent_email, setRespondent_email] = useState<string>("example@gmail.com");
+
   const [filteredData, setFilteredData] = useState([]);
 
   console.log(OCRresponses);
@@ -291,7 +291,7 @@ const ValidateResponse = () => {
                 ) : item.question_type === "star_rating" ? (
                   <StarRatingQuestion
                     question={item.question}
-                    maxRating={5}
+                    // maxRating={5}
                     questionType={item.question_type}
                     // EditQuestion={() => EditQuestion(index)}
                     // DeleteQuestion={()=>handleDeleteQuestion(index)}

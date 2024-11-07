@@ -564,7 +564,7 @@ const EditSurvey = () => {
                     ) : item.question_type === "star_rating" ? (
                       <StarRatingQuestion
                         question={item.question}
-                        maxRating={5}
+                        // maxRating={5}
                         questionType={item.question_type}
                         EditQuestion={() => EditQuestion(index)}
                         DeleteQuestion={() => handleDeleteQuestion(index)}

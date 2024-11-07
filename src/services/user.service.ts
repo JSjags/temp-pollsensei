@@ -121,6 +121,28 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    gooleRegister: builder.mutation({
+      query: (body) => ({
+        url: "/social/google/register",
+        method: "POST",
+        body,
+      }),
+    }),
+    googleLogin: builder.mutation({
+      query: (body) => ({
+        url: "/social/google/login",
+        method: "POST",
+        body,
+      }),
+    }),
+    facebookRegister: builder.mutation({
+      query: (body) => ({
+        url: "/social/facebook/register",
+        method: "POST",
+        body,
+      }),
+    }),
+
   }),
 });
 
@@ -135,4 +157,7 @@ export const {
   useUpdateUserProfileMutation,
   useUpdateUserPasswordMutation,
   useUpdateProfileImageMutation,
+  useGooleRegisterMutation,
+  useFacebookRegisterMutation, 
+  useGoogleLoginMutation,
 } = userApiSlice;

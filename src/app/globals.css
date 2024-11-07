@@ -463,3 +463,11 @@ display: none !important;
 .select-container .select-name__indicator-separator{
   display: none !important;
   }
+
+
+  .hero_bg{
+    background: url('../assets/images/hero-bg.svg');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+  }

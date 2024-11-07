@@ -83,10 +83,12 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 
   const selectOptions = [
     { value: "multiple_choice", label: "Multiple Choice" },
+    { value: "single_choice", label: "Single Choice" },
     { value: "long_text", label: "Comment" },
     // { value: "likert_scale", label: "Likert Scale" },
-    // { value: "linear_scale", label: "Linear Scale" },
+    { value: "short_text", label: "Short Text" },
     { value: "star_rating", label: "Star Rating" },
+    { value: "boolean", label: "Boolean" },
     // { value: "matrix_checkbox", label: "Matrix" },
   ];
 
@@ -137,14 +139,16 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
                 )}
               </div>
             ))}
-            {questionType === "multiple_choice" && (
+            {questionType === "multiple_choice" || 
+            questionType === "likert_scale" || 
+            questionType === "boolean" ? (
               <button
                 onClick={handleAddOption}
                 className="text-blue-500 mt-2 border py-2 px-4 rounded-full text-start"
               >
                 Add Option
               </button>
-            )}
+            ) : ''}
           </div>
         )}
 

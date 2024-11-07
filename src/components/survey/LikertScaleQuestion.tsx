@@ -3,6 +3,8 @@ import Image from "next/image";
 import React from "react";
 import { usePathname } from "next/navigation";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { Check } from "lucide-react";
+import { BsExclamation } from "react-icons/bs";
 
 interface LikertScaleQuestionProps {
   question: string;
@@ -12,6 +14,10 @@ interface LikertScaleQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index?: number;
+  canUseAI?: boolean;
+  status?: string;
+  is_required?: boolean;
+  setIsRequired?: (value: boolean) => void;
   setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   onSave?: (
     updatedQuestion: string,
@@ -31,6 +37,10 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
   DeleteQuestion,
   setEditId,
   onSave,
+  canUseAI = false,
+  status,
+  is_required,
+  setIsRequired,
 }) => {
   const pathname = usePathname();
 
@@ -40,22 +50,44 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
     }
   };
 
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 mr-3">
+            <Check strokeWidth={1} className="text-xs text-white" />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
+            <BsExclamation />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3">
       <Image
         src={draggable}
         alt="draggable icon"
         className={
-          pathname === "/surveys/edit-survey" ||
-          pathname === "surveys/preview-survey"
-            ? "invisible"
-            : "visible"
+          pathname === "/surveys/create-survey" ? "visible" : "invisible"
         }
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
-          <h3 className="group text-lg font-semibold text-start">
-            {question}
+          <h3 className="group flex text-lg font-semibold text-start">
+          <p>
+                <span>{index}. </span> {question}
+                {is_required === true && (
+                  <span className="text-2xl ml-2 text-red-500">*</span>
+                )}
+              </p>
             <PollsenseiTriggerButton
               key={index}
               imageUrl={stars}
@@ -70,9 +102,9 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
               index={index!}
             />
           </h3>
-          {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>}
+          {/* {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>} */}
         </div>
-        <div className="flex justify-between my-2">
+        <div className="flex justify- gap-5 my-2">
           {options?.map((option, index) => (
             <div key={index} className="flex flex-col items-center">
               <input
@@ -104,7 +136,18 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
             </button>
           </div>
         )}
+         <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ? (
+            ""
+          ) : (
+            <p>{questionType === "likert_scale" ? "Likert Scale" : ""}</p>
+          )}
+        </div>
       </div>
+      {pathname.includes("survey-reponse-upload") && status && (
+        <div>{getStatus(status)}</div>
+      )}
     </div>
   );
 };
