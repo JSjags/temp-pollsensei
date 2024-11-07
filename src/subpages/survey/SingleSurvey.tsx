@@ -21,21 +21,22 @@ export default function SingleSurvey() {
   });
 
   return (
-    <>
+    <div className="bg-[url(/assets/milestones-bg.svg)]">
       {surveyMilestone.isLoading && (
         <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
           <Loading />
         </div>
       )}
-      {console.log(surveyMilestone.data?.current_stage)}
       {surveyMilestone.isSuccess && surveyMilestone.data?.current_stage && (
         <Milestones
           stage={generateMilestoneStage(
             surveyMilestone.data?.current_stage ?? "0"
           )}
           surveyId={String(params.id)}
+          generated_by={surveyMilestone.data?.generated_by}
+          survey_type={surveyMilestone.data?.survey_type}
         />
       )}
-    </>
+    </div>
   );
 }
