@@ -246,4 +246,6 @@ export const {
   useDeleteSurveyResponseMutation,
   useDownloadAllResponseQuery,
   useDownloadSingleResponseQuery,
+  useLazyDownloadAllResponseQuery,
+  useLazyDownloadSingleResponseQuery
 } = surveyApiSlice;

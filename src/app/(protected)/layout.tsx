@@ -12,7 +12,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PrivateRoute>
+    <PrivateRoute> 
       <SenseiProvider>
         <div className="dashboard-layout pb-16 md:pb-0">
           <Navbar />
