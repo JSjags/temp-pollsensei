@@ -33,13 +33,32 @@ interface PasswordChangeModalProps {
 const AccountSecurityPage = () => {
   const router = useRouter();
   const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
+  const [getCode, setGetCode] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  const resetCodeQuery = useQuery({
+    queryKey: ["reset-code"],
+    queryFn: getPasswordResetCode,
+    enabled: getCode,
+  });
+
+  const handlePasswordReset = () => {
+    setGetCode(true);
+  };
+
+  useEffect(() => {
+    if (resetCodeQuery.isSuccess) {
+      toast.success("Password reset code sent to your email.");
+      setGetCode(false);
+      setShowPasswordModal(true);
+    }
+  }, [resetCodeQuery.isSuccess]);
 
   return (
     <div className="px-[2rem] lg:px-[4.4rem] flex flex-col py-[3.88rem]">
       <div className="lg:flex justify-between items-center pb-5">
         <div className="flex flex-col lg:w-2/3">
-          <h3 className="text-[calc(1rem+4px)] font-bold ">Change Password
-          </h3>
+          <h3 className="text-[calc(1rem+4px)] font-bold ">Change Password</h3>
           <p className="text-[#898989] text-[1rem]">
             Regularly updating your password helps protect your account from
             unauthorized access and enhances overall security.
@@ -69,11 +88,11 @@ const AccountSecurityPage = () => {
             unauthorized access and enhances overall security.
           </p>
         </div>
-        {/* <Switch
+        <Switch
           isChecked={isTwoFactorEnabled}
           onClick={() => setIsTwoFactorEnabled(!isTwoFactorEnabled)}
         />
-      </div>
+      </div> */}
     </div>
   );
 };
