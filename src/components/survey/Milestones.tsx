@@ -45,10 +45,14 @@ export default function Milestones({
   stage,
   onClick,
   surveyId = "",
+  generated_by,
+  survey_type,
 }: {
   stage: string;
   onClick?: () => void;
   surveyId?: string;
+  generated_by?: "manually" | "ai";
+  survey_type?: "both" | "qualitative" | "quantitative";
 }) {
   const router = useRouter();
   const [currentStage] = useState(parseInt(stage) + 1);
@@ -74,6 +78,9 @@ export default function Milestones({
       position: { x: 200, y: 34 },
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
+      style: {
+        strokeDasharray: currentStage <= 2 ? 10 : 0,
+      },
     },
     {
       id: "3",
@@ -93,6 +100,9 @@ export default function Milestones({
       position: { x: 1250, y: 255 },
       sourcePosition: Position.Left,
       targetPosition: Position.Top,
+      style: {
+        strokeDasharray: currentStage <= 4 ? 10 : 0,
+      },
     },
     {
       id: "5",
@@ -112,6 +122,9 @@ export default function Milestones({
       position: { x: 0, y: 500 },
       sourcePosition: Position.Right,
       targetPosition: Position.Top,
+      style: {
+        strokeDasharray: currentStage <= 6 ? 10 : 0,
+      },
     },
     {
       id: "7",
@@ -461,7 +474,7 @@ export default function Milestones({
           // alert(label);
         }
         if (label === "Quantitative Analysis") {
-          router.push("/surveys/create-survey");
+          // router.push("/surveys/create-survey");
           // alert(label);
         }
       }
@@ -483,7 +496,12 @@ export default function Milestones({
       <div
         style={{
           border: data.options ? "2px dashed #EB06AB" : "",
-          borderStyle: currentStage >= parseInt(id) ? "solid" : "dashed",
+          borderStyle:
+            currentStage === parseInt(id)
+              ? "dashed"
+              : currentStage >= parseInt(id)
+              ? "dashed"
+              : "solid",
           borderRadius: "8px",
           textAlign: "center",
           cursor: "pointer",
@@ -506,9 +524,12 @@ export default function Milestones({
             handleLabelPosition(data.label)
           )}
           onClick={() =>
-            currentStage === parseInt(id)
-              ? handleAction(id, data.label)
-              : () => {}
+            // currentStage === parseInt(id)
+            //   ? handleAction(id, data.label)
+            //   : () => {}
+            {
+              if (Number(id) <= Number(stage)) handleAction(id, data.label);
+            }
           }
         >
           <span
@@ -527,9 +548,12 @@ export default function Milestones({
             }}
             className="rounded-full"
             onClick={() =>
-              currentStage === parseInt(id)
-                ? handleAction(id, data.label)
-                : () => {}
+              // currentStage === parseInt(id)
+              //   ? handleAction(id, data.label)
+              //   : () => {}
+              {
+                if (Number(id) <= Number(stage)) handleAction(id, data.label);
+              }
             }
           >
             {data.icon ? (
@@ -584,11 +608,36 @@ export default function Milestones({
                 padding: 5,
                 cursor: "pointer",
               }}
-              className="border-2 border-[#CC9BFD] hover:border-[#9C27B0] hover:bg-[#9C27B010] transition-all bg-white h-[60px] min-w-[240px] rounded-lg gap-4 flex justify-center items-center"
+              className={cn(
+                "border-2 border-[#CC9BFD] hover:border-[#9C27B0] hover:bg-[#9C27B010] transition-all bg-white h-[60px] min-w-[240px] rounded-lg gap-4 flex justify-center items-center",
+                Number(stage) >= 2 &&
+                  generated_by &&
+                  option.toLowerCase().includes(generated_by?.toLowerCase()) &&
+                  "border-[#9C27B0] border-[3px]",
+                Number(stage) >= 5 &&
+                  data.label.toLowerCase() === "analyze survey" &&
+                  survey_type &&
+                  (survey_type.toLowerCase() === "both" ||
+                    option
+                      .toLowerCase()
+                      .includes(survey_type?.toLowerCase())) &&
+                  "border-[#9C27B0] border-[3px] cursor-not-allowed hover:bg-white hover:border-[#9C27B0]",
+                option.toLowerCase().includes("ai") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]",
+                option.toLowerCase().includes("manual") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]",
+                option.toLowerCase().includes("respondents") &&
+                  "cursor-not-allowed opacity-35 hover:border-[#CC9BFD] hover:bg-white",
+                option.toLowerCase().includes("qualitative") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]",
+                option.toLowerCase().includes("quantitative") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]"
+              )}
               onClick={() => {
-                currentStage === parseInt(id)
-                  ? handleAction(id, option)
-                  : () => {};
+                // currentStage === parseInt(id)
+                //   ? handleAction(id, option)
+                //   : () => {};
+                if (Number(id) - 1 <= Number(stage)) handleAction(id, option);
               }}
             >
               {handleLabelIcon(id, option)}

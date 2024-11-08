@@ -201,7 +201,7 @@ const Navbar = () => {
             </DropdownMenu>
           </div>
 
-          <div className="lg:hidden flex items-center gap-3">
+          {/* <div className="lg:hidden flex items-center gap-3">
             <div
               // onClick={() => {
               //   alert("Clicked");
@@ -224,7 +224,7 @@ const Navbar = () => {
             >
               {generateInitials((user as any)?.name ?? "")}
             </div>
-          </div>
+          </div> */}
         </header>
       </div>
 

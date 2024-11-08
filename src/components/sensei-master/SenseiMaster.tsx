@@ -341,7 +341,7 @@
 
 // export default SenseiMaster;
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Draggable from "react-draggable";
 import { useRive } from "@rive-app/react-canvas";
 import { Button } from "@/components/ui/button";
@@ -400,6 +400,8 @@ const SenseiMaster = ({
     return state.senseiMaster || {};
   });
 
+  const [showSensei, setShowSensei] = useState(false);
+
   const { rive, RiveComponent } = useRive({
     src: "/assets/rive/pollsensei_master.riv",
     stateMachines: "sensei-states",
@@ -409,14 +411,14 @@ const SenseiMaster = ({
     },
   });
 
-  const rightBound = useMemo(
-    () => windowWidth - (isCollapsed ? 96 : 400),
-    [windowWidth, isCollapsed]
-  );
-  const bottomBound = useMemo(
-    () => windowHeight - (isCollapsed ? 226 : 600),
-    [windowHeight, isCollapsed]
-  );
+  // const rightBound = useMemo(
+  //   () => windowWidth - (isCollapsed ? 96 : 400),
+  //   [windowWidth, isCollapsed]
+  // );
+  // const bottomBound = useMemo(
+  //   () => windowHeight - (isCollapsed ? 226 : 600),
+  //   [windowHeight, isCollapsed]
+  // );
 
   const handleMouseDown = (event: React.MouseEvent) => {
     dispatch(setStartPos({ x: event.clientX, y: event.clientY }));
@@ -565,9 +567,53 @@ const SenseiMaster = ({
     }
   }, [count, rive]);
 
-  return (
+  useEffect(() => {
+    let timeout;
+
+    timeout = setTimeout(() => {
+      setShowSensei(true);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+  // Update window dimensions on resize
+  useEffect(() => {
+    const handleResize = () => {
+      dispatch(setWindowWidth(window.innerWidth));
+      dispatch(setWindowHeight(window.innerHeight));
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial call
+    return () => window.removeEventListener("resize", handleResize);
+  }, [dispatch]);
+
+  // Right and bottom bounds based on window size and component size
+  const rightBound = useMemo(
+    () => windowWidth - (isCollapsed ? 96 : 400),
+    [windowWidth, isCollapsed]
+  );
+  const bottomBound = useMemo(
+    () => windowHeight - (isCollapsed ? 226 : 600),
+    [windowHeight, isCollapsed]
+  );
+  const x = useMemo(
+    () => windowWidth - (windowWidth <= 1024 ? 100 : 530),
+    [windowWidth, window.innerWidth, isCollapsed]
+  );
+  const y = useMemo(
+    () => windowHeight - 500,
+    [windowHeight, window.innerWidth, isCollapsed]
+  );
+
+  return showSensei ? (
     <Draggable
-    // Add your drag logic here
+      defaultPosition={{
+        x,
+        y,
+      }}
+      bounds={{ top: 0, left: 0, right: rightBound, bottom: bottomBound }}
     >
       <div
         className={cn(
@@ -589,7 +635,7 @@ const SenseiMaster = ({
             )}
           >
             <RiveComponent
-              className="absolute inset-0 size-[90%] object-cover rounded-full cursor-pointer flex justify-center items-center mx-auto"
+              className="absolute inset-0 size-[100%] object-cover rounded-full cursor-pointer flex justify-center items-center mx-auto"
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -631,7 +677,7 @@ const SenseiMaster = ({
         </div>
       </div>
     </Draggable>
-  );
+  ) : null;
 };
 
 export default SenseiMaster;

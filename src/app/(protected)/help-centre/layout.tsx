@@ -22,7 +22,7 @@ export default function Component({ children }: { children: ReactNode }) {
               <h1 className="text-3xl md:text-4xl font-extrabold text-white text-center mb-6 drop-shadow-lg">
                 How can we help you?
               </h1>
-              <div className="relative max-w-[424px] mx-auto">
+              {/* <div className="relative max-w-[424px] mx-auto">
                 <Input
                   className="w-full pl-4 pr-10 py-2 rounded-full bg-white text-black ring-offset-purple-500 outline-purple-500 focus-visible:outline-purple-500"
                   placeholder="Search"
@@ -44,7 +44,7 @@ export default function Component({ children }: { children: ReactNode }) {
                     />
                   </svg>
                 </div>
-              </div>
+              </div> */}
             </div>
           </header>
         </Slide>
