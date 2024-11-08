@@ -107,15 +107,33 @@ const RegisterPage = () => {
     return validate(values, constraints) || {};
   };
 
+  // const googleSignUp = useGoogleLogin({
+  //   onSuccess: async (response) => {
+  //     const authCode = response.code;
+  //     const requestData = {
+  //       code: authCode,
+  //     };
+
+  //     try {
+  //       await gooleRegister(requestData).unwrap();
+  //       toast.success("Register success");
+  //     } catch (err: any) {
+  //       toast.error(
+  //         "Failed to register user " + (err?.data?.message || err.message)
+  //       );
+  //       console.error("Failed to sign up user", err);
+  //     }
+  //   },
+  //   onError: () => console.log("Google Sign-In Failed"),
+  //   flow: "auth-code",
+  // });
+
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
-      const authCode = response.code;
-      const requestData = {
-        code: authCode,
-      };
-
+      const accessToken = response.access_token; // Directly get the access token
+  
       try {
-        await gooleRegister(requestData).unwrap();
+        await gooleRegister({ code: accessToken }).unwrap();
         toast.success("Register success");
       } catch (err: any) {
         toast.error(
@@ -125,8 +143,9 @@ const RegisterPage = () => {
       }
     },
     onError: () => console.log("Google Sign-In Failed"),
-    flow: "auth-code",
+    flow: "implicit", // Use the 'implicit' flow
   });
+  
 
   const facebookSignUp = async () => {
     try {
@@ -350,7 +369,7 @@ const RegisterPage = () => {
           </div>
 
           <div className="social-icons flex justify-center items-center gap-4 pt-5">
-            <span onClick={googleSignUp}>
+            <span onClick={()=>googleSignUp()}>
               <Image
                 src={google}
                 alt="Google"

@@ -72,25 +72,48 @@ const LoginPage = () => {
   };
 
 
+  // const googleSignUp = useGoogleLogin({
+  //   onSuccess: async (response) => {
+  //     const authCode = response.code;
+  //     const requestData = {
+  //       code: authCode,
+  //     };
+
+  //     try {
+  //       await googleLogin(requestData).unwrap();
+  //       toast.success("Log in success");
+  //     } catch (err: any) {
+  //       toast.error(
+  //         "Failed to log in user " + (err?.data?.message || err.message)
+  //       );
+  //       console.error("Failed to sign in user", err);
+  //     }
+  //   },
+  //   onError: () => console.log("Google Sign-In Failed"),
+  //   flow: "auth-code",
+  //   scope: 'https://www.googleapis.com/auth/userinfo.profile',
+  // });
+
+
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
-      const authCode = response.code;
-      const requestData = {
-        code: authCode,
-      };
-
+      const accessToken = response.access_token; // Directly get the access token
+  
       try {
-        await googleLogin(requestData).unwrap();
-        toast.success("Log in success");
+        const userData =  await googleLogin({ code: accessToken }).unwrap();
+        toast.success("Sign in  success");
+        dispatch(updateUser(userData.data));
+        setState(true);
+        setLoginState(false);
       } catch (err: any) {
         toast.error(
-          "Failed to log in user " + (err?.data?.message || err.message)
+          "Failed to register user " + (err?.data?.message || err.message)
         );
-        console.error("Failed to sign in user", err);
+        console.error("Failed to sign up user", err);
       }
     },
     onError: () => console.log("Google Sign-In Failed"),
-    flow: "auth-code",
+    flow: "implicit", 
   });
 
   console.log(data);
@@ -199,7 +222,7 @@ const LoginPage = () => {
             </div>
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5">
-              <span onClick={googleSignUp} >
+              <span onClick={()=>googleSignUp()} >
                 <Image
                   src={google}
                   alt="Google"
