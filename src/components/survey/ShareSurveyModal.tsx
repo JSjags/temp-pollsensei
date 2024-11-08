@@ -15,8 +15,8 @@ interface ShareSurveyModalProps {
 
 const ShareSurveyModal: React.FC<ShareSurveyModalProps> = ({ onClose, openModal, _id }) => {
   return (
-    <ModalComponent titleClassName={"pl-0"} openModal={openModal} onClose={onClose}>
-      <ShareSurvey _id={_id} />
+    <ModalComponent titleClassName={"p-0"} openModal={openModal} onClose={onClose}>
+      <ShareSurvey _id={_id}  />
     </ModalComponent>
   );
 };

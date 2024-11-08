@@ -21,6 +21,7 @@ import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import { FaTimesCircle } from "react-icons/fa";
 import { IoCheckmarkCircle } from "react-icons/io5";
+import { dark_theme_logo } from "@/assets/images";
 
 const constraints = {
   name: {
@@ -106,15 +107,33 @@ const RegisterPage = () => {
     return validate(values, constraints) || {};
   };
 
+  // const googleSignUp = useGoogleLogin({
+  //   onSuccess: async (response) => {
+  //     const authCode = response.code;
+  //     const requestData = {
+  //       code: authCode,
+  //     };
+
+  //     try {
+  //       await gooleRegister(requestData).unwrap();
+  //       toast.success("Register success");
+  //     } catch (err: any) {
+  //       toast.error(
+  //         "Failed to register user " + (err?.data?.message || err.message)
+  //       );
+  //       console.error("Failed to sign up user", err);
+  //     }
+  //   },
+  //   onError: () => console.log("Google Sign-In Failed"),
+  //   flow: "auth-code",
+  // });
+
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
-      const authCode = response.code;
-      const requestData = {
-        code: authCode,
-      };
-
+      const accessToken = response.access_token; // Directly get the access token
+  
       try {
-        await gooleRegister(requestData).unwrap();
+        await gooleRegister({ code: accessToken }).unwrap();
         toast.success("Register success");
       } catch (err: any) {
         toast.error(
@@ -124,8 +143,9 @@ const RegisterPage = () => {
       }
     },
     onError: () => console.log("Google Sign-In Failed"),
-    flow: "auth-code",
+    flow: "implicit", // Use the 'implicit' flow
   });
+  
 
   const facebookSignUp = async () => {
     try {
@@ -152,8 +172,8 @@ const RegisterPage = () => {
       <div className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8">
         <div className="flex flex-col items-center max-w-md w-full">
           <div className="flex items-center justify-center gap-3 pb-10">
-            <Image src={logo} alt="Logo" width={32} height={32} />
-            <h1 className="auth-head">PollSensei</h1>
+            <Image src={dark_theme_logo} alt="Logo" width={200} height={32} />
+            {/* <h1 className="auth-head">PollSensei</h1> */}
           </div>
 
           <Image
@@ -349,7 +369,7 @@ const RegisterPage = () => {
           </div>
 
           <div className="social-icons flex justify-center items-center gap-4 pt-5">
-            <span onClick={googleSignUp}>
+            <span onClick={()=>googleSignUp()}>
               <Image
                 src={google}
                 alt="Google"

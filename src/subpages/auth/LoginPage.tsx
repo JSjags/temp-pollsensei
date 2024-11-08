@@ -19,6 +19,7 @@ import StateLoader from "../../components/common/StateLoader";
 import { useGoogleLoginMutation, useLoginUserMutation } from "../../services/user.service";
 import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
+import { dark_theme_logo } from "@/assets/images";
 
 const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
@@ -71,25 +72,48 @@ const LoginPage = () => {
   };
 
 
+  // const googleSignUp = useGoogleLogin({
+  //   onSuccess: async (response) => {
+  //     const authCode = response.code;
+  //     const requestData = {
+  //       code: authCode,
+  //     };
+
+  //     try {
+  //       await googleLogin(requestData).unwrap();
+  //       toast.success("Log in success");
+  //     } catch (err: any) {
+  //       toast.error(
+  //         "Failed to log in user " + (err?.data?.message || err.message)
+  //       );
+  //       console.error("Failed to sign in user", err);
+  //     }
+  //   },
+  //   onError: () => console.log("Google Sign-In Failed"),
+  //   flow: "auth-code",
+  //   scope: 'https://www.googleapis.com/auth/userinfo.profile',
+  // });
+
+
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
-      const authCode = response.code;
-      const requestData = {
-        code: authCode,
-      };
-
+      const accessToken = response.access_token; // Directly get the access token
+  
       try {
-        await googleLogin(requestData).unwrap();
-        toast.success("Log in success");
+        const userData =  await googleLogin({ code: accessToken }).unwrap();
+        toast.success("Sign in  success");
+        dispatch(updateUser(userData.data));
+        setState(true);
+        setLoginState(false);
       } catch (err: any) {
         toast.error(
-          "Failed to log in user " + (err?.data?.message || err.message)
+          "Failed to register user " + (err?.data?.message || err.message)
         );
-        console.error("Failed to sign in user", err);
+        console.error("Failed to sign up user", err);
       }
     },
     onError: () => console.log("Google Sign-In Failed"),
-    flow: "auth-code",
+    flow: "implicit", 
   });
 
   console.log(data);
@@ -104,8 +128,8 @@ const LoginPage = () => {
       <div className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8">
         <div className="flex flex-col items-center max-w-md w-full">
           <div className="flex items-center justify-center gap-3 pb-10">
-            <Image src={logo} alt="Logo" width={32} height={32} />
-            <h1 className="auth-head">PollSensei</h1>
+            <Image src={dark_theme_logo} alt="Logo" width={200} height={32} />
+            {/* <h1 className="auth-head">PollSensei</h1> */}
           </div>
 
           <Image
@@ -198,7 +222,7 @@ const LoginPage = () => {
             </div>
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5">
-              <span onClick={googleSignUp} >
+              <span onClick={()=>googleSignUp()} >
                 <Image
                   src={google}
                   alt="Google"

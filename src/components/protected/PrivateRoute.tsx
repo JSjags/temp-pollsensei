@@ -22,7 +22,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, message }) => {
 
   console.log(isLoggedIn);
 
-  if (!isLoggedIn || state.user === null || state.token === null) {
+  if (!isLoggedIn || state.user === null || state.access_token === null) {
     return <LoadRedirect text={logoutMessage} goto="/login" />;
   }
 

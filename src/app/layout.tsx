@@ -38,6 +38,7 @@ export default function RootLayout({
       >
         <GoogleOAuthProvider
           clientId={googleClientId}
+          
         >
           <TanstackProvider>
             <ToastContainer className={`${cn(fontSans.variable)} z-50`} />

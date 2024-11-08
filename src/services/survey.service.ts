@@ -198,6 +198,18 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    downloadAllResponse: builder.query({
+      query: ({survey_id, format}) => ({
+        url: `response/export?survey_id=${survey_id}&format=${format}`, // 
+        method: "GET",
+      }),
+    }),
+    downloadSingleResponse: builder.query({
+      query: ({response_id, format}) => ({
+        url: `response/export?response_id=${response_id}&format=${format}`, // 
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -232,4 +244,6 @@ export const {
   useEditSurveyMutation,
   useDuplicateSurveyMutation,
   useDeleteSurveyResponseMutation,
+  useDownloadAllResponseQuery,
+  useDownloadSingleResponseQuery,
 } = surveyApiSlice;

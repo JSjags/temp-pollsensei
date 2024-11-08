@@ -1,5 +1,6 @@
 "use client";
 
+import EarlyAccessMessage from "@/components/custom/EarlybedMessage";
 import React from "react";
 import {
   Card,

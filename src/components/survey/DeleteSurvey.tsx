@@ -21,7 +21,7 @@ const DeleteSurvey: React.FC<DeleteSurveyProps> = ({ onClose, openModal, onDelet
           be undone.
         </p>
         <div className="mt-3 flex items-center justify-between w-full">
-          <ButtonOutline label="No, cancel" />
+          <ButtonOutline label="No, cancel" onclick={onClose} />
           <ButtonDelete label="Delete" onclick={onDelete}/>
         </div>
       </div>

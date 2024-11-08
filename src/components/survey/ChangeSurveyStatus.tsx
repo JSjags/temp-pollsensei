@@ -27,7 +27,7 @@ const ChangeSurveyStatus: React.FC<ChangeSurveyStatusProps> = ({
           Note that this cannot be undone.
         </p>
         <div className="mt-3 flex items-center justify-between w-full">
-          <ButtonOutline label="No, cancel" />
+          <ButtonOutline label="No, cancel" onclick={onClose} />
           <ButtonDelete
             label={isClosing ? "Waiting..." : "Close Survey"}
             onclick={onCloseSurvey}

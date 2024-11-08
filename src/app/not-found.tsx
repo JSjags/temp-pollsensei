@@ -8,7 +8,7 @@ const NotFound: React.FC = () => {
 const router = useRouter();
 
   const goHome = () => {
-    router.push('/dashboard');
+    router.back();
   };
 
   return (
@@ -23,7 +23,7 @@ const router = useRouter();
           onClick={goHome}
           className="mt-6 px-6 py-2 text-white bg-purple-600 rounded-lg hover:bg-purple-700 focus:outline-none"
         >
-          Go Back Home
+          Go Back
         </button>
       </div>
     </div>

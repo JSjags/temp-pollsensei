@@ -111,6 +111,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setShowDuplicate(false);
     setShowRename(false);
     setCloseSurvey(false);
+    setShareSurvey(false)
   };
 
   const handleSetToggle = (op: any) => {

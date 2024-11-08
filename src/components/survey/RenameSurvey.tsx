@@ -33,7 +33,7 @@ const RenameSurvey: React.FC<RenameSurveyProps> = ({ onClose, openModal, isEditi
           className="mt-3 border-[1px] w-full rounded-[6px] px-[20px] py-[9px]"
         />
         <div className="mt-3 flex items-center justify-between w-full">
-          <ButtonOutline label="No, cancel" />
+          <ButtonOutline label="No, cancel" onclick={onClose} />
           <Button label={isEditing ? "Editing..." : "Rename"} onClick={onRenameSurvey} />
         </div>
       </div>
