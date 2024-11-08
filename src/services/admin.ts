@@ -1,5 +1,9 @@
 import axiosInstance from "@/lib/axios-instance";
 
+export const getPasswordResetCode = async () => {
+  return axiosInstance.get(`/user/password-reset-code`);
+};
+
 export const getTeamMembers = async ({
   page = 1,
   page_size = 10,
@@ -43,4 +47,13 @@ export const editTeamMember = async ({
 export const removeMember = async (id: string) => {
   const { data } = await axiosInstance.delete(`/team/members/${id}`);
   return data;
+};
+
+export const changePassword = async (data: {
+  code: number;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}) => {
+  return await axiosInstance.patch(`/user/update-password`, data);
 };

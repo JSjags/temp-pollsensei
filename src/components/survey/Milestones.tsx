@@ -474,7 +474,7 @@ export default function Milestones({
           // alert(label);
         }
         if (label === "Quantitative Analysis") {
-          router.push("/surveys/create-survey");
+          // router.push("/surveys/create-survey");
           // alert(label);
         }
       }
@@ -621,7 +621,17 @@ export default function Milestones({
                     option
                       .toLowerCase()
                       .includes(survey_type?.toLowerCase())) &&
-                  "border-[#9C27B0] border-[3px]"
+                  "border-[#9C27B0] border-[3px] cursor-not-allowed hover:bg-white hover:border-[#9C27B0]",
+                option.toLowerCase().includes("ai") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]",
+                option.toLowerCase().includes("manual") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]",
+                option.toLowerCase().includes("respondents") &&
+                  "cursor-not-allowed opacity-35 hover:border-[#CC9BFD] hover:bg-white",
+                option.toLowerCase().includes("qualitative") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]",
+                option.toLowerCase().includes("quantitative") &&
+                  "cursor-not-allowed hover:bg-white hover:border-[#CC9BFD]"
               )}
               onClick={() => {
                 // currentStage === parseInt(id)
