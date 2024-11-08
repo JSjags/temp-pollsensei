@@ -17,6 +17,7 @@ interface ResponseHeaderProps {
   handlePrev?: () => void;
   deleteAResponse?: () => void;
   respondent_data?:any[];
+  response_id?:string;
 }
 
 const ResponseHeader: React.FC<ResponseHeaderProps> = ({
@@ -30,16 +31,19 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   respondent_data,
   valid_response,
   invalid_response,
-  deleteAResponse
+  deleteAResponse,
+  response_id
 }) => {
   const [downloadModal, setDownloadModal] = useState(false);
   const params = useParams();
+
+  console.log(response_id)
 
   const [triggerDownloadAll, { data: allDownloadData }] = useLazyDownloadAllResponseQuery();
   const [triggerDownloadSingle, { data: singleDownloadData }] = useLazyDownloadSingleResponseQuery();
 
   const handleDownload = async (type: "all" | "single", format: "pdf" | "csv" | "xlsx") => {
-    const id = type === "all" ? { survey_id: params.id, format } : { response_id: data?._id, format };
+    const id = type === "all" ? { survey_id: params.id, format } : { response_id: response_id, format };
 
     try {
       if (type === "all") {

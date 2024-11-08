@@ -151,6 +151,7 @@ const handleDeleteAResponse=async()=>{
         valid_response={validCount}
         invalid_response={invalidCount}
         deleteAResponse={handleDeleteAResponse}
+        response_id={validateSource?._id}
       />
       <RespondentDetails data={validateSource} validCount={validCount} isLoading={isLoading} />
       {activeTab === "Individual Responses" && (
