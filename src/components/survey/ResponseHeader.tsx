@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { FaDownload, FaExpand, FaPrint } from "react-icons/fa6";
 import ResponseActions from "./ResponseAction";
+import { useDownloadAllResponseQuery, useDownloadSingleResponseQuery } from "@/services/survey.service";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 
 interface ResponseHeaderProps {
   data: any;
@@ -30,10 +33,24 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   deleteAResponse
 }) => {
   console.log(curerentSurvey)
+  const [downloadModal, setDownloadModal] = useState(false)
+
+  const params = useParams()
+
+  const {data:allAsPdf, isSuccess:isSuccessPdfAll } = useDownloadAllResponseQuery({survey_id: params.id, format:'pdf'})
+  const {data:allAsCsv, isSuccess:isSuccessCsvAll } = useDownloadAllResponseQuery({survey_id: params.id, format:'csv'})
+  const {data:allAsXlsx, isSuccess:isSuccessXlsxAll } = useDownloadAllResponseQuery({survey_id: params.id, format:'xlsx'})
+  const { data:singleAsPdf, isSuccess:isSuccessPdfSingle} = useDownloadSingleResponseQuery({response_id: data?._id, format:'csv'})
+  const { data:singleAsCsv, isSuccess:isSuccessCsvSIngle} = useDownloadSingleResponseQuery({response_id: data?._id, format:'csv'})
+  const { data:singleAsXlsx, isSuccess:isSuccessXlsxSingle} = useDownloadSingleResponseQuery({response_id: data?._id, format:'csv'})
+
+  console.log(allAsPdf)
+console.log(data)
+
   return (
     <div className="border rounded-lg p-4 shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <div className="lg:flex items-center space-x-2">
+      <div className="flex justify-between items-center mb-4 w-full">
+        <div className="lg:flex items-center space-x-2 w-full">
           {/* Avatars */}
           <div className="flex -space-x-2">
             <img
@@ -56,13 +73,37 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
 
         {/* Icons */}
 
-        <div className="flex space-x-3">
+        <div className="flex relative w-full justify-end">
           {/* <button className="text-gray-500 hover:text-gray-700">
             <FaPrint size={25} />
-          </button>
-          <button className="text-gray-500 hover:text-gray-700">
-            <FaDownload size={25} />
           </button> */}
+          <button className="text-gray-500 hover:text-gray-700" onClick={()=>setDownloadModal((prev)=>!prev)}>
+            <FaDownload size={25} />
+          </button>
+
+         {downloadModal &&
+          <div className="min-w-md px-6 py-3 shadow-md rounded-md absolute right-10 top-10 z-50 bg-white">
+            <ul className="text-xs flex flex-col gap-4 w-full">
+              <li className="cursor-pointer">
+                <Link href={allAsPdf && isSuccessPdfAll ? allAsPdf?.data?.url : ""} target="blank" download>Download all response as pdf</Link>
+              </li>
+              <li>
+                <Link href={singleAsPdf && isSuccessPdfSingle ? singleAsPdf?.data?.url : ""} target="blank" download>Download current response as pdf</Link>
+              </li>
+              <li className="cursor-pointer">
+                <Link href={allAsCsv && isSuccessCsvAll ? allAsCsv?.data?.url : ""} target="blank" download>Download all response as csv</Link>
+              </li>
+              <li>
+                <Link href={singleAsCsv && isSuccessCsvSIngle ? singleAsCsv?.data?.url : ""} target="blank" download>Download current response as csv</Link>
+              </li>
+              <li className="cursor-pointer">
+                <Link href={allAsXlsx && isSuccessXlsxAll ? allAsXlsx?.data?.url : ""} target="blank" download>Download all response as Excel</Link>
+              </li>
+              <li>
+                <Link href={singleAsXlsx && isSuccessXlsxSingle ? singleAsXlsx?.data?.url : ""} target="blank" download>Download current response as Excel</Link>
+              </li>
+            </ul>
+          </div>}
           {/* <button className="text-gray-500 hover:text-gray-700">
             <FaExpand size={25} />
           </button> */}

@@ -96,7 +96,7 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
   const totalResponses = response_?.data?.total || 0;
   console.log(summary_)
 
- 
+ console.log(totalResponses)
   // console.log(validate_individual_response?.data?.data);
 
   useEffect(() => {
