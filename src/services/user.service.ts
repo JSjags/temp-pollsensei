@@ -100,6 +100,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    changePswdCode: builder.query({
+      query: () => ({
+        url: "/user/password-reset-code",
+        method: "GET",
+      }),
+    }),
     updateUserProfile: builder.mutation({
       query: (body) => ({
         url: "/user/me",
@@ -160,4 +166,6 @@ export const {
   useGooleRegisterMutation,
   useFacebookRegisterMutation, 
   useGoogleLoginMutation,
+  useLazyChangePswdCodeQuery,
+
 } = userApiSlice;

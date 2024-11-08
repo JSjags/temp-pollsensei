@@ -1,5 +1,6 @@
 "use client";
 
+import EarlyAccessMessage from "@/components/custom/EarlybedMessage";
 import React from "react";
 
 const SubscriptionPage: React.FC = () => {
@@ -12,6 +13,7 @@ const SubscriptionPage: React.FC = () => {
         </p>
         <hr className="mt-8" />
       </div>
+      <EarlyAccessMessage />
     </div>
   );
 };
