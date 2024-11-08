@@ -22,18 +22,10 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
 
   const router = useRouter();
 
-  // const handleLinkClick = (item: string) => {
-  //   if (item === "Features" || item === "FAQs") {
-  //     scrollToSection(item.toLowerCase());
-  //   } else {
-  //     router.push(`/${item.toLowerCase().replace(" ", "-")}`);
-  //   }
-  // };
-
   const handleLinkClick = (item: string) => {
     const isLandingPage = pathname === "/"; 
 
-    if (item === "Features" || item === "FAQs") {
+    if (item === "Features" || item === "FAQs" || item === "Benefits") {
       const sectionId = item.toLowerCase();
 
       if (isLandingPage) {

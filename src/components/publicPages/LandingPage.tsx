@@ -73,7 +73,8 @@ const LandingPage: React.FC = () => {
   const [subscribe, setSubscribe] = useState(false);
 
   const featuresRef = useRef<HTMLDivElement>(null);
-const faqsRef = useRef<HTMLDivElement>(null);
+const faqsRef = useRef<HTMLDivElement>(null); 
+const benefitsRef = useRef<HTMLDivElement>(null); 
 
 
 const scrollToSection = (id: string) => {
@@ -81,6 +82,8 @@ const scrollToSection = (id: string) => {
     featuresRef.current.scrollIntoView({ behavior: "smooth" });
   } else if (id === "faqs" && faqsRef.current) {
     faqsRef.current.scrollIntoView({ behavior: "smooth" });
+  }else if(id === "benefits" && benefitsRef.current){
+    benefitsRef.current.scrollIntoView({ behavior: "smooth" });
   }
 };
 
@@ -94,6 +97,8 @@ useEffect(() => {
     featuresRef.current.scrollIntoView({ behavior: "smooth" });
   } else if (section === "faqs" && faqsRef.current) {
     faqsRef.current.scrollIntoView({ behavior: "smooth" });
+  }else if(section === "benefits" && benefitsRef.current){
+    benefitsRef.current.scrollIntoView({ behavior: "smooth" });
   }
 }, []);
 
@@ -105,7 +110,7 @@ useEffect(() => {
 
   //   return () => clearTimeout(timer);
   // }, []);
-  
+
 
   useEffect(() => {
     // Helper function to check if it's a new day since the last modal display
@@ -248,7 +253,7 @@ useEffect(() => {
           </motion.div>
         </section>
 
-        <section className="pb-16 sm:pb-24 pt-8 bg-white overflow-hidden flex flex-col items-center px-24">
+        <section className="pb-16 sm:pb- pt-8 bg-white overflow-hidden flex flex-col items-center px-24">
           <h3 className="font-semibold text-[calc(1rem+4px)] text-black mx-auto ">
             Trusted By:
           </h3>
@@ -256,7 +261,7 @@ useEffect(() => {
         </section>
 
   
-        <section id="" className="pb-12 sm:pb-24 lg:px-24 bg-white overflow-hidden">
+        <section id="benefits" ref={benefitsRef} className="pb-12 sm:py-24 lg:px-24 bg-white overflow-hidden">
           <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
               Built for you
