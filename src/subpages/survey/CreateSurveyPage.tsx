@@ -100,6 +100,7 @@ const CreateSurveyPage = () => {
   };
 
   const maxCharacters = 3000;
+  console.log(data)
 
   const handleSurveyType = (userType: any, prompt: string) => {
     setSelectedDiv(userType);
@@ -174,7 +175,7 @@ const CreateSurveyPage = () => {
       });
       dispatch(addSection({ questions: refactoredQuestions }));
       dispatch(updateConversationId(data?.data?.conversation_id));
-      dispatch(updateDescription(surveyPrompt));
+      dispatch(updateDescription(data?.data?.description || surveyPrompt));   
       toast.success("Survey created successfully");
       setGenerated((prev) => !prev);
       setPromptForm(false);
@@ -783,9 +784,9 @@ const CreateSurveyPage = () => {
         </IsLoadingModal>
       )}
       {isLoadingTopics && (
-        <IsGenerating isGeneratingSurveyLoading={isLoadingTopics} />
+        <IsGenerating isGeneratingSurveyLoading={isLoadingTopics} what="Topics" />
       )}
-      {isLoading && <IsGenerating isGeneratingSurveyLoading={isLoading} />}
+      {isLoading && <IsGenerating isGeneratingSurveyLoading={isLoading} what="Questions" />}
       {generated && (
         <>
           <GeneratedSurvey data={survey?.sections} onClick={UseAnotherPrompt} />

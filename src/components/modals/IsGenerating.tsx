@@ -61,6 +61,7 @@ import { Fade } from "react-awesome-reveal";
 
 interface IsGeneratingProps {
   isGeneratingSurveyLoading: boolean;
+  what?:string;
 }
 
 const messages = [
@@ -74,6 +75,7 @@ const messages = [
 
 const IsGenerating: React.FC<IsGeneratingProps> = ({
   isGeneratingSurveyLoading,
+  what ="Question"
 }) => {
   const [currentMessage, setCurrentMessage] = useState(messages[0]);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -109,7 +111,7 @@ const IsGenerating: React.FC<IsGeneratingProps> = ({
               speedMultiplier={1}
               className="mx-auto"
             />
-            <h2 className="text-lg">Generating Questions for you</h2>
+            <h2 className="text-lg">Generating {what} for you</h2>
             <Fade delay={1e3} cascade damping={1e-1} className="text-sm">
               {currentMessage}
             </Fade>
