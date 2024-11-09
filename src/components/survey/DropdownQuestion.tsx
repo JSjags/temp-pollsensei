@@ -1,17 +1,15 @@
-import { draggable } from "@/assets/images";
-import Image from "next/image";
-import React, { useState } from "react";
-import { usePathname } from "next/navigation";
-import { useSelector } from "react-redux";
+import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
-import { Button } from "../ui/button";
-import { stars } from "@/assets/images";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
 import { Switch } from "../ui/switch";
 
-interface MultiChoiceQuestionProps {
+interface DropdownQuestionProps {
   question: string;
   questionType: string;
   options: string[] | undefined;
@@ -32,7 +30,7 @@ interface MultiChoiceQuestionProps {
   setIsRequired?: (value: boolean) => void;
 }
 
-const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
+const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
   question,
   options,
   questionType,
@@ -59,11 +57,11 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   // Handle option selection
-  const handleOptionChange = (option: string) => {
-    setSelectedOption(option); // Set the selected option
-    console.log(`Selected option for question ${question}:`, option); // Log the selected option
+  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = e.target.value;
+    setSelectedOption(selectedValue);
     if (onChange) {
-      onChange(option); // Trigger external onChange callback if provided
+      onChange(selectedValue);
     }
   };
 
@@ -81,7 +79,6 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             <BsExclamation />
           </div>
         );
-
       default:
         return null;
     }
@@ -112,56 +109,53 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                   <span className="text-2xl ml-2 text-red-500">*</span>
                 )}
               </p>
-              {!pathname.includes("survey-public-response") &&
-                !pathname.includes("create-survey") && (
-                  <PollsenseiTriggerButton
-                    key={index}
-                    imageUrl={stars}
-                    tooltipText="Rephrase question"
-                    className={"group-hover:inline-block hidden"}
-                    triggerType="rephrase"
-                    question={question}
-                    optionType={questionType}
-                    options={options}
-                    setEditId={setEditId}
-                    onSave={onSave!}
-                    index={index}
-                  />
-                )}
+              <PollsenseiTriggerButton
+                key={index}
+                imageUrl={stars}
+                tooltipText="Rephrase question"
+                className={"group-hover:inline-block hidden"}
+                triggerType="rephrase"
+                question={question}
+                optionType={questionType}
+                options={options}
+                setEditId={setEditId}
+                onSave={onSave!}
+                index={index}
+              />
             </div>
           </h3>
         </div>
-        {options?.map((option, optionIndex) => (
-          <div key={optionIndex} className="flex items-center my-2">
-            <label className="relative flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                id={`option-${optionIndex}`}
-                name={question}
-                value={option}
-                className="mr-2 text-[#5B03B2] radio hidden peer"
-                checked={selectedOption === option}
-                required={is_required}
-                onChange={() => handleOptionChange(option)}
-              />
-              <span
-                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
-                style={{ borderColor: colorTheme }}
-              ></span>
-              <span className="ml-2">{option}</span>
-            </label>
-          </div>
-        ))}
+
+        {/* Dropdown for Single Choice Options */}
+        <div className="my-2">
+          <select
+            value={selectedOption || ""}
+            onChange={handleOptionChange}
+            className="w-full p-2 border rounded-md"
+            required={is_required}
+            style={{ borderColor: colorTheme }}
+          >
+            <option value="" disabled>
+              Select an option
+            </option>
+            {options?.map((option, optionIndex) => (
+              <option key={optionIndex} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {pathname === "/surveys/edit-survey" && (
           <div className="flex justify-end gap-4">
             <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
+              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
               onClick={EditQuestion}
             >
               Edit
             </button>
             <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
+              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
             >
               Delete
@@ -178,7 +172,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                   ? (checked: boolean) => setIsRequired(checked)
                   : undefined
               }
-              className="bg-[#9D50BB] "
+              className="bg-[#9D50BB]"
             />
           </div>
         )}
@@ -187,7 +181,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           pathname.includes("surveys/question") ? (
             ""
           ) : (
-            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
+            <p>{questionType === "single_choice" ? "Single Choice" : ""}</p>
           )}
         </div>
       </div>
@@ -198,4 +192,4 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   );
 };
 
-export default MultiChoiceQuestion;
+export default DropdownQuestion;

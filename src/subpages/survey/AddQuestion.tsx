@@ -85,10 +85,15 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
     { value: "multiple_choice", label: "Multiple Choice" },
     { value: "single_choice", label: "Single Choice" },
     { value: "long_text", label: "Comment" },
-    // { value: "likert_scale", label: "Likert Scale" },
+    { value: "likert_scale", label: "Likert Scale" },
     { value: "short_text", label: "Short Text" },
+    { value: "checkbox", label: "Checkbox" },
     { value: "star_rating", label: "Star Rating" },
+    { value: "rating_scale", label: "Rating Scale" },
     { value: "boolean", label: "Boolean" },
+    { value: "slider", label: "Slider" },
+    // { value: "number", label: "Number" },
+    { value: "drop_down", label: "Dropdown" },
     // { value: "matrix_checkbox", label: "Matrix" },
   ];
 
@@ -106,7 +111,11 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           />
         </div>
         <div className="flex justify-between py-4 items-center">
-          <p>Option</p>
+          { questionType === "long_text" || 
+            questionType === "short_text" ||
+            questionType === "number"
+             ? "" :
+            <p>Option</p>}
           <Select
             className="select-container border-2 rounded mx-4 my-4"
             classNamePrefix="questionType"
@@ -139,16 +148,17 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
                 )}
               </div>
             ))}
-            {questionType === "multiple_choice" || 
-            questionType === "likert_scale" || 
-            questionType === "boolean" ? (
+            {questionType === "long_text" || 
+            questionType === "short_text" ||
+            questionType === "number"
+             ? "": (
               <button
                 onClick={handleAddOption}
                 className="text-blue-500 mt-2 border py-2 px-4 rounded-full text-start"
               >
                 Add Option
               </button>
-            ) : ''}
+            ) }
           </div>
         )}
 

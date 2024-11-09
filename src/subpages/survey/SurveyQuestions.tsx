@@ -13,6 +13,11 @@ import { useFetchASurveyQuery } from "@/services/survey.service";
 import { useParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import SliderQuestion from "@/components/survey/SliderQuestion";
+import ShortTextQuestion from "@/components/survey/LongTextQuestion";
+import BooleanQuestion from "@/components/survey/BooleanQuestion";
+import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
+import NumberQuestion from "@/components/survey/NumberQuestion";
 
 const SurveyQuestions = () => {
   const params = useParams();
@@ -102,17 +107,33 @@ const SurveyQuestions = () => {
                         question={item.question}
                         is_required={item.is_required}
                       />
-                    ) : item.question_type === "likert_scale" ? (
+                    ) : item.question_type === "slider" ? (
+                      <SliderQuestion
+                      question={item.question}
+                      options={item.options}
+                      // step={item.options.length}
+                      questionType={item.question_type}
+                      index={index + 1}
+                      is_required={item.is_required}
+                      />
+                    )
+                    : item.question_type === "likert_scale" ? (
                       <LikertScaleQuestion
                         question={item.question}
                         options={item.options}
                         questionType={item.question_type}
+                        key={index}
+                        index={index + 1}
+                        is_required={item.is_required}
+
                       />
                     ) : item.question_type === "star_rating" ? (
                       <StarRatingQuestion
                         question={item.question}
-                        // maxRating={5}
+                      // maxRating={5}
+                        index={index + 1}
                         questionType={item.question_type}
+                        is_required={item.is_required}
                       />
                     ) : item.question_type === "matrix_checkbox" ? (
                       <MatrixQuestion
@@ -121,8 +142,46 @@ const SurveyQuestions = () => {
                         options={item.options}
                         questionType={item.question_type}
                         question={item.question}
+                        // is_required={item.is_required}
+
                       />
-                    ) : null}
+                    ) : item.question_type === "short_text" ? (
+                      <ShortTextQuestion
+                        key={index}
+                        index={index + 1}
+                        question={item.question}
+                        questionType={item.question_type}
+                        is_required={item.is_required}
+                       
+                      />
+                    ) : item.question_type === "boolean" ? (
+                      <BooleanQuestion
+                        key={index}
+                        index={index + 1}
+                        question={item.question}
+                        options={item.options}
+                        questionType={item.question_type}
+                       
+                      />
+                    )  :  item.question_type === "single_choice" ? (
+                      <SingleChoiceQuestion
+                        index={index + 1}
+                        key={index}
+                        question={item.question}
+                        options={item.options}
+                        questionType={item.question_type}
+                        
+                      />
+                    ) : item.question_type === "number" ? (
+                      <NumberQuestion
+                        key={index}
+                        index={index + 1}
+                        question={item.question}
+                        questionType={item.question_type}
+                        // EditQuestion={() => EditQuestion(index)}
+                      />
+                    )
+                     : null}
                   </div>
                 )
               )}

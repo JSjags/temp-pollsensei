@@ -39,6 +39,11 @@ import MultiChoiceQuestionEdit from "../milestone/Test";
 import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import ShortTextQuestion from "@/components/survey/LongTextQuestion";
 import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
+import SliderQuestion from "@/components/survey/SliderQuestion";
+import NumberQuestion from "@/components/survey/NumberQuestion";
+import DropdownQuestion from "@/components/survey/DropdownQuestion";
+import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
+import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -190,8 +195,8 @@ const AddQuestionPage = () => {
     <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
-          {logoUrl ? (
-            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
+          {logoUrl && (
+ <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
               <Image
                 src={
                   logoUrl instanceof File
@@ -201,29 +206,27 @@ const AddQuestionPage = () => {
                     : sparkly
                 }
                 alt=""
-                className="w-full object-cover bg-no-repeat h-16 rounded-full"
+                   className="w-full object-cover rounded  bg-no-repeat h-16 "
                 width={"100"}
                 height={"200"}
               />
             </div>
-          ) : (
-            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white py-3 flex items-center flex-col ">
-              <p>LOGO GOES HERE</p>
-            </div>
           )}{" "}
-          <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
-            <Image
-              src={
-                headerUrl 
-                  ? headerUrl
-                  : sparkly
-              }
-              alt=""
-              className="w-full object-cover bg-no-repeat h-24 rounded-lg"
-              width={"100"}
-              height={"200"}
-            />
-          </div>
+       {headerUrl &&  (<div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+         <Image
+                    src={
+                      headerUrl instanceof File
+                        ? URL.createObjectURL(headerUrl)
+                        : typeof headerUrl === "string"
+                        ? headerUrl
+                        : sparkly
+                    }
+                    alt=""
+                    className="w-full object-cover bg-no-repeat h-24 rounded-lg"
+                    width={"100"}
+                    height={"200"}
+                  />
+          </div>)}
           {isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
               <AutosizeTextarea
@@ -324,7 +327,7 @@ const AddQuestionPage = () => {
                               EditQuestion={() => EditQuestion(index)}
                             />
                           )
-                          : item.question_type === "likert_Scale" ? (
+                          : item.question_type === "likert_scale" ? (
                             <LikertScaleQuestion
                               question={item.question}
                               options={item.options}
@@ -402,6 +405,52 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
+                            ) :  item.question_type === "checkbox" ? (
+                              <CheckboxQuestion
+                              key={index} 
+                              index={index + 1}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() =>
+                                handleDeleteQuestion(index)
+                              }
+                            />
+                            ) : item.question_type === "rating_scale" ? (
+                              <RatingScaleQuestion
+                                key={index} 
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
+                              />
+                            )
+                            :  item.question_type === "drop_down" ? (
+                              <DropdownQuestion
+                                index={index + 1}
+                                key={index}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
+                              />
+                            )
+                             : item.question_type === "number" ? (
+                              <NumberQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                              />
                             )
                              : item.question_type === "long_text" ? (
                               <CommentQuestion
@@ -460,7 +509,17 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
-                            ) : null
+                            )  : item.question_type === "slider" ? (
+                              <SliderQuestion
+                              question={item.question}
+                              options={item.options}
+                              // step={item.options.length}
+                              questionType={item.question_type}
+                              index={index + 1}
+                              is_required={item.is_required}
+                              />
+                            )
+                             : null
                           }
                         </div>
                       )}
