@@ -24,11 +24,11 @@ const supportMenu: MenuItem[] = [
     path: "/settings/account-security",
     icons: <TbShieldHalf />,
   },
-  // {
-  //   label: "Notifications",
-  //   path: "/settings/notifications",
-  //   icons: <FaRegBell />,
-  // },
+  {
+    label: "Notifications",
+    path: "/settings/notifications",
+    icons: <FaRegBell />,
+  },
   // {
   //   label: "Payment",
   //   path: "/settings/payment",

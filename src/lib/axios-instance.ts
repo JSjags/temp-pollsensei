@@ -53,7 +53,7 @@ axiosInstance.interceptors.response.use(
               error?.message ??
               "You are not Authorized. Log in to continue"
       );
-      return window.location.assign("/login");
+      // return window.location.assign("/login");
     }
 
     if (

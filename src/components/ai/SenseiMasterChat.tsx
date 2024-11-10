@@ -259,7 +259,7 @@ const SenseiMasterChat: React.FC<Props> = ({
   const handleActionSend = async (actionInput: string) => {
     if (actionInput.trim()) {
       senseiStateSetter("start thinking");
-      addUserMessage(actionInput);
+      // addUserMessage(actionInput);
 
       if (actionInput.toLowerCase().includes("rephrase")) {
         const index = Number(actionInput[actionInput.length - 1]);

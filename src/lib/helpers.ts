@@ -60,26 +60,29 @@ export const formatDate = (isoDateString: string): string => {
   return `${dayWithSuffix} ${month} ${year}`;
 };
 
-
-export const  formatDateOption = (dateString: string | number | Date) => {
+export const formatDateOption = (dateString: string | number | Date) => {
   const date = new Date(dateString);
 
   const day = date.getUTCDate();
-  const month = date.toLocaleString('default', { month: 'long' });
+  const month = date.toLocaleString("default", { month: "long" });
   const year = date.getUTCFullYear();
 
   const getOrdinalSuffix = (day: number) => {
-    if (day > 3 && day < 21) return 'th'; 
+    if (day > 3 && day < 21) return "th";
     switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
     }
   };
 
   return `${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
-}
+};
 
 export const formatTo12Hour = (isoString: string): string => {
   const date = new Date(isoString);
@@ -89,15 +92,13 @@ export const formatTo12Hour = (isoString: string): string => {
   const isAM = hours < 12;
 
   // Convert to 12-hour format
-  hours = hours % 12 || 12; 
+  hours = hours % 12 || 12;
 
   // Format minutes to always be two digits
   const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
 
   // Combine the formatted time with AM/PM
-  const ampm = isAM ? 'am' : 'pm';
-  
+  const ampm = isAM ? "am" : "pm";
+
   return `${hours}:${formattedMinutes}${ampm}`;
 };
-
-

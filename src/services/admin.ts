@@ -57,3 +57,14 @@ export const changePassword = async (data: {
 }) => {
   return await axiosInstance.patch(`/user/update-password`, data);
 };
+
+export const updateNotification = async (data: {
+  news_and_updates: boolean;
+  tips_and_tutorials: boolean;
+  offers_and_promotions: boolean;
+  all_reminders_and_activities: boolean;
+  activities_only: boolean;
+  important_reminder_only: boolean;
+}) => {
+  return await axiosInstance.patch(`/user/notification`, data);
+};
