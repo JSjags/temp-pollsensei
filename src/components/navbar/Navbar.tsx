@@ -88,13 +88,15 @@ const Navbar = () => {
       <div className="border-b-[0.5px]">
         <header className="container flex items-center justify-between py-5 px-5">
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
-            <Image src={pollsensei_new_logo} alt="Logo" />
+            <Link href={"/dashboard"}>
+              <Image src={pollsensei_new_logo} alt="Logo" />
+            </Link>
             {/* <h2 className="text-xl text-[#5B03B2]">PollSensei</h2> */}
             {path.includes("/surveys") && (
               <div className="hidden lg:flex items-center gap-2 space-x-1 text-xs mt-[10px] font-semibold ml-2">
                 <Link href={"/dashboard"}>Dashboard</Link>
-                <Link href={"/dashboard"}>Pricing</Link>
-                <Link href={"/dashboard"}>Upgrade to pro</Link>
+                {/* <Link href={"/dashboard"}>Pricing</Link>
+                <Link href={"/dashboard"}>Upgrade to pro</Link> */}
               </div>
             )}
           </div>
