@@ -201,7 +201,7 @@ const PublicResponse = () => {
           className={`${question?.data?.theme} flex justify-center  items-center px-5 mx-auto gap-10 lg:w-[80%]`}
         >
           <form onSubmit={handleSubmitResponse}
-            className={` flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
+            className={` flex flex-col overflow-y-auto max-h-screen custom-scrollbar w-full`}
           >
             {
               question?.data?.logo_url && (
@@ -310,128 +310,128 @@ const PublicResponse = () => {
                       is_required={item.is_required}
                     />
                   )  
-                  // : item.question_type === "slider" ? (
-                  //   <SliderQuestion
-                  //   question={item.question}
-                  //   options={item.options}
-                  //   // step={item.options.length}
-                  //   questionType={item.question_type}
-                  //   index={index + 1}
-                  //   is_required={item.is_required}
-                  //   />
-                  // )
-                  // : item.question_type === "likert_scale" ? (
-                  //   <LikertScaleQuestion
-                  //     question={item.question}
-                  //     options={item.options}
-                  //     questionType={item.question_type}
-                  //     key={index}
-                  //     index={index + 1}
-                  //     is_required={item.is_required}
+                  : item.question_type === "slider" ? (
+                    <SliderQuestion
+                    question={item.question}
+                    options={item.options}
+                    // step={item.options.length}
+                    questionType={item.question_type}
+                    index={index + 1}
+                    is_required={item.is_required}
+                    />
+                  )
+                  : item.question_type === "likert_scale" ? (
+                    <LikertScaleQuestion
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      key={index}
+                      index={index + 1}
+                      is_required={item.is_required}
 
-                  //   />
-                  // ) : item.question_type === "star_rating" ? (
-                  //   <StarRatingQuestion
-                  //     question={item.question}
-                  //   // maxRating={5}
-                  //     index={index + 1}
-                  //     questionType={item.question_type}
-                  //     is_required={item.is_required}
-                  //   />
-                  // ) : item.question_type === "matrix_checkbox" ? (
-                  //   <MatrixQuestion
-                  //     key={index}
-                  //     index={index + 1}
-                  //     // options={item.options}
-                  //     rows={item.rows}
-                  //     columns={item.columns}
-                  //     questionType={item.question_type}
-                  //     question={item.question}
-                  //     is_required={item.is_required}
+                    />
+                  ) : item.question_type === "star_rating" ? (
+                    <StarRatingQuestion
+                      question={item.question}
+                    // maxRating={5}
+                      index={index + 1}
+                      questionType={item.question_type}
+                      is_required={item.is_required}
+                    />
+                  ) : item.question_type === "matrix_checkbox" ? (
+                    <MatrixQuestion
+                      key={index}
+                      index={index + 1}
+                      // options={item.options}
+                      rows={item.rows}
+                      columns={item.columns}
+                      questionType={item.question_type}
+                      question={item.question}
+                      is_required={item.is_required}
 
-                  //   />
-                  // ) : item.question_type === "short_text" ? (
-                  //   <ShortTextQuestion
-                  //     key={index}
-                  //     index={index + 1}
-                  //     question={item.question}
-                  //     questionType={item.question_type}
-                  //     is_required={item.is_required}
+                    />
+                  ) : item.question_type === "short_text" ? (
+                    <ShortTextQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      questionType={item.question_type}
+                      is_required={item.is_required}
                      
-                  //   />
-                  // ) : item.question_type === "boolean" ? (
-                  //   <BooleanQuestion
-                  //     key={index}
-                  //     index={index + 1}
-                  //     question={item.question}
-                  //     options={item.options}
-                  //     questionType={item.question_type}
+                    />
+                  ) : item.question_type === "boolean" ? (
+                    <BooleanQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
                      
-                  //   />
-                  // )  :  item.question_type === "single_choice" ? (
-                  //   <SingleChoiceQuestion
-                  //     index={index + 1}
-                  //     key={index}
-                  //     question={item.question}
-                  //     options={item.options}
-                  //     questionType={item.question_type}
+                    />
+                  )  :  item.question_type === "single_choice" ? (
+                    <SingleChoiceQuestion
+                      index={index + 1}
+                      key={index}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
                       
-                  //   />
-                  // ) : item.question_type === "number" ? (
-                  //   <NumberQuestion
-                  //     key={index}
-                  //     index={index + 1}
-                  //     question={item.question}
-                  //     questionType={item.question_type}
-                  //     // EditQuestion={() => EditQuestion(index)}
-                  //   />
-                  // ) :  item.question_type === "checkbox" ? (
-                  //   <CheckboxQuestion
-                  //   key={index} 
-                  //   index={index + 1}
-                  //   question={item.question}
-                  //   options={item.options}
-                  //   questionType={item.question_type}
+                    />
+                  ) : item.question_type === "number" ? (
+                    <NumberQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      questionType={item.question_type}
+                      // EditQuestion={() => EditQuestion(index)}
+                    />
+                  ) :  item.question_type === "checkbox" ? (
+                    <CheckboxQuestion
+                    key={index} 
+                    index={index + 1}
+                    question={item.question}
+                    options={item.options}
+                    questionType={item.question_type}
                    
-                  // />
-                  // )  :  item.question_type === "checkbox" ? (
-                  //   <CheckboxQuestion
-                  //   key={index} 
-                  //   index={index + 1}
-                  //   question={item.question}
-                  //   options={item.options}
-                  //   questionType={item.question_type}
+                  />
+                  )  :  item.question_type === "checkbox" ? (
+                    <CheckboxQuestion
+                    key={index} 
+                    index={index + 1}
+                    question={item.question}
+                    options={item.options}
+                    questionType={item.question_type}
                    
-                  // />
-                  // ) : item.question_type === "rating_scale" ? (
-                  //   <RatingScaleQuestion
-                  //     key={index} 
-                  //     index={index + 1}
-                  //     question={item.question}
-                  //     options={item.options}
-                  //     questionType={item.question_type}
+                  />
+                  ) : item.question_type === "rating_scale" ? (
+                    <RatingScaleQuestion
+                      key={index} 
+                      index={index + 1}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
                    
-                  //   />
-                  // )
-                  // :  item.question_type === "drop_down" ? (
-                  //   <DropdownQuestion
-                  //     index={index + 1}
-                  //     key={index}
-                  //     question={item.question}
-                  //     options={item.options}
-                  //     questionType={item.question_type}
+                    />
+                  )
+                  :  item.question_type === "drop_down" ? (
+                    <DropdownQuestion
+                      index={index + 1}
+                      key={index}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
                      
-                  //   />
-                  // )
-                  //  : item.question_type === "number" ? (
-                  //   <NumberQuestion
-                  //     key={index}
-                  //     index={index + 1}
-                  //     question={item.question}
-                  //     questionType={item.question_type}
+                    />
+                  )
+                   : item.question_type === "number" ? (
+                    <NumberQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      questionType={item.question_type}
                      
-                  //   />
-                  // ) 
+                    />
+                  ) 
                   : null}
                 </div>
               )
