@@ -49,10 +49,9 @@ const customBaseQuery: BaseQueryFn<
         "Something went wrong " +
           (result.error.data as { message: string })?.message
       );
-    }else if (status === 404) {
+    } else if (status === 404) {
       toast.error(
-        "Page not found" +
-          (result.error.data as { message: string })?.message
+        "Page not found" + (result.error.data as { message: string })?.message
       );
     }
   }
