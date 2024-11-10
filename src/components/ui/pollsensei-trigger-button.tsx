@@ -34,8 +34,8 @@ interface CustomButtonProps {
     | string[]
     | undefined
     | {
-        Head: string[];
-        Body: string[];
+      columns: string[];
+        rows: string[];
       };
   onSave: (
     updatedQuestion: string,

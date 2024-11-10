@@ -74,30 +74,22 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
 
   const { data:respondent_name } = useGetRespondentNameQuery(params.id);
   const { data:validate_ } = useValidateSurveyResponseQuery(params.id);
-  const { data:validate_individual_response, isLoading } = useValidateIndividualResponseQuery({
+  const { data:validate_individual_response, isLoading, refetch } = useValidateIndividualResponseQuery({
     id: params.id, pagesNumber:pagesNumber, path_params:path_params.toString()
+  },   {
+    skip: !path_params,
   });
   console.log(validate_individual_response)
   const validateSource = validate_individual_response?.data?.data && validate_individual_response?.data?.data?.length > 0 ? validate_individual_response?.data?.data[currentUserResponse] : validate_individual_response?.data
   const { validCount, invalidCount } = calculateValidationCounts2(validateSource);
   console.log(validateSource)
 
-  // let validCount = 0;
-  // let invalidCount = 0;
-  
-  // if (validate_individual_response?.data?.data?.length > 0 && currentUserResponse < validate_individual_response.data.data.length) {
-  //   const counts = calculateValidationCounts2(validate_individual_response.data.data[currentUserResponse]);
-  //   validCount = counts.validCount;
-  //   invalidCount = counts.invalidCount;
-  // }
-  
-
  
   const totalResponses = response_?.data?.total || 0;
   console.log(summary_)
 
  console.log(totalResponses)
-  // console.log(validate_individual_response?.data?.data);
+
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -106,6 +98,11 @@ const Responses: React.FC<{ data: any, }> = ({ data }) => {
     router.replace(newUrl); // Update the URL without reloading the page
   }, [activeTab, router]);
 
+  useEffect(() => {
+    if (name) {
+      refetch(); 
+    }
+  }, [name, refetch]);
 
 
   const handleNext = () => {

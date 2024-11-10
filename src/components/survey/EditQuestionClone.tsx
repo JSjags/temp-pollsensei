@@ -3,7 +3,13 @@ import Select from "react-select";
 import { MdDeleteOutline } from "react-icons/md";
 import { Switch } from "@/components/ui/switch";
 
-interface AddQuestionProps {
+interface EditQuestionCloneProps {
+  initialQuestion?: string;
+  initialQuestionType?: string;
+  initialOptions?: string[];
+  initialRows?: string[];
+  initialColumns?: string[];
+  isEditMode?: boolean;
   onSave?: (
     question: string,
     options: string[],
@@ -33,7 +39,14 @@ const customStyles = {
   }),
 };
 
-const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
+const EditQuestionClone: React.FC<EditQuestionCloneProps> = ({   initialQuestion = "",
+  initialQuestionType = "multiple_choice",
+  initialOptions = [""],
+  initialRows = [],
+  initialColumns = [],
+  isEditMode = false,
+  onSave,
+  onCancel, }) => {
   const [question, setQuestion] = useState<string>("");
   const [questionType, setQuestionType] = useState<string>("multiple_choice");
   const [options, setOptions] = useState<string[] | any>([""]);
@@ -42,6 +55,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [max, setMax] = useState<number | undefined>(undefined);
   const [rows, setRows] = useState<string[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
+  
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -317,4 +331,4 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   );
 };
 
-export default AddQuestion;
+export default EditQuestionClone;

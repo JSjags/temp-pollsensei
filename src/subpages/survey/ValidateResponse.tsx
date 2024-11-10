@@ -280,7 +280,7 @@ const ValidateResponse = () => {
                     // EditQuestion={() => EditQuestion(index)}
                     // DeleteQuestion={()=>handleDeleteQuestion(index)}
                   />
-                ) : item.question_type === "likert_Scale" ? (
+                ) : item.question_type === "likert_scale" ? (
                   <LikertScaleQuestion
                     question={item.question}
                     options={item.options}
