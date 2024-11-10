@@ -2,19 +2,27 @@ import { draggable, stars } from "@/assets/images";
 import Image from "next/image";
 import React from "react";
 import { usePathname } from "next/navigation";
+import { BsExclamation } from "react-icons/bs";
+import { Check } from "lucide-react";
+import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 
 interface MatrixQuestionProps {
   question: string;
   questionType: string;
-  options: {
-    Head: string[];
-    Body: string[];
-  };
+  // options: {
+  //   Head: string[];
+  //   Body: string[];
+  // };
+  rows: string[];
+  columns: string[];
   onChange?: (rowIndex: number, columnIndex: number) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
+  status?: string;
+  is_required?: boolean;
+  setIsRequired?: (value: boolean) => void;
   setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   onSave?: (
     updatedQuestion: string,
@@ -26,7 +34,9 @@ interface MatrixQuestionProps {
 
 const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
   question,
-  options,
+  // options,
+  rows,
+  columns,
   questionType,
   EditQuestion,
   index,
@@ -34,8 +44,31 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
   DeleteQuestion,
   onSave,
   setEditId,
+  status,
+  is_required,
+  setIsRequired,
 }) => {
   const pathname = usePathname();
+
+  const getStatus = (status: string) => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 mr-3">
+            <Check strokeWidth={1} className="text-xs text-white" />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
+            <BsExclamation />
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="mb-4 bg-[#FAFAFA] w-full p-3 gap-3 rounded">
@@ -59,20 +92,21 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                 triggerType="rephrase"
                 question={question}
                 optionType={questionType!}
-                options={options}
+                // options={options}
+                options={{ rows, columns }}
                 setEditId={setEditId}
                 onSave={onSave!}
                 index={index!}
               />
             </h3>
-            {pathname !== "/surveys/edit-survey" && <p>{questionType}</p>}
+            {/* {pathname !== "/surveys/edit-survey" && <p>{questionType}</p>} */}
           </div>
           <table className="w-full mt-4 border-collapse">
             <thead>
               <tr>
                 <th className="border-b border-gray-300 text-start"></th>{" "}
                 {/* Empty top-left corner */}
-                {options?.Head?.map((header, headerIndex) => (
+                {columns?.map((header, headerIndex) => (
                   <th
                     key={headerIndex}
                     className="border-b border-gray-300 text-center px-4 py-2"
@@ -83,12 +117,12 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
               </tr>
             </thead>
             <tbody>
-              {options?.Body?.map((rowLabel, rowIndex) => (
+              {rows?.map((rowLabel, rowIndex) => (
                 <tr key={rowIndex}>
                   <td className="border-b border-gray-300 text-start px-4 py-2">
                     {rowLabel}
                   </td>
-                  {options?.Head?.map((_, columnIndex) => (
+                  {columns?.map((_, columnIndex) => (
                     <td
                       key={columnIndex}
                       className="border-b border-gray-300 text-center"
@@ -107,14 +141,19 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
               ))}
             </tbody>
           </table>
-          {pathname === "/surveys/edit-survey" && (
+          {pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
+              {
+                pathname === "/surveys/add-question-m" ? "" : (
               <button
                 className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
                 onClick={EditQuestion}
               >
                 Edit
               </button>
+
+                ) 
+              }
               <button
                 className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
                 onClick={DeleteQuestion}
@@ -125,6 +164,31 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
           )}
         </div>
       </div>
+        {pathname.includes("edit-survey") || pathname === ("/surveys/add-question-m") && (
+          <div className="flex items-center gap-4">
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+        <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
+          pathname.includes("surveys/question") ? (
+            ""
+          ) : (
+            <p>{questionType === "matrix_checkbox" ? "Matrix" : ""}</p>
+          )}
+        </div>
+      {pathname.includes("survey-reponse-upload") && status && (
+        <div>{getStatus(status)}</div>
+      )}
     </div>
   );
 };

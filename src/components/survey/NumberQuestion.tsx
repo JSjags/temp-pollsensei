@@ -20,6 +20,8 @@ interface NumberQuestionProps {
   DeleteQuestion?: () => void;
   index: number;
   status?: string;
+  min?: number;
+  max?: number;
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
   setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
@@ -39,7 +41,8 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
   DeleteQuestion,
   index,
   response,
-
+  min,
+  max,
   options,
   onChange,
   status,
@@ -74,6 +77,21 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
         return null;
     }
   };
+
+  // const [value, setValue] = useState<string>("");
+  // const [errorNum, setErrorNum] = useState<string | null>(null);
+  // const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  //   const newValue = e.target.value;
+  //   setValue(newValue);
+
+  //   const numericValue = Number(newValue);
+  //   if ((min !== undefined && numericValue < min) || (max !== undefined && numericValue > max)) {
+  //     setErrorNum(`Please enter a number between ${min} and ${max}.`);
+  //   } else {
+  //     setErrorNum(null);
+  //   }
+  //   if (onChange) onChange(e);
+  // };
 
   return (
     <div
@@ -117,9 +135,10 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
           )}
         </div>
         <div>
+        {/* {errorNum && <p className="text-red-500 text-sm">{errorNum}</p>} */}
           <AutosizeTextarea
             className="w-full border-none rounded-md p-2"
-            placeholder="Type your response here..."
+            placeholder={min && max ? `Enter a number between ${min} and ${max}` : "Enter your response here"}
             style={{ borderColor: colorTheme }}
             onChange={onChange}
             value={response}

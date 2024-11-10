@@ -24,7 +24,7 @@ import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import QuestionType from "./QuestionType";
 import StyleEditor from "./StyleEditor";
 import AddQuestion from "./AddQuestion";
-import { addSection, resetSurvey } from "@/redux/slices/survey.slice";
+import { addSection, deleteQuestionFromSection, resetSurvey } from "@/redux/slices/survey.slice";
 import { useRouter } from "next/navigation";
 import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
@@ -65,6 +65,8 @@ const AddQuestionPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
+  const [currentSection, setCurrentSection] = useState(0);
+
   const [createSurvey, { isLoading, isSuccess, isError, error }] =
     useCreateSurveyMutation();
   const [
@@ -190,6 +192,15 @@ const AddQuestionPage = () => {
     dispatch(deleteQuestion({ questions, editIndex }));
   };
 
+  // const handleDeleteQuestion = (index: number) => {
+  //   dispatch(
+  //     deleteQuestionFromSection({
+  //       sectionIndex: currentSection,
+  //       questionIndex: index,
+  //     })
+  //   );
+  // };
+
   console.log(questions);
   return (
     <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16`}>
@@ -273,95 +284,7 @@ const AddQuestionPage = () => {
               </div>
             </div>
           )}
-          {/* <DragDropContext onDragEnd={handleDragEnd}>
-            <StrictModeDroppable droppableId="questions">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {questions?.map((item: any, index: any) => (
-                    <Draggable
-                      key={index}
-                      draggableId={index.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-4"
-                        >
-                          {
-                            isEdit && editIndex === index && item.question_type === "matrix_checkbox" ? (
-                              <MatrixQuestionEdit
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                              />
-                            ) :
-                            isEdit && editIndex === index ? (
-                              <MultiChoiceQuestionEdit
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                              />
-                            ) :
-                          item.question_type === "multiple_choice" ? (
-                            <MultiChoiceQuestion
-                              index={index + 1}
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              DeleteQuestion={()=>{}}
-                            />
-                          ) : item.question_type === "long_text" ? (
-                            <CommentQuestion
-                              key={index}
-                              index={index + 1}
-                              question={item.question}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                            />
-                          )
-                          : item.question_type === "likert_scale" ? (
-                            <LikertScaleQuestion
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          ) : item.question_type === "star_rating" ? (
-                            <StarRatingQuestion
-                              question={item.question}
-                              maxRating={5}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          )
-                           : item.question_type === "long_text" ? (
-                            <MatrixQuestion
-                              key={index}
-                              index={index + 1}
-                              options={item.objectptions}
-                              question={item.question}
-                              questionType={item.question_type}
-                            />
-                          ) : null}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </StrictModeDroppable>
-          </DragDropContext> */}
+
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
@@ -392,6 +315,7 @@ const AddQuestionPage = () => {
                                 DeleteQuestion={() =>
                                   handleDeleteQuestion(index)
                                 }
+                                
                               />
                             ) :  item.question_type === "single_choice" ? (
                               <SingleChoiceQuestion
@@ -493,9 +417,15 @@ const AddQuestionPage = () => {
                               <MatrixQuestion
                                 key={index}
                                 index={index + 1}
-                                options={item.options}
+                                // options={item.options}
+                                rows={item.rows}
+                                columns={item.columns}
                                 question={item.question}
+                                is_required={item.is_required}
                                 questionType={item.question_type}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
                               />
                             ) : item.question_type === "boolean" ? (
                               <BooleanQuestion
@@ -533,16 +463,45 @@ const AddQuestionPage = () => {
           {addquestions && (
             <AddQuestion
               onCancel={() => setAddQuestions((prev) => !prev)}
-              onSave={(question, options, questionType, is_required) => {
-                const newQuestion = {
-                  question: question,
-                  question_type: questionType,
-                  options: options,
-                  is_required: is_required,
-                };
-                console.log(newQuestion);
-                dispatch(addQuestion(newQuestion));
-                setAddQuestions((prev) => !prev);
+              onSave={(question, options, questionType, is_required, min, max, rows, columns ) => { 
+                if(questionType === 'number'){
+
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                    min: min,
+                    max: max
+                  };
+                  console.log(newQuestion);
+                  dispatch(addQuestion(newQuestion));
+                  setAddQuestions((prev) => !prev);
+                }else if(questionType === "matrix_checkbox"){
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                    rows: rows,
+                    columns: columns
+                  };
+                  console.log(newQuestion);
+                  dispatch(addQuestion(newQuestion));
+                  setAddQuestions((prev) => !prev);
+                }
+                else{
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                  };
+                  console.log(newQuestion);
+                  dispatch(addQuestion(newQuestion));
+                  setAddQuestions((prev) => !prev);
+
+                }
               }}
             />
           )}
