@@ -500,7 +500,7 @@ const SurveyCreationNav = () => {
                 //   <IoEyeOutline className="mr-1" /> Preview
                 // </button>
             }
-            {path.includes("/surveys/question") && (
+            {/* {path.includes("/surveys/question") && (
               <button
                 className="border-none flex items-center"
                 onClick={() => {
@@ -510,7 +510,7 @@ const SurveyCreationNav = () => {
                 <IoSettingsOutline className="mr-1" />
                 <span className="hidden xl:flex"> Survey Settings </span>
               </button>
-            )}
+            )} */}
             {path.includes("/surveys/question") && (
               <div className="relative">
                 <button

@@ -108,7 +108,11 @@ const PublicResponse = () => {
         text: textResponses[index] || "something",  
       };
     }
-    return null;
+    return  {
+      question: item.question,
+      question_type: item.question_type,
+      selected_options: [selectedOptions[index]],
+    };;
   })
   .filter(Boolean);
 
