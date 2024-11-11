@@ -23,7 +23,7 @@ const customStyles = {
     paddingLeft: "1.3rem",
     border: "none",
     backgroundColor: "#fff",
-    color: "#8A7575",
+    color: "#9900EF",
     outline: "none",
   }),
   option: (provided: any) => ({
@@ -110,6 +110,12 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
       case "long_text":
         setOptions([]);
         break;
+      case "boolean":
+        setOptions([
+          "True",
+          "False"
+        ]);
+        break;
       case "number":
         setOptions([]);
         break;
@@ -163,6 +169,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           ) : (
             <p>Option</p>
           )}
+          <div className="flex justify-end items-center">
           <Select
             className="select-container border-2 rounded mx-4 my-4"
             classNamePrefix="questionType"
@@ -175,6 +182,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
             styles={customStyles}
             onChange={handleQuestionTypeChange}
           />
+          </div>
         </div>
 
              {/* Rows and Columns for Matrix Checkbox */}
@@ -230,6 +238,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 
         {questionType !== "long_text" &&
           questionType !== "short_text" &&
+          questionType !== "boolean" &&
           questionType !== "matrix_checkbox" && (
             <div>
               {options?.map((option: any, index: any) => (
@@ -252,6 +261,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
               ))}
               {questionType === "long_text" ||
               questionType === "short_text" ||
+              questionType === "boolean" ||
               questionType === "number" ? (
                 ""
               ) : (
