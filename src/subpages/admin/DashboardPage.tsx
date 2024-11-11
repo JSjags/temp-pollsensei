@@ -105,7 +105,7 @@ const DashboardPage = () => {
                 <div className="flex justify-between items-center">
                   <p className="survey-head text-lg font-semibold">Surveys</p>
                   <button className="survey-view-btn w-auto text-sm">
-                    <Link href={"/surveys/created-surveys"}>View all</Link>
+                    <Link href={"/surveys/survey-list"}>View all</Link>
                   </button>
                 </div>
               </div>
