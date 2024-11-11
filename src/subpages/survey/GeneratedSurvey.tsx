@@ -19,6 +19,16 @@ import { RootState } from "@/redux/store";
 import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
 import { AnimatePresence, motion } from "framer-motion";
 import SenseiMaster from "@/components/sensei-master/SenseiMaster";
+import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
+import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
+import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
+import DropdownQuestion from "@/components/survey/DropdownQuestion";
+import NumberQuestion from "@/components/survey/NumberQuestion";
+import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
+import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
+import ShortTextQuestion from "@/components/survey/LongTextQuestion";
+import SliderQuestion from "@/components/survey/SliderQuestion";
+import BooleanQuestion from "@/components/survey/BooleanQuestion";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -176,7 +186,18 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 EditQuestion={() => EditQuestion(index)}
                                 canUseAI={true}
                               />
-                            ) : item.question_type === "comment" ||
+                            )  :  item.question_type === "single_choice" ? (
+                              <SingleChoiceQuestion
+                                index={index + 1}
+                                key={index}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                              
+                               
+                              />
+                            )
+                            : item.question_type === "comment" ||
                               item.question_type === "long_text" ? (
                               <CommentQuestion
                                 key={index}
@@ -188,11 +209,108 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                               <MatrixQuestion
                                 key={index}
                                 index={index + 1}
-                                options={item.options}
+                                // options={item.options}
+                                rows={item.rows}
+                                columns={item.columns}
                                 question={item.question}
                                 questionType={item.question_type}
                               />
-                            ) : null}
+                            ) :  item.question_type === "checkbox" ? (
+                              <CheckboxQuestion
+                              key={index} 
+                              index={index + 1}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              // EditQuestion={() => EditQuestion(index)}
+                              // DeleteQuestion={() =>
+                              //   handleDeleteQuestion(index)
+                              // }
+                            />
+                            ) : item.question_type === "rating_scale" ? (
+                              <RatingScaleQuestion
+                                key={index} 
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={() =>
+                                //   handleDeleteQuestion(index)
+                                // }
+                              />
+                            ) : item.question_type === "drop_down" ? (
+                              <DropdownQuestion
+                                index={index + 1}
+                                key={index}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={() =>
+                                //   handleDeleteQuestion(index)
+                                // }
+                              />
+                            )  : item.question_type === "number" ? (
+                              <NumberQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) : item.question_type === "short_text" ? (
+                              <ShortTextQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) 
+                             : item.question_type === "likert_scale" ? (
+                              <LikertScaleQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) : item.question_type === "star_rating" ? (
+                              <StarRatingQuestion
+                                question={item.question}
+                                // maxRating={5}
+                                index={index + 1}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={() =>
+                                //   handleDeleteQuestion(index)
+                                // }
+                              />
+                            )  : item.question_type === "boolean" ? (
+                              <BooleanQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={() =>
+                                //   handleDeleteQuestion(index)
+                                // }
+                              />
+                            )  : item.question_type === "slider" ? (
+                              <SliderQuestion
+                              question={item.question}
+                              options={item.options}
+                              // step={item.options.length}
+                              questionType={item.question_type}
+                              index={index + 1}
+                              is_required={item.is_required}
+                              />
+                            )
+                             : null}
                           </div>
                         )}
                       </Draggable>
