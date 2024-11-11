@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
-import { IoDocumentOutline } from "react-icons/io5";
 import { VscLayersActive } from "react-icons/vsc";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -109,11 +108,6 @@ const AddQuestionPage = () => {
   };
 
   const handleSurveyCreation = async () => {
-    // if (logoUrl === "" || headerUrl === "") {
-    //   toast.warning("Header image and logo cannot be empty");
-    //   return null;
-    // }
-
     const sectionExists = survey.sections.some(
       (section) =>
         section.section_topic === sectionTitle &&
@@ -176,7 +170,7 @@ const AddQuestionPage = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError]);
+  }, [progressError, progressIsError, progressSuccess]);
 
   const handleCancel = () => {
     // setEditIndex(null);
@@ -192,14 +186,7 @@ const AddQuestionPage = () => {
     dispatch(deleteQuestion({ questions, editIndex }));
   };
 
-  // const handleDeleteQuestion = (index: number) => {
-  //   dispatch(
-  //     deleteQuestionFromSection({
-  //       sectionIndex: currentSection,
-  //       questionIndex: index,
-  //     })
-  //   );
-  // };
+
 
   console.log(questions);
   return (
