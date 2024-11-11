@@ -267,7 +267,9 @@ const CreateNewSection = () => {
                             <MatrixQuestion
                               key={index}
                               index={index + 1}
-                              options={item.options}
+                              columns={item.columns}
+                              rows={item.rows}
+                              // options={item.options}
                               question={item.question}
                               questionType={item.question_type}
                             />
