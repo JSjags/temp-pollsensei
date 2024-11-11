@@ -29,12 +29,10 @@ interface DataProps {
   uploaded_files: any;
 }
 interface OCRResponse {
-
   extracted_answers: Answer[];
   survey: any;
   uploaded_files: any;
- }
-
+}
 
 const ValidateResponse = () => {
   const params = useParams();
@@ -53,7 +51,8 @@ const ValidateResponse = () => {
   const [respondent_phone, setRespondent_phone] = useState("");
   const [respondent_country, setRespondent_country] = useState("");
   // const [respondent_email, setRespondent_email] = useState( "" || "example@gmail.com");
-  const [respondent_email, setRespondent_email] = useState<string>("example@gmail.com");
+  const [respondent_email, setRespondent_email] =
+    useState<string>("example@gmail.com");
 
   const [filteredData, setFilteredData] = useState([]);
 
@@ -63,7 +62,9 @@ const ValidateResponse = () => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
         // @ts-ignore
-        return prevIndex < OCRresponses[currentSection]?.survey?.length - 1 ? prevIndex + 1 : prevIndex;
+        return prevIndex < OCRresponses[currentSection]?.survey?.length - 1
+          ? prevIndex + 1
+          : prevIndex;
       } else {
         return prevIndex > 0 ? prevIndex - 1 : prevIndex;
       }
@@ -81,7 +82,7 @@ const ValidateResponse = () => {
           return {
             question: item.question,
             question_type: item.question_type,
-            selected_options: item.selected_options || [], 
+            selected_options: item.selected_options || [],
           };
         } else if (
           item.question_type === "comment" ||
@@ -106,18 +107,13 @@ const ValidateResponse = () => {
       respondent_email: respondent_email,
       answers: answers,
     };
-    console.log(responsePayload)
+    console.log(responsePayload);
     try {
       await submitResponse(responsePayload);
     } catch (e) {
       console.log(e);
     }
   };
-
- 
-
-  
- 
 
   useEffect(() => {
     if (isSuccess) {
@@ -151,28 +147,28 @@ const ValidateResponse = () => {
       return uniqueQuestions;
     }
 
-    const currentExtractedAnswers = OCRresponses[currentSection]?.extracted_answers || [];
+    const currentExtractedAnswers =
+      OCRresponses?.[currentSection]?.extracted_answers || [];
     const uniqueFilteredData = filterUniqueQuestions(currentExtractedAnswers);
     // @ts-ignore
-    setFilteredData(uniqueFilteredData); 
+    setFilteredData(uniqueFilteredData);
   }, [OCRresponses, currentSection]);
-
 
   return (
     <div
       className={`${
-        (OCRresponses as any)[currentSection]?.survey?.theme
+        (OCRresponses as any)?.[currentSection]?.survey?.theme
       } flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}
     >
       <div
         className={`${
-          (OCRresponses as any)[currentSection]?.survey?.theme
+          (OCRresponses as any)?.[currentSection]?.survey?.theme
         } flex justify-between gap-10 w-full`}
       >
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
           <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
             <Image
-              src={(OCRresponses as any)[currentSection]?.survey?.logo_url}
+              src={(OCRresponses as any)?.[currentSection]?.survey?.logo_url}
               alt=""
               className="w-full object-cover bg-no-repeat h-16 rounded-full"
               width={"100"}
@@ -182,7 +178,7 @@ const ValidateResponse = () => {
 
           <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
             <Image
-              src={(OCRresponses as any)[currentSection]?.survey?.header_url}
+              src={(OCRresponses as any)?.[currentSection]?.survey?.header_url}
               alt=""
               className="w-full object-cover bg-no-repeat h-24 rounded-lg"
               width={"100"}
@@ -193,24 +189,36 @@ const ValidateResponse = () => {
             <h2
               className="text-[1.5rem] font-normal"
               style={{
-                fontSize: `${(OCRresponses as any)[currentSection]?.survey?.header_text?.size}px`,
-                fontFamily: `${(OCRresponses as any)[currentSection]?.survey?.header_text?.name}`,
+                fontSize: `${
+                  (OCRresponses as any)?.[currentSection]?.survey?.header_text
+                    ?.size
+                }px`,
+                fontFamily: `${
+                  (OCRresponses as any)?.[currentSection]?.survey?.header_text
+                    ?.name
+                }`,
               }}
             >
-              {(OCRresponses as any)[currentSection]?.survey?.topic}
+              {(OCRresponses as any)?.[currentSection]?.survey?.topic}
             </h2>
             <p
               style={{
-                fontSize: `${(OCRresponses as any)[currentSection]?.survey?.body_text?.size}px`,
-                fontFamily: `${(OCRresponses as any)[currentSection]?.survey?.body_text?.name}`,
+                fontSize: `${
+                  (OCRresponses as any)?.[currentSection]?.survey?.body_text
+                    ?.size
+                }px`,
+                fontFamily: `${
+                  (OCRresponses as any)?.[currentSection]?.survey?.body_text
+                    ?.name
+                }`,
               }}
             >
-              {(OCRresponses as any)[currentSection]?.survey?.description}
+              {(OCRresponses as any)?.[currentSection]?.survey?.description}
             </p>
           </div>
 
           <div className="flex flex-col gap-2 w-full bg-white px-11 py-4 rounded-lg mb-4">
-            {(OCRresponses as any)[currentSection]?.survey?.settings
+            {(OCRresponses as any)?.[currentSection]?.survey?.settings
               ?.collect_email_addresses && (
               <div className="flex flex-col w-full">
                 <label htmlFor="full name" className="pl-5">
@@ -225,7 +233,7 @@ const ValidateResponse = () => {
                 />
               </div>
             )}
-            {(OCRresponses as any)[currentSection]?.survey?.settings
+            {(OCRresponses as any)?.[currentSection]?.survey?.settings
               ?.collect_name_of_respondents && (
               <div className="flex flex-col w-full">
                 <label htmlFor="full name" className="pl-5">
@@ -243,73 +251,71 @@ const ValidateResponse = () => {
           </div>
 
           {/* @ts-ignore */}
-          {filteredData?.map(
-            (item: any, index: number) => (
-              <div key={index} className="mb-4">
-                {item.question_type === "multiple_choice" ||
-                item.question_type === "multi_choice" ? (
-                  <AnswerMultiChoiceQuestion
-                    key={index}
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    selectedOptions={item.selected_options || []}
-                    onChange={(selected) =>
-                      // handleQuestionChange(index, selected)
-                      console.log(selected)
-                    }
-                    index={index + 1}
-                  />
-                ) : item.question_type === "comment" ||
-                  item.question_type === "long_text" ? (
-                  <CommentQuestion
-                    key={index}
-                    index={index + 1}
-                    questionType={item.question_type}
-                    question={item.question}
-                    response={item.text}
-                    // EditQuestion={() => EditQuestion(index)}
-                    // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  />
-                ) : item.question_type === "linear_Scale" ? (
-                  <LinearScaleQuestion
-                    question={item.question}
-                    scaleStart={item.scaleStart}
-                    scaleEnd={item.scaleEnd}
-                    questionType={item.question_type}
-                    // EditQuestion={() => EditQuestion(index)}
-                    // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  />
-                ) : item.question_type === "likert_Scale" ? (
-                  <LikertScaleQuestion
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    // EditQuestion={() => EditQuestion(index)}
-                    // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  />
-                ) : item.question_type === "star_rating" ? (
-                  <StarRatingQuestion
-                    question={item.question}
-                    // maxRating={5}
-                    questionType={item.question_type}
-                    // EditQuestion={() => EditQuestion(index)}
-                    // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  />
-                ) : item.question_type === "matrix_checkbox" ? (
-                  <MatrixQuestion
-                    key={index}
-                    index={index + 1}
-                    options={item.options}
-                    questionType={item.question_type}
-                    question={item.question}
-                    // EditQuestion={() => EditQuestion(index)}
-                    // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  />
-                ) : null}
-              </div>
-            )
-          )}
+          {filteredData?.map((item: any, index: number) => (
+            <div key={index} className="mb-4">
+              {item.question_type === "multiple_choice" ||
+              item.question_type === "multi_choice" ? (
+                <AnswerMultiChoiceQuestion
+                  key={index}
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
+                  selectedOptions={item.selected_options || []}
+                  onChange={(selected) =>
+                    // handleQuestionChange(index, selected)
+                    console.log(selected)
+                  }
+                  index={index + 1}
+                />
+              ) : item.question_type === "comment" ||
+                item.question_type === "long_text" ? (
+                <CommentQuestion
+                  key={index}
+                  index={index + 1}
+                  questionType={item.question_type}
+                  question={item.question}
+                  response={item.text}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) : item.question_type === "linear_Scale" ? (
+                <LinearScaleQuestion
+                  question={item.question}
+                  scaleStart={item.scaleStart}
+                  scaleEnd={item.scaleEnd}
+                  questionType={item.question_type}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) : item.question_type === "likert_Scale" ? (
+                <LikertScaleQuestion
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) : item.question_type === "star_rating" ? (
+                <StarRatingQuestion
+                  question={item.question}
+                  // maxRating={5}
+                  questionType={item.question_type}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) : item.question_type === "matrix_checkbox" ? (
+                <MatrixQuestion
+                  key={index}
+                  index={index + 1}
+                  options={item.options}
+                  questionType={item.question_type}
+                  question={item.question}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) : null}
+            </div>
+          ))}
           <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
             <div className="flex gap-2 items-center"></div>
             {OCRresponses?.length > 1 && (
@@ -324,13 +330,12 @@ const ValidateResponse = () => {
           </div>
 
           <div className=" rounded-md flex  items-center w-full md:min-w-[16rem] py-5 text-center">
-
             <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
               type="button"
-              onClick={()=>{
+              onClick={() => {
                 dispatch(replaceAnswers(filteredData));
-                console.log("You clicked me")
+                console.log("You clicked me");
               }}
             >
               Remove duplicate questions
@@ -338,12 +343,12 @@ const ValidateResponse = () => {
             <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
               type="button"
-              onClick={()=>{
-                setTimeout(()=>{
-                  router.push("/surveys/survey-list")
-                  toast.success("Successful")
+              onClick={() => {
+                setTimeout(() => {
+                  router.push("/surveys/survey-list");
+                  toast.success("Successful");
                   dispatch(resetAnswers());
-                }, 3000)
+                }, 3000);
               }}
             >
               {isLoading ? "Submitting..." : "Submit"}
@@ -362,7 +367,7 @@ const ValidateResponse = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          <PreviewFile data={OCRresponses[currentSection]?.uploaded_files} />
+          <PreviewFile data={OCRresponses?.[currentSection]?.uploaded_files} />
         </div>
       </div>
     </div>

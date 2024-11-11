@@ -97,7 +97,7 @@ export default function Milestones({
         label: "Collect Data",
         options: ["Buy Respondents", "Share Survey"],
       },
-      position: { x: 1250, y: 255 },
+      position: { x: 1250, y: 253 },
       sourcePosition: Position.Left,
       targetPosition: Position.Top,
       style: {
@@ -459,6 +459,7 @@ export default function Milestones({
           router.push(`/surveys/question/${surveyId}`);
         }
       }
+
       if (id === "5") {
         if (label === "Validate Response") {
           router.push(`/surveys/${surveyId}/validate-response`);
@@ -495,13 +496,19 @@ export default function Milestones({
     return (
       <div
         style={{
-          border: data.options ? "2px dashed #EB06AB" : "",
+          border: data.options
+            ? currentStage === parseInt(id)
+              ? "2px dashed #EB06AB"
+              : currentStage >= parseInt(id)
+              ? "4px dashed #EB06AB"
+              : "2px dashed #EB06AB"
+            : "",
           borderStyle:
             currentStage === parseInt(id)
               ? "dashed"
               : currentStage >= parseInt(id)
-              ? "dashed"
-              : "solid",
+              ? "solid"
+              : "dashed",
           borderRadius: "8px",
           textAlign: "center",
           cursor: "pointer",
