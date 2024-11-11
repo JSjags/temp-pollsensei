@@ -247,7 +247,7 @@ const CreateNewSection = () => {
                               question={item.question}
                               questionType={item.question_type}
                             />
-                          ) : item.question_type === "likert_Scale" ? (
+                          ) : item.question_type === "likert_scale" ? (
                             <LikertScaleQuestion
                               question={item.question}
                               options={item.options}

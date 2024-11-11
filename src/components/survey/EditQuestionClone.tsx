@@ -3,7 +3,13 @@ import Select from "react-select";
 import { MdDeleteOutline } from "react-icons/md";
 import { Switch } from "@/components/ui/switch";
 
-interface AddQuestionProps {
+interface EditQuestionCloneProps {
+  initialQuestion?: string;
+  initialQuestionType?: string;
+  initialOptions?: string[];
+  initialRows?: string[];
+  initialColumns?: string[];
+  isEditMode?: boolean;
   onSave?: (
     question: string,
     options: string[],
@@ -23,7 +29,7 @@ const customStyles = {
     paddingLeft: "1.3rem",
     border: "none",
     backgroundColor: "#fff",
-    color: "#9900EF",
+    color: "#8A7575",
     outline: "none",
   }),
   option: (provided: any) => ({
@@ -33,7 +39,14 @@ const customStyles = {
   }),
 };
 
-const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
+const EditQuestionClone: React.FC<EditQuestionCloneProps> = ({   initialQuestion = "",
+  initialQuestionType = "multiple_choice",
+  initialOptions = [""],
+  initialRows = [],
+  initialColumns = [],
+  isEditMode = false,
+  onSave,
+  onCancel, }) => {
   const [question, setQuestion] = useState<string>("");
   const [questionType, setQuestionType] = useState<string>("multiple_choice");
   const [options, setOptions] = useState<string[] | any>([""]);
@@ -42,6 +55,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [max, setMax] = useState<number | undefined>(undefined);
   const [rows, setRows] = useState<string[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
+  
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -110,12 +124,6 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
       case "long_text":
         setOptions([]);
         break;
-      case "boolean":
-        setOptions([
-          "True",
-          "False"
-        ]);
-        break;
       case "number":
         setOptions([]);
         break;
@@ -169,7 +177,6 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
           ) : (
             <p>Option</p>
           )}
-          <div className="flex justify-end items-center">
           <Select
             className="select-container border-2 rounded mx-4 my-4"
             classNamePrefix="questionType"
@@ -182,7 +189,6 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
             styles={customStyles}
             onChange={handleQuestionTypeChange}
           />
-          </div>
         </div>
 
              {/* Rows and Columns for Matrix Checkbox */}
@@ -238,7 +244,6 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 
         {questionType !== "long_text" &&
           questionType !== "short_text" &&
-          questionType !== "boolean" &&
           questionType !== "matrix_checkbox" && (
             <div>
               {options?.map((option: any, index: any) => (
@@ -261,7 +266,6 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
               ))}
               {questionType === "long_text" ||
               questionType === "short_text" ||
-              questionType === "boolean" ||
               questionType === "number" ? (
                 ""
               ) : (
@@ -327,4 +331,4 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   );
 };
 
-export default AddQuestion;
+export default EditQuestionClone;

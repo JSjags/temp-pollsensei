@@ -1,20 +1,18 @@
-import { draggable } from "@/assets/images";
+import { draggable, stars } from "@/assets/images";
+import { RootState } from "@/redux/store";
 import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { Button } from "../ui/button";
-import { stars } from "@/assets/images";
-import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
-import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
+import { BsExclamation } from "react-icons/bs";
 import { Switch } from "../ui/switch";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 
-interface MultiChoiceQuestionProps {
+interface RatingScaleQuestionProps {
   question: string;
   questionType: string;
-  options: string[] | undefined;
+  options: string[] | undefined; // Options represent each rating level
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
@@ -32,7 +30,7 @@ interface MultiChoiceQuestionProps {
   setIsRequired?: (value: boolean) => void;
 }
 
-const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
+const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
   question,
   options,
   questionType,
@@ -55,15 +53,14 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  // State to store the selected option
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  // State to store the selected rating
+  const [selectedRating, setSelectedRating] = useState<string | null>(null);
 
-  // Handle option selection
-  const handleOptionChange = (option: string) => {
-    setSelectedOption(option); // Set the selected option
-    console.log(`Selected option for question ${question}:`, option); // Log the selected option
+  // Handle rating selection
+  const handleRatingChange = (option: string) => {
+    setSelectedRating(option);
     if (onChange) {
-      onChange(option); // Trigger external onChange callback if provided
+      onChange(option);
     }
   };
 
@@ -81,7 +78,6 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             <BsExclamation />
           </div>
         );
-
       default:
         return null;
     }
@@ -131,44 +127,45 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             </div>
           </h3>
         </div>
-        {options?.map((option, optionIndex) => (
-          <div key={optionIndex} className="flex items-center my-2">
-            <label className="relative flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                id={`option-${optionIndex}`}
-                name={question}
-                value={option}
-                className="mr-2 text-[#5B03B2] radio hidden peer"
-                checked={selectedOption === option}
-                required={is_required}
-                onChange={() => handleOptionChange(option)}
-              />
-              <span
-                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
-                style={{ borderColor: colorTheme }}
-              ></span>
-              <span className="ml-2">{option}</span>
-            </label>
-          </div>
-        ))}
+
+        {/* Rating Scale UI */}
+        <div className="flex items-center justify-between gap-2 my-4 w-full">
+          {options?.map((option, optionIndex) => (
+            <div className="flex flex-col justify-center items-center" key={optionIndex}>
+              <button
+                type="button"
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  selectedRating === option
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-200 text-gray-600"
+                } hover:bg-purple-600 hover:text-white transition-colors duration-200`}
+                onClick={() => handleRatingChange(option)}
+              >
+              </button>
+               <span className="flex items-center justify-center"> {option}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Edit and Delete Buttons */}
         {/* {pathname === "/surveys/edit-survey" && (
           <div className="flex justify-end gap-4">
             <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
+              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
               onClick={EditQuestion}
             >
               Edit
             </button>
             <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
+              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
             >
               Delete
             </button>
           </div>
-        )} */} 
-          {pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
+        )} */}
+
+{pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
               {
                 pathname === "/surveys/add-question-m" ? "" : (
@@ -189,6 +186,8 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
               </button>
             </div>
           )}
+
+        {/* Required Toggle */}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
             <span>Required</span>
@@ -203,12 +202,14 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
             />
           </div>
         )}
+
+        {/* Display Question Type Label */}
         <div className="flex justify-end">
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (
-            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
+            <p>{questionType === "rating_scale" ? "Rating Scale" : ""}</p>
           )}
         </div>
       </div>
@@ -219,4 +220,4 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   );
 };
 
-export default MultiChoiceQuestion;
+export default RatingScaleQuestion;

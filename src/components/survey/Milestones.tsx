@@ -462,7 +462,8 @@ export default function Milestones({
 
       if (id === "5") {
         if (label === "Validate Response") {
-          router.push(`/surveys/${surveyId}/validate-response`);
+          router.push(`/surveys/${surveyId}/survey-reponse-upload`);
+
           // alert(label);
         }
       }

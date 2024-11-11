@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
-import { IoDocumentOutline } from "react-icons/io5";
 import { VscLayersActive } from "react-icons/vsc";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -24,7 +23,7 @@ import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import QuestionType from "./QuestionType";
 import StyleEditor from "./StyleEditor";
 import AddQuestion from "./AddQuestion";
-import { addSection, resetSurvey } from "@/redux/slices/survey.slice";
+import { addSection, deleteQuestionFromSection, resetSurvey } from "@/redux/slices/survey.slice";
 import { useRouter } from "next/navigation";
 import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
@@ -39,6 +38,11 @@ import MultiChoiceQuestionEdit from "../milestone/Test";
 import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import ShortTextQuestion from "@/components/survey/LongTextQuestion";
 import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
+import SliderQuestion from "@/components/survey/SliderQuestion";
+import NumberQuestion from "@/components/survey/NumberQuestion";
+import DropdownQuestion from "@/components/survey/DropdownQuestion";
+import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
+import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -60,6 +64,8 @@ const AddQuestionPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
+  const [currentSection, setCurrentSection] = useState(0);
+
   const [createSurvey, { isLoading, isSuccess, isError, error }] =
     useCreateSurveyMutation();
   const [
@@ -102,11 +108,6 @@ const AddQuestionPage = () => {
   };
 
   const handleSurveyCreation = async () => {
-    // if (logoUrl === "" || headerUrl === "") {
-    //   toast.warning("Header image and logo cannot be empty");
-    //   return null;
-    // }
-
     const sectionExists = survey.sections.some(
       (section) =>
         section.section_topic === sectionTitle &&
@@ -169,7 +170,7 @@ const AddQuestionPage = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError]);
+  }, [progressError, progressIsError, progressSuccess]);
 
   const handleCancel = () => {
     // setEditIndex(null);
@@ -185,13 +186,15 @@ const AddQuestionPage = () => {
     dispatch(deleteQuestion({ questions, editIndex }));
   };
 
+
+
   console.log(questions);
   return (
     <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
-          {logoUrl ? (
-            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white flex items-center flex-col ">
+          {logoUrl && (
+ <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
               <Image
                 src={
                   logoUrl instanceof File
@@ -201,29 +204,27 @@ const AddQuestionPage = () => {
                     : sparkly
                 }
                 alt=""
-                className="w-full object-cover bg-no-repeat h-16 rounded-full"
+                   className="w-full object-cover rounded  bg-no-repeat h-16 "
                 width={"100"}
                 height={"200"}
               />
             </div>
-          ) : (
-            <div className="bg-[#9D50BB] rounded-full w-1/3 my-5 text-white py-3 flex items-center flex-col ">
-              <p>LOGO GOES HERE</p>
-            </div>
           )}{" "}
-          <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
-            <Image
-              src={
-                headerUrl 
-                  ? headerUrl
-                  : sparkly
-              }
-              alt=""
-              className="w-full object-cover bg-no-repeat h-24 rounded-lg"
-              width={"100"}
-              height={"200"}
-            />
-          </div>
+       {headerUrl &&  (<div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+         <Image
+                    src={
+                      headerUrl instanceof File
+                        ? URL.createObjectURL(headerUrl)
+                        : typeof headerUrl === "string"
+                        ? headerUrl
+                        : sparkly
+                    }
+                    alt=""
+                    className="w-full object-cover bg-no-repeat h-24 rounded-lg"
+                    width={"100"}
+                    height={"200"}
+                  />
+          </div>)}
           {isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
               <AutosizeTextarea
@@ -270,95 +271,7 @@ const AddQuestionPage = () => {
               </div>
             </div>
           )}
-          {/* <DragDropContext onDragEnd={handleDragEnd}>
-            <StrictModeDroppable droppableId="questions">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {questions?.map((item: any, index: any) => (
-                    <Draggable
-                      key={index}
-                      draggableId={index.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-4"
-                        >
-                          {
-                            isEdit && editIndex === index && item.question_type === "matrix_checkbox" ? (
-                              <MatrixQuestionEdit
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                              />
-                            ) :
-                            isEdit && editIndex === index ? (
-                              <MultiChoiceQuestionEdit
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                onSave={handleSave}
-                                onCancel={handleCancel}
-                              />
-                            ) :
-                          item.question_type === "multiple_choice" ? (
-                            <MultiChoiceQuestion
-                              index={index + 1}
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              DeleteQuestion={()=>{}}
-                            />
-                          ) : item.question_type === "long_text" ? (
-                            <CommentQuestion
-                              key={index}
-                              index={index + 1}
-                              question={item.question}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                            />
-                          )
-                          : item.question_type === "likert_Scale" ? (
-                            <LikertScaleQuestion
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          ) : item.question_type === "star_rating" ? (
-                            <StarRatingQuestion
-                              question={item.question}
-                              maxRating={5}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          )
-                           : item.question_type === "long_text" ? (
-                            <MatrixQuestion
-                              key={index}
-                              index={index + 1}
-                              options={item.objectptions}
-                              question={item.question}
-                              questionType={item.question_type}
-                            />
-                          ) : null}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </StrictModeDroppable>
-          </DragDropContext> */}
+
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
@@ -389,6 +302,7 @@ const AddQuestionPage = () => {
                                 DeleteQuestion={() =>
                                   handleDeleteQuestion(index)
                                 }
+                                
                               />
                             ) :  item.question_type === "single_choice" ? (
                               <SingleChoiceQuestion
@@ -401,6 +315,52 @@ const AddQuestionPage = () => {
                                 DeleteQuestion={() =>
                                   handleDeleteQuestion(index)
                                 }
+                              />
+                            ) :  item.question_type === "checkbox" ? (
+                              <CheckboxQuestion
+                              key={index} 
+                              index={index + 1}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() =>
+                                handleDeleteQuestion(index)
+                              }
+                            />
+                            ) : item.question_type === "rating_scale" ? (
+                              <RatingScaleQuestion
+                                key={index} 
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
+                              />
+                            )
+                            :  item.question_type === "drop_down" ? (
+                              <DropdownQuestion
+                                index={index + 1}
+                                key={index}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
+                              />
+                            )
+                             : item.question_type === "number" ? (
+                              <NumberQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
                               />
                             )
                              : item.question_type === "long_text" ? (
@@ -444,9 +404,15 @@ const AddQuestionPage = () => {
                               <MatrixQuestion
                                 key={index}
                                 index={index + 1}
-                                options={item.options}
+                                // options={item.options}
+                                rows={item.rows}
+                                columns={item.columns}
                                 question={item.question}
+                                is_required={item.is_required}
                                 questionType={item.question_type}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
                               />
                             ) : item.question_type === "boolean" ? (
                               <BooleanQuestion
@@ -460,7 +426,17 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
-                            ) : null
+                            )  : item.question_type === "slider" ? (
+                              <SliderQuestion
+                              question={item.question}
+                              options={item.options}
+                              // step={item.options.length}
+                              questionType={item.question_type}
+                              index={index + 1}
+                              is_required={item.is_required}
+                              />
+                            )
+                             : null
                           }
                         </div>
                       )}
@@ -474,16 +450,45 @@ const AddQuestionPage = () => {
           {addquestions && (
             <AddQuestion
               onCancel={() => setAddQuestions((prev) => !prev)}
-              onSave={(question, options, questionType, is_required) => {
-                const newQuestion = {
-                  question: question,
-                  question_type: questionType,
-                  options: options,
-                  is_required: is_required,
-                };
-                console.log(newQuestion);
-                dispatch(addQuestion(newQuestion));
-                setAddQuestions((prev) => !prev);
+              onSave={(question, options, questionType, is_required, min, max, rows, columns ) => { 
+                if(questionType === 'number'){
+
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                    min: min,
+                    max: max
+                  };
+                  console.log(newQuestion);
+                  dispatch(addQuestion(newQuestion));
+                  setAddQuestions((prev) => !prev);
+                }else if(questionType === "matrix_checkbox"){
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                    rows: rows,
+                    columns: columns
+                  };
+                  console.log(newQuestion);
+                  dispatch(addQuestion(newQuestion));
+                  setAddQuestions((prev) => !prev);
+                }
+                else{
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                  };
+                  console.log(newQuestion);
+                  dispatch(addQuestion(newQuestion));
+                  setAddQuestions((prev) => !prev);
+
+                }
               }}
             />
           )}

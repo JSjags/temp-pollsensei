@@ -650,7 +650,7 @@ function TestZone({
   return (
     <div
       ref={drop as any}
-      className="p-4 w-full rounded-lg border border-[#BDBDBD] bg-white max-h-[370px] min-h-[240px] sm:min-h-[370px] !m-0"
+      className="p-4 w-full rounded-lg border border-[#BDBDBD] bg-white min-h-[240px] sm:min-h-[370px] !m-0"
     >
       <div className="flex justify-between items-center mb-2">
         <h3 className="font-semibold">{test.name}</h3>

@@ -27,7 +27,7 @@ interface UserResponseProps {
 
 const UserResponses: React.FC<UserResponseProps> = ({ data, index, isLoading }) => {
   console.log(data);
-  console.log(index);
+  console.log(isLoading);
   const [currentSection, setCurrentSection] = useState(0);
 
   const navigatePage = (direction: any) => {
@@ -59,14 +59,7 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index, isLoading }) 
 
   return (
     <div className={`flex flex-col gap-5 w-full relative mt-4`}>
-     {
-      isLoading ? (
-        <div className="w-full h-100 flex justify-center items-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="sr-only">Loading...</span>
-          </div>
-        </div>
-      ) : (
+  
         <div className={`flex  flex-col justify-between gap-10 w-full`}>
         {data?.answers?.map((item: any, index: number) => (
           <div key={index} className="mb-4">
@@ -105,7 +98,7 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index, isLoading }) 
                 // EditQuestion={() => EditQuestion(index)}
                 // DeleteQuestion={()=>handleDeleteQuestion(index)}
               />
-            ) : item.question_type === "likert_Scale" ? (
+            ) : item.question_type === "likert_scale" ? (
               <LikertScaleQuestion
                 question={item.question}
                 options={item.options}
@@ -125,7 +118,9 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index, isLoading }) 
               <MatrixQuestion
                 key={index}
                 index={index + 1}
-                options={item.options}
+                // options={item.options}
+                rows={item.rows}
+                columns={item.columns}
                 questionType={item.question_type}
                 question={item.question}
                 // EditQuestion={() => EditQuestion(index)}
@@ -135,8 +130,7 @@ const UserResponses: React.FC<UserResponseProps> = ({ data, index, isLoading }) 
           </div>
         ))}
       </div>
-      )
-     }
+   
     </div>
   );
 };

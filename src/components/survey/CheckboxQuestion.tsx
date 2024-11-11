@@ -11,7 +11,7 @@ import { BsExclamation } from "react-icons/bs";
 import { Check } from "lucide-react";
 import { Switch } from "../ui/switch";
 
-interface MultiChoiceQuestionProps {
+interface CheckboxQuestionProps {
   question: string;
   questionType: string;
   options: string[] | undefined;
@@ -32,7 +32,7 @@ interface MultiChoiceQuestionProps {
   setIsRequired?: (value: boolean) => void;
 }
 
-const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
+const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
   question,
   options,
   questionType,
@@ -139,15 +139,15 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                 id={`option-${optionIndex}`}
                 name={question}
                 value={option}
-                className="mr-2 text-[#5B03B2] radio hidden peer"
+                className="mr-2 text-[#5B03B2]  peer"
                 checked={selectedOption === option}
                 required={is_required}
                 onChange={() => handleOptionChange(option)}
               />
-              <span
+              {/* <span
                 className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
                 style={{ borderColor: colorTheme }}
-              ></span>
+              ></span> */}
               <span className="ml-2">{option}</span>
             </label>
           </div>
@@ -167,7 +167,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
               Delete
             </button>
           </div>
-        )} */} 
+        )} */}
           {pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
               {
@@ -219,4 +219,4 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   );
 };
 
-export default MultiChoiceQuestion;
+export default CheckboxQuestion;
