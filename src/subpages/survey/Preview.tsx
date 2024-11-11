@@ -163,7 +163,9 @@ const Preview = () => {
                     <MatrixQuestion
                       key={index}
                       index={index + 1}
-                      options={item.options}
+                      // options={item.options}
+                      rows={item.rows}
+                      columns={item.columns}
                       questionType={item.question_type}
                       question={item.question}
                     />

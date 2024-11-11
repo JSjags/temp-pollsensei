@@ -87,22 +87,22 @@ const Footer = (props: Props) => {
             <div>
               <h4 className="text-lg font-semibold text-[#606060] mb-4">Socials</h4>
               <div className="flex flex-col">
-                <a href="#" className="text-black hover:text-white">
+                <Link href="https://x.com/pollsenseiAI?t=7fKJdJRHIPfnOLlzEd6oYw&s=09" className="text-black hover:text-white">
                   {/* <FaTwitter /> */}
                   Twitter
-                </a>
-                <a href="#" className="text-black hover:text-white">
+                </Link>
+                <Link href="https://www.facebook.com/profile.php?id=61567009761421&mibextid=ZbWKwL" className="text-black hover:text-white">
                   {/* <FaFacebook /> */}
                   Facebook
-                </a>
+                </Link>
                 <a href="#" className="text-black hover:text-white">
                   {/* <FaLinkedin /> */}
                   Linkedin
                 </a>
-                <a href="#" className="text-black hover:text-white">
+                <Link href="https://www.instagram.com/pollsensei/" className="text-black hover:text-white">
                   {/* <FaInstagram /> */}
                   Instagram
-                </a>
+                </Link>
                 <a href="#" className="text-black hover:text-white">
                   {/* <FaInstagram /> */}
                   Contact Us
@@ -112,7 +112,7 @@ const Footer = (props: Props) => {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 text-black">
-          <p>&copy; 2024 PollSensei. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Oaks Intelligence Limited. All rights reserved.</p>
         </div>
       </div>
       <Image src={footer_logo} alt="Logo" className="w-full absolute -bottom-[125px] " />
