@@ -131,7 +131,7 @@ const RegisterPage = () => {
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
       const accessToken = response.access_token; // Directly get the access token
-  
+
       try {
         await gooleRegister({ code: accessToken }).unwrap();
         toast.success("Register success");
@@ -145,7 +145,6 @@ const RegisterPage = () => {
     onError: () => console.log("Google Sign-In Failed"),
     flow: "implicit", // Use the 'implicit' flow
   });
-  
 
   const facebookSignUp = async () => {
     try {
@@ -368,8 +367,8 @@ const RegisterPage = () => {
             <div className="border flex-grow border-[#E5EFFF]"></div>
           </div>
 
-          <div className="social-icons flex justify-center items-center gap-4 pt-5">
-            <span onClick={()=>googleSignUp()}>
+          <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
+            <span onClick={() => googleSignUp()}>
               <Image
                 src={google}
                 alt="Google"

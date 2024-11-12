@@ -131,7 +131,10 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
         {/* Rating Scale UI */}
         <div className="flex items-center justify-between gap-2 my-4 w-full">
           {options?.map((option, optionIndex) => (
-            <div className="flex flex-col justify-center items-center" key={optionIndex}>
+            <div
+              className="flex flex-col justify-center items-center"
+              key={optionIndex}
+            >
               <button
                 type="button"
                 className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -140,9 +143,11 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
                     : "bg-gray-200 text-gray-600"
                 } hover:bg-purple-600 hover:text-white transition-colors duration-200`}
                 onClick={() => handleRatingChange(option)}
-              >
-              </button>
-               <span className="flex items-center justify-center"> {option}</span>
+              ></button>
+              <span className="flex items-center justify-center">
+                {" "}
+                {option}
+              </span>
             </div>
           ))}
         </div>
@@ -165,19 +170,19 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
           </div>
         )} */}
 
-{pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
+        {pathname === "/surveys/edit-survey" ||
+          (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
-              {
-                pathname === "/surveys/add-question-m" ? "" : (
-              <button
-                className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-
-                ) 
-              }
+              {pathname === "/surveys/add-question-m" ? (
+                ""
+              ) : (
+                <button
+                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
+                  onClick={EditQuestion}
+                >
+                  Edit
+                </button>
+              )}
               <button
                 className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
                 onClick={DeleteQuestion}
@@ -185,7 +190,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
                 Delete
               </button>
             </div>
-          )}
+          ))}
 
         {/* Required Toggle */}
         {pathname.includes("edit-survey") && (
@@ -213,7 +218,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
           )}
         </div>
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>

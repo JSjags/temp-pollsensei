@@ -184,7 +184,7 @@
 //       </div>
 
 //       {/* Status Indicator */}
-//       {pathname.includes("survey-reponse-upload") && status && (
+//       {pathname.includes("survey-response-upload") && status && (
 //         <div>{getStatus(status)}</div>
 //       )}
 //     </div>
@@ -192,7 +192,6 @@
 // };
 
 // export default SliderQuestion;
-
 
 // import { draggable } from "@/assets/images";
 // import Image from "next/image";
@@ -338,7 +337,7 @@
 //             onChange={handleSliderChange}
 //             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#5B03B2]"
 //             style={{
-//               background: `linear-gradient(to right, #5B03B2 0%, #5B03B2 ${  
+//               background: `linear-gradient(to right, #5B03B2 0%, #5B03B2 ${
 //                 ((sliderValue - min) / (max - min)) * 100
 //               }%, #e5e7eb ${(sliderValue - min) / (max - min)}%, #e5e7eb 100%)`,
 //             }}
@@ -393,7 +392,7 @@
 //       </div>
 
 //       {/* Status Indicator */}
-//       {pathname.includes("survey-reponse-upload") && status && (
+//       {pathname.includes("survey-response-upload") && status && (
 //         <div>{getStatus(status)}</div>
 //       )}
 //     </div>
@@ -401,8 +400,6 @@
 // };
 
 // export default SliderQuestion;
-
-
 
 import { draggable } from "@/assets/images";
 import Image from "next/image";
@@ -459,13 +456,19 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
   setIsRequired,
 }) => {
   const pathname = usePathname();
-  const questionText = useSelector((state: RootState) => state?.survey?.question_text);
-  const colorTheme = useSelector((state: RootState) => state?.survey?.color_theme);
+  const questionText = useSelector(
+    (state: RootState) => state?.survey?.question_text
+  );
+  const colorTheme = useSelector(
+    (state: RootState) => state?.survey?.color_theme
+  );
 
   // Set min, max, and step based on options count if options are provided
   const dynamicMin = options && options.length > 0 ? 0 : min || 0;
-  const dynamicMax = options && options.length > 0 ? options.length - 1 : max || 5;
-  const step = options && options.length > 1 ? 1 : (dynamicMax - dynamicMin) / 5;
+  const dynamicMax =
+    options && options.length > 0 ? options.length - 1 : max || 5;
+  const step =
+    options && options.length > 1 ? 1 : (dynamicMax - dynamicMin) / 5;
 
   // State to handle slider value
   const [sliderValue, setSliderValue] = useState<number>(value || dynamicMin);
@@ -509,7 +512,9 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
       <Image
         src={draggable}
         alt="draggable icon"
-        className={pathname === "/surveys/create-survey" ? "visible" : "invisible"}
+        className={
+          pathname === "/surveys/create-survey" ? "visible" : "invisible"
+        }
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
@@ -517,7 +522,9 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
             <div className="group flex justify-between gap-2 items-start">
               <p>
                 <span>{index}. </span> {question}
-                {is_required && <span className="text-2xl ml-2 text-red-500">*</span>}
+                {is_required && (
+                  <span className="text-2xl ml-2 text-red-500">*</span>
+                )}
               </p>
               {!pathname.includes("survey-public-response") &&
                 !pathname.includes("create-survey") && (
@@ -531,7 +538,9 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
                     optionType={questionType}
                     options={options || []}
                     setEditId={setEditId}
-                    onSave={() => onSave && onSave(question, dynamicMin, dynamicMax, index)}
+                    onSave={() =>
+                      onSave && onSave(question, dynamicMin, dynamicMax, index)
+                    }
                     index={index}
                   />
                 )}
@@ -552,12 +561,12 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
             style={{
               background: `linear-gradient(to right, #5B03B2 0%, #5B03B2 ${
                 ((sliderValue - dynamicMin) / (dynamicMax - dynamicMin)) * 100
-              }%, #e5e7eb ${(sliderValue - dynamicMin) / (dynamicMax - dynamicMin)}%, #e5e7eb 100%)`,
+              }%, #e5e7eb ${
+                (sliderValue - dynamicMin) / (dynamicMax - dynamicMin)
+              }%, #e5e7eb 100%)`,
             }}
           />
-          <div
-            className="relative w-full mt-4 flex justify-between text-sm 0"
-          >
+          <div className="relative w-full mt-4 flex justify-between text-sm 0">
             {options && options.length > 0
               ? options.map((option, i) => (
                   <span key={i} className="text- border w-[20%]">
@@ -596,7 +605,9 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
             <span>Required</span>
             <Switch
               checked={is_required}
-              onCheckedChange={(checked) => setIsRequired && setIsRequired(checked)}
+              onCheckedChange={(checked) =>
+                setIsRequired && setIsRequired(checked)
+              }
               className="bg-[#9D50BB]"
             />
           </div>
@@ -604,7 +615,7 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
       </div>
 
       {/* Status Indicator */}
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>
@@ -612,6 +623,3 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
 };
 
 export default SliderQuestion;
-
-
-

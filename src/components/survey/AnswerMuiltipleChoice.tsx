@@ -41,7 +41,6 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   const [localSelectedOptions, setLocalSelectedOptions] = useState<string[]>(
     selectedOptions || []
   );
-  
 
   useEffect(() => {
     if (selectedOptions !== localSelectedOptions) {
@@ -61,17 +60,12 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
       onChange(updatedOptions);
     }
 
-
-
-  //   const updatedSelected = selected.includes(option)
-  //   ? selected.filter((o) => o !== option)
-  //   : [...selected, option];
-  //   setLocalSelectedOptions(updatedSelected);
-  // onChange(updatedSelected); 
+    //   const updatedSelected = selected.includes(option)
+    //   ? selected.filter((o) => o !== option)
+    //   : [...selected, option];
+    //   setLocalSelectedOptions(updatedSelected);
+    // onChange(updatedSelected);
   };
-
-
-
 
   // const handleOptionChange = (option: string) => {
   //   const updatedSelected = selected.includes(option)
@@ -80,7 +74,6 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   //   setSelected(updatedSelected);
   //   onChange(updatedSelected); // Notify the parent of the change
   // };
-
 
   const getStatus = useMemo(() => {
     switch (status) {
@@ -112,16 +105,20 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
       <Image
         src={draggable}
         alt="draggable icon"
-        className={pathname === "/surveys/create-survey" ? "visible" : "invisible"}
+        className={
+          pathname === "/surveys/create-survey" ? "visible" : "invisible"
+        }
       />
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="text-lg font-semibold text-start">
             <span>{index}. </span> {question}
           </h3>
-          {!(pathname === "/surveys/edit-survey" || pathname.includes('survey-reponse-upload') || pathname.includes('validate-response')) && (
-            <p>{questionType}</p>
-          )}
+          {!(
+            pathname === "/surveys/edit-survey" ||
+            pathname.includes("survey-response-upload") ||
+            pathname.includes("validate-response")
+          ) && <p>{questionType}</p>}
         </div>
         {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
@@ -164,7 +161,7 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
           </div>
         )}
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus}</div>
       )}
     </div>

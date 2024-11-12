@@ -82,12 +82,12 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="group flex text-lg font-semibold text-start">
-          <p>
-                <span>{index}. </span> {question}
-                {is_required === true && (
-                  <span className="text-2xl ml-2 text-red-500">*</span>
-                )}
-              </p>
+            <p>
+              <span>{index}. </span> {question}
+              {is_required === true && (
+                <span className="text-2xl ml-2 text-red-500">*</span>
+              )}
+            </p>
             <PollsenseiTriggerButton
               key={index}
               imageUrl={stars}
@@ -136,19 +136,19 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
             </button>
           </div>
         )} */}
-          {pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
+        {pathname === "/surveys/edit-survey" ||
+          (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
-              {
-                pathname === "/surveys/add-question-m" ? "" : (
-              <button
-                className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-
-                ) 
-              }
+              {pathname === "/surveys/add-question-m" ? (
+                ""
+              ) : (
+                <button
+                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
+                  onClick={EditQuestion}
+                >
+                  Edit
+                </button>
+              )}
               <button
                 className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
                 onClick={DeleteQuestion}
@@ -156,8 +156,8 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
                 Delete
               </button>
             </div>
-          )}
-         <div className="flex justify-end">
+          ))}
+        <div className="flex justify-end">
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
@@ -166,7 +166,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
           )}
         </div>
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>

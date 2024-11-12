@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AOSInit } from "@/components/ui/Aos";
 import { TanstackProvider } from "@/providers/TanstackProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -36,10 +37,8 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <GoogleOAuthProvider
-          clientId={googleClientId}
-          
-        >
+        <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
+        <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
             <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
             <ReduxContext>{children}</ReduxContext>

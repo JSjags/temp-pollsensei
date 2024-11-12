@@ -167,19 +167,20 @@ const SingleChoiceQuestion: React.FC<SingleChoiceQuestionProps> = ({
         )}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
-          <span>Required</span>
-           <Switch checked={is_required} 
-            onCheckedChange={
-             setIsRequired
-               ? (checked: boolean) => setIsRequired(checked)
-               : undefined
-           }
-           className="bg-[#9D50BB] " />
-         </div>
-        )
-       }
-       <div className="flex justify-end">
-       {pathname === "/surveys/edit-survey" ||
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+        <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (
@@ -187,7 +188,7 @@ const SingleChoiceQuestion: React.FC<SingleChoiceQuestionProps> = ({
           )}
         </div>
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>

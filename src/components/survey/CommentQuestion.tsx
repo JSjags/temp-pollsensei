@@ -153,19 +153,19 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           </div>
         )} */}
 
-{pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
+        {pathname === "/surveys/edit-survey" ||
+          (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
-              {
-                pathname === "/surveys/add-question-m" ? "" : (
-              <button
-                className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-
-                ) 
-              }
+              {pathname === "/surveys/add-question-m" ? (
+                ""
+              ) : (
+                <button
+                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
+                  onClick={EditQuestion}
+                >
+                  Edit
+                </button>
+              )}
               <button
                 className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
                 onClick={DeleteQuestion}
@@ -173,8 +173,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
                 Delete
               </button>
             </div>
-          )}
-
+          ))}
 
         {/* {
         pathname.includes('survey-public-response') && (  <VoiceRecorder />)
@@ -199,7 +198,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ||
           pathname.includes("validate-response") ||
-          pathname.includes("survey-reponse-upload") ||
+          pathname.includes("survey-response-upload") ||
           pathname.includes("survey-public-response") ? (
             ""
           ) : (
@@ -207,7 +206,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           )}
         </div>
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>
