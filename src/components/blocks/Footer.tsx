@@ -9,9 +9,11 @@ import {
   FaTwitter,
 } from "react-icons/fa6";
 
-type Props = {};
+type Props = {
+  onClick?:()=>void;
+};
 
-const Footer = (props: Props) => {
+const Footer:React.FC<Props> = ({onClick}) => {
   return (
     <footer className="bg-gray-90 text-[#F9F9F9] pt-12 pb-32 px-4 sm:px-6 lg:px-8 w-full relative">
       <div className="container mx-auto w-full">
@@ -30,37 +32,38 @@ const Footer = (props: Props) => {
               <h4 className="text-lg font-semibold text-[#606060] mb-4">Company</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link
-                    href="/features"
+                  <span 
+                  onClick={onClick}
+                    // href="/features"
                     className="text-black hover:text-white"
                   >
-                    Features
+                    Update
+                  </span>
+                </li>
+                <li>
+                  <Link
+                    href="/#"
+                    className="text-black hover:text-white"
+                  >
+                    Contact Sales
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/pricing"
+                    href="/#"
                     className="text-black hover:text-white"
                   >
-                    Pricing
+                    Support
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="/about-us"
-                    className="text-black hover:text-white"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
+                {/* <li>
                   <Link
                     href="/contact"
                     className="text-black hover:text-white"
                   >
                     Benefit
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
             <div>
@@ -95,18 +98,18 @@ const Footer = (props: Props) => {
                   {/* <FaFacebook /> */}
                   Facebook
                 </Link>
-                <a href="#" className="text-black hover:text-white">
-                  {/* <FaLinkedin /> */}
+                {/* <a href="#" className="text-black hover:text-white">
+                 
                   Linkedin
-                </a>
+                </a> */}
                 <Link href="https://www.instagram.com/pollsensei/" className="text-black hover:text-white">
                   {/* <FaInstagram /> */}
                   Instagram
                 </Link>
-                <a href="#" className="text-black hover:text-white">
-                  {/* <FaInstagram /> */}
+                {/* <a href="#" className="text-black hover:text-white">
+                  <FaInstagram />
                   Contact Us
-                </a>
+                </a> */}
               </div>
             </div>
           </div>
