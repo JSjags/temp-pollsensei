@@ -36,6 +36,7 @@ import SeePricing from "./SeePricing";
 import GetAppSection from "./GetApp";
 import Subscribe from "../modals/Subsribe";
 import { useRouter } from "next/navigation";
+import EmbedVideo from "./EmbedVideo";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -73,72 +74,68 @@ const LandingPage: React.FC = () => {
   const [subscribe, setSubscribe] = useState(false);
 
   const featuresRef = useRef<HTMLDivElement>(null);
-const faqsRef = useRef<HTMLDivElement>(null); 
-const benefitsRef = useRef<HTMLDivElement>(null); 
+  const faqsRef = useRef<HTMLDivElement>(null);
+  const benefitsRef = useRef<HTMLDivElement>(null);
 
+  const scrollToSection = (id: string) => {
+    if (id === "features" && featuresRef.current) {
+      featuresRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (id === "faqs" && faqsRef.current) {
+      faqsRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (id === "benefits" && benefitsRef.current) {
+      benefitsRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
-const scrollToSection = (id: string) => {
-  if (id === "features" && featuresRef.current) {
-    featuresRef.current.scrollIntoView({ behavior: "smooth" });
-  } else if (id === "faqs" && faqsRef.current) {
-    faqsRef.current.scrollIntoView({ behavior: "smooth" });
-  }else if(id === "benefits" && benefitsRef.current){
-    benefitsRef.current.scrollIntoView({ behavior: "smooth" });
-  }
-};
+  // Scroll to the section based on query parameter
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const section = url.searchParams.get("section");
 
-
-// Scroll to the section based on query parameter
-useEffect(() => {
-  const url = new URL(window.location.href);
-  const section = url.searchParams.get("section");
-  
-  if (section === "features" && featuresRef.current) {
-    featuresRef.current.scrollIntoView({ behavior: "smooth" });
-  } else if (section === "faqs" && faqsRef.current) {
-    faqsRef.current.scrollIntoView({ behavior: "smooth" });
-  }else if(section === "benefits" && benefitsRef.current){
-    benefitsRef.current.scrollIntoView({ behavior: "smooth" });
-  }
-}, []);
-
+    if (section === "features" && featuresRef.current) {
+      featuresRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (section === "faqs" && faqsRef.current) {
+      faqsRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (section === "benefits" && benefitsRef.current) {
+      benefitsRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
 
   // useEffect(() => {
   //   const timer = setTimeout(() => {
   //     setSubscribe(true);
-  //   }, 10000); 
+  //   }, 10000);
 
   //   return () => clearTimeout(timer);
   // }, []);
 
+  // useEffect(() => {
+  //   // Helper function to check if it's a new day since the last modal display
+  //   const isNewDay = () => {
+  //     const lastShown = localStorage.getItem('modalLastShown');
+  //     if (!lastShown) return true;
 
-  useEffect(() => {
-    // Helper function to check if it's a new day since the last modal display
-    const isNewDay = () => {
-      const lastShown = localStorage.getItem('modalLastShown');
-      if (!lastShown) return true;
+  //     const lastShownDate = new Date(lastShown);
+  //     const currentDate = new Date();
+  //     return (
+  //       lastShownDate.getDate() !== currentDate.getDate() ||
+  //       lastShownDate.getMonth() !== currentDate.getMonth() ||
+  //       lastShownDate.getFullYear() !== currentDate.getFullYear()
+  //     );
+  //   };
 
-      const lastShownDate = new Date(lastShown);
-      const currentDate = new Date();
-      return (
-        lastShownDate.getDate() !== currentDate.getDate() ||
-        lastShownDate.getMonth() !== currentDate.getMonth() ||
-        lastShownDate.getFullYear() !== currentDate.getFullYear()
-      );
-    };
-
-    if (isNewDay()) {
-      const timer = setTimeout(() => {
-        setSubscribe(true);
-        localStorage.setItem('modalLastShown', new Date().toISOString());
-      }, 10000); 
-      return () => clearTimeout(timer);
-    }
-  }, []);
+  //   if (isNewDay()) {
+  //     const timer = setTimeout(() => {
+  //       setSubscribe(true);
+  //       localStorage.setItem('modalLastShown', new Date().toISOString());
+  //     }, 10000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, []);
 
   return (
     <main className="min-h-screen">
-      <NavBar  scrollToSection={scrollToSection} />
+      <NavBar scrollToSection={scrollToSection} />
       <div className="min-h-screen dark:bg-gradient-to-br from-[#1a0b2e] to-[#4a2075] text-white overflow-hidden">
         {/* Hero Section */}
         <section className="relative min-h-screen flex-col gap-10 flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 hero_bg ">
@@ -150,9 +147,7 @@ useEffect(() => {
           <motion.div
             style={{ y }}
             className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
-          >
-
-          </motion.div>
+          ></motion.div>
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -177,7 +172,6 @@ useEffect(() => {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xs sm:text-sm md:text-lg mb-12 max-w-3xl mx-auto text-black"
             >
-
               Experience AI-powered surveys that make every response meaningful
               and <br className="hidden lg:block" /> every decision impactful.
             </motion.p>
@@ -196,7 +190,7 @@ useEffect(() => {
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                   <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-indigo-600 group-hover:text-white transition-colors duration-300 flex items-center justify-center">
-                    Get Started
+                    Write your First Prompt
                   </span>
                 </Link>
               </motion.div>
@@ -209,7 +203,7 @@ useEffect(() => {
                 className="inline-block"
               >
                 <Link
-                  href="/register"
+                  href="https://youtu.be/VtHEtba0OnA?si=oAP1P0nwoRn2-Vm3"
                   className="relative inline-block bg-none font-bold py-3 px-6 sm:px-8 rounded-md text-base sm:text-lg shadow-lg overflow-hidden group text-purple-500 border border-purple-500"
                 >
                   <span className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -253,15 +247,18 @@ useEffect(() => {
           </motion.div>
         </section>
 
-        <section className="pb-16 sm:pb- pt-8 bg-white overflow-hidden flex flex-col items-center px-24">
+        {/* <section className="pb-16 sm:pb- pt-8 bg-white overflow-hidden flex flex-col items-center px-24">
           <h3 className="font-semibold text-[calc(1rem+4px)] text-black mx-auto ">
             Trusted By:
           </h3>
           <MarqueSlider />
-        </section>
+        </section> */}
 
-  
-        <section id="benefits" ref={benefitsRef} className="pb-12 sm:py-24 lg:px-24 bg-white overflow-hidden">
+        <section
+          id="benefits"
+          ref={benefitsRef}
+          className="pb-12 sm:py-24 lg:px-24 bg-white overflow-hidden"
+        >
           <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
               Built for you
@@ -279,7 +276,14 @@ useEffect(() => {
           <div className="flex flex-col gap-10 items-center w-full py-8 px-4">
             <div className="p-4 bg-white border-purple rounded-lg shadow-lg lg:flex justify-between items-center gap-5 w-full">
               <div className="lg:w-[60%]">
-                <Image src={built_for_u_1} alt="feature" className="w-full" />
+                {/* <Image src={built_for_u_1} alt="feature" className="w-full" /> */}
+                <video loop muted autoPlay className="w-full">
+                  <source
+                    src={"/videos/Generate_survey.mp4"}
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
               </div>
               <div className="lg:w-[40%] mb-4 lg:mb-0">
                 <div className="flex flex-col gap-3 items- text-black mx-">
@@ -290,7 +294,9 @@ useEffect(() => {
                     Build audience specific surveys with one simple <br />{" "}
                     prompt
                   </p>
-                  <button className="auth-btn w-1/2">Get Started</button>
+                  <Link href={"/login"} className="auth-btn w-1/2">
+                    Survey in 1-Click
+                  </Link>
                 </div>
               </div>
             </div>
@@ -304,11 +310,20 @@ useEffect(() => {
                     Access Real-time PollMaster support throughout the survey
                     lifecycle-from creation to reporting.
                   </p>
-                  <button className="auth-btn w-1/2">Get Started</button>
+                  <Link href={"/login"} className="auth-btn w-1/2">
+                    Get Instant AI Assistance
+                  </Link>
                 </div>
               </div>
               <div className="lg:w-[60%] mb-4 lg:mb-0 mt-3 lg:mt-0">
-                <Image src={ai_powered} alt="feature" className="w-full" />
+                {/* <Image src={ai_powered} alt="feature" className="w-full" /> */}
+                <video loop muted autoPlay className="w-full">
+                  <source
+                    src={"/videos/ai_powerded.mp4"}
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
               </div>
             </div>
             <div className="p-4 bg-white border-purple rounded-lg shadow-lg lg:flex flex-col justify-between items-center gap-5 w-full">
@@ -321,16 +336,26 @@ useEffect(() => {
                   into <br className="hidden lg:flex" /> clear, impactful
                   insights—no data expertise required
                 </p>
-                <button className="auth-btn md:w-1/3">Get Started</button>
+                <Link href={"/login"} className="auth-btn md:w-1/3">
+                  Try Now
+                </Link>
               </div>
               <div className="lg:w-[80%] mb-4 lg:mb-0 mt-3 lg:mt-0">
-                <Image src={analysis} alt="feature" className="w-full" />
+                {/* <Image src={analysis} alt="feature" className="w-full" /> */}
+                <video loop muted autoPlay className="w-full">
+                  <source src="/videos/Analysis.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
               </div>
             </div>
           </div>
         </section>
-              {/* Features Section */}
-        <section id="features" ref={featuresRef} className="py-12 sm:py-24 px-12 lg:px-24 bg-[#ffffff] text-black overflow-hidden">
+        {/* Features Section */}
+        <section
+          id="features"
+          ref={featuresRef}
+          className="py-12 sm:py-24 px-12 lg:px-24 bg-[#ffffff] text-black overflow-hidden"
+        >
           <div className="flex flex-col gap-3 justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
               Key Features
@@ -397,7 +422,8 @@ useEffect(() => {
             <p className="text-[#667085] ">How PollSensei Works</p>
           </div>
           <div>
-            <Image src={poll_video} alt="poll_ videos" className="mx-auto" />
+            {/* <Image src={poll_video} alt="poll_ videos" className="mx-auto" /> */}
+            <EmbedVideo />
           </div>
         </section>
 
@@ -415,8 +441,12 @@ useEffect(() => {
           </div>
         </section>
 
-      {/* FAQs Section */}
-        <section id="faqs" ref={faqsRef} className="py-12 sm:py-24 bg-[#F5F5F5] text-black overflow-hidden">
+        {/* FAQs Section */}
+        <section
+          id="faqs"
+          ref={faqsRef}
+          className="py-12 sm:py-24 bg-[#F5F5F5] text-black overflow-hidden"
+        >
           <div className="flex flex-col justify-center text-center items-center text-black mx-auto">
             <div className="border-purple-500 border rounded-full py-2 px-5 text-purple-500">
               FAQs
@@ -435,16 +465,19 @@ useEffect(() => {
           {/* <ContactUsCard /> */}
           <SeePricing />
         </section>
-        
+
         <section className="pt-12 sm:pt-24 lg:px-24 gap-4 bg-white text-black overflow-hidden">
           {/* <ContactUsCard /> */}
           <GetAppSection />
         </section>
-        <Footer />
+        <Footer onClick={() => setSubscribe((prev) => !prev)} />
       </div>
-      {
-        subscribe && <Subscribe openModal={subscribe} onClose={()=> setSubscribe((prev)=>!prev)} />
-      }
+      {subscribe && (
+        <Subscribe
+          openModal={subscribe}
+          onClose={() => setSubscribe((prev) => !prev)}
+        />
+      )}
     </main>
   );
 };

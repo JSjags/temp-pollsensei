@@ -143,7 +143,7 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
                 onChange={() => handleOptionChange(option)}
               />
               <span
-                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
+                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-[#5B03B2] peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
                 style={{ borderColor: colorTheme }}
               ></span>
               <span className="ml-2">{option}</span>

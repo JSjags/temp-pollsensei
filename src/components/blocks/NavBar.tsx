@@ -90,7 +90,7 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
             href="/login"
             className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-md"
           >
-            Get Started
+            Try for Free
           </Link>
         </div>
 
