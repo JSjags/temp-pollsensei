@@ -135,10 +135,14 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
           )}
         </div>
         <div>
-        {/* {errorNum && <p className="text-red-500 text-sm">{errorNum}</p>} */}
+          {/* {errorNum && <p className="text-red-500 text-sm">{errorNum}</p>} */}
           <AutosizeTextarea
             className="w-full border-none rounded-md p-2"
-            placeholder={min && max ? `Enter a number between ${min} and ${max}` : "Enter your response here"}
+            placeholder={
+              min && max
+                ? `Enter a number between ${min} and ${max}`
+                : "Enter your response here"
+            }
             style={{ borderColor: colorTheme }}
             onChange={onChange}
             value={response}
@@ -162,19 +166,19 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
           </div>
         )} */}
 
-{pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
+        {pathname === "/surveys/edit-survey" ||
+          (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
-              {
-                pathname === "/surveys/add-question-m" ? "" : (
-              <button
-                className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-
-                ) 
-              }
+              {pathname === "/surveys/add-question-m" ? (
+                ""
+              ) : (
+                <button
+                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
+                  onClick={EditQuestion}
+                >
+                  Edit
+                </button>
+              )}
               <button
                 className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
                 onClick={DeleteQuestion}
@@ -182,7 +186,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
                 Delete
               </button>
             </div>
-          )}
+          ))}
         {/* {
         pathname.includes('survey-public-response') && (  <VoiceRecorder />)
 
@@ -206,7 +210,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ||
           pathname.includes("validate-response") ||
-          pathname.includes("survey-reponse-upload") ||
+          pathname.includes("survey-response-upload") ||
           pathname.includes("survey-public-response") ? (
             ""
           ) : (
@@ -214,7 +218,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
           )}
         </div>
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>

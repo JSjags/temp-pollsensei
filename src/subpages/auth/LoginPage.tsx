@@ -16,14 +16,16 @@ import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slices/user.slice";
 import { useState } from "react";
 import StateLoader from "../../components/common/StateLoader";
-import { useGoogleLoginMutation, useLoginUserMutation } from "../../services/user.service";
+import {
+  useGoogleLoginMutation,
+  useLoginUserMutation,
+} from "../../services/user.service";
 import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import { dark_theme_logo } from "@/assets/images";
 
 const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
-
 
 const constraints = {
   email: {
@@ -45,7 +47,7 @@ const LoginPage = () => {
   const [state, setState] = useState(false);
   const [eyeState, setEyeState] = useState(false);
   const [googleLogin, { data: register, error: registerError }] =
-  useGoogleLoginMutation();
+    useGoogleLoginMutation();
 
   const onSubmit = async (values: { email: string; password: string }) => {
     try {
@@ -71,7 +73,6 @@ const LoginPage = () => {
     setEyeState((prev) => !prev);
   };
 
-
   // const googleSignUp = useGoogleLogin({
   //   onSuccess: async (response) => {
   //     const authCode = response.code;
@@ -94,13 +95,12 @@ const LoginPage = () => {
   //   scope: 'https://www.googleapis.com/auth/userinfo.profile',
   // });
 
-
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
       const accessToken = response.access_token; // Directly get the access token
-  
+
       try {
-        const userData =  await googleLogin({ code: accessToken }).unwrap();
+        const userData = await googleLogin({ code: accessToken }).unwrap();
         toast.success("Sign in  success");
         dispatch(updateUser(userData.data));
         setState(true);
@@ -113,10 +113,9 @@ const LoginPage = () => {
       }
     },
     onError: () => console.log("Google Sign-In Failed"),
-    flow: "implicit", 
+    flow: "implicit",
   });
 
-  console.log(data);
   return (
     <section className="min-h-screen flex flex-col md:flex-row">
       <div className="auth-bg md:hidden flex items-center justify-center p-4">
@@ -221,8 +220,8 @@ const LoginPage = () => {
               <div className="border flex-grow border-[#E5EFFF]"></div>
             </div>
 
-            <div className="social-icons flex justify-center items-center gap-4 pt-5">
-              <span onClick={()=>googleSignUp()} >
+            <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
+              <span onClick={() => googleSignUp()}>
                 <Image
                   src={google}
                   alt="Google"

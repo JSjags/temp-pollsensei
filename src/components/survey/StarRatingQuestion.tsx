@@ -126,9 +126,6 @@
 
 // export default StarRatingQuestion;
 
-
-
-
 import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
@@ -162,7 +159,7 @@ interface StarRatingQuestionProps {
 
 const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   question,
-  options = ["1 star", "2 star", "3 star", "4 star", "5 star"], 
+  options = ["1 star", "2 star", "3 star", "4 star", "5 star"],
   questionType,
   currentRating = 0,
   onRate,
@@ -220,7 +217,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             : "visible"
         }
       /> */}
-        <Image
+      <Image
         src={draggable}
         alt="draggable icon"
         className={
@@ -230,12 +227,12 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
       <div className="w-full">
         <div className="flex justify-between w-full items-center">
           <h3 className="group text-lg font-semibold text-start">
-          <p>
-                <span>{index}. </span> {question}
-                {is_required === true && (
-                  <span className="text-2xl ml-2 text-red-500">*</span>
-                )}
-              </p>
+            <p>
+              <span>{index}. </span> {question}
+              {is_required === true && (
+                <span className="text-2xl ml-2 text-red-500">*</span>
+              )}
+            </p>
             {!pathname.includes("survey-public-response") && (
               <PollsenseiTriggerButton
                 key={index}
@@ -265,8 +262,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
               key={idx}
               size={24}
               className={`mr-1 cursor-pointer ${
-                (hoveredRating !== null ? hoveredRating : selectedRating) >
-                idx
+                (hoveredRating !== null ? hoveredRating : selectedRating) > idx
                   ? "text-[#5B03B2]"
                   : "text-gray-300"
               }`}
@@ -292,19 +288,19 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             </button>
           </div>
         )} */}
-          {pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
+        {pathname === "/surveys/edit-survey" ||
+          (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
-              {
-                pathname === "/surveys/add-question-m" ? "" : (
-              <button
-                className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-
-                ) 
-              }
+              {pathname === "/surveys/add-question-m" ? (
+                ""
+              ) : (
+                <button
+                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
+                  onClick={EditQuestion}
+                >
+                  Edit
+                </button>
+              )}
               <button
                 className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
                 onClick={DeleteQuestion}
@@ -312,8 +308,8 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
                 Delete
               </button>
             </div>
-          )}
-          <div className="flex justify-end">
+          ))}
+        <div className="flex justify-end">
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
@@ -322,7 +318,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
           )}
         </div>
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>
@@ -330,15 +326,6 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 };
 
 export default StarRatingQuestion;
-
-
-
-
-
-
-
-
-
 
 // import { draggable } from "@/assets/images";
 // import Image from "next/image";

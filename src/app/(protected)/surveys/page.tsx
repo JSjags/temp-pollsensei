@@ -59,6 +59,12 @@ const Page = (props: Props) => {
                     >
                       Create Survey
                     </ShadButton>
+                    <ShadButton
+                      onClick={() => router.push("/surveys/survey-list")}
+                      className="border rounded-lg border-[#5b03b2] text-[#5b03b2] hover:bg-[#5b03b210] bg-white"
+                    >
+                      Created Surveys
+                    </ShadButton>
                   </div>
                 </div>
               </div>

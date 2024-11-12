@@ -16,7 +16,7 @@ import {
   getSurveyVariableNames,
   runTest,
 } from "@/services/analysis";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import AnalysisLoadingScreen, {
   LoadingOverlay,
   Spinner,
@@ -28,6 +28,13 @@ import AnalysisReport from "./AnalysisReport";
 import { AnimatePresence, motion } from "framer-motion";
 import SenseiMaster from "../sensei-master/SenseiMaster";
 import DataVisualizationComponent from "../charts/DataVisualization";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "../ui/dialog";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -212,13 +219,13 @@ const toCamelCase = (str: string): string => {
 };
 
 export default function DragAndDropPage() {
+  const router = useRouter();
   const path = usePathname();
   const [variables, setVariables] = useState(initialVariables);
   const [testsLibrary, setTestsLibrary] = useState<Test[]>([]);
   const [testLibrary, setTestLibrary] = useState<Test[]>([]);
   const [showReport, setShowReport] = useState<boolean>(false);
-
-  // AnalysisLoadingScreen
+  const [showErrorDialog, setShowErrorDialog] = useState<boolean>(false);
 
   // Extract surveyId regardless of path
   const surveyId = extractMongoId(path);
@@ -263,8 +270,9 @@ export default function DragAndDropPage() {
     },
     onError: (error) => {
       console.log(error);
-      toast.error("Error conducting analysis");
-      setShowReport(true);
+      if ((error as any).response?.data?.message === "Unable to run test") {
+        setShowErrorDialog(true);
+      }
     },
   });
 
@@ -411,12 +419,109 @@ export default function DragAndDropPage() {
     }
   }, [createTestsQuery.isSuccess]);
 
+  // Check if survey has less than 3 responses
+  if (getSurvey.isSuccess && getSurvey.data?.response_count < 10) {
+    return (
+      <Dialog
+        open={true}
+        onOpenChange={() => router.push(`/surveys/${surveyId}`)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center text-center gap-6 py-4">
+            <div className="w-48 h-48">
+              <img
+                src="/assets/analysis/no-data.svg"
+                alt="Insufficient Data"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="space-y-3">
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                Not Enough Responses
+              </DialogTitle>
+              <DialogDescription className="text-gray-600">
+                Your survey needs at least 10 responses before we can perform
+                any analysis. Currently you have{" "}
+                {getSurvey.data?.response_count || 0} responses.
+                <div className="mt-4 text-sm">
+                  Share your survey to collect more responses and unlock
+                  powerful insights!
+                </div>
+              </DialogDescription>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={() => router.push(`/surveys/${surveyId}`)}
+                className="w-full sm:w-auto auth-btn"
+              >
+                Return to Survey
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return !showReport ? (
     <Fragment>
       {variablesQuery.isLoading && <AnalysisLoadingScreen />}
       {variablesQuery.isError && <AnalysisErrorComponent />}
       {variablesQuery.isSuccess && (
         <>
+          <Dialog
+            open={showErrorDialog}
+            onOpenChange={() => {
+              setShowErrorDialog(false);
+              router.push(`/surveys/${surveyId}/survey-response-upload`);
+            }}
+          >
+            <DialogContent
+              className="sm:max-w-md z-[1000000] max-h-[90vh] overflow-y-auto mx-4"
+              overlayClassName="z-[1000000]"
+            >
+              <div className="flex flex-col items-center text-center gap-4 sm:gap-6 py-2 sm:py-4">
+                <div className="w-32 h-32 sm:w-48 sm:h-48">
+                  <img
+                    src="/assets/analysis/no-data.svg"
+                    alt="Analysis Error"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="space-y-2 sm:space-y-3">
+                  <DialogTitle className="text-lg sm:text-xl font-semibold text-gray-900">
+                    Unable to Run Analysis
+                  </DialogTitle>
+                  <DialogDescription className="text-sm sm:text-base text-gray-600">
+                    We encountered an issue while trying to analyze your survey
+                    data. This could be due to:
+                    <ul className="mt-3 sm:mt-4 text-left list-disc pl-4 sm:pl-6">
+                      <li>Insufficient data for meaningful analysis</li>
+                      <li>Temporary maintenance of our AI services</li>
+                      <li>Incompatible data types for selected tests</li>
+                    </ul>
+                    <div className="mt-3 sm:mt-4 text-xs sm:text-sm">
+                      Please review your responses and try again later.
+                    </div>
+                  </DialogDescription>
+                </div>
+                <DialogFooter className="w-full sm:w-auto">
+                  <Button
+                    onClick={() => {
+                      setShowErrorDialog(false);
+                      router.push(
+                        `/surveys/${surveyId}/survey-response-upload`
+                      );
+                    }}
+                    className="w-full sm:w-auto auth-btn"
+                  >
+                    View Responses
+                  </Button>
+                </DialogFooter>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           {runTestMutation.isPending && (
             <>
               <LoadingOverlay

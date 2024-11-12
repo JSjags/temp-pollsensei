@@ -166,19 +166,19 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
             </button>
           </div>
         )} */}
-          {pathname === "/surveys/edit-survey" || pathname === "/surveys/add-question-m" && (
+        {pathname === "/surveys/edit-survey" ||
+          (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
-              {
-                pathname === "/surveys/add-question-m" ? "" : (
-              <button
-                className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-
-                ) 
-              }
+              {pathname === "/surveys/add-question-m" ? (
+                ""
+              ) : (
+                <button
+                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
+                  onClick={EditQuestion}
+                >
+                  Edit
+                </button>
+              )}
               <button
                 className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
                 onClick={DeleteQuestion}
@@ -186,22 +186,23 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
                 Delete
               </button>
             </div>
-          )}
+          ))}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
-          <span>Required</span>
-           <Switch checked={is_required} 
-            onCheckedChange={
-             setIsRequired
-               ? (checked: boolean) => setIsRequired(checked)
-               : undefined
-           }
-           className="bg-[#9D50BB] " />
-         </div>
-        )
-       }
-       <div className="flex justify-end">
-       {pathname === "/surveys/edit-survey" ||
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+        <div className="flex justify-end">
+          {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (
             ""
           ) : (
@@ -209,7 +210,7 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
           )}
         </div>
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>

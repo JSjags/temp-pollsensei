@@ -187,7 +187,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
           <p>{questionType === "matrix_checkbox" ? "Matrix" : ""}</p>
         )}
       </div>
-      {pathname.includes("survey-reponse-upload") && status && (
+      {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
       )}
     </div>

@@ -449,7 +449,7 @@ export default function Milestones({
       }
       if (id === "4") {
         if (label === "Collect Data") {
-          router.push(`surveys/${surveyId}/survey-reponse-upload`);
+          router.push(`surveys/${surveyId}/survey-response-upload`);
           // alert(label);
         }
         if (label === "Buy Respondents") {
@@ -462,7 +462,7 @@ export default function Milestones({
 
       if (id === "5") {
         if (label === "Validate Response") {
-          router.push(`/surveys/${surveyId}/survey-reponse-upload`);
+          router.push(`/surveys/${surveyId}/survey-response-upload`);
 
           // alert(label);
         }
