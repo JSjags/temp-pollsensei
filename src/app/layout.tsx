@@ -9,6 +9,7 @@ import { AOSInit } from "@/components/ui/Aos";
 import { TanstackProvider } from "@/providers/TanstackProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { CookieConsent } from "@/components/primitives/CookieConsent";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -37,6 +38,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
+        <CookieConsent />
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>

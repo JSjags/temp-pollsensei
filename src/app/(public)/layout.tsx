@@ -1,3 +1,4 @@
+import { CookieConsent } from "@/components/primitives/CookieConsent";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({
@@ -6,15 +7,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      // <ThemeProvider
-      //   attribute="class"
-      //   defaultTheme="system"
-      //   enableSystem
-      //   disableTransitionOnChange
-      // >
-    <section className="">
-        {children}
-    </section>
-      // </ThemeProvider>
+    // <ThemeProvider
+    //   attribute="class"
+    //   defaultTheme="system"
+    //   enableSystem
+    //   disableTransitionOnChange
+    // >
+    <section className="">{children}</section>
+    // </ThemeProvider>
   );
 }

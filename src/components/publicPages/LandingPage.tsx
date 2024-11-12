@@ -37,6 +37,14 @@ import GetAppSection from "./GetApp";
 import Subscribe from "../modals/Subsribe";
 import { useRouter } from "next/navigation";
 import EmbedVideo from "./EmbedVideo";
+import { cn } from "@/lib/utils";
+import { useRive } from "@rive-app/react-canvas";
+import {
+  setAnimationState,
+  setCount,
+} from "@/redux/slices/sensei-master.slice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -77,6 +85,8 @@ const LandingPage: React.FC = () => {
   const faqsRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
 
+  const dispatch = useDispatch();
+
   const scrollToSection = (id: string) => {
     if (id === "features" && featuresRef.current) {
       featuresRef.current.scrollIntoView({ behavior: "smooth" });
@@ -100,6 +110,40 @@ const LandingPage: React.FC = () => {
       benefitsRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, []);
+
+  const [showSensei, setShowSensei] = useState(false);
+
+  const { rive, RiveComponent } = useRive({
+    src: "/assets/rive/pollsensei_master.riv",
+    stateMachines: "sensei-states",
+    autoplay: true,
+    onStateChange: (state) => {
+      dispatch(setAnimationState(state.data));
+    },
+  });
+
+  const {
+    count = 0, // Fallback to 0 if undefined
+    animationState = "Sleeping",
+  } = useSelector((state: RootState) => {
+    return state.senseiMaster || {};
+  });
+
+  const toggleStates = (stage?: number) => {
+    if (rive) {
+      const statesLength = rive?.animationNames.length;
+      // dispatch(setAnimationState(animationState === "idle" ? "chat" : "idle"));
+      if (count >= statesLength - 1) {
+        dispatch(setCount(stage ?? 1));
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "stop talking");
+
+        trigger!.fire();
+      } else {
+        dispatch(setCount(count + 1));
+      }
+    }
+  };
 
   // useEffect(() => {
   //   const timer = setTimeout(() => {
@@ -133,17 +177,113 @@ const LandingPage: React.FC = () => {
   //   }
   // }, []);
 
+  const senseiStateSetter = (
+    state:
+      | "sleep"
+      | "be idle"
+      | "start thinking"
+      | "start talking"
+      | "stop talking"
+  ) => {
+    if (rive) {
+      if (state === "sleep") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "sleep");
+        trigger?.fire();
+      }
+      if (state === "be idle") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "be idle");
+        trigger?.fire();
+      }
+      if (state === "start thinking") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "start thinking");
+        trigger?.fire();
+      }
+      if (state === "start talking") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "start talking");
+        trigger?.fire();
+      }
+      if (state === "stop talking") {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs.find((i) => i.name === "stop talking");
+        trigger?.fire();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (rive) {
+      const statesLength = rive?.animationNames.length;
+
+      console.log(count);
+      console.log(statesLength);
+
+      const inputs = rive?.stateMachineInputs("sensei-states");
+      const trigger1 = inputs?.find((i) => i.name === "sleep");
+      if (trigger1?.fire) trigger1.fire();
+      const trigger2 = inputs?.find((i) => i.name === "be idle");
+      if (trigger2?.fire) trigger2.fire();
+
+      if (count >= statesLength) {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+        const trigger = inputs?.find((i) => i.name === "sleep");
+        if (trigger?.fire) trigger.fire();
+      } else {
+        const inputs = rive?.stateMachineInputs("sensei-states");
+
+        if (count === 0) {
+          const trigger = inputs?.find((i) => i.name === "sleep");
+          if (trigger?.fire) trigger.fire();
+          if (animationState) {
+            setTimeout(() => {
+              const trigger = inputs?.find((i) => i.name === "sleep");
+              if (trigger?.fire) trigger.fire();
+            }, 10000);
+          }
+        }
+        if (count === 1) {
+          const trigger = inputs?.find((i) => i.name === "be idle");
+          console.log(trigger);
+          if (trigger?.fire) trigger.fire();
+        }
+        if (count === 2) {
+          const trigger = inputs?.find((i) => i.name === "start thinking");
+          console.log(trigger);
+          if (trigger?.fire) trigger.fire();
+        }
+        if (count === 3) {
+          const trigger = inputs?.find((i) => i.name === "start talking");
+          console.log(trigger);
+          if (trigger?.fire) trigger.fire();
+        }
+      }
+    }
+  }, [count, rive]);
+
+  useEffect(() => {
+    if (rive) {
+      setTimeout(() => {
+        dispatch(setCount(count + 1));
+      }, 1);
+    }
+  }, [rive]);
+
   return (
     <main className="min-h-screen">
       <NavBar scrollToSection={scrollToSection} />
       <div className="min-h-screen dark:bg-gradient-to-br from-[#1a0b2e] to-[#4a2075] text-white overflow-hidden">
         {/* Hero Section */}
         <section className="relative min-h-screen flex-col gap-10 flex items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8 hero_bg ">
-          <Image
-            src={pollsensei}
-            alt="Abstract Background"
-            className=" mx-auto"
-          />
+          <div
+            className={cn(
+              "rive-animation size-60 max-w-60 max-h-60 transition-all flex justify-center items-center"
+            )}
+          >
+            <RiveComponent className="size-[100%] object-cover rounded-full cursor-pointer flex justify-center items-center mx-auto translate-x-[15%]" />
+          </div>
           <motion.div
             style={{ y }}
             className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
@@ -268,7 +408,7 @@ const LandingPage: React.FC = () => {
             </h2>
             <p>
               Create, validate, and analyze surveys effortlessly — all with{" "}
-              <br className="hidden lg:flex" /> PollSensei’s intelligent
+              <br className="hidden lg:flex" /> PollSensei's intelligent
               platform.
             </p>
           </div>
@@ -318,10 +458,7 @@ const LandingPage: React.FC = () => {
               <div className="lg:w-[60%] mb-4 lg:mb-0 mt-3 lg:mt-0">
                 {/* <Image src={ai_powered} alt="feature" className="w-full" /> */}
                 <video loop muted autoPlay className="w-full">
-                  <source
-                    src={"/videos/ai_powerded.mp4"}
-                    type="video/mp4"
-                  />
+                  <source src={"/videos/ai_powerded.mp4"} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               </div>
@@ -332,7 +469,7 @@ const LandingPage: React.FC = () => {
                   Insightful, Actionable Analysis
                 </h2>
                 <p>
-                  With PollSensei’s powerful AI analysis, transform raw data
+                  With PollSensei's powerful AI analysis, transform raw data
                   into <br className="hidden lg:flex" /> clear, impactful
                   insights—no data expertise required
                 </p>

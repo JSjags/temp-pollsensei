@@ -1,4 +1,8 @@
-import { dark_theme_logo, footer_logo, pollsensei_new_logo } from "@/assets/images";
+import {
+  dark_theme_logo,
+  footer_logo,
+  pollsensei_new_logo,
+} from "@/assets/images";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -10,10 +14,10 @@ import {
 } from "react-icons/fa6";
 
 type Props = {
-  onClick?:()=>void;
+  onClick?: () => void;
 };
 
-const Footer:React.FC<Props> = ({onClick}) => {
+const Footer: React.FC<Props> = ({ onClick }) => {
   return (
     <footer className="bg-gray-90 text-[#F9F9F9] pt-12 pb-32 px-4 sm:px-6 lg:px-8 w-full relative">
       <div className="container mx-auto w-full">
@@ -24,42 +28,37 @@ const Footer:React.FC<Props> = ({onClick}) => {
               Revolutionizing surveys with AI-powered insights
             </p> */}
             <Image src={pollsensei_new_logo} alt="Logo" />
-
           </div>
 
           <div className="flex justify-en gap-10 items-start w-full">
             <div>
-              <h4 className="text-lg font-semibold text-[#606060] mb-4">Company</h4>
+              <h4 className="text-lg font-semibold text-[#606060] mb-4">
+                Company
+              </h4>
               <ul className="space-y-2">
                 <li>
-                  <span 
-                  onClick={onClick}
+                  <span
+                    onClick={onClick}
                     // href="/features"
-                    className="text-black hover:text-white"
+                    className="text-black hover:text-purple-600"
                   >
                     Update
                   </span>
                 </li>
                 <li>
-                  <Link
-                    href="/#"
-                    className="text-black hover:text-white"
-                  >
+                  <Link href="/#" className="text-black hover:text-purple-600">
                     Contact Sales
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/#"
-                    className="text-black hover:text-white"
-                  >
+                  <Link href="/#" className="text-black hover:text-purple-600">
                     Support
                   </Link>
                 </li>
                 {/* <li>
                   <Link
                     href="/contact"
-                    className="text-black hover:text-white"
+                    className="text-black hover:text-purple-600"
                   >
                     Benefit
                   </Link>
@@ -67,20 +66,22 @@ const Footer:React.FC<Props> = ({onClick}) => {
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-[#606060] mb-4">Legal</h4>
+              <h4 className="text-lg font-semibold text-[#606060] mb-4">
+                Legal
+              </h4>
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="/terms"
-                    className="text-black hover:text-white"
+                    href="/terms-of-service"
+                    className="text-black hover:text-purple-600"
                   >
                     Terms of Service
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/privacy"
-                    className="text-black hover:text-white"
+                    href="/privacy-policy"
+                    className="text-black hover:text-purple-600"
                   >
                     Privacy Policy
                   </Link>
@@ -88,13 +89,21 @@ const Footer:React.FC<Props> = ({onClick}) => {
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-[#606060] mb-4">Socials</h4>
+              <h4 className="text-lg font-semibold text-[#606060] mb-4">
+                Socials
+              </h4>
               <div className="flex flex-col">
-                <Link href="https://x.com/pollsenseiAI?t=7fKJdJRHIPfnOLlzEd6oYw&s=09" className="text-black hover:text-white">
+                <Link
+                  href="https://x.com/pollsenseiAI?t=7fKJdJRHIPfnOLlzEd6oYw&s=09"
+                  className="text-black hover:text-purple-600"
+                >
                   {/* <FaTwitter /> */}
                   Twitter
                 </Link>
-                <Link href="https://www.facebook.com/profile.php?id=61567009761421&mibextid=ZbWKwL" className="text-black hover:text-white">
+                <Link
+                  href="https://www.facebook.com/profile.php?id=61567009761421&mibextid=ZbWKwL"
+                  className="text-black hover:text-purple-600"
+                >
                   {/* <FaFacebook /> */}
                   Facebook
                 </Link>
@@ -102,7 +111,10 @@ const Footer:React.FC<Props> = ({onClick}) => {
                  
                   Linkedin
                 </a> */}
-                <Link href="https://www.instagram.com/pollsensei/" className="text-black hover:text-white">
+                <Link
+                  href="https://www.instagram.com/pollsensei/"
+                  className="text-black hover:text-purple-600"
+                >
                   {/* <FaInstagram /> */}
                   Instagram
                 </Link>
@@ -115,10 +127,17 @@ const Footer:React.FC<Props> = ({onClick}) => {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 text-black">
-          <p>&copy; {new Date().getFullYear()} Oaks Intelligence Limited. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Oaks Intelligence Limited. All
+            rights reserved.
+          </p>
         </div>
       </div>
-      <Image src={footer_logo} alt="Logo" className="w-full absolute -bottom-[125px] " />
+      <Image
+        src={footer_logo}
+        alt="Logo"
+        className="w-full absolute -bottom-[125px] "
+      />
     </footer>
   );
 };
