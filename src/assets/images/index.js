@@ -60,6 +60,18 @@ import phone_1 from "./phone_1.svg"
 import phone_2 from "./phone_2.svg"
 import footer_logo from './footer_logo.svg'
 import mail_bag from './Mail.svg'
+import question_mark from './question_mark.svg'
+import article1 from './1.svg'
+import article2 from './2.svg'
+import article3 from './3.svg'
+import article4 from './4.svg'
+import article5 from './5.svg'
+import article6 from './6.svg'
+import smile1 from './smile1.svg'
+import cratf from './craft.svg'
+import tut1 from './tut1.svg'
+import tut2 from './tut2.svg'
+import tut4 from './tut4.svg'
 
 
 export {
@@ -125,4 +137,16 @@ export {
   phone_2,
   footer_logo,
   mail_bag,
+  question_mark,
+  article1,
+  article2,
+  article3,
+  article4,
+  article5,
+  article6,
+  smile1,
+  cratf,
+  tut1,
+  tut2,
+  tut4,
 };

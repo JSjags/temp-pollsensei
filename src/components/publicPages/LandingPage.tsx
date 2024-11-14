@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import Image from "next/image";
@@ -343,7 +344,7 @@ const LandingPage: React.FC = () => {
                 className="inline-block"
               >
                 <Link
-                  href="https://youtu.be/VtHEtba0OnA?si=oAP1P0nwoRn2-Vm3"
+                  href="https://youtu.be/VtHEtba0OnA?si=oAP1P0nwoRn2-Vm3" target="_blank" 
                   className="relative inline-block bg-none font-bold py-3 px-6 sm:px-8 rounded-md text-base sm:text-lg shadow-lg overflow-hidden group text-purple-500 border border-purple-500"
                 >
                   <span className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
