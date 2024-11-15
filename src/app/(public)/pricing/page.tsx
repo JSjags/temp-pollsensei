@@ -12,6 +12,7 @@ import Pricing from "@/components/publicPages/Pricing";
 import ToggleMonth from "@/components/common/ToggleMonth";
 import SeePricing from "@/components/publicPages/SeePricing";
 import PricingTable from "@/components/publicPages/PricingTable";
+import NeedAssistance from "@/components/publicPages/NeedAssistance";
 
 const PricingPage: React.FC = () => {
   useEffect(() => {
@@ -202,7 +203,7 @@ const PricingPage: React.FC = () => {
             <Pricing currency={currency} />
           </div>
         </section>
-        <div className="mt-16 text-center" data-aos="fade-up">
+        {/* <div className="mt-16 text-center" data-aos="fade-up">
           <h2 className="text-2xl font-semibold mb-4">
             Not sure which plan is right for you?
           </h2>
@@ -216,14 +217,14 @@ const PricingPage: React.FC = () => {
           >
             Schedule a Consultation
           </Link>
-        </div>
+        </div> */}
       </main>
         <section className=" bg-white text-black overflow-hidden">
           <PricingTable />
            </section>
-        <section className=" bg-white text-black overflow-hidden">
+        <section className=" bg-white text-black overflow-hidden" data-aos="fade-up">
           {/* <ContactUsCard /> */}
-          <SeePricing />
+          <NeedAssistance />
         </section>
       {/* Footer */}
       <Footer />

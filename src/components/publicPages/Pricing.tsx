@@ -95,7 +95,7 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
               href="/register"
               className={` ${
                 plan.name === "Pro"
-                  ? "bg-[#5B03B2] text-white "
+                  ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white"
                   : plan.name === "Basic"? "text-purple-500 border border-purple-500" : "text-purple border border-purple-500 "
               } block w-full my-5  text-center py-3 rounded-md hover:bg-opacity-80 transition-colors duration-300 `}
             >
@@ -105,7 +105,7 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
               {plan.features.map((feature, idx) => (
                 <li key={idx} className="flex items-center">
                   <svg
-                    className="w-5 h-5 mr-2 bg-[] rounded-full text-green-500"
+                    className="w-5 h-5 mr-2 bg-[] rounded-full text-purple-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
