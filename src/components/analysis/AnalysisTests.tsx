@@ -346,12 +346,12 @@ export default function DragAndDropPage() {
       const formatTests = () => {
         const formattedData: Test[] = [];
         const allowedTests = [
-          // "Wilcoxon Signed-Rank Test",
-          // "Kruskal-Wallis Test",
+          "Wilcoxon Signed-Rank Test",
+          "Kruskal-Wallis Test",
+          "Mann-Whitney U Test",
           "Sentiment Analysis",
           "Thematic Analysis",
           "Word Frequency Analysis",
-          // "Mann-Whitney U Test",
         ];
 
         for (const category in testsLibraryQuery.data) {
@@ -382,12 +382,12 @@ export default function DragAndDropPage() {
     if (createTestsQuery.isSuccess) {
       console.log(createTestsQuery.data);
       const allowedTests = [
-        // "Wilcoxon Signed-Rank Test",
-        // "Kruskal-Wallis Test",
+        "Wilcoxon Signed-Rank Test",
+        "Kruskal-Wallis Test",
+        "Mann-Whitney U Test",
         "Sentiment Analysis",
         "Thematic Analysis",
         "Word Frequency Analysis",
-        // "Mann-Whitney U Test",
       ];
 
       const updatedTestLibrary = createTestsQuery.data.data

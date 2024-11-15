@@ -211,7 +211,7 @@ const TeamMembersPage: React.FC = () => {
               </Slide>
             )}
           </div>
-          {data?.data?.data.length === 1 && <NoTeam />}
+          {data?.data?.data.length < 1 && <NoTeam />}
 
           <div className="flex my-10 items-center justify-between w-full">
             <div className="flex gap-2 sm:gap-5 items-center w-full">

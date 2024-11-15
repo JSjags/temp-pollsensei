@@ -368,7 +368,7 @@ input[type="number"] {
 
 .gradient-border {
   border: 2px solid;
-  border-image:linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
+  border-image: linear-gradient(90.44deg, #5b03b2 0.18%, #9d50bb 100%);
   border-image-slice: 1;
 }
 
@@ -378,27 +378,26 @@ input[type="number"] {
   -webkit-text-fill-color: transparent;
 }
 
-
-.twitter-picker span div{
+.twitter-picker span div {
   width: 4rem !important;
   height: 4rem !important;
 }
 
-.default{
+.default {
   background-image: url(../assets/images/default.svg);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
 }
 
-.neon{
-background-image: url(../assets/images/neon.svg);
-background-repeat: no-repeat;
-background-size: cover;
-background-position: center;
+.neon {
+  background-image: url(../assets/images/neon.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
-.sparkly{
+.sparkly {
   background-image: url(../assets/images/Sparkly.svg);
   background-repeat: no-repeat;
   background-size: cover;
@@ -427,47 +426,45 @@ background-position: center;
   border-radius: 10px;
 }
 
-input[type='radio'].radio {
-  -webkit-appearance:none;
-  width:20px;
-  height:20px;
-  border:1px solid darkgray;
-  border-radius:50%;
-  outline:none;
-  box-shadow:0 0 5px 0px gray inset;
+input[type="radio"].radio {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 1px solid darkgray;
+  border-radius: 50%;
+  outline: none;
+  box-shadow: 0 0 5px 0px gray inset;
 }
 
-input[type='radio'].radio:hover {
-  box-shadow:0 0 5px 0px orange inset;
+input[type="radio"].radio:hover {
+  box-shadow: 0 0 5px 0px orange inset;
 }
 
-input[type='radio'].radio:before {
-  content:'';
-  display:block;
-  width:60%;
-  height:60%;
-  margin: 20% auto;    
-  border-radius:50%;    
+input[type="radio"].radio:before {
+  content: "";
+  display: block;
+  width: 60%;
+  height: 60%;
+  margin: 20% auto;
+  border-radius: 50%;
 }
-input[type='radio'].radio:checked:before {
-  background:green;
-}
-
-
-.header_font__indicator-separator, 
-.question_font__indicator-separator, 
-.body_font__indicator-separator{
-display: none !important;
+input[type="radio"].radio:checked:before {
+  background: green;
 }
 
-.select-container .select-name__indicator-separator{
+.header_font__indicator-separator,
+.question_font__indicator-separator,
+.body_font__indicator-separator {
   display: none !important;
-  }
+}
 
+.select-container .select-name__indicator-separator {
+  display: none !important;
+}
 
-  .hero_bg{
-    background: url('../assets/images/hero-bg.svg');
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-  }
+.hero_bg {
+  background: url("../assets/images/hero-bg.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
