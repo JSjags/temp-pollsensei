@@ -2,17 +2,22 @@ import { useGetPlanQuery } from "@/services/subscribtion.service";
 import Link from "next/link";
 import React from "react";
 
-const Pricing = () => {
+interface PricingProps{
+  currency?:boolean;
+}
+
+const Pricing:React.FC<PricingProps> = ({currency}) => {
   const { data, isLoading } =useGetPlanQuery(null);
   console.log(data)
   const plans = [
     {
       name: "Basic",
       price: "$0",
+      price2: "$0",
       description:
         "Perfect for individuals and small teams just getting started.",
       features: [
-        "Unlimited Access",
+        "Free Forever",
         "1 Account",
         "200 monthly responses",
         "AI survey/Poll generation",
@@ -22,6 +27,7 @@ const Pricing = () => {
     {
       name: "Pro",
       price: "$65",
+      price2: "$60",
       description:
         "Ideal for growing businesses that need more power and flexibility.",
       features: [
@@ -41,6 +47,7 @@ const Pricing = () => {
     {
       name: "Team",
       price: "$90",
+      price2: "$85",
       description:
         "Tailored solutions for large organizations with complex needs.",
       features: [
@@ -76,7 +83,16 @@ const Pricing = () => {
               {plan.name}
             </h2>
             <p className="text-4xl font-bold mb-4 text-[#171725] text-start">
-              {plan.price}
+              {currency ? plan.price : plan.price2}
+              {/* {
+                currency
+                 ? plan.price2
+                  : plan.price2 + " " + plan.price.split("$")[1].split(".")[0] + "/month"
+              }  */}
+              {
+                !currency  && 
+               <small className="text-sm font-normal text-gray-500">Monthly</small>
+              }
             </p>
             <hr />
 

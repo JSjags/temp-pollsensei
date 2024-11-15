@@ -18,7 +18,7 @@ const fontSans = DM_Sans({
 });
 export const metadata: Metadata = {
   icons: "/favicon.ico?v=1",
-  title: "PollSensei",
+  title: "PollSensei - Your end-to-end AI survey assistant",
   description:
     "Create surveys effortlessly with manual input or AI assistance. Streamline your survey creation process with our intuitive web app.",
 };
