@@ -158,48 +158,20 @@ const CreateSurveyPage = () => {
     if (isSuccess) {
       const refactoredQuestions = data?.data?.response?.map((question: any) => {
         const optionType = question["Option type"]?.trim();
-
+        if(optionType ==="matrix_multiple_choice"){
+          return {
+            question: question.Question,
+            rows: question.Options.Rows,
+            columns: question.Options.Columns,
+            question_type:optionType === null ? optionType : "",
+            is_required: true,
+            description: "",
+          }
+        }
         return {
           question: question.Question,
           options: question.Options,
-          question_type:optionType,
-            // optionType === "Multi-choice"
-            //   ? "multiple_choice"
-            //   : 
-              // optionType === "Dropdown"
-              // ? "drop_down"
-              // : 
-              // optionType === "likert_scale"
-              // ? "likert_scale"
-              // : 
-              // optionType === "Slider"
-              // ? "slider"
-              // : 
-              // optionType === "Star Rating"
-              // ? "star_rating"
-              // : 
-              // optionType === "Multiple Choice"
-              // ? "multiple_choice"
-              // : 
-              // optionType === "Single Choice"
-              // ? "single_choice"
-              // : 
-              // optionType === "Checkbox"
-              // ? "checkbox"
-              // : 
-              // optionType === "Rating Scale"
-              // ? "rating_scale"
-              // : 
-              // optionType === "Comment"
-              // ? "long_text"
-              // : 
-              // optionType === "Boolean"
-              // ? "boolean"
-              // : 
-              // optionType === "Matrix"
-              // ? "matrix_checkbox"
-              // : "matrix_checkbox"
-              // ,
+          question_type:optionType || "",
           is_required: true,
           description: "",
         };
@@ -709,7 +681,7 @@ const CreateSurveyPage = () => {
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-start mt-4 md:mt-0`}
                 onClick={()=>{
-                  setSurveyPrompt("Student Satisfaction Survey")
+                  setSurveyPrompt("I am working on a survey to evaluate student satisfaction within our school. This survey aims to gather feedback on various aspects of the educational experience, including course content, teaching quality, campus facilities, and extracurricular activities. Additionally, the survey seeks to identify areas where the school can improve and enhance the overall student experience. The target audience for this survey includes current students across different grades and departments. By capturing diverse perspectives, the survey aims to provide actionable insights that can help improve student satisfaction and academic success. The focus will be on understanding student needs and preferences to inform future decisions and initiatives aimed at enhancing the educational environment")
                   // setTimeout(()=>{
                   //   handleGenerateTopics()
                   // }, 2000)
@@ -730,7 +702,7 @@ const CreateSurveyPage = () => {
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0 `}
                 onClick={()=>{
-                  setSurveyPrompt("Employee Engagement Survey")
+                  setSurveyPrompt("Our organisation is conducting a survey to evaluate employee engagement. This survey aims to collect feedback on various aspects of the workplace experience, including job satisfaction, work-life balance, management effectiveness, professional development opportunities, and organizational culture. Additionally, the survey seeks to identify areas where we can improve employee engagement and retention. The target audience includes all employees across different departments and levels within the organization. By capturing diverse perspectives, we aim to gather actionable insights that can inform future enhancements to our workplace policies, practices, and initiatives. The focus will be on understanding employee needs and motivations to foster a more engaged and productive workforce.")
                   // setTimeout(()=>{
                   //   handleGenerateTopics()
                   // }, 2000)
@@ -750,7 +722,7 @@ const CreateSurveyPage = () => {
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0`}
                 onClick={()=>{
-                  setSurveyPrompt("Employee Engagement Survey")
+                  setSurveyPrompt("This survey aims to gather feedback across several key aspects, including event organisation, content quality, speaker impact, venue suitability, and overall attendee satisfaction. Additionally, the survey aims to pinpoint areas where improvements can be made and to gauge how well the event achieved its goals. Participants include all attendees of the event, including participants, speakers, sponsors, and exhibitors. By gathering insights from a diverse range of perspectives, the survey aims to provide actionable feedback to enhance future event planning and improve the overall attendee experience. Our goal is to better understand attendee preferences and needs to ensure that future events are even more successful and impactful.")
                   // setTimeout(()=>{
                   //   handleGenerateTopics()
                   // }, 2000)
@@ -847,3 +819,42 @@ const CreateSurveyPage = () => {
 };
 
 export default CreateSurveyPage;
+
+
+      // optionType === "Multi-choice"
+            //   ? "multiple_choice"
+            //   : 
+              // optionType === "Dropdown"
+              // ? "drop_down"
+              // : 
+              // optionType === "likert_scale"
+              // ? "likert_scale"
+              // : 
+              // optionType === "Slider"
+              // ? "slider"
+              // : 
+              // optionType === "Star Rating"
+              // ? "star_rating"
+              // : 
+              // optionType === "Multiple Choice"
+              // ? "multiple_choice"
+              // : 
+              // optionType === "Single Choice"
+              // ? "single_choice"
+              // : 
+              // optionType === "Checkbox"
+              // ? "checkbox"
+              // : 
+              // optionType === "Rating Scale"
+              // ? "rating_scale"
+              // : 
+              // optionType === "Comment"
+              // ? "long_text"
+              // : 
+              // optionType === "Boolean"
+              // ? "boolean"
+              // : 
+              // optionType === "Matrix"
+              // ? "matrix_checkbox"
+              // : "matrix_checkbox"
+              // ,

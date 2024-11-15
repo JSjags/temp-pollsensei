@@ -56,6 +56,15 @@ const PublicResponse = () => {
   ) => {
     if (
       question_type === "multiple_choice" ||
+      question_type === "checkbox" ||
+      question_type === "drop_down" ||
+      question_type === "checkbox" ||
+      question_type === "checkbox" ||
+      question_type === "star_rating" ||
+      question_type === "rating_scale" ||
+      question_type === "boolean" ||
+      question_type === "slider" ||
+      question_type === "matrix_checkbox" ||
       question_type === "single_choice"
     ) {
       const updatedOptions = [...selectedOptions];
@@ -90,6 +99,15 @@ const PublicResponse = () => {
   .map((item: any, index: number) => {
     if (
       item.question_type === "multiple_choice" ||
+      item.question_type === "checkbox" ||
+      item.question_type === "drop_down" ||
+      item.question_type === "checkbox" ||
+      item.question_type === "checkbox" ||
+      item.question_type === "star_rating" ||
+      item.question_type === "rating_scale" ||
+      item.question_type === "boolean" ||
+      item.question_type === "slider" ||
+      item.question_type === "matrix_checkbox" ||
       item.question_type === "single_choice"
     ) {
       return {
@@ -108,11 +126,7 @@ const PublicResponse = () => {
         text: textResponses[index] || "something",  
       };
     }
-    return  {
-      question: item.question,
-      question_type: item.question_type,
-      selected_options: [selectedOptions[index]],
-    };;
+    return  null;
   })
   .filter(Boolean);
 
@@ -321,6 +335,9 @@ const PublicResponse = () => {
                     // step={item.options.length}
                     questionType={item.question_type}
                     index={index + 1}
+                    // onChange={(value: string) =>
+                    //   handleOptionChange(index, value, item.question_type)
+                    // }
                     is_required={item.is_required}
                     />
                   )
@@ -331,6 +348,9 @@ const PublicResponse = () => {
                       questionType={item.question_type}
                       key={index}
                       index={index + 1}
+                      onChange={(value: string) =>
+                        handleOptionChange(index, value, item.question_type)
+                      }
                       is_required={item.is_required}
 
                     />
@@ -340,6 +360,9 @@ const PublicResponse = () => {
                     // maxRating={5}
                       index={index + 1}
                       questionType={item.question_type}
+                      // onChange={(value: string) =>
+                      //   handleOptionChange(index, value, item.question_type)
+                      // }
                       is_required={item.is_required}
                     />
                   ) : item.question_type === "matrix_checkbox" ? (
@@ -370,6 +393,9 @@ const PublicResponse = () => {
                       question={item.question}
                       options={item.options}
                       questionType={item.question_type}
+                      onChange={(value: string) =>
+                        handleOptionChange(index, value, item.question_type)
+                      }
                      
                     />
                   )  :  item.question_type === "single_choice" ? (
@@ -379,6 +405,10 @@ const PublicResponse = () => {
                       question={item.question}
                       options={item.options}
                       questionType={item.question_type}
+                      onChange={(value: string) =>
+                        handleOptionChange(index, value, item.question_type)
+                      }
+                      is_required={item.is_required}
                       
                     />
                   ) : item.question_type === "number" ? (
@@ -396,6 +426,10 @@ const PublicResponse = () => {
                     question={item.question}
                     options={item.options}
                     questionType={item.question_type}
+                    onChange={(value: string) =>
+                      handleOptionChange(index, value, item.question_type)
+                    }
+                    is_required={item.is_required}
                    
                   />
                   )  :  item.question_type === "checkbox" ? (
@@ -405,6 +439,10 @@ const PublicResponse = () => {
                     question={item.question}
                     options={item.options}
                     questionType={item.question_type}
+                    onChange={(value: string) =>
+                      handleOptionChange(index, value, item.question_type)
+                    }
+                    is_required={item.is_required}
                    
                   />
                   ) : item.question_type === "rating_scale" ? (
@@ -414,6 +452,10 @@ const PublicResponse = () => {
                       question={item.question}
                       options={item.options}
                       questionType={item.question_type}
+                      onChange={(value: string) =>
+                        handleOptionChange(index, value, item.question_type)
+                      }
+                      is_required={item.is_required}
                    
                     />
                   )
@@ -424,6 +466,10 @@ const PublicResponse = () => {
                       question={item.question}
                       options={item.options}
                       questionType={item.question_type}
+                      onChange={(value: string) =>
+                        handleOptionChange(index, value, item.question_type)
+                      }
+                      is_required={item.is_required}
                      
                     />
                   )
@@ -433,6 +479,7 @@ const PublicResponse = () => {
                       index={index + 1}
                       question={item.question}
                       questionType={item.question_type}
+                      
                      
                     />
                   ) 

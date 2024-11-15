@@ -23,10 +23,6 @@ const Footer: React.FC<Props> = ({ onClick }) => {
       <div className="container mx-auto w-full">
         <div className="md:flex justify-between items-start  w-full">
           <div className="w-full">
-            {/* <h3 className="text-xl font-bold mb-4">PollSensei</h3>
-            <p className="text-black text-sm sm:text-base">
-              Revolutionizing surveys with AI-powered insights
-            </p> */}
             <Image src={pollsensei_new_logo} alt="Logo" />
           </div>
 
@@ -51,18 +47,10 @@ const Footer: React.FC<Props> = ({ onClick }) => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="mailto:sales@pollsensei.ai" className="text-black hover:text-purple-600">
+                  <Link href="/resource-hub" className="text-black hover:text-purple-600">
                     Support
                   </Link>
                 </li>
-                {/* <li>
-                  <Link
-                    href="/contact"
-                    className="text-black hover:text-purple-600"
-                  >
-                    Benefit
-                  </Link>
-                </li> */}
               </ul>
             </div>
             <div>

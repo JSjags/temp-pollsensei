@@ -205,7 +205,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 question={item.question}
                                 questionType={item.question_type}
                               />
-                            ) : item.question_type === "matrix_checkbox" ? (
+                            ) : item.question_type === "matrix_multiple_choice" ? (
                               <MatrixQuestion
                                 key={index}
                                 index={index + 1}

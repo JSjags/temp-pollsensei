@@ -84,7 +84,7 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
         <div className="flex gap-5 items-center">
         {/* Login Button */}
         {
-          !isLoggedIn || state.user === null || state.token === null ? (
+          !isLoggedIn || state.user === null || state.access_token === null || state.token === null ? (
         <div className="hidden md:block">
           <Link
             href="/login"

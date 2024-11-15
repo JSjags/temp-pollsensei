@@ -120,7 +120,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
             </div>
           ))}
         </div>
-        {/* {pathname === "/surveys/edit-survey" && (
+        {pathname === "/surveys/edit-survey" && (
           <div className="flex justify-end gap-4">
             <button
               className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
@@ -135,8 +135,28 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
               Delete
             </button>
           </div>
-        )} */}
-        {pathname === "/surveys/edit-survey" ||
+        )}
+
+
+{pathname === "/surveys/add-question-m" && (
+          <div className="flex justify-end gap-4">
+            {/* <button
+              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
+              onClick={EditQuestion}
+            >
+              Edit
+            </button> */}
+            <button
+              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
+              onClick={DeleteQuestion}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+
+
+        {/* {pathname === "/surveys/edit-survey" ||
           (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
               {pathname === "/surveys/add-question-m" ? (
@@ -156,7 +176,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
                 Delete
               </button>
             </div>
-          ))}
+          ))} */}
         <div className="flex justify-end">
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (

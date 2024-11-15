@@ -31,7 +31,7 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
       description:
         "Ideal for growing businesses that need more power and flexibility.",
       features: [
-        "Everything in Basic",
+       
         "Add Contributors (Up to 4)",
         "Unlimited Polls and Surveys",
         "10,000 monthly responses",
@@ -51,7 +51,6 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
       description:
         "Tailored solutions for large organizations with complex needs.",
       features: [
-        "Everything in Pro",
         "Multiple accounts",
         "Unlimited contributors",
         "Unlimited responses",
@@ -83,12 +82,8 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
               {plan.name}
             </h2>
             <p className="text-4xl font-bold mb-4 text-[#171725] text-start">
-              {currency ? plan.price : plan.price2}
-              {/* {
-                currency
-                 ? plan.price2
-                  : plan.price2 + " " + plan.price.split("$")[1].split(".")[0] + "/month"
-              }  */}
+              {currency ? plan.price : plan.price2} 
+              {/* {plan.name === "Team" ? (<small className="text-xs">/user Starting at 3</small>) : ""} */}
               {
                 !currency  && 
                <small className="text-sm font-normal text-gray-500">Monthly</small>
@@ -101,10 +96,10 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
               className={` ${
                 plan.name === "Pro"
                   ? "bg-[#5B03B2] text-white "
-                  : "text-purple border border-purple-500 "
+                  : plan.name === "Basic"? "text-purple-500 border border-purple-500" : "text-purple border border-purple-500 "
               } block w-full my-5  text-center py-3 rounded-md hover:bg-opacity-80 transition-colors duration-300 `}
             >
-              {plan.name === "Enterprise" ? "Contact Sales" : "Get Started"}
+              {plan.name === "Basic" ? "Get PollSensei for Free" : "Start Trial"}
             </Link>
             <ul className="mb-8 space-y-3">
               {plan.features.map((feature, idx) => (
