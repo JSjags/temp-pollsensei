@@ -1,558 +1,6 @@
-// import React from "react";
-// import {
-//   BarChart,
-//   Bar,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   Legend,
-//   ResponsiveContainer,
-// } from "recharts";
-// import ReactWordcloud from "react-wordcloud";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-// import { AlertCircle } from "lucide-react";
-
-// type TestResult = {
-//   status: string;
-//   reason: string;
-// };
-
-// type TestData = {
-//   test_name: string;
-//   test_results: Record<string, TestResult>;
-// };
-
-// type Props = {
-//   data: TestData[];
-// };
-
-// const wordCloudOptions = {
-//   colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"],
-//   enableTooltip: true,
-//   deterministic: false,
-//   fontFamily: "impact",
-//   fontSizes: [20, 60] as [number, number],
-//   fontStyle: "normal",
-//   fontWeight: "normal",
-//   padding: 1,
-//   rotations: 3,
-//   rotationAngles: [0, 90] as [number, number],
-//   scale: "sqrt",
-//   spiral: "archimedean",
-//   transitionDuration: 1000,
-// };
-
-// const DataVisualization: React.FC<Props> = ({ data }) => {
-//   const renderChart = (testData: TestData) => {
-//     switch (testData.test_name) {
-//       case "Thematic Analysis":
-//         // For demo purposes, we'll use dummy data
-//         const words = [
-//           { text: "Features", value: 64 },
-//           { text: "Pricing", value: 50 },
-//           { text: "Performance", value: 45 },
-//           { text: "Integration", value: 40 },
-//           { text: "Security", value: 35 },
-//           { text: "Documentation", value: 30 },
-//           { text: "Customer", value: 25 },
-//           // ... add more words as needed
-//         ];
-//         return (
-//           <div style={{ height: "400px", width: "100%" }}>
-//             <ReactWordcloud words={words} options={wordCloudOptions as any} />
-//           </div>
-//         );
-//       case "Sentiment Analysis":
-//         // For demo purposes, we'll use dummy data
-//         const sentimentData = [
-//           { name: "Product A", Positive: 60, Neutral: 30, Negative: 10 },
-//           { name: "Product B", Positive: 70, Neutral: 20, Negative: 10 },
-//           { name: "Product C", Positive: 45, Neutral: 35, Negative: 20 },
-//         ];
-//         return (
-//           <ResponsiveContainer width="100%" height={400}>
-//             <BarChart data={sentimentData}>
-//               <CartesianGrid strokeDasharray="3 3" />
-//               <XAxis dataKey="name" />
-//               <YAxis />
-//               <Tooltip />
-//               <Legend />
-//               <Bar dataKey="Positive" stackId="a" fill="#8884d8" />
-//               <Bar dataKey="Neutral" stackId="a" fill="#82ca9d" />
-//               <Bar dataKey="Negative" stackId="a" fill="#ffc658" />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         );
-//       case "Word Frequency Analysis":
-//         // For demo purposes, we'll use dummy data
-//         const frequencyData = [
-//           { word: "product", frequency: 100 },
-//           { word: "service", frequency: 85 },
-//           { word: "quality", frequency: 75 },
-//           { word: "price", frequency: 70 },
-//           { word: "feature", frequency: 65 },
-//           { word: "support", frequency: 60 },
-//           { word: "design", frequency: 55 },
-//           { word: "performance", frequency: 50 },
-//           { word: "value", frequency: 45 },
-//           { word: "experience", frequency: 40 },
-//         ];
-//         return (
-//           <ResponsiveContainer width="100%" height={400}>
-//             <BarChart data={frequencyData} layout="vertical">
-//               <CartesianGrid strokeDasharray="3 3" />
-//               <XAxis type="number" />
-//               <YAxis dataKey="word" type="category" />
-//               <Tooltip />
-//               <Legend />
-//               <Bar dataKey="frequency" fill="#8884d8" />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         );
-//       default:
-//         return null;
-//     }
-//   };
-
-//   const renderErrorMessages = (testData: TestData) => {
-//     return Object.entries(testData.test_results).map(([key, value]) => (
-//       <Alert variant="destructive" key={key}>
-//         <AlertCircle className="h-4 w-4" />
-//         <AlertTitle>Error</AlertTitle>
-//         <AlertDescription>{value.reason}</AlertDescription>
-//       </Alert>
-//     ));
-//   };
-
-//   return (
-//     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-//       {data.map((testData) => (
-//         <Card key={testData.test_name} className="w-full">
-//           <CardHeader>
-//             <CardTitle>{testData.test_name}</CardTitle>
-//           </CardHeader>
-//           <CardContent>
-//             {Object.values(testData.test_results).every(
-//               (result) => result.status === "error"
-//             )
-//               ? renderErrorMessages(testData)
-//               : renderChart(testData)}
-//           </CardContent>
-//         </Card>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default function DataVisualizationComponent({ data }: Props) {
-//   return <DataVisualization data={data} />;
-// }
-
-// "use client";
-
-// import React, { useState, useEffect } from "react";
-// import { motion } from "framer-motion";
-// import {
-//   BarChart,
-//   Bar,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   Legend,
-//   ResponsiveContainer,
-// } from "recharts";
-// import ReactWordcloud from "react-wordcloud";
-// import {
-//   Card,
-//   CardContent,
-//   CardHeader,
-//   CardTitle,
-//   CardDescription,
-// } from "@/components/ui/card";
-// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-// import { AlertCircle, BarChart2, Cloud, MessageSquare } from "lucide-react";
-
-// type TestResult = {
-//   status: string;
-//   reason: string;
-// };
-
-// type TestData = {
-//   test_name: string;
-//   test_results: Record<string, TestResult>;
-// };
-
-// type Props = {
-//   data: TestData[];
-// };
-
-// const wordCloudOptions = {
-//   colors: ["#8b5cf6", "#6366f1", "#3b82f6", "#0ea5e9", "#06b6d4", "#14b8a6"],
-//   enableTooltip: true,
-//   deterministic: false,
-//   fontFamily: "Inter, sans-serif",
-//   fontSizes: [20, 60],
-//   fontStyle: "normal",
-//   fontWeight: "bold",
-//   padding: 1,
-//   rotations: 3,
-//   rotationAngles: [0, 90],
-//   scale: "sqrt",
-//   spiral: "archimedean",
-//   transitionDuration: 1000,
-// };
-
-// const chartAnimation = {
-//   hidden: { opacity: 0, y: 20 },
-//   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
-// };
-
-// const ElegantDataVisualization: React.FC<Props> = ({ data }) => {
-//   const [activeIndex, setActiveIndex] = useState(0);
-
-//   useEffect(() => {
-//     const timer = setInterval(() => {
-//       setActiveIndex((prevIndex) => (prevIndex + 1) % data.length);
-//     }, 10000); // Switch every 10 seconds
-
-//     return () => clearInterval(timer);
-//   }, [data.length]);
-
-//   const renderChart = (testData: TestData) => {
-//     switch (testData.test_name) {
-//       case "Thematic Analysis":
-//         const words = Object.keys(testData.test_results).map((key) => ({
-//           text: key,
-//           value: Math.floor(Math.random() * 100) + 1,
-//         }));
-//         return (
-//           <div className="h-[400px] w-full">
-//             <ReactWordcloud words={words} options={wordCloudOptions as any} />
-//           </div>
-//         );
-//       case "Sentiment Analysis":
-//         const sentimentData = Object.keys(testData.test_results).map((key) => ({
-//           name: key,
-//           Positive: Math.floor(Math.random() * 100),
-//           Neutral: Math.floor(Math.random() * 50),
-//           Negative: Math.floor(Math.random() * 30),
-//         }));
-//         return (
-//           <ResponsiveContainer width="100%" height={400}>
-//             <BarChart data={sentimentData}>
-//               <CartesianGrid strokeDasharray="3 3" />
-//               <XAxis dataKey="name" />
-//               <YAxis />
-//               <Tooltip />
-//               <Legend />
-//               <Bar dataKey="Positive" stackId="a" fill="#8b5cf6" />
-//               <Bar dataKey="Neutral" stackId="a" fill="#6366f1" />
-//               <Bar dataKey="Negative" stackId="a" fill="#3b82f6" />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         );
-//       case "Word Frequency Analysis":
-//         const frequencyData = Object.keys(testData.test_results).map((key) => ({
-//           word: key,
-//           frequency: Math.floor(Math.random() * 100) + 1,
-//         }));
-//         return (
-//           <ResponsiveContainer width="100%" height={400}>
-//             <BarChart data={frequencyData} layout="vertical">
-//               <CartesianGrid strokeDasharray="3 3" />
-//               <XAxis type="number" />
-//               <YAxis dataKey="word" type="category" />
-//               <Tooltip />
-//               <Legend />
-//               <Bar dataKey="frequency" fill="#8b5cf6" />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         );
-//       default:
-//         return null;
-//     }
-//   };
-
-//   const renderErrorMessages = (testData: TestData) => {
-//     return Object.entries(testData.test_results).map(([key, value]) => (
-//       <Alert variant="destructive" key={key} className="mb-2">
-//         <AlertCircle className="h-4 w-4" />
-//         <AlertTitle className="font-semibold">{key}</AlertTitle>
-//         <AlertDescription>{value.reason}</AlertDescription>
-//       </Alert>
-//     ));
-//   };
-
-//   const getIcon = (testName: string) => {
-//     switch (testName) {
-//       case "Thematic Analysis":
-//         return <Cloud className="h-6 w-6 text-purple-500" />;
-//       case "Sentiment Analysis":
-//         return <MessageSquare className="h-6 w-6 text-blue-500" />;
-//       case "Word Frequency Analysis":
-//         return <BarChart2 className="h-6 w-6 text-indigo-500" />;
-//       default:
-//         return null;
-//     }
-//   };
-
-//   return (
-//     <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-//       <h1 className="text-4xl font-extrabold text-center mb-8 text-gray-800">
-//         Data Visualization Dashboard
-//       </h1>
-//       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-//         {data.map((testData, index) => (
-//           <motion.div
-//             key={testData.test_name}
-//             initial="hidden"
-//             animate={index === activeIndex ? "visible" : "hidden"}
-//             variants={chartAnimation}
-//           >
-//             <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-//               <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
-//                 <div className="flex items-center space-x-2">
-//                   {getIcon(testData.test_name)}
-//                   <CardTitle className="text-xl">
-//                     {testData.test_name}
-//                   </CardTitle>
-//                 </div>
-//                 <CardDescription className="text-purple-100">
-//                   {Object.values(testData.test_results).every(
-//                     (result) => result.status === "error"
-//                   )
-//                     ? "Test not compatible"
-//                     : "Analysis Results"}
-//                 </CardDescription>
-//               </CardHeader>
-//               <CardContent className="p-6">
-//                 {Object.values(testData.test_results).every(
-//                   (result) => result.status === "error"
-//                 )
-//                   ? renderErrorMessages(testData)
-//                   : renderChart(testData)}
-//               </CardContent>
-//             </Card>
-//           </motion.div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default function Component({ data = [] }: Props) {
-//   return <ElegantDataVisualization data={data} />;
-// }
-
-// "use client";
-
-// import React from "react";
-// import { motion } from "framer-motion";
-// import {
-//   BarChart,
-//   Bar,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   Legend,
-//   ResponsiveContainer,
-// } from "recharts";
-// import ReactWordcloud from "react-wordcloud";
-// import {
-//   Card,
-//   CardContent,
-//   CardHeader,
-//   CardTitle,
-//   CardDescription,
-// } from "@/components/ui/card";
-// import { AlertCircle, BarChart2, Cloud, MessageSquare } from "lucide-react";
-
-// type TestResult = {
-//   status: string;
-//   reason: string;
-// };
-
-// type TestData = {
-//   test_name: string;
-//   test_results: Record<string, TestResult>;
-// };
-
-// type Props = {
-//   data: TestData[];
-// };
-
-// const wordCloudOptions = {
-//   colors: ["#8b5cf6", "#6366f1", "#3b82f6", "#0ea5e9", "#06b6d4", "#14b8a6"],
-//   enableTooltip: true,
-//   deterministic: false,
-//   fontFamily: "Inter, sans-serif",
-//   fontSizes: [20, 60],
-//   fontStyle: "normal",
-//   fontWeight: "bold",
-//   padding: 1,
-//   rotations: 3,
-//   rotationAngles: [0, 90],
-//   scale: "sqrt",
-//   spiral: "archimedean",
-//   transitionDuration: 1000,
-// };
-
-// const chartAnimation = {
-//   hidden: { opacity: 0, y: 20 },
-//   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
-// };
-
-// const VerticalDataVisualization: React.FC<Props> = ({ data }) => {
-//   const renderChart = (testData: TestData) => {
-//     if (
-//       Object.values(testData.test_results).every(
-//         (result) => result.status === "error"
-//       )
-//     ) {
-//       return renderErrorComponent(testData);
-//     }
-
-//     switch (testData.test_name) {
-//       case "Thematic Analysis":
-//         const words = Object.keys(testData.test_results).map((key) => ({
-//           text: key,
-//           value: Math.floor(Math.random() * 100) + 1,
-//         }));
-//         return (
-//           <div className="h-[400px] w-full">
-//             <ReactWordcloud words={words} options={wordCloudOptions as any} />
-//           </div>
-//         );
-//       case "Sentiment Analysis":
-//         const sentimentData = Object.keys(testData.test_results).map((key) => ({
-//           name: key,
-//           Positive: Math.floor(Math.random() * 100),
-//           Neutral: Math.floor(Math.random() * 50),
-//           Negative: Math.floor(Math.random() * 30),
-//         }));
-//         return (
-//           <ResponsiveContainer width="100%" height={400}>
-//             <BarChart data={sentimentData}>
-//               <CartesianGrid strokeDasharray="3 3" />
-//               <XAxis dataKey="name" />
-//               <YAxis />
-//               <Tooltip />
-//               <Legend />
-//               <Bar dataKey="Positive" stackId="a" fill="#8b5cf6" />
-//               <Bar dataKey="Neutral" stackId="a" fill="#6366f1" />
-//               <Bar dataKey="Negative" stackId="a" fill="#3b82f6" />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         );
-//       case "Word Frequency Analysis":
-//         const frequencyData = Object.keys(testData.test_results).map((key) => ({
-//           word: key,
-//           frequency: Math.floor(Math.random() * 100) + 1,
-//         }));
-//         return (
-//           <ResponsiveContainer width="100%" height={400}>
-//             <BarChart data={frequencyData} layout="vertical">
-//               <CartesianGrid strokeDasharray="3 3" />
-//               <XAxis type="number" />
-//               <YAxis dataKey="word" type="category" />
-//               <Tooltip />
-//               <Legend />
-//               <Bar dataKey="frequency" fill="#8b5cf6" />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         );
-//       default:
-//         return null;
-//     }
-//   };
-
-//   const renderErrorComponent = (testData: TestData) => {
-//     return (
-//       <div className="flex flex-col items-center justify-center h-[400px] bg-gray-100 rounded-lg p-6 text-center">
-//         <AlertCircle className="w-16 h-16 text-yellow-500 mb-4" />
-//         <h3 className="text-2xl font-bold text-gray-800 mb-2">
-//           Unable to Render Chart
-//         </h3>
-//         <p className="text-gray-600 mb-4">
-//           We couldn't generate the chart for {testData.test_name} due to
-//           incompatible data.
-//         </p>
-//         <div className="bg-white p-4 rounded-md shadow-md">
-//           <h4 className="font-semibold text-gray-700 mb-2">Reasons:</h4>
-//           <ul className="list-disc list-inside text-left">
-//             {Object.entries(testData.test_results).map(([key, value]) => (
-//               <li key={key} className="text-gray-600">
-//                 {value.reason}
-//               </li>
-//             ))}
-//           </ul>
-//         </div>
-//       </div>
-//     );
-//   };
-
-//   const getIcon = (testName: string) => {
-//     switch (testName) {
-//       case "Thematic Analysis":
-//         return <Cloud className="h-6 w-6 text-purple-500" />;
-//       case "Sentiment Analysis":
-//         return <MessageSquare className="h-6 w-6 text-blue-500" />;
-//       case "Word Frequency Analysis":
-//         return <BarChart2 className="h-6 w-6 text-indigo-500" />;
-//       default:
-//         return null;
-//     }
-//   };
-
-//   return (
-//     <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-//       <h1 className="text-4xl font-extrabold text-center mb-8 text-gray-800">
-//         Data Visualization Dashboard
-//       </h1>
-//       <div className="space-y-8">
-//         {data.map((testData, index) => (
-//           <motion.div
-//             key={testData.test_name}
-//             initial="hidden"
-//             animate="visible"
-//             variants={chartAnimation}
-//           >
-//             <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-//               <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
-//                 <div className="flex items-center space-x-2">
-//                   {getIcon(testData.test_name)}
-//                   <CardTitle className="text-xl">
-//                     {testData.test_name}
-//                   </CardTitle>
-//                 </div>
-//                 <CardDescription className="text-purple-100">
-//                   {Object.values(testData.test_results).every(
-//                     (result) => result.status === "error"
-//                   )
-//                     ? "Test not compatible"
-//                     : "Analysis Results"}
-//                 </CardDescription>
-//               </CardHeader>
-//               <CardContent className="p-6">{renderChart(testData)}</CardContent>
-//             </Card>
-//           </motion.div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default function Component({ data = [] }: Props) {
-//   return <VerticalDataVisualization data={data} />;
-// }
-
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart,
@@ -570,6 +18,8 @@ import {
   ComposedChart,
   Area,
   Rectangle,
+  LabelList,
+  Line,
 } from "recharts";
 import ReactWordcloud from "react-wordcloud";
 import {
@@ -584,11 +34,17 @@ import {
   BarChart2,
   Cloud,
   CloudIcon,
+  Info,
+  LineChartIcon,
   MessageSquare,
+  RectangleHorizontalIcon,
   RefreshCcw,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { ChartContainer } from "@/components/ui/chart";
+import { ChartContainer, ChartLegend } from "@/components/ui/chart";
+import { Alert, AlertDescription } from "../ui/alert";
+import ViolinPlot from "./KruskalWallisChart";
+import WordFrequencyChart from "./WordFrequencyChart";
 
 type TestResult = {
   status: string;
@@ -598,6 +54,15 @@ type TestResult = {
 type TestData = {
   test_name: string;
   test_results: Record<string, TestResult>;
+  variable_id: string;
+  survey_id: string;
+  data: Array<{
+    [key: string]: {
+      u_statistic: number;
+      p_value: number;
+    };
+  }>;
+  stats_test_result_id: string;
 };
 
 export type TSurvey = {
@@ -723,6 +188,7 @@ const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
   const renderChart = (testData: TestData) => {
     if (
       testData.test_name !== "Kruskal-Wallis Test" &&
+      testData.test_name !== "Mann-Whitney U Test" &&
       Object.values(testData.test_results).every(
         (result) => result.status === "error"
       )
@@ -765,36 +231,9 @@ const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
           </ResponsiveContainer>
         );
       case "Word Frequency Analysis":
-        const frequencyData = Object.entries(testData.test_results).map(
-          (key) => ({
-            word: formatText(key[0]),
-            frequency: Object.values(key[1]).reduce(
-              (prev, curr) => prev + Number(curr),
-              0
-            ),
-          })
-        );
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={frequencyData}
-              layout="vertical"
-              margin={{ left: 20, right: 20, top: 20, bottom: 20 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis
-                dataKey="word"
-                type="category"
-                width={80}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend formatter={(value) => formatText(value)} />
-              <Bar dataKey="frequency" fill="#8b5cf6" />
-            </BarChart>
-          </ResponsiveContainer>
-        );
+        console.log(testData.test_results);
+
+        return <WordFrequencyChart testData={[testData.test_results] as any} />;
       case "Spearman":
         const generateData = () => {
           const data = [];
@@ -874,266 +313,34 @@ const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
 
       case "Wilcoxon Signed-Rank Test":
         // Generate placeholder data with similar distribution
-        const generateWilcoxinData = () => {
-          const data = [];
-          for (let i = 0; i < 50; i++) {
-            const before = Math.random() * 12;
-            // Add some variation around the diagonal line
-            const after = before + (Math.random() - 0.5) * 4;
-            data.push({ before, after });
-          }
-          return data;
-        };
-        const wilcoxinData = generateWilcoxinData();
-
-        const wilcoxinChartConfig = {
-          data: {
-            color: "hsl(246, 100%, 87%)", // Light purple for scatter points
-          },
-        };
-        return (
-          <Card className="w-full max-w-3xl">
-            <CardHeader className="space-y-0 pb-2">
-              <CardTitle className="text-center text-xl font-normal">
-                Wilcoxon Signed-Rank Test: Before vs After
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <div className="absolute left-8 top-4 z-10 rounded-md bg-purple-50 px-2 py-1 text-sm text-purple-900">
-                  W = 678, p &lt; 0.001
-                </div>
-                <ChartContainer
-                  config={wilcoxinChartConfig}
-                  className="h-[600px]"
-                >
-                  <ScatterChart
-                    margin={{
-                      top: 60,
-                      right: 30,
-                      left: 40,
-                      bottom: 20,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                    <XAxis
-                      type="number"
-                      dataKey="before"
-                      name="Before"
-                      domain={[0, 12]}
-                      tickCount={7}
-                      stroke="#666"
-                      label={{ value: "Before", position: "bottom", offset: 0 }}
-                    />
-                    <YAxis
-                      type="number"
-                      dataKey="after"
-                      name="After"
-                      domain={[0, 12]}
-                      tickCount={7}
-                      stroke="#666"
-                      label={{
-                        value: "After",
-                        angle: -90,
-                        position: "left",
-                        offset: 20,
-                      }}
-                    />
-                    <ZAxis range={[20, 60]} />
-                    <ReferenceLine
-                      segment={[
-                        { x: 0, y: 0 },
-                        { x: 12, y: 12 },
-                      ]}
-                      stroke="red"
-                      strokeDasharray="5 5"
-                      ifOverflow="extendDomain"
-                    />
-                    <Scatter
-                      data={wilcoxinData}
-                      fill="hsl(246, 100%, 87%)"
-                      opacity={0.7}
-                    />
-                  </ScatterChart>
-                </ChartContainer>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <Wilcoxon test_data={testData.test_results as any} />;
       case "Kruskal-Wallis Test":
         // Generate normal distribution data points
-        const generateNormalDistribution = (
-          mean: number,
-          stdDev: number,
-          count: number
-        ): number[] => {
-          const points: number[] = [];
-          for (let i = 0; i < count; i++) {
-            let u = 0,
-              v = 0;
-            while (u === 0) u = Math.random();
-            while (v === 0) v = Math.random();
-            const z =
-              Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-            points.push(z * stdDev + mean);
-          }
-          return points;
-        };
-
-        const createDensityData = (
-          points: number[],
-          bandwidth = 0.5
-        ): DensityPoint[] => {
-          const min = Math.min(...points);
-          const max = Math.max(...points);
-          const steps = 50;
-          const step = (max - min) / steps;
-
-          return Array.from({ length: steps + 1 }, (_, i) => {
-            const x = min + i * step;
-            const density =
-              points.reduce((sum, point) => {
-                const z = (x - point) / bandwidth;
-                return (
-                  sum +
-                  Math.exp(-0.5 * z * z) / (Math.sqrt(2 * Math.PI) * bandwidth)
-                );
-              }, 0) / points.length;
-            return {
-              value: x,
-              density: density * 2,
-            };
-          });
-        };
-
-        const calculateQuartiles = (data: number[]): Quartiles => {
-          const sorted = [...data].sort((a, b) => a - b);
-          return {
-            min: sorted[0],
-            q1: sorted[Math.floor(sorted.length * 0.25)],
-            median: sorted[Math.floor(sorted.length * 0.5)],
-            q3: sorted[Math.floor(sorted.length * 0.75)],
-            max: sorted[sorted.length - 1],
-          };
-        };
-
-        // Generate sample data for three groups
-        const groupA = generateNormalDistribution(2.5, 1.2, 100);
-        const groupB = generateNormalDistribution(3, 1.5, 100);
-        const groupC = generateNormalDistribution(3.2, 1.3, 100);
-
-        // Create density data for each group
-        const densityA = createDensityData(groupA);
-        const densityB = createDensityData(groupB);
-        const densityC = createDensityData(groupC);
-
-        // Calculate quartiles for box plots
-        const quartilesA = calculateQuartiles(groupA);
-        const quartilesB = calculateQuartiles(groupB);
-        const quartilesC = calculateQuartiles(groupC);
-
-        // Prepare data for the chart
-        const kruskalData: ChartDataPoint[] = densityA.map((point, i) => ({
-          value: point.value,
-          A: point.density,
-          "A-mirror": -point.density,
-          B: densityB[i].density,
-          "B-mirror": -densityB[i].density,
-          C: densityC[i].density,
-          "C-mirror": -densityC[i].density,
-        }));
-
-        // Box plot data
-        const boxPlotData: BoxPlotData[] = [
-          { group: "A", ...quartilesA },
-          { group: "B", ...quartilesB },
-          { group: "C", ...quartilesC },
-        ];
-
+        return <ViolinPlot test_data={testData.test_results as any} />;
+      case "Mann-Whitney U Test":
+        // Generate normal distribution data points
         return (
-          <Card className="w-full p-4">
-            <CardHeader>
-              <CardTitle>
-                Kruskal-Wallis Test: Comparison of Three Groups
-              </CardTitle>
-              <div className="text-sm text-purple-600">
-                H = 12.37, p = 0.002
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-96 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={kruskalData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="value"
-                      type="number"
-                      domain={[0, 6]}
-                      ticks={[1, 2, 3]}
-                      tickFormatter={(value: number) =>
-                        ["A", "B", "C"][value - 1] || ""
-                      }
-                    />
-                    <YAxis domain={[-2, 2]} />
-
-                    {/* Group A */}
-                    <Area
-                      dataKey="A"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                      stroke="#8884d8"
-                      strokeWidth={1}
-                      stackId="1"
-                    />
-                    <Area
-                      dataKey="A-mirror"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                      stroke="#8884d8"
-                      strokeWidth={1}
-                      stackId="1"
-                    />
-
-                    {/* Group B */}
-                    <Area
-                      dataKey="B"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                      stroke="#8884d8"
-                      strokeWidth={1}
-                      stackId="2"
-                    />
-                    <Area
-                      dataKey="B-mirror"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                      stroke="#8884d8"
-                      strokeWidth={1}
-                      stackId="2"
-                    />
-
-                    {/* Group C */}
-                    <Area
-                      dataKey="C"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                      stroke="#8884d8"
-                      strokeWidth={1}
-                      stackId="3"
-                    />
-                    <Area
-                      dataKey="C-mirror"
-                      fill="#8884d8"
-                      fillOpacity={0.3}
-                      stroke="#8884d8"
-                      strokeWidth={1}
-                      stackId="3"
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <MannWhitney
+            test_name={testData.test_name}
+            // test_results={Object.entries(testData.test_results).map(
+            //   ([key, value]) => ({
+            //     [key]: {
+            //       u_statistic: (value as any).u_statistic, // Ensure this property exists in TestResult
+            //       p_value: (value as any).p_value, // Ensure this property exists in TestResult
+            //     },
+            //   })
+            // )}
+            test_results={
+              (testData?.test_results as any) ?? [
+                {
+                  "example-comparison": {
+                    u_statistic: 300,
+                    p_value: 0.04,
+                  },
+                },
+              ]
+            }
+          />
         );
 
       default:
@@ -1174,6 +381,10 @@ const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
         return <MessageSquare className="h-6 w-6 text-white" />;
       case "Word Frequency Analysis":
         return <BarChart2 className="h-6 w-6 text-white" />;
+      case "Mann-Whitney U Test":
+        return <RectangleHorizontalIcon className="h-6 w-6 text-white" />;
+      case "Wilcoxon Signed-Rank Test":
+        return <LineChartIcon className="h-6 w-6 text-white" />;
       default:
         return null;
     }
@@ -1257,3 +468,307 @@ export default function Component({ data = [], survey, rerunTests }: Props) {
     </div>
   );
 }
+
+interface MannTestResult {
+  [key: string]: {
+    u_statistic: number;
+    p_value: number;
+  };
+}
+
+interface MannWhitneyProps {
+  test_name: string;
+  test_results: MannTestResult[];
+}
+
+const DEFAULT_TEST_RESULT: MannTestResult[] = [
+  {
+    "example-comparison": {
+      u_statistic: 300,
+      p_value: 0.04,
+    },
+  },
+];
+
+const MannWhitney: React.FC<MannWhitneyProps> = ({
+  test_name,
+  test_results = DEFAULT_TEST_RESULT,
+}) => {
+  // Use default results if test_results is empty
+  const resultsToUse =
+    test_results.length === 0 ? DEFAULT_TEST_RESULT : test_results;
+
+  const firstResult = resultsToUse[0];
+  const [variableName, testResult] = Object.entries(firstResult)[0];
+
+  // Format p-value for display
+  const formatPValue = (p: number): string => {
+    if (p < 0.001) return "p < 0.001";
+    return `p = ${p.toFixed(3)}`;
+  };
+
+  // Determine statistical significance
+  const isSignificant = testResult.p_value < 0.05;
+
+  // Calculate effect size interpretation based on U statistic
+  const getEffectSize = (u: number): string => {
+    if (u < 200) return "Large";
+    if (u < 400) return "Medium";
+    return "Small";
+  };
+
+  const effectSize = getEffectSize(testResult.u_statistic);
+
+  // Color coding for significance
+  const getSignificanceColor = (significant: boolean): string => {
+    return significant ? "bg-green-100" : "bg-yellow-100";
+  };
+
+  // Add notice when using default data
+  const isUsingDefault = test_results.length === 0;
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          {test_name}
+          <Info className="h-4 w-4 text-gray-500" />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isUsingDefault && (
+          <Alert className="bg-blue-50">
+            <AlertDescription>
+              Showing example data. No test results were provided.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Variable Name */}
+        <div className="text-lg font-medium capitalize">
+          Variable: {variableName.replace(/[-_]/g, " ")}
+        </div>
+
+        {/* Test Statistics */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-lg bg-blue-50 p-4">
+            <div className="text-sm text-gray-600">U Statistic</div>
+            <div className="text-2xl font-bold">{testResult.u_statistic}</div>
+            <div className="text-sm text-gray-600">
+              Effect Size: {effectSize}
+            </div>
+          </div>
+
+          <div
+            className={`rounded-lg p-4 ${getSignificanceColor(isSignificant)}`}
+          >
+            <div className="text-sm text-gray-600">P-Value</div>
+            <div className="text-2xl font-bold">
+              {formatPValue(testResult.p_value)}
+            </div>
+            <div className="text-sm text-gray-600">
+              {isSignificant ? "Statistically Significant" : "Not Significant"}
+            </div>
+          </div>
+        </div>
+
+        {/* Interpretation */}
+        <Alert className="mt-4">
+          <AlertDescription>
+            {isSignificant
+              ? `There is strong statistical evidence to suggest a significant difference between the groups (${formatPValue(
+                  testResult.p_value
+                )}). The test shows a ${effectSize.toLowerCase()} effect size based on the U statistic of ${
+                  testResult.u_statistic
+                }.`
+              : `There is not enough statistical evidence to suggest a significant difference between the groups (${formatPValue(
+                  testResult.p_value
+                )}). The test shows a ${effectSize.toLowerCase()} effect size based on the U statistic of ${
+                  testResult.u_statistic
+                }.`}
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
+  );
+};
+
+interface WilcoxinTestResult {
+  [key: string]:
+    | {
+        w_statistic: number;
+        p_value: number;
+      }
+    | string
+    | null;
+}
+
+const generateDeterministicData = (wStatistic: number, pValue: number) => {
+  const data = [];
+
+  // Normalize w_statistic to create a more meaningful effect size
+  const effectSize = (wStatistic / 1000) * 2; // Doubled for more visible effect
+
+  // Use p_value to determine variance (smaller p-value = tighter clustering)
+  const variance = Math.max(0.1, pValue) * 1.5;
+
+  // Generate points that better reflect the statistical properties
+  for (let i = 0; i < 50; i++) {
+    // Create more consistent base values across the range
+    const baseValue = (i / 50) * 12;
+
+    // Add controlled random variation
+    const seed = Math.sin(i * 13.37);
+    const variation = seed * variance;
+
+    // Calculate before and after values
+    const before = baseValue + variation;
+    const after = before + effectSize + seed * variance * 0.5;
+
+    // Ensure values stay within bounds while maintaining relationship
+    data.push({
+      before: Math.max(0, Math.min(12, before)),
+      after: Math.max(0, Math.min(12, after)),
+    });
+  }
+
+  // Sort by 'before' value for smoother visualization
+  return data.sort((a, b) => a.before - b.before);
+};
+
+const Wilcoxon: React.FC<{ test_data: WilcoxinTestResult[] }> = ({
+  test_data = [],
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  // Update width on resize
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  const resultsToUse =
+    test_data.length === 0
+      ? [
+          {
+            "product_experience-customer_service_quality": {
+              w_statistic: 245,
+              p_value: 0.03,
+            },
+          },
+        ]
+      : test_data;
+
+  const validResults = resultsToUse.filter((result) => {
+    const [_, value] = Object.entries(result)[0];
+    return value !== null && typeof value !== "string";
+  });
+
+  const firstValidResult = validResults[0];
+  const [comparisonName, stats] = firstValidResult
+    ? Object.entries(firstValidResult)[0]
+    : [null, null];
+
+  const scatterData = useMemo(() => {
+    if (stats && typeof stats !== "string") {
+      return generateDeterministicData(
+        (stats as any).w_statistic,
+        (stats as any).p_value
+      );
+    }
+    return generateDeterministicData(245, 0.03);
+  }, [stats]);
+
+  const isUsingDefault = test_data.length === 0;
+
+  // Calculate aspect ratio based on container width
+  const aspectRatio = Math.min(1.2, Math.max(0.8, containerWidth / 800));
+  const height = containerWidth * aspectRatio;
+
+  // Calculate dynamic margins based on container size
+  const margins = {
+    top: Math.max(20, containerWidth * 0.05),
+    right: Math.max(15, containerWidth * 0.03),
+    bottom: Math.max(20, containerWidth * 0.05),
+    left: Math.max(40, containerWidth * 0.06),
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="space-y-0 pb-2">
+        <CardTitle className="text-center text-xl font-normal capitalize">
+          {comparisonName?.split(/[-_]/).join(" vs ")}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isUsingDefault && (
+          <Alert className="mb-4 bg-blue-50">
+            <AlertDescription>
+              Showing example data. No valid test results were provided.
+            </AlertDescription>
+          </Alert>
+        )}
+        <div className="relative" ref={containerRef}>
+          <div className="absolute left-8 top-4 z-10 rounded-md bg-purple-50 px-2 py-1 text-sm text-purple-900">
+            {stats && typeof stats !== "string"
+              ? `W = ${(stats as any).w_statistic}, p ${
+                  (stats as any).p_value < 0.001
+                    ? "< 0.001"
+                    : `= ${(stats as any).p_value.toFixed(3)}`
+                }`
+              : "Statistics not available"}
+          </div>
+          <div style={{ height: `${height}px`, width: "100%" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={margins}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                <XAxis
+                  type="number"
+                  dataKey="before"
+                  name="Before"
+                  domain={[0, 12]}
+                  tickCount={7}
+                  stroke="#666"
+                  label={{ value: "Before", position: "bottom", offset: 0 }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="after"
+                  name="After"
+                  domain={[0, 12]}
+                  tickCount={7}
+                  stroke="#666"
+                  label={{
+                    value: "After",
+                    angle: -90,
+                    position: "left",
+                    offset: 20,
+                  }}
+                />
+                <ZAxis range={[20, 60]} />
+                <ReferenceLine
+                  segment={[
+                    { x: 0, y: 0 },
+                    { x: 12, y: 12 },
+                  ]}
+                  stroke="red"
+                  strokeDasharray="5 5"
+                  ifOverflow="extendDomain"
+                />
+                <Scatter data={scatterData} fill="#80008070" opacity={0.7} />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

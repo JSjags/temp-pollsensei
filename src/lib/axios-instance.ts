@@ -7,9 +7,10 @@ import store from "@/redux/store";
 
 // Assuming you have a function to get the token from storage or some other source
 const getToken = () => {
-  const token = store.getState().user.access_token || store.getState().user.token;
+  const token =
+    store.getState().user.access_token || store.getState().user.token;
   // Replace with actual logic to retrieve the token
-  return token;
+  return store.getState().user.token || store.getState().user?.access_token;
 };
 
 const axiosInstance = axios.create({
