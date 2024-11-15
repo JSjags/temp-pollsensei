@@ -15,9 +15,10 @@ const baseQuery = retry(fetchBaseQuery({
   baseUrl: environment.API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
-    const token = state.user?.token;
+    const token = state?.user?.access_token || state.user?.token;
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
+      console.log(token)
     }
     return headers;
   },

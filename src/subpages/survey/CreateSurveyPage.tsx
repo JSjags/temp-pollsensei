@@ -426,7 +426,7 @@ const CreateSurveyPage = () => {
                 Proceed
               </button>
               <div className="bg-[#F70A0A] text-white py-2 absolute top-0 right-0 rounded-tr px-4 ">
-                Not sure
+                Not sure ?
               </div>
             </div>
             <div

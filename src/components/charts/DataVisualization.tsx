@@ -233,7 +233,7 @@ const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
       case "Word Frequency Analysis":
         console.log(testData.test_results);
 
-        return <WordFrequencyChart testData={testData.test_results as any} />;
+        return <WordFrequencyChart testData={[testData.test_results] as any} />;
       case "Spearman":
         const generateData = () => {
           const data = [];
@@ -546,7 +546,7 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
 
         {/* Variable Name */}
         <div className="text-lg font-medium">
-          Variable: {variableName.replace(/-/g, " ")}
+          Variable: {variableName.replace(/[-_]/g, " ")}
         </div>
 
         {/* Test Statistics */}

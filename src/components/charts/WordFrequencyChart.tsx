@@ -30,6 +30,7 @@ const WordFrequencyChart: React.FC<WordFrequencyChartProps> = ({
   testData = [],
 }) => {
   // Use default data if the prop is an empty array
+
   const dataToUse = testData.length > 0 ? testData : defaultTestData;
 
   // Aggregate word frequencies from dataToUse
