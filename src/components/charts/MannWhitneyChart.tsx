@@ -1,5 +1,5 @@
 import React from "react";
-import Plot from "react-plotly.js";
+// import Plot from "react-plotly.js";
 
 interface MannTestResult {
   [key: string]: {
@@ -45,7 +45,7 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
     <div className="w-full">
       <h1 className="text-xl font-bold mb-4">{test_name}</h1>
 
-      <Plot
+      {/* <Plot
         data={[
           {
             x: groupA,
@@ -88,7 +88,7 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
           },
         }}
         config={{ responsive: true }}
-      />
+      /> */}
     </div>
   );
 };

@@ -545,7 +545,7 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
         )}
 
         {/* Variable Name */}
-        <div className="text-lg font-medium">
+        <div className="text-lg font-medium capitalize">
           Variable: {variableName.replace(/[-_]/g, " ")}
         </div>
 
