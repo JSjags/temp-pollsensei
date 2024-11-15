@@ -149,7 +149,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
             required={is_required}
           />
         </div>
-        {/* {pathname === "/surveys/edit-survey" && (
+        {pathname === "/surveys/edit-survey" && (
           <div className="flex justify-end gap-4">
             <button
               className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
@@ -164,9 +164,25 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
               Delete
             </button>
           </div>
-        )} */}
+        )}
+                  {pathname === "/surveys/add-question-m" && (
+          <div className="flex justify-end gap-4">
+            {/* <button
+              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
+              onClick={EditQuestion}
+            >
+              Edit
+            </button> */}
+            <button
+              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
+              onClick={DeleteQuestion}
+            >
+              Delete
+            </button>
+          </div>
+        )}
 
-        {pathname === "/surveys/edit-survey" ||
+        {/* {pathname === "/surveys/edit-survey" ||
           (pathname === "/surveys/add-question-m" && (
             <div className="flex justify-end gap-4 mt-4">
               {pathname === "/surveys/add-question-m" ? (
@@ -186,7 +202,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
                 Delete
               </button>
             </div>
-          ))}
+          ))} */}
         {/* {
         pathname.includes('survey-public-response') && (  <VoiceRecorder />)
 

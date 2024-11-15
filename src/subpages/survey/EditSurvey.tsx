@@ -459,7 +459,7 @@ const EditSurvey = () => {
                   <div key={index} className="mb-4">
                     {isEdit &&
                     editIndex === index &&
-                    item.question_type === "matrix_checkbox" ? (
+                    item.question_type === "matrix_multiple_choice" ? (
                       <MatrixQuestionEdit
                         question={item.question}
                         options={item.options}
@@ -627,7 +627,7 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    ) : item.question_type === "matrix_checkbox" ? (
+                    ) : item.question_type === "matrix_multiple_choice" ? (
                       <MatrixQuestion
                         key={index}
                         index={index + 1}
