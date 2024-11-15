@@ -90,7 +90,7 @@ const IsGenerating: React.FC<IsGeneratingProps> = ({
           setCurrentMessage(messages[nextIndex]);
           return nextIndex;
         });
-      }, 300000); 
+      }, 20000); 
     }
 
     return () => {

@@ -19,7 +19,7 @@ type Props = {
 
 const Footer: React.FC<Props> = ({ onClick }) => {
   return (
-    <footer className="bg-gray-90 text-[#F9F9F9] pt-12 pb-32 px-4 sm:px-6 lg:px-8 w-full relative">
+    <footer className="bg-gray-90 text-[#F9F9F9] pt-12 pb-32 px-4 sm:px-6 lg:px-8 w-full relative overflow-hidden">
       <div className="container mx-auto w-full">
         <div className="md:flex justify-between items-start  w-full">
           <div className="w-full">
@@ -46,12 +46,12 @@ const Footer: React.FC<Props> = ({ onClick }) => {
                   </span>
                 </li>
                 <li>
-                  <Link href="/#" className="text-black hover:text-purple-600">
+                  <Link href="mailto:sales@pollsensei.ai" className="text-black hover:text-purple-600">
                     Contact Sales
                   </Link>
                 </li>
                 <li>
-                  <Link href="/#" className="text-black hover:text-purple-600">
+                  <Link href="mailto:sales@pollsensei.ai" className="text-black hover:text-purple-600">
                     Support
                   </Link>
                 </li>

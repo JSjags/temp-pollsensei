@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import NavBar from "@/components/blocks/NavBar";
 import { FaRocket, FaChartLine, FaBriefcase } from "react-icons/fa";
@@ -70,8 +70,14 @@ const PricingPage: React.FC = () => {
     },
   ];
 
+  // const handleToggle = (isMonthly: boolean) => {
+  //   console.log(isMonthly ? "Monthly Plan" : "Yearly Plan");
+  // };
+
+  const [currency, setCurrency] = useState(true); 
+
   const handleToggle = (isMonthly: boolean) => {
-    console.log(isMonthly ? "Monthly Plan" : "Yearly Plan");
+    setCurrency(isMonthly);
   };
 
   const featuresRef = useRef<HTMLDivElement>(null);
@@ -193,7 +199,7 @@ const PricingPage: React.FC = () => {
             <ToggleMonth onToggle={handleToggle} />
           </div>
           <div className="text-[#171725]  mt-12 w-full">
-            <Pricing />
+            <Pricing currency={currency} />
           </div>
         </section>
         <div className="mt-16 text-center" data-aos="fade-up">

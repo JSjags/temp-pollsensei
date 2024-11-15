@@ -162,13 +162,44 @@ const CreateSurveyPage = () => {
         return {
           question: question.Question,
           options: question.Options,
-          question_type:
-            optionType === "Multi-choice"
-              ? "multiple_choice"
-              : // ? "single_choice"
-              optionType === "Comment"
-              ? "long_text"
-              : "matrix_checkbox",
+          question_type:optionType,
+            // optionType === "Multi-choice"
+            //   ? "multiple_choice"
+            //   : 
+              // optionType === "Dropdown"
+              // ? "drop_down"
+              // : 
+              // optionType === "likert_scale"
+              // ? "likert_scale"
+              // : 
+              // optionType === "Slider"
+              // ? "slider"
+              // : 
+              // optionType === "Star Rating"
+              // ? "star_rating"
+              // : 
+              // optionType === "Multiple Choice"
+              // ? "multiple_choice"
+              // : 
+              // optionType === "Single Choice"
+              // ? "single_choice"
+              // : 
+              // optionType === "Checkbox"
+              // ? "checkbox"
+              // : 
+              // optionType === "Rating Scale"
+              // ? "rating_scale"
+              // : 
+              // optionType === "Comment"
+              // ? "long_text"
+              // : 
+              // optionType === "Boolean"
+              // ? "boolean"
+              // : 
+              // optionType === "Matrix"
+              // ? "matrix_checkbox"
+              // : "matrix_checkbox"
+              // ,
           is_required: true,
           description: "",
         };
@@ -677,6 +708,12 @@ const CreateSurveyPage = () => {
             <div className={`md:flex justify-center gap-5 pb-4 items-center`}>
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-start mt-4 md:mt-0`}
+                onClick={()=>{
+                  setSurveyPrompt("Student Satisfaction Survey")
+                  // setTimeout(()=>{
+                  //   handleGenerateTopics()
+                  // }, 2000)
+                }}
               >
                 <h1 className="text-lg text-start">
                   Student Satisfaction Survey
@@ -692,6 +729,13 @@ const CreateSurveyPage = () => {
 
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0 `}
+                onClick={()=>{
+                  setSurveyPrompt("Employee Engagement Survey")
+                  // setTimeout(()=>{
+                  //   handleGenerateTopics()
+                  // }, 2000)
+                }}
+
               >
                 <h1 className="text-lg text-start">
                   Employee Engagement Survey
@@ -705,6 +749,12 @@ const CreateSurveyPage = () => {
               </div>
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0`}
+                onClick={()=>{
+                  setSurveyPrompt("Employee Engagement Survey")
+                  // setTimeout(()=>{
+                  //   handleGenerateTopics()
+                  // }, 2000)
+                }}
               >
                 <h1 className="text-lg text-start">Event Feedback Survey</h1>
                 <p className="text-start">
