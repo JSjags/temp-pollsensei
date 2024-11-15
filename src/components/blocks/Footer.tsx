@@ -51,7 +51,7 @@ const Footer: React.FC<Props> = ({ onClick }) => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="mailto:sales@pollsensei.ai" className="text-black hover:text-purple-600">
+                  <Link href="/resource-hub" className="text-black hover:text-purple-600">
                     Support
                   </Link>
                 </li>
