@@ -163,7 +163,7 @@ const CreateSurveyPage = () => {
             question: question.Question,
             rows: question.Options.Rows,
             columns: question.Options.Columns,
-            question_type:optionType || "",
+            question_type:optionType === null ? optionType : "",
             is_required: true,
             description: "",
           }
