@@ -4,23 +4,24 @@ import {
   BaseQueryFn,
   FetchArgs,
   FetchBaseQueryError,
+  retry,
 } from "@reduxjs/toolkit/query/react";
 import environment from "../config/base";
 import { logoutUser } from "../../redux/slices/user.slice";
 import { toast } from "react-toastify";
 import { RootState } from "../../redux/store";
 
-const baseQuery = fetchBaseQuery({
+const baseQuery = retry(fetchBaseQuery({
   baseUrl: environment.API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState;
-    const token = state.user?.token || state.user?.access_token;
+    const token = state.user?.token;
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }
     return headers;
   },
-});
+}), { maxRetries: 3 });
 
 const customBaseQuery: BaseQueryFn<
   string | FetchArgs,
@@ -49,9 +50,10 @@ const customBaseQuery: BaseQueryFn<
         "Something went wrong " +
           (result.error.data as { message: string })?.message
       );
-    } else if (status === 404) {
+    }else if (status === 404) {
       toast.error(
-        "Page not found" + (result.error.data as { message: string })?.message
+        "Page not found" +
+          (result.error.data as { message: string })?.message
       );
     }
   }

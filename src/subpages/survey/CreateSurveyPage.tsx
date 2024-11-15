@@ -162,13 +162,44 @@ const CreateSurveyPage = () => {
         return {
           question: question.Question,
           options: question.Options,
-          question_type:
-            optionType === "Multi-choice"
-              ? "multiple_choice"
-              : // ? "single_choice"
-              optionType === "Comment"
-              ? "long_text"
-              : "matrix_checkbox",
+          question_type:optionType,
+            // optionType === "Multi-choice"
+            //   ? "multiple_choice"
+            //   : 
+              // optionType === "Dropdown"
+              // ? "drop_down"
+              // : 
+              // optionType === "likert_scale"
+              // ? "likert_scale"
+              // : 
+              // optionType === "Slider"
+              // ? "slider"
+              // : 
+              // optionType === "Star Rating"
+              // ? "star_rating"
+              // : 
+              // optionType === "Multiple Choice"
+              // ? "multiple_choice"
+              // : 
+              // optionType === "Single Choice"
+              // ? "single_choice"
+              // : 
+              // optionType === "Checkbox"
+              // ? "checkbox"
+              // : 
+              // optionType === "Rating Scale"
+              // ? "rating_scale"
+              // : 
+              // optionType === "Comment"
+              // ? "long_text"
+              // : 
+              // optionType === "Boolean"
+              // ? "boolean"
+              // : 
+              // optionType === "Matrix"
+              // ? "matrix_checkbox"
+              // : "matrix_checkbox"
+              // ,
           is_required: true,
           description: "",
         };
