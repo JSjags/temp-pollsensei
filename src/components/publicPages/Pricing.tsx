@@ -83,10 +83,10 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
             </h2>
             <p className="text-4xl font-bold mb-4 text-[#171725] text-start">
               {currency ? plan.price : plan.price2} 
-              {/* {plan.name === "Team" ? (<small className="text-xs">/user Starting at 3</small>) : ""} */}
+              {plan.name === "Team" ? (<small className="text-sm">/user Starting at 3</small>) : ""}
               {
                 !currency  && 
-               <small className="text-sm font-normal text-gray-500">Monthly</small>
+               <small className="text-sm font-normal text-gray-500"> Monthly</small>
               }
             </p>
             <hr />
