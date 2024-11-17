@@ -144,10 +144,10 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
                 required={is_required}
                 onChange={() => handleOptionChange(option)}
               />
-              {/* <span
-                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-green-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
+              <span
+                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-purple-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
                 style={{ borderColor: colorTheme }}
-              ></span> */}
+              ></span>
               <span className="ml-2">{option}</span>
             </label>
           </div>
@@ -171,12 +171,7 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
 
 {pathname === "/surveys/add-question-m" && (
           <div className="flex justify-end gap-4">
-            {/* <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button> */}
+           
             <button
               className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
@@ -186,28 +181,6 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
           </div>
         )}
 
-
-        {/* {pathname === "/surveys/edit-survey" ||
-          (pathname === "/surveys/add-question-m" && (
-            <div className="flex justify-end gap-4 mt-4">
-              {pathname === "/surveys/add-question-m" ? (
-                ""
-              ) : (
-                <button
-                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                  onClick={EditQuestion}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
-          ))} */}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
             <span>Required</span>

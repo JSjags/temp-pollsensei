@@ -165,12 +165,7 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
 
 {pathname === "/surveys/add-question-m" && (
           <div className="flex justify-end gap-4">
-            {/* <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button> */}
+           
             <button
               className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
@@ -180,27 +175,6 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
           </div>
         )}
 
-        {/* {pathname === "/surveys/edit-survey" ||
-          (pathname === "/surveys/add-question-m" && (
-            <div className="flex justify-end gap-4 mt-4">
-              {pathname === "/surveys/add-question-m" ? (
-                ""
-              ) : (
-                <button
-                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                  onClick={EditQuestion}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
-          ))} */}
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
             <span>Required</span>

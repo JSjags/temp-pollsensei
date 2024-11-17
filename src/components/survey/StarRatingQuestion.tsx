@@ -134,6 +134,7 @@ import { draggable, stars } from "@/assets/images";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Check } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
+import { Switch } from "../ui/switch";
 
 interface StarRatingQuestionProps {
   question: string;
@@ -207,16 +208,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 
   return (
     <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3">
-      {/* <Image
-        src={draggable}
-        alt="draggable icon"
-        className={
-          pathname === "/surveys/edit-survey" ||
-          pathname === "surveys/preview-survey"
-            ? "invisible"
-            : "visible"
-        }
-      /> */}
+    
       <Image
         src={draggable}
         alt="draggable icon"
@@ -249,12 +241,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
               />
             )}
           </h3>
-          {/* {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType}</p>
-          )} */}
+     
         </div>
         <div className="flex items-center my-2">
           {options.map((_, idx) => (
@@ -290,12 +277,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
         )}
                 {pathname === "/surveys/add-question-m" && (
           <div className="flex justify-end gap-4">
-            {/* <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button> */}
+          
             <button
               className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
@@ -304,27 +286,21 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             </button>
           </div>
         )}
-        {/* {pathname === "/surveys/edit-survey" ||
-          (pathname === "/surveys/add-question-m" && (
-            <div className="flex justify-end gap-4 mt-4">
-              {pathname === "/surveys/add-question-m" ? (
-                ""
-              ) : (
-                <button
-                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                  onClick={EditQuestion}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
-          ))} */}
+       
+            {pathname.includes("edit-survey") && (
+          <div className="flex items-center gap-4">
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
         <div className="flex justify-end">
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (

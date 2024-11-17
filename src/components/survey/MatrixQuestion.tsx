@@ -10,10 +10,6 @@ import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 interface MatrixQuestionProps {
   question: string;
   questionType: string;
-  // options: {
-  //   Head: string[];
-  //   Body: string[];
-  // };
   rows?: string[];
   columns?: string[];
   onChange?: (rowIndex: number, columnIndex: number) => void;
@@ -177,27 +173,6 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
         )}
 
 
-          {/* {pathname === "/surveys/edit-survey" ||
-            (pathname === "/surveys/add-question-m" && (
-              <div className="flex justify-end gap-4 mt-4">
-                {pathname === "/surveys/add-question-m" ? (
-                  ""
-                ) : (
-                  <button
-                    className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                    onClick={EditQuestion}
-                  >
-                    Edit
-                  </button>
-                )}
-                <button
-                  className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-                  onClick={DeleteQuestion}
-                >
-                  Delete
-                </button>
-              </div>
-            ))} */}
         </div>
       </div>
       {pathname.includes("edit-survey") ||

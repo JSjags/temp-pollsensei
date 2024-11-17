@@ -49,41 +49,76 @@ const PublicResponse = () => {
   const router = useRouter();
 
 
+  // const handleOptionChange = (
+  //   index: number,
+  //   value: string,
+  //   question_type: string
+  // ) => {
+  //   if (
+  //     question_type === "multiple_choice" ||
+  //     question_type === "checkbox" ||
+  //     question_type === "drop_down" ||
+  //     question_type === "checkbox" ||
+  //     question_type === "checkbox" ||
+  //     question_type === "star_rating" ||
+  //     question_type === "rating_scale" ||
+  //     question_type === "boolean" ||
+  //     question_type === "slider" ||
+  //     question_type === "matrix_checkbox" ||
+  //     question_type === "single_choice"
+  //   ) {
+  //     const updatedOptions = [...selectedOptions];
+  //     updatedOptions[index] = value;
+  //     setSelectedOptions(updatedOptions);
+  //   } else if (
+  //     question_type === "comment" ||
+  //     question_type === "long_text" ||
+  //     question_type === "short_text"
+  //   ) {
+  //     const updatedTextResponses = [...textResponses];
+  //     updatedTextResponses[index] = value;
+  //     setTextResponses(updatedTextResponses);
+  //     console.log(updatedTextResponses);
+  //   }
+  // };
+
   const handleOptionChange = (
     index: number,
     value: string,
     question_type: string
   ) => {
     if (
-      question_type === "multiple_choice" ||
-      question_type === "checkbox" ||
-      question_type === "drop_down" ||
-      question_type === "checkbox" ||
-      question_type === "checkbox" ||
-      question_type === "star_rating" ||
-      question_type === "rating_scale" ||
-      question_type === "boolean" ||
-      question_type === "slider" ||
-      question_type === "matrix_checkbox" ||
-      question_type === "single_choice"
+      [
+        "multiple_choice",
+        "checkbox",
+        "drop_down",
+        "star_rating",
+        "rating_scale",
+        "boolean",
+        "slider",
+        "matrix_checkbox",
+        "single_choice",
+      ].includes(question_type)
     ) {
       const updatedOptions = [...selectedOptions];
       updatedOptions[index] = value;
       setSelectedOptions(updatedOptions);
     } else if (
-      question_type === "comment" ||
-      question_type === "long_text" ||
-      question_type === "short_text"
+      ["comment", "long_text", "short_text"].includes(question_type)
     ) {
       const updatedTextResponses = [...textResponses];
       updatedTextResponses[index] = value;
       setTextResponses(updatedTextResponses);
-      console.log(updatedTextResponses);
     }
+  
+    console.log("Selected Options:", selectedOptions);
+    console.log("Text Responses:", textResponses);
   };
+  
   
 
   console.log(textResponses);
+  console.log(selectedOptions);
 
   console.log(params.id);
   const question =
@@ -91,44 +126,88 @@ const PublicResponse = () => {
       ? psId
       : psShortUrl;
 
+
+      useEffect(() => {
+        if (question?.data?.sections) {
+          setSelectedOptions(new Array(question.data.sections.length).fill(null));
+          setTextResponses(new Array(question.data.sections.length).fill(""));
+        }
+      }, [question]);
+      
+
   const handleSubmitResponse = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
  
 
-    const formattedAnswers = question?.data?.sections[currentSection]?.questions
-  .map((item: any, index: number) => {
+  //   const formattedAnswers = question?.data?.sections[currentSection]?.questions
+  // .map((item: any, index: number) => {
+  //   if (
+  //     item.question_type === "multiple_choice" ||
+  //     item.question_type === "checkbox" ||
+  //     item.question_type === "drop_down" ||
+  //     item.question_type === "checkbox" ||
+  //     item.question_type === "checkbox" ||
+  //     item.question_type === "star_rating" ||
+  //     item.question_type === "rating_scale" ||
+  //     item.question_type === "boolean" ||
+  //     item.question_type === "slider" ||
+  //     item.question_type === "matrix_checkbox" ||
+  //     item.question_type === "single_choice"
+  //   ) {
+  //     return {
+  //       question: item.question,
+  //       question_type: item.question_type,
+  //       selected_options: [selectedOptions[index]],
+  //     };
+  //   } else if (
+  //     item.question_type === "comment" ||
+  //     item.question_type === "long_text" ||
+  //     item.question_type === "short_text"
+  //   ) {
+  //     return {
+  //       question: item.question,
+  //       question_type: item.question_type,
+  //       text: textResponses[index] || "something",  
+  //     };
+  //   }
+  //   return  null;
+  // })
+  // .filter(Boolean);
+
+  const formattedAnswers = question?.data?.sections[currentSection]?.questions
+  ?.map((item:any, index:any) => {
     if (
-      item.question_type === "multiple_choice" ||
-      item.question_type === "checkbox" ||
-      item.question_type === "drop_down" ||
-      item.question_type === "checkbox" ||
-      item.question_type === "checkbox" ||
-      item.question_type === "star_rating" ||
-      item.question_type === "rating_scale" ||
-      item.question_type === "boolean" ||
-      item.question_type === "slider" ||
-      item.question_type === "matrix_checkbox" ||
-      item.question_type === "single_choice"
+      [
+        "multiple_choice",
+        "checkbox",
+        "drop_down",
+        "star_rating",
+        "rating_scale",
+        "boolean",
+        "slider",
+        "matrix_checkbox",
+        "single_choice",
+      ].includes(item.question_type)
     ) {
       return {
         question: item.question,
         question_type: item.question_type,
-        selected_options: [selectedOptions[index]],
+        selected_options: selectedOptions[index] ? [selectedOptions[index]] : [],
       };
     } else if (
-      item.question_type === "comment" ||
-      item.question_type === "long_text" ||
-      item.question_type === "short_text"
+      ["comment", "long_text", "short_text"].includes(item.question_type)
     ) {
       return {
         question: item.question,
         question_type: item.question_type,
-        text: textResponses[index] || "something",  
+        text: textResponses[index] || "No provided",
       };
     }
-    return  null;
+    return null;
   })
-  .filter(Boolean);
+  .filter((answer:any) => answer !== null && (answer.selected_options?.length || answer.text));
+  console.log(formattedAnswers)
+
 
     if (
       !formattedAnswers ||
