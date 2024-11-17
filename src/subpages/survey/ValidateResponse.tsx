@@ -333,7 +333,7 @@ const ValidateResponse = () => {
           </div>
 
           <div className=" rounded-md flex  items-center w-full md:min-w-[16rem] py-5 text-center">
-            <button
+            {/* <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
               type="button"
               onClick={() => {
@@ -342,7 +342,7 @@ const ValidateResponse = () => {
               }}
             >
               Remove duplicate questions
-            </button>
+            </button> */}
             <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
               type="button"
