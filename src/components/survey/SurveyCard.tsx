@@ -28,6 +28,8 @@ import {
 import ShareSurveyModal from "./ShareSurveyModal";
 import ChangeSurveyStatus from "./ChangeSurveyStatus";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface SurveyCardProps {
   topic: string;
@@ -74,6 +76,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const router = useRouter();
   const { data, isSuccess: shareSuccess } = useShareSurveyQuery(params.id);
   const shareLink = data?.data?.link;
+  const userRoles = useSelector((state: RootState) => state.user.user?.roles[0].role || []);
 
   const handleViewOption = () => {
     setViewOptions(!viewOptions);
@@ -210,13 +213,16 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
             onClick={handleViewOption}
             className="cursor-pointer shrink-0 hover:bg-gray-100 p-1 flex justify-center items-center rounded-md"
           >
-            <Image
-              src={ellipses}
-              alt="Options"
-              width={24}
-              height={24}
-              className="shrink-0"
-            />
+            {
+              userRoles.includes("Admin") && 
+              <Image
+                src={ellipses}
+                alt="Options"
+                width={24}
+                height={24}
+                className="shrink-0"
+              />
+            }
           </div>
         </div>
         <p className="text-[12px] sm:text-[14px] text-[#838383]">
@@ -279,11 +285,14 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
             </div>
           </div>
           <div>
+            {
+              userRoles.includes("Admin") && 
             <Switch
               className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-400"
               checked={status === "On going" && true}
               onCheckedChange={() => handleSetToggle("Close")}
             />
+            }
           </div>
         </div>
       </div>
