@@ -23,6 +23,7 @@ import {
 import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import { dark_theme_logo } from "@/assets/images";
+import StateLoader2 from "@/components/common/StateLoader2";
 
 const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
@@ -253,7 +254,7 @@ const LoginPage = () => {
             </div>
           </div>
         )}
-        {state && <StateLoader defaultGoto="/login" />}
+        {state && <StateLoader2 defaultGoto="/login" />}
         {/* {state && <StateLoader goto="/dashboard" />} */}
       </div>
     </section>
