@@ -253,7 +253,8 @@ const LoginPage = () => {
             </div>
           </div>
         )}
-        {state && <StateLoader goto="/dashboard" />}
+        {state && <StateLoader defaultGoto="/login" />}
+        {/* {state && <StateLoader goto="/dashboard" />} */}
       </div>
     </section>
   );

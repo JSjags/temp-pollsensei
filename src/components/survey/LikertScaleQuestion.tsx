@@ -1,10 +1,11 @@
 import { draggable, stars } from "@/assets/images";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Check } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
+import { Switch } from "../ui/switch";
 
 interface LikertScaleQuestionProps {
   question: string;
@@ -44,9 +45,13 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
 }) => {
   const pathname = usePathname();
 
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
   const handleScaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedValue = e.target.value;
+    setSelectedOption(selectedValue);
     if (onChange) {
-      onChange(e.target.value);
+      onChange(selectedValue);
     }
   };
 
@@ -113,6 +118,9 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
                 name={question}
                 className="text-[#5B03B2]"
                 onChange={handleScaleChange}
+                checked={selectedOption === option}
+                value={option}
+                required={is_required}
               />
               <label htmlFor={`likert-${index}`} className="mt-1">
                 {option}
@@ -140,12 +148,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
 
 {pathname === "/surveys/add-question-m" && (
           <div className="flex justify-end gap-4">
-            {/* <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button> */}
+          
             <button
               className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
@@ -156,27 +159,21 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
         )}
 
 
-        {/* {pathname === "/surveys/edit-survey" ||
-          (pathname === "/surveys/add-question-m" && (
-            <div className="flex justify-end gap-4 mt-4">
-              {pathname === "/surveys/add-question-m" ? (
-                ""
-              ) : (
-                <button
-                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                  onClick={EditQuestion}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
-          ))} */}
+     
+            {pathname.includes("edit-survey") && (
+          <div className="flex items-center gap-4">
+            <span>Required</span>
+            <Switch
+              checked={is_required}
+              onCheckedChange={
+                setIsRequired
+                  ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
         <div className="flex justify-end">
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ? (

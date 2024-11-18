@@ -135,7 +135,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
           <div key={optionIndex} className="flex items-center my-2">
             <label className="relative flex items-center cursor-pointer">
               <input
-                type="checkbox"
+                type="radio"
                 id={`option-${optionIndex}`}
                 name={question}
                 value={option}

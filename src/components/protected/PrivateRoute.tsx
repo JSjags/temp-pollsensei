@@ -16,7 +16,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, message }) => {
   const { isLoggedIn } = useIsLoggedIn({ message: "" });
   const state = useSelector((state: RootState) => state.user);
 
-  console.log(state);
+  console.log(state?.user?.roles);
 
   const logoutMessage = message || "You must be logged in to access this page.";
 

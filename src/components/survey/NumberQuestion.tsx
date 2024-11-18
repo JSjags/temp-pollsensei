@@ -78,20 +78,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
     }
   };
 
-  // const [value, setValue] = useState<string>("");
-  // const [errorNum, setErrorNum] = useState<string | null>(null);
-  // const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   const newValue = e.target.value;
-  //   setValue(newValue);
 
-  //   const numericValue = Number(newValue);
-  //   if ((min !== undefined && numericValue < min) || (max !== undefined && numericValue > max)) {
-  //     setErrorNum(`Please enter a number between ${min} and ${max}.`);
-  //   } else {
-  //     setErrorNum(null);
-  //   }
-  //   if (onChange) onChange(e);
-  // };
 
   return (
     <div
@@ -167,12 +154,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
         )}
                   {pathname === "/surveys/add-question-m" && (
           <div className="flex justify-end gap-4">
-            {/* <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button> */}
+     
             <button
               className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
@@ -182,31 +164,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
           </div>
         )}
 
-        {/* {pathname === "/surveys/edit-survey" ||
-          (pathname === "/surveys/add-question-m" && (
-            <div className="flex justify-end gap-4 mt-4">
-              {pathname === "/surveys/add-question-m" ? (
-                ""
-              ) : (
-                <button
-                  className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                  onClick={EditQuestion}
-                >
-                  Edit
-                </button>
-              )}
-              <button
-                className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
-          ))} */}
-        {/* {
-        pathname.includes('survey-public-response') && (  <VoiceRecorder />)
-
-        } */}
+   
         {pathname.includes("edit-survey") && (
           <div className="flex items-center gap-4">
             <span>Required</span>

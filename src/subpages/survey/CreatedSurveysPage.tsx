@@ -10,12 +10,16 @@ import PaginationBtn from "@/components/common/PaginationBtn";
 import PageControl from "@/components/common/PageControl";
 import { Button as ShadButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const CreatedSurveysPage = () => {
   const [itemsPerPage] = useState(6);
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading } = useFetchSurveysQuery(currentPage);
   const router = useRouter();
+  const userRoles = useSelector((state: RootState) => state.user.user?.roles[0].role || []);
+
 
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -39,12 +43,15 @@ const CreatedSurveysPage = () => {
               Your Surveys
             </h2>
             <div className="block md:hidden mt-2 md:mt-0">
+              {
+              userRoles.includes("Admin") && 
               <Button
                 label="Create new survey +"
                 onClick={() => {
                   router.push("/surveys/create-survey");
                 }}
               />
+              }
             </div>
             <div className="hidden lg:flex items-center pl-4 gap-2 rounded-[8px] border-[1px] px- border-[#d9d9d9] w-[292px] h-[40px]">
               <Image src={search} alt="Search icon" width={20} height={20} />
@@ -59,12 +66,16 @@ const CreatedSurveysPage = () => {
             </div>
           </div>
           <div className="hidden md:block mt-2 md:mt-0">
-            <Button
-              label="Create new survey +"
-              onClick={() => {
-                router.push("/surveys/create-survey");
-              }}
-            />
+            {
+              userRoles.includes("Admin") && 
+              <Button
+                label="Create new survey +"
+                onClick={() => {
+                  router.push("/surveys/create-survey");
+                }}
+              />
+
+            }
           </div>
           <div className="block md:hidden">
             <FilterButton text="Add filter" />
@@ -109,12 +120,14 @@ const CreatedSurveysPage = () => {
                 Your Surveys
               </h2>
               <div className="block md:hidden mt-2 md:mt-0">
-                <Button
+              { 
+              userRoles.includes("Admin") && 
+               <Button
                   label="Create new survey +"
                   onClick={() => {
                     router.push("/surveys/create-survey");
                   }}
-                />
+                />}
               </div>
               <div className="hidden lg:flex items-center pl-4 gap-2 rounded-[8px] border-[1px] px- border-[#d9d9d9] w-[292px] h-[40px]">
                 <Image src={search} alt="Search icon" width={20} height={20} />
@@ -129,12 +142,14 @@ const CreatedSurveysPage = () => {
               </div>
             </div>
             <div className="hidden md:block mt-2 md:mt-0">
-              <Button
+           { 
+              userRoles.includes("Admin") && 
+             <Button
                 label="Create new survey +"
                 onClick={() => {
                   router.push("/surveys/create-survey");
                 }}
-              />
+              />}
             </div>
             <div className="block md:hidden">
               <FilterButton text="Add filter" />
