@@ -1,3 +1,4 @@
+import { PanelLeft } from "lucide-react";
 import React from "react";
 import { FiStar, FiSun, FiRefreshCw, FiBell } from "react-icons/fi";
 import { HiOutlineViewList } from "react-icons/hi";
@@ -12,7 +13,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
     <div className="flex justify-between items-center bg-white px-4 py-2 shadow-sm rounded-lg">
       {/* Left Section */}
       <div className="flex items-center gap-4">
-        <HiOutlineViewList className="text-lg text-gray-800" onClick={onClick} />
+        <PanelLeft size={18}  className="text-xs text-gray-800" onClick={onClick} />
         <FiStar className="text-lg text-gray-800" />
         <div className="flex items-center text-sm text-gray-500">
           <span>Dashboards</span>
