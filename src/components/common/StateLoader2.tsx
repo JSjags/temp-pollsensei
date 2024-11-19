@@ -16,6 +16,7 @@ const roleRouteMap: { [key: string]: string } = {
   "Data Validator": "/surveys/survey-list",
   "Data Analyst": "/surveys/analysis",
   "Data Editor": "/surveys/survey-list",
+  "Super Admin": "/super-admin",
 };
 
 const StateLoader2: React.FC<StateLoader2Props> = ({ defaultGoto }) => {

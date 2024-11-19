@@ -168,6 +168,24 @@ const CreateSurveyPage = () => {
             description: "",
           }
         }
+        if(optionType ==="long_text" || optionType ==="short_text"){
+          return {
+            question: question.Question,
+            options: "",
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
+        if(optionType ==="boolean"){
+          return {
+            question: question.Question,
+            options: ["Yes", "No"],
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
         return {
           question: question.Question,
           options: question.Options,
