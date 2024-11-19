@@ -4,6 +4,11 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { pollsensei_new_logo } from "@/assets/images";
+import { logoutUser } from "@/redux/slices/user.slice";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface SuperAdminSidebarProps {
   isSidebarOpen: boolean;
@@ -14,6 +19,10 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
   isSidebarOpen,
   onClose,
 }) => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const user = useSelector((state: RootState) => state.user.user);
+
   return (
     <aside
       className={cn(
@@ -112,12 +121,15 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/subscriptions"
-                  className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+                <span
+                     onClick={() => {
+                      dispatch(logoutUser());
+                      router.push("/login");
+                    }}
+                  className="flex items-center gap-2 p-2 text-red-500 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
                 >
                   {isSidebarOpen && <span>Logout</span>}
-                </Link>
+                </span>
               </li>
             </ul>
           </nav>

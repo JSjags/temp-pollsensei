@@ -195,7 +195,7 @@ const Navbar = () => {
                 <DropdownMenuItem
                   onClick={() => {
                     dispatch(logoutUser());
-                    router.push("/");
+                    router.push("/login");
                   }}
                   className="text-red-600"
                 >
