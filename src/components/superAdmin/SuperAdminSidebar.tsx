@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, generateInitials } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { pollsensei_new_logo } from "@/assets/images";
@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface SuperAdminSidebarProps {
   isSidebarOpen: boolean;
@@ -60,6 +61,20 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
         {/* Sidebar Content */}
         <div className="flex flex-col justify-between items-center h-full">
           <nav className="">
+            {isSidebarOpen && (
+              <div className="flex justify-between items-center">
+                <Avatar className="size-10">
+                  <AvatarImage
+                    src={(user as any)?.photo_url ?? ""}
+                    alt="@johndoe"
+                  />
+                  <AvatarFallback className="font-semibold">
+                    {generateInitials((user as any)?.name ?? "")}
+                  </AvatarFallback>
+                </Avatar>
+                <h2>{(user as any)?.name ?? ""}</h2>
+              </div>
+            )}
             <ul className="space-y-2 p-2">
               <li>
                 <Link
@@ -91,7 +106,7 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
 
               <li>
                 <Link
-                  href="/FAQs"
+                  href="/faqs"
                   className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
                 >
                   {/* <span>⚙️</span> */}
@@ -122,10 +137,10 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
               </li>
               <li>
                 <span
-                     onClick={() => {
-                      dispatch(logoutUser());
-                      router.push("/login");
-                    }}
+                  onClick={() => {
+                    dispatch(logoutUser());
+                    router.push("/login");
+                  }}
                   className="flex items-center gap-2 p-2 text-red-500 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
                 >
                   {isSidebarOpen && <span>Logout</span>}

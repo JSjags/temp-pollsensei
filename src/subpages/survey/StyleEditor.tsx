@@ -125,6 +125,19 @@ const StyleEditor = () => {
 
   console.log(color);
 
+
+  useEffect(() => {
+    dispatch(saveHeaderText(headerFont));
+  }, [headerFont, dispatch]);
+
+  useEffect(() => {
+    dispatch(saveQuestionText(questionFont));
+  }, [questionFont, dispatch]);
+
+  useEffect(() => {
+    dispatch(saveBodyText(bodyFont));
+  }, [bodyFont, dispatch]);
+
   return (
     <div className="style-editor bg-white h-full flex flex-col transform transition-transform duration-300 ease-in-out">
       <div className="border-b py-4">
@@ -194,23 +207,29 @@ const StyleEditor = () => {
             <Select
               options={fontOptions}
               value={fontOptions.find((opt) => opt.value === headerFont.name)}
-              onChange={(opt) => {
-                setHeaderFont({
-                  ...headerFont,
-                  name: opt?.value || "Helvetica",
-                });
-                dispatch(saveHeaderText(headerFont));
-              }}
+              // onChange={(opt) => {
+              //   setHeaderFont({
+              //     ...headerFont,
+              //     name: opt?.value || "Helvetica",
+              //   });
+              //   dispatch(saveHeaderText(headerFont));
+              // }}
+              onChange={(opt) =>
+                setHeaderFont((prev) => ({ ...prev, name: opt?.value || "Helvetica" }))
+              }
               className="w-[80%]"
               classNamePrefix={`header_font`}
             />
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === headerFont.size)}
-              onChange={(opt) => {
-                setHeaderFont({ ...headerFont, size: opt?.value || 24 });
-                dispatch(saveHeaderText(headerFont));
-              }}
+              // onChange={(opt) => {
+              //   setHeaderFont({ ...headerFont, size: opt?.value || 24 });
+              //   dispatch(saveHeaderText(headerFont));
+              // }}
+              onChange={(opt) =>
+                setHeaderFont((prev) => ({ ...prev, size: opt?.value || 24 }))
+              }
               className="w-[20%]"
               classNamePrefix={`header_font`}
             />
@@ -222,23 +241,29 @@ const StyleEditor = () => {
             <Select
               options={fontOptions}
               value={fontOptions.find((opt) => opt.value === questionFont.name)}
-              onChange={(opt) => {
-                setQuestionFont({
-                  ...questionFont,
-                  name: opt?.value || "Helvetica",
-                });
-                dispatch(saveQuestionText(questionFont));
-              }}
+              // onChange={(opt) => {
+              //   setQuestionFont({
+              //     ...questionFont,
+              //     name: opt?.value || "Helvetica",
+              //   });
+              //   dispatch(saveQuestionText(questionFont));
+              // }}
+              onChange={(opt) =>
+                setQuestionFont((prev) => ({ ...prev, name: opt?.value || "Helvetica" }))
+              }
               className="w-[80%]"
               classNamePrefix={`question_font`}
             />
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === questionFont.size)}
-              onChange={(opt) => {
-                setQuestionFont({ ...questionFont, size: opt?.value || 18 });
-                dispatch(saveQuestionText(questionFont));
-              }}
+              // onChange={(opt) => {
+              //   setQuestionFont({ ...questionFont, size: opt?.value || 18 });
+              //   dispatch(saveQuestionText(questionFont));
+              // }}
+              onChange={(opt) =>
+                setQuestionFont((prev) => ({ ...prev, size: opt?.value || 18 }))
+              }
               className="w-[20%]"
               classNamePrefix={`question_font`}
             />
@@ -250,20 +275,26 @@ const StyleEditor = () => {
             <Select
               options={fontOptions}
               value={fontOptions.find((opt) => opt.value === bodyFont.name)}
-              onChange={(opt) => {
-                setBodyFont({ ...bodyFont, name: opt?.value || "Helvetica" });
-                dispatch(saveBodyText(bodyFont));
-              }}
+              // onChange={(opt) => {
+              //   setBodyFont({ ...bodyFont, name: opt?.value || "Helvetica" });
+              //   dispatch(saveBodyText(bodyFont));
+              // }}
+              onChange={(opt) =>
+                setBodyFont((prev) => ({ ...prev, name: opt?.value || "Helvetica" }))
+              }
               className="w-[80%]"
               classNamePrefix={`body_font`}
             />
             <Select
               options={sizeOptions}
               value={sizeOptions.find((opt) => opt.value === bodyFont.size)}
-              onChange={(opt) => {
-                setBodyFont({ ...bodyFont, size: opt?.value || 16 });
-                dispatch(saveBodyText(bodyFont));
-              }}
+              // onChange={(opt) => {
+              //   setBodyFont({ ...bodyFont, size: opt?.value || 16 });
+              //   dispatch(saveBodyText(bodyFont));
+              // }}
+              onChange={(opt) =>
+                setBodyFont((prev) => ({ ...prev, size: opt?.value || 16 }))
+              }
               className="w-[20%]"
               classNamePrefix={`body_font`}
             />
