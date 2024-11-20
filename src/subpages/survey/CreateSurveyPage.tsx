@@ -186,6 +186,17 @@ const CreateSurveyPage = () => {
             description: "",
           }
         }
+        if(optionType ==="number"){
+          return {
+            question: question.Question,
+            options: "",
+            min:1,
+            max:10000000,
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
         return {
           question: question.Question,
           options: question.Options,
