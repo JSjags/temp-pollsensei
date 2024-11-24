@@ -74,9 +74,11 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [surveyName, setSurveyName] = useState<string>("");
 
   const router = useRouter();
-  const { data, isSuccess: shareSuccess } = useShareSurveyQuery(params.id);
-  const shareLink = data?.data?.link;
-  const userRoles = useSelector((state: RootState) => state.user.user?.roles[0].role || []);
+  // const { data, isSuccess: shareSuccess } = useShareSurveyQuery(params.id);
+  // const shareLink = data?.data?.link;
+  const userRoles = useSelector(
+    (state: RootState) => state.user.user?.roles[0].role || []
+  );
 
   const handleViewOption = () => {
     setViewOptions(!viewOptions);
@@ -114,7 +116,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setShowDuplicate(false);
     setShowRename(false);
     setCloseSurvey(false);
-    setShareSurvey(false)
+    setShareSurvey(false);
   };
 
   const handleSetToggle = (op: any) => {
@@ -213,8 +215,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
             onClick={handleViewOption}
             className="cursor-pointer shrink-0 hover:bg-gray-100 p-1 flex justify-center items-center rounded-md"
           >
-            {
-              userRoles.includes("Admin") && 
+            {userRoles.some((role) =>
+              ["Admin", "Data Editor"].includes(role)
+            ) && (
               <Image
                 src={ellipses}
                 alt="Options"
@@ -222,7 +225,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                 height={24}
                 className="shrink-0"
               />
-            }
+            )}
           </div>
         </div>
         <p className="text-[12px] sm:text-[14px] text-[#838383]">
@@ -259,6 +262,8 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       <div className="mt-6 sm:mt-[42px]">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 sm:gap-4">
+           {
+            !userRoles.includes("Editor") &&
             <Link href={`/surveys/question/${_id}`}>
               <Image
                 className="cursor-pointer"
@@ -267,32 +272,37 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                 width={24}
                 height={24}
               />
-            </Link>
-            <div className="relative">
-              <Image
-                className="cursor-pointer shrink-0 size-10"
-                src={share}
-                alt="Share"
-                width={24}
-                height={24}
-                onClick={() => setShareSurvey((prev) => !prev)}
-              />
-              {shareSurvey && (
-                <div className="absolute right-0 z-50">
-                  {/* <ShareSurvey onClick={()=>setShareSurvey((prev)=>!prev)} /> */}
-                </div>
-              )}
-            </div>
+            </Link>}
+            {userRoles.some((role) =>
+              ["Admin", "Data Collector"].includes(role)
+            ) && (
+              <div className="relative">
+                <Image
+                  className="cursor-pointer shrink-0 size-10"
+                  src={share}
+                  alt="Share"
+                  width={24}
+                  height={24}
+                  onClick={() => setShareSurvey((prev) => !prev)}
+                />
+                {shareSurvey && (
+                  <div className="absolute right-0 z-50">
+                    {/* <ShareSurvey onClick={()=>setShareSurvey((prev)=>!prev)} /> */}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div>
-            {
-              userRoles.includes("Admin") && 
-            <Switch
-              className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-400"
-              checked={status === "On going" && true}
-              onCheckedChange={() => handleSetToggle("Close")}
-            />
-            }
+            {userRoles.some((role) =>
+              ["Admin", "Data Editor"].includes(role)
+            ) && (
+              <Switch
+                className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-400"
+                checked={status === "On going" && true}
+                onCheckedChange={() => handleSetToggle("Close")}
+              />
+            )}
           </div>
         </div>
       </div>

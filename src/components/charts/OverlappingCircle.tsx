@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React from "react";
 import { Label, Pie, PieChart, Sector } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
@@ -26,20 +26,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface CircleData {
+  value: number; // Percentage
+  color: string; // Background color
+  size: number; // Diameter in pixels
+}
 
-interface SuperAdminPieChartProps {
+interface OverlappingCirclesProps {
+  circles: CircleData[];
   desktopData: { plan: string; subscriber: number; fill: string }[];
   chartConfig: ChartConfig;
   bottomLegend: string[];
-  title:string;
+  title: string;
 }
 
-export function SuperAdminPieChart({
+const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
+  circles,
   desktopData,
   chartConfig,
   bottomLegend,
   title,
-}: SuperAdminPieChartProps) {
+}) => {
   const id = "pie-interactive";
   const [activeMonth, setActiveMonth] = React.useState(desktopData[0].plan);
 
@@ -47,8 +54,10 @@ export function SuperAdminPieChart({
     () => desktopData.findIndex((item) => item.plan === activeMonth),
     [activeMonth]
   );
-  const plans = React.useMemo(() => desktopData.map((item) => item.plan), [desktopData]);
-
+  const plans = React.useMemo(
+    () => desktopData.map((item) => item.plan),
+    [desktopData]
+  );
   return (
     <Card data-chart={id} className="flex flex-col w-full">
       <ChartStyle id={id} config={chartConfig} />
@@ -95,69 +104,23 @@ export function SuperAdminPieChart({
         </Select>
       </CardHeader>
       <CardContent className="flex flex-1 justify-center pb-0">
-        <ChartContainer
-          id={id}
-          config={chartConfig}
-          className="mx-auto aspect-square w-full max-w-[300px]"
-        >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={desktopData}
-              dataKey="subscriber"
-              nameKey="plan"
-              innerRadius={60}
-              strokeWidth={5}
-              activeIndex={activeIndex}
-              activeShape={({
-                outerRadius = 0,
-                ...props
-              }: PieSectorDataItem) => (
-                <g>
-                  <Sector {...props} outerRadius={outerRadius + 10} />
-                  <Sector
-                    {...props}
-                    outerRadius={outerRadius + 25}
-                    innerRadius={outerRadius + 12}
-                  />
-                </g>
-              )}
+        <div className="relative flex justify-center items-center">
+          {circles.map((circle, index) => (
+            <div
+              key={index}
+              className="absolute flex justify-center items-center rounded-full text-white font-bold"
+              style={{
+                backgroundColor: circle.color,
+                width: `${circle.size}px`,
+                height: `${circle.size}px`,
+                zIndex: index,
+                transform: `translate(${index * 70}px, ${index * 0}px)`,
+              }}
             >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {desktopData[activeIndex].subscriber.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Visitors
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
+              <span>{circle.value}%</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
       <div className="mt-4 flex justify-center space-x-6">
         {bottomLegend?.map((label, idx) => (
@@ -177,4 +140,6 @@ export function SuperAdminPieChart({
       </div>
     </Card>
   );
-}
+};
+
+export default OverlappingCircles;

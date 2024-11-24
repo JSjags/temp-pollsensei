@@ -1,8 +1,14 @@
 import React from "react";
 import { SuperAdminPieChart } from "../charts/SuperAdminPieChart";
 import { ChartConfig } from "../ui/chart";
+import { useSurveyCreationDistributionQuery } from "@/services/superadmin.service";
+import OverlappingCircles from "../charts/OverlappingCircle";
 
 const DashboardAnalytics: React.FC = () => {
+
+  const {data,  isLoading, isSuccess, error} = useSurveyCreationDistributionQuery({})
+  console.log(data)
+
   const desktopData = [
     { plan: "free", subscriber: 186, fill: "#5B03B2" },
     { plan: "pro", subscriber: 305, fill: "#E9D7FB" },
@@ -31,6 +37,13 @@ const DashboardAnalytics: React.FC = () => {
       color: "#9B51E0",
     },
   } satisfies ChartConfig;
+
+  const circleData = [
+    { value: 50, color: "#5A2D82", size: 150 }, // Purple circle
+    { value: 30, color: "#A24DDC", size: 120 }, // Light purple circle
+    // { value: 20, color: "#4C63E8", size: 80 },  // Blue circle
+  ]; 
+
   const bottomLegend = ["Free", "Pro", "Premium"];
   const surveyType = ["Quantitative", "Qualitative", "Mixed"];
   const createdBy = ["AI-Generated", "Manual", "Mixed"];
@@ -43,12 +56,14 @@ const DashboardAnalytics: React.FC = () => {
           bottomLegend={bottomLegend}
           title="User Subscription Distribution"
         />
-        <SuperAdminPieChart
+        <OverlappingCircles
           desktopData={desktopData}
           chartConfig={chartConfig}
           bottomLegend={createdBy}
           title="Creation Method Distribution"
+          circles={circleData}
         />
+       
         <SuperAdminPieChart
           desktopData={desktopData}
           chartConfig={chartConfig}
