@@ -24,6 +24,7 @@ import { useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { updateUser } from "@/redux/slices/user.slice";
 import StateLoader from "@/components/common/StateLoader";
+import StateLoader2 from "@/components/common/StateLoader2";
 
 const constraints = {
   password: {
@@ -288,7 +289,7 @@ const CompleteInvitedMemberSetupPage = () => {
           </div>
         </div>
       )}
-      {state && <StateLoader goto="/dashboard" />}
+      {state && <StateLoader2 defaultGoto="/login" />}
     </section>
   );
 };

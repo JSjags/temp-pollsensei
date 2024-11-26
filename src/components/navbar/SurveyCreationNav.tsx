@@ -32,6 +32,8 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Button } from "../ui/button";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -41,6 +43,9 @@ const SurveyCreationNav = () => {
   const { data } = useFetchASurveyQuery(params.id);
   const [shareSurvey, setShareSurvey] = useState(false);
   const queryClient = useQueryClient();
+  const userRoles = useSelector(
+    (state: RootState) => state.user.user?.roles[0].role || []
+  );
 
   // Extract surveyId regardless of path
   const surveyId = extractMongoId(path);
@@ -288,15 +293,17 @@ const SurveyCreationNav = () => {
               : " "}
             {path.includes("/surveys/question") && (
               <div className="relative">
-                <button
-                  className="border-2 px-4 py-1 rounded-lg text-[#5B03B2] border-[#5B03B2] flex items-center"
-                  onClick={() => {
-                    setShareSurvey(!shareSurvey);
-                  }}
-                >
-                  <FiShare2 className="mr-2" />
-                  <span className="hidden xl:flex"> Share </span>
-                </button>
+                {userRoles.includes("Admin") && (
+                  <button
+                    className="border-2 px-4 py-1 rounded-lg text-[#5B03B2] border-[#5B03B2] flex items-center"
+                    onClick={() => {
+                      setShareSurvey(!shareSurvey);
+                    }}
+                  >
+                    <FiShare2 className="mr-2" />
+                    <span className="hidden xl:flex"> Share </span>
+                  </button>
+                )}
                 {shareSurvey && (
                   <div className="absolute right-0 w-[23rem] lg:w-[25rem] z-50">
                     <ShareSurvey
