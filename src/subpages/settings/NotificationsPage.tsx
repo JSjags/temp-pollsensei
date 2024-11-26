@@ -74,17 +74,17 @@ export default function Component() {
 
       setSettings({
         news_and_updates: (data?.data as any)?.notifications[0]
-          .email_notification.news_and_updates,
+          ?.email_notification?.news_and_updates,
         tips_and_tutorials: (data?.data as any)?.notifications[0]
-          .email_notification.tips_and_tutorials,
+          ?.email_notification?.tips_and_tutorials,
         offers_and_promotions: (data?.data as any)?.notifications[0]
-          .email_notification.offers_and_promotions,
+          ?.email_notification?.offers_and_promotions,
         all_reminders_and_activities: (data?.data as any)?.notifications[0]
-          .more_activity.all_reminders_and_activities,
-        activities_only: (data?.data as any)?.notifications[0].more_activity
-          .activities_only,
+          ?.more_activity?.all_reminders_and_activities,
+        activities_only: (data?.data as any)?.notifications[0]?.more_activity
+          ?.activities_only,
         important_reminder_only: (data?.data as any)?.notifications[0]
-          .more_activity.important_reminder_only,
+          ?.more_activity?.important_reminder_only,
       });
     }
   }, [data]);
@@ -111,11 +111,11 @@ export default function Component() {
                   turn it off at any time
                 </p>
               </div>
-              <Switch
+              {/* <Switch
                 checked={emailEnabled}
                 onCheckedChange={setEmailEnabled}
                 className="data-[state=checked]:bg-purple-600"
-              />
+              /> */}
             </div>
             <div className="space-y-4 ml-1">
               <div className="flex items-start space-x-4">
@@ -181,11 +181,11 @@ export default function Component() {
                   notifications from PollSensei
                 </p>
               </div>
-              <Switch
+              {/* <Switch
                 checked={activityEnabled}
                 onCheckedChange={setActivityEnabled}
                 className="data-[state=checked]:bg-purple-600"
-              />
+              /> */}
             </div>
             <div className="space-y-4 ml-1">
               <div className="flex items-start space-x-4">
