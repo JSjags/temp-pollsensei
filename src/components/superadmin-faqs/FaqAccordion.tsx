@@ -66,7 +66,7 @@ interface AccordionProps {
 const FaqAccordion: React.FC<AccordionProps> = ({ items }) => {
   return (
     <div className="w-full">
-      {items.map((item, index) => (
+      {items?.map((item, index) => (
         <AccordionItem key={index} {...item} />
       ))}
     </div>
