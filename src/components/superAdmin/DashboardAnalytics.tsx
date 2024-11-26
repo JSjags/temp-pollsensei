@@ -1,42 +1,107 @@
-import React from "react";
+import React, { useState } from "react";
 import { SuperAdminPieChart } from "../charts/SuperAdminPieChart";
 import { ChartConfig } from "../ui/chart";
-import { useSurveyCreationDistributionQuery } from "@/services/superadmin.service";
+import { useSurveyCreationDistributionQuery, useSurveyTypeDistributionQuery } from "@/services/superadmin.service";
 import OverlappingCircles from "../charts/OverlappingCircle";
 
 const DashboardAnalytics: React.FC = () => {
-
-  const {data,  isLoading, isSuccess, error} = useSurveyCreationDistributionQuery({})
+  const [selectedMonth, setSelectedMonth] = useState("October");
+  // const 
+  const {data,  isLoading, isSuccess, error} = useSurveyCreationDistributionQuery({
+    month: selectedMonth,
+    year: '2024',
+  })
+  const {data:surveyTypeDistribution,  isLoading:typeLoading, isSuccess:typeSuccess, error:typeError} = useSurveyTypeDistributionQuery({
+    month: 'October',
+    year: '2024',
+  })
   console.log(data)
+  console.log(surveyTypeDistribution)
+console.log( surveyTypeDistribution?.data?.quantitative_percentage)
+const desktopData = [
+  {
+    month: "Quantitative",
+    value: surveyTypeDistribution?.data?.quantitative_percentage ?? 0,
+    fill: "#5B03B2",
+  },
+  {
+    month: "Qualitative",
+    value: surveyTypeDistribution?.data?.qualitative_percentage ?? 0,
+    fill: "#E9D7FB",
+  },
+  {
+    month: "Both",
+    value: surveyTypeDistribution?.data?.both_percentage ?? 0,
+    fill: "#9B51E0",
+  },
+];
 
-  const desktopData = [
-    { plan: "free", subscriber: 186, fill: "#5B03B2" },
-    { plan: "pro", subscriber: 305, fill: "#E9D7FB" },
-    { plan: "team", subscriber: 237, fill: "#9B51E0" },
-  ];
+const chartConfigForSurveyType = {
+  Quantitative: {
+    label: "Quantitative",
+    color: "#5B03B2",
+  },
+  Qualitative: {
+    label: "Qualitative",
+    color: "#E9D7FB",
+  },
+  Both: {
+    label: "Both",
+    color: "#9B51E0",
+  },
+} satisfies ChartConfig;
+  
   const chartConfig = {
-    visitors: {
-      label: "Visitors",
-    },
-    desktop: {
-      label: "Desktop",
-    },
-    mobile: {
-      label: "Mobile",
-    },
-    free: {
-      label: "Free",
+    January: {
+      label: "January",
       color: "#5B03B2",
     },
-    pro: {
-      label: "Pro",
+    February: {
+      label: "February",
       color: "#E9D7FB",
     },
-    team: {
-      label: "Team",
+    March: {
+      label: "March",
       color: "#9B51E0",
     },
+    April: {
+      label: "April",
+      color: "#FFC300",
+    },
+    May: {
+      label: "May",
+      color: "#FF5733",
+    },
+    June: {
+      label: "June",
+      color: "#33FF57",
+    },
+    July: {
+      label: "July",
+      color: "#5733FF",
+    },
+    August: {
+      label: "August",
+      color: "#FF33A6",
+    },
+    September: {
+      label: "September",
+      color: "#33FFF9",
+    },
+    October: {
+      label: "October",
+      color: "#F9FF33",
+    },
+    November: {
+      label: "November",
+      color: "#FF5733",
+    },
+    December: {
+      label: "December",
+      color: "#C70039",
+    },
   } satisfies ChartConfig;
+  
 
   const circleData = [
     { value: 50, color: "#5A2D82", size: 150 }, // Purple circle
@@ -66,10 +131,32 @@ const DashboardAnalytics: React.FC = () => {
        
         <SuperAdminPieChart
           desktopData={desktopData}
-          chartConfig={chartConfig}
+          chartConfig={chartConfigForSurveyType}
           bottomLegend={surveyType}
           title="Survey Type Distribution"
         />
+           {/* <SuperAdminPieChart
+          desktopData={desktopData}
+          chartConfig={chartConfigForSurveyType}
+          bottomLegend={surveyType}
+          title="Survey Type Distribution"
+          months={[
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ]}
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+        /> */}
       </div>
 
       {/* Line Chart */}

@@ -34,7 +34,7 @@ interface CircleData {
 
 interface OverlappingCirclesProps {
   circles: CircleData[];
-  desktopData: { plan: string; subscriber: number; fill: string }[];
+  desktopData: { month: string; value: number; fill: string }[];
   chartConfig: ChartConfig;
   bottomLegend: string[];
   title: string;
@@ -48,14 +48,14 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
   title,
 }) => {
   const id = "pie-interactive";
-  const [activeMonth, setActiveMonth] = React.useState(desktopData[0].plan);
+  const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
 
   const activeIndex = React.useMemo(
-    () => desktopData.findIndex((item) => item.plan === activeMonth),
+    () => desktopData.findIndex((item) => item.month === activeMonth),
     [activeMonth]
   );
   const plans = React.useMemo(
-    () => desktopData.map((item) => item.plan),
+    () => desktopData.map((item) => item.month),
     [desktopData]
   );
   return (

@@ -35,6 +35,17 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    surveyTypeDistribution: builder.query({
+      query: ({ month, year }) => {
+        const params = new URLSearchParams();
+        if (month) params.append('month', month);
+        if (year) params.append('year', year);
+        return {
+          url: `superadmin/survey-type-distribution?${params.toString()}`,
+          method: 'GET',
+        };
+      },
+    }),
     validateIndividualResponse: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
         url: `response/validate/individual/${id}?page=${pagesNumber}&page_size=20${
@@ -56,6 +67,7 @@ export const {
   useUserRegistryQuery,
   useSuperadminOverviewQuery,
   useSurveyCreationDistributionQuery,
+  useSurveyTypeDistributionQuery,
   useCreateAiSurveyMutation,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
