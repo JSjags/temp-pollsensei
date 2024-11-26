@@ -5,10 +5,11 @@ import FaqAccordion from "@/components/superadmin-faqs/FaqAccordion";
 import { useAllFAQsQuery } from "@/services/superadmin.service";
 import React, { useState } from "react";
 
-const SuperAdminFaq = () => {
+const SuperAdminLiveFaqs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, error, refetch } = useAllFAQsQuery({
     pagesNumber: currentPage,
+    filter_by:"live"
   })
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
@@ -64,4 +65,4 @@ const SuperAdminFaq = () => {
   );
 };
 
-export default SuperAdminFaq;
+export default SuperAdminLiveFaqs;

@@ -17,18 +17,11 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    createAiSurvey: builder.mutation({
-      query: (body) => ({
-        url: "survey/ai/generate-questions",
-        method: "POST",
-        body: body,
-      }),
-    }), 
     surveyCreationDistribution: builder.query({
       query: ({ month, year }) => {
         const params = new URLSearchParams();
         if (month) params.append('month', month);
-        if (year) params.append('year', year);
+        if (year) params.append('&year', year);
         return {
           url: `superadmin/survey-creation-distribution?${params.toString()}`,
           method: 'GET',
@@ -39,13 +32,30 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       query: ({ month, year }) => {
         const params = new URLSearchParams();
         if (month) params.append('month', month);
-        if (year) params.append('year', year);
+        if (year) params.append('&year', year);
         return {
           url: `superadmin/survey-type-distribution?${params.toString()}`,
           method: 'GET',
         };
       },
     }),
+    allFAQs: builder.query({
+      query: ({pagesNumber, filter_by }) => {
+        const params = new URLSearchParams();
+        if (filter_by) params.append('filter_by', filter_by);
+        return {
+          url: `superadmin/faq?page=${pagesNumber}&page_size=20&${params.toString()}`,
+          method: "GET",
+        }
+      }, // 
+    }),
+    createFAQs: builder.mutation({
+      query: (body) => ({
+        url: "superadmin/faq",
+        method: "POST",
+        body: body,
+      }),
+    }), 
     validateIndividualResponse: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
         url: `response/validate/individual/${id}?page=${pagesNumber}&page_size=20${
@@ -67,8 +77,9 @@ export const {
   useUserRegistryQuery,
   useSuperadminOverviewQuery,
   useSurveyCreationDistributionQuery,
+  useAllFAQsQuery,
   useSurveyTypeDistributionQuery,
-  useCreateAiSurveyMutation,
+  useCreateFAQsMutation,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery
