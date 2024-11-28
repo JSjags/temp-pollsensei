@@ -112,6 +112,8 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
                   <span className="text-2xl ml-2 text-red-500">*</span>
                 )}
               </p>
+              {
+                 !pathname.includes("survey-public-respons") &&
               <PollsenseiTriggerButton
                 key={index}
                 imageUrl={stars}
@@ -126,6 +128,7 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
                 onSave={onSave!}
                 index={index}
               />
+              }
             </div>
           </h3>
         </div>
