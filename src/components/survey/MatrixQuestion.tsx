@@ -80,6 +80,8 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
           <div className="flex justify-between items-center">
             <h3 className="group text-lg font-semibold text-start">
               <span>{index}. </span> {question}{" "}
+              {
+                 !pathname.includes("survey-public-respons") &&
               <PollsenseiTriggerButton
                 key={index}
                 imageUrl={stars}
@@ -94,6 +96,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                 onSave={onSave!}
                 index={index!}
               />
+              }
             </h3>
             {/* {pathname !== "/surveys/edit-survey" && <p>{questionType}</p>} */}
           </div>

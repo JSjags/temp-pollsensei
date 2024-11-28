@@ -102,7 +102,7 @@ const ShortTextQuestion: React.FC<ComponentQuestionProps> = ({
             )}
           </h3>
           <span></span>
-          <PollsenseiTriggerButton
+          {/* <PollsenseiTriggerButton
             key={index}
             imageUrl={stars}
             tooltipText="Rephrase question"
@@ -114,7 +114,24 @@ const ShortTextQuestion: React.FC<ComponentQuestionProps> = ({
             setEditId={setEditId}
             onSave={onSave!}
             index={index}
-          />
+          /> */}
+          {
+  !pathname.includes("survey-public-respons") && (
+    <PollsenseiTriggerButton
+      key={index}
+      imageUrl={stars}
+      tooltipText="Rephrase question"
+      className={"group-hover:inline-block hidden"}
+      triggerType="rephrase"
+      question={question}
+      optionType={questionType}
+      options={options}
+      setEditId={setEditId}
+      onSave={onSave!}
+      index={index}
+    />
+  )
+}
         </div>
         <div>
           <AutosizeTextarea
