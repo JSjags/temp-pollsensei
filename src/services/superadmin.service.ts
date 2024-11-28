@@ -56,6 +56,26 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }), 
+    unpublishFAQs: builder.mutation({
+      query: ({id, body}) => ({
+        url: `superadmin/faq-status/${id}?status=unpublish`,
+        method: "PATCH",
+        body: body,
+      }),
+    }), 
+    publishFAQs: builder.mutation({
+      query: ({id, body}) => ({
+        url: `superadmin/faq-status/${id}?status=publish`,
+        method: "PATCH",
+        body: body,
+      }),
+    }), 
+    deleteFAQs: builder.mutation({
+      query: (id) => ({
+        url: `/superadmin/faq/${id}`,
+        method: "DELETE",
+      }),
+    }), 
     validateIndividualResponse: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
         url: `response/validate/individual/${id}?page=${pagesNumber}&page_size=20${
@@ -79,7 +99,10 @@ export const {
   useSurveyCreationDistributionQuery,
   useAllFAQsQuery,
   useSurveyTypeDistributionQuery,
+  useDeleteFAQsMutation,
   useCreateFAQsMutation,
+  usePublishFAQsMutation,
+  useUnpublishFAQsMutation,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery

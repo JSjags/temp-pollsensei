@@ -51,6 +51,8 @@ const LinearScaleQuestion: React.FC<LinearScaleQuestionProps> = ({
         <div className="flex justify-between w-full items-center">
           <h3 className="group text-lg font-semibold text-start">
             {question}
+            {
+               !pathname.includes("survey-public-respons") &&
             <PollsenseiTriggerButton
               key={index}
               imageUrl={stars}
@@ -64,6 +66,7 @@ const LinearScaleQuestion: React.FC<LinearScaleQuestionProps> = ({
               onSave={onSave!}
               index={index!}
             />
+            }
           </h3>
           {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>}
         </div>

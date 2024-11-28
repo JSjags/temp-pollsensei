@@ -93,6 +93,8 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
                 <span className="text-2xl ml-2 text-red-500">*</span>
               )}
             </p>
+            {
+               !pathname.includes("survey-public-respons") &&
             <PollsenseiTriggerButton
               key={index}
               imageUrl={stars}
@@ -106,6 +108,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
               onSave={onSave!}
               index={index!}
             />
+            }
           </h3>
           {/* {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>} */}
         </div>
