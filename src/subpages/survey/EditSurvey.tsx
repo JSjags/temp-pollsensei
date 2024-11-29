@@ -370,7 +370,7 @@ const EditSurvey = () => {
 
   useEffect(() => {
     if (progressSuccess) {
-      router.push("/surveys");
+      router.push("/surveys/survey-list");
     }
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");

@@ -145,7 +145,7 @@ const AddQuestionPage = () => {
     if (isSuccess) {
       toast.success("Survey created successfully");
       dispatch(resetSurvey());
-      router.push("/surveys");
+      router.push("/surveys/survey-list");
     }
 
     if (isError || error) {
@@ -165,7 +165,7 @@ const AddQuestionPage = () => {
 
   useEffect(() => {
     if (progressSuccess) {
-      router.push("/surveys");
+      router.push("/surveys/survey-list");
     }
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
@@ -517,7 +517,7 @@ const AddQuestionPage = () => {
                 onClick={() => {
                   dispatch(resetQuestion());
                   dispatch(resetSurvey());
-                  router.push('/surveys/create-survey');
+                  router.push('/surveys/survey-list');
                 }}
               >
                 <GiCardDiscard className="inline-block mr-2" />
