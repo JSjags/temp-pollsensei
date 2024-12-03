@@ -68,3 +68,8 @@ export const updateNotification = async (data: {
 }) => {
   return await axiosInstance.patch(`/user/notification`, data);
 };
+
+export const getSubscriptionTiers = async () => {
+  const { data } = await axiosInstance.get(`/plan`);
+  return data;
+};

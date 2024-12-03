@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Star } from "lucide-react";
+import { CurrentPlanCard } from "./subscription/CurrentPlanCard";
+import { BillingHistoryCard } from "./subscription/BillingHistoryCard";
+import { PricingCards } from "./subscription/PricingCards";
 
 const SubscriptionPage: React.FC = () => {
   return (
@@ -21,29 +24,20 @@ const SubscriptionPage: React.FC = () => {
             <CardTitle className="text-2xl md:text-3xl font-bold">
               Subscription
             </CardTitle>
-            <Badge variant="secondary" className="text-sm">
-              Early Bird
-            </Badge>
           </div>
-          <CardDescription className="text-base md:text-lg">
+          <CardDescription className="text-sm md:text-base">
             Your current subscription status
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center text-center space-y-6">
-            <Sparkles className="h-16 w-16 text-yellow-400" />
-            <h2 className="text-xl md:text-2xl font-semibold">
-              You're part of our Early Bird Program!
-            </h2>
-            <p className="text-muted-foreground max-w-md">
-              As an early supporter, you currently don't have an active
-              subscription. Enjoy full access to our platform while we're in
-              this phase!
-            </p>
-            <div className="flex items-center space-x-2 text-yellow-500"></div>
-            <p className="text-sm text-muted-foreground">
-              We'll notify you when subscription options become available.
-            </p>
+        <CardContent className="max-w-[900px]">
+          <div className="min-h-screen bg-background py-4 sm:py-8">
+            <div className="container mx-auto space-y-6 sm:space-y-8 p-0">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+                <CurrentPlanCard />
+                <BillingHistoryCard />
+              </div>
+              <PricingCards />
+            </div>
           </div>
         </CardContent>
       </Card>

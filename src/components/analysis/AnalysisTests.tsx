@@ -534,7 +534,7 @@ export default function DragAndDropPage() {
             <div className="p-4">
               <div className="px-6">
                 <div className="flex border border-border rounded-lg p-4 gap-10">
-                  <div className="bg-[#F5EDF8] rounded-md p-4">
+                  <div className="bg-[#F5EDF8] rounded-md p-4 h-fit">
                     <p className="text-4xl text-center font-bold">
                       {variables.length}
                     </p>

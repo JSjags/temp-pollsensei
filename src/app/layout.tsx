@@ -10,6 +10,7 @@ import { TanstackProvider } from "@/providers/TanstackProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { CookieConsent } from "@/components/primitives/CookieConsent";
+import { MixPanelProvider } from "@/contexts/MixpanelContext";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -43,7 +44,9 @@ export default function RootLayout({
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
             <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
-            <ReduxContext>{children}</ReduxContext>
+            <ReduxContext>
+              <MixPanelProvider>{children}</MixPanelProvider>
+            </ReduxContext>
           </TanstackProvider>
         </GoogleOAuthProvider>
       </body>
