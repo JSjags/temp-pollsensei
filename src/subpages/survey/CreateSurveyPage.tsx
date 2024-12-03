@@ -198,6 +198,18 @@ const CreateSurveyPage = () => {
             description: "",
           }
         }
+        if(optionType ==="slider"){
+          return {
+            question: question.Question,
+            options: "",
+            min: question.Options.Min,
+            max:question.Options.Max,
+            step:question.Options.Step,
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
         return {
           question: question.Question,
           options: question.Options,

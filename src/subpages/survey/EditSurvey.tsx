@@ -294,17 +294,65 @@ const EditSurvey = () => {
       const currentSectionData = updatedSections[currentSection];
 
       // Iterate over each question in the array and add it to the current section
-      const newQuestions = newSingleSurvey.data.response.map((questionData: any) => {
-        const optionType = questionData["Option type"]?.trim();
+      const newQuestions = newSingleSurvey.data.response.map((question: any) => {
+        const optionType = question["Option type"]?.trim();
+        if(optionType ==="matrix_multiple_choice"){
+          return {
+            question: question.Question,
+            rows: question.Options.Rows,
+            columns: question.Options.Columns,
+            question_type:optionType === null ? optionType : "",
+            is_required: true,
+            description: "",
+          }
+        }
+        if(optionType ==="long_text" || optionType ==="short_text"){
+          return {
+            question: question.Question,
+            options: "",
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
+        if(optionType ==="boolean"){
+          return {
+            question: question.Question,
+            options: ["Yes", "No"],
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
+        if(optionType ==="number"){
+          return {
+            question: question.Question,
+            options: "",
+            min:1,
+            max:10000000,
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
+        if(optionType ==="slider"){
+          return {
+            question: question.Question,
+            options: "",
+            min: question.Options.Min,
+            max:question.Options.Max,
+            step:question.Options.Step,
+            question_type:optionType || "",
+            is_required: true,
+            description: "",
+          }
+        }
         return {
-          question: questionData.Question,
-          options: questionData.Options || [], // Default to an empty array if options are not provided
-          question_type: optionType === "Multi-choice"
-            ? "multiple_choice"
-            : optionType === "Comment"
-            ? "long_text"
-            : "matrix_checkbox",
+          question: question.Question,
+          options: question.Options,
+          question_type:optionType || "",
           is_required: true,
+          description: "",
         };
       });
   

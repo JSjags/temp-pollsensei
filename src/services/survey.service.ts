@@ -54,7 +54,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     }),
     closeSurveyStatus: builder.mutation({
       query: ({ id, body }) => ({
-        url: `survey/status/${id} `,
+        url: `survey/status/${id}`,
         method: "PATCH",
         body: body,
       }),

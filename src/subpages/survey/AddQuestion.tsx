@@ -118,6 +118,8 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
         break;
       case "number":
         setOptions([]);
+      case "slider":
+        setOptions([1, 2, 3, 4, 5]);
         break;
       case "matrix_checkbox":
         // setOptions({
@@ -164,6 +166,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
         <div className="flex justify-between py-4 items-center">
           {questionType === "long_text" ||
           questionType === "short_text" ||
+          questionType === "slider" ||
           questionType === "number" ? (
             ""
           ) : (
@@ -262,6 +265,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
               {questionType === "long_text" ||
               questionType === "short_text" ||
               questionType === "boolean" ||
+              questionType === "slider" ||
               questionType === "number" ? (
                 ""
               ) : (
@@ -274,7 +278,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
               )}
             </div>
           )}
-        {questionType === "number" && (
+        {questionType === "number" || questionType === "slider" && (
           <div className="flex gap-4 mt-4">
             <div>
               <label>Min Value</label>
