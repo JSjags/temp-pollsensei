@@ -49,7 +49,9 @@ const DesktopNavigation = () => {
       handleSetActiveTab("settings");
     } else if (path.includes("/help-centre")) {
       handleSetActiveTab("help-centre");
-    } else {
+    }else if(path.includes("/user-review")){
+      handleSetActiveTab("user-review");
+    }else {
       handleSetActiveTab("dashboard");
     }
   }, [path]);
@@ -173,6 +175,29 @@ const DesktopNavigation = () => {
             <div
               className={`${
                 activeTab == "help-centre" ? "block" : "hidden"
+              } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
+            />
+          </li>
+        </Link>
+        <Link href="/user-review">
+          <li
+            onClick={() => handleSetActiveTab("user-review")}
+            className={`flex flex-col items-center cursor-pointer ${
+              activeTab == "user-review"
+                ? "text-[#9D50BB]"
+                : "text-[#4F5B67] pb-[17px]"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Image
+                src={activeTab == "user-review" ? helpActive : help}
+                alt="Help Icon"
+              />
+              <p className="lg:text-[16px] text-[14px]">Review</p>
+            </div>
+            <div
+              className={`${
+                activeTab == "user-review" ? "block" : "hidden"
               } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
             />
           </li>

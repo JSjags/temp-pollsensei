@@ -106,6 +106,15 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
 
               <li>
                 <Link
+                  href="/reviews"
+                  className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+                >
+                  {/* <span>⚙️</span> */}
+                  {isSidebarOpen && <span>Reviews</span>}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/faqs"
                   className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
                 >

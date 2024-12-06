@@ -91,6 +91,12 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getReview: builder.query({
+      query: (pagesNumber) => ({
+        url: `superadmin/review?page=${pagesNumber}&page_size=20`, // {{base_url}}/superadmin/review?page=1&page_size=10
+        method: "GET",
+      }),
+    }),
     downloadSingleResponse: builder.query({
       query: ({response_id, format}) => ({
         url: `response/export?response_id=${response_id}&format=${format}`, // 
@@ -111,6 +117,7 @@ export const {
   usePublishFAQsMutation,
   useUnpublishFAQsMutation,
   useCreateReviewMutation,
+  useGetReviewQuery,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery

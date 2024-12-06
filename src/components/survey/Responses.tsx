@@ -108,10 +108,11 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
       id: params.id,
       pagesNumber: pagesNumber,
       // path_params: path_params,
-      answer:answer_params.toString(),
+      // answer:answer_params.toString(),
     },
     {
-      skip: !answer_params ? true : false,
+      skip: !path_params,
+      // skip: !answer_params ? true : false,
       // skip: Object.keys(path_params).length === 0,
     }
   );
