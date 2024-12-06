@@ -8,6 +8,7 @@ import ResponseActions from "./ResponseAction";
 interface ResponseHeaderProps {
   data: any;
   tabs: any;
+  surveyData: any;
   activeTab: string;
   setActiveTab: (tab: string) => void;
   curerentSurvey: number;
@@ -32,7 +33,8 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   valid_response,
   invalid_response,
   deleteAResponse,
-  response_id
+  response_id,
+  surveyData
 }) => {
   const [downloadModal, setDownloadModal] = useState(false);
   const params = useParams();
@@ -180,6 +182,7 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
           valid_response={valid_response}
           invalid_response={invalid_response}
           deleteAResponse={deleteAResponse}
+          surveyData={surveyData}
         />
       )}
     </div>

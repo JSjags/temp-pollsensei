@@ -144,7 +144,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
     { value: "star_rating", label: "Star Rating" },
     { value: "rating_scale", label: "Rating Scale" },
     { value: "boolean", label: "Boolean" },
-    { value: "slider", label: "Slider" },
+    // { value: "slider", label: "Slider" },
     { value: "number", label: "Number" },
     { value: "drop_down", label: "Dropdown" },
     { value: "matrix_checkbox", label: "Matrix" },

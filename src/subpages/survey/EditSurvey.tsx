@@ -46,6 +46,7 @@ import NumberQuestion from "@/components/survey/NumberQuestion";
 import ShortTextQuestion from "@/components/survey/LongTextQuestion";
 import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import SliderQuestion from "@/components/survey/SliderQuestion";
+import ReviewModal from "@/components/modals/ReviewModal";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -89,7 +90,7 @@ const EditSurvey = () => {
   const router = useRouter();
   const [aiChatbot, setAiChatbot] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
-  const [createSurvey, { isLoading, isSuccess, isError, error }] =
+  const [createSurvey, { data:createdSurveyData, isLoading, isSuccess, isError, error }] =
     useCreateSurveyMutation();
   const [
     saveprogress,
@@ -114,7 +115,8 @@ const EditSurvey = () => {
   const [question_count, setQuestionCount] = useState<number>(0);
   const [addMoreQuestion, setAddMoreQuestion] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [is_requied, setIsRequired] = useState(false);
+  const [review, setReview] = useState(false);
+  const [survey_id,setSurvey_id] = useState("")
 
   const EditQuestion = (index: any) => {
     setEditIndex(index);
@@ -388,7 +390,9 @@ const EditSurvey = () => {
     try {
       console.log(survey);
       const updatedSurvey = store.getState().survey;
-      await createSurvey(updatedSurvey);
+      await createSurvey(updatedSurvey).unwrap();
+      setSurvey_id(createdSurveyData.data._id);
+      setReview(true)
     } catch (e) {
       console.log(e);
     }
@@ -396,9 +400,12 @@ const EditSurvey = () => {
 
   useEffect(() => {
     if (isSuccess) {
+      setReview((prev)=>!prev)
       toast.success("Survey created successfully");
       dispatch(resetSurvey());
-      router.push("/surveys/survey-list");
+      setSurvey_id(createdSurveyData.data._id);
+      setReview(true)
+      // router.push("/surveys/survey-list");
     }
 
     if (isError || error) {
@@ -426,9 +433,10 @@ const EditSurvey = () => {
   }, [progressError, progressIsError]);
 
   console.log(survey);
+  console.log(survey_id);
   console.log(questions[currentSection]?.questions);
   console.log(logoUrl);
-  console.log(headerUrl);
+  console.log(createdSurveyData);
 
   return (
     <div
@@ -457,7 +465,6 @@ const EditSurvey = () => {
               )}
               {/* <button type="reset" onClick={()=>{
               dispatch(resetSurvey())
-              router.push('/surveys')
             }}>
               Reset
             </button> */}
@@ -1146,6 +1153,13 @@ const EditSurvey = () => {
           />
         </motion.div>
       </AnimatePresence>
+      {
+         review &&   <ReviewModal
+                survey_id={survey_id}
+                openModal={review}
+                onClose={() => setReview((prev) => !prev)}
+              />
+      }
     </div>
   );
 };

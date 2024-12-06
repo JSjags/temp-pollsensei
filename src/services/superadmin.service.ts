@@ -56,6 +56,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }), 
+    createReview: builder.mutation({
+      query: (body) => ({
+        url: "survey/review",
+        method: "POST",
+        body: body,
+      }),
+    }), 
     unpublishFAQs: builder.mutation({
       query: ({id, body}) => ({
         url: `superadmin/faq-status/${id}?status=unpublish`,
@@ -103,6 +110,7 @@ export const {
   useCreateFAQsMutation,
   usePublishFAQsMutation,
   useUnpublishFAQsMutation,
+  useCreateReviewMutation,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery

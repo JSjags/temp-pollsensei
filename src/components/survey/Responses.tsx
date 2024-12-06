@@ -19,6 +19,15 @@ import { useDispatch } from "react-redux";
 import { resetName } from "@/redux/slices/name.slice";
 import FeatureComing from "../common/FeatureComing";
 
+
+interface PathParamsProps{
+  name?:string;
+  question?:string;
+  question_type?:string;
+  answer?:string;
+
+}
+
 const calculateValidationCounts = (data: any) => {
   let validCount = 0;
   let invalidCount = 0;
@@ -53,6 +62,9 @@ const calculateValidationCounts2 = (survey: any) => {
 
 const Responses: React.FC<{ data: any }> = ({ data }) => {
   const name = useSelector((state: RootState) => state?.name?.name);
+  const question = useSelector((state: RootState) => state?.filter.question);
+  const questionType = useSelector((state: RootState) => state?.filter.questionType);
+  const answer = useSelector((state: RootState) => state?.filter.answer);
   const params = useParams();
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
@@ -73,8 +85,16 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     skip: activeTab !== "Summary",
   });
 
-  const path_params = new URLSearchParams();
-  path_params.set("name", name);
+  const answer_params = new URLSearchParams();
+  // answer_params.set("answer", answer);
+  console.log(answer_params.toString());
+
+  const path_params: PathParamsProps = {};
+  if (name) path_params.name = name;
+  if (answer) path_params.answer = answer;
+  if (question) path_params.question = question;
+  if (questionType) path_params.question_type = questionType;
+ 
 
   const { data: respondent_name } = useGetRespondentNameQuery(params.id);
   const { data: validate_ } = useValidateSurveyResponseQuery(params.id);
@@ -84,12 +104,15 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     refetch,
   } = useValidateIndividualResponseQuery(
     {
+      ...path_params, 
       id: params.id,
       pagesNumber: pagesNumber,
-      path_params: path_params.toString(),
+      // path_params: path_params,
+      answer:answer_params.toString(),
     },
     {
-      skip: !path_params,
+      skip: !answer_params ? true : false,
+      // skip: Object.keys(path_params).length === 0,
     }
   );
   console.log(validate_individual_response);
@@ -119,6 +142,14 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
       refetch();
     }
   }, [name, refetch]);
+
+
+  useEffect(() => {
+    if (answer && question && questionType) {
+      refetch();
+    }
+  }, [answer, question, questionType, refetch]);
+
 
   const handleNext = () => {
     if (currentUserResponse < totalResponses - 1) {
@@ -164,6 +195,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
         invalid_response={invalidCount}
         deleteAResponse={handleDeleteAResponse}
         response_id={validateSource?._id}
+        surveyData={validateSource}
       />
       <RespondentDetails
         data={validateSource}
