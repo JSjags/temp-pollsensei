@@ -87,12 +87,20 @@ const SurveyQuestions = () => {
               >
                 {data?.data?.topic}
               </h2>
-              <p>{data?.data?.description}</p>
+              <p    style={{
+                  fontSize: `${data?.data?.body_text?.size}px`,
+                  fontFamily: `${data?.data?.body_text?.name}`,
+                }}>{data?.data?.description}</p>
             </div>
             {data?.data &&
               data?.data?.sections[currentSection]?.questions?.map(
                 (item: any, index: number) => (
-                  <div key={index} className="mb-4">
+                  <div key={index} className="mb-4" 
+                  style={{
+                    fontFamily: `${data?.data?.question_text?.name}`,
+                    fontSize: `${data?.data?.question_text?.size}px`,
+                  }}
+                  >
                     {item.question_type &&
                     item.question_type === "multiple_choice" ? (
                       <MultiChoiceQuestion

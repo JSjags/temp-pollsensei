@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Playwrite+HR+Lijeva:wght@100..400&family=Yuji+Mai&display=swap');
+
 
 @layer base {
   :root {

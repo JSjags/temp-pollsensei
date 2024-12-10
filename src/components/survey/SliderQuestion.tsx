@@ -567,13 +567,15 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
             }}
           />
           <div className="relative w-full mt-4 flex justify-between text-sm 0">
-            {options && options.length > 0
-              ? options.map((option, i) => (
-                  <span key={i} className="text- border w-[20%]">
-                    {option}
-                  </span>
-                ))
-              : Array.from({ length: dynamicMax - dynamicMin + 1 }, (_, i) => (
+            {
+            // options && options.length > 0
+            //   ? options.map((option, i) => (
+            //       <span key={i} className="text- border w-[20%]">
+            //         {option}
+            //       </span>
+            //     ))
+            //   : 
+              Array.from({ length: dynamicMax - dynamicMin + 1 }, (_, i) => (
                   <span key={i} className="text-center w-[20%]">
                     {dynamicMin + i}
                   </span>

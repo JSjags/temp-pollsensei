@@ -112,7 +112,7 @@ const DashboardPage = () => {
                 {surveys?.data?.length > 0 ? (
                   <SurveyTable />
                 ) : (
-                  <NoSurvey onCreateSurvey={() => router.push("/surveys")} />
+                  <NoSurvey onCreateSurvey={() => router.push("/surveys/create-survey")} />
                 )}
               </div>
             </div>

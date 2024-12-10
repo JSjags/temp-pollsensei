@@ -43,6 +43,7 @@ import NumberQuestion from "@/components/survey/NumberQuestion";
 import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
+import ReviewModal from "@/components/modals/ReviewModal";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -65,8 +66,11 @@ const AddQuestionPage = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const [currentSection, setCurrentSection] = useState(0);
+  const [review, setReview] = useState(false);
+  const [survey_id,setSurvey_id] = useState("")
 
-  const [createSurvey, { isLoading, isSuccess, isError, error }] =
+
+  const [createSurvey, { data:createdSurveyData, isLoading, isSuccess, isError, error }] =
     useCreateSurveyMutation();
   const [
     saveprogress,
@@ -135,7 +139,9 @@ const AddQuestionPage = () => {
 
     try {
       const updatedSurvey = store.getState().survey;
-      await createSurvey(updatedSurvey);
+      await createSurvey(updatedSurvey).unwrap();
+      setSurvey_id(createdSurveyData.data._id);
+      setReview(true)
     } catch (e) {
       console.log(e);
     }
@@ -143,9 +149,12 @@ const AddQuestionPage = () => {
 
   useEffect(() => {
     if (isSuccess) {
+      setReview((prev)=>!prev)
       toast.success("Survey created successfully");
       dispatch(resetSurvey());
-      router.push("/surveys/survey-list");
+      setSurvey_id(createdSurveyData.data._id);
+      setReview(true)
+      // router.push("/surveys/survey-list");
     }
 
     if (isError || error) {
@@ -551,6 +560,13 @@ const AddQuestionPage = () => {
           {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>
       </div>
+      {
+         review &&   <ReviewModal
+                survey_id={survey_id}
+                openModal={review}
+                onClose={() => setReview((prev) => !prev)}
+              />
+      }
     </div>
   );
 };

@@ -1,6 +1,8 @@
 "use client";
 
-import PublicResponse from "@/subpages/survey/PublicResponse";
+import PublicResponse from "@/subpages/survey/PublicResponseClone";
+
+// import PublicResponse from "@/subpages/survey/PublicResponse";
 
 
 
@@ -12,3 +14,5 @@ const Page = (props: Props) => {
 };
 
 export default Page;
+
+//

@@ -91,112 +91,76 @@ const SurveyCreationNav = () => {
         </button>
 
         {/* Small screen: Only display active link */}
-        <nav className="block md:hidden">
-          <Link href={""} className="flex items-center">
-            <BreadcrumsIcon
-              icon={
-                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-              }
-            />
-            <span className="ml-3 text-sm">{activeLink}</span>
-          </Link>
-        </nav>
+        {userRoles.includes("Admin") && (
+          <>
+            <nav className="block md:hidden">
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon
+                  icon={
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                  }
+                />
+                <span className="ml-3 text-sm">{activeLink}</span>
+              </Link>
+            </nav>
 
-        {/* Medium and Large screens: Show all links */}
-        <nav className="hidden md:flex justify-between flex-wrap items-center">
-          <Link href={""} className="flex items-center">
-            <BreadcrumsIcon
-              icon={
-                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-              }
-            />
-            <span className="ml-3 text-sm">Design</span>
-          </Link>
-          <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link
-            href={
-              data?.data.sections.length > 0
-                ? `/surveys/${data?.data._id}/survey-response-upload`
-                : ""
-            }
-            className="flex items-center"
-          >
-            <BreadcrumsIcon
-              icon={
-                data?.data.sections.length > 0 && (
-                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                )
-              }
-              color={data?.data.sections === undefined ? "#B0A5BB" : ""}
-            />
-            <span className="ml-3 text-sm">Responses</span>
-          </Link>
-          <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link
-            href={
-              path.includes("survey-response-upload?tab=Individual+Responses")
-                ? `/surveys/${data?.data._id}/survey-response-upload?tab=Individual+Responses`
-                : ""
-            }
-            className="flex items-center"
-          >
-            <BreadcrumsIcon
-              icon={
-                surveyResponses.isSuccess &&
-                surveyResponses.data?.data?.length > 0 && (
-                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                )
-              }
-              color={
-                surveyResponses.isSuccess &&
-                surveyResponses.data?.data?.length > 0
-                  ? ""
-                  : "#B0A5BB"
-              }
-            />
-            <span className="ml-3 text-sm">Validation</span>
-          </Link>
-          <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          {surveyResponses.data?.data?.length >= 10 ? (
-            <button
-              className="flex items-center group relative"
-              onClick={() => {
-                if (surveyResponses.data?.data?.length >= 10) {
-                  router.push(`/surveys/${params.id}/analysis`);
+            <nav className="hidden md:flex justify-between flex-wrap items-center">
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon
+                  icon={
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                  }
+                />
+                <span className="ml-3 text-sm">Design</span>
+              </Link>
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              <Link
+                href={
+                  data?.data.sections.length > 0
+                    ? `/surveys/${data?.data._id}/survey-response-upload`
+                    : ""
                 }
-              }}
-            >
-              <BreadcrumsIcon
-                icon={
-                  surveyResponses.isSuccess ? (
-                    surveyResponses.data?.data?.length >= 10 ? (
+                className="flex items-center"
+              >
+                <BreadcrumsIcon
+                  icon={
+                    data?.data.sections.length > 0 && (
                       <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    ) : (
-                      <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                        <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                      </div>
                     )
-                  ) : null
+                  }
+                  color={data?.data.sections === undefined ? "#B0A5BB" : ""}
+                />
+                <span className="ml-3 text-sm">Responses</span>
+              </Link>
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              <Link
+                href={
+                  path.includes(
+                    "survey-response-upload?tab=Individual+Responses"
+                  )
+                    ? `/surveys/${data?.data._id}/survey-response-upload?tab=Individual+Responses`
+                    : ""
                 }
-                color={
-                  surveyResponses.isSuccess &&
-                  surveyResponses.data?.data?.length >= 10
-                    ? ""
-                    : "#B0A5BB"
-                }
-              />
-              <span className="ml-3 text-sm">Analysis</span>
-              {surveyResponses.isSuccess &&
-                surveyResponses.data?.data?.length < 10 && (
-                  <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
-                    {10 - (surveyResponses.data?.data?.length || 0)} more
-                    responses needed to unlock analysis
-                  </div>
-                )}
-            </button>
-          ) : (
-            <Dialog>
-              <DialogTrigger asChild>
+                className="flex items-center"
+              >
+                <BreadcrumsIcon
+                  icon={
+                    surveyResponses.isSuccess &&
+                    surveyResponses.data?.data?.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    )
+                  }
+                  color={
+                    surveyResponses.isSuccess &&
+                    surveyResponses.data?.data?.length > 0
+                      ? ""
+                      : "#B0A5BB"
+                  }
+                />
+                <span className="ml-3 text-sm">Validation</span>
+              </Link>
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              {surveyResponses.data?.data?.length >= 10 ? (
                 <button
                   className="flex items-center group relative"
                   onClick={() => {
@@ -233,44 +197,317 @@ const SurveyCreationNav = () => {
                       </div>
                     )}
                 </button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Insufficient Responses</DialogTitle>
-                  <DialogDescription>
-                    You need at least 10 survey responses to access the analysis
-                    section. This ensures more meaningful and statistically
-                    relevant insights from your data.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-center py-4">
-                  <Image
-                    src="/assets/analysis/no-data.svg"
-                    alt="Analysis Locked"
-                    width={200}
-                    height={200}
-                  />
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-muted-foreground">
-                    Current responses: {surveyResponses.data?.data?.length || 0}
-                    /10
-                  </p>
-                  <DialogClose asChild>
-                    <Button type="button" variant="secondary">
-                      Close
-                    </Button>
-                  </DialogClose>
-                </div>
-              </DialogContent>
-            </Dialog>
+              ) : (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      className="flex items-center group relative"
+                      onClick={() => {
+                        if (surveyResponses.data?.data?.length >= 10) {
+                          router.push(`/surveys/${params.id}/analysis`);
+                        }
+                      }}
+                    >
+                      <BreadcrumsIcon
+                        icon={
+                          surveyResponses.isSuccess ? (
+                            surveyResponses.data?.data?.length >= 10 ? (
+                              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                            ) : (
+                              <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                                <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                              </div>
+                            )
+                          ) : null
+                        }
+                        color={
+                          surveyResponses.isSuccess &&
+                          surveyResponses.data?.data?.length >= 10
+                            ? ""
+                            : "#B0A5BB"
+                        }
+                      />
+                      <span className="ml-3 text-sm">Analysis</span>
+                      {surveyResponses.isSuccess &&
+                        surveyResponses.data?.data?.length < 10 && (
+                          <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
+                            {10 - (surveyResponses.data?.data?.length || 0)}{" "}
+                            more responses needed to unlock analysis
+                          </div>
+                        )}
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Insufficient Responses</DialogTitle>
+                      <DialogDescription>
+                        You need at least 10 survey responses to access the
+                        analysis section. This ensures more meaningful and
+                        statistically relevant insights from your data.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-center py-4">
+                      <Image
+                        src="/assets/analysis/no-data.svg"
+                        alt="Analysis Locked"
+                        width={200}
+                        height={200}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-muted-foreground">
+                        Current responses:{" "}
+                        {surveyResponses.data?.data?.length || 0}
+                        /10
+                      </p>
+                      <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                          Close
+                        </Button>
+                      </DialogClose>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon color="#B0A5BB" />
+                <span className="ml-3 text-sm">Report</span>
+              </Link>
+              {/* <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " /> */}
+            </nav>
+          </>
+        )}
+
+        <nav className="flex justify-between flex-wrap items-center">
+          {userRoles.includes("Data Collector") && (
+            <>
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon
+                  icon={
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                  }
+                />
+                <span className="ml-3 text-sm">Design</span>
+              </Link>
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              <Link
+                href={
+                  data?.data.sections.length > 0
+                    ? `/surveys/${data?.data._id}/survey-response-upload`
+                    : ""
+                }
+                className="flex items-center"
+              >
+                <BreadcrumsIcon
+                  icon={
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    )
+                  }
+                  color={data?.data.sections === undefined ? "#B0A5BB" : ""}
+                />
+                <span className="ml-3 text-sm">Responses</span>
+              </Link>
+            </>
           )}
-          <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
-          <Link href={""} className="flex items-center">
-            <BreadcrumsIcon color="#B0A5BB" />
-            <span className="ml-3 text-sm">Report</span>
-          </Link>
-          {/* <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " /> */}
+          {userRoles.includes("Data Validator") && (
+            <>
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon
+                  icon={
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                  }
+                />
+                <span className="ml-3 text-sm">Design</span>
+              </Link>
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              <Link
+                href={
+                  data?.data.sections.length > 0
+                    ? `/surveys/${data?.data._id}/survey-response-upload`
+                    : ""
+                }
+                className="flex items-center"
+              >
+                <BreadcrumsIcon
+                  icon={
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    )
+                  }
+                  color={data?.data.sections === undefined ? "#B0A5BB" : ""}
+                />
+                <span className="ml-3 text-sm">Responses</span>
+              </Link>
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              <Link
+                href={
+                  path.includes(
+                    "survey-response-upload?tab=Individual+Responses"
+                  )
+                    ? `/surveys/${data?.data._id}/survey-response-upload?tab=Individual+Responses`
+                    : ""
+                }
+                className="flex items-center"
+              >
+                <BreadcrumsIcon
+                  icon={
+                    surveyResponses.isSuccess &&
+                    surveyResponses.data?.data?.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    )
+                  }
+                  color={
+                    surveyResponses.isSuccess &&
+                    surveyResponses.data?.data?.length > 0
+                      ? ""
+                      : "#B0A5BB"
+                  }
+                />
+                <span className="ml-3 text-sm">Validation</span>
+              </Link>
+            </>
+          )}
+          {userRoles.includes("Data Editor") && (
+            <>
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon
+                  icon={
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                  }
+                />
+                <span className="ml-3 text-sm">Design</span>
+              </Link>
+            </>
+          )}
+          {userRoles.includes("Data Analyst") && (
+            <>
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon
+                  icon={
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                  }
+                />
+                <span className="ml-3 text-sm">Design</span>
+              </Link>
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              {surveyResponses.data?.data?.length >= 10 ? (
+                <button
+                  className="flex items-center group relative"
+                  onClick={() => {
+                    if (surveyResponses.data?.data?.length >= 10) {
+                      router.push(`/surveys/${params.id}/analysis`);
+                    }
+                  }}
+                >
+                  <BreadcrumsIcon
+                    icon={
+                      surveyResponses.isSuccess ? (
+                        surveyResponses.data?.data?.length >= 10 ? (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                        ) : (
+                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                          </div>
+                        )
+                      ) : null
+                    }
+                    color={
+                      surveyResponses.isSuccess &&
+                      surveyResponses.data?.data?.length >= 10
+                        ? ""
+                        : "#B0A5BB"
+                    }
+                  />
+                  <span className="ml-3 text-sm">Analysis</span>
+                  {surveyResponses.isSuccess &&
+                    surveyResponses.data?.data?.length < 10 && (
+                      <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
+                        {10 - (surveyResponses.data?.data?.length || 0)} more
+                        responses needed to unlock analysis
+                      </div>
+                    )}
+                </button>
+              ) : (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      className="flex items-center group relative"
+                      onClick={() => {
+                        if (surveyResponses.data?.data?.length >= 10) {
+                          router.push(`/surveys/${params.id}/analysis`);
+                        }
+                      }}
+                    >
+                      <BreadcrumsIcon
+                        icon={
+                          surveyResponses.isSuccess ? (
+                            surveyResponses.data?.data?.length >= 10 ? (
+                              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                            ) : (
+                              <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                                <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                              </div>
+                            )
+                          ) : null
+                        }
+                        color={
+                          surveyResponses.isSuccess &&
+                          surveyResponses.data?.data?.length >= 10
+                            ? ""
+                            : "#B0A5BB"
+                        }
+                      />
+                      <span className="ml-3 text-sm">Analysis</span>
+                      {surveyResponses.isSuccess &&
+                        surveyResponses.data?.data?.length < 10 && (
+                          <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
+                            {10 - (surveyResponses.data?.data?.length || 0)}{" "}
+                            more responses needed to unlock analysis
+                          </div>
+                        )}
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Insufficient Responses</DialogTitle>
+                      <DialogDescription>
+                        You need at least 10 survey responses to access the
+                        analysis section. This ensures more meaningful and
+                        statistically relevant insights from your data.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-center py-4">
+                      <Image
+                        src="/assets/analysis/no-data.svg"
+                        alt="Analysis Locked"
+                        width={200}
+                        height={200}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-muted-foreground">
+                        Current responses:{" "}
+                        {surveyResponses.data?.data?.length || 0}
+                        /10
+                      </p>
+                      <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                          Close
+                        </Button>
+                      </DialogClose>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+              <Image src={hypen} alt="hypen" className="mx-3 hidden md:flex " />
+              <Link href={""} className="flex items-center">
+                <BreadcrumsIcon color="#B0A5BB" />
+                <span className="ml-3 text-sm">Report</span>
+              </Link>
+            </>
+          )}
         </nav>
 
         {path.includes("survey-response-upload") ? (

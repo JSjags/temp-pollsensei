@@ -14,7 +14,7 @@ const roleRouteMap: { [key: string]: string } = {
   Admin: "/dashboard",
   "Data Collector": "/surveys/survey-list",
   "Data Validator": "/surveys/survey-list",
-  "Data Analyst": "/surveys/analysis",
+  "Data Analyst": "/surveys/survey-list",
   "Data Editor": "/surveys/survey-list",
   "Super Admin": "/super-admin",
 };

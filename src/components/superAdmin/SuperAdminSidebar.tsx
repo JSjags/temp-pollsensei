@@ -6,7 +6,7 @@ import Image from "next/image";
 import { pollsensei_new_logo } from "@/assets/images";
 import { logoutUser } from "@/redux/slices/user.slice";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -23,6 +23,8 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
   const dispatch = useDispatch();
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
+  const pathname = usePathname()
+  const isActiveRoute = (route: string) => pathname === route;
 
   return (
     <aside
@@ -75,54 +77,33 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
                 <h2>{(user as any)?.name ?? ""}</h2>
               </div>
             )}
-            <ul className="space-y-2 p-2">
-              <li>
-                <Link
-                  href="/super-admin"
-                  className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
-                >
-                  {/* <span>🏠</span> */}
-                  {isSidebarOpen && <span>Dashboard</span>}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/users"
-                  className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
-                >
-                  {/* <span>📊</span> */}
-                  {isSidebarOpen && <span>Users</span>}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/tutorials"
-                  className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
-                >
-                  {/* <span>⚙️</span> */}
-                  {isSidebarOpen && <span>Tutorials</span>}
-                </Link>
-              </li>
 
-              <li>
-                <Link
-                  href="/faqs"
-                  className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
-                >
-                  {/* <span>⚙️</span> */}
-                  {isSidebarOpen && <span>FAQs</span>}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/subscriptions"
-                  className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
-                >
-                  {/* <span>⚙️</span> */}
-                  {isSidebarOpen && <span>Subscriptions</span>}
-                </Link>
-              </li>
+
+<ul className="space-y-2 p-2">
+              {[
+                { label: "Dashboard", path: "/super-admin" },
+                { label: "Users", path: "/users" },
+                { label: "Tutorials", path: "/tutorials" },
+                { label: "Reviews", path: "/reviews" },
+                { label: "FAQs", path: "/faqs" },
+                { label: "Subscriptions", path: "/subscriptions" },
+              ].map((item) => (
+                <li key={item.path}>
+                  <Link
+                    href={item.path}
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded px-4 hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] hover:text-white",
+                      isActiveRoute(item.path) ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white" : ""
+                    )}
+                  >
+                    {isSidebarOpen && <span>{item.label}</span>}
+                  </Link>
+                </li>
+              ))}
             </ul>
+
+
+            
           </nav>
 
           <nav className="text-start">
@@ -155,3 +136,62 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
 };
 
 export default SuperAdminSidebar;
+
+
+{/* <ul className="space-y-2 p-2">
+<li>
+  <Link
+    href="/super-admin"
+    className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+  >
+
+    {isSidebarOpen && <span>Dashboard</span>}
+  </Link>
+</li>
+<li>
+  <Link
+    href="/users"
+    className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+  >
+
+    {isSidebarOpen && <span>Users</span>}
+  </Link>
+</li>
+<li>
+  <Link
+    href="/tutorials"
+    className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+  >
+
+    {isSidebarOpen && <span>Tutorials</span>}
+  </Link>
+</li>
+
+<li>
+  <Link
+    href="/reviews"
+    className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+  >
+
+    {isSidebarOpen && <span>Reviews</span>}
+  </Link>
+</li>
+<li>
+  <Link
+    href="/faqs"
+    className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+  >
+
+    {isSidebarOpen && <span>FAQs</span>}
+  </Link>
+</li>
+<li>
+  <Link
+    href="/subscriptions"
+    className="flex items-center gap-2 p-2 rounded hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] px-4 hover:text-white"
+  >
+
+    {isSidebarOpen && <span>Subscriptions</span>}
+  </Link>
+</li>
+</ul> */}

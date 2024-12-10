@@ -28,7 +28,7 @@ const SurveyResponses = () => {
   const uploadState = useSelector(
     (state: RootState) => state?.upload?.isUploadOpen
   );
-  const { data } = useFetchASurveyQuery(params.id);
+  const { data } = useFetchASurveyQuery(params.id);   
   const [isToggled, setIsToggled] = useState<boolean>(false);
   const [
     uploadResponseOCR,

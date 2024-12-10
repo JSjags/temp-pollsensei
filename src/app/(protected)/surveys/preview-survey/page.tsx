@@ -10,7 +10,7 @@ const Page = (props: Props) => {
   const router = useRouter()
   const surveySection = useSelector((state:RootState)=>state?.survey?.sections)
   if(surveySection?.length === 0){
-    router.push('/surveys')
+    router.push("/surveys/survey-list");
     return null;
   }
   return(
