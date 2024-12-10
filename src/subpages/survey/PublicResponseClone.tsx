@@ -363,7 +363,7 @@ const PublicResponse = () => {
                                           ].filter(Boolean),
                                         })
                                       }
-                                      required={quest.is_required}
+                                      // required={quest.is_required}
                                     />
                                     <span>{option}</span>
                                   </label>

@@ -154,7 +154,7 @@ const AddQuestionPage = () => {
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
       setReview(true)
-      router.push("/surveys/survey-list");
+      // router.push("/surveys/survey-list");
     }
 
     if (isError || error) {
