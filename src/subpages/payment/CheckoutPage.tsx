@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useStripe,
   useElements,
   PaymentElement,
 } from "@stripe/react-stripe-js";
-import convertToSubcurrency from "@/lib/convertToSubcurrency";
 
 const CheckoutPage = ({ amount }: { amount: number }) => {
   const stripe = useStripe();
