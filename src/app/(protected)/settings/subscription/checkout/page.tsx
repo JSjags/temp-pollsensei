@@ -20,13 +20,7 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
 
-const CheckoutForm = ({
-  amount,
-  clientSecret,
-}: {
-  amount: number;
-  clientSecret: string;
-}) => {
+const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const stripe = useStripe();
@@ -128,7 +122,7 @@ const CheckoutForm = ({
   );
 };
 
-const CheckoutPage = ({ amount }: { amount: number }) => {
+const CheckoutPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const clientSecret = searchParams.get("cs");
@@ -148,7 +142,7 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
   return (
     <div className="p-6">
       <Elements stripe={stripePromise} options={options}>
-        <CheckoutForm amount={amount} clientSecret={clientSecret} />
+        <CheckoutForm clientSecret={clientSecret} />
       </Elements>
     </div>
   );
