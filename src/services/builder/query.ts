@@ -22,7 +22,7 @@ const baseQuery = retry(fetchBaseQuery({
     }
     return headers;
   },
-}), { maxRetries: 3 });
+}), { maxRetries: 5 });
 
 const customBaseQuery: BaseQueryFn<
   string | FetchArgs,

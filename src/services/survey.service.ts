@@ -54,7 +54,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     }),
     closeSurveyStatus: builder.mutation({
       query: ({ id, body }) => ({
-        url: `survey/status/${id} `,
+        url: `survey/status/${id}`,
         method: "PATCH",
         body: body,
       }),
@@ -178,7 +178,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    validateIndividualResponse: builder.query({
+    responseValidateIndividual: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
         url: `response/validate/individual/${id}?page=${pagesNumber}&page_size=20${
           path_params ? `&${path_params}` : ""
@@ -186,6 +186,39 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    validateIndividualResponse: builder.query({
+      query: ({
+        countries,
+        date,
+        start_date,
+        end_date,
+        name,
+        response_id, 
+        question,
+        question_type,
+        answer,
+        pagesNumber = 1,
+        id
+      }) => {
+        const params = new URLSearchParams();
+    
+        if (countries) params.append('countries', countries);
+        if (date) params.append('date', date);
+        if (start_date) params.append('start_date', start_date);
+        if (end_date) params.append('end_date', end_date);
+        if (name) params.append('name', name);
+        if (response_id) params.append('response_id', response_id);
+        if (question) params.append('question', question);
+        if (answer) params.append('answer', answer);
+        if (question_type) params.append('question_type', question_type);
+        params.append('page', pagesNumber.toString());
+        return {
+          url: `response/validate/individual/${id}?${params.toString()}&page_size=20`,
+          method: 'GET',
+        };
+      },
+    }),
+    
     getPublicSurveyById: builder.query({
       query: (id) => ({
         url: `ps/survey/${id}`,
@@ -238,6 +271,7 @@ export const {
   useGetRespondentNameQuery,
   useValidateSurveyResponseQuery,
   useValidateIndividualResponseQuery,
+  useResponseValidateIndividualQuery,
   useCloseSurveyStatusMutation,
   useSurveySettingsQuery,
   useEditSurveySettingsMutation,

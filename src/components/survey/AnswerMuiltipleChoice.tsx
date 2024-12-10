@@ -60,20 +60,10 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
       onChange(updatedOptions);
     }
 
-    //   const updatedSelected = selected.includes(option)
-    //   ? selected.filter((o) => o !== option)
-    //   : [...selected, option];
-    //   setLocalSelectedOptions(updatedSelected);
-    // onChange(updatedSelected);
+  
   };
 
-  // const handleOptionChange = (option: string) => {
-  //   const updatedSelected = selected.includes(option)
-  //     ? selected.filter((o) => o !== option)
-  //     : [...selected, option];
-  //   setSelected(updatedSelected);
-  //   onChange(updatedSelected); // Notify the parent of the change
-  // };
+
 
   const getStatus = useMemo(() => {
     switch (status) {

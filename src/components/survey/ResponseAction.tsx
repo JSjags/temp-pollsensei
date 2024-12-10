@@ -5,6 +5,7 @@ import { FaSearch } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import Select from "react-select";
+import ThreeStepDropdown from "../filter/ThreeStepDropdown";
 
 
 const customStyles = {
@@ -33,6 +34,7 @@ interface ResponseActionsProps {
   respondent_data?:any[];
   valid_response?: number;
   invalid_response?: number; 
+  surveyData?: any; 
 }
 
 const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -44,10 +46,12 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   valid_response,
   invalid_response,
   deleteAResponse,
+  surveyData,
 }) => {
   // const [name, setName ] = useState('')
   const name = useSelector((state:RootState)=>state?.name?.name)
   const dispatch = useDispatch()
+  console.log(surveyData)
 
  
   return (
@@ -71,9 +75,8 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
           </button>
         </div>
         <div className="flex flex-wrap items-center justify-between space-x-4">
-          {/* <button className="border border-gray-300 text-gray-700 rounded-md px-4 py-2 hover:bg-gray-50">
-            Add filter
-          </button> */}
+          <ThreeStepDropdown questions={surveyData?.answers}   />
+       
           <Select
             className="select-container border-2 border-gray-300 text-gray-700 min-w-[15rem] rounded-md focus:outline-none"
             classNamePrefix="select-name"

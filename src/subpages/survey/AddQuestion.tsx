@@ -119,6 +119,9 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
       case "number":
         setOptions([]);
         break;
+      case "slider":
+        setOptions([1, 2, 3, 4, 5]);
+        break;
       case "matrix_checkbox":
         // setOptions({
         //   Head: ["Head 1", "Head 2", "Head 3", "Head 4", "Head 5"],
@@ -142,7 +145,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
     { value: "star_rating", label: "Star Rating" },
     { value: "rating_scale", label: "Rating Scale" },
     { value: "boolean", label: "Boolean" },
-    { value: "slider", label: "Slider" },
+    // { value: "slider", label: "Slider" },
     { value: "number", label: "Number" },
     { value: "drop_down", label: "Dropdown" },
     { value: "matrix_checkbox", label: "Matrix" },
@@ -164,6 +167,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
         <div className="flex justify-between py-4 items-center">
           {questionType === "long_text" ||
           questionType === "short_text" ||
+          questionType === "slider" ||
           questionType === "number" ? (
             ""
           ) : (
@@ -262,6 +266,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
               {questionType === "long_text" ||
               questionType === "short_text" ||
               questionType === "boolean" ||
+              questionType === "slider" ||
               questionType === "number" ? (
                 ""
               ) : (
@@ -274,6 +279,28 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
               )}
             </div>
           )}
+        {questionType === "slider" && (
+          <div className="flex gap-4 mt-4">
+            <div>
+              <label>Min Value</label>
+              <input
+                type="number"
+                value={min || ""}
+                onChange={(e) => setMin(Number(e.target.value))}
+                className="w-full bg-transparent border-b py-2 border-gray-300 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label>Max Value</label>
+              <input
+                type="number"
+                value={max || ""}
+                onChange={(e) => setMax(Number(e.target.value))}
+                className="w-full bg-transparent border-b py-2 border-gray-300 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+        )}
         {questionType === "number" && (
           <div className="flex gap-4 mt-4">
             <div>

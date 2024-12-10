@@ -559,7 +559,6 @@ const PublicResponse = () => {
                       question={item.question}
                       questionType={item.question_type}
                       
-                     
                     />
                   ) 
                   : null}

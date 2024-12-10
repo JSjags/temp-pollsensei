@@ -312,7 +312,7 @@ const RegisterPage = () => {
                       <div>
                         <input {...input} type="checkbox" id="terms" />
                         <label htmlFor="terms" className="ml-2">
-                          I agree to the terms and conditions
+                          I agree to the <Link className="text-blue-700 underline" href={"/terms-of-service"}>terms and conditions</Link>
                         </label>
                         {meta.error && meta.touched && (
                           <span className="text-red-500">{meta.error}</span>

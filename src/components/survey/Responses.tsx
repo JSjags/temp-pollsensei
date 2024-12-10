@@ -18,6 +18,16 @@ import { resetAnswers } from "@/redux/slices/answer.slice";
 import { useDispatch } from "react-redux";
 import { resetName } from "@/redux/slices/name.slice";
 import FeatureComing from "../common/FeatureComing";
+import { resetFilters } from "@/redux/slices/filter.slice";
+
+
+interface PathParamsProps{
+  name?:string;
+  question?:string;
+  question_type?:string;
+  answer?:string;
+
+}
 
 const calculateValidationCounts = (data: any) => {
   let validCount = 0;
@@ -53,6 +63,9 @@ const calculateValidationCounts2 = (survey: any) => {
 
 const Responses: React.FC<{ data: any }> = ({ data }) => {
   const name = useSelector((state: RootState) => state?.name?.name);
+  const question = useSelector((state: RootState) => state?.filter.question);
+  const questionType = useSelector((state: RootState) => state?.filter.questionType);
+  const answer = useSelector((state: RootState) => state?.filter.answer);
   const params = useParams();
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
@@ -73,25 +86,35 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     skip: activeTab !== "Summary",
   });
 
-  const path_params = new URLSearchParams();
-  path_params.set("name", name);
+  const answer_params = new URLSearchParams();
+  // answer_params.set("answer", answer);
+  console.log(answer_params.toString());
+
+  const path_params: PathParamsProps = {};
+  if (name) path_params.name = name;
+  if (answer) path_params.answer = answer;
+  if (question) path_params.question = question;
+  if (questionType) path_params.question_type = questionType;
+ 
+
+  console.log(path_params)
 
   const { data: respondent_name } = useGetRespondentNameQuery(params.id);
   const { data: validate_ } = useValidateSurveyResponseQuery(params.id);
+
+  const queryArgs = {
+    id: params.id,
+    pagesNumber: pagesNumber,
+    ...(Object.keys(path_params).length >= 3 ? path_params : {}),
+  };
+  
   const {
     data: validate_individual_response,
     isLoading,
+    isSuccess,
+    isError,
     refetch,
-  } = useValidateIndividualResponseQuery(
-    {
-      id: params.id,
-      pagesNumber: pagesNumber,
-      path_params: path_params.toString(),
-    },
-    {
-      skip: !path_params,
-    }
-  );
+  } = useValidateIndividualResponseQuery(queryArgs);
   console.log(validate_individual_response);
   const validateSource =
     validate_individual_response?.data?.data &&
@@ -102,10 +125,9 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     calculateValidationCounts2(validateSource);
   console.log(validateSource);
 
-  const totalResponses = response_?.data?.total || 0;
-  console.log(summary_);
+  const totalResponses = validate_individual_response?.data?.total || 0;
 
-  console.log(totalResponses);
+  console.log(isLoading)
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -119,6 +141,14 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
       refetch();
     }
   }, [name, refetch]);
+
+
+  useEffect(() => {
+    if (answer && question && questionType) {
+      refetch();
+    }
+  }, [answer, question, questionType, refetch]);
+
 
   const handleNext = () => {
     if (currentUserResponse < totalResponses - 1) {
@@ -135,6 +165,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
   useEffect(() => {
     const handleBeforeUnload = () => {
       dispatch(resetName());
+      dispatch(resetFilters());
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -152,7 +183,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
   return (
     <div className="lg:px-24">
       <ResponseHeader
-        data={data}
+        data={validate_individual_response?.data?.data?.length}
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -164,6 +195,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
         invalid_response={invalidCount}
         deleteAResponse={handleDeleteAResponse}
         response_id={validateSource?._id}
+        surveyData={validateSource}
       />
       <RespondentDetails
         data={validateSource}
@@ -175,6 +207,8 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
           data={validateSource}
           index={currentUserResponse}
           isLoading={isLoading}
+          isSuccess={isSuccess}
+          error={isError}
         />
       )}
       {userRoles.includes("Admin") && (

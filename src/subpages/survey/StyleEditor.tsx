@@ -58,6 +58,10 @@ const StyleEditor = () => {
     { value: "Helvetica", label: "Helvetica" },
     { value: "Arial", label: "Arial" },
     { value: "Times New Roman", label: "Times New Roman" },
+    { value: "Yuji Mai", label: "Yuji Mai" },
+    { value: "Brush Script MT", label: "Brush Script MT" },
+    { value: "Garamond", label: "Garamond" },
+    { value: "Playwrite HR Lijeva", label: "Playwrite HR Lijeva" },
     // Add more fonts here...
   ];
 

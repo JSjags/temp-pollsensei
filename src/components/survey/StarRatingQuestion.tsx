@@ -135,6 +135,8 @@ import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Check } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
 import { Switch } from "../ui/switch";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface StarRatingQuestionProps {
   question: string;
@@ -175,6 +177,12 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   setIsRequired,
 }) => {
   const pathname = usePathname();
+  const questionText = useSelector(
+    (state: RootState) => state?.survey?.question_text
+  );
+  const colorTheme = useSelector(
+    (state: RootState) => state?.survey?.color_theme
+  );
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
   const [selectedRating, setSelectedRating] = useState<number>(currentRating);
 
@@ -207,7 +215,12 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   };
 
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3">
+    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3"
+    style={{
+      fontFamily: `${questionText?.name}`,
+      fontSize: `${questionText?.size}px`,
+    }}
+     >
     
       <Image
         src={draggable}

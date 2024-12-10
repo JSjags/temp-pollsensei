@@ -134,7 +134,7 @@ const CreateNewSection = () => {
     if(isSuccess){
       toast.success("Survey created successfully")
       dispatch(resetSurvey())
-      router.push('/surveys')
+      router.push("/surveys/survey-list");
     }
 
     if(isError || error){
@@ -152,7 +152,7 @@ const CreateNewSection = () => {
 
   useEffect(()=>{
     if(progressSuccess){
-      router.push('/surveys')
+      router.push("/surveys/survey-list");
     }
     if(progressIsError || progressError){
       toast.error("Failed to save progress, please try again later")

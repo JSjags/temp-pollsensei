@@ -6,6 +6,8 @@ import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Check } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
 import { Switch } from "../ui/switch";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface LikertScaleQuestionProps {
   question: string;
@@ -44,6 +46,13 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
   setIsRequired,
 }) => {
   const pathname = usePathname();
+  const questionText = useSelector(
+    (state: RootState) => state?.survey?.question_text
+  );
+  const colorTheme = useSelector(
+    (state: RootState) => state?.survey?.color_theme
+  );
+
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
@@ -76,7 +85,12 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
   };
 
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3">
+    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3" 
+    style={{
+      fontFamily: `${questionText?.name}`,
+      fontSize: `${questionText?.size}px`,
+    }} 
+    >
       <Image
         src={draggable}
         alt="draggable icon"
