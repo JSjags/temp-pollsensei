@@ -1,5 +1,9 @@
 import axiosInstance from "@/lib/axios-instance";
 
+export const getMeQuery = async () => {
+  return axiosInstance.get(`/user/me`);
+};
+
 export const getPasswordResetCode = async () => {
   return axiosInstance.get(`/user/password-reset-code`);
 };
@@ -71,5 +75,29 @@ export const updateNotification = async (data: {
 
 export const getSubscriptionTiers = async () => {
   const { data } = await axiosInstance.get(`/plan`);
+  return data;
+};
+
+export const getSubscriptionTier = async (id: string) => {
+  const { data } = await axiosInstance.get(`/plan/${id}`);
+  return data;
+};
+
+export const initPaymentQuery = async (payload: {
+  gateway: string;
+  plan_id: string;
+  organization_id: string;
+  redirect_url?: string;
+  plan_type: string;
+  country: string;
+}) => {
+  const { data } = await axiosInstance.post(`/subscription/init-payment`, {
+    ...payload,
+  });
+  return data;
+};
+
+export const cancelSubscription = async () => {
+  const { data } = await axiosInstance.post(`/subscription/cancel`);
   return data;
 };
