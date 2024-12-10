@@ -78,7 +78,7 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
           </div>
           <span className="text-gray-700 font-semibold">
             Number of Responses:{" "}
-            <span className="font-bold">{data?.response_count}</span>
+            <span className="font-bold">{data}</span>
           </span>
         </div>
 
@@ -175,7 +175,7 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
       {activeTab === "Individual Responses" && (
         <ResponseActions
           curerentSurvey={curerentSurvey}
-          totalSurveys={data?.response_count}
+          totalSurveys={data}
           handleNext={handleNext}
           handlePrev={handlePrev}
           respondent_data={respondent_data}

@@ -118,6 +118,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
         break;
       case "number":
         setOptions([]);
+        break;
       case "slider":
         setOptions([1, 2, 3, 4, 5]);
         break;
@@ -278,7 +279,29 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
               )}
             </div>
           )}
-        {questionType === "number" || questionType === "slider" && (
+        {questionType === "slider" && (
+          <div className="flex gap-4 mt-4">
+            <div>
+              <label>Min Value</label>
+              <input
+                type="number"
+                value={min || ""}
+                onChange={(e) => setMin(Number(e.target.value))}
+                className="w-full bg-transparent border-b py-2 border-gray-300 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label>Max Value</label>
+              <input
+                type="number"
+                value={max || ""}
+                onChange={(e) => setMax(Number(e.target.value))}
+                className="w-full bg-transparent border-b py-2 border-gray-300 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+        )}
+        {questionType === "number" && (
           <div className="flex gap-4 mt-4">
             <div>
               <label>Min Value</label>

@@ -22,7 +22,7 @@ const filterSlice = createSlice({
     setQuestionType(state, action: PayloadAction<string>) {
       state.questionType = action.payload;
     },
-    setAnswer(state, action: PayloadAction<string>) {
+    setAnswersss(state, action: PayloadAction<string>) {
       state.answer = action.payload;
     },
     resetFilters(state) {
@@ -33,5 +33,5 @@ const filterSlice = createSlice({
   },
 });
 
-export const { setQuestion, setQuestionType, setAnswer, resetFilters } = filterSlice.actions;
+export const { setQuestion, setQuestionType, setAnswersss, resetFilters } = filterSlice.actions;
 export default filterSlice.reducer;

@@ -18,6 +18,7 @@ import { resetAnswers } from "@/redux/slices/answer.slice";
 import { useDispatch } from "react-redux";
 import { resetName } from "@/redux/slices/name.slice";
 import FeatureComing from "../common/FeatureComing";
+import { resetFilters } from "@/redux/slices/filter.slice";
 
 
 interface PathParamsProps{
@@ -96,26 +97,24 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
   if (questionType) path_params.question_type = questionType;
  
 
+  console.log(path_params)
+
   const { data: respondent_name } = useGetRespondentNameQuery(params.id);
   const { data: validate_ } = useValidateSurveyResponseQuery(params.id);
+
+  const queryArgs = {
+    id: params.id,
+    pagesNumber: pagesNumber,
+    ...(Object.keys(path_params).length >= 3 ? path_params : {}),
+  };
+  
   const {
     data: validate_individual_response,
     isLoading,
+    isSuccess,
+    isError,
     refetch,
-  } = useValidateIndividualResponseQuery(
-    {
-      ...path_params, 
-      id: params.id,
-      pagesNumber: pagesNumber,
-      // path_params: path_params,
-      // answer:answer_params.toString(),
-    },
-    {
-      skip: !path_params,
-      // skip: !answer_params ? true : false,
-      // skip: Object.keys(path_params).length === 0,
-    }
-  );
+  } = useValidateIndividualResponseQuery(queryArgs);
   console.log(validate_individual_response);
   const validateSource =
     validate_individual_response?.data?.data &&
@@ -126,10 +125,9 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     calculateValidationCounts2(validateSource);
   console.log(validateSource);
 
-  const totalResponses = response_?.data?.total || 0;
-  console.log(summary_);
+  const totalResponses = validate_individual_response?.data?.total || 0;
 
-  console.log(totalResponses);
+  console.log(isLoading)
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -167,6 +165,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
   useEffect(() => {
     const handleBeforeUnload = () => {
       dispatch(resetName());
+      dispatch(resetFilters());
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -184,7 +183,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
   return (
     <div className="lg:px-24">
       <ResponseHeader
-        data={data}
+        data={validate_individual_response?.data?.data?.length}
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -208,6 +207,8 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
           data={validateSource}
           index={currentUserResponse}
           isLoading={isLoading}
+          isSuccess={isSuccess}
+          error={isError}
         />
       )}
       {userRoles.includes("Admin") && (

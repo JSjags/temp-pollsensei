@@ -52,13 +52,15 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
     };
   };
 
+  console.log(result)
+
   return (
     <div>
       {result?.map((item, index) => {
         // Skip items that don't have selected options
-        if (!item.selected_options || item.selected_options.length === 0) {
-          return null;
-        }
+        // if (!item.selected_options || item.selected_options.length === 0) {
+        //   return null;
+        // }
 
         const chartData = transformDataForChart(item);
 

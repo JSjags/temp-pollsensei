@@ -356,7 +356,7 @@ const CreateSurveyPage = () => {
                 handleDivClick(2);
                 dispatch(saveGeneratedBy("manually"));
                 setSurveyType("Both");
-
+                dispatch(updateSurveyType("Both"));
               }}
             >
               <Image src={User_Setting} alt="Logo" className="h-8 w-auto" />
