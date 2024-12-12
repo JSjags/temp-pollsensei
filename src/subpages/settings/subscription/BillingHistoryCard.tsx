@@ -11,7 +11,7 @@ export function BillingHistoryCard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="rounded-lg border-none bg-[#FAF8FB] shadow-sm h-full lg:col-span-2"
+      className="rounded-lg border-none bg-[#FAF8FB] shadow-sm h-full lg:col-span-2 opacity-0 grayscale"
     >
       <div className="flex items-center h-full">
         <div className="relative h-full flex-[0.9]">
@@ -30,11 +30,11 @@ export function BillingHistoryCard() {
                 Billing History
               </h3>
               <div className="space-y-1 mt-4">
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  20th November, 2024
+                <p className="text-xs sm:text-sm text-muted-foreground opacity-0">
+                  10th December, 2024
                 </p>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  10th March, 2024
+                <p className="text-xs sm:text-sm text-muted-foreground opacity-0">
+                  9th January, 2025
                 </p>
               </div>
             </div>
