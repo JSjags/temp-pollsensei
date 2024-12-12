@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { Modal } from "./Modal";
@@ -8,7 +8,9 @@ import DeleteSurvey from "../survey/DeleteSurvey";
 import DeleteFaq from "./DeleteFaq";
 import { toast } from "react-toastify";
 import {
+  useSingleFAQsQuery,
   useDeleteFAQsMutation,
+  useEditFAQsMutation,
   usePublishFAQsMutation,
   useUnpublishFAQsMutation,
 } from "@/services/superadmin.service";
@@ -22,6 +24,8 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "../ui/sheet";
+import { useParams } from "next/navigation";
+import { FadeLoader } from "react-spinners";
 
 interface AccordionItemProps {
   question: string;
@@ -38,6 +42,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   is_deleted,
   is_published,
 }) => {
+  const params = useParams()
   const [isOpen, setIsOpen] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -49,6 +54,8 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
     useUnpublishFAQsMutation();
   const [publishFAQs, { isLoading: isPublishLoading }] =
     usePublishFAQsMutation();
+  const { data:singleFAQs, isLoading:isLoadingAll, } = useSingleFAQsQuery(_id);
+  const [editFAQs, { isLoading: isEditLoading }] = useEditFAQsMutation();
 
   const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
 
@@ -112,6 +119,39 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
       toast.error("Error deleting FAQ");
     }
   };
+
+  const [editingFaq, setEdittingFaq] = useState({
+    question: "",
+    answer: "",
+  });
+
+  useEffect(() => {
+    if (singleFAQs) {
+      setEdittingFaq({
+        question: singleFAQs.data?.question || "",
+        answer: singleFAQs.data?.answer || "",
+     
+      });
+    }
+  }, [singleFAQs]);
+
+  const handleSubmit = async () => {
+   
+    const editData = {
+      question: editingFaq.question,
+      answer: editingFaq.answer,
+  }
+  console.log(editData);
+    try {
+      await editFAQs(editData).unwrap();
+      toast.success("FAQ updated successfully");
+    } catch (err: any) {
+      toast.error("Failed: " + err.message);
+    }
+  };
+
+  console.log(_id)
+  console.log(singleFAQs)
 
   return (
     <div className="relative border border-gray-300 rounded-lg mb-4 shadow-sm w-full">
@@ -192,7 +232,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
             <SheetHeader>
               <SheetTitle>Edit FAQ</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 space-y-4">
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Question
@@ -201,6 +241,10 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
                   type="text"
                   placeholder="Enter Title"
                   className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  value={editingFaq.question}
+                  onChange={(e)=>{
+                    setEdittingFaq({...editingFaq, question: e.target.value });
+                  }}
                 />
               </div>
               <div>
@@ -211,6 +255,10 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
                   placeholder="Type brief description"
                   rows={4}
                   className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  value={editingFaq.answer}
+                  onChange={(e)=>{
+                    setEdittingFaq({...editingFaq, answer: e.target.value });
+                  }}
                 />
               </div>
               <div className="flex items-center justify-end space-x-4 w-full">
@@ -218,10 +266,10 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
                   Cancel
                 </button>
                 <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg">
-                  Save and Continue
+                  {isEditLoading ? "Waiting..." : "Save and Continue"}
                 </button>
               </div>
-            </div>
+            </form>
           </SheetContent>
         </Sheet>
       )}
@@ -231,12 +279,32 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
 
 interface AccordionProps {
   items: AccordionItemProps[];
+  isLoading:boolean,
+  isError:boolean,
 }
 
-const FaqAccordion: React.FC<AccordionProps> = ({ items }) => {
+const FaqAccordion: React.FC<AccordionProps> = ({ items, isLoading, isError }) => {
   return (
     <div className="w-full">
-      {items?.map((item, index) => (
+      {
+         isLoading ? (
+         
+            <div className="text-center w-full">
+              <span className="flex justify-center items-center" >
+              <FadeLoader height={10} radius={1} className="mt-3" />
+              </span>
+            </div>
+         
+        ) : isError ? (
+         
+            <div className="text-center w-full">
+              <span className="flex justify-center items-center text-xs text-red-500" >
+              Something went wrong
+              </span>
+            </div>
+         
+        ) :
+      items?.map((item, index) => (
         <AccordionItem key={index} {...item} />
       ))}
     </div>

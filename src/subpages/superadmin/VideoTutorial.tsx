@@ -14,10 +14,11 @@ interface Card {
 }
 
 
-const TutorialPage = () => {
+const VideoTutorial = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, isError, refetch } = useAllTutorialsQuery({
     pagesNumber: currentPage,
+    filter_by:"video"
   });
 
   const totalItems = data?.data?.total || 0;
@@ -129,4 +130,4 @@ const TutorialPage = () => {
   );
 };
 
-export default TutorialPage;
+export default VideoTutorial;

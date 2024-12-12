@@ -104,11 +104,6 @@ const FAQNavigation: React.FC = () => {
           </Link>
         ))}
       </div>
-
-      {/* Create FAQ Button */}
-      {/* <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-400 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg focus:outline-none">
-        Create FAQ
-      </button> */}
       <Sheet>
         <SheetTrigger>
           <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-400 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg focus:outline-none">
@@ -172,30 +167,6 @@ const FAQNavigation: React.FC = () => {
                 </form>
               )}
             />
-            {/* <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Question</label>
-              <input
-                type="text"
-                placeholder="Enter Title"
-                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Answer</label>
-              <textarea
-                placeholder="Type brief description"
-                rows={4}
-                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-              />
-            </div>
-            <div className="flex items-center justify-end space-x-4 w-full">
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                Cancel
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg">
-                Save and Continue
-              </button>
-            </div> */}
           </div>
         </SheetContent>
       </Sheet>

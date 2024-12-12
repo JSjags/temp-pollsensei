@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -9,27 +9,50 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "../ui/sheet";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 interface Tab {
   label: string;
   value: string;
 }
 
+const slugify = (tab: string) => {
+  return tab.toLowerCase().replace(/\s+/g, "-");
+};
+
 const TutorialNavigation: React.FC = () => {
   const [activeTab, setActiveTab] = useState("all");
 
   const tabs: Tab[] = [
     { label: "All Resources", value: "all" },
-    { label: "Video Tutorials", value: "video-tutorials" },
+    { label: "Video Tutorials", value: "video-tutorial" },
     { label: "Web articles", value: "web-articles" },
   ];
+
+  const pathname = usePathname();
+  const getActiveTabFromPath = useCallback(
+    (path: string) => {
+      const matchedTab = tabs?.find((tab) => path.includes(slugify(tab.value)));
+      return matchedTab || "tutorials";
+    },
+    [tabs]
+  );
+
+  const RoutePath = (tab: string) => {
+    if (pathname.includes("tutorials")) {
+      return tab === "tutorials" ? `/tutorials` : `/tutorials/${slugify(tab)}`;
+    }
+    return "/";
+  };
 
   return (
     <div className="flex items-center justify-between w-full  p-4">
       {/* Tabs */}
       <div className="flex space-x-8">
         {tabs.map((tab) => (
-          <button
+          <Link
+          href={RoutePath(tab.value)}
             key={tab.value}
             className={`text-sm font-medium pb-2 ${
               activeTab === tab.value
@@ -39,7 +62,7 @@ const TutorialNavigation: React.FC = () => {
             onClick={() => setActiveTab(tab.value)}
           >
             {tab.label}
-          </button>
+          </Link>
         ))}
       </div>
 
