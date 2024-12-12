@@ -36,11 +36,11 @@ const constraints = {
     length: {
       minimum: 8,
     },
-    format: {
-      pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-      message:
-        "^Password must be between 8 and 20 characters long, contain at least one uppercase letter, one number, and one special character",
-    },
+    // format: {
+    //   pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+    //   message:
+    //     "^Password must be between 8 and 20 characters long, contain at least one uppercase letter, one number, and one special character",
+    // },
   },
   confirmPassword: {
     presence: true,
@@ -312,7 +312,13 @@ const RegisterPage = () => {
                       <div>
                         <input {...input} type="checkbox" id="terms" />
                         <label htmlFor="terms" className="ml-2">
-                          I agree to the <Link className="text-blue-700 underline" href={"/terms-of-service"}>terms and conditions</Link>
+                          I agree to the{" "}
+                          <Link
+                            className="text-blue-700 underline"
+                            href={"/terms-of-service"}
+                          >
+                            terms and conditions
+                          </Link>
                         </label>
                         {meta.error && meta.touched && (
                           <span className="text-red-500">{meta.error}</span>
