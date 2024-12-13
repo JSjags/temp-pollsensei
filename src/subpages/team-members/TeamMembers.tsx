@@ -23,7 +23,7 @@ import {
 } from "../../services/team.service";
 import { toggle } from "../../redux/slices/invite.slice";
 import Input from "@/components/ui/Input";
-import { Loader2 } from "lucide-react";
+import { Crown, Loader2 } from "lucide-react";
 import { multiSelectCustomStyles } from "@/constants/multi-select";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -35,6 +35,9 @@ import Image from "next/image";
 import search from "../../assets/images/search.svg";
 import Loading from "@/components/primitives/Loader";
 import { teamIcon } from "@/assets/images";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { showModal } from "@/redux/slices/modal.slice";
 
 interface FormValues {
   name: string;
@@ -88,6 +91,8 @@ const TeamMembersPage: React.FC = () => {
   const [isEditMemberToggled, setIsEditMemberToggled] =
     useState<boolean>(false);
 
+  const user = useSelector((state: RootState) => state.user.user);
+
   const teamMembers = useQuery({
     queryKey: ["team-members", page, query, filter],
     queryFn: () => getTeamMembers({ page, page_size, query, filter }),
@@ -114,7 +119,13 @@ const TeamMembersPage: React.FC = () => {
     },
   });
 
+  console.log("Helelep");
+  console.log(user);
+
   const handleToggle = () => {
+    if (user?.plan.name === "Basic Plan") {
+      return dispatch(showModal("invite member"));
+    }
     setIsToggled((prev) => !prev);
   };
 
@@ -196,13 +207,16 @@ const TeamMembersPage: React.FC = () => {
               <Slide direction="right" duration={500} triggerOnce>
                 <Button
                   label={
-                    <div className="flex justify-center items-center">
+                    <div className="flex justify-center items-center gap-2">
                       <span className="hidden sm:inline-block">
                         Invite Member
                       </span>{" "}
-                      <span className="sm:hidden">
-                        <RiMailSendLine />
+                      <span className="">
+                        <Crown className="text-amber-500 fill-amber-500" />
                       </span>
+                      {/* <span className="sm:hidden">
+                        <RiMailSendLine />
+                      </span> */}
                     </div>
                   }
                   onClick={handleToggle}
