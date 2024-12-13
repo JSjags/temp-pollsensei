@@ -34,11 +34,11 @@ const supportMenu: MenuItem[] = [
   //   path: "/settings/payment",
   //   icons: <LuCreditCard />,
   // },
-  // {
-  //   label: "Subscription",
-  //   path: "/settings/subscription",
-  //   icons: <TbStack />,
-  // },
+  {
+    label: "Subscription",
+    path: "/settings/subscription",
+    icons: <TbStack />,
+  },
 ];
 
 const SettingsSidebar: React.FC = () => {
