@@ -14,10 +14,11 @@ interface Card {
 }
 
 
-const TutorialPage = () => {
+const WebArticle = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, isError, refetch } = useAllTutorialsQuery({
     pagesNumber: currentPage,
+    filter_by:"web"
   });
 
   const totalItems = data?.data?.total || 0;
@@ -129,4 +130,4 @@ const TutorialPage = () => {
   );
 };
 
-export default TutorialPage;
+export default WebArticle;
