@@ -55,7 +55,8 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
-    }), 
+    }),  // /?page=1&page_size=20
+    
     createReview: builder.mutation({
       query: (body) => ({
         url: "survey/review",
@@ -77,12 +78,35 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }), 
+    singleFAQs: builder.query({
+      query: (id) => ({
+        url: `superadmin/faq/${id}`,
+        method: "GET",
+      }),
+    }), 
+    editFAQs: builder.mutation({
+      query: ({id, body}) => ({
+        url: `superadmin/faq/${id}`, 
+        method: "PATCH",
+        body: body,
+      }),
+    }), 
     deleteFAQs: builder.mutation({
       query: (id) => ({
         url: `/superadmin/faq/${id}`,
         method: "DELETE",
       }),
     }), 
+    allTutorials: builder.query({
+      query: ({pagesNumber, filter_by }) => {
+        const params = new URLSearchParams();
+        if (filter_by) params.append('filter_by', filter_by);
+        return {
+          url: `superadmin/tutorial?page=${pagesNumber}&page_size=20&${params.toString()}`,
+          method: "GET",
+        }
+      },
+    }),
     validateIndividualResponse: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
         url: `response/validate/individual/${id}?page=${pagesNumber}&page_size=20${
@@ -119,12 +143,15 @@ export const {
   useAllFAQsQuery,
   useSurveyTypeDistributionQuery,
   useDeleteFAQsMutation,
+  useEditFAQsMutation,
   useCreateFAQsMutation,
   usePublishFAQsMutation,
   useUnpublishFAQsMutation,
   useCreateReviewMutation,
   useGetReviewQuery,
+  useSingleFAQsQuery,
   useGetReviewQuestionQuery,
+  useAllTutorialsQuery,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery
