@@ -84,6 +84,9 @@ const AddQuestionPage = () => {
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [addquestions, setAddQuestions] = useState(false);
   const headerUrl = useSelector((state: RootState) => state.survey.header_url);
+  const headerText = useSelector(
+    (state: RootState) => state.survey.header_text
+  );
 
   const handleSave = () => {
     dispatch(updateSectionTopic(sectionTitle));
@@ -267,7 +270,12 @@ const AddQuestionPage = () => {
             </div>
           )}
           {!isEditing && (
-            <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
+            <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col " 
+            style={{
+              fontSize: `${headerText?.size}px`,
+              fontFamily: `${headerText?.name}`,
+            }}
+            >
               <h2 className="text-[1.5rem] font-normal">{sectionTopic}</h2>
               <p>{sectionDescription}</p>
               <div className="flex justify-end">
