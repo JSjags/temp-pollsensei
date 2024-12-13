@@ -29,6 +29,15 @@ export interface User {
     _id: string;
   }>;
   is_collaborator: any[];
+  plan: {
+    _id: string;
+    name: string;
+    description: string;
+    number_of_collaborators: number;
+    number_of_monthly_responses: number;
+    number_of_accounts: number;
+    features: string[];
+  };
   notifications: Array<{
     email_notification: {
       news_and_updates: boolean;
