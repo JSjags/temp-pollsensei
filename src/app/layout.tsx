@@ -11,6 +11,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { CookieConsent } from "@/components/primitives/CookieConsent";
 import { MixPanelProvider } from "@/contexts/MixpanelContext";
+import UpgradeModal from "@/components/subscription/modal-upgrade";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({
         )}
       >
         <CookieConsent />
+        <UpgradeModal />
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
