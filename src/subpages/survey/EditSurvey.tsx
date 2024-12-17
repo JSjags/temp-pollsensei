@@ -682,7 +682,7 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    ) : item.question_type === "matrix_multiple_choice" ? (
+                    ) : item.question_type === "matrix_multiple_choice" || item.question_type === "matrix_checkbox" ? (
                       <MatrixQuestion
                         key={index}
                         index={index + 1}

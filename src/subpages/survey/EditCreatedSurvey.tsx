@@ -665,7 +665,7 @@ const EditCreatedSurvey = () => {
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <>
+        <div className="w-[80%] mx-auto">
           <h1 className="text-2xl font-semibold mb-4">Edit Survey</h1>
                    {/* Survey Header */}
            <div className="mb-6">
@@ -705,7 +705,7 @@ const EditCreatedSurvey = () => {
                       {renderEditableFields(question, sectionIndex, questionIndex)}
                       <button
                         onClick={saveEdit}
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                        className="auth-btn text-white px-4 py-2 rounded hover:bg-green-600"
                       >
                         Save
                       </button>
@@ -716,7 +716,7 @@ const EditCreatedSurvey = () => {
                         <p className="text-lg">{question.question}</p>
                         <button
                           onClick={() => toggleEdit(sectionIndex, questionIndex)}
-                          className="text-blue-500 underline"
+                          className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full "
                         >
                           Edit
                         </button>
@@ -738,7 +738,7 @@ const EditCreatedSurvey = () => {
           <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={saveSurvey}>
             Save Changes
           </button>
-        </>
+        </div>
       )}
     </div>
   );
