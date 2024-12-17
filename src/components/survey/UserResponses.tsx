@@ -15,6 +15,7 @@ import NumberQuestion from "./NumberQuestion";
 import CheckboxQuestion from "./CheckboxQuestion";
 import RatingScaleQuestion from "./RatingScaleQuestion";
 import DropdownQuestion from "./DropdownQuestion";
+import MediaQuestion from "./MediaQuestion";
 
 interface Answer {
   question?: string;
@@ -111,7 +112,27 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   // EditQuestion={() => EditQuestion(index)}
                   // DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item.question_type === "linear_Scale" ? (
+              ) : item.question_type === "media"  ? (
+              <MediaQuestion
+                key={index}
+                index={index + 1}
+                questionType={item.question_type}
+                question={item.question}
+                response={item.text}
+                status={item?.validation_result?.status}
+                audio={item?.media?.url}
+                onTranscribe={()=>{
+                  console.log("You clicked me" + index)
+                  console.log(item?.media?.url)
+                  console.log(item?.media)
+                  console.log(item?.question)
+                  console.log(item)
+                }}
+                // EditQuestion={() => EditQuestion(index)}
+                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+              />
+            )
+               : item.question_type === "linear_Scale" ? (
                 <LinearScaleQuestion
                   question={item.question}
                   scaleStart={item.scaleStart}

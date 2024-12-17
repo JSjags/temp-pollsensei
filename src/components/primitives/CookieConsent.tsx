@@ -46,6 +46,15 @@ export function CookieConsent() {
     setShowConsent(false);
   };
 
+  // Prevent closing without making a choice
+  const handleOpenChange = (open: boolean) => {
+    // Only allow closing if consent has been given
+    if (!open && !localStorage.getItem("cookieConsent")) {
+      return;
+    }
+    setShowConsent(open);
+  };
+
   if (!mounted) return null;
 
   const content = (
@@ -74,10 +83,12 @@ export function CookieConsent() {
 
   if (isDesktop) {
     return (
-      <Dialog open={showConsent} onOpenChange={setShowConsent}>
+      <Dialog open={showConsent} onOpenChange={handleOpenChange}>
         <DialogContent
           className="sm:max-w-[425px] z-[1000]"
           overlayClassName="z-[1000]"
+          onInteractOutside={(e) => e.preventDefault()} // Prevent closing by clicking outside
+          onEscapeKeyDown={(e) => e.preventDefault()} // Prevent closing by escape key
         >
           <DialogHeader>
             <DialogTitle>Cookie Settings</DialogTitle>
@@ -92,8 +103,12 @@ export function CookieConsent() {
   }
 
   return (
-    <Drawer open={showConsent} onOpenChange={setShowConsent}>
-      <DrawerContent className="z-[1000]">
+    <Drawer open={showConsent} onOpenChange={handleOpenChange}>
+      <DrawerContent
+        className="z-[1000]"
+        onInteractOutside={(e) => e.preventDefault()} // Prevent closing by clicking outside
+        onEscapeKeyDown={(e) => e.preventDefault()} // Prevent closing by escape key
+      >
         <DrawerHeader className="text-left">
           <DrawerTitle>Cookie Settings</DrawerTitle>
           <DrawerDescription>
@@ -101,11 +116,6 @@ export function CookieConsent() {
           </DrawerDescription>
         </DrawerHeader>
         <div className="px-4 mb-4">{content}</div>
-        {/* <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
-          </DrawerClose>
-        </DrawerFooter> */}
       </DrawerContent>
     </Drawer>
   );
