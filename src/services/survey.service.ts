@@ -243,6 +243,14 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    // {{base_url}}/ps/survey/file
+    uploadResponseFile: builder.mutation({
+      query: (body) => ({
+        url: "ps/survey/file",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -283,5 +291,6 @@ export const {
   useDownloadAllResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadAllResponseQuery,
-  useLazyDownloadSingleResponseQuery
+  useLazyDownloadSingleResponseQuery, 
+  useUploadResponseFileMutation,
 } = surveyApiSlice;

@@ -21,6 +21,7 @@ import NumberQuestion from "@/components/survey/NumberQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
+import MediaQuestion from "@/components/survey/MediaQuestion";
 
 const SurveyQuestions = () => {
   const params = useParams();
@@ -118,7 +119,16 @@ const SurveyQuestions = () => {
                         question={item.question}
                         is_required={item.is_required}
                       />
-                    ) : item.question_type === "slider" ? (
+                    ): item.question_type === "media" ? (
+                      <MediaQuestion
+                        key={index}
+                        index={index + 1}
+                        questionType={item.question_type}
+                        question={item.question}
+                        is_required={item.is_required}
+                      />
+                    )
+                     : item.question_type === "slider" ? (
                       <SliderQuestion
                       question={item.question}
                       options={item.options}
