@@ -11,6 +11,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { CookieConsent } from "@/components/primitives/CookieConsent";
 import { MixPanelProvider } from "@/contexts/MixpanelContext";
+import UpgradeModal from "@/components/subscription/modal-upgrade";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export default function RootLayout({
           <TanstackProvider>
             <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
             <ReduxContext>
+              <UpgradeModal />
               <MixPanelProvider>{children}</MixPanelProvider>
             </ReduxContext>
           </TanstackProvider>
