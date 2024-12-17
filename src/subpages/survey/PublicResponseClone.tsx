@@ -1,6 +1,8 @@
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import StarRating from "@/components/survey/StarRating";
+import ResponseFile from "@/components/ui/VoiceRecorder";
+import VoiceRecorder from "@/components/ui/VoiceRecorder";
 import { RootState } from "@/redux/store";
 import {
   useGetPublicSurveyByIdQuery,
@@ -284,7 +286,11 @@ const PublicResponse = () => {
                     >
                       <p className="font-medium">
                         {`${index + 1}. ${quest.question}`}{" "}
-                        {quest.is_required && (<sup className="text-red-700 font-extrabold text-sm">*</sup>)}
+                        {quest.is_required && (
+                          <sup className="text-red-700 font-extrabold text-sm">
+                            *
+                          </sup>
+                        )}
                       </p>
                       {(() => {
                         switch (quest.question_type) {
@@ -469,28 +475,6 @@ const PublicResponse = () => {
                                 required={quest.is_required}
                               />
                             );
-                          // case "star_rating":
-                          //   return (
-                          //     <div className="flex gap-1 items-center mb-4 bg-[#FAFAFA] p-3 rounded">
-                          //       {["1 star", "2 star", "3 star", "4 star", "5 star"].map((_, idx) => {
-                          //         const starValue = idx + 1;
-                          //         return (
-                          //           <FaStar
-                          //             key={idx}
-                          //             size={24}
-                          //             className={`cursor-pointer ${
-                          //               (answers[quest.question]?.scale_value || "1 star") >= starValue
-                          //                 ? "text-yellow-400"
-                          //                 : "text-gray-300"
-                          //             }`}
-                          //             onClick={() =>
-                          //               handleAnswerChange(quest.question, { scale_value: starValue })
-                          //             }
-                          //           />
-                          //         );
-                          //       })}
-                          //     </div>
-                          //   );
 
                           case "rating_scale":
                             return (
@@ -598,18 +582,16 @@ const PublicResponse = () => {
                             );
                           case "media":
                             return (
-                              <input
-                                type="file"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    const fileUrl = URL.createObjectURL(file);
-                                    handleAnswerChange(quest.question, {
-                                      media_url: fileUrl,
-                                    });
+                              <div className="flex flex-col">
+                                <ResponseFile
+                                  question={quest.question}
+                                  handleAnswerChange={handleAnswerChange}
+                                  selectedValue={
+                                    answers[quest.question]?.media_url || ""
                                   }
-                                }}
-                              />
+                                  required={quest.is_required}
+                                />
+                              </div>
                             );
                           default:
                             return <p>Unsupported question type</p>;

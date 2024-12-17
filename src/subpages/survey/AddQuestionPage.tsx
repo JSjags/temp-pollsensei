@@ -44,6 +44,7 @@ import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 import ReviewModal from "@/components/modals/ReviewModal";
+import MediaQuestion from "@/components/survey/MediaQuestion";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -388,7 +389,17 @@ const AddQuestionPage = () => {
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                               />
-                            ) : item.question_type === "short_text" ? (
+                            ) 
+                             : item.question_type === "media" ? (
+                              <MediaQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) 
+                            : item.question_type === "short_text" ? (
                               <ShortTextQuestion
                                 key={index}
                                 index={index + 1}
@@ -572,7 +583,11 @@ const AddQuestionPage = () => {
          review &&   <ReviewModal
                 survey_id={survey_id}
                 openModal={review}
-                onClose={() => setReview((prev) => !prev)}
+                onClose={() => {
+                  setReview((prev) => !prev)
+                router.push("/surveys/survey-list");
+
+                }}
               />
       }
     </div>
