@@ -203,7 +203,7 @@ const TeamMembersPage: React.FC = () => {
                 </div>
               </div>
             </Fade>
-            {teamMembers?.data?.data.length > 1 && (
+            {teamMembers?.data?.data.length >= 1 && (
               <Slide direction="right" duration={500} triggerOnce>
                 <Button
                   label={
@@ -211,9 +211,11 @@ const TeamMembersPage: React.FC = () => {
                       <span className="hidden sm:inline-block">
                         Invite Member
                       </span>{" "}
-                      <span className="">
-                        <Crown className="text-amber-500 fill-amber-500" />
-                      </span>
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500" />
+                        </span>
+                      )}
                       {/* <span className="sm:hidden">
                         <RiMailSendLine />
                       </span> */}

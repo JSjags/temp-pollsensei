@@ -41,12 +41,12 @@ export default function RootLayout({
         )}
       >
         <CookieConsent />
-        <UpgradeModal />
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
             <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
             <ReduxContext>
+              <UpgradeModal />
               <MixPanelProvider>{children}</MixPanelProvider>
             </ReduxContext>
           </TanstackProvider>
