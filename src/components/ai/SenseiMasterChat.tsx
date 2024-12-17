@@ -213,6 +213,7 @@ const SenseiMasterChat: React.FC<Props> = ({
         updateMessage(messageId, displayedText);
       }, index * 20);
     });
+    senseiStateSetter("start talking");
 
     setTimeout(() => {
       senseiStateSetter("stop talking");

@@ -1,9 +1,17 @@
 import React, { useState } from "react";
 import { FaDownload } from "react-icons/fa6";
-import { useLazyDownloadAllResponseQuery, useLazyDownloadSingleResponseQuery } from "@/services/survey.service";
+import {
+  useLazyDownloadAllResponseQuery,
+  useLazyDownloadSingleResponseQuery,
+} from "@/services/survey.service";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import ResponseActions from "./ResponseAction";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { Crown } from "lucide-react";
+import { showModal } from "@/redux/slices/modal.slice";
 
 interface ResponseHeaderProps {
   data: any;
@@ -17,8 +25,8 @@ interface ResponseHeaderProps {
   handleNext?: () => void;
   handlePrev?: () => void;
   deleteAResponse?: () => void;
-  respondent_data?:any[];
-  response_id?:string;
+  respondent_data?: any[];
+  response_id?: string;
 }
 
 const ResponseHeader: React.FC<ResponseHeaderProps> = ({
@@ -34,18 +42,37 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   invalid_response,
   deleteAResponse,
   response_id,
-  surveyData
+  surveyData,
 }) => {
+  const dispatch = useDispatch();
   const [downloadModal, setDownloadModal] = useState(false);
   const params = useParams();
+  const user = useSelector((state: RootState) => state.user.user);
 
-  console.log(response_id)
+  console.log(response_id);
 
-  const [triggerDownloadAll, { data: allDownloadData }] = useLazyDownloadAllResponseQuery();
-  const [triggerDownloadSingle, { data: singleDownloadData }] = useLazyDownloadSingleResponseQuery();
+  const [triggerDownloadAll, { data: allDownloadData }] =
+    useLazyDownloadAllResponseQuery();
+  const [triggerDownloadSingle, { data: singleDownloadData }] =
+    useLazyDownloadSingleResponseQuery();
 
-  const handleDownload = async (type: "all" | "single", format: "pdf" | "csv" | "xlsx") => {
-    const id = type === "all" ? { survey_id: params.id, format } : { response_id: response_id, format };
+  const handleDownload = async (
+    type: "all" | "single",
+    format: "pdf" | "csv" | "xlsx"
+  ) => {
+    if (
+      user?.plan.name === "Basic Plan" &&
+      (format === "csv" || format === "xlsx")
+    ) {
+      setDownloadModal(false);
+      dispatch(showModal(format));
+      return;
+    }
+
+    const id =
+      type === "all"
+        ? { survey_id: params.id, format }
+        : { response_id: response_id, format };
 
     try {
       if (type === "all") {
@@ -57,6 +84,8 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
       console.error("Download error:", error);
     }
   };
+
+  console.log(user);
 
   return (
     <div className="border rounded-lg p-4 shadow-sm">
@@ -77,14 +106,16 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
             </div>
           </div>
           <span className="text-gray-700 font-semibold">
-            Number of Responses:{" "}
-            <span className="font-bold">{data}</span>
+            Number of Responses: <span className="font-bold">{data}</span>
           </span>
         </div>
 
         {/* Icons */}
         <div className="flex relative w-full justify-end">
-          <button className="text-gray-500 hover:text-gray-700" onClick={() => setDownloadModal((prev) => !prev)}>
+          <button
+            className="text-gray-500 hover:text-gray-700"
+            onClick={() => setDownloadModal((prev) => !prev)}
+          >
             <FaDownload size={25} />
           </button>
 
@@ -93,7 +124,11 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
               <ul className="text-xs flex flex-col gap-4 w-full">
                 <li className="cursor-pointer">
                   <Link
-                    href={allDownloadData && allDownloadData?.data?.url ? allDownloadData.data.url : ""}
+                    href={
+                      allDownloadData && allDownloadData?.data?.url
+                        ? allDownloadData.data.url
+                        : ""
+                    }
                     onClick={() => handleDownload("all", "pdf")}
                     target="blank"
                     download
@@ -103,7 +138,11 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                 </li>
                 <li className="cursor-pointer">
                   <Link
-                    href={singleDownloadData && singleDownloadData?.data?.url ? singleDownloadData.data.url : ""}
+                    href={
+                      singleDownloadData && singleDownloadData?.data?.url
+                        ? singleDownloadData.data.url
+                        : ""
+                    }
                     onClick={() => handleDownload("single", "pdf")}
                     target="blank"
                     download
@@ -112,44 +151,140 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                   </Link>
                 </li>
                 <li className="cursor-pointer">
-                  <Link
-                    href={allDownloadData && allDownloadData?.data?.url ? allDownloadData.data.url : ""}
-                    onClick={() => handleDownload("all", "csv")}
-                    target="blank"
-                    download
-                  >
-                    Download all responses as CSV
-                  </Link>
+                  {user?.plan.name === "Basic Plan" ? (
+                    <button
+                      onClick={() => handleDownload("all", "csv")}
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download all responses as CSV
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={
+                        allDownloadData && allDownloadData?.data?.url
+                          ? allDownloadData.data.url
+                          : ""
+                      }
+                      onClick={() => handleDownload("all", "csv")}
+                      target="blank"
+                      download
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download all responses as CSV
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </Link>
+                  )}
                 </li>
                 <li className="cursor-pointer">
-                  <Link
-                    href={singleDownloadData && singleDownloadData?.data?.url ? singleDownloadData.data.url : ""}
-                    onClick={() => handleDownload("single", "csv")}
-                    target="blank"
-                    download
-                  >
-                    Download current response as CSV
-                  </Link>
+                  {user?.plan.name === "Basic Plan" ? (
+                    <button
+                      onClick={() => handleDownload("single", "csv")}
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download current response as CSV
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={
+                        singleDownloadData && singleDownloadData?.data?.url
+                          ? singleDownloadData.data.url
+                          : ""
+                      }
+                      onClick={() => handleDownload("single", "csv")}
+                      target="blank"
+                      download
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download current response as CSV
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </Link>
+                  )}
                 </li>
                 <li className="cursor-pointer">
-                  <Link
-                    href={allDownloadData && allDownloadData?.data?.url ? allDownloadData.data.url : ""}
-                    onClick={() => handleDownload("all", "xlsx")}
-                    target="blank"
-                    download
-                  >
-                    Download all responses as Excel
-                  </Link>
+                  {user?.plan.name === "Basic Plan" ? (
+                    <button
+                      onClick={() => handleDownload("all", "xlsx")}
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download all responses as Excel
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={
+                        allDownloadData && allDownloadData?.data?.url
+                          ? allDownloadData.data.url
+                          : ""
+                      }
+                      onClick={() => handleDownload("all", "xlsx")}
+                      target="blank"
+                      download
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download all responses as Excel
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </Link>
+                  )}
                 </li>
                 <li className="cursor-pointer">
-                  <Link
-                    href={singleDownloadData && singleDownloadData?.data?.url ? singleDownloadData.data.url : ""}
-                    onClick={() => handleDownload("single", "xlsx")}
-                    target="blank"
-                    download
-                  >
-                    Download current response as Excel
-                  </Link>
+                  {user?.plan.name === "Basic Plan" ? (
+                    <button
+                      onClick={() => handleDownload("single", "xlsx")}
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download current response as Excel
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={
+                        singleDownloadData && singleDownloadData?.data?.url
+                          ? singleDownloadData.data.url
+                          : ""
+                      }
+                      onClick={() => handleDownload("single", "xlsx")}
+                      target="blank"
+                      download
+                      className="inline-flex items-start gap-2"
+                    >
+                      Download current response as Excel
+                      {user?.plan.name === "Basic Plan" && (
+                        <span className="">
+                          <Crown className="text-amber-500 fill-amber-500 size-4" />
+                        </span>
+                      )}
+                    </Link>
+                  )}
                 </li>
               </ul>
             </div>
@@ -164,7 +299,9 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 transition-colors duration-200 ${
-              activeTab === tab ? "text-purple-600 border-b-2 border-purple-600" : "text-gray-500"
+              activeTab === tab
+                ? "text-purple-600 border-b-2 border-purple-600"
+                : "text-gray-500"
             }`}
           >
             {tab}
@@ -190,7 +327,6 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
 };
 
 export default ResponseHeader;
-
 
 // import React, { useState } from "react";
 // import { FaDownload } from "react-icons/fa6";
