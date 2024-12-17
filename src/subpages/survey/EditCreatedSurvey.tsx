@@ -571,7 +571,7 @@ const EditCreatedSurvey = () => {
       router.push('/surveys/survey-list');
     } catch (error) {
       console.error("Error updating survey:", error);
-      alert("Failed to update survey.");
+      toast.error("Failed to update survey.");
     }
   };
 
