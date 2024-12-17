@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useQuery } from "@tanstack/react-query";
-import { TPricing } from "./PricingCards";
+import { TPricing, useGeoLocation } from "./PricingCards";
 import { getMeQuery, getSubscriptionTier } from "@/services/admin";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/redux/slices/user.slice";
@@ -20,6 +20,12 @@ export function CurrentPlanCard() {
     queryKey: ["profile"],
     queryFn: getMeQuery,
   });
+
+  const {
+    data: locationData,
+    isLoading: locationLoading,
+    isError: locationError,
+  } = useGeoLocation();
 
   const tierData = useQuery<TPricing>({
     queryKey: ["tier"],
@@ -58,7 +64,7 @@ export function CurrentPlanCard() {
           animate={{ rotate: 0 }}
           transition={{ duration: 0.6, type: "spring" }}
         >
-          <Skeleton className="size-40 rounded-full" />
+          <Skeleton className="size-40 rounded-full opacity-0" />
         </motion.div>
       </motion.div>
     );
@@ -80,7 +86,10 @@ export function CurrentPlanCard() {
               </span> */}
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              ${tierData.data?.monthly_price_dollar} / month
+              {!locationData?.isNigeria
+                ? `$${tierData.data?.monthly_price_dollar ?? "__"}`
+                : `₦${tierData.data?.monthly_price_naira ?? "__"}`}{" "}
+              / month
             </p>
           </div>
           {/* <div className="flex items-center gap-2">
@@ -92,15 +101,16 @@ export function CurrentPlanCard() {
           <div>
             <p className="text-sm font-medium">Next Billing date</p>
             <p className="text-base font-semibold">
-              {tierData.data?.monthly_price_dollar === 0
-                ? "Free"
-                : "10th December, 2025"}
+              {tierData.data?.monthly_price_dollar === 0 ? "Free" : "N/A"}
+              {/* : "10th December, 2025"} */}
             </p>
           </div>
           <div>
             <p className="text-sm font-medium">Next Billing Amount</p>
             <p className="text-base font-semibold">
-              ${tierData.data?.monthly_price_dollar}
+              {!locationData?.isNigeria
+                ? `$${tierData.data?.monthly_price_dollar ?? "__"}`
+                : `₦${tierData.data?.monthly_price_naira ?? "__"}`}
             </p>
           </div>
         </div>

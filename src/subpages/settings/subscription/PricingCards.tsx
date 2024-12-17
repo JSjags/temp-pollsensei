@@ -74,7 +74,7 @@ export interface TPricing {
   __v: number;
 }
 
-const useGeoLocation = () => {
+export const useGeoLocation = () => {
   return useQuery({
     queryKey: ["geolocation"],
     queryFn: async () => {
@@ -391,7 +391,9 @@ export function PricingCards() {
                           tiers[index].textColor && tiers[index].textColor
                         )}
                       >
-                        ${tier.monthly_price_dollar}
+                        {!locationData?.isNigeria
+                          ? `$${tier.monthly_price_dollar}`
+                          : `₦${tier.monthly_price_naira}`}
                       </span>
                       {tiers[index].period && (
                         <span
