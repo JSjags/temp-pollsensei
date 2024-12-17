@@ -149,6 +149,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
     { value: "number", label: "Number" },
     { value: "drop_down", label: "Dropdown" },
     { value: "matrix_checkbox", label: "Matrix" },
+    { value: "media", label: "Media" },
   ];
 
   return (

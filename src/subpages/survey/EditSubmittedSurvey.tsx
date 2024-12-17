@@ -326,16 +326,7 @@ import StyleEditor from "./StyleEditor";
 import QuestionType from "./QuestionType";
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
-import WaitingMessagesModal from "@/components/modals/WaitingModal";
-import PaginationBtn from "@/components/common/PaginationBtn";
-import { HiOutlinePlus } from "react-icons/hi";
-import { ClipLoader } from "react-spinners";
-import MatrixQuestion from "@/components/survey/MatrixQuestion";
-import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
-import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
-import LinearScaleQuestion from "@/components/survey/LinearScaleQuestion";
-import CommentQuestion from "@/components/survey/CommentQuestion";
-import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
+
 import MultiChoiceQuestionEdit from "../milestone/Test";
 import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
 import {
@@ -348,8 +339,6 @@ const EditSubmittedSurvey = () => {
   const { data, isLoading } = useFetchASurveyQuery(params.id);
   const [editSurvey, { isSuccess, isError, error }] = useEditSurveyMutation();
   const [isSidebar, setIsSidebarOpen] = useState(true);
-  const [isEdit, setIsEdit] = useState(true);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
 
   console.log(data);
@@ -464,7 +453,7 @@ const EditSubmittedSurvey = () => {
             <div className="flex justify-end"></div>
           </div>
 
-          {/* data.sections[0].questions */}
+
           {/* @ts-ignore */}
           {surveyData?.sections[currentSection]?.questions?.map(
             (item: any, index: number) => (
@@ -490,90 +479,7 @@ const EditSubmittedSurvey = () => {
                       // onCancel={handleCancel}
                     />
                   )
-                  //  : item.question_type === "multiple_choice" || item.question_type === "multi_choice" ? (
-                  //   <MultiChoiceQuestion
-                  //     question={item.question}
-                  //     options={item.options}
-                  //     is_required={item.is_required}
-                  //     setIsRequired={() => {
-                  //       const updatedSections = [...questions];
-                  //       const updatedSection = { ...updatedSections[currentSection] };
-                  //       const updatedQuestions = [...updatedSection.questions];
-
-                  //       updatedQuestions[index] = {
-                  //         ...updatedQuestions[index],
-                  //         is_required: !item.is_required,
-                  //       };
-
-                  //       updatedSection.questions = updatedQuestions;
-                  //       updatedSections[currentSection] = updatedSection;
-                  //       dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
-                  //     }}
-                  //     questionType={item.question_type}
-                  //     EditQuestion={() => EditQuestion(index)}
-                  //     index={index + 1}
-                  //     DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  //   />
-                  // ) : item.question_type === "comment" || item.question_type === "long_text" ? (
-                  //   <CommentQuestion
-                  //     key={index}
-                  //     index={index + 1}
-                  //     questionType={item.question_type}
-                  //     question={item.question}
-                  //     is_required={item.is_requied}
-                  //     setIsRequired={() => {
-                  //       const updatedSections = [...questions];
-                  //       const updatedSection = { ...updatedSections[currentSection] };
-                  //       const updatedQuestions = [...updatedSection.questions];
-
-                  //       updatedQuestions[index] = {
-                  //         ...updatedQuestions[index],
-                  //         is_required: !item.is_required,
-                  //       };
-
-                  //       updatedSection.questions = updatedQuestions;
-                  //       updatedSections[currentSection] = updatedSection;
-                  //       dispatch(updateSection({ index: currentSection, newSection: updatedSection }));
-                  //     }}
-                  //     EditQuestion={() => EditQuestion(index)}
-                  //     DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  //   />
-                  // ) : item.question_type === "linear_Scale" ? (
-                  //   <LinearScaleQuestion
-                  //     question={item.question}
-                  //     scaleStart={item.scaleStart}
-                  //     scaleEnd={item.scaleEnd}
-                  //     questionType={item.question_type}
-                  //     EditQuestion={() => EditQuestion(index)}
-                  //     DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  //   />
-                  // ) : item.question_type === "likert_scale" ? (
-                  //   <LikertScaleQuestion
-                  //     question={item.question}
-                  //     options={item.options}
-                  //     questionType={item.question_type}
-                  //     EditQuestion={() => EditQuestion(index)}
-                  //     DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  //   />
-                  // ) : item.question_type === "star_rating" ? (
-                  //   <StarRatingQuestion
-                  //     question={item.question}
-                  //     maxRating={5}
-                  //     questionType={item.question_type}
-                  //     EditQuestion={() => EditQuestion(index)}
-                  //     DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  //   />
-                  // ) : item.question_type === "matrix_checkbox" ? (
-                  //   <MatrixQuestion
-                  //     key={index}
-                  //     index={index + 1}
-                  //     options={item.options}
-                  //     questionType={item.question_type}
-                  //     question={item.question}
-                  //     EditQuestion={() => EditQuestion(index)}
-                  //     DeleteQuestion={()=>handleDeleteQuestion(index)}
-                  //   />
-                  // ) : null
+                
                 }
               </div>
             )
@@ -600,30 +506,10 @@ const EditSubmittedSurvey = () => {
 
           </div> */}
 
-            {/* {questions?.length > 1 && (
-          <div className="flex w-full md:w-auto md:justify-end items-center">
-            <PaginationBtn
-              currentSection={currentSection}
-              totalSections={questions.length}
-              onNavigate={navigatePage}
-            />
-          </div>
-        )} */}
+           
           </div>
 
-          {/* <WaitingMessagesModal otherPossibleCondition={generatingSingleSurvey}  openModal={openModal}
-      setOpenModal={generatingSingleSurvey === false ? () => setOpenModal(false) : () => setOpenModal(true)} 
-       /> */}
 
-          {/* <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
-        <button
-          className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-          type="button"
-          onClick={handleSurveyCreation}
-        >
-          {isLoading ? "Submitting" : "Continue"}
-        </button>
-        </div> */}
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
               <p>Form created by</p>

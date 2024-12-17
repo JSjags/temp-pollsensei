@@ -226,9 +226,9 @@ const LoginPage = () => {
                 <Image
                   src={google}
                   alt="Google"
-                  width={24}
-                  height={24}
-                  className="size-10"
+                  width={56}
+                  height={56}
+                  className="size-14"
                 />
               </span>
               {/* <Link href="">

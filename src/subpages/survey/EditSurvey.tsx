@@ -1157,7 +1157,11 @@ const EditSurvey = () => {
          review &&   <ReviewModal
                 survey_id={survey_id}
                 openModal={review}
-                onClose={() => setReview((prev) => !prev)}
+                onClose={() =>{ 
+                  setReview((prev) => !prev)
+                router.push("/surveys/survey-list");
+
+                }}
               />
       }
     </div>
