@@ -222,7 +222,7 @@ const LoginPage = () => {
             </div>
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
-              <span onClick={() => googleSignUp()}>
+              <span onClick={() => googleSignUp()} className="flex justify-between items-center gap-2 border pr-2 rounded-full">
                 <Image
                   src={google}
                   alt="Google"
@@ -230,6 +230,7 @@ const LoginPage = () => {
                   height={56}
                   className="size-14"
                 />
+                <span>Sign in with your Google account</span>
               </span>
               {/* <Link href="">
                 <Image
