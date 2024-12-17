@@ -149,6 +149,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
     { value: "number", label: "Number" },
     { value: "drop_down", label: "Dropdown" },
     { value: "matrix_checkbox", label: "Matrix" },
+    { value: "media", label: "Media" },
   ];
 
   return (
@@ -191,6 +192,54 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
 
              {/* Rows and Columns for Matrix Checkbox */}
       {questionType === "matrix_checkbox" && (
+        <div className="mt-4">
+          <div className="mb-4">
+            <label>Body</label>
+            {rows.map((row, index) => (
+              <div key={index} className="flex items-center my-2">
+                <input
+                  type="text"
+                  value={row}
+                  onChange={(e) => handleRowChange(index, e.target.value)}
+                  placeholder="Enter row option"
+                  className="mr-2 w-full bg-transparent border-b py-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                />
+                {rows.length > 1 && (
+                  <button onClick={() => handleRemoveRow(index)} className="text-red-500 ml-2">
+                    <MdDeleteOutline />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button onClick={handleAddRow} className="text-blue-500 mt-2 border py-2 px-4 rounded-full text-start">
+              Add Matrix body
+            </button>
+          </div>
+          <div className="mb-4">
+            <label>Head</label>
+            {columns.map((column, index) => (
+              <div key={index} className="flex items-center my-2">
+                <input
+                  type="text"
+                  value={column}
+                  onChange={(e) => handleColumnChange(index, e.target.value)}
+                  placeholder="Enter column option"
+                  className="mr-2 w-full bg-transparent border-b py-2 border-gray-300 focus:outline-none focus:border-blue-500"
+                />
+                {columns.length > 1 && (
+                  <button onClick={() => handleRemoveColumn(index)} className="text-red-500 ml-2">
+                    <MdDeleteOutline />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button onClick={handleAddColumn} className="text-blue-500 mt-2 border py-2 px-4 rounded-full text-start">
+              Add Matrix head
+            </button>
+          </div>
+        </div>
+      )}
+      {questionType === "matrix_multiple_choice" && (
         <div className="mt-4">
           <div className="mb-4">
             <label>Body</label>

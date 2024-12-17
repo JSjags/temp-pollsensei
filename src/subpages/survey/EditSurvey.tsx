@@ -682,7 +682,7 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    ) : item.question_type === "matrix_multiple_choice" ? (
+                    ) : item.question_type === "matrix_multiple_choice" || item.question_type === "matrix_checkbox" ? (
                       <MatrixQuestion
                         key={index}
                         index={index + 1}
@@ -1157,7 +1157,11 @@ const EditSurvey = () => {
          review &&   <ReviewModal
                 survey_id={survey_id}
                 openModal={review}
-                onClose={() => setReview((prev) => !prev)}
+                onClose={() =>{ 
+                  setReview((prev) => !prev)
+                router.push("/surveys/survey-list");
+
+                }}
               />
       }
     </div>

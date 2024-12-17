@@ -7,7 +7,7 @@ import React, { useState } from "react";
 
 const SuperAdminFaq = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error, refetch } = useAllFAQsQuery({
+  const { data, isLoading, isError, refetch } = useAllFAQsQuery({
     pagesNumber: currentPage,
   })
   const totalItems = data?.data?.total || 0;
@@ -44,7 +44,7 @@ const SuperAdminFaq = () => {
 
   return (
     <div className="p-6">
-      <FaqAccordion items={data?.data?.data} />
+      <FaqAccordion items={data?.data?.data} isLoading={isLoading} isError={isError} />
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">
           {totalItems > 0

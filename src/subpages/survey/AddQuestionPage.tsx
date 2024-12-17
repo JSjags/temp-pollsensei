@@ -44,6 +44,7 @@ import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 import ReviewModal from "@/components/modals/ReviewModal";
+import MediaQuestion from "@/components/survey/MediaQuestion";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -84,6 +85,9 @@ const AddQuestionPage = () => {
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [addquestions, setAddQuestions] = useState(false);
   const headerUrl = useSelector((state: RootState) => state.survey.header_url);
+  const headerText = useSelector(
+    (state: RootState) => state.survey.header_text
+  );
 
   const handleSave = () => {
     dispatch(updateSectionTopic(sectionTitle));
@@ -267,7 +271,12 @@ const AddQuestionPage = () => {
             </div>
           )}
           {!isEditing && (
-            <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
+            <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col " 
+            style={{
+              fontSize: `${headerText?.size}px`,
+              fontFamily: `${headerText?.name}`,
+            }}
+            >
               <h2 className="text-[1.5rem] font-normal">{sectionTopic}</h2>
               <p>{sectionDescription}</p>
               <div className="flex justify-end">
@@ -380,7 +389,17 @@ const AddQuestionPage = () => {
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                               />
-                            ) : item.question_type === "short_text" ? (
+                            ) 
+                             : item.question_type === "media" ? (
+                              <MediaQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) 
+                            : item.question_type === "short_text" ? (
                               <ShortTextQuestion
                                 key={index}
                                 index={index + 1}
@@ -564,7 +583,11 @@ const AddQuestionPage = () => {
          review &&   <ReviewModal
                 survey_id={survey_id}
                 openModal={review}
-                onClose={() => setReview((prev) => !prev)}
+                onClose={() => {
+                  setReview((prev) => !prev)
+                router.push("/surveys/survey-list");
+
+                }}
               />
       }
     </div>
