@@ -203,7 +203,7 @@ const RegisterPage = () => {
             </p>
           </div>
 
-          <Form
+          {/* <Form
             onSubmit={onSubmit}
             validate={validateForm}
             render={({ handleSubmit, form, submitting, values }) => (
@@ -357,7 +357,7 @@ const RegisterPage = () => {
                 )}
               </form>
             )}
-          />
+          /> */}
 
           <div className="flex justify-center pt-5">
             <p className="bg-[#F7F7F7] rounded-[1rem] py-[2px] px-[calc(1rem/2)] text-sm">
@@ -365,26 +365,29 @@ const RegisterPage = () => {
             </p>
           </div>
 
-          <div className="flex gap-3 md:gap-5 items-center pt-5">
+          {/* <div className="flex gap-3 md:gap-5 items-center pt-5">
             <div className="border flex-grow border-[#E5EFFF]"></div>
             <div className="auth-divider whitespace-nowrap">
               Or <span className="hidden md:inline">Continue with</span>
             </div>
             <div className="border flex-grow border-[#E5EFFF]"></div>
-          </div>
+          </div> */}
 
-                   <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
-                     <span onClick={() => googleSignUp()} className="flex justify-between items-center gap-2 border pr-2 rounded-full">
-                       <Image
-                         src={google}
-                         alt="Google"
-                         width={56}
-                         height={56}
-                         className="size-14"
-                       />
-                       <span>Sign in with your Google account</span>
-                     </span>
-                     {/* <Link href="">
+          <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
+            <span
+              onClick={() => googleSignUp()}
+              className="flex justify-between items-center gap-2 border pr-2 rounded-full"
+            >
+              <Image
+                src={google}
+                alt="Google"
+                width={56}
+                height={56}
+                className="size-14"
+              />
+              <span>Sign in with your Google account</span>
+            </span>
+            {/* <Link href="">
                        <Image
                          src={facebook}
                          alt="Facebook"
@@ -393,7 +396,7 @@ const RegisterPage = () => {
                          className="size-10"
                        />
                      </Link> */}
-                   </div>
+          </div>
 
           <div className="flex justify-end items-center mt-4">
             <p className="mr-2">Need Help?</p>

@@ -149,7 +149,7 @@ const LoginPage = () => {
           </h5>
         </div>
       </div>
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0">
+      <div className="w-full md:w-1/2 flex flex-col justify-start items-center px-4 md:px-8 py-6 md:py-0">
         {loginState && (
           <div className="flex justify-center flex-col max-w-[516px] w-full">
             <div className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10">
@@ -161,7 +161,7 @@ const LoginPage = () => {
               </p>
             </div>
 
-            <Form
+            {/* <Form
               onSubmit={onSubmit}
               validate={validateForm}
               render={({ handleSubmit, form, submitting }) => (
@@ -204,7 +204,7 @@ const LoginPage = () => {
                   </button>
                 </form>
               )}
-            />
+            /> */}
 
             <div className="flex justify-center pt-5">
               <p className="bg-[#F7F7F7] rounded-[1rem] py-[2px] px-[calc(1rem/2)] text-sm">
@@ -213,16 +213,19 @@ const LoginPage = () => {
               </p>
             </div>
 
-            <div className="flex gap-3 md:gap-5 items-center pt-5">
+            {/* <div className="flex gap-3 md:gap-5 items-center pt-5">
               <div className="border flex-grow border-[#E5EFFF]"></div>
               <div className="auth-divider whitespace-nowrap">
                 Or <span className="hidden md:inline">Continue with</span>
               </div>
               <div className="border flex-grow border-[#E5EFFF]"></div>
-            </div>
+            </div> */}
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
-              <span onClick={() => googleSignUp()} className="flex justify-between items-center gap-2 border pr-2 rounded-full">
+              <span
+                onClick={() => googleSignUp()}
+                className="flex justify-between items-center gap-2 border pr-2 rounded-full"
+              >
                 <Image
                   src={google}
                   alt="Google"
