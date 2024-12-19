@@ -161,7 +161,7 @@ const LoginPage = () => {
               </p>
             </div>
 
-            {/* <Form
+            <Form
               onSubmit={onSubmit}
               validate={validateForm}
               render={({ handleSubmit, form, submitting }) => (
@@ -204,7 +204,7 @@ const LoginPage = () => {
                   </button>
                 </form>
               )}
-            /> */}
+            />
 
             <div className="flex justify-center pt-5">
               <p className="bg-[#F7F7F7] rounded-[1rem] py-[2px] px-[calc(1rem/2)] text-sm">
@@ -213,13 +213,13 @@ const LoginPage = () => {
               </p>
             </div>
 
-            {/* <div className="flex gap-3 md:gap-5 items-center pt-5">
+            <div className="flex gap-3 md:gap-5 items-center pt-5">
               <div className="border flex-grow border-[#E5EFFF]"></div>
               <div className="auth-divider whitespace-nowrap">
                 Or <span className="hidden md:inline">Continue with</span>
               </div>
               <div className="border flex-grow border-[#E5EFFF]"></div>
-            </div> */}
+            </div>
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
               <span
