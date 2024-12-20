@@ -56,20 +56,21 @@ const LoginPage = () => {
 
   const onSubmit = async (values: { email: string; password: string }) => {
     // Track the button click with Mixpanel
-    mixpanel.track("Sign-In Button Clicked", {
-      timestamp: new Date().toISOString(), // Optional: Track time
-    });
     try {
       const userData = await loginUser(values).unwrap();
       dispatch(updateUser(userData.data));
       toast.success("Login success");
       setState(true);
       setLoginState(false);
+      // mixpanel.track("Google Sign-In Clicked", {
+      //   timestamp: new Date().toISOString(),
+      // });
     } catch (err: any) {
       toast.error(
         "Failed to login user " + (err?.data?.message || err.message)
       );
       console.error("Failed to log in user", err);
+      console.error("Error tracking event:", err);
     }
   };
 
@@ -233,10 +234,16 @@ const LoginPage = () => {
               <span
                 onClick={() => {
                   // Track the button click with Mixpanel
-                  mixpanel.track("Google Sign-In Clicked", {
-                    timestamp: new Date().toISOString(), // Optional: Track time
-                  });
-                  googleSignUp();
+                  try {
+                    googleSignUp();
+                    mixpanel.track("Google Sign-In Clicked", {
+                      timestamp: new Date().toISOString(), // Optional: Track time
+                    });
+                  } catch (err) {
+                    console.error("Error during Google sign up:", err);
+                    toast.error("Failed to sign in with Google");
+                    // console.error("Error tracking event:", err);
+                  }
                 }}
                 className="flex justify-between items-center gap-2 border pr-2 rounded-full"
               >

@@ -92,9 +92,6 @@ const RegisterPage = () => {
 
   const onSubmit = async (values: any) => {
     // Track the button click with Mixpanel
-    mixpanel.track("Sign-Up Clicked", {
-      timestamp: new Date().toISOString(), // Optional: Track time
-    });
     try {
       await registerUser(values).unwrap();
       toast.success(
@@ -103,11 +100,15 @@ const RegisterPage = () => {
       // Navigate to login page
       router.push("/login");
       console.log("User registered successfully");
+      mixpanel.track("Sign-Up Clicked", {
+        timestamp: new Date().toISOString(), // Optional: Track time
+      });
     } catch (err: any) {
       toast.error(
         "Failed to register user " + (err?.data?.message || err.message)
       );
       console.error("Failed to register user", err);
+      console.error("Error tracking event:", err);
     }
   };
 
@@ -386,10 +387,16 @@ const RegisterPage = () => {
             <span
               onClick={() => {
                 // Track the button click with Mixpanel
-                mixpanel.track("Google Sign-Up Clicked", {
-                  timestamp: new Date().toISOString(), // Optional: Track time
-                });
-                googleSignUp();
+                try {
+                  googleSignUp();
+                  // mixpanel.track("Google Sign-Up Clicked", {
+                  //   timestamp: new Date().toISOString(), // Optional: Track time
+                  // });
+                } catch (err) {
+                  console.error("Error during Google sign up:", err);
+                  toast.error("Failed to sign up with Google");
+                  console.error("Error tracking event:", err);
+                }
               }}
               className="flex justify-between items-center gap-2 border pr-2 rounded-full"
             >
