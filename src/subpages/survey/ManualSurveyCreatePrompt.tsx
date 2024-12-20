@@ -7,6 +7,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button as ShadButton } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const ManualSurveyCreatePrompt = () => {
   const [surveyPrompt, setSurveyPrompt] = useState("");
@@ -14,6 +16,11 @@ const ManualSurveyCreatePrompt = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const maxCharacters = 3000;
+
+  const userToken = useSelector(
+    (state: RootState) => state?.user?.access_token || state.user.token
+  );
+  const user = useSelector((state: RootState) => state?.user?.user);
 
   return (
     <AnimatePresence>
@@ -25,7 +32,7 @@ const ManualSurveyCreatePrompt = () => {
           duration: 0.5,
           ease: [0.43, 0.13, 0.23, 0.96],
         }}
-        className="p-0 m-0 bg-transparent rounded-lg shadow-lg"
+        className="p-0 m-0 bg-transparent rounded-lg shadow-lg min-h-screen"
       >
         <div className="flex flex-col justify-center items-center gap-10 py-10 min-h-[80vh] ">
           <div className="text-center">
@@ -95,7 +102,11 @@ const ManualSurveyCreatePrompt = () => {
               onClick={() => {
                 dispatch(updateTopic(manualSurveyTitle));
                 dispatch(updateDescription(surveyPrompt));
-                router.push("/surveys/add-question-m");
+                router.push(
+                  userToken && user
+                    ? "/surveys/add-question-m"
+                    : "/demo/add-question-m"
+                );
               }}
             >
               Continue{" "}

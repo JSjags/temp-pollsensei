@@ -101,7 +101,7 @@ const CreateSurveyPage = () => {
   };
 
   const maxCharacters = 3000;
-  console.log(data)
+  console.log(data);
 
   const handleSurveyType = (userType: any, prompt: string) => {
     setSelectedDiv(userType);
@@ -157,78 +157,82 @@ const CreateSurveyPage = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      const refactoredQuestions = data?.data?.response?.map((question: any) => {
-        const optionType = question["Option type"]?.trim();
-        if(optionType ==="matrix_multiple_choice"){
+      const refactoredQuestions = (data as any)?.data?.response?.map(
+        (question: any) => {
+          const optionType = question["Option type"]?.trim();
+          if (optionType === "matrix_multiple_choice") {
+            return {
+              question: question.Question,
+              rows: question.Options.Rows,
+              columns: question.Options.Columns,
+              question_type: optionType === null ? optionType : "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "long_text" || optionType === "short_text") {
+            return {
+              question: question.Question,
+              options: "",
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "boolean") {
+            return {
+              question: question.Question,
+              options: ["Yes", "No"],
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "number") {
+            return {
+              question: question.Question,
+              options: "",
+              min: 1,
+              max: 10000000,
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "slider") {
+            return {
+              question: question.Question,
+              options: "",
+              min: question.Options.Min,
+              max: question.Options.Max,
+              step: question.Options.Step,
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
           return {
             question: question.Question,
-            rows: question.Options.Rows,
-            columns: question.Options.Columns,
-            question_type:optionType === null ? optionType : "",
+            options: question.Options,
+            question_type: optionType || "",
             is_required: true,
             description: "",
-          }
+          };
         }
-        if(optionType ==="long_text" || optionType ==="short_text"){
-          return {
-            question: question.Question,
-            options: "",
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        if(optionType ==="boolean"){
-          return {
-            question: question.Question,
-            options: ["Yes", "No"],
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        if(optionType ==="number"){
-          return {
-            question: question.Question,
-            options: "",
-            min:1,
-            max:10000000,
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        if(optionType ==="slider"){
-          return {
-            question: question.Question,
-            options: "",
-            min: question.Options.Min,
-            max:question.Options.Max,
-            step:question.Options.Step,
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        return {
-          question: question.Question,
-          options: question.Options,
-          question_type:optionType || "",
-          is_required: true,
-          description: "",
-        };
-      });
+      );
       dispatch(addSection({ questions: refactoredQuestions }));
-      dispatch(updateConversationId(data?.data?.conversation_id));
-      dispatch(updateDescription(data?.data?.description || surveyPrompt));   
+      dispatch(updateConversationId((data as any)?.data?.conversation_id));
+      dispatch(
+        updateDescription((data as any)?.data?.description || surveyPrompt)
+      );
       toast.success("Survey created successfully");
       setGenerated((prev) => !prev);
       setPromptForm(false);
     }
   }, [
-    data?.data?.conversation_id,
-    data?.data?.response,
-    data?.data.topic,
+    (data as any)?.data?.conversation_id,
+    (data as any)?.data?.response,
+    (data as any)?.data.topic,
     dispatch,
     isSuccess,
     surveyPrompt,
@@ -244,10 +248,10 @@ const CreateSurveyPage = () => {
   console.log(data);
   console.log(survey.sections);
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(resetQuestion());
     dispatch(resetSurvey());
-  }, [])
+  }, []);
 
   // // Update URL based on the state
   // const updateURLParams = (key: string, value: string | null) => {
@@ -311,10 +315,8 @@ const CreateSurveyPage = () => {
     dispatch(resetSurvey());
   }, [dispatch]);
 
-
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center">
-   
       {whatDoYouWant && (
         <div className="flex flex-col justify-center items-center gap-10 ">
           <h1 className="text-2xl mt-10 md:mt-0">
@@ -372,7 +374,7 @@ const CreateSurveyPage = () => {
                   selectedDiv === 2 ? "visible" : "invisible"
                 }`}
                 type="button"
-                onClick={()=>{
+                onClick={() => {
                   navigate.push("/surveys/create-manual");
                 }}
               >
@@ -557,8 +559,6 @@ const CreateSurveyPage = () => {
               </button>
             </div>
           </div>
-
-
         </div>
       )}
       {promptForm && (
@@ -625,8 +625,10 @@ const CreateSurveyPage = () => {
             <div className={`md:flex justify-center gap-5 pb-4 items-center`}>
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-start mt-4 md:mt-0`}
-                onClick={()=>{
-                  setSurveyPrompt("I am working on a survey to evaluate student satisfaction within our school. This survey aims to gather feedback on various aspects of the educational experience, including course content, teaching quality, campus facilities, and extracurricular activities. Additionally, the survey seeks to identify areas where the school can improve and enhance the overall student experience. The target audience for this survey includes current students across different grades and departments. By capturing diverse perspectives, the survey aims to provide actionable insights that can help improve student satisfaction and academic success. The focus will be on understanding student needs and preferences to inform future decisions and initiatives aimed at enhancing the educational environment")
+                onClick={() => {
+                  setSurveyPrompt(
+                    "I am working on a survey to evaluate student satisfaction within our school. This survey aims to gather feedback on various aspects of the educational experience, including course content, teaching quality, campus facilities, and extracurricular activities. Additionally, the survey seeks to identify areas where the school can improve and enhance the overall student experience. The target audience for this survey includes current students across different grades and departments. By capturing diverse perspectives, the survey aims to provide actionable insights that can help improve student satisfaction and academic success. The focus will be on understanding student needs and preferences to inform future decisions and initiatives aimed at enhancing the educational environment"
+                  );
                   // setTimeout(()=>{
                   //   handleGenerateTopics()
                   // }, 2000)
@@ -646,13 +648,14 @@ const CreateSurveyPage = () => {
 
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0 `}
-                onClick={()=>{
-                  setSurveyPrompt("Our organisation is conducting a survey to evaluate employee engagement. This survey aims to collect feedback on various aspects of the workplace experience, including job satisfaction, work-life balance, management effectiveness, professional development opportunities, and organizational culture. Additionally, the survey seeks to identify areas where we can improve employee engagement and retention. The target audience includes all employees across different departments and levels within the organization. By capturing diverse perspectives, we aim to gather actionable insights that can inform future enhancements to our workplace policies, practices, and initiatives. The focus will be on understanding employee needs and motivations to foster a more engaged and productive workforce.")
+                onClick={() => {
+                  setSurveyPrompt(
+                    "Our organisation is conducting a survey to evaluate employee engagement. This survey aims to collect feedback on various aspects of the workplace experience, including job satisfaction, work-life balance, management effectiveness, professional development opportunities, and organizational culture. Additionally, the survey seeks to identify areas where we can improve employee engagement and retention. The target audience includes all employees across different departments and levels within the organization. By capturing diverse perspectives, we aim to gather actionable insights that can inform future enhancements to our workplace policies, practices, and initiatives. The focus will be on understanding employee needs and motivations to foster a more engaged and productive workforce."
+                  );
                   // setTimeout(()=>{
                   //   handleGenerateTopics()
                   // }, 2000)
                 }}
-
               >
                 <h1 className="text-lg text-start">
                   Employee Engagement Survey
@@ -666,8 +669,10 @@ const CreateSurveyPage = () => {
               </div>
               <div
                 className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0`}
-                onClick={()=>{
-                  setSurveyPrompt("This survey aims to gather feedback across several key aspects, including event organisation, content quality, speaker impact, venue suitability, and overall attendee satisfaction. Additionally, the survey aims to pinpoint areas where improvements can be made and to gauge how well the event achieved its goals. Participants include all attendees of the event, including participants, speakers, sponsors, and exhibitors. By gathering insights from a diverse range of perspectives, the survey aims to provide actionable feedback to enhance future event planning and improve the overall attendee experience. Our goal is to better understand attendee preferences and needs to ensure that future events are even more successful and impactful.")
+                onClick={() => {
+                  setSurveyPrompt(
+                    "This survey aims to gather feedback across several key aspects, including event organisation, content quality, speaker impact, venue suitability, and overall attendee satisfaction. Additionally, the survey aims to pinpoint areas where improvements can be made and to gauge how well the event achieved its goals. Participants include all attendees of the event, including participants, speakers, sponsors, and exhibitors. By gathering insights from a diverse range of perspectives, the survey aims to provide actionable feedback to enhance future event planning and improve the overall attendee experience. Our goal is to better understand attendee preferences and needs to ensure that future events are even more successful and impactful."
+                  );
                   // setTimeout(()=>{
                   //   handleGenerateTopics()
                   // }, 2000)
@@ -699,21 +704,23 @@ const CreateSurveyPage = () => {
             </div>
 
             {topics &&
-              topics?.data.topics.map((topic: string[], index: number) => (
-                <div
-                  className={`border ${
-                    isSelected === index ? "border-2 border-red-500" : ""
-                  } py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md `}
-                  key={index}
-                  onClick={(e) => {
-                    // @ts-ignore
-                    dispatch(updateTopic(e.target.innerHTML));
-                    setIsSelected(index);
-                  }}
-                >
-                  {topic}
-                </div>
-              ))}
+              (topics as any)?.data.topics.map(
+                (topic: string[], index: number) => (
+                  <div
+                    className={`border ${
+                      isSelected === index ? "border-2 border-red-500" : ""
+                    } py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md `}
+                    key={index}
+                    onClick={(e) => {
+                      // @ts-ignore
+                      dispatch(updateTopic(e.target.innerHTML));
+                      setIsSelected(index);
+                    }}
+                  >
+                    {topic}
+                  </div>
+                )
+              )}
 
             <form
               onSubmit={(e) => {
@@ -751,9 +758,14 @@ const CreateSurveyPage = () => {
         </IsLoadingModal>
       )}
       {isLoadingTopics && (
-        <IsGenerating isGeneratingSurveyLoading={isLoadingTopics} what="Topics" />
+        <IsGenerating
+          isGeneratingSurveyLoading={isLoadingTopics}
+          what="Topics"
+        />
       )}
-      {isLoading && <IsGenerating isGeneratingSurveyLoading={isLoading} what="Questions" />}
+      {isLoading && (
+        <IsGenerating isGeneratingSurveyLoading={isLoading} what="Questions" />
+      )}
       {generated && (
         <>
           <GeneratedSurvey data={survey?.sections} onClick={UseAnotherPrompt} />
@@ -765,41 +777,40 @@ const CreateSurveyPage = () => {
 
 export default CreateSurveyPage;
 
-
-      // optionType === "Multi-choice"
-            //   ? "multiple_choice"
-            //   : 
-              // optionType === "Dropdown"
-              // ? "drop_down"
-              // : 
-              // optionType === "likert_scale"
-              // ? "likert_scale"
-              // : 
-              // optionType === "Slider"
-              // ? "slider"
-              // : 
-              // optionType === "Star Rating"
-              // ? "star_rating"
-              // : 
-              // optionType === "Multiple Choice"
-              // ? "multiple_choice"
-              // : 
-              // optionType === "Single Choice"
-              // ? "single_choice"
-              // : 
-              // optionType === "Checkbox"
-              // ? "checkbox"
-              // : 
-              // optionType === "Rating Scale"
-              // ? "rating_scale"
-              // : 
-              // optionType === "Comment"
-              // ? "long_text"
-              // : 
-              // optionType === "Boolean"
-              // ? "boolean"
-              // : 
-              // optionType === "Matrix"
-              // ? "matrix_checkbox"
-              // : "matrix_checkbox"
-              // ,
+// optionType === "Multi-choice"
+//   ? "multiple_choice"
+//   :
+// optionType === "Dropdown"
+// ? "drop_down"
+// :
+// optionType === "likert_scale"
+// ? "likert_scale"
+// :
+// optionType === "Slider"
+// ? "slider"
+// :
+// optionType === "Star Rating"
+// ? "star_rating"
+// :
+// optionType === "Multiple Choice"
+// ? "multiple_choice"
+// :
+// optionType === "Single Choice"
+// ? "single_choice"
+// :
+// optionType === "Checkbox"
+// ? "checkbox"
+// :
+// optionType === "Rating Scale"
+// ? "rating_scale"
+// :
+// optionType === "Comment"
+// ? "long_text"
+// :
+// optionType === "Boolean"
+// ? "boolean"
+// :
+// optionType === "Matrix"
+// ? "matrix_checkbox"
+// : "matrix_checkbox"
+// ,

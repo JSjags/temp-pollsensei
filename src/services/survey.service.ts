@@ -141,11 +141,28 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     addSurveyHeader: builder.mutation({
-      query: (body) => ({
-        url: "/survey/file",
-        method: "POST",
-        body,
-      }),
+      //   query: (body) => ({
+      //     url: "/survey/file",
+      //     method: "POST",
+      //     body,
+      //   }),
+      queryFn: async (body, api, extraOptions, baseQuery) => {
+        // Access the Redux state
+        const state = api.getState() as RootState;
+        const token = state.user?.access_token || state.user?.token;
+
+        // Determine the endpoint URL based on the state
+        const url = token ? "survey/file" : "unauth/file";
+
+        // Use the base query to make the request
+        const result = await baseQuery({
+          url,
+          method: "POST",
+          body,
+        });
+
+        return result;
+      },
     }),
     uploadResponseOCR: builder.mutation({
       query: (body) => ({

@@ -23,7 +23,11 @@ import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import QuestionType from "./QuestionType";
 import StyleEditor from "./StyleEditor";
 import AddQuestion from "./AddQuestion";
-import { addSection, deleteQuestionFromSection, resetSurvey } from "@/redux/slices/survey.slice";
+import {
+  addSection,
+  deleteQuestionFromSection,
+  resetSurvey,
+} from "@/redux/slices/survey.slice";
 import { useRouter } from "next/navigation";
 import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
@@ -45,6 +49,15 @@ import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 import ReviewModal from "@/components/modals/ReviewModal";
 import MediaQuestion from "@/components/survey/MediaQuestion";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { IoDocumentOutline } from "react-icons/io5";
+import { Button } from "@/components/ui/button";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -60,6 +73,12 @@ const AddQuestionPage = () => {
   const questions = useSelector(
     (state: RootState) => state?.question?.questions
   );
+
+  const userToken = useSelector(
+    (state: RootState) => state?.user?.access_token || state.user.token
+  );
+  const user = useSelector((state: RootState) => state?.user?.user);
+
   const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
   const [sectionTitle, setSectionTitle] = useState(sectionTopic || "");
   const [sDescription, setsDescription] = useState(sectionDescription || "");
@@ -68,11 +87,13 @@ const AddQuestionPage = () => {
   const [editIndex, setEditIndex] = useState(0);
   const [currentSection, setCurrentSection] = useState(0);
   const [review, setReview] = useState(false);
-  const [survey_id,setSurvey_id] = useState("")
+  const [survey_id, setSurvey_id] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
-
-  const [createSurvey, { data:createdSurveyData, isLoading, isSuccess, isError, error }] =
-    useCreateSurveyMutation();
+  const [
+    createSurvey,
+    { data: createdSurveyData, isLoading, isSuccess, isError, error },
+  ] = useCreateSurveyMutation();
   const [
     saveprogress,
     {
@@ -116,6 +137,11 @@ const AddQuestionPage = () => {
   };
 
   const handleSurveyCreation = async () => {
+    if (!userToken || !user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     const sectionExists = survey.sections.some(
       (section) =>
         section.section_topic === sectionTitle &&
@@ -145,7 +171,7 @@ const AddQuestionPage = () => {
       const updatedSurvey = store.getState().survey;
       await createSurvey(updatedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true)
+      setReview(true);
     } catch (e) {
       console.log(e);
     }
@@ -153,11 +179,11 @@ const AddQuestionPage = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      setReview((prev)=>!prev)
+      setReview((prev) => !prev);
       toast.success("Survey created successfully");
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true)
+      setReview(true);
       // router.push("/surveys/survey-list");
     }
 
@@ -199,15 +225,13 @@ const AddQuestionPage = () => {
     dispatch(deleteQuestion({ questions, editIndex }));
   };
 
-
-
   console.log(questions);
   return (
     <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
           {logoUrl && (
- <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
+            <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
               <Image
                 src={
                   logoUrl instanceof File
@@ -217,27 +241,29 @@ const AddQuestionPage = () => {
                     : sparkly
                 }
                 alt=""
-                   className="w-full object-cover rounded  bg-no-repeat h-16 "
+                className="w-full object-cover rounded  bg-no-repeat h-16 "
                 width={"100"}
                 height={"200"}
               />
             </div>
           )}{" "}
-       {headerUrl &&  (<div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
-         <Image
-                    src={
-                      headerUrl instanceof File
-                        ? URL.createObjectURL(headerUrl)
-                        : typeof headerUrl === "string"
-                        ? headerUrl
-                        : sparkly
-                    }
-                    alt=""
-                    className="w-full object-cover bg-no-repeat h-24 rounded-lg"
-                    width={"100"}
-                    height={"200"}
-                  />
-          </div>)}
+          {headerUrl && (
+            <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+              <Image
+                src={
+                  headerUrl instanceof File
+                    ? URL.createObjectURL(headerUrl)
+                    : typeof headerUrl === "string"
+                    ? headerUrl
+                    : sparkly
+                }
+                alt=""
+                className="w-full object-cover bg-no-repeat h-24 rounded-lg"
+                width={"100"}
+                height={"200"}
+              />
+            </div>
+          )}
           {isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
               <AutosizeTextarea
@@ -271,11 +297,12 @@ const AddQuestionPage = () => {
             </div>
           )}
           {!isEditing && (
-            <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col " 
-            style={{
-              fontSize: `${headerText?.size}px`,
-              fontFamily: `${headerText?.name}`,
-            }}
+            <div
+              className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col "
+              style={{
+                fontSize: `${headerText?.size}px`,
+                fontFamily: `${headerText?.name}`,
+              }}
             >
               <h2 className="text-[1.5rem] font-normal">{sectionTopic}</h2>
               <p>{sectionDescription}</p>
@@ -289,7 +316,6 @@ const AddQuestionPage = () => {
               </div>
             </div>
           )}
-
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
@@ -311,7 +337,7 @@ const AddQuestionPage = () => {
                             // Conditionally render based on question type
                             item.question_type === "multiple_choice" ? (
                               <MultiChoiceQuestion
-                                key={index} 
+                                key={index}
                                 index={index + 1}
                                 question={item.question}
                                 options={item.options}
@@ -320,9 +346,8 @@ const AddQuestionPage = () => {
                                 DeleteQuestion={() =>
                                   handleDeleteQuestion(index)
                                 }
-                                
                               />
-                            ) :  item.question_type === "single_choice" ? (
+                            ) : item.question_type === "single_choice" ? (
                               <SingleChoiceQuestion
                                 index={index + 1}
                                 key={index}
@@ -334,21 +359,9 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
-                            ) :  item.question_type === "checkbox" ? (
+                            ) : item.question_type === "checkbox" ? (
                               <CheckboxQuestion
-                              key={index} 
-                              index={index + 1}
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              DeleteQuestion={() =>
-                                handleDeleteQuestion(index)
-                              }
-                            />
-                            ) : item.question_type === "rating_scale" ? (
-                              <RatingScaleQuestion
-                                key={index} 
+                                key={index}
                                 index={index + 1}
                                 question={item.question}
                                 options={item.options}
@@ -358,8 +371,19 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
-                            )
-                            :  item.question_type === "drop_down" ? (
+                            ) : item.question_type === "rating_scale" ? (
+                              <RatingScaleQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
+                              />
+                            ) : item.question_type === "drop_down" ? (
                               <DropdownQuestion
                                 index={index + 1}
                                 key={index}
@@ -371,8 +395,7 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
-                            )
-                             : item.question_type === "number" ? (
+                            ) : item.question_type === "number" ? (
                               <NumberQuestion
                                 key={index}
                                 index={index + 1}
@@ -380,8 +403,7 @@ const AddQuestionPage = () => {
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                               />
-                            )
-                             : item.question_type === "long_text" ? (
+                            ) : item.question_type === "long_text" ? (
                               <CommentQuestion
                                 key={index}
                                 index={index + 1}
@@ -389,8 +411,7 @@ const AddQuestionPage = () => {
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                               />
-                            ) 
-                             : item.question_type === "media" ? (
+                            ) : item.question_type === "media" ? (
                               <MediaQuestion
                                 key={index}
                                 index={index + 1}
@@ -398,8 +419,7 @@ const AddQuestionPage = () => {
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                               />
-                            ) 
-                            : item.question_type === "short_text" ? (
+                            ) : item.question_type === "short_text" ? (
                               <ShortTextQuestion
                                 key={index}
                                 index={index + 1}
@@ -407,8 +427,7 @@ const AddQuestionPage = () => {
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
                               />
-                            ) 
-                             : item.question_type === "likert_scale" ? (
+                            ) : item.question_type === "likert_scale" ? (
                               <LikertScaleQuestion
                                 key={index}
                                 index={index + 1}
@@ -454,17 +473,16 @@ const AddQuestionPage = () => {
                                   handleDeleteQuestion(index)
                                 }
                               />
-                            )  : item.question_type === "slider" ? (
+                            ) : item.question_type === "slider" ? (
                               <SliderQuestion
-                              question={item.question}
-                              options={item.options}
-                              // step={item.options.length}
-                              questionType={item.question_type}
-                              index={index + 1}
-                              is_required={item.is_required}
+                                question={item.question}
+                                options={item.options}
+                                // step={item.options.length}
+                                questionType={item.question_type}
+                                index={index + 1}
+                                is_required={item.is_required}
                               />
-                            )
-                             : null
+                            ) : null
                           }
                         </div>
                       )}
@@ -478,34 +496,41 @@ const AddQuestionPage = () => {
           {addquestions && (
             <AddQuestion
               onCancel={() => setAddQuestions((prev) => !prev)}
-              onSave={(question, options, questionType, is_required, min, max, rows, columns ) => { 
-                if(questionType === 'number'){
-
+              onSave={(
+                question,
+                options,
+                questionType,
+                is_required,
+                min,
+                max,
+                rows,
+                columns
+              ) => {
+                if (questionType === "number") {
                   const newQuestion = {
                     question: question,
                     question_type: questionType,
                     options: options,
                     is_required: is_required,
                     min: min,
-                    max: max
+                    max: max,
                   };
                   console.log(newQuestion);
                   dispatch(addQuestion(newQuestion));
                   setAddQuestions((prev) => !prev);
-                }else if(questionType === "matrix_checkbox"){
+                } else if (questionType === "matrix_checkbox") {
                   const newQuestion = {
                     question: question,
                     question_type: questionType,
                     options: options,
                     is_required: is_required,
                     rows: rows,
-                    columns: columns
+                    columns: columns,
                   };
                   console.log(newQuestion);
                   dispatch(addQuestion(newQuestion));
                   setAddQuestions((prev) => !prev);
-                }
-                else{
+                } else {
                   const newQuestion = {
                     question: question,
                     question_type: questionType,
@@ -515,7 +540,6 @@ const AddQuestionPage = () => {
                   console.log(newQuestion);
                   dispatch(addQuestion(newQuestion));
                   setAddQuestions((prev) => !prev);
-
                 }
               }}
             />
@@ -545,7 +569,11 @@ const AddQuestionPage = () => {
                 onClick={() => {
                   dispatch(resetQuestion());
                   dispatch(resetSurvey());
-                  router.push('/surveys/survey-list');
+                  if (!userToken || !user) {
+                    router.push("/demo/create-survey");
+                  } else {
+                    router.push("/surveys/survey-list");
+                  }
                 }}
               >
                 <GiCardDiscard className="inline-block mr-2" />
@@ -579,17 +607,58 @@ const AddQuestionPage = () => {
           {isSidebar ? <StyleEditor /> : <QuestionType />}
         </div>
       </div>
-      {
-         review &&   <ReviewModal
-                survey_id={survey_id}
-                openModal={review}
-                onClose={() => {
-                  setReview((prev) => !prev)
-                router.push("/surveys/survey-list");
+      {review && (
+        <ReviewModal
+          survey_id={survey_id}
+          openModal={review}
+          onClose={() => {
+            setReview((prev) => !prev);
+            router.push("/surveys/survey-list");
+          }}
+        />
+      )}
+      <Dialog
+        open={(!userToken || !user) && showAuthModal}
+        onOpenChange={() => setShowAuthModal(false)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                <IoDocumentOutline className="w-8 h-8 text-purple-600" />
+              </div>
+              <DialogTitle className="text-2xl font-semibold text-gray-900">
+                Authentication Required
+              </DialogTitle>
+              <DialogDescription className="text-gray-600">
+                To continue creating your survey and access all features, please
+                log in to your account or sign up if you're new here.
+              </DialogDescription>
+            </div>
+          </DialogHeader>
 
-                }}
-              />
-      }
+          <div className="flex flex-col w-full gap-3 pt-2">
+            <Button
+              onClick={() => router.push("/login?ed=3")}
+              className="w-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white hover:opacity-90 transition-opacity"
+            >
+              Log In
+            </Button>
+
+            <Button
+              onClick={() => router.push("/register?ed=3")}
+              variant="outline"
+              className="w-full border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors"
+            >
+              Sign Up
+            </Button>
+          </div>
+
+          <p className="text-sm text-gray-500 text-center pt-4">
+            By continuing, you agree to our Terms of Service and Privacy Policy.
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

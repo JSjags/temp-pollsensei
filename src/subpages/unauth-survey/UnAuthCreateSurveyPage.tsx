@@ -157,78 +157,82 @@ const UnAuthCreateSurveyPage = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      const refactoredQuestions = data?.data?.response?.map((question: any) => {
-        const optionType = question["Option type"]?.trim();
-        if (optionType === "matrix_multiple_choice") {
+      const refactoredQuestions = (data as any)?.data?.response?.map(
+        (question: any) => {
+          const optionType = question["Option type"]?.trim();
+          if (optionType === "matrix_multiple_choice") {
+            return {
+              question: question.Question,
+              rows: question.Options.Rows,
+              columns: question.Options.Columns,
+              question_type: optionType === null ? optionType : "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "long_text" || optionType === "short_text") {
+            return {
+              question: question.Question,
+              options: "",
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "boolean") {
+            return {
+              question: question.Question,
+              options: ["Yes", "No"],
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "number") {
+            return {
+              question: question.Question,
+              options: "",
+              min: 1,
+              max: 10000000,
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "slider") {
+            return {
+              question: question.Question,
+              options: "",
+              min: question.Options.Min,
+              max: question.Options.Max,
+              step: question.Options.Step,
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
           return {
             question: question.Question,
-            rows: question.Options.Rows,
-            columns: question.Options.Columns,
-            question_type: optionType === null ? optionType : "",
-            is_required: true,
-            description: "",
-          };
-        }
-        if (optionType === "long_text" || optionType === "short_text") {
-          return {
-            question: question.Question,
-            options: "",
+            options: question.Options,
             question_type: optionType || "",
             is_required: true,
             description: "",
           };
         }
-        if (optionType === "boolean") {
-          return {
-            question: question.Question,
-            options: ["Yes", "No"],
-            question_type: optionType || "",
-            is_required: true,
-            description: "",
-          };
-        }
-        if (optionType === "number") {
-          return {
-            question: question.Question,
-            options: "",
-            min: 1,
-            max: 10000000,
-            question_type: optionType || "",
-            is_required: true,
-            description: "",
-          };
-        }
-        if (optionType === "slider") {
-          return {
-            question: question.Question,
-            options: "",
-            min: question.Options.Min,
-            max: question.Options.Max,
-            step: question.Options.Step,
-            question_type: optionType || "",
-            is_required: true,
-            description: "",
-          };
-        }
-        return {
-          question: question.Question,
-          options: question.Options,
-          question_type: optionType || "",
-          is_required: true,
-          description: "",
-        };
-      });
+      );
       dispatch(addSection({ questions: refactoredQuestions }));
-      dispatch(updateConversationId(data?.data?.conversation_id));
-      dispatch(updateDescription(data?.data?.description || surveyPrompt));
+      dispatch(updateConversationId((data as any)?.data?.conversation_id));
+      dispatch(
+        updateDescription((data as any)?.data?.description || surveyPrompt)
+      );
       toast.success("Survey created successfully");
       setGenerated((prev) => !prev);
       setPromptForm(false);
     }
   }, [
-    data?.data?.conversation_id,
-    data?.data?.response,
-    data?.data.topic,
+    (data as any)?.data?.conversation_id,
+    (data as any)?.data?.response,
+    (data as any)?.data.topic,
     dispatch,
     isSuccess,
     surveyPrompt,
@@ -371,7 +375,7 @@ const UnAuthCreateSurveyPage = () => {
                 }`}
                 type="button"
                 onClick={() => {
-                  navigate.push("/surveys/create-manual");
+                  navigate.push("/demo/create-manual");
                 }}
               >
                 Proceed
@@ -700,21 +704,23 @@ const UnAuthCreateSurveyPage = () => {
             </div>
 
             {topics &&
-              topics?.data.topics.map((topic: string[], index: number) => (
-                <div
-                  className={`border ${
-                    isSelected === index ? "border-2 border-red-500" : ""
-                  } py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md `}
-                  key={index}
-                  onClick={(e) => {
-                    // @ts-ignore
-                    dispatch(updateTopic(e.target.innerHTML));
-                    setIsSelected(index);
-                  }}
-                >
-                  {topic}
-                </div>
-              ))}
+              (topics as any)?.data.topics.map(
+                (topic: string[], index: number) => (
+                  <div
+                    className={`border ${
+                      isSelected === index ? "border-2 border-red-500" : ""
+                    } py-4 text-[#7A8699] border-[#CC9BFD] px-2 bg-[#FAFAFA] rounded-md `}
+                    key={index}
+                    onClick={(e) => {
+                      // @ts-ignore
+                      dispatch(updateTopic(e.target.innerHTML));
+                      setIsSelected(index);
+                    }}
+                  >
+                    {topic}
+                  </div>
+                )
+              )}
 
             <form
               onSubmit={(e) => {
