@@ -47,6 +47,15 @@ import ShortTextQuestion from "@/components/survey/LongTextQuestion";
 import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import SliderQuestion from "@/components/survey/SliderQuestion";
 import ReviewModal from "@/components/modals/ReviewModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -81,6 +90,10 @@ const EditSurvey = () => {
   );
   const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
   const theme = useSelector((state: RootState) => state?.survey?.theme);
+  const user = useSelector((state: RootState) => state?.user?.user);
+  const userToken = useSelector(
+    (state: RootState) => state?.user?.access_token || state?.user.token
+  );
   const headerText = useSelector(
     (state: RootState) => state.survey.header_text
   );
@@ -90,8 +103,10 @@ const EditSurvey = () => {
   const router = useRouter();
   const [aiChatbot, setAiChatbot] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
-  const [createSurvey, { data:createdSurveyData, isLoading, isSuccess, isError, error }] =
-    useCreateSurveyMutation();
+  const [
+    createSurvey,
+    { data: createdSurveyData, isLoading, isSuccess, isError, error },
+  ] = useCreateSurveyMutation();
   const [
     saveprogress,
     {
@@ -116,7 +131,8 @@ const EditSurvey = () => {
   const [addMoreQuestion, setAddMoreQuestion] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [review, setReview] = useState(false);
-  const [survey_id,setSurvey_id] = useState("")
+  const [survey_id, setSurvey_id] = useState("");
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const EditQuestion = (index: any) => {
     setEditIndex(index);
@@ -290,74 +306,79 @@ const EditSurvey = () => {
   };
 
   useEffect(() => {
-    if (newQuestionGenerate && Array.isArray(newSingleSurvey?.data?.response)) {
-      console.log(newSingleSurvey);
+    if (
+      newQuestionGenerate &&
+      Array.isArray((newSingleSurvey as any)?.data?.response)
+    ) {
+      console.log(newSingleSurvey as any);
       const updatedSections = [...questions];
       const currentSectionData = updatedSections[currentSection];
 
       // Iterate over each question in the array and add it to the current section
-      const newQuestions = newSingleSurvey.data.response.map((question: any) => {
-        const optionType = question["Option type"]?.trim();
-        if(optionType ==="matrix_multiple_choice"){
+      const newQuestions = (newSingleSurvey as any).data.response.map(
+        (question: any) => {
+          const optionType = question["Option type"]?.trim();
+          if (optionType === "matrix_multiple_choice") {
+            return {
+              question: question.Question,
+              rows: question.Options.Rows,
+              columns: question.Options.Columns,
+              question_type: optionType === null ? optionType : "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "long_text" || optionType === "short_text") {
+            return {
+              question: question.Question,
+              options: "",
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "boolean") {
+            return {
+              question: question.Question,
+              options: ["Yes", "No"],
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "number") {
+            return {
+              question: question.Question,
+              options: "",
+              min: 1,
+              max: 10000000,
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
+          if (optionType === "slider") {
+            return {
+              question: question.Question,
+              options: "",
+              min: question.Options.Min,
+              max: question.Options.Max,
+              step: question.Options.Step,
+              question_type: optionType || "",
+              is_required: true,
+              description: "",
+            };
+          }
           return {
             question: question.Question,
-            rows: question.Options.Rows,
-            columns: question.Options.Columns,
-            question_type:optionType === null ? optionType : "",
+            options: question.Options,
+            question_type: optionType || "",
             is_required: true,
             description: "",
-          }
+          };
         }
-        if(optionType ==="long_text" || optionType ==="short_text"){
-          return {
-            question: question.Question,
-            options: "",
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        if(optionType ==="boolean"){
-          return {
-            question: question.Question,
-            options: ["Yes", "No"],
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        if(optionType ==="number"){
-          return {
-            question: question.Question,
-            options: "",
-            min:1,
-            max:10000000,
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        if(optionType ==="slider"){
-          return {
-            question: question.Question,
-            options: "",
-            min: question.Options.Min,
-            max:question.Options.Max,
-            step:question.Options.Step,
-            question_type:optionType || "",
-            is_required: true,
-            description: "",
-          }
-        }
-        return {
-          question: question.Question,
-          options: question.Options,
-          question_type:optionType || "",
-          is_required: true,
-          description: "",
-        };
-      });
-  
+      );
+
       // Append new questions to the current section
       const updatedQuestions = [
         ...currentSectionData.questions,
@@ -378,21 +399,22 @@ const EditSurvey = () => {
   }, [
     dispatch,
     newQuestionGenerate,
-    newSingleSurvey?.data?.response,
+    (newSingleSurvey as any)?.data?.response,
     currentSection,
   ]);
 
   const handleSurveyCreation = async () => {
-    // if(logoUrl === '' || headerUrl === ''){
-    //   toast.warning("Header image and logo can not be empty")
-    //   return null
-    // }
+    if (!userToken || !user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       console.log(survey);
       const updatedSurvey = store.getState().survey;
       await createSurvey(updatedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true)
+      setReview(true);
     } catch (e) {
       console.log(e);
     }
@@ -400,11 +422,11 @@ const EditSurvey = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      setReview((prev)=>!prev)
+      setReview((prev) => !prev);
       toast.success("Survey created successfully");
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true)
+      setReview(true);
       // router.push("/surveys/survey-list");
     }
 
@@ -682,7 +704,8 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    ) : item.question_type === "matrix_multiple_choice" || item.question_type === "matrix_checkbox" ? (
+                    ) : item.question_type === "matrix_multiple_choice" ||
+                      item.question_type === "matrix_checkbox" ? (
                       <MatrixQuestion
                         key={index}
                         index={index + 1}
@@ -719,7 +742,7 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    ) :  item.question_type === "single_choice" ? (
+                    ) : item.question_type === "single_choice" ? (
                       <SingleChoiceQuestion
                         index={index + 1}
                         key={index}
@@ -727,9 +750,7 @@ const EditSurvey = () => {
                         options={item.options}
                         questionType={item.question_type}
                         EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() =>
-                          handleDeleteQuestion(index)
-                        }
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
                         onSave={handleAISave}
                         is_required={item.is_requied}
                         setIsRequired={() => {
@@ -756,54 +777,15 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    ) :  item.question_type === "checkbox" ? (
+                    ) : item.question_type === "checkbox" ? (
                       <CheckboxQuestion
-                      key={index} 
-                      index={index + 1}
-                      question={item.question}
-                      options={item.options}
-                      questionType={item.question_type}
-                      EditQuestion={() => EditQuestion(index)}
-                      DeleteQuestion={() =>
-                        handleDeleteQuestion(index)
-                      }
-                      onSave={handleAISave}
-                      is_required={item.is_requied}
-                      setIsRequired={() => {
-                        const updatedSections = [...questions];
-                        const updatedSection = {
-                          ...updatedSections[currentSection],
-                        };
-                        const updatedQuestions = [
-                          ...updatedSection.questions,
-                        ];
-
-                        updatedQuestions[index] = {
-                          ...updatedQuestions[index],
-                          is_required: !item.is_required,
-                        };
-
-                        updatedSection.questions = updatedQuestions;
-                        updatedSections[currentSection] = updatedSection;
-                        dispatch(
-                          updateSection({
-                            index: currentSection,
-                            newSection: updatedSection,
-                          })
-                        );
-                      }}
-                    />
-                    ) : item.question_type === "rating_scale" ? (
-                      <RatingScaleQuestion
-                        key={index} 
+                        key={index}
                         index={index + 1}
                         question={item.question}
                         options={item.options}
                         questionType={item.question_type}
                         EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() =>
-                          handleDeleteQuestion(index)
-                        }
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
                         onSave={handleAISave}
                         is_required={item.is_requied}
                         setIsRequired={() => {
@@ -830,8 +812,42 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    )
-                    :  item.question_type === "drop_down" ? (
+                    ) : item.question_type === "rating_scale" ? (
+                      <RatingScaleQuestion
+                        key={index}
+                        index={index + 1}
+                        question={item.question}
+                        options={item.options}
+                        questionType={item.question_type}
+                        EditQuestion={() => EditQuestion(index)}
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
+                        onSave={handleAISave}
+                        is_required={item.is_requied}
+                        setIsRequired={() => {
+                          const updatedSections = [...questions];
+                          const updatedSection = {
+                            ...updatedSections[currentSection],
+                          };
+                          const updatedQuestions = [
+                            ...updatedSection.questions,
+                          ];
+
+                          updatedQuestions[index] = {
+                            ...updatedQuestions[index],
+                            is_required: !item.is_required,
+                          };
+
+                          updatedSection.questions = updatedQuestions;
+                          updatedSections[currentSection] = updatedSection;
+                          dispatch(
+                            updateSection({
+                              index: currentSection,
+                              newSection: updatedSection,
+                            })
+                          );
+                        }}
+                      />
+                    ) : item.question_type === "drop_down" ? (
                       <DropdownQuestion
                         index={index + 1}
                         key={index}
@@ -839,9 +855,7 @@ const EditSurvey = () => {
                         options={item.options}
                         questionType={item.question_type}
                         EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() =>
-                          handleDeleteQuestion(index)
-                        }
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
                         onSave={handleAISave}
                         is_required={item.is_requied}
                         setIsRequired={() => {
@@ -868,17 +882,14 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    )
-                     : item.question_type === "number" ? (
+                    ) : item.question_type === "number" ? (
                       <NumberQuestion
                         key={index}
                         index={index + 1}
                         question={item.question}
                         questionType={item.question_type}
                         EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() =>
-                          handleDeleteQuestion(index)
-                        }
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
                         onSave={handleAISave}
                         is_required={item.is_requied}
                         setIsRequired={() => {
@@ -912,9 +923,7 @@ const EditSurvey = () => {
                         question={item.question}
                         questionType={item.question_type}
                         EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() =>
-                          handleDeleteQuestion(index)
-                        }
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
                         onSave={handleAISave}
                         is_required={item.is_requied}
                         setIsRequired={() => {
@@ -949,9 +958,7 @@ const EditSurvey = () => {
                         options={item.options}
                         questionType={item.question_type}
                         EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() =>
-                          handleDeleteQuestion(index)
-                        }
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
                         onSave={handleAISave}
                         is_required={item.is_requied}
                         setIsRequired={() => {
@@ -978,18 +985,16 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    )  : item.question_type === "slider" ? (
+                    ) : item.question_type === "slider" ? (
                       <SliderQuestion
-                      question={item.question}
-                      options={item.options}
-                      // step={item.options.length}
-                      questionType={item.question_type}
-                      index={index + 1}
-                      is_required={item.is_required}
-                      EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() =>
-                          handleDeleteQuestion(index)
-                        }
+                        question={item.question}
+                        options={item.options}
+                        // step={item.options.length}
+                        questionType={item.question_type}
+                        index={index + 1}
+                        is_required={item.is_required}
+                        EditQuestion={() => EditQuestion(index)}
+                        DeleteQuestion={() => handleDeleteQuestion(index)}
                         // @ts-expect-error expect here
                         onSave={handleAISave}
                         setIsRequired={() => {
@@ -1016,8 +1021,7 @@ const EditSurvey = () => {
                           );
                         }}
                       />
-                    ) 
-                    : null}
+                    ) : null}
                   </div>
                 )
               )}
@@ -1153,17 +1157,58 @@ const EditSurvey = () => {
           />
         </motion.div>
       </AnimatePresence>
-      {
-         review &&   <ReviewModal
-                survey_id={survey_id}
-                openModal={review}
-                onClose={() =>{ 
-                  setReview((prev) => !prev)
-                router.push("/surveys/survey-list");
+      {review && (
+        <ReviewModal
+          survey_id={survey_id}
+          openModal={review}
+          onClose={() => {
+            setReview((prev) => !prev);
+            router.push("/surveys/survey-list");
+          }}
+        />
+      )}
+      <Dialog
+        open={(!userToken || !user) && showAuthModal}
+        onOpenChange={() => setShowAuthModal(false)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                <IoDocumentOutline className="w-8 h-8 text-purple-600" />
+              </div>
+              <DialogTitle className="text-2xl font-semibold text-gray-900">
+                Authentication Required
+              </DialogTitle>
+              <DialogDescription className="text-gray-600">
+                To continue creating your survey and access all features, please
+                log in to your account or sign up if you're new here.
+              </DialogDescription>
+            </div>
+          </DialogHeader>
 
-                }}
-              />
-      }
+          <div className="flex flex-col w-full gap-3 pt-2">
+            <Button
+              onClick={() => router.push("/login?ed=2")}
+              className="w-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white hover:opacity-90 transition-opacity"
+            >
+              Log In
+            </Button>
+
+            <Button
+              onClick={() => router.push("/register?ed=2")}
+              variant="outline"
+              className="w-full border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors"
+            >
+              Sign Up
+            </Button>
+          </div>
+
+          <p className="text-sm text-gray-500 text-center pt-4">
+            By continuing, you agree to our Terms of Service and Privacy Policy.
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

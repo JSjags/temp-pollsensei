@@ -24,6 +24,7 @@ import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import { dark_theme_logo } from "@/assets/images";
 import StateLoader2 from "@/components/common/StateLoader2";
+import { useSearchParams } from "next/navigation";
 
 const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
@@ -49,6 +50,8 @@ const LoginPage = () => {
   const [eyeState, setEyeState] = useState(false);
   const [googleLogin, { data: register, error: registerError }] =
     useGoogleLoginMutation();
+  const searchParams = useSearchParams();
+  const ed = searchParams.get("ed");
 
   const onSubmit = async (values: { email: string; password: string }) => {
     try {
@@ -149,7 +152,7 @@ const LoginPage = () => {
           </h5>
         </div>
       </div>
-      <div className="w-full md:w-1/2 flex flex-col justify-start items-center px-4 md:px-8 py-6 md:py-0">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0">
         {loginState && (
           <div className="flex justify-center flex-col max-w-[516px] w-full">
             <div className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10">
@@ -258,7 +261,12 @@ const LoginPage = () => {
             </div>
           </div>
         )}
-        {state && <StateLoader2 defaultGoto="/login" />}
+        {state && (
+          <StateLoader2
+            defaultGoto={"/login"}
+            directRoute={ed ? "/surveys/edit-survey" : undefined}
+          />
+        )}
         {/* {state && <StateLoader goto="/dashboard" />} */}
       </div>
     </section>

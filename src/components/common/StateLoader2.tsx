@@ -8,6 +8,7 @@ import { RootState } from "@/redux/store";
 
 interface StateLoader2Props {
   defaultGoto: string; // Fallback route
+  directRoute?: string; // Fallback route
 }
 
 const roleRouteMap: { [key: string]: string } = {
@@ -19,13 +20,21 @@ const roleRouteMap: { [key: string]: string } = {
   "Super Admin": "/super-admin",
 };
 
-const StateLoader2: React.FC<StateLoader2Props> = ({ defaultGoto }) => {
+const StateLoader2: React.FC<StateLoader2Props> = ({
+  defaultGoto,
+  directRoute,
+}) => {
   const [count, setCount] = useState(5);
   const router = useRouter();
-  const userRoles = useSelector((state: RootState) => state.user.user?.roles[0].role || []);
-  console.log(userRoles)
+  const userRoles = useSelector(
+    (state: RootState) => state.user.user?.roles[0].role || []
+  );
+  console.log(userRoles);
 
   const getDestinationRoute = () => {
+    if (directRoute) {
+      return directRoute;
+    }
     if (userRoles.includes("Admin")) return roleRouteMap["Admin"]; // Admin has highest priority
     for (const role of Object.keys(roleRouteMap)) {
       if (userRoles.includes(role)) {
@@ -59,4 +68,3 @@ const StateLoader2: React.FC<StateLoader2Props> = ({ defaultGoto }) => {
 };
 
 export default StateLoader2;
-

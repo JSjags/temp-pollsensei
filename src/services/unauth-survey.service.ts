@@ -1,7 +1,6 @@
-import { RootState } from "@/redux/store";
 import apiSlice from "./config/apiSlice";
 
-export const surveyApiSlice = apiSlice.injectEndpoints({
+export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     fetchSurveys: builder.query({
       query: (page) => ({
@@ -9,31 +8,19 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    createAiSurvey: builder.mutation({
-      // query: (body) => ({
-      //   url: "survey/ai/generate-questions",
-      //   method: "POST",
-      //   body: body,
-      // }),
-      queryFn: async (body, api, extraOptions, baseQuery) => {
-        // Access the Redux state
-        const state = api.getState() as RootState;
-        const token = state.user?.access_token || state.user?.token;
-
-        // Determine the endpoint URL based on the state
-        const url = token
-          ? "survey/ai/generate-questions"
-          : "unauth/ai/generate-questions";
-
-        // Use the base query to make the request
-        const result = await baseQuery({
-          url,
-          method: "POST",
-          body,
-        });
-
-        return result;
-      },
+    unAuthCreateAiSurvey: builder.mutation({
+      query: (body) => ({
+        url: "unauth/ai/generate-questions",
+        method: "POST",
+        body: body,
+      }),
+    }),
+    unAuthRecreateAiSurvey: builder.mutation({
+      query: (body) => ({
+        url: "unauth/ai/generate-questions",
+        method: "POST",
+        body: body,
+      }),
     }),
     duplicateSurvey: builder.mutation({
       query: (body) => ({
@@ -79,52 +66,26 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
-    generateTopics: builder.mutation({
-      queryFn: async (body, api, extraOptions, baseQuery) => {
-        // Access the Redux state
-        const state = api.getState() as RootState;
-        const token = state.user?.access_token || state.user?.token;
-
-        // Determine the endpoint URL based on the state
-        const url = token
-          ? "survey/ai/generate-topics"
-          : "unauth/ai/generate-topics";
-
-        // Use the base query to make the request
-        const result = await baseQuery({
-          url,
-          method: "POST",
-          body,
-        });
-
-        return result;
-      },
+    unAuthGenerateTopics: builder.mutation({
+      query: (body) => ({
+        url: "unauth/ai/generate-topics",
+        method: "POST",
+        body: body,
+      }),
     }),
-    generateSingleSurvey: builder.mutation({
-      // query: (body) => ({
-      //   url: "survey/ai/generate-single-question",
-      //   method: "POST",
-      //   body: body,
-      // }),
-      queryFn: async (body, api, extraOptions, baseQuery) => {
-        // Access the Redux state
-        const state = api.getState() as RootState;
-        const token = state.user?.access_token || state.user?.token;
-
-        // Determine the endpoint URL based on the state
-        const url = token
-          ? "survey/ai/generate-single-question"
-          : "unauth/ai/generate-single-question";
-
-        // Use the base query to make the request
-        const result = await baseQuery({
-          url,
-          method: "POST",
-          body,
-        });
-
-        return result;
-      },
+    unAuthGenerateSingleSurvey: builder.mutation({
+      query: (body) => ({
+        url: "unauth/ai/generate-single-question",
+        method: "POST",
+        body: body,
+      }),
+    }),
+    unAuthRegenerateSingleSurvey: builder.mutation({
+      query: (body) => ({
+        url: "unauth/ai/regenerate-single-question",
+        method: "POST",
+        body: body,
+      }),
     }),
     saveProgress: builder.mutation({
       query: (body) => ({
@@ -310,10 +271,10 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 export const {
   useFetchSurveysQuery,
   useCreateSurveyMutation,
-  useCreateAiSurveyMutation,
-  useGenerateSingleSurveyMutation,
+  useUnAuthCreateAiSurveyMutation,
+  useUnAuthGenerateSingleSurveyMutation,
   useAddSurveyHeaderMutation,
-  useGenerateTopicsMutation,
+  useUnAuthGenerateTopicsMutation,
   useSaveProgressMutation,
   useFetchASurveyQuery,
   useDownloadPDFQuery,
@@ -346,4 +307,4 @@ export const {
   useLazyDownloadAllResponseQuery,
   useLazyDownloadSingleResponseQuery,
   useUploadResponseFileMutation,
-} = surveyApiSlice;
+} = unAuthSurveyApiSlice;
