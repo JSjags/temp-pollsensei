@@ -288,7 +288,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 )}
               </div>
             ))}
-            {editedQuestionType === "multiple_choice" && (
+            {editedQuestionType === "multiple_choice" || editedQuestionType === "single_choice" || editedQuestionType === "checkbox" && (
               <button
                 onClick={handleAddOption}
                 className="text-blue-500 mt-2 text-start"
@@ -296,6 +296,21 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 Add Option
               </button>
             )}
+
+              {editedQuestionType === "long_text" ||
+              editedQuestionType === "short_text" ||
+              editedQuestionType === "boolean" ||
+              editedQuestionType === "slider" ||
+              editedQuestionType === "number" ? (
+                ""
+              ) : (
+                <button
+                  onClick={handleAddOption}
+                  className="text-blue-500 mt-2 border py-2 px-4 rounded-full text-start"
+                >
+                  Add Option
+                </button>
+              )}
           </div>
         )}
 
