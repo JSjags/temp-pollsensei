@@ -19,7 +19,7 @@ import {
 } from "@/services/survey.service";
 import { toast } from "react-toastify";
 import IsLoadingModal from "@/components/modals/IsLoadingModal";
-import GeneratedSurvey from "./GeneratedSurvey";
+import GeneratedSurvey from "../survey/GeneratedSurvey";
 import IsGenerating from "@/components/modals/IsGenerating";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
@@ -63,7 +63,7 @@ const mascotVariants = {
   },
 };
 
-const CreateSurveyPage = () => {
+const UnAuthCreateSurveyPage = () => {
   const [selectedDiv, setSelectedDiv] = useState(null);
   const [selectedSurveyType, setSelectedSurveyType] = useState("");
   const [isSelected, setIsSelected] = useState<number | null>(null);
@@ -375,7 +375,7 @@ const CreateSurveyPage = () => {
                 }`}
                 type="button"
                 onClick={() => {
-                  navigate.push("/surveys/create-manual");
+                  navigate.push("/demo/create-manual");
                 }}
               >
                 Proceed
@@ -775,7 +775,7 @@ const CreateSurveyPage = () => {
   );
 };
 
-export default CreateSurveyPage;
+export default UnAuthCreateSurveyPage;
 
 // optionType === "Multi-choice"
 //   ? "multiple_choice"

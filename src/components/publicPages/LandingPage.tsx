@@ -326,7 +326,7 @@ const LandingPage: React.FC = () => {
                 className="inline-block"
               >
                 <Link
-                  href="/register"
+                  href="/demo/create-survey"
                   className="relative inline-block bg-white font-bold py-3 px-6 sm:px-8 rounded-md text-base sm:text-lg shadow-lg overflow-hidden group"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -344,7 +344,8 @@ const LandingPage: React.FC = () => {
                 className="inline-block"
               >
                 <Link
-                  href="https://youtu.be/VtHEtba0OnA?si=oAP1P0nwoRn2-Vm3" target="_blank" 
+                  href="https://youtu.be/VtHEtba0OnA?si=oAP1P0nwoRn2-Vm3"
+                  target="_blank"
                   className="relative inline-block bg-none font-bold py-3 px-6 sm:px-8 rounded-md text-base sm:text-lg shadow-lg overflow-hidden group text-purple-500 border border-purple-500"
                 >
                   <span className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
@@ -435,7 +436,7 @@ const LandingPage: React.FC = () => {
                     Build audience specific surveys with one simple <br />{" "}
                     prompt
                   </p>
-                  <Link href={"/login"} className="auth-btn w-1/2">
+                  <Link href="/demo/create-survey" className="auth-btn w-1/2">
                     Survey in 1-Click
                   </Link>
                 </div>
@@ -451,7 +452,7 @@ const LandingPage: React.FC = () => {
                     Access Real-time PollMaster support throughout the survey
                     lifecycle-from creation to reporting.
                   </p>
-                  <Link href={"/login"} className="auth-btn w-1/2">
+                  <Link href="/demo/create-survey" className="auth-btn w-1/2">
                     Get Instant AI Assistance
                   </Link>
                 </div>
@@ -474,7 +475,7 @@ const LandingPage: React.FC = () => {
                   into <br className="hidden lg:flex" /> clear, impactful
                   insights—no data expertise required
                 </p>
-                <Link href={"/login"} className="auth-btn md:w-1/3">
+                <Link href="/demo/create-survey" className="auth-btn md:w-1/3">
                   Try Now
                 </Link>
               </div>

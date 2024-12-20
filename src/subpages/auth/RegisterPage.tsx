@@ -22,7 +22,8 @@ import Input from "@/components/ui/Input";
 import { FaTimesCircle } from "react-icons/fa";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import { dark_theme_logo } from "@/assets/images";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import mixpanel from "mixpanel-browser";
 
 const constraints = {
   name: {
@@ -65,7 +66,7 @@ const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
 
 const RegisterPage = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [registerUser, { isSuccess, isError, error, isLoading }] =
     useRegisterUserMutation();
 
@@ -80,6 +81,9 @@ const RegisterPage = () => {
   const [pwdFocus, setPwdFocus] = useState(false);
   const [matchFocus, setMatchFocus] = useState(false);
 
+  const searchParams = useSearchParams();
+  const ed = searchParams.get("ed");
+
   const pattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
 
   const toggleEye = (field: "password" | "confirmPassword") => {
@@ -89,22 +93,25 @@ const RegisterPage = () => {
     }));
   };
 
-  
-
   const onSubmit = async (values: any) => {
+    // Track the button click with Mixpanel
     try {
       await registerUser(values).unwrap();
       toast.success(
         "User registered successfully, check your email to continue"
       );
       // Navigate to login page
-      router.push("/login");
+      router.push(`/login?${ed && `ed=${ed}`}`);
       console.log("User registered successfully");
+      // mixpanel.track("Sign-Up Clicked", {
+      //   timestamp: new Date().toISOString(), // Optional: Track time
+      // });
     } catch (err: any) {
       toast.error(
         "Failed to register user " + (err?.data?.message || err.message)
       );
       console.error("Failed to register user", err);
+      console.error("Error tracking event:", err);
     }
   };
 
@@ -381,7 +388,19 @@ const RegisterPage = () => {
 
           <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
             <span
-              onClick={() => googleSignUp()}
+              onClick={() => {
+                // Track the button click with Mixpanel
+                try {
+                  googleSignUp();
+                  // mixpanel.track("Google Sign-Up Clicked", {
+                  //   timestamp: new Date().toISOString(), // Optional: Track time
+                  // });
+                } catch (err) {
+                  console.error("Error during Google sign up:", err);
+                  toast.error("Failed to sign up with Google");
+                  console.error("Error tracking event:", err);
+                }
+              }}
               className="flex justify-between items-center gap-2 border pr-2 rounded-full"
             >
               <Image

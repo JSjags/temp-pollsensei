@@ -10,12 +10,15 @@ import { pollsensei_new_logo } from "@/assets/images";
 import { usePathname, useRouter } from "next/navigation";
 // import { ThemeToggle } from "../theme-toggle";
 
-
-const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void }) => {
+const NavBar = ({
+  scrollToSection,
+}: {
+  scrollToSection?: (id: string) => void;
+}) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { isLoggedIn } = useIsLoggedIn({ message: "" });
   const state = useSelector((state: RootState) => state.user);
-  const pathname = usePathname()
+  const pathname = usePathname();
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -23,14 +26,14 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
   const router = useRouter();
 
   const handleLinkClick = (item: string) => {
-    const isLandingPage = pathname === "/"; 
+    const isLandingPage = pathname === "/";
 
     if (item === "Features" || item === "FAQs" || item === "Benefits") {
       const sectionId = item.toLowerCase();
 
       if (isLandingPage) {
         // If already on the landing page, scroll to the section
-        scrollToSection ?  scrollToSection(sectionId) : null;
+        scrollToSection ? scrollToSection(sectionId) : null;
       } else {
         // If not on the landing page, navigate to the landing page with a query parameter
         router.push(`/?section=${sectionId}`);
@@ -45,13 +48,20 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
     <header className="sticky top-0 z-50 shadow-md bg-white">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex gap-5 items-center">
-        {/* Logo */}
-        <Link href={"/"} className="flex items-center gap-2 cursor-pointer lg:mr-16">
-          <Image src={pollsensei_new_logo} alt="Logo" className="h-8 w-auto" />
-        </Link>
+          {/* Logo */}
+          <Link
+            href={"/"}
+            className="flex items-center gap-2 cursor-pointer lg:mr-16"
+          >
+            <Image
+              src={pollsensei_new_logo}
+              alt="Logo"
+              className="h-8 w-auto"
+            />
+          </Link>
 
-        {/* Desktop Navigation */}
-        {/* <div className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation */}
+          {/* <div className="hidden md:flex items-center space-x-8">
           {[ "Benefits" , "Features", "Pricing", "Resource Hub", "FAQs"].map((item) => (
             <Link
               key={item}
@@ -64,36 +74,37 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
           ))}
         </div> */}
 
-<div className="hidden md:flex items-center space-x-8">
-            {["Benefits", "Features", "Pricing", "Resource Hub", "FAQs"].map((item) => (
-              <span
-                key={item}
-                onClick={() => handleLinkClick(item)}
-                className="text-gray-600 hover:text-[#5B03B2] relative group cursor-pointer"
-              >
-                {item}
-                <span className="absolute left-0 bottom-0 w-full h-0.5 bg-[#5B03B2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-              </span>
-            ))}
+          <div className="hidden md:flex items-center space-x-8">
+            {["Benefits", "Features", "Pricing", "Resource Hub", "FAQs"].map(
+              (item) => (
+                <span
+                  key={item}
+                  onClick={() => handleLinkClick(item)}
+                  className="text-gray-600 hover:text-[#5B03B2] relative group cursor-pointer"
+                >
+                  {item}
+                  <span className="absolute left-0 bottom-0 w-full h-0.5 bg-[#5B03B2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                </span>
+              )
+            )}
           </div>
-
         </div>
-
 
         {/* Mobile Menu Button */}
         <div className="flex gap-5 items-center">
-        {/* Login Button */}
-        {
-          !isLoggedIn || state.user === null || state.access_token === null || state.token === null ? (
-        <div className="hidden md:block">
-          <Link
-            href="/login"
-            className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-md"
-          >
-            Try for Free
-          </Link>
-        </div>
-
+          {/* Login Button */}
+          {!isLoggedIn ||
+          state.user === null ||
+          state.access_token === null ||
+          state.token === null ? (
+            <div className="hidden md:block">
+              <Link
+                href="/demo/create-survey"
+                className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-md"
+              >
+                Try for Free
+              </Link>
+            </div>
           ) : (
             <div className="hidden md:block">
               <Link
@@ -103,8 +114,7 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
                 Dashboard
               </Link>
             </div>
-          )
-        }
+          )}
           {/* <ThemeToggle /> */}
         </div>
         <button className="md:hidden" onClick={toggleSidebar}>
@@ -179,7 +189,7 @@ const NavBar = ({ scrollToSection }: { scrollToSection?: (id: string) => void })
                   </button>
                 </div>
                 <div className="flex flex-col space-y-4">
-                  {[ "About Us", "Benefits" , "Features", "Pricing", "FAQs"].map(
+                  {["About Us", "Benefits", "Features", "Pricing", "FAQs"].map(
                     (item) => (
                       <Link
                         key={item}

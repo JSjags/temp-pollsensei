@@ -13,13 +13,12 @@ const Page = (props: Props) => {
   const router = useRouter();
   const { isLoggedIn } = useIsLoggedIn({ message: "" });
   const state = useSelector((state: RootState) => state.user);
-  if (
-    isLoggedIn ||
-    state.user !== null ||
-    state.access_token !== null ||
-    state.token !== null
-  ) {
-    router.push("/dashboard");
+  const userToken = useSelector(
+    (state: RootState) => state.user?.access_token || state.user.token
+  );
+
+  if (state.user) {
+    router.push(`/dashboard`);
   }
   return <RegisterPage />;
 };

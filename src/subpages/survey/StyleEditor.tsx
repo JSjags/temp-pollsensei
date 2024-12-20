@@ -103,9 +103,9 @@ const StyleEditor = () => {
         const response = await addSurveyHeader(formData).unwrap();
 
         if (file_type === "logo") {
-          dispatch(saveLogoUrl(response?.data.url));
+          dispatch(saveLogoUrl((response as any)?.data.url));
         } else {
-          dispatch(saveHeaderUrl(response?.data.url));
+          dispatch(saveHeaderUrl((response as any)?.data.url));
         }
 
         toast.success("Image uploaded successfully");
@@ -118,17 +118,16 @@ const StyleEditor = () => {
   };
 
   useEffect(() => {
-    if (isSuccess && response?.data) {
-      if (response.data.file_type === "logo") {
-        dispatch(saveLogoUrl(response.data.url));
-      } else if (response.data.file_type === "header_image") {
-        dispatch(saveHeaderUrl(response.data.url));
+    if (isSuccess && (response as any)?.data) {
+      if ((response as any).data.file_type === "logo") {
+        dispatch(saveLogoUrl((response as any).data.url));
+      } else if ((response as any).data.file_type === "header_image") {
+        dispatch(saveHeaderUrl((response as any).data.url));
       }
     }
   }, [isSuccess, response, dispatch]);
 
   console.log(color);
-
 
   useEffect(() => {
     dispatch(saveHeaderText(headerFont));
@@ -219,7 +218,10 @@ const StyleEditor = () => {
               //   dispatch(saveHeaderText(headerFont));
               // }}
               onChange={(opt) =>
-                setHeaderFont((prev) => ({ ...prev, name: opt?.value || "Helvetica" }))
+                setHeaderFont((prev) => ({
+                  ...prev,
+                  name: opt?.value || "Helvetica",
+                }))
               }
               className="w-[80%]"
               classNamePrefix={`header_font`}
@@ -253,7 +255,10 @@ const StyleEditor = () => {
               //   dispatch(saveQuestionText(questionFont));
               // }}
               onChange={(opt) =>
-                setQuestionFont((prev) => ({ ...prev, name: opt?.value || "Helvetica" }))
+                setQuestionFont((prev) => ({
+                  ...prev,
+                  name: opt?.value || "Helvetica",
+                }))
               }
               className="w-[80%]"
               classNamePrefix={`question_font`}
@@ -284,7 +289,10 @@ const StyleEditor = () => {
               //   dispatch(saveBodyText(bodyFont));
               // }}
               onChange={(opt) =>
-                setBodyFont((prev) => ({ ...prev, name: opt?.value || "Helvetica" }))
+                setBodyFont((prev) => ({
+                  ...prev,
+                  name: opt?.value || "Helvetica",
+                }))
               }
               className="w-[80%]"
               classNamePrefix={`body_font`}
@@ -352,7 +360,6 @@ const StyleEditor = () => {
                     src={logo_url !== null && logo_url ? logo_url : ""}
                     alt="Logo"
                   />
-              
                 )}
               </label>
               <input
