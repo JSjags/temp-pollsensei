@@ -70,6 +70,10 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const surveyTitle = useSelector((state: RootState) => state?.survey.topic);
+  const userToken = useSelector(
+    (state: RootState) => state?.user?.access_token || state.user.token
+  );
+  const user = useSelector((state: RootState) => state?.user?.user);
   const headerText = useSelector(
     (state: RootState) => state?.survey?.header_text
   );
@@ -107,7 +111,9 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
         description: surveyDescription,
       })
     );
-    router.push("/surveys/edit-survey");
+    router.push(
+      userToken && user ? "/surveys/edit-survey" : "/demo/edit-survey"
+    );
   };
 
   return (
@@ -186,18 +192,15 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 EditQuestion={() => EditQuestion(index)}
                                 canUseAI={true}
                               />
-                            )  :  item.question_type === "single_choice" ? (
+                            ) : item.question_type === "single_choice" ? (
                               <SingleChoiceQuestion
                                 index={index + 1}
                                 key={index}
                                 question={item.question}
                                 options={item.options}
                                 questionType={item.question_type}
-                              
-                               
                               />
-                            )
-                            : item.question_type === "comment" ||
+                            ) : item.question_type === "comment" ||
                               item.question_type === "long_text" ? (
                               <CommentQuestion
                                 key={index}
@@ -205,7 +208,8 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 question={item.question}
                                 questionType={item.question_type}
                               />
-                            ) : item.question_type === "matrix_multiple_choice" ? (
+                            ) : item.question_type ===
+                              "matrix_multiple_choice" ? (
                               <MatrixQuestion
                                 key={index}
                                 index={index + 1}
@@ -215,21 +219,21 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 question={item.question}
                                 questionType={item.question_type}
                               />
-                            ) :  item.question_type === "checkbox" ? (
+                            ) : item.question_type === "checkbox" ? (
                               <CheckboxQuestion
-                              key={index} 
-                              index={index + 1}
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              // EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={() =>
-                              //   handleDeleteQuestion(index)
-                              // }
-                            />
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                // EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={() =>
+                                //   handleDeleteQuestion(index)
+                                // }
+                              />
                             ) : item.question_type === "rating_scale" ? (
                               <RatingScaleQuestion
-                                key={index} 
+                                key={index}
                                 index={index + 1}
                                 question={item.question}
                                 options={item.options}
@@ -251,7 +255,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 //   handleDeleteQuestion(index)
                                 // }
                               />
-                            )  : item.question_type === "number" ? (
+                            ) : item.question_type === "number" ? (
                               <NumberQuestion
                                 key={index}
                                 index={index + 1}
@@ -267,8 +271,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 questionType={item.question_type}
                                 // EditQuestion={() => EditQuestion(index)}
                               />
-                            ) 
-                             : item.question_type === "likert_scale" ? (
+                            ) : item.question_type === "likert_scale" ? (
                               <LikertScaleQuestion
                                 key={index}
                                 index={index + 1}
@@ -288,7 +291,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 //   handleDeleteQuestion(index)
                                 // }
                               />
-                            )  : item.question_type === "boolean" ? (
+                            ) : item.question_type === "boolean" ? (
                               <BooleanQuestion
                                 key={index}
                                 index={index + 1}
@@ -300,17 +303,16 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 //   handleDeleteQuestion(index)
                                 // }
                               />
-                            )  : item.question_type === "slider" ? (
+                            ) : item.question_type === "slider" ? (
                               <SliderQuestion
-                              question={item.question}
-                              options={item.options}
-                              // step={item.options.length}
-                              questionType={item.question_type}
-                              index={index + 1}
-                              is_required={item.is_required}
+                                question={item.question}
+                                options={item.options}
+                                // step={item.options.length}
+                                questionType={item.question_type}
+                                index={index + 1}
+                                is_required={item.is_required}
                               />
-                            )
-                             : null}
+                            ) : null}
                           </div>
                         )}
                       </Draggable>

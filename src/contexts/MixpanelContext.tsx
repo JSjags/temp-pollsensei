@@ -32,6 +32,30 @@ const MixPanelProvider = ({ children }: Props) => {
   const pathname = usePathname();
   const state = useSelector((state: RootState) => state.user);
 
+  // Helper function to get page name from pathname
+  const getPageName = (path: string) => {
+    // Remove leading slash and split by remaining slashes
+    const segments = path.slice(1).split("/");
+
+    if (segments[0] === "") return "Home";
+
+    // Map common paths to readable names
+    const pageMap: { [key: string]: string } = {
+      dashboard: "Dashboard",
+      surveys: "Surveys",
+      login: "Login",
+      register: "Register",
+      profile: "Profile",
+      settings: "Settings",
+      demo: "Demo",
+    };
+
+    return (
+      pageMap[segments[0]] ||
+      segments[0].charAt(0).toUpperCase() + segments[0].slice(1)
+    );
+  };
+
   useEffect(() => {
     // Initialize Mixpanel here
     if (typeof window !== "undefined" && MIXPANEL_TOKEN) {
@@ -54,11 +78,13 @@ const MixPanelProvider = ({ children }: Props) => {
         mixpanel &&
         typeof mixpanel.track === "function"
       ) {
+        const pageName = getPageName(pathname);
         const eventProperties = {
-          page: pathname,
+          pageName,
+          fullPath: pathname,
           ...(state?.user && { user: state.user }),
         };
-        mixpanel.track("Page View", eventProperties);
+        mixpanel.track(pageName, eventProperties);
       }
     } catch (error) {
       console.error("Failed to track page view:", error);

@@ -23,6 +23,7 @@ import { FaTimesCircle } from "react-icons/fa";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import { dark_theme_logo } from "@/assets/images";
 import { useRouter } from "next/navigation";
+import mixpanel from "mixpanel-browser";
 
 const constraints = {
   name: {
@@ -65,7 +66,7 @@ const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
 
 const RegisterPage = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [registerUser, { isSuccess, isError, error, isLoading }] =
     useRegisterUserMutation();
 
@@ -89,9 +90,11 @@ const RegisterPage = () => {
     }));
   };
 
-  
-
   const onSubmit = async (values: any) => {
+    // Track the button click with Mixpanel
+    mixpanel.track("Sign-Up Clicked", {
+      timestamp: new Date().toISOString(), // Optional: Track time
+    });
     try {
       await registerUser(values).unwrap();
       toast.success(
@@ -381,7 +384,13 @@ const RegisterPage = () => {
 
           <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
             <span
-              onClick={() => googleSignUp()}
+              onClick={() => {
+                // Track the button click with Mixpanel
+                mixpanel.track("Google Sign-Up Clicked", {
+                  timestamp: new Date().toISOString(), // Optional: Track time
+                });
+                googleSignUp();
+              }}
               className="flex justify-between items-center gap-2 border pr-2 rounded-full"
             >
               <Image
