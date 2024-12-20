@@ -6,16 +6,19 @@ import CommentQuestion from "./CommentQuestion";
 import LinearScaleQuestion from "./LinearScaleQuestion";
 import LikertScaleQuestion from "./LikertScaleQuestion";
 import MatrixQuestion from "./MatrixQuestion";
-import StarRatingQuestion from "./StarRatingQuestion";
+// import StarRatingQuestion from "./StarRatingQuestion";
 import PaginationBtn from "../common/PaginationBtn";
 import ShortTextQuestion from "./LongTextQuestion";
-import BooleanQuestion from "./BooleanQuestion";
+// import BooleanQuestion from "./BooleanQuestion";
 import SingleChoiceQuestion from "./SingleChoiceQuestion";
 import NumberQuestion from "./NumberQuestion";
 import CheckboxQuestion from "./CheckboxQuestion";
 import RatingScaleQuestion from "./RatingScaleQuestion";
-import DropdownQuestion from "./DropdownQuestion";
+// import DropdownQuestion from "./DropdownQuestion";
 import MediaQuestion from "./MediaQuestion";
+import StarRatingQuestion from "./AnswerStarRating";
+import BooleanQuestion from "./AnswerBoolean";
+import DropdownQuestion from "./AnswerDropdownQuestion";
 
 interface Answer {
   question?: string;
@@ -86,8 +89,10 @@ const UserResponses: React.FC<UserResponseProps> = ({
         ) : isSuccess ? (
           data?.answers?.map((item: any, index: number) => (
             <div key={index} className="mb-4">
-              {item.question_type === "multiple_choice" ||
-              item.question_type === "multi_choice" ? (
+              {
+              item.question_type === "multiple_choice" ||
+              item.question_type === "checkbox" ||
+              item.question_type === "single_choice" ? (
                 <AnswerMultiChoiceQuestion
                   key={index}
                   question={item.question}
@@ -100,7 +105,9 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   index={index + 1}
                   status={item?.validation_result?.status}
                 />
-              ) : item.question_type === "comment" ||
+              ) : 
+              item.question_type === "comment" ||
+               item.question_type === "short_text" ||
                 item.question_type === "long_text" ? (
                 <CommentQuestion
                   key={index}
@@ -112,13 +119,27 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   // EditQuestion={() => EditQuestion(index)}
                   // DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item.question_type === "media"  ? (
+              ) :
+                 
+               item.question_type === "number" ? (
+               <CommentQuestion
+                 key={index}
+                 index={index + 1}
+                 questionType={item.question_type}
+                 question={item.question}
+                 response={item.num}
+                 status={item?.validation_result?.status}
+                 // EditQuestion={() => EditQuestion(index)}
+                 // DeleteQuestion={()=>handleDeleteQuestion(index)}
+               />
+             ) 
+              : item.question_type === "media"  ? (
               <MediaQuestion
                 key={index}
                 index={index + 1}
                 questionType={item.question_type}
                 question={item.question}
-                response={item.text}
+                response={item?.media?.text}
                 status={item?.validation_result?.status}
                 audio={item?.media?.url}
                 onTranscribe={()=>{
@@ -128,6 +149,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   console.log(item?.question)
                   console.log(item)
                 }}
+                
                 // EditQuestion={() => EditQuestion(index)}
                 // DeleteQuestion={()=>handleDeleteQuestion(index)}
               />
@@ -146,19 +168,17 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
-
-                  // EditQuestion={() => EditQuestion(index)}
-                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item.question_type === "star_rating" ? (
+              )
+               : item.question_type === "star_rating" ? (
                 <StarRatingQuestion
                   question={item.question}
-                  // maxRating={5}
                   questionType={item.question_type}
-                  // EditQuestion={() => EditQuestion(index)}
-                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                  scale_value={item.scale_value}
+                  onRate={(value) => console.log("Rated:", value)}
                 />
-              ) : item.question_type === "matrix_checkbox" ? (
+              ) 
+              : item.question_type === "matrix_checkbox" ? (
                 <MatrixQuestion
                   key={index}
                   index={index + 1}
@@ -167,8 +187,6 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   columns={item.columns}
                   questionType={item.question_type}
                   question={item.question}
-                  // EditQuestion={() => EditQuestion(index)}
-                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
               ) : item.question_type === "short_text" ? (
                 <ShortTextQuestion
@@ -184,32 +202,41 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   index={index + 1}
                   question={item.question}
                   options={item.options}
+                  boolean_value={item?.boolean_value}
                   questionType={item.question_type}
+                 status={item?.validation_result?.status}
+
                 />
-              ) : item.question_type === "single_choice" ? (
-                <SingleChoiceQuestion
-                  index={index + 1}
-                  key={index}
-                  question={item.question}
-                  options={item.options}
-                  questionType={item.question_type}
-                  // selectedOptions={item.selected_options}
-                />
-              ) : item.question_type === "number" ? (
-                <NumberQuestion
-                  key={index}
-                  index={index + 1}
-                  question={item.question}
-                  questionType={item.question_type}
-                  // EditQuestion={() => EditQuestion(index)}
-                />
-              ) : item.question_type === "checkbox" ? (
+              )
+              //  : item.question_type === "single_choice" ? (
+              //   <SingleChoiceQuestion
+              //     index={index + 1}
+              //     key={index}
+              //     question={item.question}
+              //     options={item.options}
+              //     questionType={item.question_type}
+              //     // selectedOptions={item.selected_options}
+              //   />
+              // ) 
+
+              // : item.question_type === "number" ? (
+              //   <NumberQuestion
+              //     key={index}
+              //     index={index + 1}
+              //     question={item.question}
+              //     questionType={item.question_type}
+              //     // EditQuestion={() => EditQuestion(index)}
+              //   />
+              // )
+               : item.question_type === "checkbox" ? (
                 <CheckboxQuestion
                   key={index}
                   index={index + 1}
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
+                 status={item?.validation_result?.status}
+
                 />
               ) : item.question_type === "rating_scale" ? (
                 <RatingScaleQuestion
@@ -219,15 +246,20 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   options={item.options}
                   questionType={item.question_type}
                 />
-              ) : item.question_type === "drop_down" ? (
+              )
+               : item.question_type === "drop_down" ? (
                 <DropdownQuestion
                   index={index + 1}
                   key={index}
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
+                  drop_down_value={item.drop_down_value}
+                 status={item?.validation_result?.status}
+
                 />
-              ) : item.question_type === "number" ? (
+              )
+               : item.question_type === "number" ? (
                 <NumberQuestion
                   key={index}
                   index={index + 1}
