@@ -37,11 +37,11 @@ const constraints = {
     length: {
       minimum: 8,
     },
-    format: {
-      pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-      message:
-        "^Password must be between 8 and 20 characters long, contain at least one uppercase letter, one number, and one special character",
-    },
+    // format: {
+    //   pattern: /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+    //   message:
+    //     "^Password must be between 8 and 20 characters long, contain at least one uppercase letter, one number, and one special character",
+    // },
   },
   confirmPassword: {
     presence: true,
@@ -318,7 +318,13 @@ const RegisterPage = () => {
                       <div>
                         <input {...input} type="checkbox" id="terms" />
                         <label htmlFor="terms" className="ml-2">
-                          I agree to the <Link className="text-blue-700 underline" href={"/terms-of-service"}>terms and conditions</Link>
+                          I agree to the{" "}
+                          <Link
+                            className="text-blue-700 underline"
+                            href={"/terms-of-service"}
+                          >
+                            terms and conditions
+                          </Link>
                         </label>
                         {meta.error && meta.touched && (
                           <span className="text-red-500">{meta.error}</span>
@@ -373,18 +379,21 @@ const RegisterPage = () => {
             <div className="border flex-grow border-[#E5EFFF]"></div>
           </div>
 
-                   <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
-                     <span onClick={() => googleSignUp()} className="flex justify-between items-center gap-2 border pr-2 rounded-full">
-                       <Image
-                         src={google}
-                         alt="Google"
-                         width={56}
-                         height={56}
-                         className="size-14"
-                       />
-                       <span>Sign in with your Google account</span>
-                     </span>
-                     {/* <Link href="">
+          <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
+            <span
+              onClick={() => googleSignUp()}
+              className="flex justify-between items-center gap-2 border pr-2 rounded-full"
+            >
+              <Image
+                src={google}
+                alt="Google"
+                width={56}
+                height={56}
+                className="size-14"
+              />
+              <span>Sign in with your Google account</span>
+            </span>
+            {/* <Link href="">
                        <Image
                          src={facebook}
                          alt="Facebook"
@@ -393,7 +402,7 @@ const RegisterPage = () => {
                          className="size-10"
                        />
                      </Link> */}
-                   </div>
+          </div>
 
           <div className="flex justify-end items-center mt-4">
             <p className="mr-2">Need Help?</p>
