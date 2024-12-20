@@ -142,7 +142,8 @@ const AdminReviews: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Customer Reviews</h1>
-      <div className="overflow-x-auto">
+
+      {/* <div className="overflow-x-auto">
         <table className="min-w-full table-auto border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
@@ -225,7 +226,7 @@ const AdminReviews: React.FC = () => {
             )}
           </tbody>
         </table>
-      </div>
+      </div> */}
 
       <div className="overflow-x-auto w-full">
         <table className="w-full border-collapse border-gray-200 overflow-x-auto">
@@ -247,7 +248,7 @@ const AdminReviews: React.FC = () => {
                 Created At
               </th>
               <th className="border border-gray-300 px-4 py-2 text-left">
-                Updated At
+                View
               </th>
             </tr>
           </thead>
@@ -270,7 +271,7 @@ const AdminReviews: React.FC = () => {
                   </td>
                 </tr>
               ) :
-            data?.data?.data?.map((user: any, index: number) => (
+              reviews?.map((review: any, index: number) => (
               <tr
                 key={index}
                 className={`${
@@ -280,53 +281,28 @@ const AdminReviews: React.FC = () => {
                 <td className="py-3 px-4 flex items-center gap-2">
                 <Avatar className="size-8">
                   <AvatarImage
-                    src={(user as any)?.photo_url ?? ""}
+                    src={(review as any)?.photo_url ?? ""}
                     alt="@johndoe"
                   />
                   <AvatarFallback className={`font-semibold  `} style={{backgroundColor: getRandomColor()}}>
-                    {generateInitials(user?.name ?? "")}
+                    {generateInitials(review?.user_id?.name ?? "")}
                   </AvatarFallback>
                 </Avatar>
-                   {user?.name}</td>
+                   {review?.user_id?.name}</td>
+               
+                <td className="py-3 px-4">{review?.user_id?.email}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                    {review?.user_id?.country || "Not Provided"}
+                  </td>
                 <td className="py-3 px-4">
-                  {user?.accountType ? user?.accountType : "Not Available"}
+                  {review?.collaborators ? review.collaborators : "Not Available"}
                 </td>
-                <td className="py-3 px-4">{user?.email}</td>
-                <td
-                  className={`py-3 px-4 font-medium ${
-                    user.subscription === "Premium"
-                      ? "text-purple-600"
-                      : user.subscription === "Pro Plan"
-                      ? "text-red-600"
-                      : "text-green-600"
-                  }`}
-                >
-                  <span
-                    className={`py-1 px-2 rounded-full ${
-                      user.subscription === "Premium"
-                        ? "bg-[#D195FC1A]"
-                        : user.subscription === "Pro Plan"
-                        ? "bg-[#FFEBED]"
-                        : "bg-[#D3FAEC]"
-                    }`}
-                  >
-                    {user?.subscription ? user?.subscription : "Free Plan"}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  {user?.collaborators ? user.collaborators : "Not Available"}
-                </td>
-                <td
-                  className={`py-3 px-4 font-medium ${
-                    user.plan === "Premium"
-                      ? "text-purple-600"
-                      : user.plan === "Pro Plan"
-                      ? "text-red-600"
-                      : "text-green-600"
-                  }`}
-                >
-                  {user?.plan ? user?.plan : "Free Plan"}
-                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                    {new Date(review.createdAt).toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    View
+                  </td>
               </tr>
             ))}
           </tbody>
