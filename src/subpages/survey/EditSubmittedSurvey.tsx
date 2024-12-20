@@ -62,7 +62,7 @@ const EditSubmittedSurvey = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [isEditHeader, setIsEditHeader] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [editSurvey, { isSuccess, isError, error }] = useEditSurveyMutation();
+  const [editSurvey, { isSuccess, isError, error, isLoading:isEditLoading }] = useEditSurveyMutation();
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [currentSection, setCurrentSection] = useState(0);
 
@@ -94,35 +94,50 @@ const EditSubmittedSurvey = () => {
     // setSelectIndex(index);
   };
 
+  // const handleDeleteQuestion = (questionIndex: number) => {
+  //   setSurveyData((prevData) => {
+  //     // Clone sections
+  //     const updatedSections = [...prevData.sections];
+  
+  //     // Check if currentSection and questionIndex are valid
+  //     const currentQuestions =
+  //       updatedSections[currentSection]?.questions || [];
+  
+  //     if (
+  //       Array.isArray(currentQuestions) &&
+  //       questionIndex >= 0 &&
+  //       questionIndex < currentQuestions.length
+  //     ) {
+  //       // Remove the question
+  //       updatedSections[currentSection].questions = currentQuestions.filter(
+  //         (_, idx) => idx !== questionIndex
+  //       );
+  //     } else {
+  //       toast.warn(
+  //         `Invalid operation: currentSection=${currentSection}, questionIndex=${questionIndex}`
+  //       );
+  //     }
+  
+  //     return { ...prevData, sections: updatedSections };
+  //   });
+  // };
+  
   const handleDeleteQuestion = (questionIndex: number) => {
     setSurveyData((prevData) => {
-      // Clone sections
-      const updatedSections = [...prevData.sections];
-  
-      // Check if currentSection and questionIndex are valid
-      const currentQuestions =
-        updatedSections[currentSection]?.questions || [];
-  
-      if (
-        Array.isArray(currentQuestions) &&
-        questionIndex >= 0 &&
-        questionIndex < currentQuestions.length
-      ) {
-        // Remove the question
-        updatedSections[currentSection].questions = currentQuestions.filter(
-          (_, idx) => idx !== questionIndex
-        );
-      } else {
-        toast.warn(
-          `Invalid operation: currentSection=${currentSection}, questionIndex=${questionIndex}`
-        );
-      }
+      // Create deep copies to avoid mutating the state directly
+      const updatedSections = prevData.sections.map((section, idx) => {
+        if (idx === currentSection) {
+          return {
+            ...section,
+            questions: section.questions.filter((_, qIdx) => qIdx !== questionIndex),
+          };
+        }
+        return section;
+      });
   
       return { ...prevData, sections: updatedSections };
     });
   };
-  
-  
 
 
   // const handleDeleteQuestion = ( questionIndex: number) => {
@@ -232,7 +247,7 @@ const EditSubmittedSurvey = () => {
   const saveSurvey = async () => {
     console.log({ id: params.id, surveyData })
         try {
-          await editSurvey({ id: params.id, surveyData }).unwrap();
+          await editSurvey({ id: params.id, body:surveyData }).unwrap();
           toast.success("Survey updated successfully!");
           router.push('/surveys/survey-list');
         } catch (error) {
@@ -372,12 +387,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                     questionType={item.question_type}
                     EditQuestion={() => EditQuestion(index)}
@@ -407,12 +417,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                     EditQuestion={() => EditQuestion(index)}
                     DeleteQuestion={() => handleDeleteQuestion(index)}
@@ -453,12 +458,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "star_rating" ? (
@@ -485,12 +485,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "matrix_multiple_choice" ||
@@ -521,12 +516,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "single_choice" ? (
@@ -554,12 +544,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "checkbox" ? (
@@ -587,12 +572,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "rating_scale" ? (
@@ -620,12 +600,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "drop_down" ? (
@@ -653,12 +628,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "number" ? (
@@ -685,12 +655,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "short_text" ? (
@@ -717,12 +682,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "boolean" ? (
@@ -750,12 +710,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : item.question_type === "slider" ? (
@@ -784,12 +739,7 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                      // dispatch(
-                      //   updateSection({
-                      //     index: currentSection,
-                      //     newSection: updatedSection,
-                      //   })
-                      // );
+                    
                     }}
                   />
                 ) : (
@@ -801,7 +751,7 @@ const EditSubmittedSurvey = () => {
 
           <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
           <button className="auth-btn text-white px-4 py-2 rounded hover:bg-blue-700" onClick={saveSurvey}>
-            Save Changes
+            {isEditLoading ? "Saving..." : "Save Changes"}
           </button>
           </div>
 
