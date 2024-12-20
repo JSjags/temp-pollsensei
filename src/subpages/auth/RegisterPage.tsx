@@ -22,7 +22,7 @@ import Input from "@/components/ui/Input";
 import { FaTimesCircle } from "react-icons/fa";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import { dark_theme_logo } from "@/assets/images";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import mixpanel from "mixpanel-browser";
 
 const constraints = {
@@ -81,6 +81,9 @@ const RegisterPage = () => {
   const [pwdFocus, setPwdFocus] = useState(false);
   const [matchFocus, setMatchFocus] = useState(false);
 
+  const searchParams = useSearchParams();
+  const ed = searchParams.get("ed");
+
   const pattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
 
   const toggleEye = (field: "password" | "confirmPassword") => {
@@ -98,11 +101,11 @@ const RegisterPage = () => {
         "User registered successfully, check your email to continue"
       );
       // Navigate to login page
-      router.push("/login");
+      router.push(`/login?${ed && `ed=${ed}`}`);
       console.log("User registered successfully");
-      mixpanel.track("Sign-Up Clicked", {
-        timestamp: new Date().toISOString(), // Optional: Track time
-      });
+      // mixpanel.track("Sign-Up Clicked", {
+      //   timestamp: new Date().toISOString(), // Optional: Track time
+      // });
     } catch (err: any) {
       toast.error(
         "Failed to register user " + (err?.data?.message || err.message)
