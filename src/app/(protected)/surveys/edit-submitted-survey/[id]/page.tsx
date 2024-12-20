@@ -9,9 +9,9 @@ type Props = {};
 const Page = (props: Props) => {
   return (
     <>
-      {/* <EditSubmittedSurvey /> */}
+      <EditSubmittedSurvey />
       {/* <FeatureComing/> */}
-      <EditCreatedSurvey />
+      {/* <EditCreatedSurvey /> */}
     </>
   );
 };

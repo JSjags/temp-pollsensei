@@ -22,6 +22,7 @@ import Input from "@/components/ui/Input";
 import { FaTimesCircle } from "react-icons/fa";
 import { IoCheckmarkCircle } from "react-icons/io5";
 import { dark_theme_logo } from "@/assets/images";
+import { useRouter } from "next/navigation";
 import mixpanel from "mixpanel-browser";
 
 const constraints = {
@@ -65,6 +66,7 @@ const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
 
 const RegisterPage = () => {
+  const router = useRouter();
   const [registerUser, { isSuccess, isError, error, isLoading }] =
     useRegisterUserMutation();
 
@@ -99,6 +101,7 @@ const RegisterPage = () => {
         "User registered successfully, check your email to continue"
       );
       // Navigate to login page
+      router.push("/login");
       console.log("User registered successfully");
     } catch (err: any) {
       toast.error(
@@ -140,6 +143,7 @@ const RegisterPage = () => {
       try {
         await gooleRegister({ code: accessToken }).unwrap();
         toast.success("Register success");
+        router.push("/login");
       } catch (err: any) {
         toast.error(
           "Failed to register user " + (err?.data?.message || err.message)

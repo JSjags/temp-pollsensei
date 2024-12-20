@@ -13,6 +13,8 @@ import {
   addQuestion,
   resetQuestion,
   deleteQuestion,
+  updateQuestions,
+  updateQuestion,
 } from "@/redux/slices/questions.slice";
 import { toast } from "react-toastify";
 import CommentQuestion from "@/components/survey/CommentQuestion";
@@ -38,7 +40,7 @@ import {
 import store from "@/redux/store";
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
-import MultiChoiceQuestionEdit from "../milestone/Test";
+
 import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import ShortTextQuestion from "@/components/survey/LongTextQuestion";
 import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
@@ -49,6 +51,7 @@ import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 import ReviewModal from "@/components/modals/ReviewModal";
 import MediaQuestion from "@/components/survey/MediaQuestion";
+import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import {
   Dialog,
   DialogContent,
@@ -84,7 +87,7 @@ const AddQuestionPage = () => {
   const [sDescription, setsDescription] = useState(sectionDescription || "");
   const [isEditing, setIsEditing] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [editIndex, setEditIndex] = useState(0);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
@@ -114,6 +117,36 @@ const AddQuestionPage = () => {
     dispatch(updateSectionTopic(sectionTitle));
     dispatch(updateSectionDescription(sDescription));
     setIsEditing(false);
+  };
+
+  const handleSaveEdittedQuestion = (
+    updatedQuestion: string,
+    updatedOptions: string[],
+    updatedQuestionType: string,
+    isRequired: boolean
+  ) => {
+    // Ensure `editIndex` is valid
+    if (editIndex === null || editIndex < 0 || editIndex >= questions.length) {
+      console.error("Invalid edit index.");
+      return;
+    }
+
+    // Create the updated question object
+    const updatedQuestionData = {
+      question: updatedQuestion,
+      options: updatedOptions,
+      question_type: updatedQuestionType,
+      is_required: isRequired,
+    };
+
+    // Dispatch the `updateQuestion` action
+    dispatch(
+      updateQuestion({ index: editIndex, updatedQuestion: updatedQuestionData })
+    );
+
+    // Reset editing state
+    setEditIndex(null);
+    setIsEdit(false);
   };
 
   console.log(survey);
@@ -335,7 +368,28 @@ const AddQuestionPage = () => {
                         >
                           {
                             // Conditionally render based on question type
-                            item.question_type === "multiple_choice" ? (
+                            isEdit &&
+                            editIndex === index &&
+                            item.question_type === "matrix_checkbox" ? (
+                              <MatrixQuestionEdit
+                                question={item.question}
+                                options={item.options}
+                                is_required={item.is_required}
+                                questionType={item.question_type}
+                                onSave={handleSaveEdittedQuestion}
+                                onCancel={handleCancel}
+                              />
+                            ) : isEdit && editIndex === index ? (
+                              <MultiChoiceQuestionEdit
+                                // index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                is_required={item.is_required}
+                                onSave={handleSaveEdittedQuestion}
+                                onCancel={handleCancel}
+                              />
+                            ) : item.question_type === "multiple_choice" ? (
                               <MultiChoiceQuestion
                                 key={index}
                                 index={index + 1}
