@@ -288,7 +288,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 )}
               </div>
             ))}
-            {editedQuestionType === "multiple_choice" && (
+            {editedQuestionType === "multiple_choice" || editedQuestionType === "single_choice" || editedQuestionType === "checkbox" && (
               <button
                 onClick={handleAddOption}
                 className="text-blue-500 mt-2 text-start"
