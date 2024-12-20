@@ -32,6 +32,8 @@ const StateLoader2: React.FC<StateLoader2Props> = ({
   console.log(userRoles);
 
   const getDestinationRoute = () => {
+    console.log(directRoute);
+
     if (directRoute) {
       return directRoute;
     }
