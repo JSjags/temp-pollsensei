@@ -272,7 +272,23 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
             />
           ))}
         </div>
-        {pathname === "/surveys/edit-survey" || pathname.includes("/edit-submitted-survey") && (
+        {pathname === "/surveys/edit-survey"  && (
+          <div className="flex justify-end gap-4">
+            <button
+              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
+              onClick={EditQuestion}
+            >
+              Edit
+            </button>
+            <button
+              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
+              onClick={DeleteQuestion}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+        { pathname.includes("/edit-submitted-survey") && (
           <div className="flex justify-end gap-4">
             <button
               className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"

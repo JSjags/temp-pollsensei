@@ -2,7 +2,7 @@ import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { BsExclamation } from "react-icons/bs";
@@ -12,7 +12,8 @@ import { Switch } from "../ui/switch";
 interface DropdownQuestionProps {
   question: string;
   questionType: string;
-  options: string[] | undefined;
+  options?: string[];
+  drop_down_value?: string; // Added prop for preselected value
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
@@ -32,7 +33,8 @@ interface DropdownQuestionProps {
 
 const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
   question,
-  options,
+  options = [], // Default to empty array
+  drop_down_value = null, // Default to null
   questionType,
   EditQuestion,
   DeleteQuestion,
@@ -53,15 +55,20 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  // State to store the selected option
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  // State to store the selected dropdown value
+  const [selectedOption, setSelectedOption] = useState<string | null>(drop_down_value);
+
+  // Sync the drop_down_value prop with the state
+  useEffect(() => {
+    setSelectedOption(drop_down_value);
+  }, [drop_down_value]);
 
   // Handle option selection
   const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;
     setSelectedOption(selectedValue);
     if (onChange) {
-      onChange(selectedValue);
+      onChange(selectedValue); // Trigger onChange callback if provided
     }
   };
 
@@ -105,27 +112,25 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
             <div className="group flex justify-between gap-2 items-start">
               <p>
                 <span>{index}. </span> {question}
-                {is_required === true && (
+                {is_required && (
                   <span className="text-2xl ml-2 text-red-500">*</span>
                 )}
               </p>
-              {
-               !pathname.includes("survey-public-respons") &&
-               <PollsenseiTriggerButton
-                 key={index}
-                 imageUrl={stars}
-                 tooltipText="Rephrase question"
-                 className={"group-hover:inline-block hidden"}
-                 triggerType="rephrase"
-                 question={question}
-                 optionType={questionType}
-                 options={options}
-                 setEditId={setEditId}
-                 onSave={onSave!}
-                 index={index}
-               />
-
-              }
+              {!pathname.includes("survey-public-respons") && (
+                <PollsenseiTriggerButton
+                  key={index}
+                  imageUrl={stars}
+                  tooltipText="Rephrase question"
+                  className={"group-hover:inline-block hidden"}
+                  triggerType="rephrase"
+                  question={question}
+                  optionType={questionType}
+                  options={options}
+                  setEditId={setEditId}
+                  onSave={onSave!}
+                  index={index}
+                />
+              )}
             </div>
           </h3>
         </div>
@@ -142,7 +147,7 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
             <option value="" disabled>
               Select an option
             </option>
-            {options?.map((option, optionIndex) => (
+            {options.map((option, optionIndex) => (
               <option key={optionIndex} value={option}>
                 {option}
               </option>
@@ -150,7 +155,7 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
           </select>
         </div>
 
-        {pathname === "/surveys/edit-survey"  && (
+        {pathname === "/surveys/edit-survey" || pathname.includes("/edit-submitted-survey") && (
           <div className="flex justify-end gap-4">
             <button
               className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
@@ -160,35 +165,6 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
             </button>
             <button
               className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        { pathname.includes("/edit-submitted-survey") && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-{pathname === "/surveys/add-question-m" && (
-          <div className="flex justify-end gap-4">
-           
-            <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
               onClick={DeleteQuestion}
             >
               Delete
@@ -210,14 +186,6 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
             />
           </div>
         )}
-        <div className="flex justify-end">
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "single_choice" ? "Single Choice" : ""}</p>
-          )}
-        </div>
       </div>
       {pathname.includes("survey-response-upload") && status && (
         <div>{getStatus(status)}</div>
