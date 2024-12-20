@@ -217,7 +217,7 @@ const ResponseFile = ({
       formData.append("file", file);
       const response = await uploadResponseFile(formData).unwrap();
       console.log(response)
-      const mediaUrl = response?.data?.media_url; // Adjust according to API response
+      const mediaUrl = response?.data?.media_url; 
       if (mediaUrl) {
         handleAnswerChange(question, { media_url: mediaUrl });
         toast.success("File uploaded successfully!");
