@@ -4,13 +4,12 @@ import React, { useState } from "react";
 import AnswerMultiChoiceQuestion from "./AnswerMuiltipleChoice";
 import CommentQuestion from "./CommentQuestion";
 import LinearScaleQuestion from "./LinearScaleQuestion";
-import LikertScaleQuestion from "./LikertScaleQuestion";
+// import LikertScaleQuestion from "./LikertScaleQuestion";
 import MatrixQuestion from "./MatrixQuestion";
 // import StarRatingQuestion from "./StarRatingQuestion";
 import PaginationBtn from "../common/PaginationBtn";
 import ShortTextQuestion from "./LongTextQuestion";
 // import BooleanQuestion from "./BooleanQuestion";
-import SingleChoiceQuestion from "./SingleChoiceQuestion";
 import NumberQuestion from "./NumberQuestion";
 import CheckboxQuestion from "./CheckboxQuestion";
 import RatingScaleQuestion from "./RatingScaleQuestion";
@@ -19,6 +18,10 @@ import MediaQuestion from "./MediaQuestion";
 import StarRatingQuestion from "./AnswerStarRating";
 import BooleanQuestion from "./AnswerBoolean";
 import DropdownQuestion from "./AnswerDropdownQuestion";
+import LikertScaleQuestion from "./AnswerLikertScale";
+import { useEditTranscriptionMutation } from "@/services/survey.service";
+import { useParams } from "next/navigation";
+import { toast } from "react-toastify";
 
 interface Answer {
   question?: string;
@@ -27,10 +30,13 @@ interface Answer {
   selected_options?: string[];
 }
 
+interface DataProps{
+  _id?: string;
+  answers: Answer[];
+}
+
 interface UserResponseProps {
-  data?: {
-    answers: Answer[];
-  };
+  data?: DataProps;
   index: number;
   isLoading?: boolean;
   error?: boolean;
@@ -47,7 +53,9 @@ const UserResponses: React.FC<UserResponseProps> = ({
   console.log(data);
   console.log(isLoading);
   const [currentSection, setCurrentSection] = useState(0);
-
+  const [editTranscription, {isLoading:IsTranscribing}] = useEditTranscriptionMutation();
+  const params = useParams();
+  const response_id = data?._id
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (data && data.answers) {
@@ -76,6 +84,43 @@ const UserResponses: React.FC<UserResponseProps> = ({
       </div>
     );
   }
+
+  // const handleTranscribe = async (updatedResponse: string) => {
+  //   console.log("Updated transcription:", updatedResponse);
+  //   const payload = {
+  //     transcription_id: updatedResponse,
+  //     text:""   // update text goes here
+  //   }
+  //   console.log(payload)
+  //      try {
+  //             await editTranscription(payload).unwrap();
+  //             toast.success("Transcription updated successfully!");
+  //           } catch (error) {
+  //             console.error("Error updating response:", error);
+  //             toast.error("Failed to transcribe response.");
+  //           }
+    
+  // };
+
+  const handleTranscribe = async (transcription_id: string, text: string) => {
+    console.log("Updating transcription:", transcription_id, text);
+
+    const payload = {
+      id:response_id,
+      transcription_id: transcription_id,
+      text: text, 
+    };
+
+    console.log(payload)
+
+    try {
+      await editTranscription(payload).unwrap();
+      toast.success("Transcription updated successfully!");
+    } catch (error) {
+      console.error("Error updating response:", error);
+      toast.error("Failed to transcribe response.");
+    }
+  };
 
   return (
     <div className={`flex flex-col gap-5 w-full relative mt-4`}>
@@ -142,13 +187,15 @@ const UserResponses: React.FC<UserResponseProps> = ({
                 response={item?.media?.text}
                 status={item?.validation_result?.status}
                 audio={item?.media?.url}
-                onTranscribe={()=>{
-                  console.log("You clicked me" + index)
-                  console.log(item?.media?.url)
-                  console.log(item?.media)
-                  console.log(item?.question)
-                  console.log(item)
+                onTranscribe={(updatedText) => {
+                  handleTranscribe(item?.media?.transcription_id, updatedText);
                 }}
+                // onTranscribe={()=>{
+                //   console.log("You clicked me" + index)
+                //   console.log(item?.media?.url)
+                //   handleTranscribe(item?.media?.transcription_id
+                //     )
+                // }}
                 
                 // EditQuestion={() => EditQuestion(index)}
                 // DeleteQuestion={()=>handleDeleteQuestion(index)}
@@ -168,6 +215,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
+                  scale_value={item.scale_value}
                 />
               )
                : item.question_type === "star_rating" ? (
