@@ -3,9 +3,7 @@ import { RootState } from "@/redux/store";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import CommentQuestion from "@/components/survey/CommentQuestion";
-import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import LinearScaleQuestion from "@/components/survey/LinearScaleQuestion";
-import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { pollsensei_new_logo } from "@/assets/images";
@@ -15,6 +13,9 @@ import PreviewFile from "@/components/survey/PreviewFile";
 import AnswerMultiChoiceQuestion from "@/components/survey/AnswerMuiltipleChoice";
 import { toast } from "react-toastify";
 import { useSubmitResponseMutation } from "@/services/survey.service";
+import MediaQuestion from "@/components/survey/MediaQuestion";
+import StarRatingQuestion from "@/components/survey/ValidateStarRattings";
+import LikertScaleQuestion from "@/components/survey/ValidateLikertScale";
 
 interface Answer {
   question: string;
@@ -74,11 +75,12 @@ const ValidateResponse = () => {
   };
 
   const handleSubmitResponse = async () => {
+    console.log("U clicked")
     // @ts-ignore
-    const answers = OCRresponses[currentSection]?.survey?.extracted_answers
-      ?.map((item: any) => {
+    const answers = (OCRresponses as any)?.extracted_answers?.map((item: any) => {
         if (
           item.question_type === "multiple_choice" ||
+          item.question_type === "checkbox" ||
           item.question_type === "single_choice"
         ) {
           return {
@@ -96,6 +98,32 @@ const ValidateResponse = () => {
             question_type: item.question_type,
             text: item.text || "",
           };
+        } else if (
+          item.question_type === "likert_scale" ||
+          item.question_type === "rating_scale" ||
+          item.question_type === "star_rating"
+        ) {
+          return {
+            question: item.question,
+            question_type: item.question_type,
+            scale_value: item.scale_value,
+          };
+        } else if (
+          item.question_type === "drop_down_value"
+        ) {
+          return {
+            question: item.question,
+            question_type: item.question_type,
+            drop_down_value: item.drop_down_value,
+          };
+        } else if (
+          item.question_type === "boolean_value"
+        ) {
+          return {
+            question: item.question,
+            question_type: item.question_type,
+            boolean_value: item.boolean_value,
+          };
         }
         // return null;
       })
@@ -111,8 +139,10 @@ const ValidateResponse = () => {
     };
     console.log(responsePayload);
     try {
-      await submitResponse(responsePayload);
+      await submitResponse(responsePayload).unwrap();
+      toast.success("Submitted successfully")
     } catch (e) {
+      toast.error("Error submitting data: " + e)
       console.log(e);
     }
   };
@@ -255,6 +285,7 @@ const ValidateResponse = () => {
           { (OCRresponses as any)?.extracted_answers?.map((item: any, index: number) => (
             <div key={index} className="mb-4">
               {item.question_type === "multiple_choice" ||
+              item.question_type === "single_choice" ||
               item.question_type === "multi_choice" ? (
                 <AnswerMultiChoiceQuestion
                   key={index}
@@ -279,7 +310,41 @@ const ValidateResponse = () => {
                   // EditQuestion={() => EditQuestion(index)}
                   // DeleteQuestion={()=>handleDeleteQuestion(index)}
                 />
-              ) : item.question_type === "linear_Scale" ? (
+              ) :
+                 
+              item.question_type === "number" ? (
+              <CommentQuestion
+                key={index}
+                index={index + 1}
+                questionType={item.question_type}
+                question={item.question}
+                response={item.num}
+                status={item?.validation_result?.status}
+                // EditQuestion={() => EditQuestion(index)}
+                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+              />
+            )  : item.question_type === "media"  ? (
+              <MediaQuestion
+                key={index}
+                index={index + 1}
+                questionType={item.question_type}
+                question={item.question}
+                response={item?.media?.text}
+                status={item?.validation_result?.status}
+                audio={item?.media?.url}
+                onTranscribe={()=>{
+                  console.log("You clicked me" + index)
+                  console.log(item?.media?.url)
+                  console.log(item?.media)
+                  console.log(item?.question)
+                  console.log(item)
+                }}
+                
+                // EditQuestion={() => EditQuestion(index)}
+                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+              />
+            )
+               : item.question_type === "linear_Scale" ? (
                 <LinearScaleQuestion
                   question={item.question}
                   scaleStart={item.scaleStart}
@@ -290,19 +355,22 @@ const ValidateResponse = () => {
                 />
               ) : item.question_type === "likert_scale" ? (
                 <LikertScaleQuestion
+                key={index}
+                index={index + 1}
+                question={item.question}
+                options={item.options}
+                questionType={item.question_type}
+                scale_value={item.scale_value}
+              />
+              ) : item.question_type === "star_rating" ? (
+                <StarRatingQuestion
+                key={index}
+                index={index + 1}
                   question={item.question}
                   options={item.options}
                   questionType={item.question_type}
-                  // EditQuestion={() => EditQuestion(index)}
-                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                />
-              ) : item.question_type === "star_rating" ? (
-                <StarRatingQuestion
-                  question={item.question}
-                  // maxRating={5}
-                  questionType={item.question_type}
-                  // EditQuestion={() => EditQuestion(index)}
-                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                  scale_value={item.scale_value}
+                  onRate={(value) => console.log("Rated:", value)}
                 />
               ) : item.question_type === "matrix_checkbox" ? (
                 <MatrixQuestion
@@ -345,16 +413,18 @@ const ValidateResponse = () => {
             </button> */}
             <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-              type="button"
+              // type="submit"
               onClick={() => {
-                setTimeout(() => {
-                  router.push("/surveys/survey-list");
-                  toast.success("Successful");
-                  dispatch(resetAnswers());
-                }, 3000);
+                handleSubmitResponse()
+                // setTimeout(() => {
+                //   router.push("/surveys/survey-list");
+                //   toast.success("Successful");
+                //   dispatch(resetAnswers());
+                // }, 3000);
               }}
             >
-              {isLoading ? "Submitting..." : "Submit"}
+              {/* Submit Response */}
+              {isLoading ? "Submitting..." : "Submit Response"}
             </button>
           </div>
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">

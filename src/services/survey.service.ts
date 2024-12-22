@@ -205,6 +205,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    editTranscription: builder.mutation({
+      query: ({ id, transcription_id, text }) => ({
+        url: `response/transcription/${id}`, // response/transcription/66bcc5fe8522baceb3ddf711
+        method: "PATCH",
+        body: { transcription_id, text },
+      }),
+    }),
     inviteCollaborator: builder.mutation({
       query: (body) => ({
         url: `/survey/collaborators`,
@@ -353,6 +360,7 @@ export const {
   useCloseSurveyStatusMutation,
   useSurveySettingsQuery,
   useEditSurveySettingsMutation,
+  useEditTranscriptionMutation,
   useInviteCollaboratorMutation,
   useGetCollaboratorsListQuery,
   useEditSurveyMutation,
