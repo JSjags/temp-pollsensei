@@ -149,7 +149,7 @@ const LoginPage = () => {
           </h5>
         </div>
       </div>
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0">
+      <div className="w-full md:w-1/2 flex flex-col justify-start items-center px-4 md:px-8 py-6 md:py-0">
         {loginState && (
           <div className="flex justify-center flex-col max-w-[516px] w-full">
             <div className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10">
@@ -222,7 +222,10 @@ const LoginPage = () => {
             </div>
 
             <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
-              <span onClick={() => googleSignUp()}>
+              <span
+                onClick={() => googleSignUp()}
+                className="flex justify-between items-center gap-2 border pr-2 rounded-full"
+              >
                 <Image
                   src={google}
                   alt="Google"
@@ -230,6 +233,7 @@ const LoginPage = () => {
                   height={56}
                   className="size-14"
                 />
+                <span>Sign in with your Google account</span>
               </span>
               {/* <Link href="">
                 <Image
