@@ -166,29 +166,64 @@ const ResponseFile = ({
   const [uploadResponseFile] = useUploadResponseFileMutation();
 
   // Start Recording
+  // const handleStartRecording = async () => {
+  //   try {
+  //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  //     const mediaRecorder = new MediaRecorder(stream);
+  //     mediaRecorderRef.current = mediaRecorder;
+
+  //     mediaRecorder.ondataavailable = (event) => {
+  //       audioChunksRef.current.push(event.data);
+  //     };
+
+  //     mediaRecorder.onstop = async () => {
+  //       const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+  //       setAudioURL(URL.createObjectURL(audioBlob));
+  //       await uploadFile(audioBlob);
+  //       audioChunksRef.current = [];
+  //     };
+
+  //     mediaRecorder.start();
+  //     setIsRecording(true);
+  //   } catch (error) {
+  //     toast.error("Microphone access denied or not available.");
+  //   }
+  // };
+
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-
+  
       mediaRecorder.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
       };
-
+  
       mediaRecorder.onstop = async () => {
+        const fileName = `audio_${Date.now()}.wav`; // Generate a unique filename
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-        setAudioURL(URL.createObjectURL(audioBlob));
-        await uploadFile(audioBlob);
+  
+        // Convert Blob to File
+        const audioFile = new File([audioBlob], fileName, { type: "audio/wav" });
+  
+        // Optionally, create a URL for playback
+        setAudioURL(URL.createObjectURL(audioFile));
+  
+        // Upload the raw File object
+        await uploadFile(audioFile);
+  
+        // Clear audio chunks
         audioChunksRef.current = [];
       };
-
+  
       mediaRecorder.start();
       setIsRecording(true);
     } catch (error) {
       toast.error("Microphone access denied or not available.");
     }
   };
+  
 
   // Stop Recording
   const handleStopRecording = () => {

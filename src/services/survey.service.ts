@@ -1,3 +1,4 @@
+import { RootState } from "@/redux/store";
 import apiSlice from "./config/apiSlice";
 
 export const surveyApiSlice = apiSlice.injectEndpoints({
@@ -9,11 +10,30 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     createAiSurvey: builder.mutation({
-      query: (body) => ({
-        url: "survey/ai/generate-questions",
-        method: "POST",
-        body: body,
-      }),
+      // query: (body) => ({
+      //   url: "survey/ai/generate-questions",
+      //   method: "POST",
+      //   body: body,
+      // }),
+      queryFn: async (body, api, extraOptions, baseQuery) => {
+        // Access the Redux state
+        const state = api.getState() as RootState;
+        const token = state.user?.access_token || state.user?.token;
+
+        // Determine the endpoint URL based on the state
+        const url = token
+          ? "survey/ai/generate-questions"
+          : "unauth/ai/generate-questions";
+
+        // Use the base query to make the request
+        const result = await baseQuery({
+          url,
+          method: "POST",
+          body,
+        });
+
+        return result;
+      },
     }),
     duplicateSurvey: builder.mutation({
       query: (body) => ({
@@ -60,18 +80,51 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     generateTopics: builder.mutation({
-      query: (body) => ({
-        url: "survey/ai/generate-topics",
-        method: "POST",
-        body: body,
-      }),
+      queryFn: async (body, api, extraOptions, baseQuery) => {
+        // Access the Redux state
+        const state = api.getState() as RootState;
+        const token = state.user?.access_token || state.user?.token;
+
+        // Determine the endpoint URL based on the state
+        const url = token
+          ? "survey/ai/generate-topics"
+          : "unauth/ai/generate-topics";
+
+        // Use the base query to make the request
+        const result = await baseQuery({
+          url,
+          method: "POST",
+          body,
+        });
+
+        return result;
+      },
     }),
     generateSingleSurvey: builder.mutation({
-      query: (body) => ({
-        url: "survey/ai/generate-single-question",
-        method: "POST",
-        body: body,
-      }),
+      // query: (body) => ({
+      //   url: "survey/ai/generate-single-question",
+      //   method: "POST",
+      //   body: body,
+      // }),
+      queryFn: async (body, api, extraOptions, baseQuery) => {
+        // Access the Redux state
+        const state = api.getState() as RootState;
+        const token = state.user?.access_token || state.user?.token;
+
+        // Determine the endpoint URL based on the state
+        const url = token
+          ? "survey/ai/generate-single-question"
+          : "unauth/ai/generate-single-question";
+
+        // Use the base query to make the request
+        const result = await baseQuery({
+          url,
+          method: "POST",
+          body,
+        });
+
+        return result;
+      },
     }),
     saveProgress: builder.mutation({
       query: (body) => ({
@@ -88,11 +141,28 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     addSurveyHeader: builder.mutation({
-      query: (body) => ({
-        url: "/survey/file",
-        method: "POST",
-        body,
-      }),
+      //   query: (body) => ({
+      //     url: "/survey/file",
+      //     method: "POST",
+      //     body,
+      //   }),
+      queryFn: async (body, api, extraOptions, baseQuery) => {
+        // Access the Redux state
+        const state = api.getState() as RootState;
+        const token = state.user?.access_token || state.user?.token;
+
+        // Determine the endpoint URL based on the state
+        const url = token ? "survey/file" : "unauth/file";
+
+        // Use the base query to make the request
+        const result = await baseQuery({
+          url,
+          method: "POST",
+          body,
+        });
+
+        return result;
+      },
     }),
     uploadResponseOCR: builder.mutation({
       query: (body) => ({
@@ -133,6 +203,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         url: `survey/update/${id}`,
         method: "PATCH",
         body: body,
+      }),
+    }),
+    editTranscription: builder.mutation({
+      query: ({ id, transcription_id, text }) => ({
+        url: `response/transcription/${id}`, // response/transcription/66bcc5fe8522baceb3ddf711
+        method: "PATCH",
+        body: { transcription_id, text },
       }),
     }),
     inviteCollaborator: builder.mutation({
@@ -193,32 +270,32 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         start_date,
         end_date,
         name,
-        response_id, 
+        response_id,
         question,
         question_type,
         answer,
         pagesNumber = 1,
-        id
+        id,
       }) => {
         const params = new URLSearchParams();
-    
-        if (countries) params.append('countries', countries);
-        if (date) params.append('date', date);
-        if (start_date) params.append('start_date', start_date);
-        if (end_date) params.append('end_date', end_date);
-        if (name) params.append('name', name);
-        if (response_id) params.append('response_id', response_id);
-        if (question) params.append('question', question);
-        if (answer) params.append('answer', answer);
-        if (question_type) params.append('question_type', question_type);
-        params.append('page', pagesNumber.toString());
+
+        if (countries) params.append("countries", countries);
+        if (date) params.append("date", date);
+        if (start_date) params.append("start_date", start_date);
+        if (end_date) params.append("end_date", end_date);
+        if (name) params.append("name", name);
+        if (response_id) params.append("response_id", response_id);
+        if (question) params.append("question", question);
+        if (answer) params.append("answer", answer);
+        if (question_type) params.append("question_type", question_type);
+        params.append("page", pagesNumber.toString());
         return {
           url: `response/validate/individual/${id}?${params.toString()}&page_size=20`,
-          method: 'GET',
+          method: "GET",
         };
       },
     }),
-    
+
     getPublicSurveyById: builder.query({
       query: (id) => ({
         url: `ps/survey/${id}`,
@@ -232,14 +309,14 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     downloadAllResponse: builder.query({
-      query: ({survey_id, format}) => ({
-        url: `response/export?survey_id=${survey_id}&format=${format}`, // 
+      query: ({ survey_id, format }) => ({
+        url: `response/export?survey_id=${survey_id}&format=${format}`, //
         method: "GET",
       }),
     }),
     downloadSingleResponse: builder.query({
-      query: ({response_id, format}) => ({
-        url: `response/export?response_id=${response_id}&format=${format}`, // 
+      query: ({ response_id, format }) => ({
+        url: `response/export?response_id=${response_id}&format=${format}`, //
         method: "GET",
       }),
     }),
@@ -283,6 +360,7 @@ export const {
   useCloseSurveyStatusMutation,
   useSurveySettingsQuery,
   useEditSurveySettingsMutation,
+  useEditTranscriptionMutation,
   useInviteCollaboratorMutation,
   useGetCollaboratorsListQuery,
   useEditSurveyMutation,
@@ -291,6 +369,6 @@ export const {
   useDownloadAllResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadAllResponseQuery,
-  useLazyDownloadSingleResponseQuery, 
+  useLazyDownloadSingleResponseQuery,
   useUploadResponseFileMutation,
 } = surveyApiSlice;

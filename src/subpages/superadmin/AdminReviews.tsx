@@ -82,6 +82,8 @@ import PageControl from "@/components/common/PageControl";
 import { useGetReviewQuery } from "@/services/superadmin.service";
 import React, { useState } from "react";
 import { FadeLoader } from "react-spinners";
+import { generateInitials } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Answer {
   question: string;
@@ -128,12 +130,20 @@ const AdminReviews: React.FC = () => {
     refetch();
   };
 
+  const statusColorMap = ["#FFC107", "#3498DB", "#27AE60", "#2980B9", "#2ECC71", "#E74C3C", "#FF5733", "#FF5733", "#FF5733",
+  ];
+  const getRandomColor = () => {
+    return statusColorMap[Math.floor(Math.random() * statusColorMap.length)];
+  };
+
+
   console.log(reviews)
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Customer Reviews</h1>
-      <div className="overflow-x-auto">
+
+      {/* <div className="overflow-x-auto">
         <table className="min-w-full table-auto border-collapse border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
@@ -214,6 +224,87 @@ const AdminReviews: React.FC = () => {
                 </tr>
               ))
             )}
+          </tbody>
+        </table>
+      </div> */}
+
+      <div className="overflow-x-auto w-full">
+        <table className="w-full border-collapse border-gray-200 overflow-x-auto">
+          <thead className="bg-gray-100">
+          <tr>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Respondent Name
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Respondent Email
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Country
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Answers
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                Created At
+              </th>
+              <th className="border border-gray-300 px-4 py-2 text-left">
+                View
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              isLoading ? (
+                <tr>
+                  <td colSpan={6} className="text-center ">
+                    <span className="flex justify-center items-center" >
+                    <FadeLoader height={10} radius={1} className="mt-3" />
+                    </span>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="text-center ">
+                    <span className="flex justify-center items-center text-xs text-red-500" >
+                    Something went wrong
+                    </span>
+                  </td>
+                </tr>
+              ) :
+              reviews?.map((review: any, index: number) => (
+              <tr
+                key={index}
+                className={`${
+                  index % 2 === 0 ? "bg-[#F7EEFED9]" : "bg-[#FEF5FED6]"
+                } text-sm rounded-md`}
+              >
+                <td className="py-3 px-4 flex items-center gap-2">
+                <Avatar className="size-8">
+                  <AvatarImage
+                    src={(review as any)?.photo_url ?? ""}
+                    alt="@johndoe"
+                  />
+                  <AvatarFallback className={`font-semibold  `} style={{backgroundColor: getRandomColor()}}>
+                    {generateInitials(review?.user_id?.name ?? "")}
+                  </AvatarFallback>
+                </Avatar>
+                   {review?.user_id?.name}</td>
+               
+                <td className="py-3 px-4">{review?.user_id?.email}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                    {review?.user_id?.country || "Not Provided"}
+                  </td>
+                <td className="py-3 px-4">
+                  {review?.collaborators ? review.collaborators : "Not Available"}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">
+                    {new Date(review.createdAt).toLocaleString()}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    View
+                  </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

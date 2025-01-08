@@ -78,15 +78,12 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     updateUser(state: UserState, action: PayloadAction<Partial<UserState>>) {
-      console.log(state);
-      console.log(action);
-
-      console.log({ ...state, ...action.payload });
-
       return { ...state, ...action.payload };
     },
     logoutUser(state: UserState) {
+      const cookieConsent = localStorage.getItem("cookieConsent");
       localStorage.clear();
+      if (cookieConsent) localStorage.setItem("cookieConsent", cookieConsent);
       return {
         ...state,
         user: null,

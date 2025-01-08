@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/slices/user.slice";
-import { RootState } from "@/redux/store";
+import store, { RootState } from "@/redux/store";
 import logo from "../../assets/images/pollsensei-logo.png";
 import hamburger from "../../assets/images/hamburger-menu.png";
 import notification from "../../assets/images/notification.svg";
@@ -40,6 +40,7 @@ import {
 import { Button } from "../ui/button";
 import { HelpCircle, LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { persistStore } from "redux-persist";
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -51,9 +52,16 @@ const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const persistor = persistStore(store);
+
   const handleSetActiveTab = (tab: string) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
+  };
+
+  // Function to clear persisted state
+  const clearPersistedState = () => {
+    persistor.purge(); // Clear persisted storage
   };
 
   console.log(user);
@@ -94,11 +102,9 @@ const Navbar = () => {
             {/* <h2 className="text-xl text-[#5B03B2]">PollSensei</h2> */}
             {path.includes("/surveys") && (
               <div className="hidden lg:flex items-center gap-2 space-x-1 text-xs mt-[10px] font-semibold ml-2">
-                {
-              user?.roles[0].role.includes("Admin") && 
-              <Link href={"/dashboard"}>Dashboard</Link>
-
-                }
+                {user?.roles[0].role.includes("Admin") && (
+                  <Link href={"/dashboard"}>Dashboard</Link>
+                )}
                 {/* <Link href={"/dashboard"}>Pricing</Link>
                 <Link href={"/dashboard"}>Upgrade to pro</Link> */}
               </div>
@@ -195,6 +201,8 @@ const Navbar = () => {
                 <DropdownMenuItem
                   onClick={() => {
                     dispatch(logoutUser());
+                    clearPersistedState();
+                    localStorage.removeItem("persist:root");
                     router.push("/login");
                   }}
                   className="text-red-600"

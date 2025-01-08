@@ -12,15 +12,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PrivateRoute> 
-      <SenseiProvider>
-        <div className="dashboard-layout pb-16 md:pb-0">
-          <Navbar />
-          {/* You can add common dashboard elements here, like a sidebar or header */}
-          <main>{children}</main>
-          <MobileNavbar />
-        </div>
-      </SenseiProvider>
+    <PrivateRoute>
+      <div className="dashboard-layout pb-16 md:pb-0">
+        <Navbar />
+        {/* You can add common dashboard elements here, like a sidebar or header */}
+        <main>{children}</main>
+        <MobileNavbar />
+      </div>
     </PrivateRoute>
   );
 }
