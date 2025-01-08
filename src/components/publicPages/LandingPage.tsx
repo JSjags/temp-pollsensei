@@ -121,6 +121,13 @@ const LandingPage: React.FC = () => {
     onStateChange: (state) => {
       dispatch(setAnimationState(state.data));
     },
+    onLoad: () => {
+      const inputs = rive?.stateMachineInputs("sensei-states");
+      const trigger = inputs?.find((i) => i.name === "be idle");
+      if (trigger) {
+        trigger.fire();
+      }
+    },
   });
 
   const {
@@ -129,22 +136,6 @@ const LandingPage: React.FC = () => {
   } = useSelector((state: RootState) => {
     return state.senseiMaster || {};
   });
-
-  const toggleStates = (stage?: number) => {
-    if (rive) {
-      const statesLength = rive?.animationNames.length;
-      // dispatch(setAnimationState(animationState === "idle" ? "chat" : "idle"));
-      if (count >= statesLength - 1) {
-        dispatch(setCount(stage ?? 1));
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "stop talking");
-
-        trigger!.fire();
-      } else {
-        dispatch(setCount(count + 1));
-      }
-    }
-  };
 
   // useEffect(() => {
   //   const timer = setTimeout(() => {
@@ -178,43 +169,6 @@ const LandingPage: React.FC = () => {
   //   }
   // }, []);
 
-  const senseiStateSetter = (
-    state:
-      | "sleep"
-      | "be idle"
-      | "start thinking"
-      | "start talking"
-      | "stop talking"
-  ) => {
-    if (rive) {
-      if (state === "sleep") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "sleep");
-        trigger?.fire();
-      }
-      if (state === "be idle") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "be idle");
-        trigger?.fire();
-      }
-      if (state === "start thinking") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "start thinking");
-        trigger?.fire();
-      }
-      if (state === "start talking") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "start talking");
-        trigger?.fire();
-      }
-      if (state === "stop talking") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "stop talking");
-        trigger?.fire();
-      }
-    }
-  };
-
   useEffect(() => {
     if (rive) {
       const statesLength = rive?.animationNames.length;
@@ -236,14 +190,9 @@ const LandingPage: React.FC = () => {
         const inputs = rive?.stateMachineInputs("sensei-states");
 
         if (count === 0) {
-          const trigger = inputs?.find((i) => i.name === "sleep");
+          const trigger = inputs?.find((i) => i.name === "be idle");
+          console.log(trigger);
           if (trigger?.fire) trigger.fire();
-          if (animationState) {
-            setTimeout(() => {
-              const trigger = inputs?.find((i) => i.name === "sleep");
-              if (trigger?.fire) trigger.fire();
-            }, 10000);
-          }
         }
         if (count === 1) {
           const trigger = inputs?.find((i) => i.name === "be idle");
@@ -251,12 +200,22 @@ const LandingPage: React.FC = () => {
           if (trigger?.fire) trigger.fire();
         }
         if (count === 2) {
-          const trigger = inputs?.find((i) => i.name === "start thinking");
+          const trigger = inputs?.find((i) => i.name === "be idle");
           console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
         if (count === 3) {
-          const trigger = inputs?.find((i) => i.name === "start talking");
+          const trigger = inputs?.find((i) => i.name === "be idle");
+          console.log(trigger);
+          if (trigger?.fire) trigger.fire();
+        }
+        if (count === 4) {
+          const trigger = inputs?.find((i) => i.name === "be idle");
+          console.log(trigger);
+          if (trigger?.fire) trigger.fire();
+        }
+        if (count === 5) {
+          const trigger = inputs?.find((i) => i.name === "be idle");
           console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
