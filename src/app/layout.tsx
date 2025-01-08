@@ -121,7 +121,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <CookieConsent />
+        {/* <CookieConsent /> */}
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>

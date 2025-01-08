@@ -115,7 +115,7 @@ const LandingPage: React.FC = () => {
   const [showSensei, setShowSensei] = useState(false);
 
   const { rive, RiveComponent } = useRive({
-    src: "/assets/rive/pollsensei_master.riv",
+    src: "/assets/rive/pollsensei_master_latest.riv",
     stateMachines: "sensei-states",
     autoplay: true,
     onStateChange: (state) => {

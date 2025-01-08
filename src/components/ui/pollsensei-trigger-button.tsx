@@ -34,7 +34,7 @@ interface CustomButtonProps {
     | string[]
     | undefined
     | {
-      columns: string[];
+        columns: string[];
         rows: string[];
       };
   onSave: (
@@ -152,7 +152,7 @@ export default function PollsenseiTriggerButton({
                 alt=""
                 width={16}
                 height={16}
-                className="size-4 w-auto animate-spin-slow"
+                className="size-4 w-auto"
               />
             </motion.div>
           </Button>
