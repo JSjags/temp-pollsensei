@@ -4,6 +4,10 @@ export const getMeQuery = async () => {
   return axiosInstance.get(`/user/me`);
 };
 
+export const getResponseRate = async (period: "year" | "month" | "week") => {
+  return axiosInstance.get(`/dashboard/surveys/response-rate?period=${period}`);
+};
+
 export const getPasswordResetCode = async () => {
   return axiosInstance.get(`/user/password-reset-code`);
 };

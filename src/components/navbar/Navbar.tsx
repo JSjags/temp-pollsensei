@@ -38,9 +38,11 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { HelpCircle, LogOut, Settings, User } from "lucide-react";
+import { HelpCircle, LogOut, Search, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { persistStore } from "redux-persist";
+import { useSidebar } from "../ui/sidebar";
+import { Input } from "../ui/shadcn-input";
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -85,51 +87,90 @@ const Navbar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
+
   return (
     <div
       className={cn(
-        "w-full bg-white sticky top-0 z-[1000]",
-        isSidebarOpen && "h-screen lg:h-auto",
-        path.includes("survey") ? "" : "shadow-md shadow-black/5"
+        "w-full bg-transparent",
+        isSidebarOpen && "h-screen lg:h-auto"
+        // path.includes("survey") ? "" : "shadow-md shadow-black/5"
       )}
     >
-      <div className="border-b-[0.5px]">
-        <header className="container flex items-center justify-between py-5 px-5">
+      <div className="sticky top-0 z-50 bg-[#F7F8FB]">
+        <header className="container flex items-center justify-between py-2 pt-2 px-2 sm:px-5 fixed top-0 bg-[#F7F8FB99] backdrop-blur-md">
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
-            <Link href={"/dashboard"}>
-              <Image src={pollsensei_new_logo} alt="Logo" />
-            </Link>
-            {/* <h2 className="text-xl text-[#5B03B2]">PollSensei</h2> */}
-            {path.includes("/surveys") && (
-              <div className="hidden lg:flex items-center gap-2 space-x-1 text-xs mt-[10px] font-semibold ml-2">
-                {user?.roles[0].role.includes("Admin") && (
-                  <Link href={"/dashboard"}>Dashboard</Link>
-                )}
-                {/* <Link href={"/dashboard"}>Pricing</Link>
-                <Link href={"/dashboard"}>Upgrade to pro</Link> */}
+            <div className="flex gap-4 items-center h-10">
+              {isOpen ? (
+                <Image
+                  src={"/assets/sidebar/open.svg"}
+                  alt="Close sidebar"
+                  width={24}
+                  height={24}
+                  onClick={toogleMainSidebar}
+                />
+              ) : (
+                <Image
+                  src={"/assets/sidebar/close.svg"}
+                  alt="Open sidebar"
+                  width={24}
+                  height={24}
+                  onClick={toogleMainSidebar}
+                />
+              )}
+              <div className="h-10 bg-white relative rounded-lg w-52">
+                <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
+                <Input
+                  className="border-none h-10 pl-8 rounded-lg"
+                  placeholder="Search anything"
+                />
               </div>
-            )}
+            </div>
           </div>
-          <div
-            className="lg:hidden flex items-center gap-2 cursor-pointer"
-            onClick={toggleSidebar}
-          >
-            <Image src={hamburger} alt="Menu" className="size-4" />
+          {/* mobile */}
+          <div className="lg:hidden flex items-center gap-2 cursor-pointer">
+            <div className="flex gap-4 items-center h-10">
+              {isOpen ? (
+                <Image
+                  src={"/assets/sidebar/open.svg"}
+                  alt="Close sidebar"
+                  width={24}
+                  height={24}
+                  onClick={toogleMainSidebar}
+                />
+              ) : (
+                <Image
+                  src={"/assets/sidebar/close.svg"}
+                  alt="Open sidebar"
+                  width={24}
+                  height={24}
+                  onClick={toogleMainSidebar}
+                />
+              )}
+              {/* <div className="h-10 bg-white relative rounded-lg w-52">
+                <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
+                <Input
+                  className="border-none h-10 pl-8 rounded-lg"
+                  placeholder="Search anything"
+                />
+              </div> */}
+            </div>
           </div>
           <div className="lg:hidden flex items-center gap-2 cursor-pointer">
-            <Image src={logo} alt="Logo" className="h-8 w-auto" />
-            <h2 className="text-lg text-[#5B03B2]">PollSensei</h2>
+            <Link href="/dashboard" className="w-full">
+              <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
+            </Link>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <div
               // onClick={() => {
               //   alert("Clicked");
               // }}
-              className="h-[48px] w-[48px] rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px]"
+              className="size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px]"
             >
               <Image
-                className="object-contain"
+                className="object-contain size-8"
                 width={24}
                 height={24}
                 src={notification}
@@ -138,11 +179,15 @@ const Navbar = () => {
             </div>
 
             <DropdownMenu open={open} onOpenChange={setOpen}>
-              <DropdownMenuTrigger asChild className="cursor-pointer">
-                <Avatar className="size-12">
+              <DropdownMenuTrigger
+                asChild
+                className="cursor-pointerflex justify-center items-center size-12"
+              >
+                <Avatar className="size-8">
                   <AvatarImage
                     src={(user as any)?.photo_url ?? ""}
                     alt="@johndoe"
+                    className="size-8"
                   />
                   <AvatarFallback className="font-semibold">
                     {generateInitials((user as any)?.name ?? "")}
@@ -336,7 +381,7 @@ const Navbar = () => {
 
       {/* Desktop navigation */}
       <div className="hidden lg:block shadow-md shadow-black/0">
-        <DesktopNavigation />
+        {/* <DesktopNavigation /> */}
         <div className="flex justify-end items-center px-5">
           <MilestoneCTA />
         </div>

@@ -58,14 +58,14 @@ export function CurrentPlanCard() {
             </div>
           </div>
         </div>
-        <motion.div
+        {/* <motion.div
           className="absolute -bottom-2 right-0 z-10"
           initial={{ rotate: -10 }}
           animate={{ rotate: 0 }}
           transition={{ duration: 0.6, type: "spring" }}
         >
           <Skeleton className="size-40 rounded-full opacity-0" />
-        </motion.div>
+        </motion.div> */}
       </motion.div>
     );
   }
@@ -126,7 +126,7 @@ export function CurrentPlanCard() {
           alt="Shopping bag image"
           width={128}
           height={128}
-          className="size-40"
+          className="size-40 hidden xl:block"
         />
       </motion.div>
     </motion.div>

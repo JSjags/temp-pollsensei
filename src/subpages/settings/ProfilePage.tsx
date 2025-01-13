@@ -55,9 +55,6 @@ const ProfilePage: React.FC = () => {
     }
   }, [data]);
 
-  console.log(data);
-  console.log(userData);
-
   const [updateUserProfile, { isLoading }] = useUpdateUserProfileMutation();
   const [updateProfileImage, { isLoading: Updating }] =
     useUpdateProfileImageMutation();
@@ -82,7 +79,6 @@ const ProfilePage: React.FC = () => {
       toast.success("User profile updated successfully");
       toggleEdit();
       refetch();
-      // Invalidate all queries and mutations in the cache
       dispatch(apiSlice.util.resetApiState());
     } catch (err: any) {
       toast.error(
@@ -121,22 +117,23 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="px-[4.4rem] flex flex-col py-[3.88rem]">
+    <div className="px-4 md:px-[4.4rem] flex flex-col py-6 md:py-[3.88rem]">
       {!editProfile ? (
         <>
-          <div className="flex justify-between items-center">
-            <div className="flex flex-1 gap-3 items-center size-28">
-              <Image
-                src={
-                  typeof profileImage === "string"
-                    ? profileImage
-                    : userPlaceholder
-                }
-                alt="Profile image"
-                width={107}
-                height={107}
-                className="rounded-full size-28 object-cover"
-              />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+            <div className="flex flex-col md:flex-row flex-1 gap-3 items-start md:items-center">
+              <div className="w-24 h-24 md:w-28 md:h-28 relative">
+                <Image
+                  src={
+                    typeof profileImage === "string"
+                      ? profileImage
+                      : userPlaceholder
+                  }
+                  alt="Profile image"
+                  fill
+                  className="rounded-full object-cover"
+                />
+              </div>
               <div className="flex flex-col gap-2">
                 <p className="text-[#333333] font-semibold">Profile picture</p>
                 <small className="text-[#BDBDBD]">PNG, JPG up to 5MB</small>
@@ -153,7 +150,7 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             <button
-              className="shadow-md flex text-sm rounded items-center px-4 py-2"
+              className="shadow-md flex text-sm rounded items-center px-4 py-2 w-full md:w-auto justify-center md:justify-start"
               onClick={toggleEdit}
             >
               <FaRegEdit className="mr-2" /> Edit
@@ -170,7 +167,7 @@ const ProfilePage: React.FC = () => {
               </div>
               <div className="pb-4">
                 <p className="text-[#7D8398] text-sm">Email Address</p>
-                <h3 className="text-[#070707] text-[1rem]">
+                <h3 className="text-[#070707] text-[1rem] break-all">
                   {userData.email || "Not set"}
                 </h3>
               </div>
@@ -193,20 +190,21 @@ const ProfilePage: React.FC = () => {
         </>
       ) : (
         <>
-          <div className="flex gap-3 items-center">
-            <Image
-              src={
-                profileImage instanceof File
-                  ? URL.createObjectURL(profileImage)
-                  : typeof profileImage === "string"
-                  ? profileImage
-                  : userPlaceholder
-              }
-              alt="Profile"
-              width={107}
-              height={107}
-              className="rounded-full"
-            />
+          <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
+            <div className="w-24 h-24 md:w-28 md:h-28 relative">
+              <Image
+                src={
+                  profileImage instanceof File
+                    ? URL.createObjectURL(profileImage)
+                    : typeof profileImage === "string"
+                    ? profileImage
+                    : userPlaceholder
+                }
+                alt="Profile"
+                fill
+                className="rounded-full object-cover"
+              />
+            </div>
             <div className="flex flex-col gap-2">
               <p className="text-[#333333] font-semibold">Profile picture</p>
               <small className="text-[#BDBDBD]">PNG, JPG up to 5MB</small>
@@ -231,7 +229,7 @@ const ProfilePage: React.FC = () => {
               onSubmit={onSubmit}
               initialValues={userData}
               render={({ handleSubmit, form, submitting }) => (
-                <form onSubmit={handleSubmit} className="w-2/3">
+                <form onSubmit={handleSubmit} className="w-full md:w-2/3">
                   <Field name="name">
                     {({ input, meta }) => (
                       <InputEdit
@@ -281,16 +279,16 @@ const ProfilePage: React.FC = () => {
                     )}
                   </Field>
 
-                  <div className="w-full flex gap-3 pt-3">
+                  <div className="w-full flex flex-col md:flex-row gap-3 pt-3">
                     <button
-                      className="text-[#898989] border-border border w-full justify-center rounded-lg hover:bg-gray-100"
+                      className="text-[#898989] border-border border w-full justify-center rounded-lg hover:bg-gray-100 py-2"
                       type="button"
                       onClick={toggleEdit}
                     >
                       Cancel
                     </button>
                     <button
-                      className="auth-btn w-full justify-center items-center"
+                      className="auth-btn w-full justify-center items-center py-2"
                       type="submit"
                       disabled={submitting || isLoading}
                     >
