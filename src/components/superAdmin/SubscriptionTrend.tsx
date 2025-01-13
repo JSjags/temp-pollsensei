@@ -182,11 +182,12 @@
 import React from "react";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
+import { useSubscriptionTrendQuery } from "@/services/superadmin.service";
 
 const SubscriptionTrend: React.FC = () => {
   const chartOptions: ApexOptions = {
     chart: {
-      type: "area", // Explicitly matches the ApexOptions type
+      type: "area", 
       height: 350,
       toolbar: {
         show: false,
@@ -248,6 +249,9 @@ const SubscriptionTrend: React.FC = () => {
       data: [2, 8, 12, 22, 28, 18, 25],
     },
   ];
+
+  const {data} = useSubscriptionTrendQuery(null)
+  console.log(data)
 
   return (
     <div className=" w-full">

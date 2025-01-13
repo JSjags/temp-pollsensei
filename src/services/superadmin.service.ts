@@ -68,6 +68,17 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    subscriptionTrend: builder.query({
+      query: ({ month, year }) => {
+        const params = new URLSearchParams();
+        if (month) params.append("month", month);
+        if (year) params.append("year", year);
+        return {
+          url: `superadmin/user-subscription-distribution?${params.toString()}`,  // superadmin/user-subscription-distribution?month=October&year=2024
+          method: "GET",
+        };
+      },
+    }),
     allFAQs: builder.query({
       query: ({ pagesNumber, filter_by }) => {
         const params = new URLSearchParams();
@@ -77,6 +88,16 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       }, //
+    }),
+    tutorial: builder.query({
+      query: ({ pagesNumber, filter_by }) => {
+        const params = new URLSearchParams();
+        if (filter_by) params.append("filter_by", filter_by);
+        return {
+          url: `tutorial?page=${pagesNumber}&page_size=20`, // /tutorial?page=1&page_size=20&filter_by=video
+          method: "GET"
+        };
+      },
     }),
     createFAQs: builder.mutation({
       query: (body) => ({
@@ -170,9 +191,21 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
+    fetchTutorial: builder.query({
+      query: (pagesNumber: any) => ({
+        url: `tutorial?page=${pagesNumber}&page_size=20`,
+        method: "GET",
+      }),
+    }),
     previewTutorial: builder.query({
       query: (id) => ({
         url: `superadmin/tutorial/${id}`, // {{base_url}}/superadmin/tutorial/674cef905d1a62ffc9bea12f
+        method: "GET",
+      }),
+    }),
+    viewTutorial: builder.query({
+      query: (id) => ({
+        url: `tutorial/${id}`, // {{base_url}}/tutorial/6780f1f58a7256f0e2f428bc
         method: "GET",
       }),
     }),
@@ -211,6 +244,7 @@ export const {
   useSurveyCreationDistributionQuery,
   useAllFAQsQuery,
   useSurveyTypeDistributionQuery,
+  useSubscriptionTrendQuery,
   useLazySurveyTypeDistributionQuery,
   useDeleteTutorialMutation,
   useDeleteFAQsMutation,
@@ -228,6 +262,9 @@ export const {
   useGetReviewQuestionQuery,
   useAllTutorialsQuery,
   usePreviewTutorialQuery,
+  useViewTutorialQuery,
+  useFetchTutorialQuery,
+  useTutorialQuery,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery,
