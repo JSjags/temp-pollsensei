@@ -3,17 +3,22 @@ import { SuperAdminPieChart } from "../charts/SuperAdminPieChart";
 import { ChartConfig } from "../ui/chart";
 import { useSurveyCreationDistributionQuery, useSurveyTypeDistributionQuery } from "@/services/superadmin.service";
 import OverlappingCircles from "../charts/OverlappingCircle";
+import { SurveyTypeChart } from "./SurveyTypeChart";
+import { SuperAdminPieChart2 } from "../charts/SuperAdminPieChart2";
+import SubscriptionTrend from "./SubscriptionTrend";
+
 
 const DashboardAnalytics: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState("October");
+  const [selectedMonth, setSelectedMonth] = useState("January");
+  const [selectedYear, setSelectedYear] = useState("2025");
   // const 
   const {data,  isLoading, isSuccess, error} = useSurveyCreationDistributionQuery({
     month: selectedMonth,
-    year: '2024',
+    year: selectedYear,
   })
   const {data:surveyTypeDistribution,  isLoading:typeLoading, isSuccess:typeSuccess, error:typeError} = useSurveyTypeDistributionQuery({
-    month: 'October',
-    year: '2024',
+    month: 'January',
+    year: selectedYear,
   })
   console.log(data)
   console.log(surveyTypeDistribution)
@@ -115,31 +120,23 @@ const chartConfigForSurveyType = {
   return (
     <div className="p-6 bg-gray-50">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SuperAdminPieChart
-          desktopData={desktopData}
-          chartConfig={chartConfig}
-          bottomLegend={bottomLegend}
-          title="User Subscription Distribution"
-        />
-        <OverlappingCircles
-          desktopData={desktopData}
-          chartConfig={chartConfig}
-          bottomLegend={createdBy}
-          title="Creation Method Distribution"
-          circles={circleData}
-        />
-       
-        <SuperAdminPieChart
+
+      {/* <SuperAdminPieChart2
+  chartConfig={{
+    Quantitative: { label: "Quantitative" },
+    Qualitative: { label: "Qualitative" },
+    Mixed: { label: "Mixed" },
+  }}
+  bottomLegend={["Quantitative", "Qualitative", "Mixed"]}
+  title="Survey Type Distribution"
+/> */}
+
+<SuperAdminPieChart
           desktopData={desktopData}
           chartConfig={chartConfigForSurveyType}
           bottomLegend={surveyType}
           title="Survey Type Distribution"
-        />
-           {/* <SuperAdminPieChart
-          desktopData={desktopData}
-          chartConfig={chartConfigForSurveyType}
-          bottomLegend={surveyType}
-          title="Survey Type Distribution"
+          year={["2023", "2024", '2025']}
           months={[
             "January",
             "February",
@@ -154,9 +151,52 @@ const chartConfigForSurveyType = {
             "November",
             "December",
           ]}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
+        />
+
+        {/* <SurveyTypeChart /> */}
+        <OverlappingCircles
+          desktopData={desktopData}
+          chartConfig={chartConfig}
+          bottomLegend={createdBy}
+          title="Creation Method Distribution"
+          circles={circleData}
+        />
+       
+        {/* <SuperAdminPieChart
+          desktopData={desktopData}
+          chartConfig={chartConfigForSurveyType}
+          bottomLegend={surveyType}
+          title="Survey Type Distribution"
         /> */}
+           <SuperAdminPieChart
+          desktopData={desktopData}
+          chartConfig={chartConfigForSurveyType}
+          bottomLegend={surveyType}
+          title="Survey Type Distribution"
+          year={["2023", "2024", '2025']}
+          months={[
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ]}
+          selectedYear={selectedYear}
+          onYearChange={setSelectedYear}
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+        />
       </div>
 
       {/* Line Chart */}
@@ -178,15 +218,14 @@ const chartConfigForSurveyType = {
               )
             )}
           </div>
-          <div className="flex items-center space-x-4 text-sm text-gray-600">
+          {/* <div className="flex items-center space-x-4 text-sm text-gray-600">
             <span className="text-gray-800">Premium plan</span>
             <span className="text-purple-500">Pro plan</span>
             <span className="text-blue-400">Free plan</span>
-          </div>
+          </div> */}
         </div>
-        <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-          {/* Placeholder for chart */}
-          <span className="text-sm text-gray-500">Line chart goes here</span>
+        <div className=" bg-gray-100 rounded-lg flex w-full items-center justify-center">
+         <SubscriptionTrend />
         </div>
       </div>
     </div>

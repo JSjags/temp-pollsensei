@@ -169,11 +169,14 @@ const UserRegistry: React.FC = () => {
               <th className="text-left py-3 px-4 font-medium text-sm">
                 User Name
               </th>
-              {/* <th className="text-left py-3 px-4 font-medium text-sm">
+              <th className="text-left py-3 px-4 font-medium text-sm">
                 Account Type
-              </th> */}
+              </th>
               <th className="text-left py-3 px-4 font-medium text-sm">
                 Email Address
+              </th>
+              <th className="text-left py-3 px-4 font-medium text-sm">
+                Country
               </th>
               <th className="text-left py-3 px-4 font-medium text-sm">
                 Subscription
@@ -227,10 +230,11 @@ const UserRegistry: React.FC = () => {
                     </Avatar>
                     {user?.name}
                   </td>
-                  {/* <td className="py-3 px-4">
-                  {user?.accountType ? user?.accountType : "Not Available"}
-                </td> */}
+                  <td className="py-3 px-4">
+                  {user?.account_type ? user?.account_type : "Not Available"}
+                </td>
                   <td className="py-3 px-4">{user?.email}</td>
+                  <td className="py-3 px-4">{user?.country ? user?.country : "Not Available"}</td>
                   <td
                     className={`py-3 px-4 font-medium ${
                       user.subscription === "Premium"

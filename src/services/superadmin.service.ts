@@ -31,7 +31,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       query: ({ month, year }) => {
         const params = new URLSearchParams();
         if (month) params.append("month", month);
-        if (year) params.append("&year", year);
+        if (year) params.append("year", year);
         return {
           url: `superadmin/survey-creation-distribution?${params.toString()}`,
           method: "GET",
@@ -42,7 +42,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       query: ({ month, year }) => {
         const params = new URLSearchParams();
         if (month) params.append("month", month);
-        if (year) params.append("&year", year);
+        if (year) params.append("year", year);
         return {
           url: `superadmin/survey-type-distribution?${params.toString()}`,
           method: "GET",
@@ -74,6 +74,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    createTutorial: builder.mutation({
+      query: (body) => ({
+        url: "superadmin/tutorial",
+        method: "POST",
+        body: body,
+      }),
+    }),
     unpublishFAQs: builder.mutation({
       query: ({ id, body }) => ({
         url: `superadmin/faq-status/${id}?status=unpublish`,
@@ -81,9 +88,23 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    unpublishTutorial: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `superadmin/tutorial-status/${id}?status=unpublish`, // {{base_url}}/superadmin/tutorial-status/674cf336922a72e499678670?status=unpublish
+        method: "PATCH",
+        body: body,
+      }),
+    }),
     publishFAQs: builder.mutation({
       query: ({ id, body }) => ({
         url: `superadmin/faq-status/${id}?status=publish`,
+        method: "PATCH",
+        body: body,
+      }),
+    }),
+    publishTutorial: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `superadmin/tutorial-status/${id}?status=publish`,
         method: "PATCH",
         body: body,
       }),
@@ -101,9 +122,22 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    editTutorial: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `superadmin/tutorial/${id}`,
+        method: "PATCH",
+        body: body,
+      }),
+    }),
     deleteFAQs: builder.mutation({
       query: (id) => ({
         url: `/superadmin/faq/${id}`,
+        method: "DELETE",
+      }),
+    }),
+    deleteTutorial: builder.mutation({
+      query: (id) => ({
+        url: `/superadmin/tutorial/${id}`, // superadmin/tutorial/674cf336922a72e499678670
         method: "DELETE",
       }),
     }),
@@ -116,6 +150,12 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
+    }),
+    previewTutorial: builder.query({
+      query: (id) => ({
+        url: `superadmin/tutorial/${id}`, // {{base_url}}/superadmin/tutorial/674cef905d1a62ffc9bea12f
+        method: "GET",
+      }),
     }),
     validateIndividualResponse: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
@@ -152,16 +192,23 @@ export const {
   useSurveyCreationDistributionQuery,
   useAllFAQsQuery,
   useSurveyTypeDistributionQuery,
+  useLazySurveyTypeDistributionQuery,
+  useDeleteTutorialMutation,
   useDeleteFAQsMutation,
+  useEditTutorialMutation,
   useEditFAQsMutation,
+  useCreateTutorialMutation,
   useCreateFAQsMutation,
   usePublishFAQsMutation,
+  usePublishTutorialMutation,
   useUnpublishFAQsMutation,
+  useUnpublishTutorialMutation,
   useCreateReviewMutation,
   useGetReviewQuery,
   useSingleFAQsQuery,
   useGetReviewQuestionQuery,
   useAllTutorialsQuery,
+  usePreviewTutorialQuery,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery,
