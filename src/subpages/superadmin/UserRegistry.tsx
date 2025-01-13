@@ -19,13 +19,13 @@ interface PathParamsProps {
 
 const options = {
   subscription: [
-    { label: "Premium Plan", value: "premium" },
-    { label: "Free Plan", value: "free" },
-    { label: "Pro Plan", value: "pro" },
+    { label: "Premium Plan", value: "Team Plan" },
+    { label: "Free Plan", value: "Basic Plan" },
+    { label: "Pro Plan", value: "Pro Plan" },
   ],
   accountType: [
     { label: "Individual", value: "individual" },
-    { label: "Organisation", value: "organisation" },
+    { label: "Organisation", value: "organization" },
   ],
   location: [
     { label: "Europe", value: "europe" },
@@ -47,15 +47,24 @@ const UserRegistry: React.FC = () => {
   const path_params: PathParamsProps = {};
   if (email) path_params.email = email;
 
+  // const queryArgs = useMemo(() => {
+  //   return {
+  //     pagesNumber: currentPage,
+  //     path_params: {
+  //       ...selectedFilters,
+  //       email: email || undefined,
+  //     },
+  //   };
+  // }, [currentPage, selectedFilters, email]);
+
   const queryArgs = useMemo(() => {
+    const params = { ...selectedFilters, email: email || undefined };
     return {
       pagesNumber: currentPage,
-      path_params: {
-        ...selectedFilters,
-        email: email || undefined,
-      },
+      ...params, 
     };
   }, [currentPage, selectedFilters, email]);
+  
 
   console.log(selectedFilters)
   const { data, isLoading, error, refetch } = useUserRegistryQuery(queryArgs);
@@ -70,11 +79,18 @@ const UserRegistry: React.FC = () => {
     }));
   };
 
+  // const resetFilters = () => {
+  //   setSelectedFilters({});
+  //   setEmail("");
+  //   setCurrentPage(1);
+  // };
   const resetFilters = () => {
     setSelectedFilters({});
     setEmail("");
     setCurrentPage(1);
+    refetch(); // Optional: Trigger a refetch to clear the results
   };
+  
 
   const navigatePage = (direction: "next" | "prev") => {
     setCurrentPage((prevIndex) => {
@@ -104,6 +120,8 @@ const UserRegistry: React.FC = () => {
     return statusColorMap[Math.floor(Math.random() * statusColorMap.length)];
   };
 
+  console.log(data)
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen w-full">
       <h1 className="text-sm font-bold mb-6">User Registry</h1>
@@ -129,7 +147,7 @@ const UserRegistry: React.FC = () => {
               />
             </svg>
           </button>
-          <DropdownFilter
+          {/* <DropdownFilter
             title="Subscription"
             options={options?.subscription}
             onApply={(selected) =>
@@ -146,7 +164,24 @@ const UserRegistry: React.FC = () => {
             options={options?.location}
             multiSelect
             onApply={(selected) => handleFilterApply("location", selected)}
-          />
+          /> */}
+          <DropdownFilter
+  title="Subscription"
+  options={options.subscription}
+  onApply={(selected) => handleFilterApply("subscription_type", selected)}
+/>
+<DropdownFilter
+  title="Account Type"
+  options={options.accountType}
+  onApply={(selected) => handleFilterApply("account_type", selected)}
+/>
+<DropdownFilter
+  title="Location"
+  options={options.location}
+  multiSelect
+  onApply={(selected) => handleFilterApply("location", selected)}
+/>
+
           <button
             onClick={resetFilters}
             className="text-red-500 bg-white border-gray-300 py-2 px-4 text-sm border rounded-r-full"
@@ -257,18 +292,18 @@ const UserRegistry: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-3 text-center px-4">
-                    {user?.collaborators ? user.collaborators : "0"}
+                    {user?.collaborators ? user?.collaborators : "0"}
                   </td>
                   <td
                     className={`py-3 px-4 font-medium ${
-                      user.plan === "Premium"
+                      user?.plan?.name === "Team Plan"
                         ? "text-purple-600"
-                        : user.plan === "Pro Plan"
+                        : user?.plan?.name === "Pro Plan"
                         ? "text-red-600"
                         : "text-green-600"
                     }`}
                   >
-                    {user?.plan ? user?.plan : "Free Plan"}
+                    {user?.plan ? user?.plan.name : "Free Plan"}
                   </td>
                   <td className="py-3 px-4">
                     {user?.createdAt

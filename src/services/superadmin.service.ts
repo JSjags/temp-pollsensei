@@ -3,24 +3,43 @@ import apiSlice from "./config/apiSlice";
 
 export const surveyApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    userRegistry: builder.query({
-      query: ({ pagesNumber, subscription_type, account_type, location, email }) => {
-        const params = new URLSearchParams();
-        if (subscription_type)
-          params.append("subscription_type", subscription_type);
-        if (account_type)
-          params.append("account_type", account_type);
-        if (location)
-          params.append("location", location);
-        if (email)
-          params.append("email", email);
+    // userRegistry: builder.query({
+    //   query: ({ pagesNumber, subscription_type, account_type, location, email }) => {
+    //     const params = new URLSearchParams();
+    //     if (subscription_type)
+    //       params.append("subscription_type", subscription_type);
+    //     if (account_type)
+    //       params.append("account_type", account_type);
+    //     if (location)
+    //       params.append("location", location);
+    //     if (email)
+    //       params.append("email", email);
 
+    //     return {
+    //       url: `superadmin/users?page=${pagesNumber}&page_size=20${params.toString()}`,
+    //       method: "GET",
+    //     };
+    //   },
+    // }),
+    userRegistry: builder.query({
+      query: ({ pagesNumber, ...filters }) => {
+        const params = new URLSearchParams();
+    
+        Object.entries(filters).forEach(([key, value]) => {
+          if (typeof value === 'string' && value) {
+            params.append(key, value);
+          } else if (Array.isArray(value) && value.length > 0) {
+            value.forEach((val) => params.append(key, val));
+          }
+        });
+    
         return {
-          url: `superadmin/users?page=${pagesNumber}&page_size=20${params.toString()}`,
+          url: `superadmin/users?page=${pagesNumber}&page_size=20&${params.toString()}`,
           method: "GET",
         };
       },
     }),
+       
     superadminOverview: builder.query({
       query: () => ({
         url: `/superadmin/overview`, //
