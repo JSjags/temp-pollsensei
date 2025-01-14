@@ -453,15 +453,39 @@ const PublicResponse = () => {
                             );
                           case "long_text":
                             return (
-                              <textarea
-                                rows={4}
-                                className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
-                                onChange={(e) =>
-                                  handleAnswerChange(quest.question, {
-                                    text: e.target.value,
-                                  })
+                              <div className="flex flex-col">
+                                <textarea
+                                  rows={4}
+                                  className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                                  onChange={(e) =>
+                                    handleAnswerChange(quest.question, {
+                                      text: e.target.value,
+                                    })
+                                  }
+                                />
+                              <ResponseFile
+                                question={quest.question}
+                                handleAnswerChange={handleAnswerChange}
+                                selectedValue={
+                                  answers[quest.question]?.media_url || ""
                                 }
+                                required={quest.is_required}
                               />
+                            </div>
+                            );
+                          case "short_text":
+                            return (
+                              <div className="flex flex-col">
+                                <input
+                                  placeholder="Your response here..."
+                                  className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                                  onChange={(e) =>
+                                    handleAnswerChange(quest.question, {
+                                      text: e.target.value,
+                                    })
+                                  }
+                                />
+                            </div>
                             );
                           case "star_rating":
                             return (
