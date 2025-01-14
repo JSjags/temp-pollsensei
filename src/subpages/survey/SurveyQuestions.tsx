@@ -22,6 +22,7 @@ import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 import MediaQuestion from "@/components/survey/MediaQuestion";
+import { cn } from "@/lib/utils";
 
 const SurveyQuestions = () => {
   const params = useParams();
@@ -45,7 +46,12 @@ const SurveyQuestions = () => {
   };
 
   return (
-    <div className={` flex flex-col gap-5 lg:px-16 w-full`}>
+    <div
+      className={cn(
+        `flex flex-col gap-5 lg:px-16 w-full`,
+        data?.data?.theme && data?.data?.theme
+      )}
+    >
       {data && data?.data && (
         <div
           className={`${data?.data?.theme} flex justify-center items-center px-5 mx-auto gap-10 lg:w-[80%]`}
@@ -64,19 +70,17 @@ const SurveyQuestions = () => {
                 />
               </div>
             )}
-              {
-                data && !isLoading && data?.data?.header_url && (
-            <div className="bg-[#9D50BB]  w-full my-2 text-white h-24 flex items-center flex-col ">
-              <Image
-                src={data && !isLoading && data?.data?.header_url}
-                alt=""
-                className="w-full object-cover bg-no-repeat h-24 "
-                width={"100"}
-                height={"200"}
-              />
-            </div>
-                )
-              }
+            {data && !isLoading && data?.data?.header_url && (
+              <div className="bg-[#9D50BB]  w-full my-2 text-white h-24 flex items-center flex-col ">
+                <Image
+                  src={data && !isLoading && data?.data?.header_url}
+                  alt=""
+                  className="w-full object-cover bg-no-repeat h-24 "
+                  width={"100"}
+                  height={"200"}
+                />
+              </div>
+            )}
 
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
               <h2
@@ -88,19 +92,25 @@ const SurveyQuestions = () => {
               >
                 {data?.data?.topic}
               </h2>
-              <p    style={{
+              <p
+                style={{
                   fontSize: `${data?.data?.body_text?.size}px`,
                   fontFamily: `${data?.data?.body_text?.name}`,
-                }}>{data?.data?.description}</p>
+                }}
+              >
+                {data?.data?.description}
+              </p>
             </div>
             {data?.data &&
               data?.data?.sections[currentSection]?.questions?.map(
                 (item: any, index: number) => (
-                  <div key={index} className="mb-4" 
-                  style={{
-                    fontFamily: `${data?.data?.question_text?.name}`,
-                    fontSize: `${data?.data?.question_text?.size}px`,
-                  }}
+                  <div
+                    key={index}
+                    className="mb-4"
+                    style={{
+                      fontFamily: `${data?.data?.question_text?.name}`,
+                      fontSize: `${data?.data?.question_text?.size}px`,
+                    }}
                   >
                     {item.question_type &&
                     item.question_type === "multiple_choice" ? (
@@ -119,7 +129,7 @@ const SurveyQuestions = () => {
                         question={item.question}
                         is_required={item.is_required}
                       />
-                    ): item.question_type === "media" ? (
+                    ) : item.question_type === "media" ? (
                       <MediaQuestion
                         key={index}
                         index={index + 1}
@@ -127,18 +137,16 @@ const SurveyQuestions = () => {
                         question={item.question}
                         is_required={item.is_required}
                       />
-                    )
-                     : item.question_type === "slider" ? (
+                    ) : item.question_type === "slider" ? (
                       <SliderQuestion
-                      question={item.question}
-                      options={item.options}
-                      // step={item.options.length}
-                      questionType={item.question_type}
-                      index={index + 1}
-                      is_required={item.is_required}
+                        question={item.question}
+                        options={item.options}
+                        // step={item.options.length}
+                        questionType={item.question_type}
+                        index={index + 1}
+                        is_required={item.is_required}
                       />
-                    )
-                    : item.question_type === "likert_scale" ? (
+                    ) : item.question_type === "likert_scale" ? (
                       <LikertScaleQuestion
                         question={item.question}
                         options={item.options}
@@ -146,12 +154,11 @@ const SurveyQuestions = () => {
                         key={index}
                         index={index + 1}
                         is_required={item.is_required}
-
                       />
                     ) : item.question_type === "star_rating" ? (
                       <StarRatingQuestion
                         question={item.question}
-                      // maxRating={5}
+                        // maxRating={5}
                         index={index + 1}
                         questionType={item.question_type}
                         is_required={item.is_required}
@@ -166,7 +173,6 @@ const SurveyQuestions = () => {
                         questionType={item.question_type}
                         question={item.question}
                         is_required={item.is_required}
-
                       />
                     ) : item.question_type === "short_text" ? (
                       <ShortTextQuestion
@@ -175,7 +181,6 @@ const SurveyQuestions = () => {
                         question={item.question}
                         questionType={item.question_type}
                         is_required={item.is_required}
-                       
                       />
                     ) : item.question_type === "boolean" ? (
                       <BooleanQuestion
@@ -184,16 +189,14 @@ const SurveyQuestions = () => {
                         question={item.question}
                         options={item.options}
                         questionType={item.question_type}
-                       
                       />
-                    )  :  item.question_type === "single_choice" ? (
+                    ) : item.question_type === "single_choice" ? (
                       <SingleChoiceQuestion
                         index={index + 1}
                         key={index}
                         question={item.question}
                         options={item.options}
                         questionType={item.question_type}
-                        
                       />
                     ) : item.question_type === "number" ? (
                       <NumberQuestion
@@ -203,54 +206,46 @@ const SurveyQuestions = () => {
                         questionType={item.question_type}
                         // EditQuestion={() => EditQuestion(index)}
                       />
-                    ) :  item.question_type === "checkbox" ? (
+                    ) : item.question_type === "checkbox" ? (
                       <CheckboxQuestion
-                      key={index} 
-                      index={index + 1}
-                      question={item.question}
-                      options={item.options}
-                      questionType={item.question_type}
-                     
-                    />
-                    )  :  item.question_type === "checkbox" ? (
-                      <CheckboxQuestion
-                      key={index} 
-                      index={index + 1}
-                      question={item.question}
-                      options={item.options}
-                      questionType={item.question_type}
-                     
-                    />
-                    ) : item.question_type === "rating_scale" ? (
-                      <RatingScaleQuestion
-                        key={index} 
+                        key={index}
                         index={index + 1}
                         question={item.question}
                         options={item.options}
                         questionType={item.question_type}
-                     
                       />
-                    )
-                    :  item.question_type === "drop_down" ? (
+                    ) : item.question_type === "checkbox" ? (
+                      <CheckboxQuestion
+                        key={index}
+                        index={index + 1}
+                        question={item.question}
+                        options={item.options}
+                        questionType={item.question_type}
+                      />
+                    ) : item.question_type === "rating_scale" ? (
+                      <RatingScaleQuestion
+                        key={index}
+                        index={index + 1}
+                        question={item.question}
+                        options={item.options}
+                        questionType={item.question_type}
+                      />
+                    ) : item.question_type === "drop_down" ? (
                       <DropdownQuestion
                         index={index + 1}
                         key={index}
                         question={item.question}
                         options={item.options}
                         questionType={item.question_type}
-                       
                       />
-                    )
-                     : item.question_type === "number" ? (
+                    ) : item.question_type === "number" ? (
                       <NumberQuestion
                         key={index}
                         index={index + 1}
                         question={item.question}
                         questionType={item.question_type}
-                       
                       />
-                    )
-                     : null}
+                    ) : null}
                   </div>
                 )
               )}

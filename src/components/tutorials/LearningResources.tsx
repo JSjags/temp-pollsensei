@@ -26,21 +26,21 @@ export default function LearningResources() {
   );
 
   return (
-    <div className="container mx-auto p-4 px-0 md:p-8 md:px-0">
+    <div className="container mx-auto p-5 px-2 md:p-8 md:px-5">
       <div className="mb-8">
-        <Button
+        {/* <Button
           variant="ghost"
           className="mb-4 hover:bg-transparent hover:text-purple-600"
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-        </Button>
-        <div className="max-w-fit mx-auto">
-          <h2 className="text-sm text-purple-600 mb-2 text-center font-bold">
+        </Button> */}
+        <div className="max-w-fit">
+          {/* <h2 className="text-sm text-purple-600 mb-2 text-center font-bold">
             GET STARTED
-          </h2>
-          <h1 className="text-3xl font-bold mb-6 text-center">
-            Start Learning
+          </h2> */}
+          <h1 className="text-3xl font-bold mb-6 text-left">
+            Available resources
           </h1>
           <div className="relative mb-8 w-fit">
             <div className="flex space-x-4 border-b border-gray-200 px-2">
@@ -48,7 +48,7 @@ export default function LearningResources() {
                 <button
                   key={type}
                   onClick={() => setActiveTab(type)}
-                  className={`pb-2 text-sm font-medium transition-colors duration-300 ${
+                  className={`pb-2 text-sm font-medium transition-colors duration-300 px-4 ${
                     activeTab === type
                       ? "text-purple-600"
                       : "text-gray-500 hover:text-gray-700"
@@ -76,7 +76,7 @@ export default function LearningResources() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="max-w-6xl mx-auto"
+            className="max-w-7xl mx-auto"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResources.map((resource, index) => (

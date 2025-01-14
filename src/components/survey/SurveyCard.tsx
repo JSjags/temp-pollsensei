@@ -30,6 +30,24 @@ import ChangeSurveyStatus from "./ChangeSurveyStatus";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Pencil,
+  Edit2,
+  Eye,
+  Share2,
+  Copy,
+  XCircle,
+  Trash2,
+  MoreVertical,
+  Edit,
+} from "lucide-react";
+import OpenSurvey from "./OpenSurvey";
 
 interface SurveyCardProps {
   topic: string;
@@ -46,18 +64,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   number_of_responses,
   _id,
 }) => {
-  const options = [
-    "Rename",
-    "Edit Survey",
-    "Preview",
-    "Share",
-    "Make a copy",
-    "Close survey",
-    "Delete",
-  ];
-  const [viewOptions, setViewOptions] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [closeSurvey, setCloseSurvey] = useState(false);
+  const [openSurvey, setOpenSurvey] = useState(false);
   const [showRename, setShowRename] = useState(false);
   const [showDuplicate, setShowDuplicate] = useState(false);
   const [toggle, setToggle] = useState(false);
@@ -74,39 +83,33 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [surveyName, setSurveyName] = useState<string>("");
 
   const router = useRouter();
-  // const { data, isSuccess: shareSuccess } = useShareSurveyQuery(params.id);
-  // const shareLink = data?.data?.link;
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
   );
 
-  const handleViewOption = () => {
-    setViewOptions(!viewOptions);
-  };
-
-  const handleSelectOption = (option: string) => {
-    setViewOptions(false);
-    const choice = option.toLowerCase();
-
-    if (choice.includes("rename")) {
+  const handleSelectOption = (choice: string) => {
+    if (choice === "rename") {
       setShowRename(true);
     }
-    if (choice.includes("copy")) {
+    if (choice === "copy") {
       setShowDuplicate(true);
     }
-    if (choice.includes("delete")) {
+    if (choice === "delete") {
       setShowDelete(true);
     }
-    if (choice.includes("edit")) {
+    if (choice === "edit") {
       router.push(`/surveys/edit-submitted-survey/${_id}`);
     }
-    if (choice.includes("share")) {
+    if (choice === "share") {
       setShareSurvey(true);
     }
-    if (choice.includes("close")) {
+    if (choice === "close") {
       setCloseSurvey(true);
     }
-    if (choice.includes("preview")) {
+    if (choice === "open") {
+      setOpenSurvey(true);
+    }
+    if (choice === "preview") {
       router.push(`/surveys/question/${_id}`);
     }
   };
@@ -116,12 +119,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setShowDuplicate(false);
     setShowRename(false);
     setCloseSurvey(false);
+    setOpenSurvey(false);
     setShareSurvey(false);
   };
 
   const handleSetToggle = (op: any) => {
     handleSelectOption(op);
-    // setToggle(!toggle);
   };
 
   const handleDeleteSurvey = async (id: any) => {
@@ -135,6 +138,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       toast.error("Error deleting survey");
     }
   };
+
   const handleCloseSurvey = async (id: string) => {
     try {
       const result = await closeSurveyStatus({
@@ -148,6 +152,23 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       setToggle(!toggle);
     } catch (err) {
       toast.error("Failed to close survey");
+      console.error("Error:", err);
+    }
+  };
+
+  const handleOpenSurvey = async (id: string) => {
+    try {
+      const result = await closeSurveyStatus({
+        id: id,
+        body: { status: "On going" },
+      }).unwrap();
+      toast.success("Survey opened successfully");
+      handleCloseAll();
+      refetch();
+      console.log("Success:", result);
+      setToggle(!toggle);
+    } catch (err) {
+      toast.error("Failed to open survey");
       console.error("Error:", err);
     }
   };
@@ -183,8 +204,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     }
   };
 
-  // console.log(status)
-
   let bg = "";
   let text = "";
   let color = "";
@@ -204,29 +223,72 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   }
 
   return (
-    <div className="relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px]">
+    <div className="bg-white relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px] transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-purple-400">
       <div>
         <div className="flex justify-between items-center mb-1 gap-2">
           <h3 className="text-[16px] sm:text-[20px] text-[#333333] truncate">
             {topic}
           </h3>
-          <div
-            role="button"
-            onClick={handleViewOption}
-            className="cursor-pointer shrink-0 hover:bg-gray-100 p-1 flex justify-center items-center rounded-md"
-          >
-            {userRoles.some((role) =>
-              ["Admin", "Data Editor"].includes(role)
-            ) && (
-              <Image
-                src={ellipses}
-                alt="Options"
-                width={24}
-                height={24}
-                className="shrink-0"
-              />
-            )}
-          </div>
+          {userRoles.some((role) =>
+            ["Admin", "Data Editor"].includes(role)
+          ) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <MoreVertical className="h-5 w-5 text-gray-500 hover:text-purple-600 transition-colors duration-200" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => handleSelectOption("rename")}
+                  className="gap-2 cursor-pointer"
+                >
+                  <Pencil className="h-4 w-4" />
+                  <span>Rename</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSelectOption("edit")}
+                  className="gap-2 cursor-pointer"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Edit Survey</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSelectOption("preview")}
+                  className="gap-2 cursor-pointer"
+                >
+                  <Eye className="h-4 w-4" />
+                  <span>Preview</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSelectOption("share")}
+                  className="gap-2 cursor-pointer"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span>Share</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSelectOption("copy")}
+                  className="gap-2 cursor-pointer"
+                >
+                  <Copy className="h-4 w-4" />
+                  <span>Make a copy</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSelectOption("close")}
+                  className="gap-2 cursor-pointer"
+                >
+                  <XCircle className="h-4 w-4" />
+                  <span>Close survey</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSelectOption("delete")}
+                  className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         <p className="text-[12px] sm:text-[14px] text-[#838383]">
           Created: {formatDate(createdAt)}
@@ -236,24 +298,28 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       <div className="mt-3 sm:mt-4">
         <div
           style={{ backgroundColor: bg, color }}
-          className={`text-[12px] rounded-[12px] w-[69px] h-[24px] flex items-center justify-center px-[10px] pt-[5px] pb-[7px] whitespace-nowrap`}
+          className={`text-[12px] rounded-[12px] w-[69px] h-[24px] flex items-center justify-center px-[10px] pt-[5px] pb-[7px] whitespace-nowrap transition-all duration-200 hover:scale-105`}
         >
-          {text}
+          {text.split(" ").join("")}
         </div>
       </div>
 
       <div className="mt-6 sm:mt-10 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <span className="text-[24px] sm:text-[32px]">
-            {number_of_responses}
+          <span className="text-[24px] sm:text-[32px] transition-all duration-200 hover:text-purple-600">
+            {number_of_responses.toLocaleString()}
           </span>
           <p className="text-[#333333] text-[14px] sm:text-[16px]">responses</p>
         </div>
         <div>
           <Link href={`/surveys/${_id}`}>
-            <button className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-[3rem] py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]">
+            <button className="flex items-center justify-center gap-2 text-white text-[1rem] rounded-md px-6 h-[42px] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] transition-all duration-300 hover:shadow-lg hover:scale-[1-2%] hover:from-[#5B03B2] hover:to-[#9D50BB] active:scale-95">
               View
-              <IoEyeOutline size={30} />
+              <Eye
+                size={30}
+                strokeWidth={1.5}
+                className="transition-transform duration-200 group-hover:rotate-12"
+              />
             </button>
           </Link>
         </div>
@@ -262,34 +328,30 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       <div className="mt-6 sm:mt-[42px]">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3 sm:gap-4">
-           {
-            !userRoles.includes("Editor") &&
-            <Link href={`/surveys/question/${_id}`}>
-              <Image
-                className="cursor-pointer"
-                src={eyes}
-                alt="View"
-                width={24}
-                height={24}
-              />
-            </Link>}
+            {!userRoles.includes("Editor") && (
+              <Link href={`/surveys/question/${_id}`}>
+                <Image
+                  className="cursor-pointer transition-all duration-200 hover:scale-110"
+                  src={eyes}
+                  alt="View"
+                  width={24}
+                  height={24}
+                />
+              </Link>
+            )}
             {userRoles.some((role) =>
               ["Admin", "Data Collector"].includes(role)
             ) && (
               <div className="relative">
                 <Image
-                  className="cursor-pointer shrink-0 size-10"
+                  className="cursor-pointer shrink-0 size-10 transition-all duration-200 hover:scale-110"
                   src={share}
                   alt="Share"
                   width={24}
                   height={24}
                   onClick={() => setShareSurvey((prev) => !prev)}
                 />
-                {shareSurvey && (
-                  <div className="absolute right-0 z-50">
-                    {/* <ShareSurvey onClick={()=>setShareSurvey((prev)=>!prev)} /> */}
-                  </div>
-                )}
+                {shareSurvey && <div className="absolute right-0 z-50"></div>}
               </div>
             )}
           </div>
@@ -298,77 +360,63 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
               ["Admin", "Data Editor"].includes(role)
             ) && (
               <Switch
-                className="data-[state=checked]:bg-purple-500 data-[state=unchecked]:bg-gray-400"
+                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[#5B03B2] data-[state=checked]:to-[#9D50BB] data-[state=unchecked]:bg-gray-400 transition-colors duration-200"
                 checked={status === "On going" && true}
-                onCheckedChange={() => handleSetToggle("Close")}
+                onCheckedChange={() => {
+                  if (status === "On going") {
+                    handleSetToggle("close");
+                  }
+                  if (status === "Closed") {
+                    handleSetToggle("open");
+                  }
+                }}
               />
             )}
           </div>
         </div>
       </div>
-      {viewOptions && (
-        <div className="absolute right-4 sm:right-8 top-12 sm:top-16 z-50 w-[180px] sm:w-[210px] rounded-[8px] py-[20px] sm:py-[24px] px-[30px] sm:px-[40px] border border-border/50 bg-white shadow-lg">
-          <div className="flex flex-col justify-between h-full">
-            {options.map((op, id) => (
-              <p
-                key={id}
-                onClick={() => handleSelectOption(op)}
-                className={`${
-                  op.toLowerCase() === "delete"
-                    ? "text-[#FF3E3E]"
-                    : "text-[#333333]"
-                } text-[14px] sm:text-[16px] cursor-pointer mb-2 sm:mb-3`}
-              >
-                {op}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
-      {showDelete && (
-        <DeleteSurvey
-          openModal={showDelete}
-          onClose={handleCloseAll}
-          onDelete={() => handleDeleteSurvey(_id)}
-        />
-      )}
-      {closeSurvey && (
-        <ChangeSurveyStatus
-          openModal={closeSurvey}
-          onClose={handleCloseAll}
-          isClosing={isClosing}
-          onCloseSurvey={() => {
-            handleCloseSurvey(_id);
-          }}
-        />
-      )}
-      {showRename && (
-        <RenameSurvey
-          openModal={showRename}
-          onClose={handleCloseAll}
-          isEditing={isEditing}
-          onRenameSurvey={() => {
-            handleRename(_id);
-          }}
-          surveyName={surveyName}
-          setSurveyName={(e) => setSurveyName(e.target.value)}
-        />
-      )}
-      {showDuplicate && (
-        <DuplicateSurvey
-          openModal={showDuplicate}
-          onClose={handleCloseAll}
-          isDuplicating={isDuplicating}
-          onDuplicatingSurvey={() => handleDuplicate(_id)}
-        />
-      )}
-      {shareSurvey && (
-        <ShareSurveyModal
-          openModal={shareSurvey}
-          onClose={handleCloseAll}
-          _id={_id}
-        />
-      )}
+      <DeleteSurvey
+        openModal={showDelete}
+        onClose={handleCloseAll}
+        onDelete={() => handleDeleteSurvey(_id)}
+      />
+      <ChangeSurveyStatus
+        openModal={closeSurvey}
+        onClose={handleCloseAll}
+        isClosing={isClosing}
+        onCloseSurvey={() => {
+          handleCloseSurvey(_id);
+        }}
+      />
+      <OpenSurvey
+        openModal={openSurvey}
+        onClose={handleCloseAll}
+        isOpening={isClosing}
+        onOpenSurvey={() => {
+          handleOpenSurvey(_id);
+        }}
+      />
+      <RenameSurvey
+        openModal={showRename}
+        onClose={handleCloseAll}
+        isEditing={isEditing}
+        onRenameSurvey={() => {
+          handleRename(_id);
+        }}
+        surveyName={surveyName}
+        setSurveyName={(e) => setSurveyName(e.target.value)}
+      />
+      <DuplicateSurvey
+        openModal={showDuplicate}
+        onClose={handleCloseAll}
+        isDuplicating={isDuplicating}
+        onDuplicatingSurvey={() => handleDuplicate(_id)}
+      />
+      <ShareSurveyModal
+        openModal={shareSurvey}
+        onClose={handleCloseAll}
+        _id={_id}
+      />
     </div>
   );
 };

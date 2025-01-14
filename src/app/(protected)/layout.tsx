@@ -18,10 +18,10 @@ export default function DashboardLayout({
           <div className="flex flex-1 gap-0 pr-2">
             <AppSidebar />
             <main className="flex-1 mt-2 rounded-md">
-              <div className="flex justify-between">
+              <div className="flex justify-between sticky top-0 z-[100]">
                 <Navbar />
               </div>
-              <div className="mt-16">{children}</div>
+              <div>{children}</div>
             </main>
           </div>
         </SidebarProvider>

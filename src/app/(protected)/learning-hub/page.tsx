@@ -1,12 +1,16 @@
+"use client";
+
 import { ComingSoon } from "@/components/reusable/coming-soon";
+import LearningResources from "@/components/tutorials/LearningResources";
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
 
 export default function Page() {
+  const user = useSelector((state: RootState) => state.user.user);
+
   return (
-    <ComingSoon
-      title="Learning hub"
-      description="Access educational resources and enhance your survey-taking skills. Learn best practices, get tips for providing quality responses, and stay updated with the latest survey methodologies and guidelines."
-      eta="Q2 2025"
-      backUrl="/dashboard"
-    />
+    <>
+      <LearningResources />
+    </>
   );
 }

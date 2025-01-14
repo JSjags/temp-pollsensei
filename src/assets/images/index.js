@@ -10,7 +10,7 @@ import Collect_data from "./Collect_data.svg";
 import analyse_survey from "./analyse_survey.svg";
 import collect_data_ from "./collect_data_.svg";
 import no_survey_state from "./no_survey_state.svg";
-import hypen from "./hypen.svg";
+import hyphen from "./hypen.svg";
 import User_Setting from "./User_Setting.svg";
 import qualitative_survey from "./qualitative_survey.svg";
 import Quantitative_survey from "./Quantitative_survey.svg";
@@ -87,7 +87,7 @@ export {
   analyse_survey,
   collect_data_,
   no_survey_state,
-  hypen,
+  hyphen,
   User_Setting,
   qualitative_survey,
   Quantitative_survey,

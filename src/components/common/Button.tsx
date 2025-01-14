@@ -12,7 +12,7 @@ const Button: React.FC<ButtonProps> = ({ label, onClick, className }) => {
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center justify-center text-white text-[16px] min-w-[188px] rounded-[6px] px-[24px] py-[16px] max-h-[52px] bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]",
+        "flex items-center justify-center text-white text-[16px] min-w-[188px] rounded-[6px] px-[24px] py-[16px] max-h-[52px] !bg-gradient-to-r !from-[#5B03B2] !to-[#9D50BB]",
         className
       )}
     >

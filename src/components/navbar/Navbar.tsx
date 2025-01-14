@@ -98,7 +98,7 @@ const Navbar = () => {
       )}
     >
       <div className="sticky top-0 z-50 bg-[#F7F8FB]">
-        <header className="container flex items-center justify-between py-2 pt-2 px-2 sm:px-5 fixed top-0 bg-[#F7F8FB99] backdrop-blur-md">
+        <header className="container flex items-center justify-between py-2 pt-2 px-2 sm:px-5 sticky top-0 bg-[#F7F8FB99] backdrop-blur-md">
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
             <div className="flex gap-4 items-center h-10">
               {isOpen ? (

@@ -125,7 +125,7 @@ export default function RootLayout({
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
-            <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
+            <ToastContainer className={`${fontSans.className} z-50`} />
             <ReduxContext>
               <SenseiProvider>
                 <UpgradeModal />

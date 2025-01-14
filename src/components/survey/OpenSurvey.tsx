@@ -9,34 +9,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import { AlertTriangle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
-interface DeleteSurveyProps {
+interface OpenSurveyProps {
   onClose: () => void;
   openModal: boolean;
-  onDelete?: () => void;
+  isOpening?: boolean;
+  onOpenSurvey?: () => void;
 }
 
-const DeleteSurvey: React.FC<DeleteSurveyProps> = ({
+const OpenSurvey: React.FC<OpenSurveyProps> = ({
   onClose,
   openModal,
-  onDelete,
+  onOpenSurvey,
+  isOpening,
 }) => {
   return (
     <AlertDialog open={openModal} onOpenChange={onClose}>
       <AlertDialogContent className="sm:max-w-[425px]">
         <AlertDialogHeader>
           <div className="flex flex-col items-center gap-6 py-4">
-            <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-green-600" />
             </div>
             <div className="space-y-2 text-center">
               <AlertDialogTitle className="text-xl font-semibold text-gray-900">
-                Delete Survey
+                Open survey?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-sm text-gray-500">
-                Are you sure you want to delete this survey? This action cannot
-                be undone.
+                Are you sure you want to start receiving responses for this
+                survey?
               </AlertDialogDescription>
             </div>
           </div>
@@ -46,10 +48,11 @@ const DeleteSurvey: React.FC<DeleteSurveyProps> = ({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={onDelete}
-            className="bg-red-600 hover:bg-red-700"
+            onClick={onOpenSurvey}
+            disabled={isOpening}
+            className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
           >
-            Delete Survey
+            {isOpening ? "Opening..." : "Open Survey"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -57,4 +60,4 @@ const DeleteSurvey: React.FC<DeleteSurveyProps> = ({
   );
 };
 
-export default DeleteSurvey;
+export default OpenSurvey;
