@@ -64,7 +64,7 @@ export const formatDateOption = (dateString: string | number | Date) => {
   const date = new Date(dateString);
 
   const day = date.getUTCDate();
-  const month = date.toLocaleString("default", { month: "long" });
+  const month = date.toLocaleString("default", { month: "short" });
   const year = date.getUTCFullYear();
 
   const getOrdinalSuffix = (day: number) => {

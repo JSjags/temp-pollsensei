@@ -5,6 +5,7 @@ import { useAllTutorialsQuery } from "@/services/superadmin.service";
 import React, { useState } from "react";
 import Image from "next/image";
 import { FadeLoader } from "react-spinners";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 interface Card {
   title: string;
@@ -40,6 +41,8 @@ const VideoTutorial = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
           <div className="text-center flex justify-center items-center w-full">
@@ -83,8 +86,11 @@ const VideoTutorial = () => {
                 <h3 className="text-sm font-medium text-gray-800">
                   {card?.title}
                 </h3>
+                <div className="w-full flex justify-between items-center">
+                  <small></small> 
+                  <BsThreeDotsVertical />
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {card?.description}
                 </p>
               </div>
 
@@ -111,6 +117,11 @@ const VideoTutorial = () => {
           ))
         )}
       </div>
+
+
+
+
+
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">
           {totalItems > 0

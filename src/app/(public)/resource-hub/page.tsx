@@ -24,8 +24,6 @@ const Page = (props: Props) => {
   };
   return (
     <section className="mt-2 min-h-[50vh] relative">
-      {/* <NavBar /> */}
-    {/* <FeatureComing height="min-h-[70vh]" /> */}
     <Help />
     <ResourceActions onClick={toggleChat} />
     <KnowledgeBase />
