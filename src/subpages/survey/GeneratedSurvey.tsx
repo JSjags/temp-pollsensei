@@ -29,6 +29,14 @@ import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import ShortTextQuestion from "@/components/survey/LongTextQuestion";
 import SliderQuestion from "@/components/survey/SliderQuestion";
 import BooleanQuestion from "@/components/survey/BooleanQuestion";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -65,6 +73,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const [questions, setQuestions] = useState(data);
+  const [showDialog, setShowDialog] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
   const [itemsPerPage, setItemsPerPage] = useState(4);
@@ -118,53 +127,159 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
 
   return (
     <div className="w-full">
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent
+          className="sm:max-w-md z-[100000]"
+          overlayClassName="z-[100000]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-semibold bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent">
+              Continue to Edit Survey
+            </DialogTitle>
+            <DialogDescription className="text-center pt-4">
+              You're about to edit your generated survey. Click below to
+              proceed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-4">
+            <Button
+              onClick={handleEdit}
+              className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-8 py-2 rounded-lg hover:opacity-90 transition-all duration-200"
+            >
+              Continue to Editor
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="py-10 px-16 w-full">
         <div className="flex justify-between items-center">
-          <div className="flex flex-col text-start">
-            <h2 className="text-[1.5rem] font-normal">
-              <IoArrowBackOutline className="inline-block" /> Generated Survey
-            </h2>
-            <p className="font-normal">
-              Here’s your survey. You can choose to continue or use another
-              prompt
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="button-primary" onClick={handleEdit}>
-              <FiEdit2 className="inline-block" /> Edit Survey
-            </button>
-            <button
-              className="gradient-border gradient-text px-6 py-2 rounded-lg flex items-center space-x-2"
-              onClick={onClick}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col text-start"
+          >
+            <motion.h2
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-[1.5rem] font-medium bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent"
             >
-              Use another prompt
-              <Image src={stars} alt="stars" className={`inline-block`} />
-            </button>
+              Generated Survey
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="font-normal text-gray-600"
+            >
+              Here's your survey. You can choose to continue or use another
+              prompt
+            </motion.p>
+          </motion.div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              className="group relative py-3 px-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 hover:bg-purple-50"
+              onClick={() => setShowDialog(true)}
+            >
+              <FiEdit2 className="size-4 transition-transform group-hover:scale-110 group-hover:text-purple-700" />
+              <span className="relative z-10 group-hover:text-purple-700">
+                Edit Survey
+              </span>
+            </Button>
+            <Button
+              onClick={onClick}
+              className="group relative py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden w-full hover:scale-[1.02] active:scale-[0.98] border-2 border-[#5B03B2] bg-transparent hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+            >
+              <span className="relative z-10 text-[#5B03B2] group-hover:text-white transition-colors duration-300 text-sm">
+                Use another prompt
+              </span>
+              <Image
+                src={stars}
+                alt="stars"
+                className="w-5 h-5 relative z-10 brightness-0 group-hover:brightness-200 transition-all duration-300"
+              />
+            </Button>
           </div>
         </div>
         <hr />
         <div className="py-10 w-full flex gap-10 ">
           <div className="pb-10 w-2/3 flex flex-col">
-            <div className="text-start pb-5">
-              <p className="font-bold text-[#7A8699]">Survey Topic</p>
-              <h2
-                className="text-[1.5rem] font-normal"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-start pb-5"
+            >
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="font-bold text-[#7A8699] mb-2"
+              >
+                Survey Topic
+              </motion.p>
+              <motion.h2
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="text-[1.5rem] font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent"
                 style={{
                   fontSize: `${headerText?.size}px`,
                   fontFamily: `${headerText?.name}`,
                 }}
               >
                 {surveyTitle}
-              </h2>
-            </div>
-            <div className="text-start">
-              <p className="font-bold text-[#7A8699]">Survey description</p>
-              <h2>{surveyDescription}</h2>
-            </div>
-            <div className="flex justify-between items-center pt-8 pb-5">
-              <p className="text-sm">Question</p>
-              <p className="text-sm">Question Type</p>
-            </div>
+              </motion.h2>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-start"
+            >
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.4 }}
+                className="font-bold text-[#7A8699] mb-2"
+              >
+                Survey description
+              </motion.p>
+              <motion.h2
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 }}
+                className="text-gray-700 leading-relaxed"
+              >
+                {surveyDescription}
+              </motion.h2>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex justify-between items-center pt-8 pb-5"
+            >
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+                className="text-sm font-medium text-[#5B03B2]"
+              >
+                Question
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+                className="text-sm font-medium text-[#9D50BB]"
+              >
+                Question Type
+              </motion.p>
+            </motion.div>
             <DragDropContext onDragEnd={handleDragEnd}>
               <StrictModeDroppable droppableId="questions">
                 {(provided) => (
@@ -180,7 +295,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className="mb-4"
+                            className="mb-4 rounded-lg"
                           >
                             {item.question_type === "multiple_choice" ||
                             item.question_type === "multi_choice" ? (
@@ -286,6 +401,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 // maxRating={5}
                                 index={index + 1}
                                 questionType={item.question_type}
+
                                 // EditQuestion={() => EditQuestion(index)}
                                 // DeleteQuestion={() =>
                                 //   handleDeleteQuestion(index)
@@ -324,16 +440,27 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
             </DragDropContext>
 
             <div className="flex justify-between items-center pt-5 pb-10">
-              <div className="">
-                <button
-                  className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-                  type="button"
-                  onClick={handleEdit}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Button
+                  onClick={() => setShowDialog(true)}
+                  className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90"
                 >
-                  <FaEye className="inline-block mr-2" />
-                  Continue
-                </button>
-              </div>
+                  <FaEye className="text-lg transition-transform group-hover:scale-110 duration-200" />
+                  <span className="group-hover:tracking-wider transition-all duration-200">
+                    Continue
+                  </span>
+                  <motion.div
+                    className="absolute inset-0 bg-white"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 0.1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </Button>
+              </motion.div>
               {/* <div className="mt-6 sm:mt-8">
                 <PaginationControls
                   currentPage={currentPage}

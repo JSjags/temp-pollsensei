@@ -1,15 +1,19 @@
-import { draggable } from "@/assets/images";
-import Image from "next/image";
-import React, { useState } from "react";
-import { usePathname } from "next/navigation";
-import { useSelector } from "react-redux";
+import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
-import { Button } from "../ui/button";
-import { stars } from "@/assets/images";
-import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
-import { Check } from "lucide-react";
+import {
+  Check,
+  CheckCircle,
+  GripVertical,
+  ListChecks,
+  SquareMousePointer,
+} from "lucide-react";
 import { Switch } from "../ui/switch";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { Checkbox } from "../ui/shadcn-checkbox";
 
 interface CheckboxQuestionProps {
   question: string;
@@ -30,6 +34,7 @@ interface CheckboxQuestionProps {
   status?: string;
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
+  isEdit?: boolean;
 }
 
 const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
@@ -42,10 +47,10 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
   index,
   onChange,
   onSave,
-  canUseAI = false,
   status,
   is_required,
   setIsRequired,
+  isEdit = false,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -55,15 +60,18 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  // State to store the selected option
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  // Handle option selection
   const handleOptionChange = (option: string) => {
-    setSelectedOption(option); // Set the selected option
-    console.log(`Selected option for question ${question}:`, option); // Log the selected option
+    setSelectedOptions((prev) => {
+      if (prev.includes(option)) {
+        return prev.filter((item) => item !== option);
+      } else {
+        return [...prev, option];
+      }
+    });
     if (onChange) {
-      onChange(option); // Trigger external onChange callback if provided
+      onChange(option);
     }
   };
 
@@ -71,17 +79,16 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1.5 mr-3">
+            <Check strokeWidth={1.5} className="text-white w-4 h-4" />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1.5 mr-3">
+            <BsExclamation className="text-white w-4 h-4" />
           </div>
         );
-
       default:
         return null;
     }
@@ -89,140 +96,126 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
 
   return (
     <div
-      className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
+      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
       style={{
-        fontFamily: `${questionText?.name}`,
+        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <Image
-        src={draggable}
-        alt="draggable icon"
-        className={
-          pathname === "/surveys/create-survey" ? "visible" : "invisible"
-        }
-      />
-      <div className="w-full">
-        <div className="flex justify-between w-full items-center">
-          <h3 className="text-lg font-semibold text-start">
-            <div className="group flex justify-between gap-2 items-start">
-              <p>
-                <span>{index}. </span> {question}
-                {is_required === true && (
-                  <span className="text-2xl ml-2 text-red-500">*</span>
-                )}
-              </p>
-              {!pathname.includes("survey-public-response") &&
-                !pathname.includes("create-survey") && (
-                  <PollsenseiTriggerButton
-                    key={index}
-                    imageUrl={stars}
-                    tooltipText="Rephrase question"
-                    className={"group-hover:inline-block hidden"}
-                    triggerType="rephrase"
-                    question={question}
-                    optionType={questionType}
-                    options={options}
-                    setEditId={setEditId}
-                    onSave={onSave!}
-                    index={index}
-                  />
-                )}
+      <div className="flex items-start gap-3">
+        {pathname === "/surveys/create-survey" && (
+          <GripVertical className="w-5 h-5 text-gray-300" />
+        )}
+        <div className="w-full">
+          <div className="flex justify-between items-start w-full">
+            <h3 className="text-lg font-semibold">
+              <div className="group flex justify-between gap-2 items-start">
+                <p>
+                  <span>{index}. </span> {question}
+                  {is_required && (
+                    <span className="text-2xl ml-2 text-red-500">*</span>
+                  )}
+                </p>
+                {!pathname.includes("survey-public-response") &&
+                  !pathname.includes("create-survey") && (
+                    <PollsenseiTriggerButton
+                      key={index}
+                      imageUrl={stars}
+                      tooltipText="Rephrase question"
+                      className="group-hover:inline-block hidden"
+                      triggerType="rephrase"
+                      question={question}
+                      optionType={questionType}
+                      options={options}
+                      setEditId={setEditId}
+                      onSave={onSave!}
+                      index={index}
+                    />
+                  )}
+              </div>
+            </h3>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {options?.map((option, optionIndex) => (
+              <div key={optionIndex} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`option-${optionIndex}`}
+                  checked={selectedOptions.includes(option)}
+                  onCheckedChange={() => handleOptionChange(option)}
+                  className="border-2 data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-[#5B03B2]"
+                />
+                <label
+                  htmlFor={`option-${optionIndex}`}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {option}
+                </label>
+              </div>
+            ))}
+          </div>
+
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey")) && (
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={EditQuestion}
+              >
+                Edit
+              </button>
+              <button
+                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
+                onClick={DeleteQuestion}
+              >
+                Delete
+              </button>
             </div>
-          </h3>
-        </div>
-        {options?.map((option, optionIndex) => (
-          <div key={optionIndex} className="flex items-center my-2">
-            <label className="relative flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                id={`option-${optionIndex}`}
-                name={question}
-                value={option}
-                className="mr-2 text-[#5B03B2]  peer"
-                checked={selectedOption === option}
-                required={is_required}
-                onChange={() => handleOptionChange(option)}
-              />
-              <span
-                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col peer-checked:before:bg-purple-500 peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
-                style={{ borderColor: colorTheme }}
-              ></span>
-              <span className="ml-2">{option}</span>
-            </label>
-          </div>
-        ))}
-        {pathname === "/surveys/edit-survey"  && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-        { pathname.includes("/edit-submitted-survey") && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-{pathname === "/surveys/add-question-m" && (
-          <div className="flex justify-end gap-4">
-           
-            <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        {pathname.includes("edit-survey") && (
-          <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB] "
-            />
-          </div>
-        )}
-        <div className="flex justify-end">
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "multiple_choice" ? "Multiple Choice" : ""}</p>
           )}
+
+          {pathname === "/surveys/add-question-m" && (
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
+                onClick={DeleteQuestion}
+              >
+                Delete
+              </button>
+            </div>
+          )}
+
+          {pathname.includes("edit-survey") && (
+            <div className="flex items-center gap-3">
+              <span className="text-gray-600">Required</span>
+              <Switch
+                checked={is_required}
+                onCheckedChange={
+                  setIsRequired
+                    ? (checked: boolean) => setIsRequired(checked)
+                    : undefined
+                }
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            {!pathname.includes("edit-survey") &&
+              !pathname.includes("surveys/question") && (
+                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+                  <span className="flex items-center gap-1 text-xs">
+                    <SquareMousePointer className="text-[#9D50BB] w-3 h-3" />
+                    Multiple Choice
+                  </span>
+                </p>
+              )}
+          </div>
         </div>
+
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus(status)}</div>
+        )}
       </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
-      )}
     </div>
   );
 };
