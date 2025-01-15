@@ -68,7 +68,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         };
       },
     }),
-    subscriptionTrend: builder.query({
+    subscriptionDistribution: builder.query({
       query: ({ month, year }) => {
         const params = new URLSearchParams();
         if (month) params.append("month", month);
@@ -130,7 +130,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     }),
     unpublishTutorial: builder.mutation({
       query: ({ id, body }) => ({
-        url: `superadmin/tutorial-status/${id}?status=unpublish`, // {{base_url}}/superadmin/tutorial-status/674cf336922a72e499678670?status=unpublish
+        url: `superadmin/tutorial-status/${id}?status=unpublish`, // superadmin/tutorial-status/674cf336922a72e499678670?status=unpublish
         method: "PATCH",
         body: body,
       }),
@@ -197,15 +197,33 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    usersLocation: builder.query({
+      query: (pagesNumber: any) => ({
+        url: `superadmin/users/location?page=${pagesNumber}&page_size=40`, // superadmin/users/location?page=1&page_size=20
+        method: "GET",
+      }),
+    }),
+    usersByLocation: builder.query({
+      query: () => ({
+        url: `superadmin/users/users-by-location`, // superadmin/users/users-by-location
+        method: "GET",
+      }),
+    }),
+    subscriptionTrend: builder.query({
+      query: () => ({
+        url: `superadmin/subscription-trend?period=6 months`, // superadmin/subscription-trend?period=1 year
+        method: "GET",
+      }),
+    }),
     previewTutorial: builder.query({
       query: (id) => ({
-        url: `superadmin/tutorial/${id}`, // {{base_url}}/superadmin/tutorial/674cef905d1a62ffc9bea12f
+        url: `superadmin/tutorial/${id}`, // superadmin/tutorial/674cef905d1a62ffc9bea12f
         method: "GET",
       }),
     }),
     viewTutorial: builder.query({
       query: (id) => ({
-        url: `tutorial/${id}`, // {{base_url}}/tutorial/6780f1f58a7256f0e2f428bc
+        url: `tutorial/${id}`, // tutorial/6780f1f58a7256f0e2f428bc
         method: "GET",
       }),
     }),
@@ -225,7 +243,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     }),
     getReview: builder.query({
       query: (pagesNumber) => ({
-        url: `superadmin/review?page=${pagesNumber}&page_size=20`, // {{base_url}}/superadmin/review?page=1&page_size=10
+        url: `superadmin/review?page=${pagesNumber}&page_size=20`, // superadmin/review?page=1&page_size=10
         method: "GET",
       }),
     }),
@@ -245,6 +263,7 @@ export const {
   useAllFAQsQuery,
   useSurveyTypeDistributionQuery,
   useSubscriptionTrendQuery,
+  useSubscriptionDistributionQuery,
   useLazySurveyTypeDistributionQuery,
   useDeleteTutorialMutation,
   useDeleteFAQsMutation,
@@ -264,6 +283,8 @@ export const {
   usePreviewTutorialQuery,
   useViewTutorialQuery,
   useFetchTutorialQuery,
+  useUsersLocationQuery,
+  useUsersByLocationQuery,
   useTutorialQuery,
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,

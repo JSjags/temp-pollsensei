@@ -1,61 +1,125 @@
 import React, { useState } from "react";
 import { SuperAdminPieChart } from "../charts/SuperAdminPieChart";
 import { ChartConfig } from "../ui/chart";
-import { useSurveyCreationDistributionQuery, useSurveyTypeDistributionQuery } from "@/services/superadmin.service";
+import {
+  useSubscriptionDistributionQuery,
+  useSurveyCreationDistributionQuery,
+  useSurveyTypeDistributionQuery,
+} from "@/services/superadmin.service";
 import OverlappingCircles from "../charts/OverlappingCircle";
 import { SurveyTypeChart } from "./SurveyTypeChart";
 import { SuperAdminPieChart2 } from "../charts/SuperAdminPieChart2";
 import SubscriptionTrend from "./SubscriptionTrend";
-
+import UsersByLocation from "./UsersByLocation";
+import TrafficByDevice from "./TrafficByDevice";
 
 const DashboardAnalytics: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState("January");
   const [selectedYear, setSelectedYear] = useState("2025");
-  // const 
-  const {data,  isLoading, isSuccess, error} = useSurveyCreationDistributionQuery({
-    month: selectedMonth,
-    year: selectedYear,
-  })
-  const {data:surveyTypeDistribution,  isLoading:typeLoading, isSuccess:typeSuccess, error:typeError} = useSurveyTypeDistributionQuery({
-    month: 'January',
-    year: selectedYear,
-  })
-  console.log(data)
-  console.log(surveyTypeDistribution)
-console.log( surveyTypeDistribution?.data?.quantitative_percentage)
-const desktopData = [
-  {
-    month: "Quantitative",
-    value: surveyTypeDistribution?.data?.quantitative_percentage ?? 0,
-    fill: "#5B03B2",
-  },
-  {
-    month: "Qualitative",
-    value: surveyTypeDistribution?.data?.qualitative_percentage ?? 0,
-    fill: "#E9D7FB",
-  },
-  {
-    month: "Both",
-    value: surveyTypeDistribution?.data?.both_percentage ?? 0,
-    fill: "#9B51E0",
-  },
-];
+  // const
+  const { data, isLoading, isSuccess, error } =
+    useSurveyCreationDistributionQuery({
+      month: selectedMonth,
+      year: selectedYear,
+    });
 
-const chartConfigForSurveyType = {
-  Quantitative: {
-    label: "Quantitative",
-    color: "#5B03B2",
-  },
-  Qualitative: {
-    label: "Qualitative",
-    color: "#E9D7FB",
-  },
-  Both: {
-    label: "Both",
-    color: "#9B51E0",
-  },
-} satisfies ChartConfig;
-  
+  const { data:subScribe, isLoading:subIsLoading , isSuccess:subIsSuccess, error:subError } =
+    useSubscriptionDistributionQuery({
+      month: selectedMonth,
+      year: selectedYear,
+    });
+
+  const {
+    data: surveyTypeDistribution,
+    isLoading: typeLoading,
+    isSuccess: typeSuccess,
+    error: typeError,
+  } = useSurveyTypeDistributionQuery({
+    month: "January",
+    year: selectedYear,
+  });
+  // console.log(data);
+  console.log(subScribe);
+ 
+
+  const circles = [
+    {
+      value: Math.round(data?.data?.ai_generated_percentage),
+      color: "#8E24AA", 
+      size: 120,
+    },
+    {
+      value: Math.round(data?.data?.manually_generated_percentage),
+      color: "#E1BEE7", 
+      size: 90,
+    },
+  ];
+
+  const desktopData = [
+    {
+      month: "Quantitative",
+      value: surveyTypeDistribution?.data?.quantitative_percentage ?? 0,
+      fill: "#5B03B2",
+    },
+    {
+      month: "Qualitative",
+      value: surveyTypeDistribution?.data?.qualitative_percentage ?? 0,
+      fill: "#E9D7FB",
+    },
+    {
+      month: "Both",
+      value: surveyTypeDistribution?.data?.both_percentage ?? 0,
+      fill: "#9B51E0",
+    },
+  ];
+  const desktopData3 = [
+    {
+      month: "Basic",
+      value: subScribe?.data?.basic_sub_percentage ?? 0,
+      fill: "#5B03B2",
+    },
+    {
+      month: "Business",
+      value: subScribe?.data?.
+      business_sub_percentage ?? 0,
+      fill: "#9B51E0", // 
+    },
+    {
+      month: "Pro",
+      value: subScribe?.data?.
+      pro_sub_percentage ?? 0,
+      fill: "#E9D7FB",
+    },
+  ];
+
+  const desktopData2 = [
+    {
+      month: data?.data?.month,
+      value: Math.round(data?.data?.ai_generated_percentage),
+      fill: "#8E24AA",
+    },
+    {
+      month: data?.data?.month,
+      value: Math.round(data?.data?.manually_generated_percentage),
+      fill: "#E1BEE7",
+    },
+  ];
+
+  const chartConfigForSurveyType = {
+    Quantitative: {
+      label: "Quantitative",
+      color: "#5B03B2",
+    },
+    Qualitative: {
+      label: "Qualitative",
+      color: "#E9D7FB",
+    },
+    Both: {
+      label: "Both",
+      color: "#9B51E0",
+    },
+  } satisfies ChartConfig;
+
   const chartConfig = {
     January: {
       label: "January",
@@ -106,37 +170,26 @@ const chartConfigForSurveyType = {
       color: "#C70039",
     },
   } satisfies ChartConfig;
-  
 
   const circleData = [
     { value: 50, color: "#5A2D82", size: 150 }, // Purple circle
     { value: 30, color: "#A24DDC", size: 120 }, // Light purple circle
     // { value: 20, color: "#4C63E8", size: 80 },  // Blue circle
-  ]; 
+  ];
 
   const bottomLegend = ["Free", "Pro", "Premium"];
   const surveyType = ["Quantitative", "Qualitative", "Mixed"];
-  const createdBy = ["AI-Generated", "Manual", "Mixed"];
+  const planType = ["Basic", "Business", "Pro"];
+  const createdBy = ["AI-Generated", "Manual",];
   return (
     <div className="p-6 bg-gray-50">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-      {/* <SuperAdminPieChart2
-  chartConfig={{
-    Quantitative: { label: "Quantitative" },
-    Qualitative: { label: "Qualitative" },
-    Mixed: { label: "Mixed" },
-  }}
-  bottomLegend={["Quantitative", "Qualitative", "Mixed"]}
-  title="Survey Type Distribution"
-/> */}
-
-<SuperAdminPieChart
-          desktopData={desktopData}
+        <SuperAdminPieChart
+          desktopData={desktopData3}
           chartConfig={chartConfigForSurveyType}
-          bottomLegend={surveyType}
-          title="Survey Type Distribution"
-          year={["2023", "2024", '2025']}
+          bottomLegend={planType}
+          title="User Subscription Distribution"
+          year={["2023", "2024", "2025"]}
           months={[
             "January",
             "February",
@@ -159,25 +212,19 @@ const chartConfigForSurveyType = {
 
         {/* <SurveyTypeChart /> */}
         <OverlappingCircles
-          desktopData={desktopData}
+          desktopData={desktopData2}
           chartConfig={chartConfig}
           bottomLegend={createdBy}
           title="Creation Method Distribution"
-          circles={circleData}
+          circles={circles}
         />
-       
-        {/* <SuperAdminPieChart
+
+        <SuperAdminPieChart
           desktopData={desktopData}
           chartConfig={chartConfigForSurveyType}
           bottomLegend={surveyType}
           title="Survey Type Distribution"
-        /> */}
-           <SuperAdminPieChart
-          desktopData={desktopData}
-          chartConfig={chartConfigForSurveyType}
-          bottomLegend={surveyType}
-          title="Survey Type Distribution"
-          year={["2023", "2024", '2025']}
+          year={["2023", "2024", "2025"]}
           months={[
             "January",
             "February",
@@ -203,7 +250,8 @@ const chartConfigForSurveyType = {
       <div className="bg-white mt-8 p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-6">
-            {["Total Users", "New Users", "Operating Status"].map(
+            {["Subscription Trend"].map(
+              // {["Subscription Trend", "New Users", "Operating Status"].map(
               (tab, idx) => (
                 <span
                   key={idx}
@@ -218,15 +266,15 @@ const chartConfigForSurveyType = {
               )
             )}
           </div>
-          {/* <div className="flex items-center space-x-4 text-sm text-gray-600">
-            <span className="text-gray-800">Premium plan</span>
-            <span className="text-purple-500">Pro plan</span>
-            <span className="text-blue-400">Free plan</span>
-          </div> */}
         </div>
         <div className=" bg-gray-100 rounded-lg flex w-full items-center justify-center">
-         <SubscriptionTrend />
+          <SubscriptionTrend />
         </div>
+      </div>
+
+      <div className="flex justify-between items-center gap-4 mt-5">
+        <UsersByLocation />
+        <TrafficByDevice />
       </div>
     </div>
   );

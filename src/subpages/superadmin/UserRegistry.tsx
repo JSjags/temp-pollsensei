@@ -2,7 +2,7 @@
 
 import { ImFilter } from "react-icons/im";
 import React, { useMemo, useState } from "react";
-import { useUserRegistryQuery } from "@/services/superadmin.service";
+import { useUserRegistryQuery, useUsersLocationQuery } from "@/services/superadmin.service";
 import PageControl from "@/components/common/PageControl";
 import DropdownFilter from "@/components/superAdmin/DropdownFilter";
 import { generateInitials } from "@/lib/utils";
@@ -47,15 +47,13 @@ const UserRegistry: React.FC = () => {
   const path_params: PathParamsProps = {};
   if (email) path_params.email = email;
 
-  // const queryArgs = useMemo(() => {
-  //   return {
-  //     pagesNumber: currentPage,
-  //     path_params: {
-  //       ...selectedFilters,
-  //       email: email || undefined,
-  //     },
-  //   };
-  // }, [currentPage, selectedFilters, email]);
+  const { data:location } = useUsersLocationQuery(1);
+  console.log(location)
+
+  const refactoredData = location?.data?.data?.map((item:any) => ({
+    label: item,
+    value: item.toLowerCase().replace(/\s+/g, '-'),
+  }));
 
   const queryArgs = useMemo(() => {
     const params = { ...selectedFilters, email: email || undefined };
@@ -177,7 +175,7 @@ const UserRegistry: React.FC = () => {
 />
 <DropdownFilter
   title="Location"
-  options={options.location}
+  options={refactoredData}
   multiSelect
   onApply={(selected) => handleFilterApply("location", selected)}
 />

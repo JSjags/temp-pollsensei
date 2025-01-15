@@ -184,7 +184,46 @@ import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { useSubscriptionTrendQuery } from "@/services/superadmin.service";
 
+type InputData = {
+  month: string;
+  basic: number;
+  pro: number;
+  team: number;
+}[];
+
+type ChartSeries = {
+  name: string;
+  data: number[];
+}[];
+
 const SubscriptionTrend: React.FC = () => {
+  const { data } = useSubscriptionTrendQuery('')
+
+
+  const months = data?.data?.map((item:any) => {
+    const [month] = item.month.split(" "); 
+    return month.slice(0, 3); 
+  });
+
+  function transformDataToChartSeries(data: InputData): ChartSeries {
+    const chartSeries = [
+      {
+        name: "Free plan",
+        data: data?.map((item) => item?.basic),
+      },
+      {
+        name: "Pro plan",
+        data: data?.map((item) => item?.pro),
+      },
+      {
+        name: "Premium plan",
+        data: data?.map((item) => item?.team),
+      },
+    ];
+  
+    return chartSeries;
+  }
+
   const chartOptions: ApexOptions = {
     chart: {
       type: "area", 
@@ -193,7 +232,7 @@ const SubscriptionTrend: React.FC = () => {
         show: false,
       },
     },
-    colors: ["#1E90FF", "#FF00FF", "#32CD32"], // Free plan, Pro plan, Premium plan
+    colors: ["#1E90FF", "#FF00FF", "#32CD32"], 
     stroke: {
       curve: "smooth",
       width: 2,
@@ -213,7 +252,7 @@ const SubscriptionTrend: React.FC = () => {
       horizontalAlign: "right",
     },
     xaxis: {
-      categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+      categories: months,
       axisBorder: {
         show: false,
       },
@@ -223,7 +262,7 @@ const SubscriptionTrend: React.FC = () => {
     },
     yaxis: {
       labels: {
-        formatter: (value: number) => `${value}K`,
+        formatter: (value: number) => `${value}`,
       },
     },
     grid: {
@@ -235,34 +274,12 @@ const SubscriptionTrend: React.FC = () => {
     },
   };
 
-  const chartSeries = [
-    {
-      name: "Free plan",
-      data: [10, 15, 20, 30, 35, 25, 40],
-    },
-    {
-      name: "Pro plan",
-      data: [5, 10, 15, 25, 30, 20, 30],
-    },
-    {
-      name: "Premium plan",
-      data: [2, 8, 12, 22, 28, 18, 25],
-    },
-  ];
+  const chartSeries = transformDataToChartSeries(data?.data);
 
-  const {data} = useSubscriptionTrendQuery(null)
-  console.log(data)
+
 
   return (
     <div className=" w-full">
-      {/* <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold text-gray-800">Subscription Trend</h2>
-        <div className="flex space-x-6 text-gray-500 text-sm">
-          <span className="cursor-pointer hover:text-gray-800">New Users</span>
-          <span className="cursor-pointer hover:text-gray-800">Operating Status</span>
-        </div>
-      </div> */}
-      {/* <hr className="border-gray-200 mb-4" /> */}
       <ReactApexChart options={chartOptions} series={chartSeries} type="area" height={300} />
     </div>
   );
