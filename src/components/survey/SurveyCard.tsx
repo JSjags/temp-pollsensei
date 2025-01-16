@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import StatusTag, { StatusTagProps } from "./StatusTag";
 import ellipses from "../../assets/images/ellipsisVertical.svg";
@@ -37,6 +37,7 @@ interface SurveyCardProps {
   status: string;
   number_of_responses: number;
   _id: string;
+  index: number;
 }
 
 const SurveyCard: React.FC<SurveyCardProps> = ({
@@ -45,6 +46,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   status,
   number_of_responses,
   _id,
+  index,
 }) => {
   const options = [
     "Rename",
@@ -55,7 +57,9 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     "Close survey",
     "Delete",
   ];
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [viewOptions, setViewOptions] = useState(false);
+  const [dropdownIndex, setDropdownIndex] = useState<number | null>(null);
   const [showDelete, setShowDelete] = useState(false);
   const [closeSurvey, setCloseSurvey] = useState(false);
   const [showRename, setShowRename] = useState(false);
@@ -203,6 +207,23 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     color = "#242D35";
   }
 
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(event.target as Node)
+        ) {
+          setDropdownIndex(null);
+        }
+      };
+  
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
+
   return (
     <div className="relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px]">
       <div>
@@ -212,7 +233,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
           </h3>
           <div
             role="button"
-            onClick={handleViewOption}
+            onClick={()=>{
+              handleViewOption()
+              setDropdownIndex((prevIndex) =>
+                prevIndex === index ? null : index
+              )
+            }}
             className="cursor-pointer shrink-0 hover:bg-gray-100 p-1 flex justify-center items-center rounded-md"
           >
             {userRoles.some((role) =>
@@ -306,8 +332,8 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
           </div>
         </div>
       </div>
-      {viewOptions && (
-        <div className="absolute right-4 sm:right-8 top-12 sm:top-16 z-50 w-[180px] sm:w-[210px] rounded-[8px] py-[20px] sm:py-[24px] px-[30px] sm:px-[40px] border border-border/50 bg-white shadow-lg">
+      {viewOptions && dropdownIndex === index && (
+        <div className="absolute right-4 sm:right-8 top-12 sm:top-16 z-50 w-[180px] sm:w-[210px] rounded-[8px] py-[20px] sm:py-[24px] px-[30px] sm:px-[40px] border border-border/50 bg-white shadow-lg"   ref={dropdownRef}>
           <div className="flex flex-col justify-between h-full">
             {options.map((op, id) => (
               <p
