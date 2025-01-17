@@ -14,12 +14,11 @@ interface Card {
   hasPlayButton?: boolean;
 }
 
-
 const VideoTutorial = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, isError, refetch } = useAllTutorialsQuery({
     pagesNumber: currentPage,
-    filter_by:"video"
+    filter_by: "video",
   });
 
   const totalItems = data?.data?.total || 0;
@@ -36,13 +35,8 @@ const VideoTutorial = () => {
     refetch();
   };
 
-  console.log(data);
-  console.log(currentPage);
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
           <div className="text-center flex justify-center items-center w-full">
@@ -64,9 +58,9 @@ const VideoTutorial = () => {
             >
               {/* Card Background */}
               <div className={`relative h-40 flex justify-center items-center`}>
-                {card.media[0].type === "image/jpeg" ? (
+                {card?.media[0]?.type === "image/jpeg" ? (
                   <Image
-                    className="dark:invert"
+                    className="dark:invert w-full h-40 object-cover aspect-auto"
                     src={card?.media[0]?.url}
                     alt="Next.js logo"
                     width={180}
@@ -87,11 +81,10 @@ const VideoTutorial = () => {
                   {card?.title}
                 </h3>
                 <div className="w-full flex justify-between items-center">
-                  <small></small> 
+                  <small></small>
                   <BsThreeDotsVertical />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                </p>
+                <p className="text-xs text-gray-500 mt-1"></p>
               </div>
 
               {/* Action Menu */}
@@ -117,10 +110,6 @@ const VideoTutorial = () => {
           ))
         )}
       </div>
-
-
-
-
 
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">

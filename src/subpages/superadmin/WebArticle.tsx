@@ -1,15 +1,15 @@
 "use client";
 
 import PageControl from "@/components/common/PageControl";
-import { 
+import {
   useAllTutorialsQuery,
   useDeleteTutorialMutation,
   useEditTutorialMutation,
   usePreviewTutorialQuery,
   usePublishTutorialMutation,
   useUnpublishTutorialMutation,
- } from "@/services/superadmin.service";
- import React, { useState, useRef, useEffect } from "react";
+} from "@/services/superadmin.service";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -29,164 +29,160 @@ import { Modal } from "@/components/superadmin-faqs/Modal";
 import { FaFileUpload } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 
-
-
 const WebArticle = () => {
-  
-    const [currentPage, setCurrentPage] = useState(1);
-    const [dropdownIndex, setDropdownIndex] = useState<number | null>(null);
-    const dropdownRef = useRef<HTMLDivElement | null>(null);
-    const [preview, setPreview] = useState(false);
-    const [edit, setEdit] = useState(false);
-    const [publish, setPublish] = useState(false);
-    const [unpublish, setUnpublish] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
-    const [_id, set_Id] = useState("");
-    const [deleteTutorial, { isLoading: isDeleteing }] =
-      useDeleteTutorialMutation();
-    const [unpublishTutorial, { isLoading: isUnpublishLoading }] =
-      useUnpublishTutorialMutation();
-    const [publishTutorial, { isLoading: isPublishLoading }] =
-      usePublishTutorialMutation();
-    const { data: previewTutorial, isLoading: isLoadingAll } =
-      usePreviewTutorialQuery(_id, { skip: _id ? false : true });
-    const [editTutorial, { isLoading: isEditLoading }] =
-      useEditTutorialMutation();
-  
-    // const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
-  
-    const [formData, setFormData] = useState<{
-      type: string;
-      title: string;
-      description: string;
-      links: string;
-      file: File | null;
-    }>({
-      type: "image",
-      title: "",
-      description: "",
-      links: "",
-      file: null,
-    });
-  
-    const handleChange = (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
-    ) => {
-      const { name, value } = e.target;
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    };
-  
-    const [fileName, setFileName] = useState<string | null>(null);
-    const [file, setFile] = useState<File | null>(null);
-  
-    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      const droppedFile = event.dataTransfer.files[0];
-      if (droppedFile) {
-        setFileName(droppedFile.name);
-        setFile(droppedFile);
-      }
-    };
-  
-    const preventDefaults = (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-    };
-  
-    // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //   const file = e.target.files?.[0] || null;
-    //   setFormData((prevData) => ({
-    //     ...prevData,
-    //     file,
-    //   }));
-    // };
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0] || null;
-      setFormData((prevData) => ({
-          ...prevData,
-          file, 
-      }));
-      setFileName(file?.name || null); 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [dropdownIndex, setDropdownIndex] = useState<number | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [preview, setPreview] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [publish, setPublish] = useState(false);
+  const [unpublish, setUnpublish] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [_id, set_Id] = useState("");
+  const [deleteTutorial, { isLoading: isDeleteing }] =
+    useDeleteTutorialMutation();
+  const [unpublishTutorial, { isLoading: isUnpublishLoading }] =
+    useUnpublishTutorialMutation();
+  const [publishTutorial, { isLoading: isPublishLoading }] =
+    usePublishTutorialMutation();
+  const { data: previewTutorial, isLoading: isLoadingAll } =
+    usePreviewTutorialQuery(_id, { skip: _id ? false : true });
+  const [editTutorial, { isLoading: isEditLoading }] =
+    useEditTutorialMutation();
+
+  // const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
+
+  const [formData, setFormData] = useState<{
+    type: string;
+    title: string;
+    description: string;
+    links: string;
+    file: File | null;
+  }>({
+    type: "image",
+    title: "",
+    description: "",
+    links: "",
+    file: null,
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
-  
-  
-    const handleSubmit = async () => {
-      const editFormData = new FormData();
-      editFormData.append("type", formData.type);
-      editFormData.append("title", formData.title);
-      editFormData.append("description", formData.description);
+
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const droppedFile = event.dataTransfer.files[0];
+    if (droppedFile) {
+      setFileName(droppedFile.name);
+      setFile(droppedFile);
+    }
+  };
+
+  const preventDefaults = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0] || null;
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     file,
+  //   }));
+  // };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData((prevData) => ({
+      ...prevData,
+      file,
+    }));
+    setFileName(file?.name || null);
+  };
+
+  const handleSubmit = async () => {
+    const editFormData = new FormData();
+    editFormData.append("type", formData.type);
+    editFormData.append("title", formData.title);
+    editFormData.append("description", formData.description);
+    editFormData.append("links", formData.links);
+    if (formData.links) {
       editFormData.append("links", formData.links);
-      if (formData.links) {
-        editFormData.append("links", formData.links);
-      }
-      if (formData.file) {
-        editFormData.append("file", formData.file);
-      } else {
-        toast.error("Please upload a file to proceed.");
-        return;
-      }
-      console.log(editFormData);
-      try {
-        await editTutorial({id:_id, body:editFormData}).unwrap();
-        toast.success("Tutorial created successfully");
-        setEdit(false);
-      } catch (err: any) {
-        toast.error(
-          "Failed to create tutorial " + (err?.data?.message || err.message)
-        );
-        console.error("Failed to create tutorial", err);
-      }
-    };
-  
-    const handleCloseAll = () => {
+    }
+    if (formData.file) {
+      editFormData.append("file", formData.file);
+    } else {
+      toast.error("Please upload a file to proceed.");
+      return;
+    }
+    console.log(editFormData);
+    try {
+      await editTutorial({ id: _id, body: editFormData }).unwrap();
+      toast.success("Tutorial created successfully");
       setEdit(false);
-      setPublish(false);
-      setUnpublish(false);
-      setShowDelete(false);
-    };
-  
-    const handleDeleteTutorial = async (id: any) => {
-      try {
-        await deleteTutorial(id).unwrap();
-        toast.success("FAQ deleted successfully");
-        handleCloseAll();
-        // refetch();
-      } catch (e) {
-        console.log(e);
-        toast.error("Error deleting FAQ");
-      }
-    };
-  
-    const handleUnpublishTutorial = async (id: any) => {
-      try {
-        await unpublishTutorial(id).unwrap();
-        toast.success("FAQ unpublish successfully");
-        handleCloseAll();
-        // refetch();
-      } catch (e) {
-        console.log(e);
-        toast.error("Error deleting FAQ");
-      }
-    };
-    const handlePublishTutorial = async (id: any) => {
-      try {
-        await publishTutorial(id).unwrap();
-        toast.success("FAQ deleted successfully");
-        handleCloseAll();
-        // refetch();
-      } catch (e) {
-        console.log(e);
-        toast.error("Error deleting FAQ");
-      }
-    };
+    } catch (err: any) {
+      toast.error(
+        "Failed to create tutorial " + (err?.data?.message || err.message)
+      );
+      console.error("Failed to create tutorial", err);
+    }
+  };
+
+  const handleCloseAll = () => {
+    setEdit(false);
+    setPublish(false);
+    setUnpublish(false);
+    setShowDelete(false);
+  };
+
+  const handleDeleteTutorial = async (id: any) => {
+    try {
+      await deleteTutorial(id).unwrap();
+      toast.success("FAQ deleted successfully");
+      handleCloseAll();
+      // refetch();
+    } catch (e) {
+      console.log(e);
+      toast.error("Error deleting FAQ");
+    }
+  };
+
+  const handleUnpublishTutorial = async (id: any) => {
+    try {
+      await unpublishTutorial(id).unwrap();
+      toast.success("FAQ unpublish successfully");
+      handleCloseAll();
+      // refetch();
+    } catch (e) {
+      console.log(e);
+      toast.error("Error deleting FAQ");
+    }
+  };
+  const handlePublishTutorial = async (id: any) => {
+    try {
+      await publishTutorial(id).unwrap();
+      toast.success("FAQ deleted successfully");
+      handleCloseAll();
+      // refetch();
+    } catch (e) {
+      console.log(e);
+      toast.error("Error deleting FAQ");
+    }
+  };
   const { data, isLoading, isError, refetch } = useAllTutorialsQuery({
     pagesNumber: currentPage,
-    filter_by:"web"
+    filter_by: "web",
   });
 
   const totalItems = data?.data?.total || 0;
@@ -204,32 +200,32 @@ const WebArticle = () => {
   };
 
   // Close dropdown when clicking outside
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          dropdownRef.current &&
-          !dropdownRef.current.contains(event.target as Node)
-        ) {
-          setDropdownIndex(null);
-        }
-      };
-  
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
-  
-    useEffect(() => {
-      if (previewTutorial?.data) {
-          setFormData({
-              type: previewTutorial.data.type || "image",
-              title: previewTutorial.data.title || "",
-              description: previewTutorial.data.description || "",
-              links: previewTutorial.data.links || "",
-              file: null, // Files are not retrieved from the server
-          });
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownIndex(null);
       }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (previewTutorial?.data) {
+      setFormData({
+        type: previewTutorial.data.type || "image",
+        title: previewTutorial.data.title || "",
+        description: previewTutorial.data.description || "",
+        links: previewTutorial.data.links || "",
+        file: null, // Files are not retrieved from the server
+      });
+    }
   }, [previewTutorial]);
 
   console.log(data);
@@ -237,7 +233,7 @@ const WebArticle = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
           <div className="text-center flex justify-center items-center w-full">
             <span className="flex justify-center items-center">
@@ -258,9 +254,9 @@ const WebArticle = () => {
             >
               {/* Card Background */}
               <div className={`relative h-40 flex justify-center items-center`}>
-                {card.media[0].type.includes("image") ? (
+                {card?.media[0]?.type.includes("image") ? (
                   <Image
-                    className="dark:invert"
+                    className="dark:invert w-full h-40 object-cover aspect-auto"
                     src={card?.media[0]?.url}
                     alt="Next.js logo"
                     width={180}
@@ -281,10 +277,10 @@ const WebArticle = () => {
                   {card?.title}
                 </h3>
                 <div className="w-full flex justify-between items-center">
-                  {card.media[0].type.includes("image") && (
+                  {card?.media[0]?.type.includes("image") && (
                     <small>Read article</small>
                   )}
-                  {card.media[0].type === "video/mp4" && (
+                  {card?.media[0]?.type === "video/mp4" && (
                     <small>Watch Video</small>
                   )}
                   <button
@@ -427,114 +423,124 @@ const WebArticle = () => {
                     </SheetHeader>
                     <div className="mt-6 space-y-4">
                       <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-                      {isLoadingAll && "Loading..."}
-                      {
-                        previewTutorial && <>
+                        {isLoadingAll && "Loading..."}
+                        {previewTutorial && (
+                          <>
+                            <div>
+                              <select
+                                className={cn(
+                                  "auth-input focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground w-full placeholder:text-foreground/40"
+                                )}
+                                name="type"
+                                id="type"
+                              >
+                                <option value="">{formData.type}</option>
+                                {[
+                                  { value: "video", label: "Video" },
+                                  { value: "image", label: "Image" },
+                                  { value: "Link", label: "Link" },
+                                ].map((option: any) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Title
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="Enter Title"
+                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                                value={formData.title}
+                                onChange={handleChange}
+                                name="title"
+                                id="title"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Description
+                              </label>
+                              <textarea
+                                placeholder="Type brief description"
+                                rows={4}
+                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                                value={formData.description}
+                                onChange={handleChange}
+                                name="description"
+                                id="description"
+                              />
+                            </div>
 
-                        <div>
-                          <select
-                            className={cn(
-                              "auth-input focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground w-full placeholder:text-foreground/40"
-                            )}
-                            name="type"
-                            id="type"
-                          >
-                            <option value="">{formData.type}</option>
-                            {[
-                              { value: "video", label: "Video" },
-                              { value: "image", label: "Image" },
-                              { value: "Link", label: "Link" },
-                            ].map((option: any) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Title
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Enter Title"
-                            className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                            value={formData.title}
-                            onChange={handleChange}
-                            name="title"
-                            id="title"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Description
-                          </label>
-                          <textarea
-                            placeholder="Type brief description"
-                            rows={4}
-                            className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                            value={formData.description}
-                            onChange={handleChange}
-                            name="description"
-                            id="description"
-                          />
-                        </div>
-
-                        <div
-                          onDrop={handleDrop}
-                          onDragOver={preventDefaults}
-                          onDragEnter={preventDefaults}
-                          className="flex flex-col items-center justify-center w-full h-32 cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-lg"
-                        >
-                          <div className="flex flex-col items-center">
-                            <FaFileUpload size={24} />
-                            <p className="text-gray-500 mt-2">
-                              {fileName ||
-                                "Select a file or drag and drop here"}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              MP4, MOV, MKV, file size no more than 50MB
-                            </p>
-                          </div>
-                          <input
-                            type="file"
-                            id="fileUpload"
-                            name="fileUpload"
-                            accept=".mp4, .mov, .mkv, .jpg, .jpeg, .png"
-                            className="hidden"
-                            onChange={handleFileChange}
-                          />
-                          <label
-                            htmlFor="fileUpload"
-                            className="border border-purple-800 py-1 px-4 rounded-full mt-3"
-                          >
-                            Select file
-                          </label>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Links
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Enter Title"
-                            className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                            value={formData.links}
-                            onChange={handleChange}
-                            name="links"
-                            id="links"
-                          />
-                        </div>
-                        <div className="flex items-center justify-end space-x-4 w-full">
-                          <button className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100" type="button">
-                            Cancel
-                          </button>
-                          <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg" type="submit">
-                            {isEditLoading ? "Waiting..." : "Save and Continue"}
-                          </button>
-                        </div>
-                        </>
-                      }
+                            <div
+                              onDrop={handleDrop}
+                              onDragOver={preventDefaults}
+                              onDragEnter={preventDefaults}
+                              className="flex flex-col items-center justify-center w-full h-32 cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-lg"
+                            >
+                              <div className="flex flex-col items-center">
+                                <FaFileUpload size={24} />
+                                <p className="text-gray-500 mt-2">
+                                  {fileName ||
+                                    "Select a file or drag and drop here"}
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                  MP4, MOV, MKV, file size no more than 50MB
+                                </p>
+                              </div>
+                              <input
+                                type="file"
+                                id="fileUpload"
+                                name="fileUpload"
+                                accept=".mp4, .mov, .mkv, .jpg, .jpeg, .png"
+                                className="hidden"
+                                onChange={handleFileChange}
+                              />
+                              <label
+                                htmlFor="fileUpload"
+                                className="border border-purple-800 py-1 px-4 rounded-full mt-3"
+                              >
+                                Select file
+                              </label>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Links
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="Enter Title"
+                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                                value={formData.links}
+                                onChange={handleChange}
+                                name="links"
+                                id="links"
+                              />
+                            </div>
+                            <div className="flex items-center justify-end space-x-4 w-full">
+                              <button
+                                className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100"
+                                type="button"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg"
+                                type="submit"
+                              >
+                                {isEditLoading
+                                  ? "Waiting..."
+                                  : "Save and Continue"}
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </form>
                     </div>
                   </SheetContent>

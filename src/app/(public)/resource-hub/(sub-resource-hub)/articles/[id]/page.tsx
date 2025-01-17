@@ -1,50 +1,97 @@
 "use client";
 
+import AppLoadingSkeleton from "@/components/common/AppLoadingSkeleton";
+import EmptyTableData from "@/components/common/EmptyTableData";
 /* eslint-disable react/no-unescaped-entities */
-import { cratf, smile1 } from "@/assets/images";
 import { formatDate } from "@/lib/helpers";
-import { useViewTutorialQuery } from "@/services/superadmin.service";
+import { handleApiErrors, isValidResponse } from "@/lib/utils";
+import { getSingleTutorial } from "@/services/api/tutorial";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React from "react";
 
 const ArticleDetails: React.FC = () => {
   const params = useParams();
-  const { data, isLoading, error } = useViewTutorialQuery(params?.id);
-  console.log(data);
+  const id = params?.id?.toString();
+
+  const { data, isLoading, isRefetching, refetch } = useQuery({
+    queryKey: ["getSingleTutorial", "article", id],
+    queryFn: async () => {
+      const response = await getSingleTutorial(id);
+      if (isValidResponse(response)) {
+        return response?.data;
+      } else {
+        handleApiErrors(response);
+        return null;
+      }
+    },
+  });
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white text-gray-800">
-      <div className="mb-6">
-        <h1 className="text-3xl font-semibold text-gray-900">
-          {data?.data?.title}
-        </h1>
-        <p className="text-sm text-gray-500 mt-2">10 mins read</p>
-        <p className="text-sm text-gray-500">
-          {formatDate(data?.data?.createdAt)}
-        </p>
-      </div>
+      {isLoading || isRefetching ? (
+        <div className="flex flex-col gap-y-6">
+          <div className="w-full">
+            <AppLoadingSkeleton className="w-full h-4 mb-2 max-w-80" />
+            <AppLoadingSkeleton className="w-full h-3 max-w-40" />
+          </div>
+          <AppLoadingSkeleton className="w-full  aspect-video rounded " />
+          <div className="flex flex-col gap-y-3">
+            <AppLoadingSkeleton className="w-full h-3 max-w-[80%]" />
+            <AppLoadingSkeleton className="w-full h-3 max-w-[70%]" />
+            <AppLoadingSkeleton className="w-full h-3 max-w-[60%]" />
+            <AppLoadingSkeleton className="w-full h-3 max-w-[50%]" />
+            <AppLoadingSkeleton className="w-full h-3 max-w-[60%]" />
+            <AppLoadingSkeleton className="w-full h-3 max-w-[70%]" />
+            <AppLoadingSkeleton className="w-full h-3 max-w-[80%]" />
+          </div>
+        </div>
+      ) : !data?.data ? (
+        <EmptyTableData onRefectch={refetch} />
+      ) : (
+        <>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">
+            {data?.data?.title}
+          </h1>
+          <div>
+            {!!data?.data?.createdAt && (
+              <p className="text-sm py-5 text-gray-500">
+                {formatDate(data?.data?.createdAt)}
+              </p>
+            )}
+          </div>
 
-      <div className={`relative flex justify-center items-center`}>
-        {data?.data?.type === "image" ? (
-          <Image
-            className="dark:invert"
-            src={data?.data?.media[0]?.url}
-            alt={data?.data?.title}
-            width={700}
-            height={300}
-          />
-        ) : (
-          <video loop muted autoPlay className="w-full">
-            <source src={data?.data?.media[0]?.url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        )}
-      </div>
+          <div className={`relative flex justify-center items-center`}>
+            {data?.data?.type === "image" ? (
+              <Image
+                className="w-full dark:invert"
+                src={data?.data?.media[0]?.url}
+                alt={data?.data?.title}
+                width={700}
+                draggable={false}
+                height={300}
+              />
+            ) : (
+              <video loop muted autoPlay className="w-full">
+                <source src={data?.data?.media[0]?.url} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
 
-     
-      <p className="text-base text-gray-700 mb-6 leading-relaxed">
-       {data?.data?.description}
-      </p>
+          <p className="text-base pt-10 text-gray-700 mb-6 leading-relaxed">
+            {data?.data?.description}
+          </p>
+
+          {!!data?.data?.content && (
+            <main
+              className="py-10 prose"
+              dangerouslySetInnerHTML={{ __html: data?.data?.content }}
+            ></main>
+          )}
+        </>
+      )}
       {/* <div className="mb-6">
         <h2 className="font-semibold text-lg">1. Keep it Simple</h2>
         <ul className="list-disc list-inside text-gray-700 mt-2 space-y-1">

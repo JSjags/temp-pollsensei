@@ -473,3 +473,24 @@ input[type="radio"].radio:checked:before {
 .ql-editor {
   @apply !min-h-40;
 }
+
+.app-button {
+  @apply flex w-full max-w-44 items-center justify-center gap-1 rounded-lg bg-purple-700 p-2 text-sm font-medium text-white  transition-all duration-300 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-65;
+}
+
+.app-horizontal-collapse {
+  display: grid !important;
+  transition: grid-template-rows 500ms !important;
+  transition-duration: 700ms;
+  transition: grid-template-columns 500ms !important; /* Might not be as smooth */
+}
+
+.app-horizontal-collapse-close {
+  grid-template-rows: 0fr !important;
+  grid-template-columns: 0fr !important;
+}
+
+.app-horizontal-collapse-open {
+  grid-template-rows: 1fr !important;
+  grid-template-columns: 1fr !important;
+}
