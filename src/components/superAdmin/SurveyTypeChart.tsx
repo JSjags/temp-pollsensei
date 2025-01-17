@@ -111,6 +111,7 @@ export function SurveyTypeChart() {
             outerRadius={80}
             activeIndex={activeIndex}
             onMouseEnter={handlePieEnter}
+
             activeShape={(props: any) => (
               <Sector {...props} outerRadius={props.outerRadius + 10} />
             )}

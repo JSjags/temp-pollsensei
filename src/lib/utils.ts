@@ -1,5 +1,6 @@
 import { Test, Variable } from "@/components/analysis/AnalysisTests";
 import { type ClassValue, clsx } from "clsx";
+import { toast } from "react-toastify";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -108,4 +109,18 @@ export const generateMilestoneStage = (stage: string): string => {
     return "7";
   }
   return "0";
+};
+
+export const handleApiErrors = (response: any) => {
+  const message = response?.message ?? response?.data?.message;
+  toast.error(message);
+};
+
+export const isValidResponse = (response: any) => {
+  console.log(response);
+  if (response?.success || response?.data?.success) {
+    return true;
+  }
+
+  return false;
 };

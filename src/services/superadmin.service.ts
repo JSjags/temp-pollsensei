@@ -24,22 +24,22 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     userRegistry: builder.query({
       query: ({ pagesNumber, ...filters }) => {
         const params = new URLSearchParams();
-    
+
         Object.entries(filters).forEach(([key, value]) => {
-          if (typeof value === 'string' && value) {
+          if (typeof value === "string" && value) {
             params.append(key, value);
           } else if (Array.isArray(value) && value.length > 0) {
             value.forEach((val) => params.append(key, val));
           }
         });
-    
+
         return {
           url: `superadmin/users?page=${pagesNumber}&page_size=20&${params.toString()}`,
           method: "GET",
         };
       },
     }),
-       
+
     superadminOverview: builder.query({
       query: () => ({
         url: `/superadmin/overview`, //
@@ -74,7 +74,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         if (month) params.append("month", month);
         if (year) params.append("year", year);
         return {
-          url: `superadmin/user-subscription-distribution?${params.toString()}`,  // superadmin/user-subscription-distribution?month=October&year=2024
+          url: `superadmin/user-subscription-distribution?${params.toString()}`, // superadmin/user-subscription-distribution?month=October&year=2024
           method: "GET",
         };
       },
@@ -95,7 +95,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         if (filter_by) params.append("filter_by", filter_by);
         return {
           url: `tutorial?page=${pagesNumber}&page_size=20`, // /tutorial?page=1&page_size=20&filter_by=video
-          method: "GET"
+          method: "GET",
         };
       },
     }),
@@ -184,7 +184,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     allTutorials: builder.query({
       query: ({ pagesNumber, filter_by }) => {
         const params = new URLSearchParams();
-        if (filter_by) params.append("filter_by", filter_by);
+        if (!!filter_by) params.append("filter_by", filter_by);
         return {
           url: `superadmin/tutorial?page=${pagesNumber}&page_size=20&${params.toString()}`,
           method: "GET",
