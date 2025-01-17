@@ -8,6 +8,8 @@ import { Switch } from "../ui/switch";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { BiSliderAlt } from "react-icons/bi";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import ActionButtons from "./ActionButtons";
 
 interface LikertScaleQuestionProps {
   question: string;
@@ -57,11 +59,10 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  const handleScaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedValue = e.target.value;
-    setSelectedOption(selectedValue);
+  const handleScaleChange = (value: string) => {
+    setSelectedOption(value);
     if (onChange) {
-      onChange(selectedValue);
+      onChange(value);
     }
   };
 
@@ -95,7 +96,7 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
       <div className="flex gap-4">
         <GripVertical
           className={`w-5 h-5 text-gray-400 mt-1 ${
-            pathname === "/surveys/create-survey" ? "visible" : "invisible"
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
           }`}
         />
 
@@ -129,43 +130,31 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
               </h3>
 
               <div className="flex justify-between gap-5 mt-4">
-                {options?.map((option, idx) => (
-                  <div key={idx} className="flex flex-col items-center">
-                    <input
-                      type="radio"
-                      id={`likert-${idx}`}
-                      name={question}
-                      className="accent-[#5B03B2] w-4 h-4 cursor-pointer"
-                      onChange={handleScaleChange}
-                      checked={selectedOption === option}
-                      value={option}
-                      required={is_required}
-                    />
-                    <label htmlFor={`likert-${idx}`} className="mt-1 text-sm">
-                      {option}
-                    </label>
-                  </div>
-                ))}
+                <RadioGroup
+                  onValueChange={handleScaleChange}
+                  value={selectedOption || undefined}
+                  className="flex justify-between gap-5 w-full"
+                >
+                  {options?.map((option, idx) => (
+                    <div key={idx} className="flex flex-col items-center">
+                      <RadioGroupItem
+                        value={option}
+                        id={`likert-${idx}`}
+                        className="accent-[#5B03B2]"
+                      />
+                      <label htmlFor={`likert-${idx}`} className="mt-1 text-sm">
+                        {option}
+                      </label>
+                    </div>
+                  ))}
+                </RadioGroup>
               </div>
             </div>
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
             pathname.includes("/edit-submitted-survey")) && (
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
           {pathname === "/surveys/add-question-m" && (
@@ -180,16 +169,14 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-600">Required</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
               <Switch
                 checked={is_required}
                 onCheckedChange={
-                  setIsRequired
-                    ? (checked: boolean) => setIsRequired(checked)
-                    : undefined
+                  setIsRequired && ((checked) => setIsRequired(checked))
                 }
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
               />
             </div>
           )}

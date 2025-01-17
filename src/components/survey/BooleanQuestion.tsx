@@ -1,40 +1,14 @@
-/* 
-UI Design Explanation:
----------------------
-The boolean question uses a clean, modern design with radio buttons for Yes/No selection.
-This design was chosen because:
-
-1. Simple, clear layout that emphasizes the binary choice
-2. Custom styled radio buttons with smooth animations
-3. Consistent styling with other question types
-4. Toggle icon represents binary/boolean nature
-
-Visual representation:
-
-+-------------------------------------------+
-|  1. What do you agree with this? *        |  <- Question text with required asterisk
-|  [Icon: ToggleLeft]                       |  <- Toggle icon represents boolean
-|                                           |
-|  O Yes                                    |  <- Custom radio with hover effects
-|  O No                                     |  <- Matching theme colors
-|                                           |
-|  [Edit] [Delete]  Required [Switch]       |  <- Action buttons & required toggle
-+-------------------------------------------+
-
-The ToggleLeft icon was chosen since it visually represents a binary/boolean choice
-and matches the yes/no nature of the question type.
-*/
-
-import { draggable, stars } from "@/assets/images";
-import Image from "next/image";
-import React, { useState } from "react";
-import { usePathname } from "next/navigation";
-import { useSelector } from "react-redux";
+import { stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
-import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
-import { Check, ToggleLeft } from "lucide-react";
+import { Check, CheckCircle, GripVertical, ToggleLeft } from "lucide-react";
 import { Switch } from "../ui/switch";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import ActionButtons from "./ActionButtons";
 
 interface BooleanQuestionProps {
   question: string;
@@ -68,7 +42,6 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
   index,
   onChange,
   onSave,
-  canUseAI = false,
   status,
   is_required,
   setIsRequired,
@@ -78,16 +51,13 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector(
-    (state: RootState) => state?.survey?.color_theme
-  );
 
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string>("");
 
-  const handleOptionChange = (option: string) => {
-    setSelectedOption(option);
+  const handleOptionChange = (value: string) => {
+    setSelectedOption(value);
     if (onChange) {
-      onChange(option);
+      onChange(value);
     }
   };
 
@@ -118,82 +88,73 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <div className="flex items-center gap-3">
-        {pathname === "/surveys/create-survey" && (
-          <Image src={draggable} alt="draggable icon" />
-        )}
-        <div className="w-full">
-          <div className="flex justify-between w-full items-center">
-            <h3 className="text-lg font-semibold text-start">
-              <div className="group flex justify-between gap-2 items-start">
-                <p>
-                  <span>{index}. </span> {question}
-                  {is_required === true && (
-                    <span className="text-2xl ml-2 text-red-500">*</span>
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
+
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
                   )}
-                </p>
-                {!pathname.includes("survey-public-response") &&
-                  !pathname.includes("create-survey") && (
+
+                  {!pathname.includes("survey-public-response") && isEdit && (
                     <PollsenseiTriggerButton
                       key={index}
                       imageUrl={stars}
                       tooltipText="Rephrase question"
-                      className={"group-hover:inline-block hidden"}
+                      className="hidden group-hover:inline-block transition transform hover:scale-110"
                       triggerType="rephrase"
                       question={question}
                       optionType={questionType}
                       options={options}
                       setEditId={setEditId}
-                      onSave={onSave!}
+                      onSave={() =>
+                        onSave && onSave(question, options, questionType, index)
+                      }
                       index={index}
                     />
                   )}
-              </div>
-            </h3>
-          </div>
+                </div>
+              </h3>
 
-          <div className="space-y-4 mt-4">
-            {(options ?? ["Yes", "No"]).map((option, optionIndex) => (
-              <div key={optionIndex} className="flex items-center">
-                <label className="relative flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name={`boolean-${index}`}
-                    value={option}
-                    className="peer sr-only"
-                    checked={selectedOption === option}
-                    required={is_required}
-                    onChange={() => handleOptionChange(option)}
-                  />
-                  <div className="w-5 h-5 border-2 rounded-full flex items-center justify-center peer-checked:border-purple-600 peer-checked:bg-purple-600 transition-all">
-                    <div className="w-2.5 h-2.5 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
-                  </div>
-                  <span className="ml-3 text-gray-700">{option}</span>
-                </label>
+              <div className="mt-4">
+                <RadioGroup
+                  onValueChange={handleOptionChange}
+                  defaultValue={selectedOption}
+                  className="flex flex-col space-y-2"
+                >
+                  {options.map((option, i) => (
+                    <div key={i} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option} id={`option-${i}`} />
+                      <label
+                        htmlFor={`option-${i}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        {option}
+                      </label>
+                    </div>
+                  ))}
+                </RadioGroup>
               </div>
-            ))}
+            </div>
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
             pathname.includes("/edit-submitted-survey")) && (
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
           {pathname === "/surveys/add-question-m" && (
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3">
               <button
                 className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
                 onClick={DeleteQuestion}
@@ -204,21 +165,19 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-3 mt-4">
-              <span className="text-gray-600">Required</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
               <Switch
                 checked={is_required}
                 onCheckedChange={
-                  setIsRequired
-                    ? (checked: boolean) => setIsRequired(checked)
-                    : undefined
+                  setIsRequired && ((checked) => setIsRequired(checked))
                 }
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
               />
             </div>
           )}
 
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end">
             {!pathname.includes("edit-survey") &&
               !pathname.includes("surveys/question") && (
                 <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">

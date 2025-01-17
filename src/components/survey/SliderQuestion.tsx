@@ -1,40 +1,15 @@
-/*
-Design explanation:
-- Added a slider icon (HiOutlineAdjustmentsHorizontal) to visually represent the question type
-- Using shadcn/ui Slider component for a more polished look with better touch support
-- Added hover effects and transitions for smoother interactions
-- Improved spacing and alignment
-- Added isEdit prop to control edit mode visibility
-- Added tooltip for better UX
-
-Visual representation:
-
-[Slider Icon] Question Text *                    [AI Button]
-|--------------------------------------------|
-min    [=========O==========================] max
-       0    1    2    3    4    5    6    7
-[Edit] [Delete]  Required [Switch]
-*/
-
-import { draggable } from "@/assets/images";
-import Image from "next/image";
-import React, { useState } from "react";
-import { usePathname } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import { stars } from "@/assets/images";
-import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { RootState } from "@/redux/store";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
-import { Check } from "lucide-react";
+import { Check, CheckCircle, GripVertical } from "lucide-react";
 import { Switch } from "../ui/switch";
-import { Slider } from "@/components/ui/slider";
-import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
+import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { Slider } from "../ui/slider";
+import { RxSlider } from "react-icons/rx";
+import ActionButtons from "./ActionButtons";
 
 interface SliderQuestionProps {
   question: string;
@@ -74,7 +49,6 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
   index,
   onChange,
   onSave,
-  canUseAI = false,
   status,
   is_required,
   setIsRequired,
@@ -84,15 +58,70 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector(
-    (state: RootState) => state?.survey?.color_theme
-  );
 
-  const dynamicMin = options && options.length > 0 ? 0 : min || 0;
+  // Extract range from question
+  const extractRange = (question: string) => {
+    // Match patterns like "1-5", "1 to 5", "one to five", etc.
+    const numberWords: { [key: string]: number } = {
+      one: 1,
+      two: 2,
+      three: 3,
+      four: 4,
+      five: 5,
+      six: 6,
+      seven: 7,
+      eight: 8,
+      nine: 9,
+      ten: 10,
+      twenty: 20,
+      thirty: 30,
+      forty: 40,
+      fifty: 50,
+      sixty: 60,
+      seventy: 70,
+      eighty: 80,
+      ninety: 90,
+      hundred: 100,
+    };
+
+    // Convert text numbers to digits
+    let processedQuestion = question.toLowerCase();
+    Object.entries(numberWords).forEach(([word, num]) => {
+      processedQuestion = processedQuestion.replace(
+        new RegExp(word, "g"),
+        num.toString()
+      );
+    });
+
+    // Try different patterns
+    const patterns = [
+      /(\d+)\s*-\s*(\d+)/, // "1-5"
+      /(\d+)\s*to\s*(\d+)/, // "1 to 5"
+      /(\d+)\s*\.\.\s*(\d+)/, // "1..5"
+      /(\d+)\s*points?\s*=.*?\/\s*(\d+)\s*points?/i, // "1 point = not important / 5 points"
+      /(\d+)\s*points?\s*=.*?(\d+)\s*points?\s*=/i, // "1 point = ... 5 points ="
+    ];
+
+    for (const pattern of patterns) {
+      const match = processedQuestion.match(pattern);
+      if (match) {
+        const [_, start, end] = match;
+        return {
+          min: parseInt(start),
+          max: parseInt(end),
+        };
+      }
+    }
+
+    return null;
+  };
+
+  const range = extractRange(question);
+  const dynamicMin = options && options.length > 0 ? 0 : range?.min || min || 0;
   const dynamicMax =
-    options && options.length > 0 ? options.length - 1 : max || 5;
-  const step =
-    options && options.length > 1 ? 1 : (dynamicMax - dynamicMin) / 5;
+    options && options.length > 0
+      ? options.length - 1
+      : range?.max || max || 10; // Default to 10 if no range specified
 
   const [sliderValue, setSliderValue] = useState<number>(value || dynamicMin);
 
@@ -107,14 +136,14 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3 transition-colors">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1.5 mr-3">
+            <Check strokeWidth={1.5} className="text-white w-4 h-4" />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-2 mr-3 transition-colors">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1.5 mr-3">
+            <BsExclamation className="text-white w-4 h-4" />
           </div>
         );
       default:
@@ -124,111 +153,120 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
 
   return (
     <div
-      className="mb-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 flex items-center w-full p-6 gap-4 rounded-lg"
+      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
       style={{
-        fontFamily: `${questionText?.name}`,
+        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >
-      {isEdit && (
-        <Image
-          src={draggable}
-          alt="draggable icon"
-          className="cursor-move hover:opacity-70 transition-opacity"
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
         />
-      )}
 
-      <div className="w-full">
-        <div className="flex items-center gap-3 mb-6">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <HiOutlineAdjustmentsHorizontal className="w-6 h-6 text-[#5B03B2]" />
-              </TooltipTrigger>
-              <TooltipContent>Slider Question</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
+                  )}
 
-          <h3 className="text-lg font-medium text-start flex-grow">
-            <div className="group flex justify-between items-center">
-              <p className="flex items-center gap-2">
-                <span className="font-bold">{index}.</span> {question}
-                {is_required && (
-                  <span className="text-2xl text-red-500">*</span>
-                )}
-              </p>
-              {canUseAI && !pathname.includes("survey-public-response") && (
-                <PollsenseiTriggerButton
-                  key={index}
-                  imageUrl={stars}
-                  tooltipText="Rephrase question"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  triggerType="rephrase"
-                  question={question}
-                  optionType={questionType}
-                  options={options || []}
-                  setEditId={setEditId}
-                  onSave={() =>
-                    onSave && onSave(question, dynamicMin, dynamicMax, index)
-                  }
-                  index={index}
+                  {!pathname.includes("survey-public-response") && isEdit && (
+                    <PollsenseiTriggerButton
+                      key={index}
+                      imageUrl={stars}
+                      tooltipText="Rephrase question"
+                      className="hidden group-hover:inline-block transition transform hover:scale-110"
+                      triggerType="rephrase"
+                      question={question}
+                      optionType={questionType}
+                      options={options}
+                      setEditId={setEditId}
+                      onSave={() =>
+                        onSave &&
+                        onSave(question, dynamicMin, dynamicMax, index)
+                      }
+                      index={index}
+                    />
+                  )}
+                </div>
+              </h3>
+
+              <div className="mt-8 px-0">
+                <Slider
+                  defaultValue={[sliderValue]}
+                  max={dynamicMax}
+                  min={dynamicMin}
+                  step={1}
+                  onValueChange={handleSliderChange}
+                  className="w-full"
                 />
-              )}
+                <div className="w-full mt-4 flex justify-between text-sm text-gray-600">
+                  {Array.from(
+                    { length: dynamicMax - dynamicMin + 1 },
+                    (_, i) => (
+                      <span key={i} className="text-center">
+                        {dynamicMin + i}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
             </div>
-          </h3>
-        </div>
-
-        <div className="space-y-6">
-          <Slider
-            value={[sliderValue]}
-            min={dynamicMin}
-            max={dynamicMax}
-            step={step}
-            onValueChange={handleSliderChange}
-            className="w-full"
-          />
-
-          <div className="flex justify-between text-sm text-gray-600">
-            {Array.from({ length: dynamicMax - dynamicMin + 1 }, (_, i) => (
-              <span key={i} className="text-center">
-                {options ? options[i] : dynamicMin + i}
-              </span>
-            ))}
           </div>
-        </div>
 
-        {isEdit && (
-          <div className="flex items-center justify-between mt-6">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Required</span>
-              <Switch
-                checked={is_required}
-                onCheckedChange={(checked) =>
-                  setIsRequired && setIsRequired(checked)
-                }
-                className="bg-[#9D50BB]"
-              />
-            </div>
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey")) && (
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
+          )}
 
-            <div className="flex gap-3">
+          {pathname === "/surveys/add-question-m" && (
+            <div className="flex justify-end gap-3">
               <button
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 border border-gray-300 rounded-full transition-colors"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="px-4 py-2 text-sm font-medium text-red-500 hover:text-red-600 border border-red-500 rounded-full transition-colors"
+                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
                 onClick={DeleteQuestion}
               >
                 Delete
               </button>
             </div>
+          )}
+
+          {pathname.includes("edit-survey") && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
+              <Switch
+                checked={is_required}
+                onCheckedChange={
+                  setIsRequired && ((checked) => setIsRequired(checked))
+                }
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            {!pathname.includes("edit-survey") &&
+              !pathname.includes("surveys/question") && (
+                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+                  <span className="flex items-center gap-1 text-xs">
+                    <RxSlider className="text-[#9D50BB] w-3 h-3" />
+                    Slider
+                  </span>
+                </p>
+              )}
           </div>
+        </div>
+
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus(status)}</div>
         )}
       </div>
-
-      {status && <div>{getStatus(status)}</div>}
     </div>
   );
 };

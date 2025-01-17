@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { stars } from "@/assets/images";
 import { useDispatch } from "react-redux";
@@ -11,7 +11,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 interface TopicSelectionModalProps {
   topics: any;
   isSelected: number | null;
-  setIsSelected: (index: number) => void;
+  setIsSelected: (index: number | null) => void;
   manualTopic: string;
   setManualTopic: (topic: string) => void;
   surveyPrompt: string;
@@ -34,6 +34,29 @@ const TopicSelectionModal: React.FC<TopicSelectionModalProps> = ({
   updateURLParams,
 }) => {
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (manualTopic && isSelected !== null) {
+      console.log(manualTopic);
+
+      setIsSelected(null);
+      dispatch(updateTopic(""));
+    }
+  }, [manualTopic]);
+
+  const handleTopicClick = (topic: string, index: number) => {
+    if (isSelected === index) {
+      setIsSelected(null);
+      dispatch(updateTopic(""));
+    } else {
+      setIsSelected(index);
+      dispatch(updateTopic(topic.toString()));
+      setManualTopic("");
+    }
+  };
+
+  const isGenerateButtonEnabled =
+    isSelected !== null || manualTopic.trim() !== "";
 
   return (
     <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -62,16 +85,13 @@ const TopicSelectionModal: React.FC<TopicSelectionModalProps> = ({
           <ScrollArea className="h-[40vh] w-full rounded-md overflow-y-auto">
             <div className="space-y-3 pr-4 pt-4">
               <AnimatePresence>
-                {topics?.data.topics.map((topic: string[], index: number) => (
+                {topics?.data.topics.map((topic: string, index: number) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    onClick={() => {
-                      dispatch(updateTopic(topic.toString()));
-                      setIsSelected(index);
-                    }}
+                    onClick={() => handleTopicClick(topic, index)}
                     className={`flex flex-col items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 relative bg-white h-full ${
                       isSelected === index
                         ? "border-[#5B03B2] bg-purple-50 shadow-lg transform scale-[1.02]"
@@ -143,13 +163,13 @@ const TopicSelectionModal: React.FC<TopicSelectionModalProps> = ({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              disabled={!surveyPrompt && !surveyType}
+              disabled={!isGenerateButtonEnabled || isLoading}
               className={`
                 group relative w-full flex items-center justify-center gap-2 
                 px-6 py-3 rounded-lg text-base font-medium
                 transition-all duration-200
                 disabled:opacity-50 disabled:cursor-not-allowed
-                ${!surveyPrompt && !surveyType ? "opacity-50" : ""}
+                ${!isGenerateButtonEnabled ? "opacity-50" : ""}
               `}
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>

@@ -14,6 +14,7 @@ import {
 import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Checkbox } from "../ui/shadcn-checkbox";
+import ActionButtons from "./ActionButtons";
 
 interface CheckboxQuestionProps {
   question: string;
@@ -104,20 +105,24 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
     >
       <div className="flex items-start gap-3">
         {pathname === "/surveys/create-survey" && (
-          <GripVertical className="w-5 h-5 text-gray-300" />
+          <GripVertical
+            className={`w-5 h-5 text-gray-400 mt-1 ${
+              pathname === "/surveys/create-survey" ? "visible" : "hidden"
+            }`}
+          />
         )}
         <div className="w-full">
-          <div className="flex justify-between items-start w-full">
-            <h3 className="text-lg font-semibold">
-              <div className="group flex justify-between gap-2 items-start">
-                <p>
-                  <span>{index}. </span> {question}
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
                   {is_required && (
-                    <span className="text-2xl ml-2 text-red-500">*</span>
+                    <span className="text-2xl text-red-500">*</span>
                   )}
-                </p>
-                {!pathname.includes("survey-public-response") &&
-                  !pathname.includes("create-survey") && (
+
+                  {!pathname.includes("survey-public-response") && isEdit && (
                     <PollsenseiTriggerButton
                       key={index}
                       imageUrl={stars}
@@ -132,45 +137,36 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
                       index={index}
                     />
                   )}
-              </div>
-            </h3>
-          </div>
+                </div>
+              </h3>
 
-          <div className="mt-4 space-y-3">
-            {options?.map((option, optionIndex) => (
-              <div key={optionIndex} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`option-${optionIndex}`}
-                  checked={selectedOptions.includes(option)}
-                  onCheckedChange={() => handleOptionChange(option)}
-                  className="border-2 data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-[#5B03B2]"
-                />
-                <label
-                  htmlFor={`option-${optionIndex}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {option}
-                </label>
+              <div className="mt-4 space-y-3">
+                {options?.map((option, optionIndex) => (
+                  <div
+                    key={optionIndex}
+                    className="flex items-center space-x-2"
+                  >
+                    <Checkbox
+                      id={`option-${optionIndex}`}
+                      checked={selectedOptions.includes(option)}
+                      onCheckedChange={() => handleOptionChange(option)}
+                      className="border data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-[#5B03B2]"
+                    />
+                    <label
+                      htmlFor={`option-${optionIndex}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {option}
+                    </label>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
             pathname.includes("/edit-submitted-survey")) && (
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
           {pathname === "/surveys/add-question-m" && (
@@ -185,16 +181,14 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-600">Required</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
               <Switch
                 checked={is_required}
                 onCheckedChange={
-                  setIsRequired
-                    ? (checked: boolean) => setIsRequired(checked)
-                    : undefined
+                  setIsRequired && ((checked) => setIsRequired(checked))
                 }
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
               />
             </div>
           )}

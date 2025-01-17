@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ActionButtons from "./ActionButtons";
 
 interface DropdownQuestionProps {
   question: string;
@@ -100,7 +101,7 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
       <div className="flex gap-4">
         <GripVertical
           className={`w-5 h-5 text-gray-400 mt-1 ${
-            pathname === "/surveys/create-survey" ? "visible" : "invisible"
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
           }`}
         />
 
@@ -155,20 +156,7 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
 
           {(pathname === "/surveys/edit-survey" ||
             pathname.includes("/edit-submitted-survey")) && (
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
           {pathname === "/surveys/add-question-m" && (
@@ -183,16 +171,14 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-600">Required</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
               <Switch
                 checked={is_required}
                 onCheckedChange={
-                  setIsRequired
-                    ? (checked: boolean) => setIsRequired(checked)
-                    : undefined
+                  setIsRequired && ((checked) => setIsRequired(checked))
                 }
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
               />
             </div>
           )}

@@ -10,7 +10,7 @@ import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { useDispatch } from "react-redux";
 import { setQuestionObject } from "@/redux/slices/questions.slice";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FaEye } from "react-icons/fa6";
 // import PaginationControls from "@/components/common/PaginationControls";
 import MatrixQuestion from "@/components/survey/MatrixQuestion";
@@ -69,12 +69,13 @@ interface GeneratedSurveyProps {
 
 const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const [questions, setQuestions] = useState(data);
   const [showDialog, setShowDialog] = useState(false);
-  const router = useRouter();
   const dispatch = useDispatch();
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
@@ -91,6 +92,26 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
   );
   const survey = useSelector((state: RootState) => state?.survey);
   const totalPages = questions.length;
+
+  useEffect(() => {
+    if (!surveyTitle || !surveyDescription || !questions) {
+      const redirectPath = userToken && user ? "/surveys" : "/demo";
+      const returnTo = searchParams.get("returnTo");
+      if (returnTo) {
+        router.push(returnTo);
+      } else {
+        router.push(redirectPath);
+      }
+    }
+  }, [
+    surveyTitle,
+    surveyDescription,
+    questions,
+    router,
+    searchParams,
+    userToken,
+    user,
+  ]);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -129,24 +150,69 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
     <div className="w-full">
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent
-          className="sm:max-w-md z-[100000]"
-          overlayClassName="z-[100000]"
+          className="sm:max-w-md md:max-w-lg z-[100000] p-6 rounded-2xl shadow-2xl"
+          overlayClassName="z-[100000] backdrop-blur-sm"
         >
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl font-semibold bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent">
-              Continue to Edit Survey
+          <DialogHeader className="space-y-4">
+            <DialogTitle className="text-center text-xl md:text-2xl font-bold bg-gradient-to-r from-[#5B03B2] via-[#7928CA] to-[#9D50BB] bg-clip-text text-transparent animate-gradient">
+              Ready to Customize Your Survey?
             </DialogTitle>
-            <DialogDescription className="text-center pt-4">
-              You're about to edit your generated survey. Click below to
-              proceed.
+            <div className="flex justify-center">
+              <motion.img
+                src="/assets/illustrations/editor.svg"
+                alt="Survey Editor Illustration"
+                className="w-48 h-48 md:w-56 md:h-56"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 10,
+                  delay: 0.2,
+                }}
+              />
+            </div>
+            <DialogDescription className="text-center md:text-base text-gray-600 leading-relaxed max-w-md mx-auto">
+              You're about to enter the survey editor where you can refine and
+              perfect every detail of your survey. Let's make something amazing
+              together!
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-center pt-8">
             <Button
               onClick={handleEdit}
-              className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-8 py-2 rounded-lg hover:opacity-90 transition-all duration-200"
+              className="group relative overflow-hidden bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-10 py-3 rounded-xl font-medium text-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
             >
-              Continue to Editor
+              <span className="relative text-base z-10 flex items-center gap-2 group-hover:tracking-wider transition-all duration-300">
+                Continue to Editor
+                <motion.svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  animate={{
+                    x: [0, 5, 0],
+                    opacity: [1, 0.7, 1],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </motion.svg>
+              </span>
+              <div className="absolute inset-0 bg-white mix-blend-overlay opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-xl" />
+              </div>
             </Button>
           </div>
         </DialogContent>
@@ -283,158 +349,139 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
             <DragDropContext onDragEnd={handleDragEnd}>
               <StrictModeDroppable droppableId="questions">
                 {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
-                    {questions[0]?.questions.map((item: any, index: any) => (
-                      <Draggable
-                        key={index + 1}
-                        draggableId={index.toString()}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="mb-4 rounded-lg"
-                          >
-                            {item.question_type === "multiple_choice" ||
-                            item.question_type === "multi_choice" ? (
-                              <MultiChoiceQuestion
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                canUseAI={true}
-                              />
-                            ) : item.question_type === "single_choice" ? (
-                              <SingleChoiceQuestion
-                                index={index + 1}
-                                key={index}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                              />
-                            ) : item.question_type === "comment" ||
-                              item.question_type === "long_text" ? (
-                              <CommentQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                              />
-                            ) : item.question_type ===
-                              "matrix_multiple_choice" ? (
-                              <MatrixQuestion
-                                key={index}
-                                index={index + 1}
-                                // options={item.options}
-                                rows={item.rows}
-                                columns={item.columns}
-                                question={item.question}
-                                questionType={item.question_type}
-                              />
-                            ) : item.question_type === "checkbox" ? (
-                              <CheckboxQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "rating_scale" ? (
-                              <RatingScaleQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "drop_down" ? (
-                              <DropdownQuestion
-                                index={index + 1}
-                                key={index}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "number" ? (
-                              <NumberQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "short_text" ? (
-                              <ShortTextQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "likert_scale" ? (
-                              <LikertScaleQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "star_rating" ? (
-                              <StarRatingQuestion
-                                question={item.question}
-                                // maxRating={5}
-                                index={index + 1}
-                                questionType={item.question_type}
-
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "boolean" ? (
-                              <BooleanQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "slider" ? (
-                              <SliderQuestion
-                                question={item.question}
-                                options={item.options}
-                                // step={item.options.length}
-                                questionType={item.question_type}
-                                index={index + 1}
-                                is_required={item.is_required}
-                              />
-                            ) : null}
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
+                  <motion.div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <AnimatePresence>
+                      {questions[0]?.questions.map((item: any, index: any) => (
+                        <Draggable
+                          key={index + 1}
+                          draggableId={index.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="mb-4 rounded-lg"
+                            >
+                              {item.question_type === "multiple_choice" ||
+                              item.question_type === "multi_choice" ? (
+                                <MultiChoiceQuestion
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  canUseAI={true}
+                                />
+                              ) : item.question_type === "single_choice" ? (
+                                <SingleChoiceQuestion
+                                  index={index + 1}
+                                  key={index}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "comment" ||
+                                item.question_type === "long_text" ? (
+                                <CommentQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type ===
+                                "matrix_multiple_choice" ? (
+                                <MatrixQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  rows={item.rows}
+                                  columns={item.columns}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "checkbox" ? (
+                                <CheckboxQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "rating_scale" ? (
+                                <RatingScaleQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "drop_down" ? (
+                                <DropdownQuestion
+                                  index={index + 1}
+                                  key={index}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "number" ? (
+                                <NumberQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "short_text" ? (
+                                <ShortTextQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "likert_scale" ? (
+                                <LikertScaleQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "star_rating" ? (
+                                <StarRatingQuestion
+                                  question={item.question}
+                                  index={index + 1}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "boolean" ? (
+                                <BooleanQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "slider" ? (
+                                <SliderQuestion
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  index={index + 1}
+                                  is_required={item.is_required}
+                                />
+                              ) : null}
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                    </AnimatePresence>
                     {provided.placeholder}
-                  </div>
+                  </motion.div>
                 )}
               </StrictModeDroppable>
             </DragDropContext>
@@ -449,10 +496,20 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                   onClick={() => setShowDialog(true)}
                   className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90"
                 >
-                  <FaEye className="text-lg transition-transform group-hover:scale-110 duration-200" />
                   <span className="group-hover:tracking-wider transition-all duration-200">
                     Continue
                   </span>
+                  <motion.div
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{
+                      duration: 1.2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="flex items-center"
+                  >
+                    <IoArrowBackOutline className="text-lg rotate-180" />
+                  </motion.div>
                   <motion.div
                     className="absolute inset-0 bg-white"
                     initial={{ scale: 0, opacity: 0 }}

@@ -146,6 +146,10 @@ const CreateSurveyPage: React.FC = () => {
 
   const handleGenerateQuestion = async () => {
     try {
+      if (manualTopic) {
+        dispatch(updateTopic(manualTopic));
+      }
+
       await createAiSurvey({
         user_query: surveyPrompt,
         survey_type: selectedSurveyType,

@@ -4,11 +4,12 @@ import { usePathname } from "next/navigation";
 import { FaStar } from "react-icons/fa";
 import { draggable, stars } from "@/assets/images";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
-import { Check, GripVertical } from "lucide-react";
+import { Check, GripVertical, Pencil, Star, Trash2 } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
 import { Switch } from "../ui/switch";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import ActionButtons from "./ActionButtons";
 
 interface StarRatingQuestionProps {
   question: string;
@@ -95,7 +96,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
       <div className="flex gap-4">
         <GripVertical
           className={`w-5 h-5 text-gray-400 mt-1 ${
-            pathname === "/surveys/create-survey" ? "visible" : "invisible"
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
           }`}
         />
 
@@ -130,16 +131,17 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 
               <div className="flex items-center gap-2 mt-4">
                 {options.map((_, idx) => (
-                  <FaStar
+                  <Star
                     key={idx}
                     size={24}
                     className={`cursor-pointer transition-all duration-300 transform hover:scale-105 ${
                       (hoveredRating !== null
                         ? hoveredRating
                         : selectedRating) > idx
-                        ? "text-amber-400"
-                        : "text-gray-200"
+                        ? "text-amber-400 fill-amber-400"
+                        : "text-[#5B03B2] stroke-[#5B03B2]"
                     }`}
+                    strokeWidth={1}
                     onMouseEnter={() => setHoveredRating(idx + 1)}
                     onMouseLeave={() => setHoveredRating(null)}
                     onClick={() => handleRate(idx + 1)}
@@ -155,33 +157,18 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 
           {(pathname === "/surveys/edit-survey" ||
             pathname.includes("/edit-submitted-survey")) && (
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-600">Required</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
               <Switch
                 checked={is_required}
                 onCheckedChange={
-                  setIsRequired
-                    ? (checked: boolean) => setIsRequired(checked)
-                    : undefined
+                  setIsRequired && ((checked) => setIsRequired(checked))
                 }
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
               />
             </div>
           )}

@@ -1,29 +1,41 @@
 /* 
 Matrix Question Component Design Explanation:
 ------------------------------------------
-This component creates a grid-based question format where users can select one answer 
-per row from multiple columns. The design was chosen because:
-
-1. It efficiently presents multiple sub-questions (rows) with the same set of possible answers (columns)
-2. The table format makes it easy to scan and compare options
-3. Radio buttons ensure only one selection per row
-4. The layout is familiar to users who have taken surveys before
+This component creates a grid-based question format where users can select one answer
+per row from multiple columns. The design follows the same pattern as other question types,
+with consistent styling and behavior.
 
 Visual representation:
 
-[Question Text]
+[Component Container - Gray bg, rounded corners, shadow on hover]
+┌──────────────────────────────────────────────────────────────┐
+│ ⋮ [Grip Handle - Only visible in create mode]                │
+│                                                              │
+│ 1. Question Text Here                                     *  │
+│    [AI Rephrase Button - Shows on hover]                     │
+│                                                              │
+│    [Matrix Table - White bg, rounded corners, light shadow]  │
+│    ┌──────────────────────────────────────────────────────┐  │
+│    │           Col 1     Col 2     Col 3     Col 4        │  │
+│    │ Row 1      ○         ○         ○         ○          │  │
+│    │ Row 2      ○         ○         ○         ○          │  │
+│    │ Row 3      ○         ○         ○         ○          │  │
+│    └──────────────────────────────────────────────────────┘  │
+│                                                              │
+│    [Edit/Delete Buttons - If in edit mode]                   │
+│    [Required Switch - If in edit mode]                       │
+│                                                              │
+│    [Question Type Badge]                                     │
+│    Matrix Question                                           │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
 
-                   Column1    Column2    Column3    Column4
-Row1 Question        O          O          O          O
-Row2 Question        O          O          O          O  
-Row3 Question        O          O          O          O
-Row4 Question        O          O          O          O
-
-Where:
-- O represents a radio button
-- Each row can only have one selection
-- The grid format allows for easy visual scanning
-- Column headers and row labels provide context
+Key Features:
+- Consistent container styling with other question types
+- Responsive grid layout
+- Clear visual hierarchy
+- Interactive elements properly positioned
+- Maintains spacing patterns from other components
 */
 
 import { draggable, stars } from "@/assets/images";
@@ -36,6 +48,7 @@ import { BsExclamation } from "react-icons/bs";
 import { Check, GripVertical, Grid, SquareMousePointer } from "lucide-react";
 import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import ActionButtons from "./ActionButtons";
 
 interface MatrixQuestionProps {
   question: string;
@@ -110,27 +123,30 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <div className="flex items-center gap-3">
-        {pathname === "/surveys/create-survey" && (
-          <Image src={draggable} alt="draggable icon" />
-        )}
-        <div className="w-full">
-          <div className="flex justify-between w-full items-center">
-            <h3 className="text-lg font-semibold text-start">
-              <div className="group flex justify-between gap-2 items-start">
-                <p>
-                  <span>{index}. </span> {question}
-                  {is_required === true && (
-                    <span className="text-2xl ml-2 text-red-500">*</span>
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
+
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
                   )}
-                </p>
-                {!pathname.includes("survey-public-response") &&
-                  !pathname.includes("create-survey") && (
+
+                  {!pathname.includes("survey-public-response") && isEdit && (
                     <PollsenseiTriggerButton
                       key={index}
                       imageUrl={stars}
                       tooltipText="Rephrase question"
-                      className={"group-hover:inline-block hidden"}
+                      className="hidden group-hover:inline-block transition transform hover:scale-110"
                       triggerType="rephrase"
                       question={question}
                       optionType={questionType}
@@ -140,72 +156,60 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                       index={index}
                     />
                   )}
-              </div>
-            </h3>
-          </div>
+                </div>
+              </h3>
 
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full border-collapse bg-white rounded-lg shadow-sm">
-              <thead>
-                <tr>
-                  <th className="border-b border-gray-200 text-start p-3"></th>
-                  {columns?.map((header, headerIndex) => (
-                    <th
-                      key={headerIndex}
-                      className="border-b border-gray-200 text-center p-3 text-gray-700 font-medium"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows?.map((rowLabel, rowIndex) => (
-                  <tr key={rowIndex} className="hover:bg-gray-50">
-                    <td className="border-b border-gray-200 text-start p-3 text-gray-700">
-                      {rowLabel}
-                    </td>
-                    {columns?.map((_, columnIndex) => (
-                      <td
-                        key={columnIndex}
-                        className="border-b border-gray-200 text-center p-3"
-                      >
-                        <input
-                          type="radio"
-                          name={`matrix-${index}-${rowIndex}`}
-                          className="w-4 h-4 text-purple-600 focus:ring-purple-500"
-                          onChange={() =>
-                            onChange && onChange(rowIndex, columnIndex)
-                          }
-                        />
-                      </td>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full border-collapse bg-white rounded-lg shadow-sm">
+                  <thead>
+                    <tr>
+                      <th className="border-b border-gray-200 text-start p-3"></th>
+                      {columns?.map((header, headerIndex) => (
+                        <th
+                          key={headerIndex}
+                          className="border-b border-gray-200 text-center p-3 text-gray-700 font-medium"
+                        >
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows?.map((rowLabel, rowIndex) => (
+                      <tr key={rowIndex} className="hover:bg-gray-50">
+                        <td className="border-b border-gray-200 text-start p-3 text-gray-700">
+                          {rowLabel}
+                        </td>
+                        {columns?.map((_, columnIndex) => (
+                          <td
+                            key={columnIndex}
+                            className="border-b border-gray-200 text-center p-3"
+                          >
+                            <input
+                              type="radio"
+                              name={`matrix-${index}-${rowIndex}`}
+                              className="w-4 h-4 text-purple-600 focus:ring-purple-500"
+                              onChange={() =>
+                                onChange && onChange(rowIndex, columnIndex)
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
             pathname.includes("/edit-submitted-survey")) && (
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
-            </div>
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
           {pathname === "/surveys/add-question-m" && (
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3">
               <button
                 className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
                 onClick={DeleteQuestion}
@@ -216,21 +220,19 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-3 mt-4">
-              <span className="text-gray-600">Required</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
               <Switch
                 checked={is_required}
                 onCheckedChange={
-                  setIsRequired
-                    ? (checked: boolean) => setIsRequired(checked)
-                    : undefined
+                  setIsRequired && ((checked) => setIsRequired(checked))
                 }
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
               />
             </div>
           )}
 
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end">
             {!pathname.includes("edit-survey") &&
               !pathname.includes("surveys/question") && (
                 <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">

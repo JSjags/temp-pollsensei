@@ -4,24 +4,30 @@ UI/UX Design Comments:
 The number input will look like:
 
 +-------------------------------------------+
-|  1. What is your preferred rating? *       |  <- Question header with required asterisk
-|  [Icon: HashIcon]                         |  <- Number icon to indicate number input
+|  [Grip]                                   |  <- Drag handle (visible on create)
+|    |                                      |
+|    1. What is your preferred rating? *    |  <- Question with required asterisk
+|    [AI Rephrase Button - Shows on hover]  |  <- AI assist button
 |                                           |
-|  +-----------------------------------+    |
-|  |  Enter a number (0-10)            |    |  <- Input field with placeholder
-|  +-----------------------------------+    |
+|    +-----------------------------------+  |
+|    |  Enter a number (0-10)            |  |  <- Number input field
+|    +-----------------------------------+  |
 |                                           |
-|  [Error message if non-numeric input]     |  <- Validation feedback
+|    [Error: Please enter valid number]     |  <- Validation message
 |                                           |
-|  [Edit] [Delete]  Required [Switch]       |  <- Action buttons & required toggle
+|    [Edit] [Delete]                        |  <- Action buttons
+|                                           |
+|    Required [Switch]                      |  <- Required toggle
+|                                           |
+|    [Number Question Badge]                |  <- Question type indicator
 +-------------------------------------------+
 
 Key Design Decisions:
-1. Using HashIcon to represent numeric input
-2. Input validation for numbers only (integers/decimals)
-3. Matching the shadcn/ui design system
-4. Clear error messaging for invalid inputs
-5. Consistent styling with other question types
+1. Consistent layout with other question types
+2. Drag handle for reordering on create survey
+3. AI rephrase button shows on hover
+4. Clear validation feedback
+5. Matches shadcn/ui design system
 */
 
 import { draggable, stars } from "@/assets/images";
@@ -31,10 +37,11 @@ import { usePathname } from "next/navigation";
 import React, { useState, SetStateAction } from "react";
 import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
-import { Check, Hash } from "lucide-react";
+import { Check, Hash, GripVertical } from "lucide-react";
 import { Switch } from "../ui/switch";
 import { Input } from "../ui/shadcn-input";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import ActionButtons from "./ActionButtons";
 
 interface NumberQuestionProps {
   question: string;
@@ -139,100 +146,106 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <div className="w-full">
-        <div className="group flex justify-between gap-2 items-start">
-          <div className="flex items-center gap-2">
-            <Hash className="w-5 h-5 text-gray-500" />
-            <h3 className="text-lg font-semibold">
-              <span>{index}. </span>
-              {question}
-              {is_required && (
-                <span className="text-2xl ml-2 text-red-500">*</span>
-              )}
-            </h3>
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
+
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
+                  )}
+
+                  {!pathname.includes("survey-public-response") && isEdit && (
+                    <PollsenseiTriggerButton
+                      key={index}
+                      imageUrl={stars}
+                      tooltipText="Rephrase question"
+                      className="hidden group-hover:inline-block transition transform hover:scale-110"
+                      triggerType="rephrase"
+                      question={question}
+                      optionType={questionType}
+                      options={options}
+                      setEditId={setEditId}
+                      onSave={onSave!}
+                      index={index}
+                    />
+                  )}
+                </div>
+              </h3>
+
+              <div className="mt-4">
+                <Input
+                  type="text"
+                  className="w-full"
+                  placeholder={
+                    min !== undefined && max !== undefined
+                      ? `Enter a number between ${min} and ${max}`
+                      : "Enter a number"
+                  }
+                  value={value}
+                  onChange={handleNumberChange}
+                  required={is_required}
+                />
+                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+              </div>
+            </div>
           </div>
 
-          {!pathname.includes("survey-public-response") && (
-            <PollsenseiTriggerButton
-              key={index}
-              imageUrl={stars}
-              tooltipText="Rephrase question"
-              className="group-hover:inline-block hidden"
-              triggerType="rephrase"
-              question={question}
-              optionType={questionType}
-              options={options}
-              setEditId={setEditId}
-              onSave={onSave!}
-              index={index}
-            />
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey")) && (
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
+
+          {pathname === "/surveys/add-question-m" && (
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
+                onClick={DeleteQuestion}
+              >
+                Delete
+              </button>
+            </div>
+          )}
+
+          {pathname.includes("edit-survey") && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
+              <Switch
+                checked={is_required}
+                onCheckedChange={
+                  setIsRequired && ((checked) => setIsRequired(checked))
+                }
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            {!pathname.includes("edit-survey") &&
+              !pathname.includes("surveys/question") && (
+                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+                  <span className="flex items-center gap-1 text-xs">
+                    <Hash className="text-[#9D50BB] w-3 h-3" />
+                    Number
+                  </span>
+                </p>
+              )}
+          </div>
         </div>
 
-        <div className="mt-4">
-          <Input
-            type="text"
-            className="w-full"
-            placeholder={
-              min !== undefined && max !== undefined
-                ? `Enter a number between ${min} and ${max}`
-                : "Enter a number"
-            }
-            value={value}
-            onChange={handleNumberChange}
-            required={is_required}
-          />
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-        </div>
-
-        {(pathname === "/surveys/edit-survey" ||
-          pathname.includes("/edit-submitted-survey")) && (
-          <div className="flex justify-end gap-3 mt-4">
-            <button
-              className="px-6 py-2 text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        {pathname === "/surveys/add-question-m" && (
-          <div className="flex justify-end gap-3 mt-4">
-            <button
-              className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        {pathname.includes("edit-survey") && (
-          <div className="flex items-center gap-3 mt-4">
-            <span className="text-gray-600">Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
-            />
-          </div>
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus(status)}</div>
         )}
       </div>
-
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
-      )}
     </div>
   );
 };
