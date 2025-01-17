@@ -15,7 +15,7 @@ export default function ResoureLayout({
   const breadcrumbs = useBreadcrumbs();
   return (
     <div className="dashboard-layout pb-16 md:pb-0">
-          <div className="px-5 md:px-20 bg-gradient-to-r from-[#5b03b2] rounded-t-md to-[#9d50bb] text-white py-5 relative">
+      <div className="px-5 md:px-20 bg-gradient-to-r from-[#5b03b2] rounded-t-md to-[#9d50bb] text-white py-5 relative">
         <div className="md:flex justify-between items-center ">
           <ol className="flex gap-4 text-white">
             {breadcrumbs.map((breadcrumb, index) => (

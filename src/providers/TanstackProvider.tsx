@@ -14,11 +14,11 @@ export const TanstackProvider = ({
       defaultOptions: {
         queries: {
           staleTime: 1000 * 60,
-          gcTime: 0,
-          refetchOnWindowFocus: false,
-          refetchOnMount: false,
-          refetchOnReconnect: false,
-          retry: 2,
+          // gcTime: 0,
+          // refetchOnWindowFocus: false,
+          // refetchOnMount: false,
+          // refetchOnReconnect: false,
+          // retry: 2,
         },
       },
     })
