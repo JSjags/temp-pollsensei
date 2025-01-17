@@ -20,7 +20,7 @@ const ArticleDetails: React.FC = () => {
     queryFn: async () => {
       const response = await getSingleTutorial(id);
       if (isValidResponse(response)) {
-        return response?.data;
+        return response;
       } else {
         handleApiErrors(response);
         return null;
@@ -28,6 +28,7 @@ const ArticleDetails: React.FC = () => {
     },
   });
 
+  console.log(data);
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white text-gray-800">
       {isLoading || isRefetching ? (

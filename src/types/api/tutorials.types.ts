@@ -25,6 +25,4 @@ export interface ITutorial {
 export type GetTutorials = GenericPaginatedResponse<ITutorial> &
   GenericApiResponse;
 
-export interface GetSingleTutorial extends GenericApiResponse {
-  data: ITutorial;
-}
+export type GetSingleTutorial = GenericApiResponse & ITutorial;

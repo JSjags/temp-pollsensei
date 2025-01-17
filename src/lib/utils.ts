@@ -117,6 +117,7 @@ export const handleApiErrors = (response: any) => {
 };
 
 export const isValidResponse = (response: any) => {
+  console.log(response);
   if (response?.success || response?.data?.success) {
     return true;
   }
