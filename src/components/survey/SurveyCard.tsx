@@ -320,7 +320,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
             )}
           </div>
           <div>
-            {userRoles.some((role) =>
+            {status === "On going" && (userRoles.some((role) =>
               ["Admin", "Data Editor"].includes(role)
             ) && (
               <Switch
@@ -328,7 +328,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                 checked={status === "On going" && true}
                 onCheckedChange={() => handleSetToggle("Close")}
               />
-            )}
+            ))}
           </div>
         </div>
       </div>
@@ -343,6 +343,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                   op.toLowerCase() === "delete"
                     ? "text-[#FF3E3E]"
                     : "text-[#333333]"
+                } ${
+                   status === "Closed" && (
+                    op.toLowerCase() === "close survey" 
+                    ? "hidden"
+                    : "text-[#333333]"
+                   )
                 } text-[14px] sm:text-[16px] cursor-pointer mb-2 sm:mb-3`}
               >
                 {op}

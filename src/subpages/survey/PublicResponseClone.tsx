@@ -463,14 +463,17 @@ const PublicResponse = () => {
                                     })
                                   }
                                 />
-                              <ResponseFile
-                                question={quest.question}
-                                handleAnswerChange={handleAnswerChange}
-                                selectedValue={
-                                  answers[quest.question]?.media_url || ""
+                                {
+                                  quest.can_accept_media &&   <ResponseFile
+                                  question={quest.question}
+                                  handleAnswerChange={handleAnswerChange}
+                                  selectedValue={
+                                    answers[quest.question]?.media_url || ""
+                                  }
+                                  required={quest.is_required}
+                                />
                                 }
-                                required={quest.is_required}
-                              />
+                            
                             </div>
                             );
                           case "short_text":
