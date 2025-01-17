@@ -1,9 +1,20 @@
 import React, { useState } from "react";
-
 import { toast } from "react-toastify";
-
 import { useCreateReviewMutation } from "@/services/superadmin.service";
 import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { Input } from "../ui/shadcn-input";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Label } from "../ui/label";
 
 interface SubscribeProps {
   onClose: () => void;
@@ -17,40 +28,88 @@ interface Question {
   question_type: "single_choice" | "short_text" | "likert_scale";
 }
 
+const ReviewModal: React.FC<SubscribeProps> = ({
+  onClose,
+  survey_id,
+  openModal,
+}) => {
+  const [answers, setAnswers] = useState<{
+    [key: string]: {
+      selected_options?: string[];
+      scale_value?: string;
+      text?: string;
+    };
+  }>({});
+  const router = useRouter();
 
-
-
-const ReviewModal: React.FC<SubscribeProps> = ({ onClose, survey_id, openModal }) => {
-  const [answers, setAnswers] = useState<{     [key: string]: { selected_options?: string[]; scale_value?: string; text?: string }; }>({});
-  const router = useRouter()
   const questions: Question[] = [
     {
-      question: "Which better best describes you?",
+      question: "Which best describes you?",
       question_type: "single_choice",
-      options: ["Business", "Marketing / Sales", "Student", "Academic", "Government / NGO"],
+      options: [
+        "Business",
+        "Marketing / Sales",
+        "Student",
+        "Academic",
+        "Government / NGO",
+      ],
     },
     {
       question: "What improvement do you suggest for PollSensei?",
       question_type: "short_text",
     },
     {
-      question: "How satisfied are you with your overall experience on PollSensei?",
+      question:
+        "How satisfied are you with your overall experience on PollSensei?",
       question_type: "single_choice",
-      options: ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
+      options: [
+        "Very satisfied",
+        "Satisfied",
+        "Neutral",
+        "Dissatisfied",
+        "Very Dissatisfied",
+      ],
     },
   ];
 
   const handleAnswerChange = (key: string, value: any, type: string) => {
     setAnswers((prev) => ({
       ...prev,
-      [key]: type === "short_text" ? { text: value } : type === "likert_scale" ? { scale_value: value } : { selected_options: [value] },
+      [key]:
+        type === "short_text"
+          ? { text: value }
+          : type === "likert_scale"
+          ? { scale_value: value }
+          : { selected_options: [value] },
     }));
   };
 
-  const handleSubmit =async (e: React.FormEvent) => {
+  const isFormValid = () => {
+    return questions.every((question) => {
+      const answer = answers[question.question];
+      if (!answer) return false;
+
+      if (question.question_type === "short_text") {
+        return answer.text && answer.text.trim().length > 0;
+      } else if (question.question_type === "likert_scale") {
+        return answer.scale_value && answer.scale_value.length > 0;
+      } else if (question.question_type === "single_choice") {
+        return answer.selected_options && answer.selected_options.length > 0;
+      }
+      return false;
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const reviews = questions.map((question) => ({
-      question: question.question,
+
+    if (!isFormValid()) {
+      toast.error("Please answer all questions before submitting");
+      return;
+    }
+
+    const reviews = questions.map((question, index) => ({
+      question: index === 0 ? "Which best describes you?" : question.question,
       question_type: question.question_type,
       ...answers[question.question],
     }));
@@ -60,114 +119,182 @@ const ReviewModal: React.FC<SubscribeProps> = ({ onClose, survey_id, openModal }
       reviews,
     };
 
-    console.log(payload)
     try {
       await createReview(payload).unwrap();
-      toast.success(
-        "Your review is noted"
-      );
-      console.log("Your review is noted");
+      toast.success("Your review has been noted");
+      router.push("/surveys/survey-list");
     } catch (err: any) {
       toast.error(
         "Failed to register review " + (err?.data?.message || err.message)
       );
-      console.error("Failed to submit review", err);
     }
-      router.push("/surveys/survey-list");
   };
 
-  const [createReview,{ data, isLoading, isSuccess}] = useCreateReviewMutation()
-
-
-
+  const [createReview, { isLoading }] = useCreateReviewMutation();
 
   return (
- 
-      <div className="fixed inset-0 py-32 flex items-center justify-center bg-black bg-opacity-50" style={{zIndex:"999999px"}}>
-        <div className="bg-white rounded-lg mt-16 p-8 w-[80%] lg:w-[50%] relative overflow-y-auto">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute text-4xl top-4 right-4 text-gray-400 hover:text-gray-600"
+    <AlertDialog open={openModal} onOpenChange={onClose}>
+      <AlertDialogContent
+        className="max-w-[800px] max-h-[80vh] overflow-y-auto z-[100000]"
+        overlayClassName="z-[100000]"
+      >
+        <AlertDialogHeader>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center gap-4"
           >
-            &times;
-          </button>
+            <AlertDialogTitle className="text-2xl font-bold bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent">
+              Help Us Serve You Better
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 text-center">
+              Take a minute to complete this survey to improve your experience
+            </AlertDialogDescription>
+          </motion.div>
+        </AlertDialogHeader>
 
-          <div className="flex flex-col items-center gap-2">
-          <h2 className="font-medium text-2xl text-center">
-                Help Us Serve You Better
-                </h2>
-                <p className="text-[#838383] font-normal text-center">
-                  Take a minute survey
+        <form onSubmit={handleSubmit} className="space-y-8 mt-6">
+          <AnimatePresence>
+            {questions?.map((question, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="space-y-4 p-4 rounded-lg bg-gray-50"
+              >
+                <p className="font-medium text-gray-800">
+                  <span className="text-[#5B03B2]">{index + 1}. </span>
+                  {question.question}
+                  <span className="text-red-500 ml-1">*</span>
                 </p>
-          <form onSubmit={handleSubmit} className="space-y-6">
-          {questions?.map((question, index) => (
-            <div key={index} className="space-y-2 py-3">
-              <p className="font-medium">
-                <span>{index + 1}. </span>
-                {question.question}
-              </p>
-              {question.question_type === "single_choice" && question.options && (
-                <div className="space-y-1">
-                  {question.options.map((option) => (
-                    <label key={option} className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name={question.question}
-                        value={option}
-                        className="cursor-pointer"
-                        onChange={(e) =>
-                          handleAnswerChange(question.question, e.target.value, question.question_type)
-                        }
-                      />
-                      <span>{option}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-              {question.question_type === "short_text" && (
-                <input
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Type your answer here..."
-                  onChange={(e) => handleAnswerChange(question.question, e.target.value, question.question_type)}
-                />
-              )}
-              {question.question_type === "likert_scale" && question.options && (
-                <div className="flex items-center justify-between space-x-2">
-                  {question.options.map((option) => (
-                    <label key={option} className="flex flex-col items-center">
-                      <input
-                        type="radio"
-                        name={question.question}
-                        value={option}
-                        className="cursor-pointer"
-                        onChange={(e) =>
-                          handleAnswerChange(question.question, e.target.value, question.question_type)
-                        }
-                      />
-                      <span>{option}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+                {question.question_type === "single_choice" &&
+                  question.options && (
+                    <RadioGroup
+                      value={
+                        answers[question.question]?.selected_options?.[0] || ""
+                      }
+                      onValueChange={(value) =>
+                        handleAnswerChange(
+                          question.question,
+                          value,
+                          question.question_type
+                        )
+                      }
+                      required
+                    >
+                      {question.options.map((option) => (
+                        <div
+                          key={option}
+                          className="flex items-center space-x-2 mb-3"
+                        >
+                          <RadioGroupItem value={option} id={option} />
+                          <Label htmlFor={option} className="text-gray-700">
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  )}
+                {question.question_type === "short_text" && (
+                  <Input
+                    type="text"
+                    className="w-full"
+                    placeholder="Type your answer here..."
+                    value={answers[question.question]?.text || ""}
+                    onChange={(e) =>
+                      handleAnswerChange(
+                        question.question,
+                        e.target.value,
+                        question.question_type
+                      )
+                    }
+                    required
+                  />
+                )}
+                {question.question_type === "likert_scale" &&
+                  question.options && (
+                    <RadioGroup
+                      className="flex items-center justify-between space-x-4"
+                      value={answers[question.question]?.scale_value || ""}
+                      onValueChange={(value) =>
+                        handleAnswerChange(
+                          question.question,
+                          value,
+                          question.question_type
+                        )
+                      }
+                      required
+                    >
+                      {question.options.map((option) => (
+                        <div
+                          key={option}
+                          className="flex flex-col items-center space-y-2"
+                        >
+                          <RadioGroupItem
+                            value={option}
+                            id={`${question.question}-${option}`}
+                            className="text-[#5B03B2]"
+                          />
+                          <Label
+                            htmlFor={`${question.question}-${option}`}
+                            className="text-sm text-gray-600"
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
-        <button
-          type="submit"
-          className="w-full py-2 auth-btn justify-center mt-4"
-        >
-          {isLoading ? "Submitting..." : "Submit"}
-        </button>
-      </form>
-
-      </div>
-        </div>
-      </div>
+          <Button
+            type="submit"
+            className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 w-full"
+            disabled={isLoading || !isFormValid()}
+          >
+            <span className="group-hover:tracking-wider transition-all duration-200">
+              {isLoading ? "Submitting" : "Submit Review"}
+            </span>
+            {!isLoading && (
+              <motion.div
+                animate={{ x: [0, 5, 0] }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="flex items-center"
+              >
+                <ArrowRight className="h-4 w-4" />
+              </motion.div>
+            )}
+            {isLoading && (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="flex items-center"
+              >
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </motion.div>
+            )}
+            <motion.div
+              className="absolute inset-0 bg-white"
+              initial={{ scale: 0, opacity: 0 }}
+              whileHover={{ scale: 1, opacity: 0.1 }}
+              transition={{ duration: 0.2 }}
+            />
+          </Button>
+        </form>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
 export default ReviewModal;
-
-

@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import store from "@/redux/store";
 
 interface SurveyTypeSelectionProps {
   selectedDiv: number | null;
@@ -66,7 +67,7 @@ const SurveyTypeSelection: React.FC<SurveyTypeSelectionProps> = ({
       ? surveyTypes.filter((type) => type !== surveyType)
       : [...surveyTypes, surveyType];
 
-    dispatch(updateSurveyType(updatedTypes.join(",")));
+    dispatch(updateSurveyType(surveyType));
     updateURLParams({
       whatDoYouWant: "false",
       oneMoreThing: "false",
@@ -81,6 +82,8 @@ const SurveyTypeSelection: React.FC<SurveyTypeSelectionProps> = ({
   const isSelected = (type: string) => {
     return surveyTypes.includes(type);
   };
+
+  console.log(store.getState().survey);
 
   return (
     <AnimatePresence mode="wait">

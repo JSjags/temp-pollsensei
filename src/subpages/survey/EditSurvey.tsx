@@ -62,6 +62,9 @@ import {
   handleRequiredToggle,
   processNewSurveyQuestions,
 } from "@/utils/surveyUtils";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/shadcn-input";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -345,11 +348,10 @@ const EditSurvey = () => {
     }
 
     try {
-      console.log(store.getState().survey);
-      // const updatedSurvey = store.getState().survey;
-      // await createSurvey(updatedSurvey).unwrap();
-      // setSurvey_id(createdSurveyData.data._id);
-      // setReview(true);
+      const updatedSurvey = store.getState().survey;
+      await createSurvey(updatedSurvey).unwrap();
+      setSurvey_id(createdSurveyData.data._id);
+      setReview(true);
     } catch (e) {
       console.log(e);
     }
@@ -440,8 +442,9 @@ const EditSurvey = () => {
 
               <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
                 <div className="flex gap-2 items-center">
-                  <button
-                    className="bg-white rounded-full px-5 py-1"
+                  <Button
+                    variant="outline"
+                    className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
                     onClick={() => setAddMoreQuestion((prev) => !prev)}
                     disabled={generatingSingleSurvey}
                   >
@@ -449,11 +452,14 @@ const EditSurvey = () => {
                       <ClipLoader size={24} />
                     ) : (
                       <>
-                        <HiOutlinePlus className="inline-block mr-2" /> Add
-                        Question
+                        <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                        <span className="group-hover:tracking-wide transition-all duration-200">
+                          Add Question
+                        </span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
                       </>
                     )}
-                  </button>
+                  </Button>
                   {/* <div className="bg-white rounded-full px-5 py-1" 
               // onClick={handleNewSection}
               >
@@ -489,14 +495,54 @@ const EditSurvey = () => {
                 />
               )} */}
 
-              <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
-                <button
-                  className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-                  type="button"
-                  onClick={handleSurveyCreation}
+              <div className="rounded-md flex flex-col justify-center w-full md:w-[16rem] overflow-visible py-5 text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
                 >
-                  {isLoading ? "Submitting" : "Continue"}
-                </button>
+                  <Button
+                    onClick={handleSurveyCreation}
+                    className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 w-full"
+                    disabled={isLoading}
+                  >
+                    <span className="group-hover:tracking-wider transition-all duration-200">
+                      {isLoading ? "Submitting" : "Continue"}
+                    </span>
+                    {!isLoading && (
+                      <motion.div
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{
+                          duration: 1.2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                        className="flex items-center"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.div>
+                    )}
+                    {isLoading && (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="flex items-center"
+                      >
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      </motion.div>
+                    )}
+                    <motion.div
+                      className="absolute inset-0 bg-white"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileHover={{ scale: 1, opacity: 0.1 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  </Button>
+                </motion.div>
               </div>
               <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
                 <div className="flex flex-col">
@@ -519,38 +565,73 @@ const EditSurvey = () => {
         </div>
       </div>
 
-      <ModalComponent
-        title="How many more question would you like the Sensei to add?"
-        openModal={addMoreQuestion}
-        // onClose={() => setAddMoreQuestion((prev)=> !prev)}
+      <Dialog
+        open={addMoreQuestion}
+        onOpenChange={() => setAddMoreQuestion(false)}
       >
-        <div className="flex flex-col w-full gap-4 px-4">
-          <label>Enter a number between 1 and 5</label>
-          <input
-            type="number"
-            min="1"
-            max="5"
-            placeholder="Enter a number between 1 and 5"
-            className="w-full py-1 px-2 my-1"
-            onChange={(e) => setQuestionCount(Number(e.target.value))}
-          />
-
-          <button
-            className={`w-full border py-2 rounded ${
-              question_count >= 1 && question_count <= 5
-                ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-                : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
-            disabled={!(question_count >= 1 && question_count <= 5)}
-            onClick={() => {
-              setAddMoreQuestion((prev) => !prev);
-              handleGenerateSingleQuestion();
-            }}
+        <DialogContent
+          className="sm:max-w-md z-[100000]"
+          overlayClassName="z-[100000]"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            Add
-          </button>
-        </div>
-      </ModalComponent>
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-center">
+                Let the Sensei assist you
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                How many additional questions would you like the AI Sensei to
+                generate for your survey?
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex flex-col space-y-6 py-6">
+              <div className="space-y-2">
+                <Label htmlFor="question-count">Number of questions</Label>
+                <Input
+                  id="question-count"
+                  type="number"
+                  min={1}
+                  max={5}
+                  placeholder="Enter a number (1-5)"
+                  className="w-full"
+                  onChange={(e) => setQuestionCount(Number(e.target.value))}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Choose between 1 to 5 questions
+                </p>
+              </div>
+
+              <Button
+                disabled={!(question_count >= 1 && question_count <= 5)}
+                onClick={() => {
+                  setAddMoreQuestion(false);
+                  handleGenerateSingleQuestion();
+                }}
+                className="w-full group relative overflow-hidden"
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                  initial={false}
+                  animate={{
+                    scale:
+                      question_count >= 1 && question_count <= 5
+                        ? [1, 1.1, 1]
+                        : 1,
+                  }}
+                  transition={{ duration: 0.6, repeat: Infinity }}
+                />
+                <span className="relative z-10 group-hover:tracking-wider transition-all duration-200">
+                  Generate Questions
+                </span>
+              </Button>
+            </div>
+          </motion.div>
+        </DialogContent>
+      </Dialog>
 
       {/* Sensei Master */}
       <AnimatePresence>

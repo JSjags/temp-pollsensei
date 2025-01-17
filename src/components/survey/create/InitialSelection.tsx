@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { saveGeneratedBy, updateSurveyType } from "@/redux/slices/survey.slice";
 import { motion, AnimatePresence } from "framer-motion";
+import store from "@/redux/store";
 
 interface InitialSelectionProps {
   selectedDiv: string | null;

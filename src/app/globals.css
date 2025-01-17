@@ -552,3 +552,13 @@ input[type="radio"].radio:checked:before {
 .font-merriweather {
   font-family: var(--font-merriweather);
 }
+
+/* React toastify */
+
+.toastBody {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+.toastProgress {
+  background: #333f48 !important;
+  height: 2px !important;
+}
