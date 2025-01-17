@@ -19,6 +19,11 @@ import {
 } from "@/components/ui/select";
 import { useLazySurveyTypeDistributionQuery } from "@/services/superadmin.service";
 
+interface SurveyTypeItem {
+  type: string;
+  percentage: number;
+}
+
 export function SurveyTypeChart() {
   const [month, setMonth] = React.useState("January");
   const [year, setYear] = React.useState("2024");
@@ -26,7 +31,7 @@ export function SurveyTypeChart() {
     useLazySurveyTypeDistributionQuery();
 
   const chartData = React.useMemo(() => {
-    return data?.data?.map((item: any) => ({
+    return data?.data?.map((item: SurveyTypeItem) => ({
       name: item.type,
       value: item.percentage,
       fill: `var(--color-${item.type.toLowerCase()})`,
@@ -41,7 +46,7 @@ export function SurveyTypeChart() {
 
   const [activeIndex, setActiveIndex] = React.useState(0);
 
-  const handlePieEnter = (_, index) => {
+  const handlePieEnter = (_: any, index: number) => {
     setActiveIndex(index);
   };
 
@@ -85,7 +90,11 @@ export function SurveyTypeChart() {
           </SelectTrigger>
           <SelectContent align="end" className="rounded-xl">
             {[2023, 2024, 2025].map((key) => (
-              <SelectItem key={key} value={key} className="rounded-lg">
+              <SelectItem
+                key={key}
+                value={key.toString()}
+                className="rounded-lg"
+              >
                 {key}
               </SelectItem>
             ))}
@@ -102,7 +111,8 @@ export function SurveyTypeChart() {
             outerRadius={80}
             activeIndex={activeIndex}
             onMouseEnter={handlePieEnter}
-            activeShape={(props) => (
+
+            activeShape={(props: any) => (
               <Sector {...props} outerRadius={props.outerRadius + 10} />
             )}
           >
