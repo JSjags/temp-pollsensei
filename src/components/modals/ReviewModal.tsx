@@ -25,7 +25,7 @@ const ReviewModal: React.FC<SubscribeProps> = ({ onClose, survey_id, openModal }
   const router = useRouter()
   const questions: Question[] = [
     {
-      question: "Which better best describes you?",
+      question: "Which best describes you?",
       question_type: "single_choice",
       options: ["Business", "Marketing / Sales", "Student", "Academic", "Government / NGO"],
     },
