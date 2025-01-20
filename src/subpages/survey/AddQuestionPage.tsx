@@ -464,6 +464,7 @@ const AddQuestionPage = () => {
                                 question={item.question}
                                 questionType={item.question_type}
                                 EditQuestion={() => EditQuestion(index)}
+                                
                               />
                             ) : item.question_type === "media" ? (
                               <MediaQuestion
@@ -558,7 +559,8 @@ const AddQuestionPage = () => {
                 min,
                 max,
                 rows,
-                columns
+                columns,
+                can_accept_media
               ) => {
                 if (questionType === "number") {
                   const newQuestion = {
@@ -580,6 +582,17 @@ const AddQuestionPage = () => {
                     is_required: is_required,
                     rows: rows,
                     columns: columns,
+                  };
+                  console.log(newQuestion);
+                  dispatch(addQuestion(newQuestion));
+                  setAddQuestions((prev) => !prev);
+                }else if(questionType === "long_text") {
+                  const newQuestion = {
+                    question: question,
+                    question_type: questionType,
+                    options: options,
+                    is_required: is_required,
+                    can_accept_media: can_accept_media,
                   };
                   console.log(newQuestion);
                   dispatch(addQuestion(newQuestion));
@@ -643,7 +656,7 @@ const AddQuestionPage = () => {
                 Publish Survey
               </button>
             </div>
-            {survey.sections.length > 0 && <div>Pagination</div>}
+            {survey.sections.length > 0 && <div>{survey?.sections?.length + 1}</div>}
           </div>
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
@@ -686,7 +699,7 @@ const AddQuestionPage = () => {
               </DialogTitle>
               <DialogDescription className="text-gray-600">
                 To continue creating your survey and access all features, please
-                log in to your account or sign up if you're new here.
+                log in to your account or sign up if you&apos;re new here.
               </DialogDescription>
             </div>
           </DialogHeader>

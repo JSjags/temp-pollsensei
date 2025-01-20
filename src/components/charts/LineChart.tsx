@@ -124,7 +124,7 @@ const LineChart: React.FC<LineChartProps> = ({ data, xKey, yKey }) => {
     yaxis: {
       tickAmount: 5,
       labels: {
-        formatter: (value: number) => `${value}k`,
+        formatter: (value: number) => `${value}`,
         style: {
           fontSize: "12px",
           fontFamily: "Inter",

@@ -22,6 +22,8 @@ interface ComponentQuestionProps {
   index: number;
   status?: string;
   is_required?: boolean;
+  can_accept_media?: boolean;
+  setCanAcceptMedia?: (value: boolean) => void;
   setIsRequired?: (value: boolean) => void;
   setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   options?: string[] | undefined;
@@ -40,7 +42,8 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   DeleteQuestion,
   index,
   response,
-
+  can_accept_media,
+  setCanAcceptMedia,
   options,
   onChange,
   status,
@@ -190,6 +193,20 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
               onCheckedChange={
                 setIsRequired
                   ? (checked: boolean) => setIsRequired(checked)
+                  : undefined
+              }
+              className="bg-[#9D50BB] "
+            />
+          </div>
+        )}
+        {pathname.includes("edit-survey") && (
+          <div className="flex items-center gap-4">
+            <span>Allow Audio</span>
+            <Switch
+              checked={can_accept_media}
+              onCheckedChange={
+                setCanAcceptMedia
+                  ? (checked: boolean) => setCanAcceptMedia(checked)
                   : undefined
               }
               className="bg-[#9D50BB] "

@@ -151,11 +151,17 @@ const ResponseFile = ({
   handleAnswerChange,
   selectedValue,
   required,
+  isDisabled, 
+  onFocus,
+  onBlur,
 }: {
   question: string;
   handleAnswerChange: (key: string, value: any) => void;
   selectedValue: string;
   required: boolean;
+  isDisabled?: boolean; 
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isAudio, setIsAudio] = useState(true);
@@ -165,32 +171,18 @@ const ResponseFile = ({
   const audioChunksRef = useRef<Blob[]>([]);
   const [uploadResponseFile] = useUploadResponseFileMutation();
 
-  // Start Recording
-  // const handleStartRecording = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  //     const mediaRecorder = new MediaRecorder(stream);
-  //     mediaRecorderRef.current = mediaRecorder;
-
-  //     mediaRecorder.ondataavailable = (event) => {
-  //       audioChunksRef.current.push(event.data);
-  //     };
-
-  //     mediaRecorder.onstop = async () => {
-  //       const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-  //       setAudioURL(URL.createObjectURL(audioBlob));
-  //       await uploadFile(audioBlob);
-  //       audioChunksRef.current = [];
-  //     };
-
-  //     mediaRecorder.start();
-  //     setIsRecording(true);
-  //   } catch (error) {
-  //     toast.error("Microphone access denied or not available.");
-  //   }
-  // };
+  const handleDisables =()=>{
+    if(isDisabled){
+      toast.warning("Textarea is active or already has a value.");
+      return;
+    }
+  }
 
   const handleStartRecording = async () => {
+    if(isDisabled){
+      toast.warning("Textarea is active or already has a value.");
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
@@ -227,6 +219,10 @@ const ResponseFile = ({
 
   // Stop Recording
   const handleStopRecording = () => {
+    if(isDisabled){
+      toast.warning("You text input has been saved already.");
+      return;
+    }
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
@@ -277,8 +273,17 @@ const ResponseFile = ({
         {!isRecording ? (
           <button
             type="button"
-            onClick={handleStartRecording}
-            className="px-4 py-2 rounded-lg text-sm font-semibold bg-purple-600 text-white"
+            // onClick={handleStartRecording}
+            // className={`px-4 py-2 rounded-lg text-sm font-semibold ${isDisabled ? "bg-gray-600" : "bg-purple-600"}  text-white`}
+            onClick={()=>{
+              isDisabled ? handleDisables() : handleStartRecording()
+              }} 
+            className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+              isDisabled ? "bg-gray-600 cursor-not-allowed" : "bg-purple-600"
+            } text-white`}
+            disabled={isDisabled} 
+            onFocus={onFocus}
+            onBlur={onBlur}
           >
             <AiOutlineAudio className="inline-block mr-2" />
             Record
@@ -288,6 +293,9 @@ const ResponseFile = ({
             type="button"
             onClick={handleStopRecording}
             className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white"
+            disabled={isDisabled}
+            onFocus={onFocus}
+            onBlur={onBlur}
           >
             Stop Recording
           </button>

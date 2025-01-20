@@ -565,10 +565,10 @@ const UnAuthCreateSurveyPage = () => {
         <div className="flex flex-col justify-center items-center gap-10 ">
           <div>
             <h1 className="text-2xl mt-10 md:mt-10 font-normal">
-              Write a prompt. we’ll do the rest for you
+              Write a prompt. We’ll do the rest for you.
             </h1>
             <p className="text-lg">
-              Tell us the survey you want to make? We will create it for you
+              Tell us the survey you want to make? We will create it for you.
             </p>
           </div>
 
@@ -616,9 +616,9 @@ const UnAuthCreateSurveyPage = () => {
 
           <div className="flex flex-col justify-center items-center gap-10 ">
             <div>
-              <h1 className="text-lg mt-10">Try any of our Sample prompts.</h1>
+              <h1 className="text-lg mt-10">Try any of our sample prompts.</h1>
               <p className="text-sm">
-                Select one of our Pre-generated AI surveys
+                Select one of our pre-generated AI surveys.
               </p>
             </div>
 
