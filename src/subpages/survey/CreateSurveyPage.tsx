@@ -616,9 +616,9 @@ const CreateSurveyPage = () => {
 
           <div className="flex flex-col justify-center items-center gap-10 ">
             <div>
-              <h1 className="text-lg mt-10">Try any of our Sample prompts.</h1>
+              <h1 className="text-lg mt-10">Try any of our sample prompts.</h1>
               <p className="text-sm">
-                Select one of our Pre-generated AI surveys
+                Select one of our pre-generated AI surveys.
               </p>
             </div>
 

@@ -25,7 +25,7 @@ const ReviewModal: React.FC<SubscribeProps> = ({ onClose, survey_id, openModal }
   const router = useRouter()
   const questions: Question[] = [
     {
-      question: "Which better best describes you?",
+      question: "Which best describes you?",
       question_type: "single_choice",
       options: ["Business", "Marketing / Sales", "Student", "Academic", "Government / NGO"],
     },
@@ -83,12 +83,12 @@ const ReviewModal: React.FC<SubscribeProps> = ({ onClose, survey_id, openModal }
 
   return (
  
-      <div className="fixed inset-0 py-32 flex items-center justify-center bg-black bg-opacity-50" style={{zIndex:"999999px"}}>
-        <div className="bg-white rounded-lg mt-16 p-8 w-[80%] lg:w-[50%] relative overflow-y-auto">
+      <div className="fixed inset-0 py-32 flex rounded-lg items-center justify-center z-50 bg-black bg-opacity-50" style={{zIndex:"999999px"}}>
+        <div className="bg-white rounded-lg mt-16 p-8 w-[80%] lg:w-[50%] relative h-[80vh] custom-scrollbar overflow-y-auto">
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute text-4xl top-4 right-4 text-gray-400 hover:text-gray-600"
+            className="absolute text-4xl top- right-4 text-gray-400 hover:text-gray-600"
           >
             &times;
           </button>

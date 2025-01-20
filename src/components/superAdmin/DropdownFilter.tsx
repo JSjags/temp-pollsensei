@@ -78,7 +78,7 @@ const DropdownFilter: React.FC<DropdownFilterProps> = ({
           <h3 className="text-lg font-medium">{title} Type</h3>
         </div>
         <div className="flex flex-wrap gap-2 mb-4">
-          {options.map((option) => (
+          {options?.map((option) => (
             <button
               key={option.value}
               className={`py-1 px-4 border rounded-full ${

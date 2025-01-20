@@ -31,7 +31,7 @@ const UserReview: React.FC = () => {
 
   const questions: Question[] = reviewQuestion?.data || [
     {
-      question: "Which better best describes you?",
+      question: "Which best describes you?",
       question_type: "single_choice",
       options: ["Business", "Marketing / Sales", "Student", "Academic", "Government / NGO"],
     },

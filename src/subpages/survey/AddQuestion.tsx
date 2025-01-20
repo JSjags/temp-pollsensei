@@ -12,7 +12,8 @@ interface AddQuestionProps {
     min?: number,
     max?: number,
     rows?: string[],
-    columns?: string[]
+    columns?: string[],
+    can_accept_media?: boolean,
   ) => void;
   onCancel?: () => void;
 }
@@ -38,6 +39,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [questionType, setQuestionType] = useState<string>("multiple_choice");
   const [options, setOptions] = useState<string[] | any>([""]);
   const [is_required, setIsRequired] = useState<boolean>(true);
+  const [can_accept_media, setCanAcceptMedia] = useState<boolean>(true);
   const [min, setMin] = useState<number | undefined>(undefined);
   const [max, setMax] = useState<number | undefined>(undefined);
   const [rows, setRows] = useState<string[]>([]);
@@ -69,7 +71,8 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
         min,
         max,
         questionType === "matrix_checkbox" ? rows : undefined,
-        questionType === "matrix_checkbox" ? columns : undefined
+        questionType === "matrix_checkbox" ? columns : undefined,
+        can_accept_media,
       );
     }
   };
@@ -372,6 +375,17 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
             </div>
           </div>
         )}
+
+        { questionType === "long_text" &&
+          <div className="flex items-center gap-4">
+          <span>Allow Audio Response</span>
+          <Switch
+            checked={can_accept_media}
+            onCheckedChange={() => setCanAcceptMedia((prev) => !prev)}
+            className="bg-[#9D50BB]"
+          />
+        </div>
+        }
 
         <div className="flex justify-between items-center gap-4 mt-4">
           <div className="flex justify-between items-center gap-4">
