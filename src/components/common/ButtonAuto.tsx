@@ -9,7 +9,7 @@ const ButtonAuto: React.FC<ButtonAutoProps> = ({ label, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-center text-white text-[16px] rounded-[6px] px-[24px] py-[16px] h-[40px] bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
+      className="flex items-center justify-center text-white text-base rounded-lg px-[24px] h-10 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
     >
       {label}
     </button>

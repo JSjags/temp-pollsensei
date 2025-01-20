@@ -27,7 +27,8 @@ import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import SliderQuestion from "@/components/survey/SliderQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import { toast } from "react-toastify";
-
+import { motion } from "framer-motion";
+import WatermarkBanner from "@/components/common/WatermarkBanner";
 
 interface Question {
   question: string;
@@ -62,7 +63,8 @@ const EditSubmittedSurvey = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [isEditHeader, setIsEditHeader] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [editSurvey, { isSuccess, isError, error, isLoading:isEditLoading }] = useEditSurveyMutation();
+  const [editSurvey, { isSuccess, isError, error, isLoading: isEditLoading }] =
+    useEditSurveyMutation();
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [currentSection, setCurrentSection] = useState(0);
 
@@ -98,11 +100,11 @@ const EditSubmittedSurvey = () => {
   //   setSurveyData((prevData) => {
   //     // Clone sections
   //     const updatedSections = [...prevData.sections];
-  
+
   //     // Check if currentSection and questionIndex are valid
   //     const currentQuestions =
   //       updatedSections[currentSection]?.questions || [];
-  
+
   //     if (
   //       Array.isArray(currentQuestions) &&
   //       questionIndex >= 0 &&
@@ -117,11 +119,11 @@ const EditSubmittedSurvey = () => {
   //         `Invalid operation: currentSection=${currentSection}, questionIndex=${questionIndex}`
   //       );
   //     }
-  
+
   //     return { ...prevData, sections: updatedSections };
   //   });
   // };
-  
+
   const handleDeleteQuestion = (questionIndex: number) => {
     setSurveyData((prevData) => {
       // Create deep copies to avoid mutating the state directly
@@ -129,16 +131,17 @@ const EditSubmittedSurvey = () => {
         if (idx === currentSection) {
           return {
             ...section,
-            questions: section.questions.filter((_, qIdx) => qIdx !== questionIndex),
+            questions: section.questions.filter(
+              (_, qIdx) => qIdx !== questionIndex
+            ),
           };
         }
         return section;
       });
-  
+
       return { ...prevData, sections: updatedSections };
     });
   };
-
 
   // const handleDeleteQuestion = ( questionIndex: number) => {
   //   setSurveyData((prevData) => {
@@ -202,66 +205,62 @@ const EditSubmittedSurvey = () => {
     isRequired: boolean
   ) => {
     if (editIndex === null) return; // No edit index, return early
-  
+
     setSurveyData((prevData) => {
       const updatedSections = [...prevData.sections]; // Clone sections
-  
+
       // Get the current section
       const currentSectionData = updatedSections[currentSection];
-  
+
       if (currentSectionData) {
         // Update the specific question
-        const updatedQuestions = currentSectionData.questions.map((question, idx) =>
-          idx === editIndex
-            ? {
-                ...question,
-                question: updatedQuestion,
-                options: updatedOptions,
-                question_type: updatedQuestionType,
-                is_required: isRequired,
-              }
-            : question
+        const updatedQuestions = currentSectionData.questions.map(
+          (question, idx) =>
+            idx === editIndex
+              ? {
+                  ...question,
+                  question: updatedQuestion,
+                  options: updatedOptions,
+                  question_type: updatedQuestionType,
+                  is_required: isRequired,
+                }
+              : question
         );
-  
+
         // Replace the updated questions in the section
         updatedSections[currentSection] = {
           ...currentSectionData,
           questions: updatedQuestions,
         };
       }
-  
+
       return {
         ...prevData,
         sections: updatedSections,
       };
     });
-  
+
     // Exit edit mode
     setEditIndex(null);
     setIsEdit(false);
   };
-  
 
-
-  
   const saveSurvey = async () => {
-    console.log({ id: params.id, surveyData })
-        try {
-          await editSurvey({ id: params.id, body:surveyData }).unwrap();
-          toast.success("Survey updated successfully!");
-          router.push('/surveys/survey-list');
-        } catch (error) {
-          console.error("Error updating survey:", error);
-          toast.error("Failed to update survey.");
-        }
-      };
+    console.log({ id: params.id, surveyData });
+    try {
+      await editSurvey({ id: params.id, body: surveyData }).unwrap();
+      toast.success("Survey updated successfully!");
+      router.push("/surveys/survey-list");
+    } catch (error) {
+      console.error("Error updating survey:", error);
+      toast.error("Failed to update survey.");
+    }
+  };
   return (
     <div
-      className={`${surveyData?.theme} flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}
+      className={`${surveyData?.theme} flex flex-col gap-5 w-full px-0 lg:pl-6 relative`}
     >
-      <div
-        className={`${surveyData?.theme} flex justify-between gap-10 w-full`}
-      >
+      <div className={`flex justify-between gap-6 w-full`}>
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
           {surveyData?.logo_url && (
             <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
@@ -288,59 +287,108 @@ const EditSubmittedSurvey = () => {
           )}
 
           <div className="flex flex-col">
-          {
-            isEditHeader ? (
-              <div className="mb-6 bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <label className="block font-semibold mb-2">Survey Topic</label>
-               <input
-                 type="text"
-                 value={surveyData.topic}
-                 onChange={(e) => setSurveyData({ ...surveyData, topic: e.target.value })}
-                 className="w-full p-2 border rounded"
-               />
-               <label className="block font-semibold mb-2 mt-4">Survey Description</label>
-               <textarea
-                 rows={4}
-                 value={surveyData.description}
-                 onChange={(e) => setSurveyData({ ...surveyData, description: e.target.value })}
-                 className="w-full p-2 border rounded"
-               />
-                 <button className="auth-btn text-white px-4 py-2 w-1/2 rounded hover:bg-blue-700" onClick={()=>setIsEditHeader((prev)=>!prev)}>
-           Save
-          </button>
-             </div>
-            
+            {isEditHeader ? (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="mb-6 bg-white rounded-lg w-full my-4 p-6 shadow-lg"
+              >
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Survey Topic
+                    </label>
+                    <input
+                      type="text"
+                      value={surveyData.topic}
+                      onChange={(e) =>
+                        setSurveyData({ ...surveyData, topic: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Survey Description
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={surveyData.description}
+                      onChange={(e) =>
+                        setSurveyData({
+                          ...surveyData,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+                    />
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="inline-flex items-center justify-center px-4 py-2 w-auto bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-md shadow-sm hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
+                    onClick={() => setIsEditHeader((prev) => !prev)}
+                  >
+                    Save Changes
+                  </motion.button>
+                </div>
+              </motion.div>
             ) : (
-              <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <h2
-                className="text-[1.5rem] font-normal"
-                style={{
-                  fontSize: `${surveyData?.header_text?.size}px`,
-                  fontFamily: `${surveyData?.header_text?.name}`,
-                }}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="bg-white rounded-lg w-full my-4 p-6 shadow-lg hover:shadow-xl transition-shadow"
               >
-                {surveyData?.topic}
-              </h2>
-              <p
-                style={{
-                  fontSize: `${surveyData?.body_text?.size}px`,
-                  fontFamily: `${surveyData?.body_text?.name}`,
-                }}
-              >
-                {surveyData?.description}
-              </p>
-              <div className="flex justify-end">
-             <button className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full" onClick={()=>setIsEditHeader((prev)=>!prev)}>
-           Edit
-          </button>
-
-              </div>
-            </div>
-            )
-          }
+                <div className="space-y-4">
+                  <h2
+                    className="font-normal"
+                    style={{
+                      fontSize: `${surveyData?.header_text?.size}px`,
+                      fontFamily: `${surveyData?.header_text?.name}`,
+                    }}
+                  >
+                    {surveyData?.topic}
+                  </h2>
+                  <p
+                    className="text-gray-600"
+                    style={{
+                      fontSize: `${surveyData?.body_text?.size}px`,
+                      fontFamily: `${surveyData?.body_text?.name}`,
+                    }}
+                  >
+                    {surveyData?.description}
+                  </p>
+                  <div className="flex justify-end">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="inline-flex items-center px-4 h-10 border border-purple-300 text-sm font-medium rounded-full text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                      onClick={() => setIsEditHeader((prev) => !prev)}
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                      Edit
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
- 
-
 
           {/* @ts-ignore */}
           {surveyData?.sections[currentSection]?.questions?.map(
@@ -387,7 +435,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                     questionType={item.question_type}
                     EditQuestion={() => EditQuestion(index)}
@@ -417,7 +464,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                     EditQuestion={() => EditQuestion(index)}
                     DeleteQuestion={() => handleDeleteQuestion(index)}
@@ -458,7 +504,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "star_rating" ? (
@@ -485,7 +530,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "matrix_multiple_choice" ||
@@ -516,7 +560,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "single_choice" ? (
@@ -544,7 +587,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "checkbox" ? (
@@ -572,7 +614,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "rating_scale" ? (
@@ -600,7 +641,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "drop_down" ? (
@@ -628,7 +668,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "number" ? (
@@ -655,7 +694,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "short_text" ? (
@@ -682,7 +720,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "boolean" ? (
@@ -710,7 +747,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : item.question_type === "slider" ? (
@@ -739,7 +775,6 @@ const EditSubmittedSurvey = () => {
 
                       updatedSection.questions = updatedQuestions;
                       updatedSections[currentSection] = updatedSection;
-                    
                     }}
                   />
                 ) : (
@@ -749,21 +784,16 @@ const EditSubmittedSurvey = () => {
             )
           )}
 
-          <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
-          <button className="auth-btn text-white px-4 py-2 rounded hover:bg-blue-700" onClick={saveSurvey}>
-            {isEditLoading ? "Saving..." : "Save Changes"}
-          </button>
+          <div className="flex flex-col gap-4 md:flex-row justify-between items-center mb-10">
+            <button
+              className="auth-btn text-white px-4 py-2 rounded hover:bg-blue-700"
+              onClick={saveSurvey}
+            >
+              {isEditLoading ? "Saving..." : "Save Changes"}
+            </button>
           </div>
 
-          <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
-            <div className="flex flex-col">
-              <p>Form created by</p>
-              <Image src={pollsensei_new_logo} alt="Logo" />
-            </div>
-            <span className="absolute bottom-2 right-4 text-[#828282]">
-              Remove watermark
-            </span>
-          </div>
+          <WatermarkBanner className="mb-10" />
         </div>
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}

@@ -9,6 +9,22 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    searchSurveys: builder.query({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params.search_term)
+          queryParams.set("search_term", params.search_term);
+        if (params.status) queryParams.set("status", params.status);
+        queryParams.set("page", params.page.toString());
+        queryParams.set("page_size", params.page_size.toString());
+
+        return {
+          url: `survey/search?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+    }),
     createAiSurvey: builder.mutation({
       // query: (body) => ({
       //   url: "survey/ai/generate-questions",
@@ -263,38 +279,6 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
-    validateIndividualResponse: builder.query({
-      query: ({
-        countries,
-        date,
-        start_date,
-        end_date,
-        name,
-        response_id,
-        question,
-        question_type,
-        answer,
-        pagesNumber = 1,
-        id,
-      }) => {
-        const params = new URLSearchParams();
-
-        if (countries) params.append("countries", countries);
-        if (date) params.append("date", date);
-        if (start_date) params.append("start_date", start_date);
-        if (end_date) params.append("end_date", end_date);
-        if (name) params.append("name", name);
-        if (response_id) params.append("response_id", response_id);
-        if (question) params.append("question", question);
-        if (answer) params.append("answer", answer);
-        if (question_type) params.append("question_type", question_type);
-        params.append("page", pagesNumber.toString());
-        return {
-          url: `response/validate/individual/${id}?${params.toString()}&page_size=20`,
-          method: "GET",
-        };
-      },
-    }),
 
     getPublicSurveyById: builder.query({
       query: (id) => ({
@@ -328,11 +312,18 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    getReviewQuestions: builder.query({
+      query: () => ({
+        url: "survey/review-questions",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
 export const {
   useFetchSurveysQuery,
+  useSearchSurveysQuery,
   useCreateSurveyMutation,
   useCreateAiSurveyMutation,
   useGenerateSingleSurveyMutation,
@@ -355,7 +346,6 @@ export const {
   useGetSurveySummaryQuery,
   useGetRespondentNameQuery,
   useValidateSurveyResponseQuery,
-  useValidateIndividualResponseQuery,
   useResponseValidateIndividualQuery,
   useCloseSurveyStatusMutation,
   useSurveySettingsQuery,
@@ -371,4 +361,5 @@ export const {
   useLazyDownloadAllResponseQuery,
   useLazyDownloadSingleResponseQuery,
   useUploadResponseFileMutation,
+  useGetReviewQuestionsQuery,
 } = surveyApiSlice;

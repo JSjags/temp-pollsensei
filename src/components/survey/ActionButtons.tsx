@@ -14,7 +14,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onEdit, onDelete }) => {
         variant="outline"
         size="sm"
         onClick={onEdit}
-        className="flex items-center gap-1"
+        className="inline-flex items-center px-4 py-2 border border-purple-300 text-sm font-medium rounded-full text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors gap-1"
       >
         <Pencil className="w-3 h-3" />
         Edit
@@ -23,7 +23,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ onEdit, onDelete }) => {
         variant="outline"
         size="sm"
         onClick={onDelete}
-        className="flex items-center gap-1 text-red-500 border-red-500 hover:bg-red-50 hover:text-red-500"
+        className="inline-flex items-center px-4 py-2 border text-sm font-medium rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors gap-1 text-red-500 border-red-500 hover:bg-red-50 hover:text-red-500"
       >
         <Trash2 className="w-3 h-3" />
         Delete

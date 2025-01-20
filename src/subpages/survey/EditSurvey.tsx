@@ -54,6 +54,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import QuestionRenderer from "@/components/survey/QuestionRenderer";
@@ -62,9 +63,10 @@ import {
   handleRequiredToggle,
   processNewSurveyQuestions,
 } from "@/utils/surveyUtils";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Trash2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/shadcn-input";
+import WatermarkBanner from "@/components/common/WatermarkBanner";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -112,6 +114,7 @@ const EditSurvey = () => {
   const router = useRouter();
   const [aiChatbot, setAiChatbot] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const [
     createSurvey,
     { data: createdSurveyData, isLoading, isSuccess, isError, error },
@@ -142,6 +145,15 @@ const EditSurvey = () => {
   const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleClearSurvey = () => {
+    dispatch(resetSurvey());
+    setShowClearDialog(false);
+    toast.success("Survey cleared successfully", {
+      position: "bottom-right",
+    });
+    router.push("/surveys/survey-list");
+  };
 
   const EditQuestion = (index: any) => {
     setEditIndex(index);
@@ -348,8 +360,66 @@ const EditSurvey = () => {
     }
 
     try {
+      // Get base survey state
       const updatedSurvey = store.getState().survey;
-      await createSurvey(updatedSurvey).unwrap();
+
+      // Process survey to add slider options based on question text
+      const processedSurvey = {
+        ...updatedSurvey,
+        sections: updatedSurvey.sections.map((section) => ({
+          ...section,
+          questions: section.questions.map((question) => {
+            if (question.question_type === "slider") {
+              // Extract range from question text
+              const extractRange = (questionText: string) => {
+                const numberWords: { [key: string]: number } = {
+                  one: 1,
+                  two: 2,
+                  three: 3,
+                  four: 4,
+                  five: 5,
+                  six: 6,
+                  seven: 7,
+                  eight: 8,
+                  nine: 9,
+                  ten: 10,
+                };
+
+                // Convert text numbers to digits
+                let processedText = questionText.toLowerCase();
+                Object.entries(numberWords).forEach(([word, num]) => {
+                  processedText = processedText.replace(
+                    new RegExp(word, "g"),
+                    num.toString()
+                  );
+                });
+
+                // Match numeric ranges
+                const match = processedText.match(
+                  /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
+                );
+                if (match) {
+                  return {
+                    min: parseInt(match[1]),
+                    max: parseInt(match[2]),
+                  };
+                }
+                return { min: 0, max: 10 }; // Default range
+              };
+
+              const range = extractRange(question.question);
+              const options = Array.from(
+                { length: range.max - range.min + 1 },
+                (_, i) => (range.min + i).toString()
+              );
+
+              return { ...question, options };
+            }
+            return question;
+          }),
+        })),
+      };
+      await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
     } catch (e) {
@@ -460,12 +530,18 @@ const EditSurvey = () => {
                       </>
                     )}
                   </Button>
-                  {/* <div className="bg-white rounded-full px-5 py-1" 
-              // onClick={handleNewSection}
-              >
-                <IoDocumentOutline className="inline-block mr-2" />
-                New Section
-              </div> */}
+
+                  <Button
+                    variant="outline"
+                    className="group relative rounded-full transition-all duration-200 border-red-200 text-red-500 hover:!text-red-600 overflow-hidden"
+                    onClick={() => setShowClearDialog(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
+                    <span className="group-hover:tracking-wide group-hover:text-red-600 transition-all duration-200">
+                      Clear Survey
+                    </span>
+                    <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                  </Button>
                 </div>
                 {questions?.length > 1 && (
                   <div className="flex w-full md:w-auto md:justify-end items-center">
@@ -486,14 +562,6 @@ const EditSurvey = () => {
                     : () => setOpenModal(true)
                 }
               />
-              {/* {aiChatbot && (
-                <Sensei
-                  isOpen={aiChatbot}
-                  setIsOpen={() => setAiChatbot(!aiChatbot)}
-                  currentSection={currentSection}
-                  questionIndex={selectIndex}
-                />
-              )} */}
 
               <div className="rounded-md flex flex-col justify-center w-full md:w-[16rem] overflow-visible py-5 text-center">
                 <motion.div
@@ -544,15 +612,7 @@ const EditSurvey = () => {
                   </Button>
                 </motion.div>
               </div>
-              <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
-                <div className="flex flex-col">
-                  <p>Form created by</p>
-                  <Image src={pollsensei_new_logo} alt="Logo" />
-                </div>
-                <span className="absolute bottom-2 right-4 text-[#828282]">
-                  Remove watermark
-                </span>
-              </div>
+              <WatermarkBanner className="mb-10" />
             </>
           ) : (
             <CreateNewSection />
@@ -629,6 +689,46 @@ const EditSurvey = () => {
                 </span>
               </Button>
             </div>
+          </motion.div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent
+          className="sm:max-w-md z-[100000]"
+          overlayClassName="z-[100000]"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-center">
+                Clear Survey
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                Are you sure you want to clear all questions? This action cannot
+                be undone.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="flex gap-2 justify-center mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowClearDialog(false)}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleClearSurvey}
+                className="w-full bg-red-500 hover:bg-red-600"
+              >
+                Clear Survey
+              </Button>
+            </DialogFooter>
           </motion.div>
         </DialogContent>
       </Dialog>

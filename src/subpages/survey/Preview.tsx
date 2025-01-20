@@ -46,7 +46,7 @@ const Preview = () => {
   };
 
   return (
-    <div className={` flex flex-col gap-5 px-16`}>
+    <div className={`flex flex-col gap-5 px-16`}>
       <div
         className={`${theme} flex justify-center items-center px-5 mx-auto gap-10 w-[80%]`}
       >

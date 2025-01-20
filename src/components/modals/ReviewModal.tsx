@@ -8,13 +8,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
+  AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, X } from "lucide-react";
 import { Input } from "../ui/shadcn-input";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
+import { Skeleton } from "../ui/skeleton";
+import { useGetReviewQuestionsQuery } from "@/services/survey.service";
 
 interface SubscribeProps {
   onClose: () => void;
@@ -40,37 +43,18 @@ const ReviewModal: React.FC<SubscribeProps> = ({
       text?: string;
     };
   }>({});
+
   const router = useRouter();
 
-  const questions: Question[] = [
-    {
-      question: "Which best describes you?",
-      question_type: "single_choice",
-      options: [
-        "Business",
-        "Marketing / Sales",
-        "Student",
-        "Academic",
-        "Government / NGO",
-      ],
-    },
-    {
-      question: "What improvement do you suggest for PollSensei?",
-      question_type: "short_text",
-    },
-    {
-      question:
-        "How satisfied are you with your overall experience on PollSensei?",
-      question_type: "single_choice",
-      options: [
-        "Very satisfied",
-        "Satisfied",
-        "Neutral",
-        "Dissatisfied",
-        "Very Dissatisfied",
-      ],
-    },
-  ];
+  const {
+    data: questionsData,
+    isLoading: isQuestionsLoading,
+    isError: isQuestionsError,
+  } = useGetReviewQuestionsQuery(undefined, {
+    skip: !openModal,
+  });
+
+  const [createReview, { isLoading }] = useCreateReviewMutation();
 
   const handleAnswerChange = (key: string, value: any, type: string) => {
     setAnswers((prev) => ({
@@ -85,7 +69,8 @@ const ReviewModal: React.FC<SubscribeProps> = ({
   };
 
   const isFormValid = () => {
-    return questions.every((question) => {
+    if (!questionsData?.data) return false;
+    return questionsData.data.every((question: Question) => {
       const answer = answers[question.question];
       if (!answer) return false;
 
@@ -108,20 +93,19 @@ const ReviewModal: React.FC<SubscribeProps> = ({
       return;
     }
 
-    const reviews = questions.map((question, index) => ({
-      question: index === 0 ? "Which best describes you?" : question.question,
+    const reviews = questionsData?.data.map((question: Question) => ({
+      question: question.question,
       question_type: question.question_type,
       ...answers[question.question],
     }));
 
-    const payload = {
-      survey_id,
-      reviews,
-    };
-
     try {
-      await createReview(payload).unwrap();
+      await createReview({
+        survey_id,
+        reviews,
+      }).unwrap();
       toast.success("Your review has been noted");
+      router.refresh(); // Refresh the page to get latest data
       router.push("/surveys/survey-list");
     } catch (err: any) {
       toast.error(
@@ -130,7 +114,56 @@ const ReviewModal: React.FC<SubscribeProps> = ({
     }
   };
 
-  const [createReview, { isLoading }] = useCreateReviewMutation();
+  const handleSkip = () => {
+    router.refresh(); // Refresh the page to get latest data
+    router.push("/surveys/survey-list");
+    onClose();
+  };
+
+  if (isQuestionsLoading) {
+    return (
+      <AlertDialog open={openModal} onOpenChange={onClose}>
+        <AlertDialogContent
+          className="max-w-[800px] max-h-[80vh] overflow-y-auto z-[100000]"
+          overlayClassName="z-[100000]"
+        >
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="space-y-4 p-4 rounded-lg bg-gray-50">
+                <Skeleton className="h-6 w-3/4" />
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((j) => (
+                    <Skeleton key={j} className="h-8 w-full" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
+  if (isQuestionsError) {
+    return (
+      <AlertDialog open={openModal} onOpenChange={onClose}>
+        <AlertDialogContent
+          className="max-w-[800px] max-h-[80vh] overflow-y-auto z-[100000]"
+          overlayClassName="z-[100000]"
+        >
+          <div className="text-center py-6">
+            <h3 className="text-lg font-semibold text-red-600 mb-2">
+              Failed to load review questions
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Please try again later or contact support if the problem persists.
+            </p>
+            <Button onClick={handleSkip}>Skip Review</Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
 
   return (
     <AlertDialog open={openModal} onOpenChange={onClose}>
@@ -138,6 +171,17 @@ const ReviewModal: React.FC<SubscribeProps> = ({
         className="max-w-[800px] max-h-[80vh] overflow-y-auto z-[100000]"
         overlayClassName="z-[100000]"
       >
+        <div className="absolute right-4 top-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSkip}
+            className="rounded-full"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
         <AlertDialogHeader>
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -155,7 +199,7 @@ const ReviewModal: React.FC<SubscribeProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-8 mt-6">
           <AnimatePresence>
-            {questions?.map((question, index) => (
+            {questionsData?.data?.map((question: Question, index: number) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
@@ -250,47 +294,30 @@ const ReviewModal: React.FC<SubscribeProps> = ({
             ))}
           </AnimatePresence>
 
-          <Button
-            type="submit"
-            className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 w-full"
-            disabled={isLoading || !isFormValid()}
-          >
-            <span className="group-hover:tracking-wider transition-all duration-200">
-              {isLoading ? "Submitting" : "Submit Review"}
-            </span>
-            {!isLoading && (
-              <motion.div
-                animate={{ x: [0, 5, 0] }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="flex items-center"
-              >
+          <AlertDialogFooter className="flex gap-3 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSkip}
+              className="flex-1 sm:flex-none"
+            >
+              Skip Review
+            </Button>
+            <Button
+              type="submit"
+              className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 flex-1 sm:flex-none"
+              disabled={isLoading || !isFormValid()}
+            >
+              <span className="group-hover:tracking-wider transition-all duration-200">
+                {isLoading ? "Submitting" : "Submit Review"}
+              </span>
+              {!isLoading ? (
                 <ArrowRight className="h-4 w-4" />
-              </motion.div>
-            )}
-            {isLoading && (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{
-                  duration: 1,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="flex items-center"
-              >
+              ) : (
                 <Loader2 className="h-4 w-4 animate-spin" />
-              </motion.div>
-            )}
-            <motion.div
-              className="absolute inset-0 bg-white"
-              initial={{ scale: 0, opacity: 0 }}
-              whileHover={{ scale: 1, opacity: 0.1 }}
-              transition={{ duration: 0.2 }}
-            />
-          </Button>
+              )}
+            </Button>
+          </AlertDialogFooter>
         </form>
       </AlertDialogContent>
     </AlertDialog>

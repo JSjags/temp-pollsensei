@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +24,10 @@ const DeleteSurvey: React.FC<DeleteSurveyProps> = ({
 }) => {
   return (
     <AlertDialog open={openModal} onOpenChange={onClose}>
-      <AlertDialogContent className="sm:max-w-[425px]">
+      <AlertDialogContent
+        className="sm:max-w-[425px] z-[100000]"
+        overlayClassName="z-[100000]"
+      >
         <AlertDialogHeader>
           <div className="flex flex-col items-center gap-6 py-4">
             <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">

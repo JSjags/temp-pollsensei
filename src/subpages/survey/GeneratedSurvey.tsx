@@ -414,6 +414,15 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   options={item.options}
                                   questionType={item.question_type}
                                 />
+                              ) : item.question_type === "matrix_checkbox" ? (
+                                <MatrixQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  rows={item.rows}
+                                  columns={item.columns}
+                                  questionType={item.question_type}
+                                />
                               ) : item.question_type === "rating_scale" ? (
                                 <RatingScaleQuestion
                                   key={index}

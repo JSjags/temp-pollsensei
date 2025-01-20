@@ -23,6 +23,7 @@ import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
 import MediaQuestion from "@/components/survey/MediaQuestion";
 import { cn } from "@/lib/utils";
+import WatermarkBanner from "@/components/common/WatermarkBanner";
 
 const SurveyQuestions = () => {
   const params = useParams();
@@ -32,7 +33,7 @@ const SurveyQuestions = () => {
   const isSettings = useSelector(
     (state: RootState) => state.survey_settings.isSettings
   );
-  console.log(data);
+
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
@@ -48,19 +49,19 @@ const SurveyQuestions = () => {
   return (
     <div
       className={cn(
-        `flex flex-col gap-5 lg:px-16 w-full`,
+        `flex flex-col gap-5 w-full`,
         data?.data?.theme && data?.data?.theme
       )}
     >
       {data && data?.data && (
         <div
-          className={`${data?.data?.theme} flex justify-center items-center px-5 mx-auto gap-10 lg:w-[80%]`}
+          className={`flex justify-center items-center mx-auto gap-10 w-full lg:px-16`}
         >
           <div
-            className={` w-full flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
+            className={`w-full flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
           >
             {data && !isLoading && data?.data?.logo_url && (
-              <div className="bg-[#9D50BB]  w-16 my-3 text-white flex items-center flex-col ">
+              <div className="bg-[#9D50BB] w-16 my-3 text-white flex items-center flex-col ">
                 <Image
                   src={data?.data?.logo_url}
                   alt=""
@@ -260,15 +261,7 @@ const SurveyQuestions = () => {
               </div>
             )}
 
-            <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
-              <div className="flex flex-col">
-                <p>Form created by</p>
-                <Image src={pollsensei_new_logo} alt="Logo" />
-              </div>
-              <span className="absolute bottom-2 right-4 text-[#828282]">
-                Remove watermark
-              </span>
-            </div>
+            <WatermarkBanner className="mb-10" />
           </div>
         </div>
       )}

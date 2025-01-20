@@ -1,11 +1,11 @@
 import SurveyCard from "@/components/survey/SurveyCard";
-import { Key, useState } from "react";
+import { Key, useState, useCallback, useRef } from "react";
 import Button from "@/components/common/Button";
 import { useFetchSurveysQuery } from "@/services/survey.service";
 import Image from "next/image";
 import FilterButton from "@/components/filter/FilterButton";
 import search from "../../assets/images/search.svg";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import PageControl from "@/components/common/PageControl";
 import { Button as ShadButton } from "@/components/ui/button";
@@ -14,27 +14,110 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchSurveysQuery } from "@/services/survey.service";
+import debounce from "lodash/debounce";
+import { SearchIcon, XCircle } from "lucide-react";
+import { Input } from "@/components/ui/shadcn-input";
 
 const CreatedSurveysPage = () => {
   const [itemsPerPage] = useState(6);
-  const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, isFetching } = useFetchSurveysQuery(currentPage);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
   );
 
+  // Get search params
+  const search = searchParams.get("search") || "";
+  const status = searchParams.get("status") || "";
+  const currentPage = parseInt(searchParams.get("page") || "1");
+  const [searchTerm, setSearchTerm] = useState(search);
+  const [debouncedTerm, setDebouncedTerm] = useState(search);
+
+  // Update URL with search params
+  const updateSearchParams = useCallback(
+    (newParams: { [key: string]: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(newParams).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [searchParams, pathname, router]
+  );
+
+  const handleSearch = () => {
+    setDebouncedTerm(searchTerm);
+    updateSearchParams({ search: searchTerm, page: "1" });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const handleReset = () => {
+    setSearchTerm("");
+    setDebouncedTerm("");
+    router.push(pathname);
+  };
+
+  // Use the search query when search params exist
+  const {
+    data: searchData,
+    isLoading: isSearchLoading,
+    isFetching: isSearchFetching,
+    isError: isSearchError,
+  } = useSearchSurveysQuery(
+    {
+      search_term: debouncedTerm,
+      status,
+      page: currentPage,
+      page_size: itemsPerPage,
+    },
+    {
+      skip: !(debouncedTerm || status),
+      refetchOnMountOrArgChange: true,
+    }
+  );
+
+  // Use regular survey query when no search params
+  const {
+    data: regularData,
+    isLoading: isRegularLoading,
+    isFetching: isRegularFetching,
+  } = useFetchSurveysQuery(currentPage, {
+    skip: !!(debouncedTerm || status),
+    refetchOnMountOrArgChange: true,
+  });
+
+  const data = debouncedTerm || status ? searchData : regularData;
+  const isLoading =
+    debouncedTerm || status ? isSearchLoading : isRegularLoading;
+  const isFetching =
+    debouncedTerm || status ? isSearchFetching : isRegularFetching;
+
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+  const handleFilterChange = (selectedStatus: string) => {
+    updateSearchParams({ status: selectedStatus, page: "1" });
+  };
+
   const navigatePage = (direction: "next" | "prev") => {
-    setCurrentPage((prevIndex) => {
-      if (direction === "next") {
-        return prevIndex < totalPages ? prevIndex + 1 : prevIndex;
-      } else {
-        return prevIndex > 1 ? prevIndex - 1 : prevIndex;
-      }
-    });
+    const newPage =
+      direction === "next"
+        ? Math.min(currentPage + 1, totalPages)
+        : Math.max(currentPage - 1, 1);
+
+    updateSearchParams({ page: newPage.toString() });
   };
 
   const SurveyCardSkeleton = () => (
@@ -71,6 +154,65 @@ const CreatedSurveysPage = () => {
     </div>
   );
 
+  // Empty state for search results
+  const renderEmptyState = (isSearch: boolean) => (
+    <Card className="w-full max-w-3xl mx-auto mt-[10vh] border-none shadow-none bg-transparent">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center justify-center p-6 text-center space-y-8"
+      >
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="relative w-full max-w-[320px] aspect-square"
+        >
+          <Image
+            src={
+              isSearch
+                ? "/assets/no-results.svg"
+                : "/assets/survey-list/no-survey.svg"
+            }
+            alt={isSearch ? "No results found" : "No surveys created"}
+            fill
+            className="object-contain"
+          />
+        </motion.div>
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="space-y-4 max-w-[600px]"
+        >
+          <h3 className="text-2xl font-semibold text-gray-800">
+            {isSearch ? "No Matches Found" : "Start Your First Survey"}
+          </h3>
+          <p className="text-base text-muted-foreground">
+            {isSearch
+              ? "We couldn't find any surveys matching your criteria. Try broadening your search terms or adjusting your filters."
+              : "Ready to gather valuable insights? Let our AI-powered system help you create the perfect survey in minutes. We'll handle the complex parts while you focus on what matters most."}
+          </p>
+        </motion.div>
+        {!isSearch && (
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <ShadButton
+              className="auth-btn text-white px-8 !h-12 text-lg rounded-lg hover:scale-105 transition-transform"
+              onClick={() => router.push("/surveys/create-survey")}
+            >
+              Create Your First Survey
+            </ShadButton>
+          </motion.div>
+        )}
+      </motion.div>
+    </Card>
+  );
+
   if (isLoading || isFetching) {
     return (
       <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
@@ -79,19 +221,41 @@ const CreatedSurveysPage = () => {
             <h2 className="text-[#333333] font-[700] text-[24px]">
               Your Surveys
             </h2>
-            <div className="hidden lg:flex items-center pl-4 gap-2 rounded-[8px] border-[1px] bg-white border-[#d9d9d9] w-[292px] h-[40px]">
-              <Image src={search} alt="Search icon" width={20} height={20} />
+            <div className="hidden lg:flex items-center gap-2 rounded-[8px] border-[1px] bg-white border-[#d9d9d9] w-[292px] h-[40px]">
               <input
-                className="ring-0 text-[#838383] flex-1 outline-none"
+                ref={searchInputRef}
+                className="ring-0 text-[#838383] flex-1 outline-none px-3"
                 type="text"
                 placeholder="Search surveys"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
+              <button
+                onClick={handleSearch}
+                className="px-3 h-full border-l border-[#d9d9d9] hover:bg-gray-50 rounded-r-lg"
+              >
+                <SearchIcon className="text-[#9D50BB]" />
+              </button>
             </div>
-            <div className="hidden md:block">
+            <div className="hidden md:flex">
               <FilterButton
+                type="survey"
                 text="Add filter"
                 buttonClassName="border-[#D9D9D9]"
+                onFilterChange={handleFilterChange}
+                currentStatus={status}
               />
+              {(search || status) && (
+                <ShadButton
+                  variant="ghost"
+                  onClick={handleReset}
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                >
+                  <XCircle className="w-5 h-5" />
+                  <span className="ml-2 text-base">Reset</span>
+                </ShadButton>
+              )}
             </div>
           </div>
           <div className="hidden md:block mt-2 md:mt-0">
@@ -151,16 +315,41 @@ const CreatedSurveysPage = () => {
                 />
               )}
             </div>
-            <div className="hidden lg:flex items-center pl-4 gap-2 rounded-[8px] border-[1px] px- border-[#d9d9d9] w-[292px] h-[40px]">
-              <Image src={search} alt="Search icon" width={20} height={20} />
+            <div className="hidden lg:flex items-center gap-2 rounded-[8px] bg-white border-[1px] border-[#d9d9d9] w-[292px] h-[40px]">
               <input
-                className="ring-0 text-[#838383] flex-1 outline-none"
+                ref={searchInputRef}
+                className="ring-0 text-[#838383] flex-1 outline-none px-3"
                 type="text"
                 placeholder="Search surveys"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
+              <button
+                onClick={handleSearch}
+                className="px-3 h-full border-l border-[#d9d9d9] hover:bg-gray-50 rounded-r-lg"
+              >
+                <SearchIcon className="text-[#9D50BB]" />
+              </button>
             </div>
-            <div className="hidden md:block">
-              <FilterButton text="Add filter" />
+            <div className="hidden md:flex">
+              <FilterButton
+                type="survey"
+                text="Add filter"
+                buttonClassName="border-[#D9D9D9]"
+                onFilterChange={handleFilterChange}
+                currentStatus={status}
+              />
+              {(search || status) && (
+                <ShadButton
+                  variant="ghost"
+                  onClick={handleReset}
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                >
+                  <XCircle className="w-5 h-5" />
+                  <span className="ml-2 text-base">Reset</span>
+                </ShadButton>
+              )}
             </div>
           </div>
           <div className="hidden md:block mt-2 md:mt-0">
@@ -170,6 +359,7 @@ const CreatedSurveysPage = () => {
                 onClick={() => {
                   router.push("/surveys/create-survey");
                 }}
+                className="h-10 !bg-gradient-to-r !from-[#5B03B2] !to-[#9D50BB]"
               />
             )}
           </div>
@@ -177,31 +367,22 @@ const CreatedSurveysPage = () => {
             <FilterButton text="Add filter" />
           </div>
         </div>
-        <Card className="w-full max-w-3xl mx-auto mt-[10vh] border-none shadow-none">
-          <div className="flex flex-col items-center justify-center p-6 text-center space-y-8">
-            <div className="relative w-full max-w-[320px] aspect-square">
-              <Image
-                src="/assets/survey-list/no-survey.svg"
-                alt="Illustration of a person with laboratory flasks and a rocket"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <div className="space-y-2 max-w-[600px]">
-              <p className="text-lg sm:text-xl text-muted-foreground">
-                You have not created any Survey yet. Think on how to start? We
-                can help you do the difficult part using our generative-AI
-                capabilities to create your dream survey.
-              </p>
-            </div>
-            <ShadButton
-              className="auth-btn text-white px-8 !h-10 text-lg rounded-lg"
-              onClick={() => router.push("/surveys/create-survey")}
-            >
-              Create Survey
-            </ShadButton>
-          </div>
-        </Card>
+        {renderEmptyState(false)}
+      </div>
+    );
+  }
+
+  if (isSearchError) {
+    return (
+      <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
+        <div className="text-center py-10">
+          <h3 className="text-xl font-semibold text-red-600">
+            Error loading surveys
+          </h3>
+          <p className="text-gray-600 mt-2">
+            Please try again later or contact support if the problem persists.
+          </p>
+        </div>
       </div>
     );
   }
@@ -225,19 +406,41 @@ const CreatedSurveysPage = () => {
                   />
                 )}
               </div>
-              <div className="hidden lg:flex items-center pl-4 gap-2 rounded-[8px] border-[1px] bg-white border-[#d9d9d9] w-[292px] h-[40px]">
-                <Image src={search} alt="Search icon" width={20} height={20} />
+              <div className="hidden lg:flex items-center gap-2 rounded-[8px] border-[1px] bg-white border-[#d9d9d9] w-[292px] h-[40px]">
                 <input
-                  className="ring-0 text-[#838383] flex-1 outline-none"
+                  ref={searchInputRef}
+                  className="ring-0 text-[#838383] flex-1 outline-none px-3"
                   type="text"
                   placeholder="Search surveys"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={handleKeyPress}
                 />
+                <button
+                  onClick={handleSearch}
+                  className="px-3 h-full border-l border-[#d9d9d9] hover:bg-gray-50 rounded-r-lg"
+                >
+                  <SearchIcon className="text-[#9D50BB]" />
+                </button>
               </div>
-              <div className="hidden md:block">
+              <div className="hidden md:flex">
                 <FilterButton
+                  type="survey"
                   text="Add filter"
                   buttonClassName="border-[#D9D9D9]"
+                  onFilterChange={handleFilterChange}
+                  currentStatus={status}
                 />
+                {(search || status) && (
+                  <ShadButton
+                    variant="ghost"
+                    onClick={handleReset}
+                    className="ml-2 text-gray-500 hover:text-gray-700"
+                  >
+                    <XCircle className="w-5 h-5" />
+                    <span className="ml-2 text-base">Reset</span>
+                  </ShadButton>
+                )}
               </div>
             </div>
             <div className="hidden md:block mt-2 md:mt-0">

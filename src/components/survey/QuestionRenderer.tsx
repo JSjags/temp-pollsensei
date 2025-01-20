@@ -43,7 +43,10 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   handleRequiredToggle,
 }) => {
   if (isEdit && editIndex === index) {
-    if (item.question_type === "matrix_multiple_choice") {
+    if (
+      item.question_type === "matrix_multiple_choice" ||
+      item.question_type === "matrix_checkbox"
+    ) {
       return (
         <MatrixQuestionEdit
           question={item.question}
@@ -69,7 +72,6 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   }
 
   const commonProps = {
-    key: index,
     index: index + 1,
     question: item.question,
     questionType: item.question_type,
@@ -109,7 +111,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     ...(item.columns && { columns: item.columns }),
   };
 
-  return <QuestionComponent {...commonProps} {...extraProps} />;
+  return <QuestionComponent key={index} {...commonProps} {...extraProps} />;
 };
 
 export default QuestionRenderer;
