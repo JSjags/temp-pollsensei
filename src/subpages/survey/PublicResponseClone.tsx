@@ -56,6 +56,21 @@ const PublicResponse = () => {
   const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
   const router = useRouter();
 
+  const [activeInput, setActiveInput] = useState<Record<string, "textarea" | "audio" | null>>({});
+
+
+  const handleInputFocus = (question: string, inputType: "textarea" | "audio") => {
+    setActiveInput((prev) => ({ ...prev, [question]: inputType }));
+  };
+
+  const handleInputBlur = (question: string) => {
+    setActiveInput((prev) => ({ ...prev, [question]: null }));
+  };
+
+  const isTextareaDisabled = (question: string) => activeInput[question] === "audio";
+  const isAudioDisabled = (question: string) =>
+    activeInput[question] === "textarea" || !!answers[question]?.text;
+
   const handleAnswerChange = (key: string, value: any) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   };
@@ -457,6 +472,13 @@ const PublicResponse = () => {
                                 <textarea
                                   rows={4}
                                   className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                                  // onFocus={handleTextareaFocus}
+                                  // onBlur={resetActiveInput}
+                                  // disabled={activeInput === "audio"}
+                                  onFocus={() => handleInputFocus(quest.question, "textarea")}
+                                  onBlur={() => handleInputBlur(quest.question)}
+                                  readOnly={isTextareaDisabled(quest.question)}
+                                  value={answers[quest.question]?.text || ""}
                                   onChange={(e) =>
                                     handleAnswerChange(quest.question, {
                                       text: e.target.value,
@@ -471,6 +493,12 @@ const PublicResponse = () => {
                                     answers[quest.question]?.media_url || ""
                                   }
                                   required={quest.is_required}
+                                  // onFocus={handleAudioFocus}
+                                  // onBlur={resetActiveInput} 
+                                  // isDisabled={activeInput === "textarea"} 
+                                  onFocus={() => handleInputFocus(quest.question, "audio")}
+                                  onBlur={() => handleInputBlur(quest.question)}
+                                  isDisabled={isAudioDisabled(quest.question)}
                                 />
                                 }
                             

@@ -52,7 +52,7 @@ const UserRegistry: React.FC = () => {
 
   const refactoredData = location?.data?.data?.map((item:any) => ({
     label: item,
-    value: item.toLowerCase().replace(/\s+/g, '-'),
+    value: item.replace(/\s+/g, '-'),
   }));
 
   const queryArgs = useMemo(() => {
