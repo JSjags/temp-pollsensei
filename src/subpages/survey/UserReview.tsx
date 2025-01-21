@@ -11,7 +11,7 @@ interface Question {
 
 const UserReview: React.FC = () => {
   const router = useRouter();
-  const { data: reviewQuestion } = useGetReviewQuestionQuery(null);
+  const { data: reviewQuestion, } = useGetReviewQuestionQuery(null);
   const [answers, setAnswers] = useState<{
     [key: string]: { selected_options?: string[]; scale_value?: string; text?: string };
   }>({});

@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import React from "react";
 import { FaUsers, FaUserCheck, FaPoll, FaEye } from "react-icons/fa";
 
@@ -13,6 +14,7 @@ items :{
 }
 
 const OverviewCards: React.FC<OverviewProps> = ({items}) => {
+  const router = useRouter()
   const cards = [
     {
       title: "Total Users",
@@ -88,7 +90,8 @@ const OverviewCards: React.FC<OverviewProps> = ({items}) => {
         </div>
 
         <div
-          className={`flex flex-col justify-between p-4 rounded-lg shadow-sm bg-green-50`}
+          className={`flex flex-col justify-between p-4 rounded-lg shadow-sm cursor-pointer bg-green-50`}
+          onClick={()=>router.push("/super-admin-survey")}
         >
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-600">

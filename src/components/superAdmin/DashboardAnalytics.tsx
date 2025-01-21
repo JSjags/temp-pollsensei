@@ -12,10 +12,14 @@ import { SuperAdminPieChart2 } from "../charts/SuperAdminPieChart2";
 import SubscriptionTrend from "./SubscriptionTrend";
 import UsersByLocation from "./UsersByLocation";
 import TrafficByDevice from "./TrafficByDevice";
+import { getMonthsFromCurrent, getCurrentAndLastYears } from "@/lib/utils";
 
 const DashboardAnalytics: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState("January");
   const [selectedYear, setSelectedYear] = useState("2025");
+
+  const [selectedMonth2, setSelectedMonth2] = useState("January");
+  const [selectedYear2, setSelectedYear2] = useState("2025");
   // const
   const { data, isLoading, isSuccess, error } =
     useSurveyCreationDistributionQuery({
@@ -23,7 +27,7 @@ const DashboardAnalytics: React.FC = () => {
       year: selectedYear,
     });
 
-  const { data:subScribe, isLoading:subIsLoading , isSuccess:subIsSuccess, error:subError } =
+  const { data:subScribe, isLoading:subIsLoading , isSuccess:subIsSuccess, isFetching:subIsFetching } =
     useSubscriptionDistributionQuery({
       month: selectedMonth,
       year: selectedYear,
@@ -33,13 +37,14 @@ const DashboardAnalytics: React.FC = () => {
     data: surveyTypeDistribution,
     isLoading: typeLoading,
     isSuccess: typeSuccess,
-    error: typeError,
+    isFetching:typeFetching
   } = useSurveyTypeDistributionQuery({
-    month: "January",
-    year: selectedYear,
+    month: selectedMonth2,
+    year: selectedYear2,
   });
   // console.log(data);
   console.log(subScribe);
+  console.log(surveyTypeDistribution);
  
 
   const circles = [
@@ -189,25 +194,13 @@ const DashboardAnalytics: React.FC = () => {
           chartConfig={chartConfigForSurveyType}
           bottomLegend={planType}
           title="User Subscription Distribution"
-          year={["2023", "2024", "2025"]}
-          months={[
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-          ]}
+          year={getCurrentAndLastYears()}
+          months={getMonthsFromCurrent()}
           selectedYear={selectedYear}
           onYearChange={setSelectedYear}
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
+          isLoading={subIsLoading || subIsFetching} 
         />
 
         {/* <SurveyTypeChart /> */}
@@ -224,25 +217,13 @@ const DashboardAnalytics: React.FC = () => {
           chartConfig={chartConfigForSurveyType}
           bottomLegend={surveyType}
           title="Survey Type Distribution"
-          year={["2023", "2024", "2025"]}
-          months={[
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-          ]}
-          selectedYear={selectedYear}
-          onYearChange={setSelectedYear}
-          selectedMonth={selectedMonth}
-          onMonthChange={setSelectedMonth}
+          year={getCurrentAndLastYears()}
+          months={getMonthsFromCurrent()}
+          selectedYear={selectedYear2}
+          onYearChange={setSelectedYear2}
+          selectedMonth={selectedMonth2}
+          onMonthChange={setSelectedMonth2}
+          isLoading={typeLoading || typeFetching} 
         />
       </div>
 

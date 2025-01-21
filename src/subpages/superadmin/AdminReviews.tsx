@@ -34,7 +34,7 @@ interface ReviewData {
 const AdminReviews: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [reviewsPerPage] = useState(10);
-  const { data, isLoading, error, refetch } = useGetReviewQuery(currentPage);
+  const { data, isLoading, error, refetch, isFetching } = useGetReviewQuery(currentPage);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<ReviewData | null>(null);
 
@@ -106,7 +106,7 @@ const AdminReviews: React.FC = () => {
           </thead>
           <tbody>
             {
-              isLoading ? (
+              isLoading || isFetching ? (
                 <tr>
                   <td colSpan={6} className="text-center ">
                     <span className="flex justify-center items-center" >

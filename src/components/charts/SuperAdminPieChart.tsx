@@ -205,6 +205,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FadeLoader } from "react-spinners";
 
 interface SuperAdminPieChartProps {
   desktopData: { month: string; value: number; fill: string }[];
@@ -214,6 +215,7 @@ interface SuperAdminPieChartProps {
   months: string[];
   year: string[];
   selectedMonth: string;
+  isLoading: boolean;
   selectedYear: string;
   onMonthChange: (month: string) => void;
   onYearChange: (month: string) => void;
@@ -224,6 +226,7 @@ export function SuperAdminPieChart({
   chartConfig,
   bottomLegend,
   title,
+  isLoading,
   months,
   year,
   selectedMonth,
@@ -285,6 +288,15 @@ export function SuperAdminPieChart({
           </SelectContent>
         </Select>
       </CardHeader>
+      {isLoading ?  (
+          <>
+          <div className="text-center ">
+            <span className="flex justify-center items-center">
+              <FadeLoader height={10} radius={1} className="mt-3" />
+            </span>
+          </div>
+        </>
+      ) : (
       <CardContent className="flex flex-1 justify-center pb-0">
         <ChartContainer
           id={id}
@@ -345,6 +357,10 @@ export function SuperAdminPieChart({
           </PieChart>
         </ChartContainer>
       </CardContent>
+
+      )
+    }
+      
       <div className="mt-4 flex justify-center space-x-6">
         {bottomLegend?.map((label, idx) => (
           <div key={idx} className="flex items-center space-x-2">
