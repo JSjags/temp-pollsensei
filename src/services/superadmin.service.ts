@@ -169,6 +169,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    updateDisableStatus: builder.mutation({
+      query: (body) => ({
+        url: `superadmin/users/update-disable-status`, // {{base_url}}/superadmin/users/update-disable-status
+        method: "PATCH",
+        body: body,
+      }),
+    }),
     deleteFAQs: builder.mutation({
       query: (id) => ({
         url: `/superadmin/faq/${id}`,
@@ -247,6 +254,12 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    getSuperAdminSurvey: builder.query({
+      query: (pagesNumber) => ({
+        url: `superadmin/survey?page=${pagesNumber}&page_size=20`,
+        method: "GET",
+      }),
+    }),
     downloadSingleResponse: builder.query({
       query: ({ response_id, format }) => ({
         url: `response/export?response_id=${response_id}&format=${format}`, //
@@ -289,4 +302,6 @@ export const {
   useValidateIndividualResponseQuery,
   useDownloadSingleResponseQuery,
   useLazyDownloadSingleResponseQuery,
+  useUpdateDisableStatusMutation,
+  useGetSuperAdminSurveyQuery,
 } = surveyApiSlice;
