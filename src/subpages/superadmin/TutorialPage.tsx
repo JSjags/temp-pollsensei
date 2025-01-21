@@ -51,7 +51,7 @@ const TutorialPage = () => {
     usePreviewTutorialQuery(_id, { skip: _id ? false : true });
   const [editTutorial, { isLoading: isEditLoading }] =
     useEditTutorialMutation();
-  const { data, isLoading, isError, refetch } = useAllTutorialsQuery({
+  const { data, isLoading, isError, refetch, isFetching } = useAllTutorialsQuery({
     pagesNumber: currentPage,
     filter_by: "",
   });
@@ -245,7 +245,7 @@ const TutorialPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isLoading && (
+        {(isLoading || isFetching) && (
           <div className="text-center flex justify-center items-center w-full">
             <span className="flex justify-center items-center">
               <FadeLoader height={10} radius={1} className="mt-3" />

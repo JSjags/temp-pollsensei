@@ -124,3 +124,45 @@ export const isValidResponse = (response: any) => {
 
   return false;
 };
+
+
+export function getMonthsFromCurrent(): string[] {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const currentMonthIndex = new Date().getMonth();
+  const orderedMonths = [];
+
+  for (let i = 0; i < 12; i++) {
+    const monthIndex = (currentMonthIndex - i + 12) % 12; // Handle wrapping
+    orderedMonths.push(months[monthIndex]);
+  }
+
+  return orderedMonths;
+}
+
+
+export function getCurrentAndLastYears(): string[] {
+  const currentYear = new Date().getFullYear();
+  const years: string[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    years.push((currentYear - i).toString());
+  }
+
+  return years.reverse(); 
+}
+
+
