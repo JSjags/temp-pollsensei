@@ -29,6 +29,7 @@ import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
+import { BsExclamation } from "react-icons/bs";
 
 interface Question {
   question: string;
@@ -161,10 +162,10 @@ const EditSubmittedSurvey = () => {
   // Populate the form fields when the data is fetched successfully
   useEffect(() => {
     if (data) {
-      setSurveyData({
+      setSurveyData((prevData) => ({
+        ...prevData,
         topic: data?.data?.topic || "",
         description: data?.data?.description || "",
-        // sections: data?.data?.questions || [],
         theme: data?.data?.theme || "Default",
         header_text: data?.data?.header_text || {
           name: "Times New Roman",
@@ -178,11 +179,24 @@ const EditSubmittedSurvey = () => {
           name: "Times New Roman",
           size: 12,
         },
-        sections: data?.data?.sections || [],
+        sections:
+          data?.data?.sections?.map((section: any) => ({
+            ...section,
+            questions: section.questions.map((question: any) => ({
+              ...question,
+              // Ensure all possible properties are properly initialized
+              options: question.options || [],
+              rows: question.rows || [],
+              columns: question.columns || [],
+              min_value: question.min_value || 0,
+              max_value: question.max_value || 100,
+              is_required: question.is_required || false,
+            })),
+          })) || [],
         color_theme: data?.data?.color_theme || "#ffffff",
         logo_url: data?.data?.logo_url || "",
         header_url: data?.data?.header_url || "",
-      });
+      }));
     }
   }, [data]);
 
@@ -199,35 +213,70 @@ const EditSubmittedSurvey = () => {
   };
 
   const handleSave = (
-    updatedQuestion: string,
+    updatedQuestionText: string,
     updatedOptions: string[],
     updatedQuestionType: string,
-    isRequired: boolean
+    isRequired: boolean,
+    minValue?: number,
+    maxValue?: number,
+    matrixRows?: string[],
+    matrixColumns?: string[]
   ) => {
-    if (editIndex === null) return; // No edit index, return early
+    if (editIndex === null) return;
 
     setSurveyData((prevData) => {
-      const updatedSections = [...prevData.sections]; // Clone sections
-
-      // Get the current section
+      const updatedSections = [...prevData.sections];
       const currentSectionData = updatedSections[currentSection];
 
       if (currentSectionData) {
-        // Update the specific question
         const updatedQuestions = currentSectionData.questions.map(
-          (question, idx) =>
-            idx === editIndex
-              ? {
-                  ...question,
-                  question: updatedQuestion,
-                  options: updatedOptions,
-                  question_type: updatedQuestionType,
-                  is_required: isRequired,
-                }
-              : question
+          (question, idx) => {
+            if (idx === editIndex) {
+              // Create base question object
+              const baseQuestion = {
+                question: updatedQuestionText,
+                question_type: updatedQuestionType,
+                is_required: isRequired,
+              };
+
+              // Add type-specific properties
+              switch (updatedQuestionType) {
+                case "slider":
+                  return {
+                    ...baseQuestion,
+                    options: updatedOptions,
+                    min_value: minValue,
+                    max_value: maxValue,
+                  };
+
+                case "matrix_multiple_choice":
+                case "matrix_checkbox":
+                  return {
+                    ...baseQuestion,
+                    rows: matrixRows || [],
+                    columns: matrixColumns || [],
+                  };
+
+                case "likert_scale":
+                case "multiple_choice":
+                case "single_choice":
+                case "checkbox":
+                case "drop_down":
+                case "rating_scale":
+                case "boolean":
+                  return {
+                    ...baseQuestion,
+                    options: updatedOptions,
+                  };
+
+                default:
+                  return baseQuestion;
+              }
+            }
+            return question;
+          }
         );
 
-        // Replace the updated questions in the section
         updatedSections[currentSection] = {
           ...currentSectionData,
           questions: updatedQuestions,
@@ -240,7 +289,6 @@ const EditSubmittedSurvey = () => {
       };
     });
 
-    // Exit edit mode
     setEditIndex(null);
     setIsEdit(false);
   };
@@ -256,6 +304,109 @@ const EditSubmittedSurvey = () => {
       toast.error("Failed to update survey.");
     }
   };
+  // Loading skeleton state
+  if (isLoading) {
+    return (
+      <div className="flex gap-6">
+        <div className="flex flex-col gap-5 w-full px-0 lg:pl-6 animate-pulse">
+          {/* Logo skeleton */}
+          <div className="w-16 h-16 bg-gray-200 rounded my-5" />
+
+          {/* Header image skeleton */}
+          <div className="w-full h-24 bg-gray-200 rounded-lg" />
+
+          {/* Title skeleton */}
+          <div className="h-8 bg-gray-200 rounded w-1/2" />
+
+          {/* Description skeleton */}
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+
+          {/* Questions skeleton */}
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-3 bg-gray-200 rounded w-2/3" />
+                  <div className="h-3 bg-gray-200 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* StyleEditor skeleton */}
+        <div className="hidden lg:block w-1/3 animate-pulse h-screen">
+          <div className="bg-white h-full flex flex-col">
+            <div className="border-b py-4">
+              <div className="h-6 bg-gray-200 rounded w-1/2 mx-10" />
+            </div>
+
+            <div className="px-10 border-b py-5">
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+              <div className="space-y-4">
+                <div className="h-10 bg-gray-200 rounded" />
+                <div className="h-10 bg-gray-200 rounded" />
+              </div>
+            </div>
+
+            <div className="text-style px-10 border-b py-5">
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+              <div className="space-y-4">
+                <div className="h-10 bg-gray-200 rounded" />
+                <div className="h-10 bg-gray-200 rounded" />
+                <div className="h-10 bg-gray-200 rounded" />
+              </div>
+            </div>
+
+            <div className="px-10 border-b py-5">
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+              <div className="pt-5">
+                <div className="h-10 bg-gray-200 rounded" />
+              </div>
+            </div>
+
+            <div className="px-10 border-b py-5">
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+              <div className="h-24 bg-gray-200 rounded" />
+            </div>
+
+            <div className="px-10 py-5">
+              <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+              <div className="h-24 bg-gray-200 rounded" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError || error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] px-4">
+        <div className="bg-red-50 rounded-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <BsExclamation className="w-8 h-8 text-red-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-red-700 mb-2">
+            Oops! Something went wrong
+          </h3>
+          <p className="text-red-600 mb-6">
+            We encountered an error while loading your survey. Please try again
+            later.
+          </p>
+          <button
+            onClick={() => router.push("/surveys/survey-list")}
+            className="px-4 py-2 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition-colors font-medium"
+          >
+            Return to Survey List
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className={`${surveyData?.theme} flex flex-col gap-5 w-full px-0 lg:pl-6 relative`}
@@ -292,10 +443,21 @@ const EditSubmittedSurvey = () => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="mb-6 bg-white rounded-lg w-full my-4 p-6 shadow-lg"
               >
-                <div className="space-y-6">
-                  <div className="space-y-2">
+                <motion.div
+                  className="space-y-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.div
+                    className="space-y-2"
+                    initial={{ x: -20 }}
+                    animate={{ x: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
                     <label className="text-sm font-medium text-gray-700">
                       Survey Topic
                     </label>
@@ -305,11 +467,16 @@ const EditSubmittedSurvey = () => {
                       onChange={(e) =>
                         setSurveyData({ ...surveyData, topic: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
                     />
-                  </div>
+                  </motion.div>
 
-                  <div className="space-y-2">
+                  <motion.div
+                    className="space-y-2"
+                    initial={{ x: -20 }}
+                    animate={{ x: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
                     <label className="text-sm font-medium text-gray-700">
                       Survey Description
                     </label>
@@ -322,29 +489,44 @@ const EditSubmittedSurvey = () => {
                           description: e.target.value,
                         })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 resize-none"
                     />
-                  </div>
+                  </motion.div>
 
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{
+                      scale: 1.02,
+                      boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+                    }}
                     whileTap={{ scale: 0.98 }}
-                    className="inline-flex items-center justify-center px-4 py-2 w-auto bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-md shadow-sm hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="inline-flex items-center justify-center px-4 py-2 w-auto bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-md shadow-sm hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300"
                     onClick={() => setIsEditHeader((prev) => !prev)}
                   >
                     Save Changes
                   </motion.button>
-                </div>
+                </motion.div>
               </motion.div>
             ) : (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="bg-white rounded-lg w-full my-4 p-6 shadow-lg hover:shadow-xl transition-shadow"
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="bg-white rounded-lg w-full my-4 p-6 shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                <div className="space-y-4">
-                  <h2
+                <motion.div
+                  className="space-y-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.h2
+                    initial={{ x: -20 }}
+                    animate={{ x: 0 }}
+                    transition={{ delay: 0.3 }}
                     className="font-normal"
                     style={{
                       fontSize: `${surveyData?.header_text?.size}px`,
@@ -352,8 +534,11 @@ const EditSubmittedSurvey = () => {
                     }}
                   >
                     {surveyData?.topic}
-                  </h2>
-                  <p
+                  </motion.h2>
+                  <motion.p
+                    initial={{ x: -20 }}
+                    animate={{ x: 0 }}
+                    transition={{ delay: 0.4 }}
                     className="text-gray-600"
                     style={{
                       fontSize: `${surveyData?.body_text?.size}px`,
@@ -361,15 +546,25 @@ const EditSubmittedSurvey = () => {
                     }}
                   >
                     {surveyData?.description}
-                  </p>
-                  <div className="flex justify-end">
+                  </motion.p>
+                  <motion.div
+                    className="flex justify-end"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
+                      }}
                       whileTap={{ scale: 0.95 }}
-                      className="inline-flex items-center px-4 h-10 border border-purple-300 text-sm font-medium rounded-full text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                      className="inline-flex items-center px-4 h-10 border border-purple-300 text-sm font-medium rounded-full text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300"
                       onClick={() => setIsEditHeader((prev) => !prev)}
                     >
-                      <svg
+                      <motion.svg
+                        whileHover={{ rotate: 180 }}
+                        transition={{ duration: 0.3 }}
                         className="w-4 h-4 mr-2"
                         fill="none"
                         stroke="currentColor"
@@ -381,405 +576,409 @@ const EditSubmittedSurvey = () => {
                           strokeWidth={2}
                           d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                         />
-                      </svg>
+                      </motion.svg>
                       Edit
                     </motion.button>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </motion.div>
             )}
           </div>
 
+          {/* {console.log(surveyData?.sections[currentSection]?.questions)} */}
           {/* @ts-ignore */}
           {surveyData?.sections[currentSection]?.questions?.map(
             (item: any, index: number) => (
               <div key={index} className="mb-4">
-                {isEdit &&
-                editIndex === index &&
-                item.question_type === "matrix_checkbox" ? (
-                  <MatrixQuestionEdit
-                    question={item.question}
-                    options={item.options}
-                    is_required={item.is_required}
-                    questionType={item.question_type}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                  />
-                ) : isEdit && editIndex === index ? (
-                  <MultiChoiceQuestionEdit
-                    // index={index + 1}
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    is_required={item.is_required}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                  />
-                ) : item.question_type === "multiple_choice" ||
-                  item.question_type === "multi_choice" ? (
-                  <MultiChoiceQuestion
-                    question={item.question}
-                    options={item.options}
-                    is_required={item.is_required}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                {
+                  // isEdit &&
+                  // editIndex === index &&
+                  // item.question_type === "matrix_checkbox" ? (
+                  //   <MatrixQuestionEdit
+                  //     question={item.question}
+                  //     options={item.options}
+                  //     is_required={item.is_required}
+                  //     questionType={item.question_type}
+                  //     onSave={handleSave}
+                  //     onCancel={handleCancel}
+                  //   />
+                  // ) :
+                  isEdit && editIndex === index ? (
+                    <MultiChoiceQuestionEdit
+                      // index={index + 1}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      is_required={item.is_required}
+                      onSave={handleSave}
+                      onCancel={handleCancel}
+                    />
+                  ) : item.question_type === "multiple_choice" ||
+                    item.question_type === "multi_choice" ? (
+                    <MultiChoiceQuestion
+                      question={item.question}
+                      options={item.options}
+                      is_required={item.is_required}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    index={index + 1}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    setEditId={setEditIndex}
-                  />
-                ) : item.question_type === "comment" ||
-                  item.question_type === "long_text" ? (
-                  <CommentQuestion
-                    key={index}
-                    index={index + 1}
-                    questionType={item.question_type}
-                    question={item.question}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      index={index + 1}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      setEditId={setEditIndex}
+                    />
+                  ) : item.question_type === "comment" ||
+                    item.question_type === "long_text" ? (
+                    <CommentQuestion
+                      key={index}
+                      index={index + 1}
+                      questionType={item.question_type}
+                      question={item.question}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                  />
-                ) : item.question_type === "linear_Scale" ? (
-                  <LinearScaleQuestion
-                    question={item.question}
-                    scaleStart={item.scaleStart}
-                    scaleEnd={item.scaleEnd}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    index={index + 1}
-                  />
-                ) : item.question_type === "likert_scale" ? (
-                  <LikertScaleQuestion
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    index={index + 1}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                    />
+                  ) : item.question_type === "linear_Scale" ? (
+                    <LinearScaleQuestion
+                      question={item.question}
+                      scaleStart={item.scaleStart}
+                      scaleEnd={item.scaleEnd}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      index={index + 1}
+                    />
+                  ) : item.question_type === "likert_scale" ? (
+                    <LikertScaleQuestion
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      index={index + 1}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "star_rating" ? (
-                  <StarRatingQuestion
-                    question={item.question}
-                    // maxRating={5}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    index={index + 1}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "star_rating" ? (
+                    <StarRatingQuestion
+                      question={item.question}
+                      // maxRating={5}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      index={index + 1}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "matrix_multiple_choice" ||
-                  item.question_type === "matrix_checkbox" ? (
-                  <MatrixQuestion
-                    key={index}
-                    index={index + 1}
-                    // options={item.options}
-                    rows={item.rows}
-                    columns={item.columns}
-                    questionType={item.question_type}
-                    question={item.question}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "matrix_multiple_choice" ||
+                    item.question_type === "matrix_checkbox" ? (
+                    <MatrixQuestion
+                      key={index}
+                      index={index + 1}
+                      // options={item.options}
+                      rows={item.rows}
+                      columns={item.columns}
+                      questionType={item.question_type}
+                      question={item.question}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "single_choice" ? (
-                  <SingleChoiceQuestion
-                    index={index + 1}
-                    key={index}
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "single_choice" ? (
+                    <SingleChoiceQuestion
+                      index={index + 1}
+                      key={index}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "checkbox" ? (
-                  <CheckboxQuestion
-                    key={index}
-                    index={index + 1}
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "checkbox" ? (
+                    <CheckboxQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "rating_scale" ? (
-                  <RatingScaleQuestion
-                    key={index}
-                    index={index + 1}
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "rating_scale" ? (
+                    <RatingScaleQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "drop_down" ? (
-                  <DropdownQuestion
-                    index={index + 1}
-                    key={index}
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "drop_down" ? (
+                    <DropdownQuestion
+                      index={index + 1}
+                      key={index}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "number" ? (
-                  <NumberQuestion
-                    key={index}
-                    index={index + 1}
-                    question={item.question}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "number" ? (
+                    <NumberQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "short_text" ? (
-                  <ShortTextQuestion
-                    key={index}
-                    index={index + 1}
-                    question={item.question}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "short_text" ? (
+                    <ShortTextQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "boolean" ? (
-                  <BooleanQuestion
-                    key={index}
-                    index={index + 1}
-                    question={item.question}
-                    options={item.options}
-                    questionType={item.question_type}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // onSave={handleAISave}
-                    is_required={item.is_requied}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "boolean" ? (
+                    <BooleanQuestion
+                      key={index}
+                      index={index + 1}
+                      question={item.question}
+                      options={item.options}
+                      questionType={item.question_type}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // onSave={handleAISave}
+                      is_required={item.is_requied}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : item.question_type === "slider" ? (
-                  <SliderQuestion
-                    question={item.question}
-                    options={item.options}
-                    // step={item.options.length}
-                    questionType={item.question_type}
-                    index={index + 1}
-                    is_required={item.is_required}
-                    EditQuestion={() => EditQuestion(index)}
-                    DeleteQuestion={() => handleDeleteQuestion(index)}
-                    // @ts-expect-error expect here
-                    onSave={handleAISave}
-                    setIsRequired={() => {
-                      const updatedSections = [...questions];
-                      const updatedSection = {
-                        ...updatedSections[currentSection],
-                      };
-                      const updatedQuestions = [...updatedSection.questions];
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : item.question_type === "slider" ? (
+                    <SliderQuestion
+                      question={item.question}
+                      options={item.options}
+                      // step={item.options.length}
+                      questionType={item.question_type}
+                      index={index + 1}
+                      is_required={item.is_required}
+                      EditQuestion={() => EditQuestion(index)}
+                      DeleteQuestion={() => handleDeleteQuestion(index)}
+                      // @ts-expect-error expect here
+                      onSave={handleAISave}
+                      setIsRequired={() => {
+                        const updatedSections = [...questions];
+                        const updatedSection = {
+                          ...updatedSections[currentSection],
+                        };
+                        const updatedQuestions = [...updatedSection.questions];
 
-                      updatedQuestions[index] = {
-                        ...updatedQuestions[index],
-                        is_required: !item.is_required,
-                      };
+                        updatedQuestions[index] = {
+                          ...updatedQuestions[index],
+                          is_required: !item.is_required,
+                        };
 
-                      updatedSection.questions = updatedQuestions;
-                      updatedSections[currentSection] = updatedSection;
-                    }}
-                  />
-                ) : (
-                  "Unsupported question type"
-                )}
+                        updatedSection.questions = updatedQuestions;
+                        updatedSections[currentSection] = updatedSection;
+                      }}
+                    />
+                  ) : (
+                    <>{item?.question_type}</>
+                  )
+                }
               </div>
             )
           )}
@@ -798,7 +997,8 @@ const EditSubmittedSurvey = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {isSidebar ? <StyleEditor /> : <QuestionType />}
+          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
+          <StyleEditor />
         </div>
       </div>
     </div>

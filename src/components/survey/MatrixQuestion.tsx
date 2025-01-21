@@ -17,9 +17,9 @@ Visual representation:
 │    [Matrix Table - White bg, rounded corners, light shadow]  │
 │    ┌──────────────────────────────────────────────────────┐  │
 │    │           Col 1     Col 2     Col 3     Col 4        │  │
-│    │ Row 1      ○         ○         ○         ○          │  │
-│    │ Row 2      ○         ○         ○         ○          │  │
-│    │ Row 3      ○         ○         ○         ○          │  │
+│    │ Row 1      □         □         □         □          │  │
+│    │ Row 2      □         □         □         □          │  │
+│    │ Row 3      □         □         □         □          │  │
 │    └──────────────────────────────────────────────────────┘  │
 │                                                              │
 │    [Edit/Delete Buttons - If in edit mode]                   │
@@ -36,6 +36,7 @@ Key Features:
 - Clear visual hierarchy
 - Interactive elements properly positioned
 - Maintains spacing patterns from other components
+- Supports multiple selections per row for matrix_multiple_choice type
 */
 
 import { draggable, stars } from "@/assets/images";
@@ -47,6 +48,7 @@ import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
 import { Check, GripVertical, Grid, SquareMousePointer } from "lucide-react";
 import { Switch } from "../ui/switch";
+import { Checkbox } from "../ui/shadcn-checkbox";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import ActionButtons from "./ActionButtons";
 
@@ -96,6 +98,40 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
+  const [selectedItems, setSelectedItems] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  const handleMatrixItemSelect = (rowIndex: number, colIndex: number) => {
+    if (questionType === "matrix_multiple_choice") {
+      // For matrix_multiple_choice, allow multiple selections
+      const key = `${rowIndex}-${colIndex}`;
+      setSelectedItems((prev) => ({
+        ...prev,
+        [key]: !prev[key],
+      }));
+    } else {
+      // For matrix_checkbox, only allow one selection per row
+      const newSelectedItems = { ...selectedItems };
+
+      // Clear all selections in the current row
+      columns?.forEach((_, columnIndex) => {
+        const key = `${rowIndex}-${columnIndex}`;
+        newSelectedItems[key] = false;
+      });
+
+      // Set the new selection
+      const key = `${rowIndex}-${colIndex}`;
+      newSelectedItems[key] = true;
+
+      setSelectedItems(newSelectedItems);
+    }
+
+    if (onChange) {
+      onChange(rowIndex, colIndex);
+    }
+  };
+
   const getStatus = (status: string) => {
     switch (status) {
       case "passed":
@@ -113,6 +149,10 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
       default:
         return null;
     }
+  };
+
+  const headerBgStyle = {
+    backgroundColor: colorTheme ? `${colorTheme}15` : "#F5F0FF",
   };
 
   return (
@@ -163,11 +203,15 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                 <table className="w-full border-collapse bg-white rounded-lg shadow-sm">
                   <thead>
                     <tr>
-                      <th className="border-b border-gray-200 text-start p-3"></th>
+                      <th
+                        className="border-b border-gray-200 text-start p-2"
+                        style={headerBgStyle}
+                      ></th>
                       {columns?.map((header, headerIndex) => (
                         <th
                           key={headerIndex}
-                          className="border-b border-gray-200 text-center p-3 text-gray-700 font-medium"
+                          className="border-b border-gray-200 text-center p-2 text-gray-700 font-medium"
+                          style={headerBgStyle}
                         >
                           {header}
                         </th>
@@ -177,21 +221,25 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                   <tbody>
                     {rows?.map((rowLabel, rowIndex) => (
                       <tr key={rowIndex} className="hover:bg-gray-50">
-                        <td className="border-b border-gray-200 text-start p-3 text-gray-700">
+                        <td
+                          className="border-b border-gray-200 text-start p-2 text-gray-700 font-medium"
+                          style={headerBgStyle}
+                        >
                           {rowLabel}
                         </td>
                         {columns?.map((_, columnIndex) => (
                           <td
                             key={columnIndex}
-                            className="border-b border-gray-200 text-center p-3"
+                            className="border-b border-gray-200 text-center p-2"
                           >
-                            <input
-                              type="radio"
-                              name={`matrix-${index}-${rowIndex}`}
-                              className="w-4 h-4 text-purple-600 focus:ring-purple-500"
-                              onChange={() =>
-                                onChange && onChange(rowIndex, columnIndex)
+                            <Checkbox
+                              checked={
+                                selectedItems[`${rowIndex}-${columnIndex}`]
                               }
+                              onCheckedChange={() =>
+                                handleMatrixItemSelect(rowIndex, columnIndex)
+                              }
+                              className="w-4 h-4"
                             />
                           </td>
                         ))}
