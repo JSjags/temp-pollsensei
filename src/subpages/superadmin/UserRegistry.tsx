@@ -19,9 +19,8 @@ import { toast } from "react-toastify";
 
 interface SubmitData {
   email: string;
-  organization_id?: string; 
+  organization_id?: string;
 }
-
 
 interface PathParamsProps {
   subscription_type?: string;
@@ -80,8 +79,8 @@ const UserRegistry: React.FC = () => {
   const { data, isLoading, error, refetch, isFetching } =
     useUserRegistryQuery(queryArgs);
 
-  const [updateDisabledStatus, { }] = useUpdateDisableStatusMutation();
-
+  const [updateDisabledStatus, { isLoading: isDisabling }] =
+    useUpdateDisableStatusMutation();
 
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
@@ -105,7 +104,7 @@ const UserRegistry: React.FC = () => {
     refetch(); // Optional: Trigger a refetch to clear the results
   };
 
-  const handleSubmit = async ( email:string ) => {
+  const handleSubmit = async (email: string) => {
     const editData = {
       email: email,
     };
@@ -118,7 +117,6 @@ const UserRegistry: React.FC = () => {
       toast.error("Failed: " + err.message);
     }
   };
-  
 
   const navigatePage = (direction: "next" | "prev") => {
     setCurrentPage((prevIndex) => {
@@ -216,9 +214,9 @@ const UserRegistry: React.FC = () => {
               <th className="text-left py-3 px-4 font-medium text-sm">
                 User Name
               </th>
-              <th className="text-left py-3 px-4 font-medium text-sm">
+              {/* <th className="text-left py-3 px-4 font-medium text-sm">
                 Account Type
-              </th>
+              </th> */}
               <th className="text-left py-3 px-4 font-medium text-sm">
                 Email Address
               </th>
@@ -226,17 +224,17 @@ const UserRegistry: React.FC = () => {
                 Country
               </th>
               <th className="text-left py-3 px-4 font-medium text-sm">
-                Subscription
+                Status
               </th>
               <th className="text-left py-3 px-4 font-medium text-sm">
-                No. of Collaborators
+                No. of Collab...
               </th>
               <th className="text-left py-3 px-4 font-medium text-sm">Plan</th>
               <th className="text-left py-3 px-4 font-medium text-sm">
                 Created Date
               </th>
               <th className="text-left py-3 px-4 font-medium text-sm">
-                Status
+                Action
               </th>
             </tr>
           </thead>
@@ -257,7 +255,8 @@ const UserRegistry: React.FC = () => {
                   </span>
                 </td>
               </tr>
-            ) : data?.data?.data?.length === 0 || data?.data?.data?.length === undefined ? (
+            ) : data?.data?.data?.length === 0 ||
+              data?.data?.data?.length === undefined ? (
               <tr>
                 <td colSpan={6} className="text-center ">
                   <span className="flex justify-center items-center py-4 text-xs text-green-500">
@@ -288,32 +287,28 @@ const UserRegistry: React.FC = () => {
                     </Avatar>
                     {user?.name}
                   </td>
-                  <td className="py-3 px-4">
+                  {/* <td className="py-3 px-4">
                     {user?.account_type ? user?.account_type : "Not Available"}
-                  </td>
+                  </td> */}
                   <td className="py-3 px-4">{user?.email}</td>
                   <td className="py-3 px-4">
                     {user?.country ? user?.country : "Not Available"}
                   </td>
                   <td
                     className={`py-3 px-4 font-medium ${
-                      user.subscription === "Premium"
-                        ? "text-purple-600"
-                        : user.subscription === "Pro Plan"
+                      user.disabled[0].status === true
                         ? "text-red-600"
                         : "text-green-600"
                     }`}
                   >
                     <span
                       className={`py-1 px-2 rounded-full ${
-                        user.subscription === "Premium"
-                          ? "bg-[#D195FC1A]"
-                          : user.subscription === "Pro Plan"
+                        user.disabled[0].status === true
                           ? "bg-[#FFEBED]"
                           : "bg-[#D3FAEC]"
                       }`}
                     >
-                      {user?.subscription ? user?.subscription : "Free Plan"}
+                      {user.disabled[0].status === true ? "Disabled" : "Active"}
                     </span>
                   </td>
                   <td className="py-3 text-center px-4">
@@ -335,15 +330,33 @@ const UserRegistry: React.FC = () => {
                       ? formatDateOption(user.createdAt)
                       : "Not Available"}
                   </td>
-                  <td className="py-3 px-4">
-                  <Switch
-                  checked={user?.disabled[0].status}
-                  onCheckedChange={() =>
-                    handleSubmit(user?.email)
-                  }
-                  // disabled={!emailEnabled}
-                  className="data-[state=unchecked]:bg-purple-600 data-[state=checked]:bg-gray-400"
-                />
+                  <td className="py-3 px-4 flex gap-2 items-center">
+                    <button
+                      onClick={() => handleSubmit(user?.email)}
+                      disabled={isDisabling}
+                      className={`px-2 py-2 rounded-md text-white text-sm ${
+                        isDisabling
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : user?.disabled[0].status
+                          ? "bg-green-600 hover:bg-green-700"
+                          : "bg-red-600 hover:bg-red-700"
+                      }`}
+                    >
+                      {isDisabling
+                        ? "Processing..."
+                        : user?.disabled[0].status
+                        ? "Activate"
+                        : "Deactivate"}
+                    </button>
+
+                    <button
+                      // onClick={resetPassword}
+                      // disabled={isLoading}
+                      className=" py-2 px-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md disabled:bg-gray-400"
+                    >
+                      {/* {isLoading ? "Processing..." : "Reset Password"} */}
+                      Reset
+                    </button>
                   </td>
                 </tr>
               ))
@@ -351,7 +364,7 @@ const UserRegistry: React.FC = () => {
           </tbody>
         </table>
       </div>
-      
+
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">
           {totalItems > 0

@@ -51,7 +51,7 @@ const TutorialPage = () => {
     usePreviewTutorialQuery(_id, { skip: _id ? false : true });
   const [editTutorial, { isLoading: isEditLoading }] =
     useEditTutorialMutation();
-  const { data, isLoading, isError, refetch, isFetching } = useAllTutorialsQuery({
+  const { data, isLoading, error, refetch, isFetching } = useAllTutorialsQuery({
     pagesNumber: currentPage,
     filter_by: "",
   });
@@ -245,14 +245,14 @@ const TutorialPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(isLoading || isFetching) && (
+        {isLoading || isFetching && (
           <div className="text-center flex justify-center items-center w-full">
             <span className="flex justify-center items-center">
               <FadeLoader height={10} radius={1} className="mt-3" />
             </span>
           </div>
         )}
-        {isError && (
+        {error && (
           <div className="text-center w-full">
             <span className="flex justify-center items-center text-xs text-red-500">
               Something went wrong
