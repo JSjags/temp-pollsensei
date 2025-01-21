@@ -74,6 +74,7 @@ import { CookieConsent } from "@/components/primitives/CookieConsent";
 import { MixPanelProvider } from "@/contexts/MixpanelContext";
 import UpgradeModal from "@/components/subscription/modal-upgrade";
 import { SenseiProvider } from "@/contexts/SenseiContext";
+import MetaPixel from "@/components/MetaPixel";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -98,6 +99,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AOSInit />
+      <MetaPixel />
       <head>
         {/* Hotjar Tracking Code (Production Only) */}
         {process.env.NODE_ENV === "production" && (
