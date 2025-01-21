@@ -44,7 +44,7 @@ const SuperAdminSurveys = () => {
   };
   return (
     <div className='p-6 bg-gray-50 min-h-screen w-full'>
-       <h1 className="text-sm font-bold mb-6">Admin created survey table </h1>
+       <h1 className="text-sm font-bold mb-6">Created survey table </h1>
             <div className="overflow-x-auto w-full">
         <table className="w-full border-collapse border-gray-200 overflow-x-auto">
           <thead className="bg-gray-100">
