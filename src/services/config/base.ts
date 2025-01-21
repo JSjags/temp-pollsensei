@@ -21,7 +21,7 @@ const environment: EnvironmentConfig = {
   },
 };
 
-const currentEnvironment = (process.env.NEXT_APP_ENV ||
+const currentEnvironment = (process.env.NEXT_PUBLIC_APP_ENV ||
   "development") as keyof EnvironmentConfig;
 
 export default environment[currentEnvironment];

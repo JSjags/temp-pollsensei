@@ -99,6 +99,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AOSInit />
+      <MetaPixel />
       <head>
         {/* Hotjar Tracking Code (Production Only) */}
         {process.env.NODE_ENV === "production" && (
@@ -115,7 +116,6 @@ export default function RootLayout({
             }}
           />
         )}
-        <MetaPixel />
       </head>
       <body
         className={cn(
