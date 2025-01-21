@@ -74,6 +74,7 @@ import { CookieConsent } from "@/components/primitives/CookieConsent";
 import { MixPanelProvider } from "@/contexts/MixpanelContext";
 import UpgradeModal from "@/components/subscription/modal-upgrade";
 import { SenseiProvider } from "@/contexts/SenseiContext";
+import MetaPixel from "@/components/MetaPixel";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -114,6 +115,7 @@ export default function RootLayout({
             }}
           />
         )}
+        <MetaPixel />
       </head>
       <body
         className={cn(
