@@ -1,11 +1,12 @@
 "use client";
 
 import PageControl from "@/components/common/PageControl";
-import { useAllTutorialsQuery } from "@/services/superadmin.service";
-import React, { useState } from "react";
+import { useGetTutorials } from "@/hooks/useGetRequests";
+import { TUTORIAL_ENUM } from "@/services/api/constants.api";
 import Image from "next/image";
-import { FadeLoader } from "react-spinners";
+import { useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FadeLoader } from "react-spinners";
 
 interface Card {
   title: string;
@@ -16,12 +17,12 @@ interface Card {
 
 const VideoTutorial = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, isError, refetch } = useAllTutorialsQuery({
-    pagesNumber: currentPage,
-    filter_by: "video",
+  const { data, isLoading, isError, refetch } = useGetTutorials({
+    filter: TUTORIAL_ENUM.video,
+    page: currentPage,
   });
 
-  const totalItems = data?.data?.total || 0;
+  const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
   const navigatePage = (direction: "next" | "prev") => {
@@ -51,7 +52,7 @@ const VideoTutorial = () => {
             </span>
           </div>
         ) : (
-          data?.data?.data.map((card: any, index: number) => (
+          data?.data.map((card: any, index: number) => (
             <div
               key={index}
               className="flex flex-col bg-white shadow rounded-lg overflow-hidden"

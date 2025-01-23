@@ -28,6 +28,11 @@ import PublishFaq from "@/components/superadmin-faqs/Publish";
 import { Modal } from "@/components/superadmin-faqs/Modal";
 import { FaFileUpload } from "react-icons/fa";
 import { cn } from "@/lib/utils";
+import {
+  apiConstantOptions,
+  TUTORIAL_ENUM,
+} from "@/services/api/constants.api";
+import { useGetTutorials } from "@/hooks/useGetRequests";
 
 const WebArticle = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -180,12 +185,13 @@ const WebArticle = () => {
       toast.error("Error deleting FAQ");
     }
   };
-  const { data, isLoading, isError, refetch } = useAllTutorialsQuery({
-    pagesNumber: currentPage,
-    filter_by: "web",
+
+  const { data, isLoading, isError, refetch } = useGetTutorials({
+    filter: TUTORIAL_ENUM.web,
+    page: currentPage,
   });
 
-  const totalItems = data?.data?.total || 0;
+  const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
   const navigatePage = (direction: "next" | "prev") => {
@@ -247,7 +253,7 @@ const WebArticle = () => {
             </span>
           </div>
         ) : (
-          data?.data?.data.map((card: any, index: number) => (
+          data?.data.map((card: any, index: number) => (
             <div
               key={index}
               className="relative flex flex-col bg-white shadow rounded-lg overflow-hidden"
@@ -380,7 +386,7 @@ const WebArticle = () => {
                         </div>
                       </div>
                       <div className="px-10 py-4">
-                        <p className="">{previewTutorial?.data?.description}</p>
+                        <p className="">{previewTutorial?.description}</p>
                       </div>
                     </div>
                   )}
@@ -435,18 +441,16 @@ const WebArticle = () => {
                                 id="type"
                               >
                                 <option value="">{formData.type}</option>
-                                {[
-                                  { value: "video", label: "Video" },
-                                  { value: "image", label: "Image" },
-                                  { value: "Link", label: "Link" },
-                                ].map((option: any) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
+                                {apiConstantOptions?.TUTORIAL_TYPES?.map(
+                                  (option: any) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  )
+                                )}
                               </select>
                             </div>
                             <div>
