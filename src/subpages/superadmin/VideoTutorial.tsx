@@ -17,7 +17,7 @@ interface Card {
 
 const VideoTutorial = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, isError, refetch } = useGetTutorials({
+  const { data, isLoading, isError, refetch, isFetching } = useGetTutorials({
     filter: TUTORIAL_ENUM.video,
     page: currentPage,
   });
@@ -45,7 +45,7 @@ const VideoTutorial = () => {
               <FadeLoader height={10} radius={1} className="mt-3" />
             </span>
           </div>
-        ) : error ? (
+        ) : isError ? (
           <div className="text-center w-full">
             <span className="flex justify-center items-center text-xs text-red-500">
               Something went wrong

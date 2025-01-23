@@ -257,7 +257,7 @@ const TutorialPage = () => {
               </span>
             </div>
           ))}
-        {error && (
+        {isError && (
           <div className="text-center w-full">
             <span className="flex justify-center items-center text-xs text-red-500">
               Something went wrong
