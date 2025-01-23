@@ -190,7 +190,7 @@ const WebArticle = () => {
     }
   };
 
-  const { data, isLoading, isError, refetch } = useGetTutorials({
+  const { data, isLoading, isFetching, isError, refetch } = useGetTutorials({
     filter: TUTORIAL_ENUM.web,
     page: currentPage,
   });
@@ -247,7 +247,7 @@ const WebArticle = () => {
               <FadeLoader height={10} radius={1} className="mt-3" />
             </span>
           </div>
-        ) : error ? (
+        ) : isError ? (
           <div className="text-center w-full">
             <span className="flex justify-center items-center text-xs text-red-500">
               Something went wrong
