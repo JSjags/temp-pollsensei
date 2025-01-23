@@ -1,9 +1,8 @@
 // lib/axiosInstance.ts
-import axios from "axios";
-import { cn } from "./utils";
-import { toast } from "react-toastify";
-import environment from "@/services/config/base";
 import store from "@/redux/store";
+import environment from "@/services/config/base";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 // Assuming you have a function to get the token from storage or some other source
 const getToken = () => {

@@ -22,6 +22,12 @@ import {
 import TextArea from "../ui/TextArea";
 import { handleApiErrors, isValidResponse } from "@/lib/utils";
 import AppReactQuill from "../common/forms/AppReactQuill";
+import {
+  apiConstantOptions,
+  apiConstants,
+  queryKeys,
+} from "@/services/api/constants.api";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Tab {
   label: string;
@@ -55,6 +61,7 @@ const TutorialNavigation: React.FC = () => {
   const [createTutorial, { isLoading, isSuccess, error }] =
     useCreateTutorialMutation();
   const [quilValue, setQuilValue] = useState("");
+  const queryClient = useQueryClient();
   const [isSheetOpened, setIsSheetOpened] = useState(false);
 
   const tabs: Tab[] = [
@@ -111,6 +118,7 @@ const TutorialNavigation: React.FC = () => {
       if (isValidResponse(response)) {
         setIsSheetOpened(false);
         toast.success(response?.message ?? "Tutorial created successfully");
+        queryClient?.invalidateQueries({ queryKey: [queryKeys.TUTORIALS] });
       } else handleApiErrors(response?.message);
     } catch (err: any) {
       toast.error(
@@ -175,11 +183,7 @@ const TutorialNavigation: React.FC = () => {
                     {({ input, meta }) => (
                       <SelectTag
                         label="Type"
-                        options={[
-                          { value: "video", label: "Video" },
-                          { value: "image", label: "Image" },
-                          { value: "Link", label: "Link" },
-                        ]}
+                        options={apiConstantOptions?.TUTORIAL_TYPES}
                         placeholder="Select a Tutorial type"
                         form={form as any}
                         {...input}

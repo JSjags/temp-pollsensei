@@ -9,6 +9,7 @@ import DuplicateLoader from "@/components/common/DuplicateLoader";
 import AppLoadingSkeleton from "@/components/common/AppLoadingSkeleton";
 import EmptyTableData from "@/components/common/EmptyTableData";
 import { formatDate } from "@/lib/helpers";
+import routes from "@/config/routes";
 
 const ArticlesSection = (): JSX.Element => {
   const { data, isLoading } = useQuery({
@@ -34,10 +35,12 @@ const ArticlesSection = (): JSX.Element => {
         ) : !!data?.data && data?.data?.length > 0 ? (
           <>
             {data?.data?.map((value, key) => (
-              <dl>
-                <dt className="text-xl font-semibold text-purple-700 hover:underline cursor-pointer">
-                  {value?.title}
-                </dt>
+              <dl key={key}>
+                <Link href={routes.SINGLE_ARTICLE_PAGE(value?.slug)}>
+                  <dt className="text-xl font-semibold text-purple-700 hover:underline cursor-pointer">
+                    {value?.title}
+                  </dt>
+                </Link>
                 <dd className="text-gray-600 mt-2">{value?.description}</dd>
                 <p className="text-gray-500 text-sm mt-1">
                   {formatDate(value?.createdAt)}

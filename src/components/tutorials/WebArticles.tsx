@@ -1,22 +1,12 @@
-import { handleApiErrors, isValidResponse } from "@/lib/utils";
-import { getTutorials } from "@/services/api/tutorial";
-import { useQuery } from "@tanstack/react-query";
+import { useGetTutorials } from "@/hooks/useGetRequests";
+import { TUTORIAL_ENUM } from "@/services/api/constants.api";
 import DuplicateLoader from "../common/DuplicateLoader";
 import EmptyTableData from "../common/EmptyTableData";
-import { ResourceCardLoader, ResourceCard } from "./components/ResourceCard";
+import { ResourceCard, ResourceCardLoader } from "./components/ResourceCard";
 
 const WebArticles = (): JSX.Element => {
-  const { data, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["getAllWebArticles"],
-    queryFn: async () => {
-      const response = await getTutorials("web");
-      if (isValidResponse(response)) {
-        return response?.data;
-      } else {
-        handleApiErrors(response);
-        return null;
-      }
-    },
+  const { data, isLoading, refetch, isRefetching } = useGetTutorials({
+    filter: TUTORIAL_ENUM.web,
   });
 
   return (
