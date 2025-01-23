@@ -176,6 +176,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body: body,
       }),
     }),
+    resetUserPassword: builder.mutation({
+      query: (body) => ({
+        url: `superadmin/users/reset-user-password`, // {{base_url}}/superadmin/users/reset-user-password
+        method: "PATCH",
+        body: body,
+      }),
+    }),
     deleteFAQs: builder.mutation({
       query: (id) => ({
         url: `/superadmin/faq/${id}`,
@@ -304,4 +311,5 @@ export const {
   useLazyDownloadSingleResponseQuery,
   useUpdateDisableStatusMutation,
   useGetSuperAdminSurveyQuery,
+  useResetUserPasswordMutation,
 } = surveyApiSlice;
