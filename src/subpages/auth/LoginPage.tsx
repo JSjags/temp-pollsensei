@@ -6,15 +6,16 @@ import validate from "validate.js";
 import Link from "next/link";
 import { ClipLoader } from "react-spinners";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import steps from "../../assets/auth/steps2.svg";
 import logo from "../../assets/auth/logo.svg";
 import google from "../../assets/auth/goggle.svg";
 import facebook from "../../assets/auth/facebook.svg";
 import chat from "../../assets/auth/chat.svg";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../../redux/slices/user.slice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StateLoader from "../../components/common/StateLoader";
 import {
   useGoogleLoginMutation,
@@ -24,8 +25,10 @@ import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import { dark_theme_logo } from "@/assets/images";
 import StateLoader2 from "@/components/common/StateLoader2";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import mixpanel from "mixpanel-browser";
+import { RootState } from "@/redux/store";
+import router from "next/router";
 
 const Client_Id = process.env.VITE_NEXT_GOOGLE_REG_CLIENT_ID;
 console.log(Client_Id);
@@ -43,7 +46,14 @@ const constraints = {
   },
 };
 
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+};
+
 const LoginPage = () => {
+  const router = useRouter();
   const [loginUser, { data }] = useLoginUserMutation();
   const dispatch = useDispatch();
   const [loginState, setLoginState] = useState(true);
@@ -54,17 +64,21 @@ const LoginPage = () => {
   const searchParams = useSearchParams();
   const ed = searchParams.get("ed");
 
+  const user = useSelector((state: RootState) => state.user.user);
+
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
   const onSubmit = async (values: { email: string; password: string }) => {
-    // Track the button click with Mixpanel
     try {
       const userData = await loginUser(values).unwrap();
       dispatch(updateUser(userData.data));
       toast.success("Login success");
       setState(true);
       setLoginState(false);
-      // mixpanel.track("Google Sign-In Clicked", {
-      //   timestamp: new Date().toISOString(),
-      // });
     } catch (err: any) {
       toast.error(
         "Failed to login user " + (err?.data?.message || err.message)
@@ -83,35 +97,13 @@ const LoginPage = () => {
     setEyeState((prev) => !prev);
   };
 
-  // const googleSignUp = useGoogleLogin({
-  //   onSuccess: async (response) => {
-  //     const authCode = response.code;
-  //     const requestData = {
-  //       code: authCode,
-  //     };
-
-  //     try {
-  //       await googleLogin(requestData).unwrap();
-  //       toast.success("Log in success");
-  //     } catch (err: any) {
-  //       toast.error(
-  //         "Failed to log in user " + (err?.data?.message || err.message)
-  //       );
-  //       console.error("Failed to sign in user", err);
-  //     }
-  //   },
-  //   onError: () => console.log("Google Sign-In Failed"),
-  //   flow: "auth-code",
-  //   scope: 'https://www.googleapis.com/auth/userinfo.profile',
-  // });
-
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
-      const accessToken = response.access_token; // Directly get the access token
+      const accessToken = response.access_token;
 
       try {
         const userData = await googleLogin({ code: accessToken }).unwrap();
-        toast.success("Sign in  success");
+        toast.success("Sign in success");
         dispatch(updateUser(userData.data));
         setState(true);
         setLoginState(false);
@@ -126,176 +118,288 @@ const LoginPage = () => {
     flow: "implicit",
   });
 
+  if (user) {
+    return null;
+  }
+
   return (
-    <section className="min-h-screen flex flex-col md:flex-row">
-      <div className="auth-bg md:hidden flex items-center justify-center p-4">
-        <div className="flex items-center justify-center gap-3">
-          <Image src={logo} alt="Logo" width={32} height={32} />
-          <h1 className="auth-head">PollSensei</h1>
-        </div>
-      </div>
-      <div className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8">
-        <div className="flex flex-col items-center max-w-md w-full">
-          <div className="flex items-center justify-center gap-3 pb-10">
-            <Image src={dark_theme_logo} alt="Logo" width={200} height={32} />
-            {/* <h1 className="auth-head">PollSensei</h1> */}
-          </div>
-
+    <motion.section
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br"
+    >
+      <div className="auth-bg md:hidden flex items-center justify-center p-4 bg-gradient-to-r from-blue-600 to-blue-400">
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-center gap-3"
+        >
           <Image
-            src={steps}
-            alt="Steps"
-            className="pb-4 w-full max-w-[400px] h-auto"
-            width={300}
-            height={200}
+            src={logo}
+            alt="Logo"
+            width={32}
+            height={32}
+            className="animate-pulse"
           />
+          <h1 className="auth-head text-white font-bold">PollSensei</h1>
+        </motion.div>
+      </div>
 
-          <h3 className="auth-heading pb-5 text-center">
+      <motion.div
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.7 }}
+        className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8 bg-gradient-to-br from-blue-600 to-blue-400"
+      >
+        <div className="flex flex-col items-center max-w-md w-full">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center justify-center gap-3 pb-10"
+          >
+            <Image
+              src={dark_theme_logo}
+              alt="Logo"
+              width={200}
+              height={32}
+              className="drop-shadow-lg"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Image
+              src={steps}
+              alt="Steps"
+              className="pb-4 w-full max-w-[400px] h-auto hover:scale-105 transition-transform duration-300"
+              width={300}
+              height={200}
+            />
+          </motion.div>
+
+          <motion.h3
+            variants={fadeIn}
+            initial="initial"
+            animate="animate"
+            className="auth-heading pb-5 text-center text-white text-3xl font-bold"
+          >
             Create End-to-End <br /> Surveys with our AI tool
-          </h3>
-          <h5 className="auth-subtitle text-center">
+          </motion.h3>
+
+          <motion.h5
+            variants={fadeIn}
+            initial="initial"
+            animate="animate"
+            transition={{ delay: 0.4 }}
+            className="auth-subtitle text-center text-white/90"
+          >
             PollSensei helps you to Create suggest questions, <br /> formats,
             methodologies
-          </h5>
+          </motion.h5>
         </div>
-      </div>
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0">
+      </motion.div>
+
+      <AnimatePresence mode="wait">
         {loginState && (
-          <div className="flex justify-center flex-col max-w-[516px] w-full">
-            <div className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10">
-              <h2 className="auth-header font-sans text-center md:text-left">
-                Welcome back to PollSensei
-              </h2>
-              <p className="auth-title font-sans pt-3 text-center md:text-left">
-                The Best tool for your End-to-End Survey Solution
-              </p>
-            </div>
-
-            <Form
-              onSubmit={onSubmit}
-              validate={validateForm}
-              render={({ handleSubmit, form, submitting }) => (
-                <form onSubmit={handleSubmit} className="w-full">
-                  <Field name="email">
-                    {({ input, meta }) => (
-                      <Input
-                        label="Email"
-                        type="email"
-                        placeholder="Enter your Email"
-                        form={form as any}
-                        {...input}
-                      />
-                    )}
-                  </Field>
-
-                  <Field name="password">
-                    {({ input, meta }) => (
-                      <PasswordField
-                        id="password"
-                        eyeState={eyeState}
-                        toggleEye={() => setEyeState((prev) => !prev)}
-                        placeholder="*******"
-                        label="Password"
-                        form={form as any}
-                        {...input}
-                      />
-                    )}
-                  </Field>
-
-                  <div className="py-3 font-bold text-right">
-                    <Link href="/forgot-password">Forgot Password?</Link>
-                  </div>
-
-                  <button
-                    className="auth-btn w-full justify-center"
-                    type="submit"
-                  >
-                    {submitting ? <ClipLoader size={20} /> : "Sign In"}
-                  </button>
-                </form>
-              )}
-            />
-
-            <div className="flex justify-center pt-5">
-              <p className="bg-[#F7F7F7] rounded-[1rem] py-[2px] px-[calc(1rem/2)] text-sm">
-                Don&apos;t have an account?{" "}
-                <Link href="/register">Sign up</Link>
-              </p>
-            </div>
-
-            <div className="flex gap-3 md:gap-5 items-center pt-5">
-              <div className="border flex-grow border-[#E5EFFF]"></div>
-              <div className="auth-divider whitespace-nowrap">
-                Or <span className="hidden md:inline">Continue with</span>
-              </div>
-              <div className="border flex-grow border-[#E5EFFF]"></div>
-            </div>
-
-            <div className="social-icons flex justify-center items-center gap-4 pt-5 cursor-pointer">
-              <span
-                onClick={() => {
-                  // Track the button click with Mixpanel
-                  try {
-                    googleSignUp();
-                    mixpanel.track("Google Sign-In Clicked", {
-                      timestamp: new Date().toISOString(), // Optional: Track time
-                    });
-                  } catch (err) {
-                    console.error("Error during Google sign up:", err);
-                    toast.error("Failed to sign in with Google");
-                    // console.error("Error tracking event:", err);
-                  }
-                }}
-                className="flex justify-between items-center gap-2 border pr-2 rounded-full"
+          <motion.div
+            key="login"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0"
+          >
+            <div className="flex justify-center flex-col max-w-[516px] w-full">
+              <motion.div
+                variants={fadeIn}
+                initial="initial"
+                animate="animate"
+                className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10"
               >
-                <Image
-                  src={google}
-                  alt="Google"
-                  width={56}
-                  height={56}
-                  className="size-14"
-                />
-                <span>Sign in with your Google account</span>
-              </span>
-              {/* <Link href="">
-                <Image
-                  src={facebook}
-                  alt="Facebook"
-                  width={24}
-                  height={24}
-                  className="size-10"
-                />
-              </Link> */}
-            </div>
+                <h2 className="auth-header font-sans text-center md:text-left text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                  Welcome back to PollSensei
+                </h2>
+                <p className="auth-title font-sans pt-3 text-center md:text-left text-gray-600">
+                  The Best tool for your End-to-End Survey Solution
+                </p>
+              </motion.div>
 
-            <div className="flex justify-end items-center mt-4">
-              <p className="mr-2">Need Help?</p>
-              <Image
-                src={chat}
-                alt="Chat"
-                className="object-cover size-20"
-                width={24}
-                height={24}
+              <Form
+                onSubmit={onSubmit}
+                validate={validateForm}
+                render={({ handleSubmit, form, submitting }) => (
+                  <motion.form
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    onSubmit={handleSubmit}
+                    className="w-full space-y-4"
+                  >
+                    <Field name="email">
+                      {({ input, meta }) => (
+                        <Input
+                          label="Email"
+                          type="email"
+                          placeholder="Enter your Email"
+                          form={form as any}
+                          {...input}
+                        />
+                      )}
+                    </Field>
+
+                    <Field name="password">
+                      {({ input, meta }) => (
+                        <PasswordField
+                          id="password"
+                          eyeState={eyeState}
+                          toggleEye={() => setEyeState((prev) => !prev)}
+                          placeholder="*******"
+                          label="Password"
+                          form={form as any}
+                          {...input}
+                        />
+                      )}
+                    </Field>
+
+                    <div className="py-3 font-bold text-right">
+                      <Link
+                        href="/forgot-password"
+                        className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent hover:from-[#5B03B2] hover:to-[#9D50BB] transition-colors"
+                      >
+                        Forgot Password?
+                      </Link>
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="auth-btn w-full justify-center bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                      type="submit"
+                    >
+                      {submitting ? (
+                        <ClipLoader size={20} color="white" />
+                      ) : (
+                        "Sign In"
+                      )}
+                    </motion.button>
+                  </motion.form>
+                )}
               />
+
+              <motion.div
+                variants={fadeIn}
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.4 }}
+                className="flex justify-center pt-5"
+              >
+                <p className="bg-white shadow-md rounded-[1rem] py-2 px-4 text-sm">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/register"
+                    className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent hover:from-[#5B03B2] hover:to-[#9D50BB] font-semibold"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </motion.div>
+
+              <div className="flex gap-3 md:gap-5 items-center pt-5">
+                <div className="border flex-grow border-[#E5EFFF]"></div>
+                <div className="auth-divider whitespace-nowrap text-gray-500">
+                  or <span className="hidden md:inline">continue with</span>
+                </div>
+                <div className="border flex-grow border-[#E5EFFF]"></div>
+              </div>
+
+              <motion.div
+                variants={fadeIn}
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.6 }}
+                className="social-icons flex justify-center items-center gap-4 pt-5"
+              >
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    try {
+                      googleSignUp();
+                      mixpanel.track("Google Sign-In Clicked", {
+                        timestamp: new Date().toISOString(),
+                      });
+                    } catch (err) {
+                      console.error("Error during Google sign up:", err);
+                      toast.error("Failed to sign in with Google");
+                    }
+                  }}
+                  className="flex justify-between items-center gap-2 border pr-4 rounded-full hover:shadow-lg transition-shadow duration-300 cursor-pointer bg-white"
+                >
+                  <Image
+                    src={google}
+                    alt="Google"
+                    width={56}
+                    height={56}
+                    className="size-14"
+                  />
+                  <span className="text-gray-700">
+                    Sign in with your Google account
+                  </span>
+                </motion.span>
+              </motion.div>
+
+              <motion.div
+                variants={fadeIn}
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.8 }}
+                className="flex justify-end items-center mt-4"
+              >
+                <p className="mr-2 text-gray-600">Need Help?</p>
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Image
+                    src={chat}
+                    alt="Chat"
+                    className="object-cover size-20 cursor-pointer"
+                    width={24}
+                    height={24}
+                  />
+                </motion.div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         )}
+
         {state && (
-          <StateLoader2
-            defaultGoto={"/login"}
-            directRoute={
-              ed
-                ? ed === "2"
-                  ? "/surveys/edit-survey"
-                  : ed === "3"
-                  ? "/surveys/add-question-m"
+          <motion.div
+            key="loader"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <StateLoader2
+              defaultGoto={"/login"}
+              directRoute={
+                ed
+                  ? ed === "2"
+                    ? "/surveys/edit-survey"
+                    : ed === "3"
+                    ? "/surveys/add-question-m"
+                    : undefined
                   : undefined
-                : undefined
-            }
-          />
+              }
+            />
+          </motion.div>
         )}
-        {/* {state && <StateLoader goto="/dashboard" />} */}
-      </div>
-    </section>
+      </AnimatePresence>
+    </motion.section>
   );
 };
 

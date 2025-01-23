@@ -5,7 +5,12 @@ import { RootState } from "@/redux/store";
 import { saveTheme } from "@/redux/slices/survey.slice";
 import { motion } from "framer-motion";
 
-const ThemeSelector = () => {
+interface ThemeSelectorProps {
+  initialTheme?: string;
+  setSurveyData?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+const ThemeSelector = ({ initialTheme, setSurveyData }: ThemeSelectorProps) => {
   const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state?.survey?.theme);
 
@@ -15,6 +20,20 @@ const ThemeSelector = () => {
     { id: "sparkly", image: sparkly, label: "Sparkly" },
   ];
 
+  console.log(initialTheme);
+
+  const handleThemeChange = (themeId: string) => {
+    dispatch(saveTheme(themeId));
+    if (setSurveyData) {
+      setSurveyData((prev: any) => ({
+        ...prev,
+        theme: themeId,
+      }));
+    }
+  };
+
+  const currentTheme = initialTheme || theme;
+
   return (
     <div className="theme-selector px-10 border-b py-5">
       <h4 className="font-bold">Theme</h4>
@@ -23,13 +42,13 @@ const ThemeSelector = () => {
           <div
             key={item.id}
             className="flex-1 flex flex-col w-1/3 h-24 relative"
-            onClick={() => dispatch(saveTheme(item.id))}
+            onClick={() => handleThemeChange(item.id)}
           >
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{
-                scale: theme === item.id ? 1 : 0,
-                opacity: theme === item.id ? 1 : 0,
+                scale: currentTheme === item.id ? 1 : 0,
+                opacity: currentTheme === item.id ? 1 : 0,
               }}
               transition={{ duration: 0.3, type: "spring", damping: 20 }}
               className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] rounded-full p-1.5 z-10"
@@ -52,7 +71,9 @@ const ThemeSelector = () => {
               src={item.image}
               alt=""
               className={`${
-                theme === item.id ? "border-2 rounded-lg border-[#9D50BB]" : ""
+                currentTheme === item.id
+                  ? "border-2 rounded-lg border-[#9D50BB]"
+                  : ""
               } w-full`}
             />
             <span className="text-sm font-normal">{item.label}</span>

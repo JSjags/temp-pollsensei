@@ -14,20 +14,20 @@ export const fontOptions: FontOption[] = [
     label: "Brush Script MT",
     className: "font-brush-script",
   },
-  //   { value: "Lexend", label: "Lexend", className: "font-lexend" },
-  //   { value: "Roboto", label: "Roboto", className: "font-roboto" },
-  //   {
-  //     value: "Playfair Display",
-  //     label: "Playfair Display",
-  //     className: "font-playfair",
-  //   },
-  //   { value: "Montserrat", label: "Montserrat", className: "font-montserrat" },
-  //   { value: "Lora", label: "Lora", className: "font-lora" },
-  //   {
-  //     value: "Merriweather",
-  //     label: "Merriweather",
-  //     className: "font-merriweather",
-  //   },
+  { value: "Lexend", label: "Lexend", className: "font-lexend" },
+  { value: "Roboto", label: "Roboto", className: "font-roboto" },
+  {
+    value: "Playfair Display",
+    label: "Playfair Display",
+    className: "font-playfair-display",
+  },
+  { value: "Montserrat", label: "Montserrat", className: "font-montserrat" },
+  { value: "Lora", label: "Lora", className: "font-lora" },
+  {
+    value: "Merriweather",
+    label: "Merriweather",
+    className: "font-merriweather",
+  },
 ];
 
 export const sizeOptions: SizeOption[] = [

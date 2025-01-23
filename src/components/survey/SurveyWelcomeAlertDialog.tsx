@@ -45,9 +45,9 @@ export default function SurveyWelcomeAlertDialog({
   return (
     <Dialog open={showModal} onOpenChange={setShowModal}>
       <DialogContent
-        className="sm:max-w-md z-[1000]"
+        className="sm:max-w-md z-[100000]"
         buttonClassName="hidden"
-        overlayClassName="backdrop-blur-sm z-[1000]"
+        overlayClassName="backdrop-blur-sm z-[100000]"
       >
         <DialogHeader className="gap-0">
           <Button

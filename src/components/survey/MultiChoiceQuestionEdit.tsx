@@ -24,6 +24,9 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/shadcn-checkbox";
 import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/shadcn-textarea";
+import { Star } from "lucide-react";
 
 interface MultiChoiceQuestionEditProps {
   question: string;
@@ -59,7 +62,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   setIsRequired,
   index,
   minValue: initialMinValue = 0,
-  maxValue: initialMaxValue = 100,
+  maxValue: initialMaxValue = 10,
   matrixRows: initialRows = [],
   matrixColumns: initialColumns = [],
 }) => {
@@ -76,6 +79,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   const [selectedMatrixItems, setSelectedMatrixItems] = useState<{
     [key: string]: boolean;
   }>({});
+  const [previewValue, setPreviewValue] = useState<any>("");
+  const [selectedRating, setSelectedRating] = useState<number>(0);
 
   const defaultLikertOptions = [
     "Strongly Disagree",
@@ -84,6 +89,62 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     "Agree",
     "Strongly Agree",
   ];
+
+  // Extract range from question text
+  const extractRange = (question: string) => {
+    const numberWords: { [key: string]: number } = {
+      one: 1,
+      two: 2,
+      three: 3,
+      four: 4,
+      five: 5,
+      six: 6,
+      seven: 7,
+      eight: 8,
+      nine: 9,
+      ten: 10,
+    };
+
+    let processedQuestion = question.toLowerCase();
+    Object.entries(numberWords).forEach(([word, num]) => {
+      processedQuestion = processedQuestion.replace(
+        new RegExp(word, "g"),
+        num.toString()
+      );
+    });
+
+    const patterns = [
+      /(\d+)\s*-\s*(\d+)/,
+      /(\d+)\s*to\s*(\d+)/,
+      /rate.*?(\d+).*?to.*?(\d+)/i,
+      /scale.*?(\d+).*?to.*?(\d+)/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = processedQuestion.match(pattern);
+      if (match) {
+        const [_, start, end] = match;
+        return {
+          min: parseInt(start),
+          max: parseInt(end),
+        };
+      }
+    }
+
+    return null;
+  };
+
+  // Generate default labels for a rating scale
+  const generateRatingLabels = (min: number, max: number) => {
+    const defaultLabels = ["Poor", "Fair", "Good", "Very Good", "Excellent"];
+    const range = max - min + 1;
+
+    if (range <= defaultLabels.length) {
+      return defaultLabels.slice(0, range);
+    }
+
+    return Array.from({ length: range }, (_, i) => (i + min).toString());
+  };
 
   // Initialize values only when component mounts or when dependencies change
   useEffect(() => {
@@ -96,22 +157,23 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       setRows(initialRows.length ? initialRows : [""]);
       setColumns(initialColumns.length ? initialColumns : [""]);
     } else if (
-      ["multiple_choice", "single_choice", "checkbox", "drop_down"].includes(
-        questionType
-      )
+      [
+        "multiple_choice",
+        "single_choice",
+        "checkbox",
+        "drop_down",
+        "likert_scale",
+      ].includes(questionType)
     ) {
-      setEditedOptions(options?.length ? options : [""]);
-    } else if (questionType === "likert_scale") {
-      setEditedOptions(options?.length ? options : defaultLikertOptions);
+      // Only set initial options if they don't already exist
+      if (
+        !editedOptions.length ||
+        (editedOptions.length === 1 && !editedOptions[0])
+      ) {
+        setEditedOptions(options?.length ? [...options] : [""]);
+      }
     }
-  }, [
-    questionType,
-    initialMinValue,
-    initialMaxValue,
-    initialRows,
-    initialColumns,
-    options,
-  ]);
+  }, [questionType]);
 
   const questionTypes = useMemo(
     () => [
@@ -123,7 +185,6 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       { value: "short_text", label: "Short Text" },
       { value: "long_text", label: "Long Text" },
       { value: "slider", label: "Slider" },
-      { value: "media", label: "Media" },
       { value: "likert_scale", label: "Likert Scale" },
       { value: "rating_scale", label: "Rating Scale" },
       { value: "star_rating", label: "Star Rating" },
@@ -143,6 +204,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       case "single_choice":
       case "checkbox":
       case "drop_down":
+      case "likert_scale":
         // Allow saving as long as there's at least one non-empty option
         return editedOptions.some((opt) => opt.trim());
 
@@ -155,12 +217,6 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
         // Allow saving as long as there's at least one non-empty row and column
         return (
           rows.some((row) => row.trim()) && columns.some((col) => col.trim())
-        );
-
-      case "likert_scale":
-        // Allow customization of likert scale options
-        return (
-          editedOptions.length >= 2 && editedOptions.every((opt) => opt.trim())
         );
 
       // For other question types, no specific validation needed
@@ -180,6 +236,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   const handleTypeChange = (value: string) => {
     setEditedQuestionType(value);
     dispatch(setCurrentQuestionType(value));
+    setPreviewValue("");
+    setSelectedRating(0);
 
     // Initialize with appropriate default values
     switch (value) {
@@ -197,7 +255,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
         break;
       case "slider":
         setMinValue(0);
-        setMaxValue(100);
+        setMaxValue(10);
         break;
       case "likert_scale":
         setEditedOptions([...defaultLikertOptions]);
@@ -218,7 +276,10 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   };
 
   const handleRemoveOption = (index: number) => {
-    setEditedOptions((prev) => prev.filter((_, i) => i !== index));
+    setEditedOptions((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleMatrixChange = (
@@ -249,12 +310,16 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     if (!isValid) return;
 
     if (onSave) {
-      const saveOptions =
-        editedQuestionType === "slider"
-          ? [minValue.toString(), maxValue.toString()]
-          : editedOptions.filter((opt) => opt.trim());
-
-      if (
+      if (editedQuestionType === "slider") {
+        onSave(
+          editedQuestion,
+          [],
+          editedQuestionType,
+          isRequired,
+          minValue,
+          maxValue
+        );
+      } else if (
         ["matrix_multiple_choice", "matrix_checkbox"].includes(
           editedQuestionType
         )
@@ -272,11 +337,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       } else {
         onSave(
           editedQuestion,
-          saveOptions,
+          editedOptions.filter((opt) => opt.trim()),
           editedQuestionType,
-          isRequired,
-          editedQuestionType === "slider" ? minValue : undefined,
-          editedQuestionType === "slider" ? maxValue : undefined
+          isRequired
         );
       }
     }
@@ -286,6 +349,234 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     setIsRequiredLocal(checked);
     if (setIsRequired) {
       setIsRequired(checked);
+    }
+  };
+
+  const renderPreview = () => {
+    switch (editedQuestionType) {
+      case "checkbox":
+        return (
+          <div className="space-y-2">
+            {editedOptions.map((option, idx) => (
+              <div key={idx} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`preview-checkbox-${idx}`}
+                  checked={previewValue[idx]}
+                  onCheckedChange={(checked) => {
+                    setPreviewValue((prev: any) => ({
+                      ...prev,
+                      [idx]: checked,
+                    }));
+                  }}
+                />
+                <Input
+                  value={option}
+                  onChange={(e) => handleOptionChange(idx, e.target.value)}
+                  placeholder={`Option ${idx + 1}`}
+                  className="border-none shadow-none"
+                />
+              </div>
+            ))}
+          </div>
+        );
+
+      case "multiple_choice":
+      case "single_choice":
+        return (
+          <RadioGroup
+            value={previewValue}
+            onValueChange={setPreviewValue}
+            className="space-y-2"
+          >
+            {editedOptions.map((option, idx) => (
+              <div key={idx} className="flex items-center space-x-2">
+                <RadioGroupItem
+                  value={idx.toString()}
+                  id={`preview-radio-${idx}`}
+                />
+                <Input
+                  value={option}
+                  onChange={(e) => handleOptionChange(idx, e.target.value)}
+                  placeholder={`Option ${idx + 1}`}
+                  className="border-none shadow-none"
+                />
+              </div>
+            ))}
+          </RadioGroup>
+        );
+
+      case "drop_down":
+        return (
+          <Select value={previewValue} onValueChange={setPreviewValue}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+            <SelectContent>
+              {editedOptions.map((option, idx) => (
+                <SelectItem key={idx} value={idx.toString()}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case "boolean":
+        return (
+          <RadioGroup
+            value={previewValue}
+            onValueChange={setPreviewValue}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="yes" id="preview-radio-yes" />
+              <label htmlFor="preview-radio-yes">Yes</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="no" id="preview-radio-no" />
+              <label htmlFor="preview-radio-no">No</label>
+            </div>
+          </RadioGroup>
+        );
+
+      case "short_text":
+        return (
+          <Input
+            value={previewValue}
+            onChange={(e) => setPreviewValue(e.target.value)}
+            placeholder="Enter your answer"
+          />
+        );
+
+      case "long_text":
+        return (
+          <Textarea
+            value={previewValue}
+            onChange={(e) => setPreviewValue(e.target.value)}
+            placeholder="Enter your answer"
+          />
+        );
+
+      case "slider":
+        return (
+          <div className="space-y-4">
+            <Slider
+              value={[minValue, maxValue]}
+              min={Math.min(minValue, maxValue)}
+              max={Math.max(minValue, maxValue)}
+              step={1}
+              className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+              onValueChange={([min, max]) => {
+                setMinValue(min);
+                setMaxValue(max);
+              }}
+            />
+            <div className="flex justify-between text-sm text-gray-500">
+              <Input
+                type="number"
+                value={minValue}
+                onChange={(e) => setMinValue(Number(e.target.value))}
+                className="w-20 text-center"
+              />
+              <Input
+                type="number"
+                value={maxValue}
+                onChange={(e) => setMaxValue(Number(e.target.value))}
+                className="w-20 text-center"
+              />
+            </div>
+          </div>
+        );
+
+      case "likert_scale":
+        return (
+          <RadioGroup
+            value={previewValue}
+            onValueChange={setPreviewValue}
+            className="flex justify-between"
+          >
+            {editedOptions.map((option, idx) => (
+              <div key={idx} className="flex flex-col items-center space-y-2">
+                <RadioGroupItem
+                  value={idx.toString()}
+                  id={`preview-likert-${idx}`}
+                />
+                <Input
+                  value={option}
+                  onChange={(e) => handleOptionChange(idx, e.target.value)}
+                  placeholder={`Option ${idx + 1}`}
+                  className="border-none shadow-none text-center w-24 text-sm"
+                />
+              </div>
+            ))}
+          </RadioGroup>
+        );
+
+      case "rating_scale":
+        const range = extractRange(editedQuestion);
+        const { min, max } = range || { min: 1, max: 5 };
+        const labels = generateRatingLabels(min, max);
+
+        return (
+          <RadioGroup
+            value={previewValue}
+            onValueChange={setPreviewValue}
+            className="flex items-center justify-between gap-2 w-full"
+          >
+            {labels.map((label, idx) => (
+              <div
+                className="flex flex-col justify-center items-center gap-2"
+                key={idx}
+              >
+                <RadioGroupItem
+                  value={label}
+                  id={`preview-rating-${idx}`}
+                  className="h-6 w-6 data-[state=checked]:bg-purple-600 data-[state=checked]:text-white"
+                />
+                <Input
+                  value={label}
+                  onChange={(e) => {
+                    const newLabels = [...labels];
+                    newLabels[idx] = e.target.value;
+                    // Update labels logic here
+                  }}
+                  className="border-none shadow-none text-center w-20 text-sm"
+                />
+              </div>
+            ))}
+          </RadioGroup>
+        );
+
+      case "star_rating":
+        return (
+          <div className="flex space-x-2">
+            {[1, 2, 3, 4, 5].map((rating) => (
+              <Star
+                key={rating}
+                className={cn(
+                  "w-6 h-6 cursor-pointer transition-colors",
+                  rating <= selectedRating
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300 hover:text-yellow-200"
+                )}
+                onClick={() => setSelectedRating(rating)}
+              />
+            ))}
+          </div>
+        );
+
+      case "number":
+        return (
+          <Input
+            type="number"
+            value={previewValue}
+            onChange={(e) => setPreviewValue(e.target.value)}
+            placeholder="Enter a number"
+          />
+        );
+
+      default:
+        return null;
     }
   };
 
@@ -357,17 +648,6 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                     />
                   </div>
                 </div>
-                <Slider
-                  value={[minValue, maxValue]}
-                  min={Math.min(minValue, maxValue)}
-                  max={Math.max(minValue, maxValue)}
-                  step={1}
-                  className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
-                  onValueChange={([min, max]) => {
-                    setMinValue(min);
-                    setMaxValue(max);
-                  }}
-                />
               </motion.div>
             )}
 
@@ -443,48 +723,6 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                     <Plus className="mr-2 h-4 w-4" /> Add Column
                   </Button>
                 </div>
-
-                {/* Matrix Preview */}
-                <div className="mt-4">
-                  <Label>Preview</Label>
-                  <div className="mt-2 border rounded-lg p-4">
-                    <table className="w-full">
-                      <thead>
-                        <tr>
-                          <th></th>
-                          {columns.map((col, colIndex) => (
-                            <th key={colIndex} className="text-center p-2">
-                              {col || `Column ${colIndex + 1}`}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.map((row, rowIndex) => (
-                          <tr key={rowIndex}>
-                            <td className="p-2">
-                              {row || `Row ${rowIndex + 1}`}
-                            </td>
-                            {columns.map((_, colIndex) => (
-                              <td key={colIndex} className="text-center">
-                                <Checkbox
-                                  checked={
-                                    selectedMatrixItems[
-                                      `${rowIndex}-${colIndex}`
-                                    ]
-                                  }
-                                  onCheckedChange={() =>
-                                    handleMatrixItemSelect(rowIndex, colIndex)
-                                  }
-                                />
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
               </motion.div>
             )}
 
@@ -515,7 +753,6 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                         handleOptionChange(index, e.target.value)
                       }
                       placeholder={`Option ${index + 1}`}
-                      className="flex-1 bg-red-500"
                     />
                     <Button
                       variant="ghost"
@@ -531,12 +768,25 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 <Button
                   variant="outline"
                   onClick={handleAddOption}
-                  className="w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white"
+                  className="w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:bg-gradient-to-r hover:from-[#6d04d2] hover:to-[#b75ed6] hover:text-white transition-all duration-200"
                 >
                   <Plus className="mr-2 h-4 w-4" /> Add Option
                 </Button>
               </motion.div>
             )}
+
+            {/* Preview Section */}
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-4 border-t pt-4 mt-4"
+            >
+              <Label>Preview</Label>
+              <div className="p-4 border rounded-lg bg-gray-50">
+                {renderPreview()}
+              </div>
+            </motion.div>
           </AnimatePresence>
 
           <div className="flex justify-between items-center">

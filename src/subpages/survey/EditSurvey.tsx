@@ -67,6 +67,7 @@ import { ArrowRight, Loader2, Trash2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/shadcn-input";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
+import type { Question } from "@/types/survey";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -363,62 +364,106 @@ const EditSurvey = () => {
       // Get base survey state
       const updatedSurvey = store.getState().survey;
 
-      // Process survey to add slider options based on question text
+      // Process survey to ensure questions match their type structure
       const processedSurvey = {
         ...updatedSurvey,
         sections: updatedSurvey.sections.map((section) => ({
           ...section,
-          questions: section.questions.map((question) => {
-            if (question.question_type === "slider") {
-              // Extract range from question text
-              const extractRange = (questionText: string) => {
-                const numberWords: { [key: string]: number } = {
-                  one: 1,
-                  two: 2,
-                  three: 3,
-                  four: 4,
-                  five: 5,
-                  six: 6,
-                  seven: 7,
-                  eight: 8,
-                  nine: 9,
-                  ten: 10,
+          questions: section.questions.map((question: Question) => {
+            const baseQuestion = {
+              question: question.question,
+              description: question?.description || question.question,
+              question_type: question.question_type,
+              is_required: question.is_required,
+            } as Question;
+
+            switch (question.question_type) {
+              case "slider":
+                const extractRange = (questionText: string) => {
+                  const numberWords: { [key: string]: number } = {
+                    one: 1,
+                    two: 2,
+                    three: 3,
+                    four: 4,
+                    five: 5,
+                    six: 6,
+                    seven: 7,
+                    eight: 8,
+                    nine: 9,
+                    ten: 10,
+                  };
+
+                  let processedText = questionText.toLowerCase();
+                  Object.entries(numberWords).forEach(([word, num]) => {
+                    processedText = processedText.replace(
+                      new RegExp(word, "g"),
+                      num.toString()
+                    );
+                  });
+
+                  const match = processedText.match(
+                    /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
+                  );
+                  return match
+                    ? {
+                        min: parseInt(match[1]),
+                        max: parseInt(match[2]),
+                      }
+                    : { min: 0, max: 10 };
                 };
 
-                // Convert text numbers to digits
-                let processedText = questionText.toLowerCase();
-                Object.entries(numberWords).forEach(([word, num]) => {
-                  processedText = processedText.replace(
-                    new RegExp(word, "g"),
-                    num.toString()
-                  );
-                });
+                const range = extractRange(question.question);
+                return {
+                  ...baseQuestion,
+                  min: range.min,
+                  max: range.max,
+                  step: 1,
+                } as Question;
 
-                // Match numeric ranges
-                const match = processedText.match(
-                  /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
-                );
-                if (match) {
-                  return {
-                    min: parseInt(match[1]),
-                    max: parseInt(match[2]),
-                  };
-                }
-                return { min: 0, max: 10 }; // Default range
-              };
+              case "checkbox":
+              case "multiple_choice":
+              case "single_choice":
+              case "drop_down":
+              case "likert_scale":
+              case "rating_scale":
+              case "star_rating":
+              case "boolean":
+                return {
+                  ...baseQuestion,
+                  options: question.options,
+                } as Question;
 
-              const range = extractRange(question.question);
-              const options = Array.from(
-                { length: range.max - range.min + 1 },
-                (_, i) => (range.min + i).toString()
-              );
+              case "matrix_multiple_choice":
+              case "matrix_checkbox":
+                return {
+                  ...baseQuestion,
+                  rows: question.rows,
+                  columns: question.columns,
+                } as Question;
 
-              return { ...question, options };
+              case "number":
+                return {
+                  ...baseQuestion,
+                  min: (question as Question).min,
+                  max: question.max,
+                } as Question;
+
+              case "long_text":
+                return {
+                  ...baseQuestion,
+                  can_accept_media:
+                    (question as Question).can_accept_media || false,
+                } as Question;
+
+              case "short_text":
+              case "media":
+              default:
+                return baseQuestion;
             }
-            return question;
           }),
         })),
       };
+
       await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);

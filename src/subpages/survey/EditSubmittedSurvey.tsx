@@ -30,6 +30,7 @@ import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
 import { BsExclamation } from "react-icons/bs";
+import { cn } from "@/lib/utils";
 
 interface Question {
   question: string;
@@ -97,34 +98,6 @@ const EditSubmittedSurvey = () => {
     // setSelectIndex(index);
   };
 
-  // const handleDeleteQuestion = (questionIndex: number) => {
-  //   setSurveyData((prevData) => {
-  //     // Clone sections
-  //     const updatedSections = [...prevData.sections];
-
-  //     // Check if currentSection and questionIndex are valid
-  //     const currentQuestions =
-  //       updatedSections[currentSection]?.questions || [];
-
-  //     if (
-  //       Array.isArray(currentQuestions) &&
-  //       questionIndex >= 0 &&
-  //       questionIndex < currentQuestions.length
-  //     ) {
-  //       // Remove the question
-  //       updatedSections[currentSection].questions = currentQuestions.filter(
-  //         (_, idx) => idx !== questionIndex
-  //       );
-  //     } else {
-  //       toast.warn(
-  //         `Invalid operation: currentSection=${currentSection}, questionIndex=${questionIndex}`
-  //       );
-  //     }
-
-  //     return { ...prevData, sections: updatedSections };
-  //   });
-  // };
-
   const handleDeleteQuestion = (questionIndex: number) => {
     setSurveyData((prevData) => {
       // Create deep copies to avoid mutating the state directly
@@ -143,14 +116,6 @@ const EditSubmittedSurvey = () => {
       return { ...prevData, sections: updatedSections };
     });
   };
-
-  // const handleDeleteQuestion = ( questionIndex: number) => {
-  //   setSurveyData((prevData) => {
-  //     const updatedSections = [...prevData.sections];
-  //     updatedSections[currentSection].questions.splice(questionIndex, 1); // Remove question
-  //     return { ...prevData, sections: updatedSections };
-  //   });
-  // };
 
   const handleCancel = () => {
     setEditIndex(null);
@@ -244,9 +209,11 @@ const EditSubmittedSurvey = () => {
                 case "slider":
                   return {
                     ...baseQuestion,
-                    options: updatedOptions,
-                    min_value: minValue,
-                    max_value: maxValue,
+                    // options: updatedOptions,
+                    description: baseQuestion.question,
+                    min: minValue,
+                    max: maxValue,
+                    step: 1,
                   };
 
                 case "matrix_multiple_choice":
@@ -527,10 +494,15 @@ const EditSubmittedSurvey = () => {
                     initial={{ x: -20 }}
                     animate={{ x: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="font-normal"
+                    className={cn("font-normal", {
+                      [`font-${surveyData?.header_text?.name
+                        ?.split(" ")
+                        .join("-")
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`]: surveyData?.header_text?.name,
+                    })}
                     style={{
                       fontSize: `${surveyData?.header_text?.size}px`,
-                      fontFamily: `${surveyData?.header_text?.name}`,
                     }}
                   >
                     {surveyData?.topic}
@@ -539,10 +511,15 @@ const EditSubmittedSurvey = () => {
                     initial={{ x: -20 }}
                     animate={{ x: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="text-gray-600"
+                    className={cn("text-gray-600", {
+                      [`font-${surveyData?.body_text?.name
+                        ?.split(" ")
+                        .join("-")
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`]: surveyData?.body_text?.name,
+                    })}
                     style={{
                       fontSize: `${surveyData?.body_text?.size}px`,
-                      fontFamily: `${surveyData?.body_text?.name}`,
                     }}
                   >
                     {surveyData?.description}
@@ -589,7 +566,21 @@ const EditSubmittedSurvey = () => {
           {/* @ts-ignore */}
           {surveyData?.sections[currentSection]?.questions?.map(
             (item: any, index: number) => (
-              <div key={index} className="mb-4">
+              <div
+                key={index}
+                className={cn(
+                  "text-gray-600 mb-4",
+                  surveyData?.question_text?.name &&
+                    `!font-${surveyData.question_text.name
+                      .split(" ")
+                      .join("-")
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")}`
+                )}
+                style={{
+                  fontSize: `${surveyData?.question_text?.size}px !important`,
+                }}
+              >
                 {
                   // isEdit &&
                   // editIndex === index &&
@@ -665,7 +656,6 @@ const EditSubmittedSurvey = () => {
                       }}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
-                      // onSave={handleAISave}
                     />
                   ) : item.question_type === "linear_Scale" ? (
                     <LinearScaleQuestion
@@ -675,7 +665,6 @@ const EditSubmittedSurvey = () => {
                       questionType={item.question_type}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
-                      // onSave={handleAISave}
                       index={index + 1}
                     />
                   ) : item.question_type === "likert_scale" ? (
@@ -685,7 +674,6 @@ const EditSubmittedSurvey = () => {
                       questionType={item.question_type}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
-                      // onSave={handleAISave}
                       index={index + 1}
                       is_required={item.is_requied}
                       setIsRequired={() => {
@@ -711,7 +699,6 @@ const EditSubmittedSurvey = () => {
                       questionType={item.question_type}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
-                      // onSave={handleAISave}
                       index={index + 1}
                       is_required={item.is_requied}
                       setIsRequired={() => {
@@ -742,7 +729,6 @@ const EditSubmittedSurvey = () => {
                       question={item.question}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
-                      // onSave={handleAISave}
                       is_required={item.is_requied}
                       setIsRequired={() => {
                         const updatedSections = [...questions];
@@ -769,7 +755,6 @@ const EditSubmittedSurvey = () => {
                       questionType={item.question_type}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
-                      // onSave={handleAISave}
                       is_required={item.is_requied}
                       setIsRequired={() => {
                         const updatedSections = [...questions];
@@ -796,7 +781,6 @@ const EditSubmittedSurvey = () => {
                       questionType={item.question_type}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
-                      // onSave={handleAISave}
                       is_required={item.is_requied}
                       setIsRequired={() => {
                         const updatedSections = [...questions];
@@ -954,11 +938,13 @@ const EditSubmittedSurvey = () => {
                       // step={item.options.length}
                       questionType={item.question_type}
                       index={index + 1}
+                      min={item.min_value}
+                      max={item.max_value}
                       is_required={item.is_required}
                       EditQuestion={() => EditQuestion(index)}
                       DeleteQuestion={() => handleDeleteQuestion(index)}
                       // @ts-expect-error expect here
-                      onSave={handleAISave}
+                      onSave={handleSave}
                       setIsRequired={() => {
                         const updatedSections = [...questions];
                         const updatedSection = {
@@ -998,7 +984,7 @@ const EditSubmittedSurvey = () => {
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
           {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
-          <StyleEditor />
+          <StyleEditor surveyData={surveyData} setSurveyData={setSurveyData} />
         </div>
       </div>
     </div>

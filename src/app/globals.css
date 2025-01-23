@@ -537,7 +537,7 @@ input[type="radio"].radio:checked:before {
   font-family: var(--font-roboto);
 }
 
-.font-playfair {
+.font-playfair-display {
   font-family: var(--font-playfair);
 }
 

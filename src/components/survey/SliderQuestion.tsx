@@ -59,6 +59,8 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
     (state: RootState) => state?.survey?.question_text
   );
 
+  console.log(min, max);
+
   // Extract range from question
   const extractRange = (question: string) => {
     // Match patterns like "1-5", "1 to 5", "one to five", etc.
@@ -151,6 +153,47 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
     }
   };
 
+  // Format number with commas
+  const formatNumber = (num: number) => {
+    return num.toLocaleString("en-US");
+  };
+
+  // Generate smart labels based on range size
+  const generateSmartLabels = () => {
+    const range = dynamicMax - dynamicMin;
+    let step;
+
+    if (range <= 10) {
+      step = 1;
+    } else if (range <= 100) {
+      step = Math.ceil(range / 5) * 5; // Round to nearest 5
+    } else if (range <= 1000) {
+      step = Math.ceil(range / 5) * 50; // Round to nearest 50
+    } else if (range <= 10000) {
+      step = Math.ceil(range / 5) * 500; // Round to nearest 500
+    } else {
+      step = Math.ceil(range / 5) * 5000; // Round to nearest 5000
+    }
+
+    const labels = [];
+    // Always include min
+    labels.push(dynamicMin);
+
+    // Add intermediate points
+    for (let i = dynamicMin + step; i < dynamicMax; i += step) {
+      labels.push(Math.round(i)); // Round to ensure clean numbers
+    }
+
+    // Add max if not already included
+    if (labels[labels.length - 1] !== dynamicMax) {
+      labels.push(dynamicMax);
+    }
+
+    return labels;
+  };
+
+  const sliderLabels = generateSmartLabels();
+
   return (
     <div
       className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
@@ -208,14 +251,11 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
                   className="w-full"
                 />
                 <div className="w-full mt-4 flex justify-between text-sm text-gray-600">
-                  {Array.from(
-                    { length: dynamicMax - dynamicMin + 1 },
-                    (_, i) => (
-                      <span key={i} className="text-center">
-                        {dynamicMin + i}
-                      </span>
-                    )
-                  )}
+                  {sliderLabels.map((label, i) => (
+                    <span key={i} className="text-center">
+                      {formatNumber(label)}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
