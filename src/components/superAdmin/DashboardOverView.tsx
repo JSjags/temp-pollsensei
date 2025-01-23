@@ -46,7 +46,15 @@ const OverviewCards: React.FC<OverviewProps> = ({items}) => {
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-semibold text-gray-800">Overview</h2>
-        <div className="text-gray-600 cursor-pointer">Today ▼</div>
+        <div className="text-gray-600 cursor-pointer">
+          <select name="" id="">
+            <option value="">Today</option>
+            <option value="">1 Week</option>
+            <option value="">2 Weeks</option>
+            <option value="">1 Month</option>
+            <option value="">12 Months</option>
+          </select>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* {cards.map((card, index) => ( */}

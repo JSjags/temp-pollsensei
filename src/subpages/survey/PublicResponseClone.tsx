@@ -1,4 +1,5 @@
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
+import AppReactQuill from "@/components/common/forms/AppReactQuill";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import StarRating from "@/components/survey/StarRating";
 import ResponseFile from "@/components/ui/VoiceRecorder";
@@ -57,6 +58,8 @@ const PublicResponse = () => {
   const router = useRouter();
 
   const [activeInput, setActiveInput] = useState<Record<string, "textarea" | "audio" | null>>({});
+    const [quilValue, setQuilValue] = useState("");
+  
 
 
   const handleInputFocus = (question: string, inputType: "textarea" | "audio") => {
@@ -485,6 +488,12 @@ const PublicResponse = () => {
                                     })
                                   }
                                 />
+                                <div className="py-8">
+                            {/* <AppReactQuill
+                              quilValue={quilValue}
+                              setQuilValue={setQuilValue}
+                            /> */}
+                          </div>
                                 {
                                   quest.can_accept_media &&   <ResponseFile
                                   question={quest.question}
