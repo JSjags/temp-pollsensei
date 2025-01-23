@@ -4,9 +4,9 @@ import DuplicateLoader from "../common/DuplicateLoader";
 import EmptyTableData from "../common/EmptyTableData";
 import { ResourceCard, ResourceCardLoader } from "./components/ResourceCard";
 
-const VideoResources = (): JSX.Element => {
+const TextResources = (): JSX.Element => {
   const { data, isLoading, refetch, isRefetching } = useGetTutorials({
-    filter: TUTORIAL_ENUM.video,
+    filter: TUTORIAL_ENUM.text,
   });
 
   return (
@@ -28,4 +28,4 @@ const VideoResources = (): JSX.Element => {
   );
 };
 
-export default VideoResources;
+export default TextResources;

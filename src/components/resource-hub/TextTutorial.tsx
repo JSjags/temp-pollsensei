@@ -1,32 +1,24 @@
-import routes from "@/config/routes";
-import { formatDate } from "@/lib/helpers";
-import { useTutorialQuery } from "@/services/superadmin.service";
-import { ITutorial } from "@/types/api/tutorials.types";
+"use client";
+
+import { useGetTutorials } from "@/hooks/useGetRequests";
+import { TUTORIAL_ENUM } from "@/services/api/constants.api";
 import Image from "next/image";
-import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
+import { formatDate } from "@/lib/helpers";
 import { FadeLoader } from "react-spinners";
 import PageControl from "../common/PageControl";
-import { TUTORIAL_ENUM } from "@/services/api/constants.api";
-import { useGetTutorials } from "@/hooks/useGetRequests";
+import { DEFAULT_API_PAGE_SIZE } from "@/services/api/tutorial";
 
-type Article = {
-  title: string;
-  description: string;
-  date: string;
-  imageUrl: string;
-  id: string;
-};
-
-const ArticlesGrid: React.FC = () => {
+const TextTutorial = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
+
   const { data, isLoading, error } = useGetTutorials({
     page: currentPage,
-    filter: TUTORIAL_ENUM.web,
+    filter: TUTORIAL_ENUM.text,
   });
 
   const totalItems = data?.total || 0;
-  const totalPages = Math.ceil(totalItems / 20);
+  const totalPages = Math.ceil(totalItems / DEFAULT_API_PAGE_SIZE);
 
   const navigatePage = (direction: "next" | "prev") => {
     setCurrentPage((prevIndex) => {
@@ -39,56 +31,38 @@ const ArticlesGrid: React.FC = () => {
   };
 
   return (
-    <section className="py-8 bg-gray-50 px-5 md:px-20">
-      <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
-        Articles for you
-      </h2>
-
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {articles.map((article, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105" onClick={()=>router.push(`/resource-hub/articles/${article.title}`)}>
-            <Image src={article.imageUrl} alt={article.title} className="w-full h-40 object-cover" />
-            <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-800 hover:text-purple-600 transition-colors duration-200">{article.title}</h3>
-              <p className="text-gray-600 mt-2">{article.description}</p>
-              <p className="text-sm text-gray-500 mt-4">{article.date}</p>
-            </div>
-          </div>
-        ))}
-      </div> */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
         {isLoading ? (
-          <>
-            <div className="text-center ">
+          <tr>
+            <td className="text-center ">
               <span className="flex justify-center items-center">
                 <FadeLoader height={10} radius={1} className="mt-3" />
               </span>
-            </div>
-          </>
+            </td>
+          </tr>
         ) : error ? (
-          <>
-            <div className="text-center ">
+          <tr>
+            <td className="text-center ">
               <span className="flex justify-center items-center text-xs text-red-500">
                 Something went wrong
               </span>
-            </div>
-          </>
+            </td>
+          </tr>
         ) : (
-          data?.data?.map((article: ITutorial, index: any) => (
-            <Link
-              href={routes.SINGLE_ARTICLE_PAGE(article.slug)}
+          data?.data?.map((article: any, index: any) => (
+            <div
               key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105"
+              className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200"
             >
               <div
                 className={`relative min-h-48 flex justify-center items-center`}
               >
-                {!!article?.media &&
-                (article?.media?.[0]?.type === "image/jpeg" ||
-                  article?.media?.[0]?.type === "png" ||
-                  article?.media?.[0]?.type === "image/png") ? (
+                {article.media[0].type === "image/jpeg" ||
+                article.media[0].type === "png" ||
+                article.media[0].type === "image/png" ? (
                   <Image
-                    className="dark:invert w-full  h-full object-cover "
+                    className="dark:invert w-full h-40 object-cover aspect-auto"
                     src={article?.media[0]?.url}
                     alt="Next.js logo"
                     width={180}
@@ -112,7 +86,7 @@ const ArticlesGrid: React.FC = () => {
                   {formatDate(article.createdAt)}
                 </p>
               </div>
-            </Link>
+            </div>
           ))
         )}
       </div>
@@ -131,8 +105,8 @@ const ArticlesGrid: React.FC = () => {
           onNavigate={navigatePage}
         />
       </div>
-    </section>
+    </div>
   );
 };
 
-export default ArticlesGrid;
+export default TextTutorial;

@@ -28,6 +28,13 @@ import PublishFaq from "@/components/superadmin-faqs/Publish";
 import { Modal } from "@/components/superadmin-faqs/Modal";
 import { FaFileUpload } from "react-icons/fa";
 import { cn } from "@/lib/utils";
+import {
+  apiConstantOptions,
+  queryKeys,
+  TUTORIAL_ENUM,
+} from "@/services/api/constants.api";
+import { useGetTutorials } from "@/hooks/useGetRequests";
+import { useQueryClient } from "@tanstack/react-query";
 
 const WebArticle = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,6 +56,7 @@ const WebArticle = () => {
     usePreviewTutorialQuery(_id, { skip: _id ? false : true });
   const [editTutorial, { isLoading: isEditLoading }] =
     useEditTutorialMutation();
+  const queryClient = useQueryClient();
 
   // const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
 
@@ -129,8 +137,9 @@ const WebArticle = () => {
     console.log(editFormData);
     try {
       await editTutorial({ id: _id, body: editFormData }).unwrap();
-      toast.success("Tutorial created successfully");
+      toast.success("Tutorial edited successfully");
       setEdit(false);
+      queryClient?.invalidateQueries({ queryKey: [queryKeys.TUTORIALS] });
     } catch (err: any) {
       toast.error(
         "Failed to create tutorial " + (err?.data?.message || err.message)
@@ -180,12 +189,13 @@ const WebArticle = () => {
       toast.error("Error deleting FAQ");
     }
   };
-  const { data, isLoading, isFetching, error, refetch } = useAllTutorialsQuery({
-    pagesNumber: currentPage,
-    filter_by: "web",
+
+  const { data, isLoading, isError, refetch } = useGetTutorials({
+    filter: TUTORIAL_ENUM.web,
+    page: currentPage,
   });
 
-  const totalItems = data?.data?.total || 0;
+  const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
   const navigatePage = (direction: "next" | "prev") => {
@@ -228,9 +238,6 @@ const WebArticle = () => {
     }
   }, [previewTutorial]);
 
-  console.log(data);
-  console.log(currentPage);
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -247,7 +254,7 @@ const WebArticle = () => {
             </span>
           </div>
         ) : (
-          data?.data?.data.map((card: any, index: number) => (
+          data?.data.map((card: any, index: number) => (
             <div
               key={index}
               className="relative flex flex-col bg-white shadow rounded-lg overflow-hidden"
@@ -380,7 +387,7 @@ const WebArticle = () => {
                         </div>
                       </div>
                       <div className="px-10 py-4">
-                        <p className="">{previewTutorial?.data?.description}</p>
+                        <p className="">{previewTutorial?.description}</p>
                       </div>
                     </div>
                   )}
@@ -435,18 +442,16 @@ const WebArticle = () => {
                                 id="type"
                               >
                                 <option value="">{formData.type}</option>
-                                {[
-                                  { value: "video", label: "Video" },
-                                  { value: "image", label: "Image" },
-                                  { value: "Link", label: "Link" },
-                                ].map((option: any) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
+                                {apiConstantOptions?.TUTORIAL_TYPES?.map(
+                                  (option: any) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  )
+                                )}
                               </select>
                             </div>
                             <div>

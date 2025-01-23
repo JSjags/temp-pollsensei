@@ -1,11 +1,12 @@
 "use client";
 
 import PageControl from "@/components/common/PageControl";
-import { useAllTutorialsQuery } from "@/services/superadmin.service";
-import React, { useState } from "react";
+import { useGetTutorials } from "@/hooks/useGetRequests";
+import { TUTORIAL_ENUM } from "@/services/api/constants.api";
 import Image from "next/image";
-import { FadeLoader } from "react-spinners";
+import { useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FadeLoader } from "react-spinners";
 
 interface Card {
   title: string;
@@ -16,12 +17,12 @@ interface Card {
 
 const VideoTutorial = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error, refetch, isFetching } = useAllTutorialsQuery({
-    pagesNumber: currentPage,
-    filter_by: "video",
+  const { data, isLoading, isError, refetch, isFetching } = useGetTutorials({
+    filter: TUTORIAL_ENUM.video,
+    page: currentPage,
   });
 
-  const totalItems = data?.data?.total || 0;
+  const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
   const navigatePage = (direction: "next" | "prev") => {
@@ -44,14 +45,14 @@ const VideoTutorial = () => {
               <FadeLoader height={10} radius={1} className="mt-3" />
             </span>
           </div>
-        ) : error ? (
+        ) : isError ? (
           <div className="text-center w-full">
             <span className="flex justify-center items-center text-xs text-red-500">
               Something went wrong
             </span>
           </div>
         ) : (
-          data?.data?.data.map((card: any, index: number) => (
+          data?.data.map((card: any, index: number) => (
             <div
               key={index}
               className="flex flex-col bg-white shadow rounded-lg overflow-hidden"
