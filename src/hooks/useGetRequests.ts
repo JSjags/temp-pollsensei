@@ -11,8 +11,6 @@ export interface UseGetTutorialsProps {
 export const useGetTutorials = (props: UseGetTutorialsProps) => {
   const { filter, page } = props;
 
-  console.log({ filter, page });
-
   return useQuery({
     queryKey: [queryKeys.TUTORIALS, filter, page],
     queryFn: async () => {

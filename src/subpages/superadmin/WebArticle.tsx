@@ -30,9 +30,11 @@ import { FaFileUpload } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import {
   apiConstantOptions,
+  queryKeys,
   TUTORIAL_ENUM,
 } from "@/services/api/constants.api";
 import { useGetTutorials } from "@/hooks/useGetRequests";
+import { useQueryClient } from "@tanstack/react-query";
 
 const WebArticle = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,6 +56,7 @@ const WebArticle = () => {
     usePreviewTutorialQuery(_id, { skip: _id ? false : true });
   const [editTutorial, { isLoading: isEditLoading }] =
     useEditTutorialMutation();
+  const queryClient = useQueryClient();
 
   // const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
 
@@ -134,8 +137,9 @@ const WebArticle = () => {
     console.log(editFormData);
     try {
       await editTutorial({ id: _id, body: editFormData }).unwrap();
-      toast.success("Tutorial created successfully");
+      toast.success("Tutorial edited successfully");
       setEdit(false);
+      queryClient?.invalidateQueries({ queryKey: [queryKeys.TUTORIALS] });
     } catch (err: any) {
       toast.error(
         "Failed to create tutorial " + (err?.data?.message || err.message)
@@ -233,9 +237,6 @@ const WebArticle = () => {
       });
     }
   }, [previewTutorial]);
-
-  console.log(data);
-  console.log(currentPage);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

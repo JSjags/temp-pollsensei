@@ -1,5 +1,9 @@
 export type MediaType = "video" | "article" | "both";
-export type ContentType = "All resources" | "Video tutorials" | "Web Articles";
+export type ContentType =
+  | "All resources"
+  | "Video tutorials"
+  | "Web Articles"
+  | "Text tutorials";
 
 export interface LearningResource {
   id: string;

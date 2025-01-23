@@ -10,10 +10,12 @@ import { ConditionalRender } from "../common/AppTabs";
 import AllResources from "./AllResources";
 import VideoResources from "./VideoResource";
 import WebArticles from "./WebArticles";
+import TextResources from "./TextResource";
 
 const contentTypes: ContentType[] = [
   "All resources",
   "Video tutorials",
+  "Text tutorials",
   "Web Articles",
 ];
 
@@ -30,6 +32,10 @@ export default function LearningResources() {
     {
       content: <AllResources key={0} />,
       contentType: "All resources",
+    },
+    {
+      content: <TextResources key={1} />,
+      contentType: "Text tutorials",
     },
     {
       content: <VideoResources key={1} />,
