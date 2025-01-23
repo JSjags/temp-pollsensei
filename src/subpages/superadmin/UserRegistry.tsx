@@ -3,6 +3,7 @@
 import { ImFilter } from "react-icons/im";
 import React, { useMemo, useState } from "react";
 import {
+  useResetUserPasswordMutation,
   useUpdateDisableStatusMutation,
   useUserRegistryQuery,
   useUsersLocationQuery,
@@ -82,6 +83,9 @@ const UserRegistry: React.FC = () => {
   const [updateDisabledStatus, { isLoading: isDisabling }] =
     useUpdateDisableStatusMutation();
 
+  const [resetUserPassword, { isLoading: isResetPassword }] =
+    useResetUserPasswordMutation();
+
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
@@ -113,6 +117,19 @@ const UserRegistry: React.FC = () => {
       await updateDisabledStatus(editData).unwrap();
       refetch();
       toast.success("Status updated successfully");
+    } catch (err: any) {
+      toast.error("Failed: " + err.message);
+    }
+  };
+  const ResetPassword = async (email: string) => {
+    const editData = {
+      email: email,
+    };
+    console.log(editData); 
+    try {
+      await resetUserPassword(editData).unwrap();
+      refetch();
+      toast.success("Account password reset successfully");
     } catch (err: any) {
       toast.error("Failed: " + err.message);
     }
@@ -350,12 +367,11 @@ const UserRegistry: React.FC = () => {
                     </button>
 
                     <button
-                      // onClick={resetPassword}
-                      // disabled={isLoading}
-                      className=" py-2 px-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md disabled:bg-gray-400"
+                      onClick={()=>ResetPassword(user?.email)}
+                      disabled={isResetPassword}
+                      className=" py-2 px-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md disabled:bg-gray-400"
                     >
-                      {/* {isLoading ? "Processing..." : "Reset Password"} */}
-                      Reset
+                      {isResetPassword ? "Processing..." : "Reset"}
                     </button>
                   </td>
                 </tr>
