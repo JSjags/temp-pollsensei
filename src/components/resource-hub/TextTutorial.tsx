@@ -86,10 +86,12 @@ const TextTutorial = (): JSX.Element => {
               </div>
               {/* <Image src={article.imageUrl} alt={article.title} className="w-full h-48 object-cover" /> */}
               <div className="p-4 flex flex-col ">
-                <h2 className=" text-base sm:text-lg text-center font-semibold text-gray-900">
+                <h2 className=" text-base sm:text-lg line-clamp-1 custom-break-characters text-center font-semibold text-gray-900">
                   {article?.title}
                 </h2>
-                <h3 className="text-sm  text-center">{article?.description}</h3>
+                <h3 className="text-sm line-clamp-3 custom-break-characters text-center">
+                  {article?.description}
+                </h3>
                 {/* <p className="text-gray-600 text-sm mt-2">{article.description}</p> */}
                 {/* <p className="text-purple-600 font-semibold text-sm mt-4">
                   {formatDate(article.createdAt)}
