@@ -72,7 +72,7 @@ const ArticleDetailsPage = (): JSX.Element => {
                 height={300}
               />
             ) : (
-              <video loop muted autoPlay className="w-full">
+              <video controls autoPlay className="w-full">
                 <source src={data?.data?.media[0]?.url} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
