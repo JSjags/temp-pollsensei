@@ -1,13 +1,7 @@
-"use client"
-
 import VideoTutorial from "@/subpages/superadmin/VideoTutorial";
-import React from "react";
 
-
-type Props = {};
-
-const page = (props: Props) => {
+const Page = () => {
   return <VideoTutorial />;
 };
 
-export default page;
+export default Page;
