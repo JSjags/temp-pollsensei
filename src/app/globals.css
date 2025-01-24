@@ -507,3 +507,11 @@ input[type="radio"].radio:checked:before {
 .app-collapse-open {
   grid-template-rows: 1fr !important;
 }
+
+.custom-break-words {
+  word-break: break-word !important;
+}
+
+.custom-break-characters {
+  word-break: break-all !important;
+}
