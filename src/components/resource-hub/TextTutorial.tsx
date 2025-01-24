@@ -9,6 +9,8 @@ import { FadeLoader } from "react-spinners";
 import PageControl from "../common/PageControl";
 import { DEFAULT_API_PAGE_SIZE } from "@/services/api/tutorial";
 import { ChatBotIcon } from "../icons";
+import Link from "next/link";
+import routes from "@/config/routes";
 
 const TextTutorial = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,7 +35,7 @@ const TextTutorial = (): JSX.Element => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
         {isLoading ? (
           <tr>
             <td className="text-center ">
@@ -52,12 +54,13 @@ const TextTutorial = (): JSX.Element => {
           </tr>
         ) : (
           data?.data?.map((article: any, index: any) => (
-            <div
+            <Link
+              href={routes.SINGLE_ARTICLE_PAGE(article?.slug)}
               key={index}
-              className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200"
+              className="bg-white flex flex-col rounded-lg shadow-lg overflow-hidden border border-gray-200"
             >
               <div
-                className={`relative min-h-48 flex justify-center items-center`}
+                className={`w-full aspect-video flex justify-center items-center`}
               >
                 {article?.media?.[0]?.type === "image/jpeg" ||
                 article?.media?.[0]?.type === "png" ||
@@ -82,16 +85,17 @@ const TextTutorial = (): JSX.Element => {
                 )}
               </div>
               {/* <Image src={article.imageUrl} alt={article.title} className="w-full h-48 object-cover" /> */}
-              <div className="p-4">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {article.title}
+              <div className="p-4 flex flex-col ">
+                <h2 className=" text-base sm:text-lg text-center font-semibold text-gray-900">
+                  {article?.title}
                 </h2>
+                <h3 className="text-sm  text-center">{article?.description}</h3>
                 {/* <p className="text-gray-600 text-sm mt-2">{article.description}</p> */}
-                <p className="text-purple-600 font-semibold text-sm mt-4">
+                {/* <p className="text-purple-600 font-semibold text-sm mt-4">
                   {formatDate(article.createdAt)}
-                </p>
+                </p> */}
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>
