@@ -1,12 +1,7 @@
-"use client"
-
 import WebArticle from "@/subpages/superadmin/WebArticle";
-import React from "react";
 
-type Props = {};
-
-const page = (props: Props) => {
+const Page = () => {
   return <WebArticle />;
 };
 
-export default page;
+export default Page;
