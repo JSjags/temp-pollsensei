@@ -9,6 +9,8 @@ import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface MultiChoiceQuestionProps {
   question: string;
@@ -30,6 +32,7 @@ interface MultiChoiceQuestionProps {
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
   isEdit?: boolean;
+  surveyData?: SurveyData;
 }
 
 const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
@@ -46,10 +49,12 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   is_required,
   setIsRequired,
   isEdit = false,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
-    (state: RootState) => state?.survey?.question_text
+    (state: RootState) =>
+      surveyData?.question_text ?? state?.survey?.question_text
   );
 
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -88,9 +93,17 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
 
   return (
     <div
-      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >
@@ -146,7 +159,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
                       />
                       <label
                         htmlFor={`option-${optionIndex}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
                         {option}
                       </label>

@@ -10,6 +10,8 @@ import { RootState } from "@/redux/store";
 import { BiSliderAlt } from "react-icons/bi";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface LikertScaleQuestionProps {
   question: string;
@@ -31,6 +33,7 @@ interface LikertScaleQuestionProps {
     updatedQuestionType: string,
     aiEditIndex?: number
   ) => void;
+  surveyData?: SurveyData;
 }
 
 const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
@@ -48,10 +51,12 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
   is_required,
   isEdit = false,
   setIsRequired,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
-    (state: RootState) => state?.survey?.question_text
+    (state: RootState) =>
+      surveyData?.question_text ?? state?.survey?.question_text
   );
   const colorTheme = useSelector(
     (state: RootState) => state?.survey?.color_theme
@@ -87,9 +92,17 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
 
   return (
     <div
-      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >

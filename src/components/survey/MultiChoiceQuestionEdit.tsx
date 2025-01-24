@@ -7,7 +7,7 @@ import {
 } from "@/redux/slices/sensei-master.slice";
 import Image from "next/image";
 import React, { useState, useMemo, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Plus, Grip, X, Save } from "lucide-react";
 import {
@@ -27,6 +27,9 @@ import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/shadcn-textarea";
 import { Star } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { RootState } from "@/redux/store";
 
 interface MultiChoiceQuestionEditProps {
   question: string;
@@ -50,6 +53,7 @@ interface MultiChoiceQuestionEditProps {
   maxValue?: number;
   matrixRows?: string[];
   matrixColumns?: string[];
+  surveyData?: SurveyData;
 }
 
 const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
@@ -65,6 +69,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   maxValue: initialMaxValue = 10,
   matrixRows: initialRows = [],
   matrixColumns: initialColumns = [],
+  surveyData,
 }) => {
   const dispatch = useDispatch();
   const [editedQuestion, setEditedQuestion] = useState<string>(question);
@@ -82,6 +87,10 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   const [previewValue, setPreviewValue] = useState<any>("");
   const [selectedRating, setSelectedRating] = useState<number>(0);
 
+  const questionText = useSelector(
+    (state: RootState) => state?.survey?.question_text
+  );
+
   const defaultLikertOptions = [
     "Strongly Disagree",
     "Disagree",
@@ -92,6 +101,15 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
 
   // Extract range from question text
   const extractRange = (question: string) => {
+    // If min and max are provided, use those values
+    if (minValue !== undefined && maxValue !== undefined) {
+      return {
+        minValue,
+        maxValue,
+      };
+    }
+
+    // Otherwise extract from question text
     const numberWords: { [key: string]: number } = {
       one: 1,
       two: 2,
@@ -103,8 +121,18 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       eight: 8,
       nine: 9,
       ten: 10,
+      twenty: 20,
+      thirty: 30,
+      forty: 40,
+      fifty: 50,
+      sixty: 60,
+      seventy: 70,
+      eighty: 80,
+      ninety: 90,
+      hundred: 100,
     };
 
+    // Convert text numbers to digits
     let processedQuestion = question.toLowerCase();
     Object.entries(numberWords).forEach(([word, num]) => {
       processedQuestion = processedQuestion.replace(
@@ -113,11 +141,13 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       );
     });
 
+    // Try different patterns
     const patterns = [
-      /(\d+)\s*-\s*(\d+)/,
-      /(\d+)\s*to\s*(\d+)/,
-      /rate.*?(\d+).*?to.*?(\d+)/i,
-      /scale.*?(\d+).*?to.*?(\d+)/i,
+      /(\d+)\s*-\s*(\d+)/, // "1-5"
+      /(\d+)\s*to\s*(\d+)/, // "1 to 5"
+      /(\d+)\s*\.\.\s*(\d+)/, // "1..5"
+      /(\d+)\s*points?\s*=.*?\/\s*(\d+)\s*points?/i, // "1 point = not important / 5 points"
+      /(\d+)\s*points?\s*=.*?(\d+)\s*points?\s*=/i, // "1 point = ... 5 points ="
     ];
 
     for (const pattern of patterns) {
@@ -245,7 +275,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       case "single_choice":
       case "checkbox":
       case "drop_down":
-        setEditedOptions([""]); // Start with one empty option
+        setEditedOptions([""]);
         break;
       case "matrix_multiple_choice":
       case "matrix_checkbox":
@@ -358,7 +388,10 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
         return (
           <div className="space-y-2">
             {editedOptions.map((option, idx) => (
-              <div key={idx} className="flex items-center space-x-2">
+              <div
+                key={`checkbox-${idx}`}
+                className="flex items-center space-x-2"
+              >
                 <Checkbox
                   id={`preview-checkbox-${idx}`}
                   checked={previewValue[idx]}
@@ -389,7 +422,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
             className="space-y-2"
           >
             {editedOptions.map((option, idx) => (
-              <div key={idx} className="flex items-center space-x-2">
+              <div key={`radio-${idx}`} className="flex items-center space-x-2">
                 <RadioGroupItem
                   value={idx.toString()}
                   id={`preview-radio-${idx}`}
@@ -413,7 +446,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
             </SelectTrigger>
             <SelectContent>
               {editedOptions.map((option, idx) => (
-                <SelectItem key={idx} value={idx.toString()}>
+                <SelectItem key={`select-${idx}`} value={idx.toString()}>
                   {option}
                 </SelectItem>
               ))}
@@ -429,11 +462,11 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
             className="space-y-2"
           >
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="yes" id="preview-radio-yes" />
+              <RadioGroupItem value="yes" id={`preview-radio-yes`} />
               <label htmlFor="preview-radio-yes">Yes</label>
             </div>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="no" id="preview-radio-no" />
+              <RadioGroupItem value="no" id={`preview-radio-no`} />
               <label htmlFor="preview-radio-no">No</label>
             </div>
           </RadioGroup>
@@ -496,7 +529,10 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
             className="flex justify-between"
           >
             {editedOptions.map((option, idx) => (
-              <div key={idx} className="flex flex-col items-center space-y-2">
+              <div
+                key={`likert-${idx}`}
+                className="flex flex-col items-center space-y-2"
+              >
                 <RadioGroupItem
                   value={idx.toString()}
                   id={`preview-likert-${idx}`}
@@ -515,7 +551,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       case "rating_scale":
         const range = extractRange(editedQuestion);
         const { min, max } = range || { min: 1, max: 5 };
-        const labels = generateRatingLabels(min, max);
+        const labels = generateRatingLabels(min ?? 1, max ?? 5);
 
         return (
           <RadioGroup
@@ -526,7 +562,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
             {labels.map((label, idx) => (
               <div
                 className="flex flex-col justify-center items-center gap-2"
-                key={idx}
+                key={`rating-${idx}`}
               >
                 <RadioGroupItem
                   value={label}
@@ -552,7 +588,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           <div className="flex space-x-2">
             {[1, 2, 3, 4, 5].map((rating) => (
               <Star
-                key={rating}
+                key={`star-${rating}`}
                 className={cn(
                   "w-6 h-6 cursor-pointer transition-colors",
                   rating <= selectedRating
@@ -585,7 +621,19 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="mb-4 bg-white shadow-lg rounded-xl p-6"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
+      style={{
+        fontSize: `${questionText?.size}px`,
+      }}
     >
       <div className="flex items-start gap-4">
         <motion.div whileHover={{ scale: 1.1 }} className="mt-2">
@@ -614,7 +662,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
               </SelectTrigger>
               <SelectContent className="max-h-[300px] overflow-y-auto">
                 {questionTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
+                  <SelectItem key={`type-${type.value}`} value={type.value}>
                     {type.label}
                   </SelectItem>
                 ))}
@@ -663,7 +711,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 <div className="space-y-4">
                   <Label>Matrix Rows</Label>
                   {rows.map((row, index) => (
-                    <div key={`row-${index}`} className="flex gap-2">
+                    <div key={`matrix-row-${index}`} className="flex gap-2">
                       <Input
                         value={row}
                         onChange={(e) =>
@@ -694,7 +742,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 <div className="space-y-4">
                   <Label>Matrix Columns</Label>
                   {columns.map((col, index) => (
-                    <div key={`col-${index}`} className="flex gap-2">
+                    <div key={`matrix-col-${index}`} className="flex gap-2">
                       <Input
                         value={col}
                         onChange={(e) =>
@@ -741,7 +789,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
               >
                 {editedOptions.map((option, index) => (
                   <motion.div
-                    key={index}
+                    key={`option-${index}`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}

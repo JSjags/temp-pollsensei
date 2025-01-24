@@ -28,6 +28,7 @@ const fontSans = DM_Sans({
   variable: "--font-sans",
   display: "swap",
   preload: true,
+  adjustFontFallback: false,
 }) as NextFontWithVariable;
 
 const lexend = Lexend({

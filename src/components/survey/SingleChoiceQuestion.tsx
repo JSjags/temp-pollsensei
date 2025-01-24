@@ -9,6 +9,8 @@ import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface SingleChoiceQuestionProps {
   question: string;
@@ -30,6 +32,7 @@ interface SingleChoiceQuestionProps {
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
   isEdit?: boolean;
+  surveyData: SurveyData;
 }
 
 const SingleChoiceQuestion: React.FC<SingleChoiceQuestionProps> = ({
@@ -46,6 +49,7 @@ const SingleChoiceQuestion: React.FC<SingleChoiceQuestionProps> = ({
   is_required,
   setIsRequired,
   isEdit = false,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -82,9 +86,17 @@ const SingleChoiceQuestion: React.FC<SingleChoiceQuestionProps> = ({
 
   return (
     <div
-      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >

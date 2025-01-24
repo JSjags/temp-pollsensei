@@ -14,6 +14,8 @@ import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Textarea } from "../ui/shadcn-textarea";
 import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface ComponentQuestionProps {
   question: string;
@@ -35,6 +37,7 @@ interface ComponentQuestionProps {
     updatedQuestionType: string,
     aiEditIndex?: number
   ) => void;
+  surveyData?: SurveyData;
 }
 
 const CommentQuestion: React.FC<ComponentQuestionProps> = ({
@@ -52,10 +55,12 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
   onSave,
   setEditId,
   isEdit = false,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
-    (state: RootState) => state?.survey?.question_text
+    (state: RootState) =>
+      surveyData?.question_text ?? state?.survey?.question_text
   );
   const colorTheme = useSelector(
     (state: RootState) => state?.survey?.color_theme
@@ -82,9 +87,17 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
 
   return (
     <div
-      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >

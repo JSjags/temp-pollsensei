@@ -1,7 +1,7 @@
 import { stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
 import { Check, CheckCircle, GripVertical } from "lucide-react";
@@ -10,6 +10,8 @@ import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Slider } from "../ui/slider";
 import { RxSlider } from "react-icons/rx";
 import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface SliderQuestionProps {
   question: string;
@@ -34,6 +36,7 @@ interface SliderQuestionProps {
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
   isEdit?: boolean;
+  surveyData?: SurveyData;
 }
 
 const SliderQuestion: React.FC<SliderQuestionProps> = ({
@@ -53,79 +56,18 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
   is_required,
   setIsRequired,
   isEdit = false,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
 
-  console.log(min, max);
+  const [sliderValue, setSliderValue] = useState<number>(value ?? min ?? 0);
 
-  // Extract range from question
-  const extractRange = (question: string) => {
-    // Match patterns like "1-5", "1 to 5", "one to five", etc.
-    const numberWords: { [key: string]: number } = {
-      one: 1,
-      two: 2,
-      three: 3,
-      four: 4,
-      five: 5,
-      six: 6,
-      seven: 7,
-      eight: 8,
-      nine: 9,
-      ten: 10,
-      twenty: 20,
-      thirty: 30,
-      forty: 40,
-      fifty: 50,
-      sixty: 60,
-      seventy: 70,
-      eighty: 80,
-      ninety: 90,
-      hundred: 100,
-    };
-
-    // Convert text numbers to digits
-    let processedQuestion = question.toLowerCase();
-    Object.entries(numberWords).forEach(([word, num]) => {
-      processedQuestion = processedQuestion.replace(
-        new RegExp(word, "g"),
-        num.toString()
-      );
-    });
-
-    // Try different patterns
-    const patterns = [
-      /(\d+)\s*-\s*(\d+)/, // "1-5"
-      /(\d+)\s*to\s*(\d+)/, // "1 to 5"
-      /(\d+)\s*\.\.\s*(\d+)/, // "1..5"
-      /(\d+)\s*points?\s*=.*?\/\s*(\d+)\s*points?/i, // "1 point = not important / 5 points"
-      /(\d+)\s*points?\s*=.*?(\d+)\s*points?\s*=/i, // "1 point = ... 5 points ="
-    ];
-
-    for (const pattern of patterns) {
-      const match = processedQuestion.match(pattern);
-      if (match) {
-        const [_, start, end] = match;
-        return {
-          min: parseInt(start),
-          max: parseInt(end),
-        };
-      }
-    }
-
-    return null;
-  };
-
-  const range = extractRange(question);
-  const dynamicMin = options && options.length > 0 ? 0 : range?.min || min || 0;
-  const dynamicMax =
-    options && options.length > 0
-      ? options.length - 1
-      : range?.max || max || 10; // Default to 10 if no range specified
-
-  const [sliderValue, setSliderValue] = useState<number>(value || dynamicMin);
+  useEffect(() => {
+    setSliderValue(value ?? min ?? 0);
+  }, [min, value]);
 
   const handleSliderChange = (newValue: number[]) => {
     setSliderValue(newValue[0]);
@@ -160,7 +102,7 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
 
   // Generate smart labels based on range size
   const generateSmartLabels = () => {
-    const range = dynamicMax - dynamicMin;
+    const range = (max ?? 10) - (min ?? 0);
     let step;
 
     if (range <= 10) {
@@ -177,16 +119,16 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
 
     const labels = [];
     // Always include min
-    labels.push(dynamicMin);
+    labels.push(min ?? 0);
 
     // Add intermediate points
-    for (let i = dynamicMin + step; i < dynamicMax; i += step) {
+    for (let i = (min ?? 0) + step; i < (max ?? 10); i += step) {
       labels.push(Math.round(i)); // Round to ensure clean numbers
     }
 
     // Add max if not already included
-    if (labels[labels.length - 1] !== dynamicMax) {
-      labels.push(dynamicMax);
+    if (labels[labels.length - 1] !== (max ?? 10)) {
+      labels.push(max ?? 10);
     }
 
     return labels;
@@ -196,9 +138,18 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
 
   return (
     <div
-      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
+      key={index}
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >
@@ -232,8 +183,7 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
                       options={options}
                       setEditId={setEditId}
                       onSave={() =>
-                        onSave &&
-                        onSave(question, dynamicMin, dynamicMax, index)
+                        onSave && onSave(question, min ?? 0, max ?? 10, index)
                       }
                       index={index}
                     />
@@ -243,9 +193,9 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
 
               <div className="mt-8 px-0">
                 <Slider
-                  defaultValue={[sliderValue]}
-                  max={dynamicMax}
-                  min={dynamicMin}
+                  value={[sliderValue]}
+                  max={max ?? 10}
+                  min={min ?? 0}
                   step={1}
                   onValueChange={handleSliderChange}
                   className="w-full"

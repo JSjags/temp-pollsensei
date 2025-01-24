@@ -42,6 +42,8 @@ import { Switch } from "../ui/switch";
 import { Input } from "../ui/shadcn-input";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface NumberQuestionProps {
   question: string;
@@ -65,6 +67,7 @@ interface NumberQuestionProps {
     updatedQuestionType: string,
     aiEditIndex?: number
   ) => void;
+  surveyData?: SurveyData;
 }
 
 const NumberQuestion: React.FC<NumberQuestionProps> = ({
@@ -84,6 +87,7 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
   onSave,
   setEditId,
   isEdit = false,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -140,9 +144,17 @@ const NumberQuestion: React.FC<NumberQuestionProps> = ({
 
   return (
     <div
-      className="mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: questionText?.name,
         fontSize: `${questionText?.size}px`,
       }}
     >

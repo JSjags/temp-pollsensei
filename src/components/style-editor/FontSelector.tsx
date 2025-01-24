@@ -20,6 +20,7 @@ import {
   Lora,
   Merriweather,
 } from "next/font/google";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -67,21 +68,27 @@ const merriweather = Merriweather({
 
 interface FontSelectorProps {
   label: string;
+  value: string;
   font: FontSettings;
   setFont: (font: FontSettings) => void;
   fontOptions: FontOption[];
   sizeOptions: SizeOption[];
+  surveyData?: SurveyData;
+  setSurveyData?: React.Dispatch<React.SetStateAction<SurveyData>>;
 }
 
 const FontSelector = ({
   label,
+  value,
   font,
   setFont,
   fontOptions,
   sizeOptions,
+  surveyData,
+  setSurveyData,
 }: FontSelectorProps) => {
   const selectedFont = fontOptions.find(
-    (f) => f.value === (font.name || "DM Sans")
+    (f) => f.value === (font?.name || "DM Sans")
   );
 
   return (
@@ -89,8 +96,16 @@ const FontSelector = ({
       <label className="mt-4">{label}</label>
       <div className="flex gap-2 items-center w-full">
         <Select
-          value={font.name || "DM Sans"}
-          onValueChange={(value) => setFont({ ...font, name: value })}
+          value={font?.name || "DM Sans"}
+          onValueChange={(value) => {
+            setFont({ ...font, name: value });
+            if (surveyData && setSurveyData) {
+              setSurveyData({
+                ...surveyData,
+                [value]: { ...font, name: value },
+              });
+            }
+          }}
         >
           <SelectTrigger className={cn("w-full", selectedFont?.className)}>
             <SelectValue placeholder="Select font" />
@@ -108,7 +123,7 @@ const FontSelector = ({
           </SelectContent>
         </Select>
         <Select
-          value={font.size.toString()}
+          value={font?.size.toString()}
           onValueChange={(value) => setFont({ ...font, size: parseInt(value) })}
         >
           <SelectTrigger className="w-[20%]">
@@ -116,8 +131,8 @@ const FontSelector = ({
           </SelectTrigger>
           <SelectContent>
             {sizeOptions.map((size) => (
-              <SelectItem key={size.value} value={size.value.toString()}>
-                {size.label}
+              <SelectItem key={size.value} value={size?.value.toString()}>
+                {size?.label}
               </SelectItem>
             ))}
           </SelectContent>

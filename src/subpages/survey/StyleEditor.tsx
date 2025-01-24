@@ -34,9 +34,9 @@ export interface StyleEditorProps {
     description: string;
     sections: Section[];
     theme: string;
-    header_text: { name: string; size: number };
-    question_text: { name: string; size: number };
-    body_text: { name: string; size: number };
+    header_text?: any;
+    question_text?: any;
+    body_text?: any;
     color_theme: string;
     logo_url: string;
     header_url: string;
@@ -57,25 +57,22 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  const [headerFont, setHeaderFont] = useState(
-    surveyData?.header_text || { name: "DM Sans", size: 24 }
-  );
-  const [questionFont, setQuestionFont] = useState(
-    surveyData?.question_text || {
-      name: "DM Sans",
-      size: 18,
-    }
-  );
-  const [bodyFont, setBodyFont] = useState(
-    surveyData?.body_text || { name: "DM Sans", size: 16 }
-  );
+  const [headerFont, setHeaderFont] = useState(surveyData?.header_text);
+  const [questionFont, setQuestionFont] = useState(surveyData?.question_text);
+  const [bodyFont, setBodyFont] = useState(surveyData?.body_text);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
   const [color, setColor] = useState(
     surveyData?.color_theme || colorTheme || "#ff5722"
   );
 
-  console.log(surveyData?.body_text);
+  // Update state when props change
+  useEffect(() => {
+    setHeaderFont(surveyData?.header_text);
+    setQuestionFont(surveyData?.question_text);
+    setBodyFont(surveyData?.body_text);
+    setColor(surveyData?.color_theme || colorTheme || "#ff5722");
+  }, [surveyData, colorTheme]);
 
   useEffect(() => {
     dispatch(saveHeaderText(headerFont));
@@ -131,24 +128,30 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
         <h4 className="font-bold">Text Style</h4>
         <FontSelector
           label="Header"
+          value="header_text"
           font={headerFont}
           setFont={setHeaderFont}
           fontOptions={fontOptions}
           sizeOptions={sizeOptions}
+          setSurveyData={setSurveyData}
         />
         <FontSelector
           label="Question"
+          value="question_text"
           font={questionFont}
           setFont={setQuestionFont}
           fontOptions={fontOptions}
           sizeOptions={sizeOptions}
+          setSurveyData={setSurveyData}
         />
         <FontSelector
           label="Body text"
+          value="body_text"
           font={bodyFont}
           setFont={setBodyFont}
           fontOptions={fontOptions}
           sizeOptions={sizeOptions}
+          setSurveyData={setSurveyData}
         />
       </div>
 
