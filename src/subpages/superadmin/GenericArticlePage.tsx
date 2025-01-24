@@ -44,6 +44,7 @@ import { useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import AppReactQuill from "@/components/common/forms/AppReactQuill";
 import AppCollapse from "@/components/custom/AppCollapse";
 import { GetTutorials } from "@/types/api/tutorials.types";
+import { ChatBotIcon } from "@/components/icons";
 
 interface Props {
   pageValue: UseQueryResult<GetTutorials | null, Error>;
@@ -294,11 +295,15 @@ const GenericArticlePage = (props: Props) => {
                     height={38}
                     priority
                   />
-                ) : (
+                ) : card?.media?.[0]?.type.includes("video") ? (
                   <video loop muted autoPlay className="w-full">
                     <source src={card?.media[0]?.url} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
+                ) : (
+                  <div className="w-full text-3xl md:text-4xl lg:text-5xl aspect-video flex items-center justify-center">
+                    <ChatBotIcon />
+                  </div>
                 )}
               </div>
 
@@ -308,11 +313,10 @@ const GenericArticlePage = (props: Props) => {
                   {card?.title}
                 </h3>
                 <div className="w-full flex justify-between items-center">
-                  {card?.media[0]?.type.includes("image") && (
-                    <small>Read article</small>
-                  )}
-                  {card?.media[0]?.type === "video/mp4" && (
+                  {card?.media?.[0]?.type === "video/mp4" ? (
                     <small>Watch Video</small>
+                  ) : (
+                    <small>Read article</small>
                   )}
                   <button
                     onClick={() =>

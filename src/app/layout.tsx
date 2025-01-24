@@ -59,22 +59,21 @@
 //   );
 // }
 
+import MetaPixel from "@/components/MetaPixel";
+import UpgradeModal from "@/components/subscription/modal-upgrade";
+import { AOSInit } from "@/components/ui/Aos";
+import { MixPanelProvider } from "@/contexts/MixpanelContext";
+import ReduxContext from "@/contexts/ReduxContext";
+import { SenseiProvider } from "@/contexts/SenseiContext";
+import { cn } from "@/lib/utils";
+import { TanstackProvider } from "@/providers/TanstackProvider";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
-import "./globals.css";
-import ReduxContext from "@/contexts/ReduxContext";
-import { cn } from "@/lib/utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AOSInit } from "@/components/ui/Aos";
-import { TanstackProvider } from "@/providers/TanstackProvider";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { CookieConsent } from "@/components/primitives/CookieConsent";
-import { MixPanelProvider } from "@/contexts/MixpanelContext";
-import UpgradeModal from "@/components/subscription/modal-upgrade";
-import { SenseiProvider } from "@/contexts/SenseiContext";
-import MetaPixel from "@/components/MetaPixel";
+import "./globals.css";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -127,7 +126,9 @@ export default function RootLayout({
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
-            <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
+            <ToastContainer
+              className={`${cn(fontSans.variable)} !z-[9999999999999]`}
+            />
             <ReduxContext>
               <SenseiProvider>
                 <UpgradeModal />

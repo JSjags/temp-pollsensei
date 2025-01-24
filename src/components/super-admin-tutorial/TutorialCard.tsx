@@ -23,6 +23,7 @@ import { toast } from "react-toastify";
 import DeleteFaq from "../superadmin-faqs/DeleteFaq";
 import UnpublishFaq from "../superadmin-faqs/UnpublishFaq";
 import PublishFaq from "../superadmin-faqs/Publish";
+import { ChatBotIcon } from "../icons";
 
 interface TutorialCardItemProps {
   type: string;
@@ -185,8 +186,6 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
     }
   };
 
-
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -206,82 +205,79 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              className="relative flex flex-col bg-white shadow rounded-lg overflow-hidden"
-            >
-              {/* Card Background */}
-              <div className={`relative h-40 flex justify-center items-center`}>
-                {media[0].type.includes("image") ? (
-                  <Image
-                    className="dark:invert"
-                    src={media[0]?.url}
-                    alt="Next.js logo"
-                    width={180}
-                    height={38}
-                    priority
-                  />
-                ) : (
-                  <video loop muted autoPlay className="w-full">
-                    <source src={media[0]?.url} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
+        <div className="relative flex flex-col bg-white shadow rounded-lg overflow-hidden">
+          {/* Card Background */}
+          <div className={`relative h-40 flex justify-center items-center`}>
+            {media?.[0]?.type.includes("image") ? (
+              <Image
+                className="dark:invert"
+                src={media[0]?.url}
+                alt="Next.js logo"
+                width={180}
+                height={38}
+                priority
+              />
+            ) : media?.[0]?.type.includes("video") ? (
+              <video loop muted autoPlay className="w-full">
+                <source src={media[0]?.url} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <div className="w-full text-3xl md:text-4xl lg:text-5xl aspect-video flex items-center justify-between">
+                <ChatBotIcon />
               </div>
+            )}
+          </div>
 
-              {/* Card Content */}
-              <div className="p-4 flex flex-col">
-                <h3 className="text-sm font-medium text-gray-800">
-                  {title}
-                </h3>
-                <div className="w-full flex justify-between items-center">
-                  {media[0].type.includes("image") && (
-                    <small>Read article</small>
-                  )}
-                  {media[0].type === "video/mp4" && (
-                    <small>Watch Video</small>
-                  )}
-                  <button
-                    onClick={() =>
-                      setDropdownIndex((prevIndex) =>
-                        prevIndex === index ? null : index
-                      )
-                    }
-                    className="relative"
-                  >
-                    <BsThreeDotsVertical />
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-1"></p>
-              </div>
-
-              {/* Action Menu */}
-              {dropdownIndex === index && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute top-12 right-4 bg-white shadow-md rounded-md w-40 py-2 z-10"
-                >
-                  <ul>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    {options.map((op, id) => (
-                  <p
-                    key={id}
-                    onClick={() => handleSelectOption(op, id)}
-                    className={`${
-                      op.toLowerCase() === "delete"
-                        ? "text-[#FF3E3E]"
-                        : "text-[#333333]"
-                    } text-[14px] sm:text-[16px] cursor-pointer mb-2 sm:mb-3`}
-                  >
-                    {op}
-                  </p>
-                ))}
-                    </li>
-                  </ul>
-                </div>
+          {/* Card Content */}
+          <div className="p-4 flex flex-col">
+            <h3 className="text-sm font-medium text-gray-800">{title}</h3>
+            <div className="w-full flex justify-between items-center">
+              {media?.[0]?.type === "video/mp4" ? (
+                <small>Watch Video</small>
+              ) : (
+                <small>Read article</small>
               )}
+              <button
+                onClick={() =>
+                  setDropdownIndex((prevIndex) =>
+                    prevIndex === index ? null : index
+                  )
+                }
+                className="relative"
+              >
+                <BsThreeDotsVertical />
+              </button>
             </div>
-      
-  
+            <p className="text-xs text-gray-500 mt-1"></p>
+          </div>
+
+          {/* Action Menu */}
+          {dropdownIndex === index && (
+            <div
+              ref={dropdownRef}
+              className="absolute top-12 right-4 bg-white shadow-md rounded-md w-40 py-2 z-10"
+            >
+              <ul>
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  {options.map((op, id) => (
+                    <p
+                      key={id}
+                      onClick={() => handleSelectOption(op, id)}
+                      className={`${
+                        op.toLowerCase() === "delete"
+                          ? "text-[#FF3E3E]"
+                          : "text-[#333333]"
+                      } text-[14px] sm:text-[16px] cursor-pointer mb-2 sm:mb-3`}
+                    >
+                      {op}
+                    </p>
+                  ))}
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
 
       {showDelete && (
