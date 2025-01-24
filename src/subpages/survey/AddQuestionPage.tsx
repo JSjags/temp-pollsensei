@@ -2,7 +2,7 @@ import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { VscLayersActive } from "react-icons/vsc";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -349,199 +349,202 @@ const AddQuestionPage = () => {
               </div>
             </div>
           )}
+          {/* @ts-ignore */}
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {questions?.map((item: any, index: any) => (
-                    <Draggable
-                      key={index}
-                      draggableId={index.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-4"
-                        >
-                          {
-                            // Conditionally render based on question type
-                            isEdit &&
-                            editIndex === index &&
-                            item.question_type === "matrix_checkbox" ? (
-                              <MatrixQuestionEdit
-                                question={item.question}
-                                options={item.options}
-                                is_required={item.is_required}
-                                questionType={item.question_type}
-                                onSave={handleSaveEdittedQuestion}
-                                onCancel={handleCancel}
-                              />
-                            ) : isEdit && editIndex === index ? (
-                              <MultiChoiceQuestionEdit
-                                // index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                is_required={item.is_required}
-                                onSave={handleSaveEdittedQuestion}
-                                onCancel={handleCancel}
-                              />
-                            ) : item.question_type === "multiple_choice" ? (
-                              <MultiChoiceQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "single_choice" ? (
-                              <SingleChoiceQuestion
-                                index={index + 1}
-                                key={index}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "checkbox" ? (
-                              <CheckboxQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "rating_scale" ? (
-                              <RatingScaleQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "drop_down" ? (
-                              <DropdownQuestion
-                                index={index + 1}
-                                key={index}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "number" ? (
-                              <NumberQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "long_text" ? (
-                              <CommentQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                
-                              />
-                            ) : item.question_type === "media" ? (
-                              <MediaQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "short_text" ? (
-                              <ShortTextQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "likert_scale" ? (
-                              <LikertScaleQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "star_rating" ? (
-                              <StarRatingQuestion
-                                question={item.question}
-                                // maxRating={5}
-                                index={index + 1}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "matrix_checkbox" ? (
-                              <MatrixQuestion
-                                key={index}
-                                index={index + 1}
-                                // options={item.options}
-                                rows={item.rows}
-                                columns={item.columns}
-                                question={item.question}
-                                is_required={item.is_required}
-                                questionType={item.question_type}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "boolean" ? (
-                              <BooleanQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                DeleteQuestion={() =>
-                                  handleDeleteQuestion(index)
-                                }
-                              />
-                            ) : item.question_type === "slider" ? (
-                              <SliderQuestion
-                                question={item.question}
-                                options={item.options}
-                                // step={item.options.length}
-                                questionType={item.question_type}
-                                index={index + 1}
-                                is_required={item.is_required}
-                              />
-                            ) : null
-                          }
-                        </div>
-                      )}
-                    </Draggable>
+                    <Fragment key={index}>
+                      {/* @ts-ignore */}
+                      <Draggable
+                        key={index}
+                        draggableId={index.toString()}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="mb-4"
+                          >
+                            {
+                              // Conditionally render based on question type
+                              isEdit &&
+                              editIndex === index &&
+                              item.question_type === "matrix_checkbox" ? (
+                                <MatrixQuestionEdit
+                                  question={item.question}
+                                  options={item.options}
+                                  is_required={item.is_required}
+                                  questionType={item.question_type}
+                                  onSave={handleSaveEdittedQuestion}
+                                  onCancel={handleCancel}
+                                />
+                              ) : isEdit && editIndex === index ? (
+                                <MultiChoiceQuestionEdit
+                                  // index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  is_required={item.is_required}
+                                  onSave={handleSaveEdittedQuestion}
+                                  onCancel={handleCancel}
+                                />
+                              ) : item.question_type === "multiple_choice" ? (
+                                <MultiChoiceQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "single_choice" ? (
+                                <SingleChoiceQuestion
+                                  index={index + 1}
+                                  key={index}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "checkbox" ? (
+                                <CheckboxQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "rating_scale" ? (
+                                <RatingScaleQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "drop_down" ? (
+                                <DropdownQuestion
+                                  index={index + 1}
+                                  key={index}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "number" ? (
+                                <NumberQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "long_text" ? (
+                                <CommentQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "media" ? (
+                                <MediaQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "short_text" ? (
+                                <ShortTextQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "likert_scale" ? (
+                                <LikertScaleQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "star_rating" ? (
+                                <StarRatingQuestion
+                                  question={item.question}
+                                  // maxRating={5}
+                                  index={index + 1}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "matrix_checkbox" ? (
+                                <MatrixQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  // options={item.options}
+                                  rows={item.rows}
+                                  columns={item.columns}
+                                  question={item.question}
+                                  is_required={item.is_required}
+                                  questionType={item.question_type}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "boolean" ? (
+                                <BooleanQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  DeleteQuestion={() =>
+                                    handleDeleteQuestion(index)
+                                  }
+                                />
+                              ) : item.question_type === "slider" ? (
+                                <SliderQuestion
+                                  question={item.question}
+                                  options={item.options}
+                                  // step={item.options.length}
+                                  questionType={item.question_type}
+                                  index={index + 1}
+                                  is_required={item.is_required}
+                                />
+                              ) : null
+                            }
+                          </div>
+                        )}
+                      </Draggable>
+                    </Fragment>
                   ))}
                   {provided.placeholder}
                 </div>
@@ -586,7 +589,7 @@ const AddQuestionPage = () => {
                   console.log(newQuestion);
                   dispatch(addQuestion(newQuestion));
                   setAddQuestions((prev) => !prev);
-                }else if(questionType === "long_text") {
+                } else if (questionType === "long_text") {
                   const newQuestion = {
                     question: question,
                     question_type: questionType,
@@ -656,7 +659,9 @@ const AddQuestionPage = () => {
                 Publish Survey
               </button>
             </div>
-            {survey.sections.length > 0 && <div>{survey?.sections?.length + 1}</div>}
+            {survey.sections.length > 0 && (
+              <div>{survey?.sections?.length + 1}</div>
+            )}
           </div>
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
