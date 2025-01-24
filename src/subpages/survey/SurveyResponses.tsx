@@ -5,8 +5,6 @@ import UploadedItem from "@/components/ui/UploadedItem";
 import { setSurvey } from "@/redux/slices/answer.slice";
 import {
   closeUpload,
-  openUpload,
-  toggleUpload,
 } from "@/redux/slices/upload.slice";
 import { RootState } from "@/redux/store";
 import {
@@ -31,7 +29,6 @@ const SurveyResponses = () => {
     (state: RootState) => state?.upload?.isUploadOpen
   );
   const { data } = useFetchASurveyQuery(params.id);
-  const [isToggled, setIsToggled] = useState<boolean>(false);
   const [
     uploadResponseOCR,
     {
@@ -91,8 +88,17 @@ const SurveyResponses = () => {
 
           reader.onloadend = () => {
             const base64String = reader.result?.toString().split(",")[1];
+            const image_name = file.name
+            console.log(image_name)
             if (base64String) {
-              resolve(`data:${file.type};base64,${base64String}`);
+              console.log({
+                image_name: image_name,
+                base64: `data:${file.type};base64,${base64String}`, //`data:${file.type};base64,${base64String}`
+              })
+              resolve(
+                // image_name: image_name,
+                `data:${file.type};base64,${base64String}`, //`data:${file.type};base64,${base64String}`
+              );
             } else {
               reject(new Error("Failed to convert file to Base64."));
             }
@@ -230,8 +236,10 @@ const SurveyResponses = () => {
                       >
                         {[...selectedFiles].map((item, index) => (
                           <Draggable
-                            key={index + 1}
-                            draggableId={index.toString()}
+                            key={item.name}
+                            // key={index + 1}
+                            // draggableId={index.toString()}
+                            draggableId={item.name}
                             index={index}
                           >
                             {(provided) => (

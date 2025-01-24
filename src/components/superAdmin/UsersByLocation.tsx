@@ -69,7 +69,7 @@ const UsersByLocation: React.FC = () => {
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4 w-full">
+    <div className="flex-1 h-[300px] bg-white shadow-lg rounded-lg p-4 w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Users by Location</h2>
         <div className="flex space-x-4 text-sm">
@@ -95,127 +95,12 @@ const UsersByLocation: React.FC = () => {
             ></div>
             {item.country}
           </span>
-          <span>{item.percentage}%</span>
+          <span>{item?.percentage?.toFixed(2)}%</span>
         </div>
       ))}
     </div>
-        {/* <div className="ml-4 space-y-2 text-gray-700 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center">
-              <div className="w-2.5 h-2.5 bg-black rounded-full mr-2"></div>
-              United States
-            </span>
-            <span>38.6%</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="flex items-center">
-              <div className="w-2.5 h-2.5 bg-teal-400 rounded-full mr-2"></div>
-              United Kingdom
-            </span>
-            <span>22.5%</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="flex items-center">
-              <div className="w-2.5 h-2.5 bg-purple-500 rounded-full mr-2"></div>
-              Mexico
-            </span>
-            <span>30.8%</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="flex items-center">
-              <div className="w-2.5 h-2.5 bg-gray-300 rounded-full mr-2"></div>
-              Other
-            </span>
-            <span>8.1%</span>
-          </div>
-        </div> */}
       </div>
     </div>
   );
 };
 export default dynamic(() => Promise.resolve(UsersByLocation), { ssr: false });
-
-
-// import React from "react";
-// import ReactApexChart from "react-apexcharts";
-// import { ApexOptions } from "apexcharts";
-// import { useUsersByLocationQuery } from "@/services/superadmin.service";
-// import dynamic from "next/dynamic";
-
-// type CountryData = {
-//   _id: string;
-//   count: number;
-//   country: string;
-//   percentage: number;
-// }[];
-
-// function generateColorArray(length: number): string[] {
-//   const baseColors = ["#4A148C", "#8E24AA", "#CE93D8", "#E0E0E0"];
-//   return Array.from({ length }, (_, i) => baseColors[i % baseColors.length]);
-// }
-
-// const UsersByLocation: React.FC = () => {
-//   const { data, isLoading } = useUsersByLocationQuery("");
-
-//   function extractCountryList(data: CountryData): string[] {
-//     return data?.map((item) => item?.country);
-//   }
-
-//   function extractPercentageList(data: CountryData): number[] {
-//     return data?.map((item) => item?.percentage);
-//   }
-
-//   const countryList = data?.data ? extractCountryList(data.data) : [];
-//   const countryPercentage = data?.data ? extractPercentageList(data.data) : [];
-//   const colorArray = generateColorArray(countryList.length);
-
-//   const chartOptions: ApexOptions = {
-//     chart: {
-//       type: "donut",
-//       height: 200,
-//     },
-//     colors: colorArray,
-//     labels: countryList,
-//     legend: {
-//       show: false,
-//     },
-//     dataLabels: {
-//       enabled: false,
-//     },
-//     plotOptions: {
-//       pie: {
-//         donut: {
-//           size: "65%",
-//         },
-//       },
-//     },
-//     tooltip: {
-//       y: {
-//         formatter: (val: number) => `${val.toFixed(1)}%`,
-//       },
-//     },
-//   };
-
-//   const chartSeries = countryPercentage;
-
-//   if (isLoading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   if (!data?.data?.length) {
-//     return <div>No data available</div>;
-//   }
-
-//   return (
-//     <div className="bg-white shadow-lg rounded-lg p-4 w-full">
-//       <div className="flex items-center justify-between mb-4">
-//         <h2 className="text-lg font-semibold text-gray-800">Users by Location</h2>
-//       </div>
-//       <div className="flex items-center">
-//         <ReactApexChart options={chartOptions} series={chartSeries} type="donut" height={200} />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default dynamic(() => Promise.resolve(UsersByLocation), { ssr: false });

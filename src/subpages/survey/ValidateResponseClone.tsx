@@ -16,13 +16,6 @@ import { useSubmitResponseMutation } from "@/services/survey.service";
 import MediaQuestion from "@/components/survey/MediaQuestion";
 import StarRatingQuestion from "@/components/survey/ValidateStarRattings";
 import LikertScaleQuestion from "@/components/survey/ValidateLikertScale";
-import NumberQuestion from "@/components/survey/NumberQuestion";
-import DropdownQuestion from "@/components/survey/AnswerDropdownQuestion";
-import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
-import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
-import BooleanQuestion from "@/components/survey/AnswerBoolean";
-import ShortTextQuestion from "@/components/survey/LongTextQuestion";
-import CommentWithMediaQuestion from "@/components/survey/CommentWithMediaQuestion";
 
 
 interface HeaderText {
@@ -76,7 +69,16 @@ interface Answer {
   selected_options: string[];
 }
 
-
+interface DataProps {
+  extracted_answers: Answer[];
+  survey: any;
+  uploaded_files: any;
+}
+interface OCRResponse {
+  extracted_answers: Answer[];
+  survey: any;
+  uploaded_files: any;
+}
 
 const ValidateResponse = () => {
   const params = useParams();
@@ -84,7 +86,7 @@ const ValidateResponse = () => {
   const router = useRouter();
   const OCRresponses = useSelector(
     // @ts-ignore
-    (state: RootState) => state.answer as any
+    (state: RootState) => state.answer as OCRResponse[]
   );
   const ocr = useSelector((state: RootState)=> state.answer)
   console.log(ocr)
@@ -96,12 +98,13 @@ const ValidateResponse = () => {
   const [respondent_name, setRespondent_name] = useState<string>("No provided");
   const [respondent_phone, setRespondent_phone] = useState("");
   const [respondent_country, setRespondent_country] = useState("");
-
+  // const [respondent_email, setRespondent_email] = useState( "" || "example@gmail.com");
   const [respondent_email, setRespondent_email] =
     useState<string>("example@gmail.com");
 
   const [ocrRes, setOcrRes] = useState<ResponseData | null>(null);
 
+  const [filteredData, setFilteredData] = useState([]);
 
   console.log(OCRresponses);
   console.log(ocrRes);
@@ -109,9 +112,9 @@ const ValidateResponse = () => {
   useEffect(()=>{
     if(OCRresponses as any){
       setOcrRes({
-      survey: OCRresponses?.survey || [],
-      extracted_answers: OCRresponses?.extracted_answers ||[],
-      uploaded_files: OCRresponses?.uploaded_files || [],
+      survey: data?.data?.survey || [],
+      extracted_answers: data?.data?.extracted_answers ||[],
+      uploaded_files: data?.data?.uploaded_files || [],
       })
     }
   }, [OCRresponses])
@@ -135,6 +138,7 @@ const ValidateResponse = () => {
     console.log("U clicked")
     // @ts-ignore
     const answers = (ocrRes as any)?.extracted_answers?.map((item: any) => {
+    // const answers = (OCRresponses as any)?.extracted_answers?.map((item: any) => {
         if (
           item.question_type === "multiple_choice" ||
           item.question_type === "checkbox" ||
@@ -143,11 +147,7 @@ const ValidateResponse = () => {
           return {
             question: item.question,
             question_type: item.question_type,
-            selected_options:
-            item.selected_options && item.selected_options.length > 0
-              ? item.selected_options
-              : [item.options[0]], 
-            // selected_options: item.selected_options || "No answer was provided",
+            selected_options: item.selected_options || [],
           };
         } else if (
           item.question_type === "comment" ||
@@ -157,7 +157,7 @@ const ValidateResponse = () => {
           return {
             question: item.question,
             question_type: item.question_type,
-            text: item.text || "No answer was provided",
+            text: item.text || "",
           };
         } else if (
           item.question_type === "likert_scale" ||
@@ -167,7 +167,7 @@ const ValidateResponse = () => {
           return {
             question: item.question,
             question_type: item.question_type,
-            scale_value: item.scale_value || 2,
+            scale_value: item.scale_value,
           };
         } else if (
           item.question_type === "drop_down_value"
@@ -175,7 +175,7 @@ const ValidateResponse = () => {
           return {
             question: item.question,
             question_type: item.question_type,
-            drop_down_value: item.drop_down_value || [item.options[0]],
+            drop_down_value: item.drop_down_value,
           };
         } else if (
           item.question_type === "boolean_value"
@@ -208,8 +208,6 @@ const ValidateResponse = () => {
     }
   };
 
-  
-
   useEffect(() => {
     if (isSuccess) {
       toast.success("Your response was saved successfully");
@@ -223,43 +221,33 @@ const ValidateResponse = () => {
 
   // TODO: Check why the last option is not piked
 
-
-
-  const handleUpdateSelectedOption = (index: number, selectedOption: string) => {
-    if (!ocrRes) return;
-  
-    setOcrRes((prev) => {
-      if (!prev) return null;
-  
-      const updatedAnswers = [...prev.extracted_answers]; // Clone the extracted_answers array
-      const question = { ...updatedAnswers[index] }; // Clone the specific question at the index
-  
-      if (question.selected_options) {
-        if (question.selected_options.includes(selectedOption)) {
-          // Remove the option if it's already selected
-          question.selected_options = question.selected_options.filter(
-            (option) => option !== selectedOption
-          );
-        } else {
-          // Add the selected option (Single or multi-choice logic)
-          question.selected_options = [selectedOption];
-        }
-      } else {
-        // If `selected_options` is undefined, initialize it
-        question.selected_options = [selectedOption];
-      }
-  
-      updatedAnswers[index] = question; // Replace the updated question in the array
-  
-      return {
-        ...prev,
-        extracted_answers: updatedAnswers, // Update the extracted_answers array
-      };
-    });
+  const handleQuestionChange = (index: number, selectedOptions: string[]) => {
+    console.log(`Question ${index} selected options:`, selectedOptions);
   };
-  
-  
 
+  useEffect(() => {
+    function filterUniqueQuestions(data: Answer[]) {
+      const uniqueQuestions: Answer[] = [];
+      const seenQuestions = new Set<string>();
+
+      data?.forEach((item) => {
+        if (!seenQuestions.has(item.question)) {
+          uniqueQuestions.push(item);
+          seenQuestions.add(item.question);
+        }
+      });
+
+      return uniqueQuestions;
+    }
+
+    const currentExtractedAnswers =
+      (OCRresponses as any)?.extracted_answers || [];
+    const uniqueFilteredData = filterUniqueQuestions(currentExtractedAnswers);
+    // @ts-ignore
+    setFilteredData(uniqueFilteredData);
+  }, [OCRresponses, currentSection]);
+
+  console.log(filteredData)
   return (
     <div
       className={`${
@@ -356,37 +344,35 @@ const ValidateResponse = () => {
 
           {/* @ts-ignore */}
           { (ocrRes as any)?.extracted_answers?.map((item: any, index: number) => (
-             <div key={index} className="mb-4">
-             {
-             item.question_type === "multiple_choice" ||
-             item.question_type === "checkbox" ||
-             item.question_type === "single_choice" ? (
-               <AnswerMultiChoiceQuestion
-                 key={index}
-                 question={item.question}
-                 options={item.options}
-                 questionType={item.question_type}
-                 selectedOptions={item.selected_options || [""]}
-                 onChange={(selected) => {
-                  handleUpdateSelectedOption(index, item.selected_options)
-                 }}
-                 index={index + 1}
-                 status={item?.validation_result?.status}
-               />
-             ) : 
-             item.question_type === "comment" ||
-              item.question_type === "short_text"  ? (
-               <CommentQuestion
-                 key={index}
-                 index={index + 1}
-                 questionType={item.question_type}
-                 question={item.question}
-                 response={item.text}
-                 status={item?.validation_result?.status}
-                
-               />
-             ) :
-                
+            <div key={index} className="mb-4">
+              {item.question_type === "multiple_choice" ||
+              item.question_type === "single_choice" ||
+              item.question_type === "multi_choice" ? (
+                <AnswerMultiChoiceQuestion
+                  key={index}
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
+                  selectedOptions={item.selected_options || []}
+                  onChange={(selected) =>
+                    // handleQuestionChange(index, selected)
+                    console.log(selected)
+                  }
+                  index={index + 1}
+                />
+              ) : item.question_type === "comment" ||
+                item.question_type === "long_text" ? (
+                <CommentQuestion
+                  key={index}
+                  index={index + 1}
+                  questionType={item.question_type}
+                  question={item.question}
+                  response={item.text}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) :
+                 
               item.question_type === "number" ? (
               <CommentQuestion
                 key={index}
@@ -395,130 +381,72 @@ const ValidateResponse = () => {
                 question={item.question}
                 response={item.num}
                 status={item?.validation_result?.status}
-               
+                // EditQuestion={() => EditQuestion(index)}
+                // DeleteQuestion={()=>handleDeleteQuestion(index)}
               />
-            ) 
-             : item.question_type === "media"  ? (
-             <MediaQuestion
-               key={index}
-               index={index + 1}
-               questionType={item.question_type}
-               question={item.question}
-               response={item?.media?.text}
-               status={item?.validation_result?.status}
-               audio={item?.media?.url}
-           
-             />
-           ) :
-      
-        
-               item.question_type === "long_text" ? (
-               <CommentWithMediaQuestion
-                 key={index}
-                 index={index + 1}
-                 questionType={item.question_type}
-                 question={item.question}
-                 response={item?.media?.text || item.text }
-                 mediaUrl={item?.media?.url}
-                 status={item?.validation_result?.status}
-                 audio={item?.media?.url}
-              
-               />
-             )
-              : item.question_type === "linear_Scale" ? (
-               <LinearScaleQuestion
-                 question={item.question}
-                 scaleStart={item.scaleStart}
-                 scaleEnd={item.scaleEnd}
-                 questionType={item.question_type}
+            )  : item.question_type === "media"  ? (
+              <MediaQuestion
+                key={index}
+                index={index + 1}
+                questionType={item.question_type}
+                question={item.question}
+                response={item?.media?.text}
+                status={item?.validation_result?.status}
+                audio={item?.media?.url}
+                onTranscribe={()=>{
+                  console.log("You clicked me" + index)
+                  console.log(item?.media?.url)
+                  console.log(item?.media)
+                  console.log(item?.question)
+                  console.log(item)
+                }}
                 
-               />
-             ) : item.question_type === "likert_scale" ? (
-               <LikertScaleQuestion
-                 question={item.question}
-                 options={item.options}
-                 questionType={item.question_type}
-                 scale_value={item.scale_value}
-               />
-             )
-              : item.question_type === "star_rating" ? (
-               <StarRatingQuestion
-                 question={item.question}
-                 questionType={item.question_type}
-                 scale_value={item.scale_value}
-                 onRate={(value) => console.log("Rated:", value)}
-               />
-             ) 
-             : item.question_type === "matrix_checkbox" ? (
-               <MatrixQuestion
-                 key={index}
-                 index={index + 1}
-                 rows={item.rows}
-                 columns={item.columns}
-                 questionType={item.question_type}
-                 question={item.question}
-               />
-             ) : item.question_type === "short_text" ? (
-               <ShortTextQuestion
-                 key={index}
-                 index={index + 1}
-                 question={item.question}
-                 questionType={item.question_type}
-                 is_required={item.is_required}
-               />
-             ) : item.question_type === "boolean" ? (
-               <BooleanQuestion
-                 key={index}
-                 index={index + 1}
-                 question={item.question}
-                 options={item.options}
-                 boolean_value={item?.boolean_value}
-                 questionType={item.question_type}
-                status={item?.validation_result?.status}
-
-               />
-             )
-            
-              : item.question_type === "checkbox" ? (
-               <CheckboxQuestion
-                 key={index}
-                 index={index + 1}
-                 question={item.question}
-                 options={item.options}
-                 questionType={item.question_type}
-                status={item?.validation_result?.status}
-
-               />
-             ) : item.question_type === "rating_scale" ? (
-               <RatingScaleQuestion
-                 key={index}
-                 index={index + 1}
-                 question={item.question}
-                 options={item.options}
-                 questionType={item.question_type}
-               />
-             )
-              : item.question_type === "drop_down" ? (
-               <DropdownQuestion
-                 index={index + 1}
-                 key={index}
-                 question={item.question}
-                 options={item.options}
-                 questionType={item.question_type}
-                 drop_down_value={item.drop_down_value}
-                status={item?.validation_result?.status}
-
-               />
-             )
-              : item.question_type === "number" ? (
-               <NumberQuestion
-                 key={index}
-                 index={index + 1}
-                 question={item.question}
-                 questionType={item.question_type}
-               />
-             ) : null}
-           </div>
+                // EditQuestion={() => EditQuestion(index)}
+                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+              />
+            )
+               : item.question_type === "linear_Scale" ? (
+                <LinearScaleQuestion
+                  question={item.question}
+                  scaleStart={item.scaleStart}
+                  scaleEnd={item.scaleEnd}
+                  questionType={item.question_type}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) : item.question_type === "likert_scale" ? (
+                <LikertScaleQuestion
+                key={index}
+                index={index + 1}
+                question={item.question}
+                options={item.options}
+                questionType={item.question_type}
+                scale_value={item.scale_value}
+              />
+              ) : item.question_type === "star_rating" ? (
+                <StarRatingQuestion
+                key={index}
+                index={index + 1}
+                  question={item.question}
+                  options={item.options}
+                  questionType={item.question_type}
+                  scale_value={item.scale_value}
+                  onRate={(value) => console.log("Rated:", value)}
+                />
+              ) : item.question_type === "matrix_checkbox" ? (
+                <MatrixQuestion
+                  key={index}
+                  index={index + 1}
+                  // options={item.options}
+                  rows={item.rows}
+                  columns={item.columns}
+                  questionType={item.question_type}
+                  question={item.question}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              ) : null}
+            </div>
           ))}
           <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
             <div className="flex gap-2 items-center"></div>
@@ -534,13 +462,26 @@ const ValidateResponse = () => {
           </div>
 
           <div className=" rounded-md flex  items-center w-full md:min-w-[16rem] py-5 text-center">
-        
+            {/* <button
+              className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
+              type="button"
+              onClick={() => {
+                dispatch(replaceAnswers(filteredData));
+                console.log("You clicked me");
+              }}
+            >
+              Remove duplicate questions
+            </button> */}
             <button
               className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] rounded-lg px-8 py-2 text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
               // type="submit"
               onClick={() => {
                 handleSubmitResponse()
-             
+                // setTimeout(() => {
+                //   router.push("/surveys/survey-list");
+                //   toast.success("Successful");
+                //   dispatch(resetAnswers());
+                // }, 3000);
               }}
             >
               {/* Submit Response */}
