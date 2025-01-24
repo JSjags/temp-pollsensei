@@ -62,7 +62,7 @@ const ArticleDetailsPage = (): JSX.Element => {
           </div>
 
           <div className={`relative flex justify-center items-center`}>
-            {data?.data?.type === "image" ? (
+            {data?.data?.media[0]?.type?.includes("image") && (
               <Image
                 className="w-full dark:invert"
                 src={data?.data?.media[0]?.url}
@@ -71,7 +71,8 @@ const ArticleDetailsPage = (): JSX.Element => {
                 draggable={false}
                 height={300}
               />
-            ) : (
+            )}
+            {data?.data?.media[0]?.type?.includes("video") && (
               <video controls autoPlay className="w-full">
                 <source src={data?.data?.media[0]?.url} type="video/mp4" />
                 Your browser does not support the video tag.

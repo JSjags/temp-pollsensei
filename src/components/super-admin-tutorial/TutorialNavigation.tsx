@@ -81,19 +81,43 @@ const TutorialNavigation: React.FC = () => {
     links: string;
     file: any;
   }) => {
+    if (!values?.type) {
+      return toast.error("Tutorial type is required.");
+    }
+
+    if (!values?.title) {
+      return toast.error("Title is required.");
+    }
+
+    if (values?.title?.length < 5) {
+      return toast.error("Title must be at least 5 characters.");
+    }
+
+    if (!values?.description) {
+      return toast.error("Description is required.");
+    }
+    if (values?.description?.length < 10) {
+      return toast.error("Description must be at least 10 characters.");
+    }
+    if (!quilValue) {
+      return toast.error("Tutorial content is required.");
+    }
+
     const formData = new FormData();
     formData.append("type", values.type);
     formData.append("title", values.title);
     formData.append("description", values.description);
-    formData.append("links", values.links);
     if (values.links) {
       formData.append("links", values.links);
     }
-    if (values.file && values.file.length > 0) {
-      formData.append("file", values.file[0]);
-    } else {
-      toast.error("Please upload a file to proceed.");
-      return;
+
+    if (values?.type != TUTORIAL_ENUM.text) {
+      if (values.file && values.file.length > 0) {
+        formData.append("file", values.file[0]);
+      } else {
+        toast.error("Please upload a file to proceed.");
+        return;
+      }
     }
 
     if (quilValue) {
@@ -116,9 +140,9 @@ const TutorialNavigation: React.FC = () => {
     }
   };
 
-  const validateForm = (values: any) => {
-    return validate(values, constraints) || {};
-  };
+  // const validateForm = (values: any) => {
+  //   return validate(values, constraints) || {};
+  // };
 
   return (
     <div>
@@ -160,7 +184,7 @@ const TutorialNavigation: React.FC = () => {
 
             <Form
               onSubmit={onSubmit}
-              validate={validateForm}
+              // validate={validateForm}
               render={({ handleSubmit, form, values, submitting }) => (
                 <form
                   onSubmit={handleSubmit}
