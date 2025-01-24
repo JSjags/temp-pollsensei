@@ -52,9 +52,9 @@ export interface SurveyData {
   description: string;
   sections: Section[];
   theme: string;
-  header_text?: any;
-  question_text?: any;
-  body_text?: any;
+  header_text: { name: string; size: number };
+  question_text: { name: string; size: number };
+  body_text: { name: string; size: number };
   color_theme: string;
   logo_url: string;
   header_url: string;
@@ -87,11 +87,13 @@ const EditSubmittedSurvey = () => {
     description: "",
     sections: [],
     theme: "",
+    header_text: { name: "", size: 24 },
+    question_text: { name: "", size: 18 },
+    body_text: { name: "", size: 16 },
     color_theme: "#ffffff",
     logo_url: "#ffffff",
     header_url: "#ffffff",
   });
-
   const questions = surveyData?.sections;
   console.log(questions);
   console.log(surveyData);
@@ -136,9 +138,9 @@ const EditSubmittedSurvey = () => {
     if (!data) return;
 
     const defaultFontSettings = {
-      header: { name: "Times New Roman", size: 18 },
-      question: { name: "Times New Roman", size: 14 },
-      body: { name: "Times New Roman", size: 12 },
+      header: { name: "DM Sans", size: 18 },
+      question: { name: "DM Sans", size: 14 },
+      body: { name: "DM Sans", size: 12 },
     };
 
     const processedSections =
@@ -169,11 +171,11 @@ const EditSubmittedSurvey = () => {
       logo_url: data?.data?.logo_url ?? "",
       header_url: data?.data?.header_url ?? "",
     });
-
-    alert("data");
   }, [data, isSurveySuccess]);
 
   console.log(data);
+  console.log(surveyData.topic);
+  console.log(data?.data?.question_text);
   console.log(surveyData.question_text);
 
   // Add effect to refetch data on mount
