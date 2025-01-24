@@ -66,6 +66,8 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     surveyData?.color_theme || colorTheme || "#ff5722"
   );
 
+  console.log(surveyData);
+
   // Update state when props change
   useEffect(() => {
     setHeaderFont(surveyData?.header_text);
@@ -178,6 +180,8 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
         setFile={setLogoFile}
         fileType="logo"
         currentFile={logoFile}
+        surveyData={surveyData}
+        setSurveyData={setSurveyData}
       />
 
       <ImageUploader
@@ -190,6 +194,8 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
         setFile={setHeaderImageFile}
         fileType="header_image"
         currentFile={headerImageFile}
+        surveyData={surveyData}
+        setSurveyData={setSurveyData}
       />
     </div>
   );

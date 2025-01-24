@@ -72,7 +72,7 @@ export function ColorPicker({ field, value, onChange }: ColorPickerProps) {
             key={color}
             className={`w-8 h-8 rounded-md border transition-all duration-200 ${
               selectedColor === color
-                ? "ring-2 ring-offset-2 ring-blue-500"
+                ? "ring-2 ring-offset-2 ring-[#5B03B2]"
                 : ""
             }`}
             style={{ backgroundColor: color }}
@@ -103,7 +103,7 @@ export function ColorPicker({ field, value, onChange }: ColorPickerProps) {
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 bg-[#5B03B210] hover:bg-[#5B03B2] transition-all duration-200 group"
               onClick={() => {
                 const colorValue = inputColor.replace("#", "");
                 if (/^([A-Fa-f0-9]{6})$/.test(colorValue)) {
@@ -111,7 +111,7 @@ export function ColorPicker({ field, value, onChange }: ColorPickerProps) {
                 }
               }}
             >
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4 text-[#5B03B2] group-hover:text-white transition-all duration-200" />
             </Button>
           </div>
           <div

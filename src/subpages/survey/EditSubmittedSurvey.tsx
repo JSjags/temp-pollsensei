@@ -33,6 +33,7 @@ import { BsExclamation } from "react-icons/bs";
 import { cn } from "@/lib/utils";
 import axiosInstance from "@/lib/axios-instance";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 
 interface Question {
   question: string;
@@ -90,7 +91,7 @@ const EditSubmittedSurvey = () => {
     header_text: { name: "", size: 24 },
     question_text: { name: "", size: 18 },
     body_text: { name: "", size: 16 },
-    color_theme: "#ffffff",
+    color_theme: "#000000",
     logo_url: "#ffffff",
     header_url: "#ffffff",
   });
@@ -1041,12 +1042,75 @@ const EditSubmittedSurvey = () => {
             )}
 
             <div className="flex flex-col gap-4 md:flex-row justify-between items-center mb-10">
-              <button
-                className="auth-btn text-white px-4 py-2 rounded hover:bg-blue-700"
+              <Button
+                className="relative overflow-hidden bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white
+                  transform transition-all duration-300 ease-in-out
+                  hover:scale-100 hover:shadow-lg hover:shadow-purple-500/30
+                  active:scale-95
+                  before:absolute before:top-0 before:left-0 before:w-full before:h-full 
+                  before:bg-gradient-to-r before:from-purple-600 before:to-fuchsia-600
+                  before:opacity-0 before:transition-opacity before:duration-300
+                  hover:before:opacity-100
+                  disabled:opacity-70 disabled:cursor-not-allowed
+                  group"
                 onClick={saveSurvey}
+                disabled={isEditLoading}
               >
-                {isEditLoading ? "Saving..." : "Save Changes"}
-              </button>
+                <span className="relative flex items-center justify-center gap-2">
+                  {isEditLoading ? (
+                    <>
+                      {/* <svg
+                        className="animate-spin h-5 w-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                      </svg> */}
+                      <span className="flex items-center gap-2">
+                        <svg
+                          className="w-5 h-5 animate-bounce"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                          />
+                        </svg>
+                        Saving changes
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex items-center gap-2">
+                        <svg
+                          className="w-5 h-5 animate-pulse"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                          />
+                        </svg>
+                        Save changes
+                      </span>
+                    </>
+                  )}
+                </span>
+              </Button>
             </div>
 
             <WatermarkBanner className="mb-10" />

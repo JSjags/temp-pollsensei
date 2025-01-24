@@ -280,7 +280,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
               {number_of_responses.toLocaleString()}
             </span>
             <p className="text-[#333333] text-[14px] sm:text-[16px]">
-              responses
+              {number_of_responses > 1 ? "responses" : "response"}
             </p>
           </div>
           <Link href={`/surveys/${_id}`}>
