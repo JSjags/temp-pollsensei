@@ -10,6 +10,7 @@ import PageControl from "../common/PageControl";
 import { DEFAULT_API_PAGE_SIZE } from "@/services/api/tutorial";
 import Link from "next/link";
 import routes from "@/config/routes";
+import { ChatBotIcon } from "../icons";
 
 const VideoTutorial = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,9 +66,9 @@ const VideoTutorial = (): JSX.Element => {
                 <div
                   className={`relative min-h-48 flex justify-center items-center`}
                 >
-                  {article.media[0].type === "image/jpeg" ||
-                  article.media[0].type === "png" ||
-                  article.media[0].type === "image/png" ? (
+                  {article?.media?.[0]?.type === "image/jpeg" ||
+                  article?.media?.[0]?.type === "png" ||
+                  article?.media?.[0]?.type === "image/png" ? (
                     <Image
                       className="dark:invert w-full h-40 object-cover aspect-auto"
                       src={article?.media[0]?.url}
@@ -76,11 +77,15 @@ const VideoTutorial = (): JSX.Element => {
                       height={38}
                       priority
                     />
-                  ) : (
+                  ) : article?.media?.[0]?.type.includes("video") ? (
                     <video loop muted autoPlay className="w-full">
                       <source src={article?.media[0]?.url} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
+                  ) : (
+                    <div className="w-full text-3xl md:text-4xl lg:text-5xl aspect-video flex items-center justify-center">
+                      <ChatBotIcon />
+                    </div>
                   )}
                 </div>
                 {/* <Image src={article.imageUrl} alt={article.title} className="w-full h-48 object-cover" /> */}

@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { ITutorial } from "@/types/api/tutorials.types";
 import AppLoadingSkeleton from "@/components/common/AppLoadingSkeleton";
+import { ChatBotIcon } from "@/components/icons";
 
 export function ResourceCard({
   resource,
@@ -41,10 +42,17 @@ export function ResourceCard({
             src={resource?.media?.[0]?.url}
             alt=""
           />
-        ) : resource.type === "video" ? (
-          <PlayCircle className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white h-12 w-12" />
+        ) : resource?.media?.[0]?.type?.includes("video") ? (
+          <video loop muted autoPlay className="w-full">
+            <source src={resource?.media?.[0]?.url} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         ) : (
-          <FileText className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white h-12 w-12" />
+          <div className="w-full bg-white/90 text-3xl md:text-4xl lg:text-5xl aspect-video flex items-center justify-center">
+            <ChatBotIcon />
+          </div>
+          // <PlayCircle className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white h-12 w-12" />
+          // <FileText className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white h-12 w-12" />
         )}
       </div>
       <div className="pt-4">
