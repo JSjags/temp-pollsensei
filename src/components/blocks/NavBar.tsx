@@ -97,6 +97,17 @@ const NavBar = ({
           state.user === null ||
           state.access_token === null ||
           state.token === null ? (
+            <Link
+              href="/login"
+              className="text-gray-600 hover:text-[#5B03B2] transition-colors duration-300"
+            >
+              Login
+            </Link>
+          ) : null}
+          {!isLoggedIn ||
+          state.user === null ||
+          state.access_token === null ||
+          state.token === null ? (
             <div className="hidden md:block">
               <Link
                 href="/demo/create-survey"
