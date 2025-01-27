@@ -37,4 +37,6 @@ export enum TUTORIAL_ENUM {
 
 export const queryKeys = Object.freeze({
   TUTORIALS: "getTutorials",
+
+  REFERRERS: "getReferrers",
 });

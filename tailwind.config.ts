@@ -77,6 +77,9 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "spin-slow": "spin 5s linear infinite",
       },
+      boxShadow: {
+        popoverShadow: "0px 0px 15px 0px #C3C3C3",
+      },
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],

@@ -8,10 +8,16 @@ import close from "./close.svg";
 interface DeleteSurveyProps {
   onClose: () => void;
   openModal: boolean;
-  onDelete?:()=>void;
+  onDelete?: () => void;
+  isLoading?: boolean;
 }
 
-const DeleteSurvey: React.FC<DeleteSurveyProps> = ({ onClose, openModal, onDelete }) => {
+const DeleteSurvey: React.FC<DeleteSurveyProps> = ({
+  onClose,
+  openModal,
+  onDelete,
+  isLoading,
+}) => {
   return (
     <Modals title="" openModal={openModal} modalSize="lg" onClose={onClose}>
       <div className="flex flex-col items-center gap-2">
@@ -21,8 +27,16 @@ const DeleteSurvey: React.FC<DeleteSurveyProps> = ({ onClose, openModal, onDelet
           be undone.
         </p>
         <div className="mt-3 flex items-center justify-between w-full">
-          <ButtonOutline label="No, cancel" onclick={onClose} />
-          <ButtonDelete label="Delete" onclick={onDelete}/>
+          <ButtonOutline
+            disabled={isLoading}
+            label="No, cancel"
+            onclick={onClose}
+          />
+          <ButtonDelete
+            isLoading={isLoading}
+            label="Delete"
+            onclick={onDelete}
+          />
         </div>
       </div>
     </Modals>

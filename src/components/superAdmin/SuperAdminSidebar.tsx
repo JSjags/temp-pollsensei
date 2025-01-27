@@ -23,7 +23,7 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
   const dispatch = useDispatch();
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
-  const pathname = usePathname()
+  const pathname = usePathname();
   const isActiveRoute = (route: string) => pathname === route;
 
   return (
@@ -78,8 +78,7 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
               </div>
             )}
 
-
-<ul className="space-y-2 p-2">
+            <ul className="space-y-2 p-2">
               {[
                 { label: "Dashboard", path: "/super-admin" },
                 { label: "Users", path: "/users" },
@@ -87,13 +86,16 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
                 { label: "Reviews", path: "/reviews" },
                 { label: "FAQs", path: "/faqs" },
                 { label: "Subscriptions", path: "/subscriptions" },
+                { label: "Referrers", path: "/referrers" },
               ].map((item) => (
                 <li key={item.path}>
                   <Link
                     href={item.path}
                     className={cn(
                       "flex items-center gap-2 p-2 rounded px-4 hover:bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] hover:text-white",
-                      isActiveRoute(item.path) ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white" : ""
+                      isActiveRoute(item.path)
+                        ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white"
+                        : ""
                     )}
                   >
                     {isSidebarOpen && <span>{item.label}</span>}
@@ -101,9 +103,6 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
                 </li>
               ))}
             </ul>
-
-
-            
           </nav>
 
           <nav className="text-start">
@@ -137,8 +136,8 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
 
 export default SuperAdminSidebar;
 
-
-{/* <ul className="space-y-2 p-2">
+{
+  /* <ul className="space-y-2 p-2">
 <li>
   <Link
     href="/super-admin"
@@ -194,4 +193,5 @@ export default SuperAdminSidebar;
     {isSidebarOpen && <span>Subscriptions</span>}
   </Link>
 </li>
-</ul> */}
+</ul> */
+}
