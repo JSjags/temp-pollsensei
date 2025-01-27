@@ -21,7 +21,7 @@ const DashboardAnalytics: React.FC = () => {
   const [selectedMonth2, setSelectedMonth2] = useState("January");
   const [selectedYear2, setSelectedYear2] = useState("2025");
   // const
-  const { data, isLoading, isSuccess, error } =
+  const { data, isLoading, isSuccess, error, isFetching } =
     useSurveyCreationDistributionQuery({
       month: selectedMonth,
       year: selectedYear,
@@ -210,6 +210,7 @@ const DashboardAnalytics: React.FC = () => {
           bottomLegend={createdBy}
           title="Creation Method Distribution"
           circles={circles}
+          isLoading={ isLoading || isFetching}
         />
 
         <SuperAdminPieChart
