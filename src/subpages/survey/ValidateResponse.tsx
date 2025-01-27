@@ -167,7 +167,7 @@ const ValidateResponse = () => {
           return {
             question: item.question,
             question_type: item.question_type,
-            scale_value: item.scale_value || 2,
+            scale_value: item.scale_value.toString() || '2',
           };
         } else if (
           item.question_type === "drop_down_value"
