@@ -234,7 +234,6 @@ const SurveyResponses = () => {
               the survey was created. You can drag and drop the selected files
               to reorder them if they are not arranged correctly.
             </small>
-            {/* @ts-ignore */}
             <DragDropContext onDragEnd={handleDragEnd}>
               <StrictModeDroppable droppableId="files">
                 {(provided) => (
