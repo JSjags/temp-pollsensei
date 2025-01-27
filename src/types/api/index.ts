@@ -10,3 +10,12 @@ export interface GenericPaginatedResponse<T> {
   total: number;
   page_size: number;
 }
+
+export interface GenericPaginatedRequest {
+  pageNumber?: number;
+}
+
+export interface GenericTypeWithId<T> {
+  value: T;
+  id: string;
+}

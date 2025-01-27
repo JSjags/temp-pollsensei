@@ -125,7 +125,7 @@ const UserRegistry: React.FC = () => {
     const editData = {
       email: email,
     };
-    console.log(editData); 
+    console.log(editData);
     try {
       await resetUserPassword(editData).unwrap();
       refetch();
@@ -367,7 +367,7 @@ const UserRegistry: React.FC = () => {
                     </button>
 
                     <button
-                      onClick={()=>ResetPassword(user?.email)}
+                      onClick={() => ResetPassword(user?.email)}
                       disabled={isResetPassword}
                       className=" py-2 px-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md disabled:bg-gray-400"
                     >
