@@ -5,8 +5,6 @@ import UploadedItem from "@/components/ui/UploadedItem";
 import { setSurvey } from "@/redux/slices/answer.slice";
 import {
   closeUpload,
-  openUpload,
-  toggleUpload,
 } from "@/redux/slices/upload.slice";
 import { RootState } from "@/redux/store";
 import {
@@ -37,7 +35,6 @@ const SurveyResponses = () => {
     (state: RootState) => state?.upload?.isUploadOpen
   );
   const { data } = useFetchASurveyQuery(params.id);
-  const [isToggled, setIsToggled] = useState<boolean>(false);
   const [
     uploadResponseOCR,
     {
@@ -97,8 +94,17 @@ const SurveyResponses = () => {
 
           reader.onloadend = () => {
             const base64String = reader.result?.toString().split(",")[1];
+            const image_name = file.name
+            console.log(image_name)
             if (base64String) {
-              resolve(`data:${file.type};base64,${base64String}`);
+              console.log({
+                image_name: image_name,
+                base64: `data:${file.type};base64,${base64String}`, //`data:${file.type};base64,${base64String}`
+              })
+              resolve(
+                // image_name: image_name,
+                `data:${file.type};base64,${base64String}`, //`data:${file.type};base64,${base64String}`
+              );
             } else {
               reject(new Error("Failed to convert file to Base64."));
             }
@@ -228,7 +234,6 @@ const SurveyResponses = () => {
               the survey was created. You can drag and drop the selected files
               to reorder them if they are not arranged correctly.
             </small>
-            {/* @ts-ignore */}
             <DragDropContext onDragEnd={handleDragEnd}>
               <StrictModeDroppable droppableId="files">
                 {(provided) => (
@@ -240,30 +245,29 @@ const SurveyResponses = () => {
                         } pt-2 rounded-md max-h-80 overflow-y-auto flex-wrap w-full`}
                       >
                         {[...selectedFiles].map((item, index) => (
-                          <Fragment key={index}>
-                            {/* @ts-ignore */}
-                            <Draggable
-                              key={index + 1}
-                              draggableId={index.toString()}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="mb-4"
-                                >
-                                  <UploadedItem
-                                    key={index}
-                                    item={item}
-                                    onRemove={handleRemove}
-                                    onItemSelect={handleItemSelect}
-                                  />
-                                </div>
-                              )}
-                            </Draggable>
-                          </Fragment>
+                          <Draggable
+                            key={item.name}
+                            // key={index + 1}
+                            // draggableId={index.toString()}
+                            draggableId={item.name}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="mb-4"
+                              >
+                                <UploadedItem
+                                  key={index}
+                                  item={item}
+                                  onRemove={handleRemove}
+                                  onItemSelect={handleItemSelect}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
                         ))}
                       </div>
                     )}

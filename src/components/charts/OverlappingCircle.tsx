@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FadeLoader } from "react-spinners";
 
 interface CircleData {
   value: number; // Percentage
@@ -38,6 +39,7 @@ interface OverlappingCirclesProps {
   chartConfig: ChartConfig;
   bottomLegend: string[];
   title: string;
+  isLoading: boolean;
 }
 
 const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
@@ -46,6 +48,7 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
   chartConfig,
   bottomLegend,
   title,
+  isLoading,
 }) => {
   const id = "pie-interactive";
   const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
@@ -104,23 +107,33 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
         </Select>
       </CardHeader>
       <CardContent className="flex flex-1 justify-center pb-0">
-        <div className="relative flex justify-center items-center">
-          {circles.map((circle, index) => (
-            <div
-              key={index}
-              className="absolute flex justify-center items-center rounded-full text-white font-bold"
-              style={{
-                backgroundColor: circle.color,
-                width: `${circle.size}px`,
-                height: `${circle.size}px`,
-                zIndex: index,
-                transform: `translate(${index * 70}px, ${index * 0}px)`,
-              }}
-            >
-              <span>{circle.value}%</span>
+        {isLoading ? (
+          <>
+            <div className="text-center ">
+              <span className="flex justify-center items-center">
+                <FadeLoader height={10} radius={1} className="mt-3" />
+              </span>
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <div className="relative flex justify-center items-center">
+            {circles.map((circle, index) => (
+              <div
+                key={index}
+                className="absolute flex justify-center items-center rounded-full text-white font-bold"
+                style={{
+                  backgroundColor: circle.color,
+                  width: `${circle.size}px`,
+                  height: `${circle.size}px`,
+                  zIndex: index,
+                  transform: `translate(${index * 70}px, ${index * 0}px)`,
+                }}
+              >
+                <span>{circle.value}%</span>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
       <div className="mt-4 flex justify-center space-x-6">
         {bottomLegend?.map((label, idx) => (

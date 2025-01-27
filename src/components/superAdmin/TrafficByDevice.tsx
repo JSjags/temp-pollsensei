@@ -57,7 +57,7 @@ const TrafficByDevice: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4 w-full">
+    <div className="flex-1 h-[300px] bg-white shadow-lg rounded-lg p-4 w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Traffic by Device</h2>
         <div className="flex space-x-4 text-sm">
