@@ -41,10 +41,14 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
     }),
 
     superadminOverview: builder.query({
-      query: () => ({
-        url: `/superadmin/overview`, //
-        method: "GET",
-      }),
+      query: (filter_by) => {
+        const params = new URLSearchParams();
+        if (!!filter_by) params.append("filter_by", filter_by);
+        return {
+          url: `/superadmin/overview?${params.toString()}`, // filter_by
+          method: "GET",
+        }
+      },
     }),
     surveyCreationDistribution: builder.query({
       query: ({ month, year }) => {
