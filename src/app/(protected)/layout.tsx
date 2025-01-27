@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import PrivateRoute from "@/components/protected/PrivateRoute";
 import { SidebarProvider } from "@/components/ui/sidebar";

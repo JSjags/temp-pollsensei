@@ -541,6 +541,13 @@ input[type="radio"].radio:checked:before {
   font-family: var(--font-playfair);
 }
 
+.font-brush-script-mt {
+  font-family: "Brush Script MT", cursive;
+}
+.font-times-new-roman {
+  font-family: "Times New Roman", Times, serif;
+}
+
 .font-montserrat {
   font-family: var(--font-montserrat);
 }

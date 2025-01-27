@@ -115,7 +115,7 @@ const ManualSurveyCreatePrompt = () => {
               dispatch(updateDescription(surveyPrompt));
               router.push(
                 userToken && user
-                  ? "/surveys/add-question-m"
+                  ? "/surveys/manual-survey-create"
                   : "/demo/add-question-m"
               );
             }}

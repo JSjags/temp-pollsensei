@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
+import { AnimatePresence, motion } from "framer-motion";
 import { GiCardDiscard } from "react-icons/gi";
 import {
   updateSectionTopic,
@@ -61,6 +62,13 @@ import {
 } from "@/components/ui/dialog";
 import { IoDocumentOutline } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/shadcn-textarea";
+import { Edit, Save } from "lucide-react";
+import { X } from "lucide-react";
+import { SurveyData } from "./EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
+import WatermarkBanner from "@/components/common/WatermarkBanner";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -107,15 +115,59 @@ const AddQuestionPage = () => {
   ] = useSaveProgressMutation();
   const survey = useSelector((state: RootState) => state?.survey);
   const [isSidebar, setIsSidebarOpen] = useState(true);
-  const [addquestions, setAddQuestions] = useState(false);
+  const [addQuestions, setAddQuestions] = useState(false);
   const headerUrl = useSelector((state: RootState) => state.survey.header_url);
   const headerText = useSelector(
     (state: RootState) => state.survey.header_text
   );
+  const bodyText = useSelector((state: RootState) => state.survey.body_text);
+
+  // Default survey data state
+  const [surveyData, setSurveyData] = useState<SurveyData>({
+    topic: sectionTopic || "Untitled Survey",
+    description: sectionDescription || "",
+    sections: [],
+    theme: theme || "default",
+    header_text: headerText
+      ? {
+          name: headerText.name,
+          size: Number(headerText.size),
+        }
+      : {
+          name: "DM Sans",
+          size: 24,
+        },
+    question_text: {
+      name: "DM Sans",
+      size: 18,
+    },
+    body_text: bodyText
+      ? {
+          name: bodyText.name,
+          size: Number(bodyText.size),
+        }
+      : {
+          name: "DM Sans",
+          size: 16,
+        },
+    color_theme: "#000000",
+    logo_url:
+      (logoUrl instanceof File ? URL.createObjectURL(logoUrl) : logoUrl) ||
+      "#ffffff",
+    header_url:
+      (headerUrl instanceof File
+        ? URL.createObjectURL(headerUrl)
+        : headerUrl) || "#ffffff",
+  });
 
   const handleSave = () => {
     dispatch(updateSectionTopic(sectionTitle));
     dispatch(updateSectionDescription(sDescription));
+    setSurveyData((prev) => ({
+      ...prev,
+      topic: sectionTitle,
+      description: sDescription,
+    }));
     setIsEditing(false);
   };
 
@@ -259,12 +311,21 @@ const AddQuestionPage = () => {
   };
 
   console.log(questions);
+
+  console.log(surveyData);
+
   return (
-    <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-16`}>
+    <div className={`${theme} flex flex-col gap-5 w-full px-5 lg:pl-10`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
           {logoUrl && (
-            <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+              className="bg-gradient-to-r from-[#9D50BB] to-[#6E48AA] rounded-lg w-16 my-5 text-white flex items-center flex-col shadow-lg hover:shadow-xl transform"
+            >
               <Image
                 src={
                   logoUrl instanceof File
@@ -274,14 +335,20 @@ const AddQuestionPage = () => {
                     : sparkly
                 }
                 alt=""
-                className="w-full object-cover rounded  bg-no-repeat h-16 "
-                width={"100"}
-                height={"200"}
+                className="w-full object-cover rounded-lg bg-no-repeat h-16 transition-transform duration-300"
+                width={100}
+                height={200}
               />
-            </div>
-          )}{" "}
+            </motion.div>
+          )}
+
           {headerUrl && (
-            <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gradient-to-r from-[#9D50BB] to-[#6E48AA] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col shadow-lg overflow-hidden"
+            >
               <Image
                 src={
                   headerUrl instanceof File
@@ -291,64 +358,164 @@ const AddQuestionPage = () => {
                     : sparkly
                 }
                 alt=""
-                className="w-full object-cover bg-no-repeat h-24 rounded-lg"
-                width={"100"}
-                height={"200"}
+                className="w-full object-cover bg-no-repeat h-24 rounded-lg transition-transform duration-300 hover:scale-105"
+                width={100}
+                height={200}
               />
-            </div>
+            </motion.div>
           )}
-          {isEditing && (
-            <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <AutosizeTextarea
-                value={sectionTitle}
-                onChange={(e) => setSectionTitle(e.target.value)}
-                placeholder="Untitled Section"
-                className="border-b-2 border-[#5B03B2]"
-              ></AutosizeTextarea>
-              <AutosizeTextarea
-                value={sDescription}
-                onChange={(e) => setsDescription(e.target.value)}
-                placeholder="Describe section (optional)"
-                className="border-b-2 border-[#D9D9D9]"
-              ></AutosizeTextarea>
+          <AnimatePresence mode="wait">
+            {isEditing && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="w-full my-4 border-none">
+                  <CardContent className="flex flex-col gap-2 px-11 py-4">
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: 20, opacity: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <Textarea
+                        value={sectionTitle}
+                        onChange={(e) => setSectionTitle(e.target.value)}
+                        placeholder="Untitled Section"
+                        className={cn(
+                          "resize-none",
+                          `font-${surveyData?.header_text?.name
+                            .split(" ")
+                            .join("-")
+                            .toLowerCase()}`
+                        )}
+                        style={{
+                          fontSize: `${surveyData?.header_text?.size}px`,
+                          // fontFamily: `${headerText?.name}`,
+                        }}
+                      />
+                    </motion.div>
 
-              <div className="flex justify-end gap-5 mt-creat">
-                <button
-                  className="rounded-full border px-5 py-1"
-                  onClick={() => setIsEditing(false)}
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: 20, opacity: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Textarea
+                        value={sDescription}
+                        onChange={(e) => setsDescription(e.target.value)}
+                        placeholder="Describe section (optional)"
+                        className={cn(
+                          "resize-none",
+                          `font-${surveyData?.body_text?.name
+                            .split(" ")
+                            .join("-")
+                            .toLowerCase()}`
+                        )}
+                        style={{
+                          fontSize: `${surveyData?.body_text?.size}px`,
+                          // fontFamily: `${bodyText?.name}`,
+                        }}
+                      />
+                    </motion.div>
+
+                    <motion.div
+                      className="flex justify-end gap-5 mt-4"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -20, opacity: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <Button
+                        variant="outline"
+                        className="rounded-full flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-md hover:bg-gray-50"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </Button>
+                      <Button
+                        className="rounded-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
+                        onClick={handleSave}
+                        disabled={!sectionTitle.trim()}
+                      >
+                        <Save className="h-4 w-4" />
+                        Save
+                      </Button>
+                    </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {!isEditing && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-lg w-full my-4 flex gap-2 px-4 md:px-6 py-6 flex-col shadow-md hover:shadow-lg transition-shadow duration-300"
+              >
+                <motion.h2
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className={cn(
+                    "text-[1.5rem] font-normal font-lexend bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+                    `font-${surveyData?.header_text?.name
+                      .split(" ")
+                      .join("-")
+                      .toLowerCase()}`
+                  )}
+                  style={{
+                    fontSize: `${surveyData?.header_text?.size}px`,
+                    // fontFamily: `${surveyData?.header_text?.name}`,
+                  }}
                 >
-                  Cancel
-                </button>
-                <button
-                  className="rounded-full border px-5 py-1 bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white text-[16px] font-medium leading-6 text-center font-inter justify-center"
-                  onClick={handleSave}
-                  disabled={!sectionTitle.trim()}
+                  {surveyData.topic}
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className={cn(
+                    "text-gray-600 leading-relaxed",
+                    `font-${surveyData?.body_text?.name
+                      .split(" ")
+                      .join("-")
+                      .toLowerCase()}`
+                  )}
+                  style={{
+                    fontSize: `${surveyData?.body_text?.size}px`,
+                    // fontFamily: `${surveyData?.body_text?.name}`,
+                  }}
                 >
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-          {!isEditing && (
-            <div
-              className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col "
-              style={{
-                fontSize: `${headerText?.size}px`,
-                fontFamily: `${headerText?.name}`,
-              }}
-            >
-              <h2 className="text-[1.5rem] font-normal">{sectionTopic}</h2>
-              <p>{sectionDescription}</p>
-              <div className="flex justify-end">
-                <button
-                  className="rounded-full border px-5 py-1"
-                  onClick={() => setIsEditing(true)}
+                  {surveyData.description}
+                </motion.p>
+                <motion.div
+                  className="flex justify-end"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
                 >
-                  Edit
-                </button>
-              </div>
-            </div>
-          )}
+                  <Button
+                    variant="outline"
+                    className="rounded-full px-5 py-1 hover:scale-105 transition-all duration-300 hover:bg-gray-50 hover:shadow-md flex items-center gap-2"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
@@ -547,7 +714,7 @@ const AddQuestionPage = () => {
               )}
             </StrictModeDroppable>
           </DragDropContext>
-          {addquestions && (
+          {addQuestions && (
             <AddQuestion
               onCancel={() => setAddQuestions((prev) => !prev)}
               onSave={(
@@ -645,20 +812,13 @@ const AddQuestionPage = () => {
             </div>
             {survey.sections.length > 0 && <div>Pagination</div>}
           </div>
-          <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
-            <div className="flex flex-col">
-              <p>Form created by</p>
-              <Image src={pollsensei_new_logo} alt="Logo" />
-            </div>
-            <span className="absolute bottom-2 right-4 text-[#828282]">
-              Remove watermark
-            </span>
-          </div>
+          <WatermarkBanner />
         </div>
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {isSidebar ? <StyleEditor /> : <QuestionType />}
+          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
+          <StyleEditor surveyData={surveyData} setSurveyData={setSurveyData} />
         </div>
       </div>
       {review && (
