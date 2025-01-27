@@ -4,7 +4,7 @@ import { HiOutlinePlus } from "react-icons/hi";
 import { IoDocumentOutline } from "react-icons/io5";
 
 import { VscLayersActive } from "react-icons/vsc";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -27,38 +27,53 @@ import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
 import AddQuestion from "./AddQuestion";
 import { addSection, resetSurvey } from "@/redux/slices/survey.slice";
-import { useCreateSurveyMutation, useSaveProgressMutation } from "@/services/survey.service";
+import {
+  useCreateSurveyMutation,
+  useSaveProgressMutation,
+} from "@/services/survey.service";
 import { useRouter } from "next/navigation";
-import store from '@/redux/store';
+import store from "@/redux/store";
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import { GiCardDiscard } from "react-icons/gi";
-
-
 
 const CreateNewSection = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const newSectionTopic = useSelector((state:RootState)=>state.question.sectionTopic)
-  const newSectionDesc = useSelector((state:RootState)=>state.question.sectionDescription)
+  const newSectionTopic = useSelector(
+    (state: RootState) => state.question.sectionTopic
+  );
+  const newSectionDesc = useSelector(
+    (state: RootState) => state.question.sectionDescription
+  );
   const [sectionTitle, setSectionTitle] = useState("");
   const [sDescription, setsDescription] = useState("");
   const [isEditing, setIsEditing] = useState(true);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
-  const questions = useSelector((state: RootState) => state?.question?.questions);
+  const questions = useSelector(
+    (state: RootState) => state?.question?.questions
+  );
   const theme = useSelector((state: RootState) => state?.survey?.theme);
-  const [createSurvey, {isLoading, isSuccess, isError, error}] = useCreateSurveyMutation();
-  const [saveprogress, { isSuccess:progressSuccess, isError:progressIsError, error:progressError}] = useSaveProgressMutation();
+  const [createSurvey, { isLoading, isSuccess, isError, error }] =
+    useCreateSurveyMutation();
+  const [
+    saveprogress,
+    {
+      isSuccess: progressSuccess,
+      isError: progressIsError,
+      error: progressError,
+    },
+  ] = useSaveProgressMutation();
   const survey = useSelector((state: RootState) => state?.survey);
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [addquestions, setAddQuestions] = useState(false);
-  const logoUrl = useSelector((state:RootState)=>state.survey.logo_url)
-  const headerUrl = useSelector((state:RootState)=>state.survey.header_url)
+  const logoUrl = useSelector((state: RootState) => state.survey.logo_url);
+  const headerUrl = useSelector((state: RootState) => state.survey.header_url);
 
   const handleSave = () => {
     dispatch(updateSectionTopic(sectionTitle));
     dispatch(updateSectionDescription(sDescription));
-    setIsEditing((prev)=> !prev);
+    setIsEditing((prev) => !prev);
   };
 
   const handleDragEnd = (result: any) => {
@@ -67,7 +82,7 @@ const CreateNewSection = () => {
     const items = Array.from(questions);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    dispatch(addQuestion(items))
+    dispatch(addQuestion(items));
     // setQuestions(items);
   };
 
@@ -81,45 +96,45 @@ const CreateNewSection = () => {
     setIsSidebarOpen(false);
   };
 
-
   const handleSurveyCreation = async () => {
-    if (logoUrl === '' || headerUrl === '') {
+    if (logoUrl === "" || headerUrl === "") {
       toast.warning("Header image and logo cannot be empty");
       return null;
     }
-    const sectionExists = survey.sections.some((section) => 
-      section.section_topic === sectionTitle &&
-      section.section_description === sDescription &&
-      JSON.stringify(section.questions) === JSON.stringify(questions)
+    const sectionExists = survey.sections.some(
+      (section) =>
+        section.section_topic === sectionTitle &&
+        section.section_description === sDescription &&
+        JSON.stringify(section.questions) === JSON.stringify(questions)
     );
-  
+
     if (!sectionExists) {
       if (survey.sections.length === 0) {
-        dispatch(addSection({
-          questions: questions
-        }));
-        console.log(
-    
-          {  questions: questions}
-       
-        )
+        dispatch(
+          addSection({
+            questions: questions,
+          })
+        );
+        console.log({ questions: questions });
       } else {
-        dispatch(addSection({
-          section_topic: newSectionTopic,
-          section_description: newSectionDesc,
-          questions: questions
-        }));
+        dispatch(
+          addSection({
+            section_topic: newSectionTopic,
+            section_description: newSectionDesc,
+            questions: questions,
+          })
+        );
         console.log({
           section_topic: newSectionTopic,
           section_description: newSectionDesc,
-          questions: questions
-        })
+          questions: questions,
+        });
       }
     }
 
-       const updatedSurvey = store.getState().survey;
-       console.log(updatedSurvey.sections)
-  
+    const updatedSurvey = store.getState().survey;
+    console.log(updatedSurvey.sections);
+
     try {
       const updatedSurvey = store.getState().survey;
       await createSurvey(updatedSurvey);
@@ -127,37 +142,37 @@ const CreateNewSection = () => {
       console.log(e);
     }
   };
-  
 
-
-  useEffect(()=>{
-    if(isSuccess){
-      toast.success("Survey created successfully")
-      dispatch(resetSurvey())
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Survey created successfully");
+      dispatch(resetSurvey());
       router.push("/surveys/survey-list");
     }
 
-    if(isError || error){
-      const SaveProgress=async()=>{
-        try{
+    if (isError || error) {
+      const SaveProgress = async () => {
+        try {
           await saveprogress(survey);
-        }catch(e){
-          console.error(e)
+        } catch (e) {
+          console.error(e);
         }
-      }
-      SaveProgress()
-      toast.error("Failed to create survey, Don't panic, your progress was saved")
+      };
+      SaveProgress();
+      toast.error(
+        "Failed to create survey, Don't panic, your progress was saved"
+      );
     }
   }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
 
-  useEffect(()=>{
-    if(progressSuccess){
+  useEffect(() => {
+    if (progressSuccess) {
       router.push("/surveys/survey-list");
     }
-    if(progressIsError || progressError){
-      toast.error("Failed to save progress, please try again later")
+    if (progressIsError || progressError) {
+      toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError])
+  }, [progressError, progressIsError]);
 
   console.log(questions);
   console.log(survey);
@@ -199,9 +214,11 @@ const CreateNewSection = () => {
             </div>
           )}
 
-          {!isEditing  && (
+          {!isEditing && (
             <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-              <h2 className="text-[1.5rem] font-normal">{newSectionTopic || sectionTitle}</h2>
+              <h2 className="text-[1.5rem] font-normal">
+                {newSectionTopic || sectionTitle}
+              </h2>
               <p>{newSectionDesc || sDescription}</p>
               <div className="flex justify-end">
                 <button
@@ -214,69 +231,73 @@ const CreateNewSection = () => {
             </div>
           )}
 
+          {/* @ts-ignore  */}
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {questions.map((item: any, index: any) => (
-                    <Draggable
-                      key={index + 1}
-                      draggableId={index.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-4"
-                          // key={index}
-                        >
-                          {item.question_type === "multiple_choice" ? (
-                            <MultiChoiceQuestion
-                              index={index + 1}
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                            />
-                          ) : item.question_type === "long_text" ? (
-                            <CommentQuestion
-                              key={index}
-                              index={index + 1}
-                              question={item.question}
-                              questionType={item.question_type}
-                            />
-                          ) : item.question_type === "likert_scale" ? (
-                            <LikertScaleQuestion
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          ) : item.question_type === "star_rating" ? (
-                            <StarRatingQuestion
-                              question={item.question}
-                              // maxRating={5}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          ) : item.question_type === "long_text" ? (
-                            <MatrixQuestion
-                              key={index}
-                              index={index + 1}
-                              columns={item.columns}
-                              rows={item.rows}
-                              // options={item.options}
-                              question={item.question}
-                              questionType={item.question_type}
-                            />
-                          ) : null}
-                        </div>
-                      )}
-                    </Draggable>
+                    <Fragment key={index}>
+                      {/* @ts-ignore */}
+                      <Draggable
+                        key={index + 1}
+                        draggableId={index.toString()}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="mb-4"
+                            // key={index}
+                          >
+                            {item.question_type === "multiple_choice" ? (
+                              <MultiChoiceQuestion
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) : item.question_type === "long_text" ? (
+                              <CommentQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                              />
+                            ) : item.question_type === "likert_scale" ? (
+                              <LikertScaleQuestion
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                              />
+                            ) : item.question_type === "star_rating" ? (
+                              <StarRatingQuestion
+                                question={item.question}
+                                // maxRating={5}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                              />
+                            ) : item.question_type === "long_text" ? (
+                              <MatrixQuestion
+                                key={index}
+                                index={index + 1}
+                                columns={item.columns}
+                                rows={item.rows}
+                                // options={item.options}
+                                question={item.question}
+                                questionType={item.question_type}
+                              />
+                            ) : null}
+                          </div>
+                        )}
+                      </Draggable>
+                    </Fragment>
                   ))}
                   {provided.placeholder}
                 </div>
@@ -295,7 +316,7 @@ const CreateNewSection = () => {
                   is_required: is_required,
                 };
                 console.log(newQuestion);
-                dispatch(addQuestion(newQuestion))
+                dispatch(addQuestion(newQuestion));
                 setAddQuestions((prev) => !prev);
               }}
             />
@@ -341,13 +362,17 @@ const CreateNewSection = () => {
                 onClick={() => {
                   dispatch(resetQuestion());
                   dispatch(resetSurvey());
-                  router.push('/surveys/create-survey');
+                  router.push("/surveys/create-survey");
                 }}
               >
                 <GiCardDiscard className="inline-block mr-2" />
                 Discard
               </button>
-              <button disabled={isLoading} className="bg-white rounded-full px-5 py-1" onClick={handleSurveyCreation}>
+              <button
+                disabled={isLoading}
+                className="bg-white rounded-full px-5 py-1"
+                onClick={handleSurveyCreation}
+              >
                 <VscLayersActive className="inline-block mr-2" />
                 Publish Survey
               </button>

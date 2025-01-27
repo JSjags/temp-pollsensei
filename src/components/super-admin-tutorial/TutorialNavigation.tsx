@@ -22,6 +22,14 @@ import {
 import TextArea from "../ui/TextArea";
 import { handleApiErrors, isValidResponse } from "@/lib/utils";
 import AppReactQuill from "../common/forms/AppReactQuill";
+import {
+  apiConstantOptions,
+  apiConstants,
+  queryKeys,
+  TUTORIAL_ENUM,
+} from "@/services/api/constants.api";
+import { useQueryClient } from "@tanstack/react-query";
+import AppCollapse from "../custom/AppCollapse";
 
 interface Tab {
   label: string;
@@ -43,7 +51,7 @@ const constraints = {
     presence: true,
   },
   file: {
-    presence: true,
+    presence: false,
   },
   links: {
     presence: false,
@@ -51,33 +59,20 @@ const constraints = {
 };
 
 const TutorialNavigation: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("");
   const [createTutorial, { isLoading, isSuccess, error }] =
     useCreateTutorialMutation();
   const [quilValue, setQuilValue] = useState("");
+  const queryClient = useQueryClient();
   const [isSheetOpened, setIsSheetOpened] = useState(false);
 
   const tabs: Tab[] = [
-    { label: "All Resources", value: "" },
-    { label: "Video Tutorials", value: "video-tutorial" },
-    { label: "Web articles", value: "web-articles" },
+    { label: "All Resources", value: "/tutorials" },
+    { label: "Video Tutorials", value: "/tutorials/video-tutorial" },
+    { label: "Web articles", value: "/tutorials/web-articles" },
+    { label: "Text Tutorials", value: "/tutorials/text-tutorials" },
   ];
 
   const pathname = usePathname();
-  const getActiveTabFromPath = useCallback(
-    (path: string) => {
-      const matchedTab = tabs?.find((tab) => path.includes(slugify(tab.value)));
-      return matchedTab || "tutorials";
-    },
-    [tabs]
-  );
-
-  const RoutePath = (tab: string) => {
-    if (pathname.includes("tutorials")) {
-      return tab === "tutorials" ? `/tutorials` : `/tutorials/${slugify(tab)}`;
-    }
-    return "/";
-  };
 
   const onSubmit = async (values: {
     type: string;
@@ -86,19 +81,43 @@ const TutorialNavigation: React.FC = () => {
     links: string;
     file: any;
   }) => {
+    if (!values?.type) {
+      return toast.error("Tutorial type is required.");
+    }
+
+    if (!values?.title) {
+      return toast.error("Title is required.");
+    }
+
+    if (values?.title?.length < 5) {
+      return toast.error("Title must be at least 5 characters.");
+    }
+
+    if (!values?.description) {
+      return toast.error("Description is required.");
+    }
+    if (values?.description?.length < 10) {
+      return toast.error("Description must be at least 10 characters.");
+    }
+    if (!quilValue) {
+      return toast.error("Tutorial content is required.");
+    }
+
     const formData = new FormData();
     formData.append("type", values.type);
     formData.append("title", values.title);
     formData.append("description", values.description);
-    formData.append("links", values.links);
     if (values.links) {
       formData.append("links", values.links);
     }
-    if (values.file && values.file.length > 0) {
-      formData.append("file", values.file[0]);
-    } else {
-      toast.error("Please upload a file to proceed.");
-      return;
+
+    if (values?.type != TUTORIAL_ENUM.text) {
+      if (values.file && values.file.length > 0) {
+        formData.append("file", values.file[0]);
+      } else {
+        toast.error("Please upload a file to proceed.");
+        return;
+      }
     }
 
     if (quilValue) {
@@ -111,6 +130,7 @@ const TutorialNavigation: React.FC = () => {
       if (isValidResponse(response)) {
         setIsSheetOpened(false);
         toast.success(response?.message ?? "Tutorial created successfully");
+        queryClient?.invalidateQueries({ queryKey: [queryKeys.TUTORIALS] });
       } else handleApiErrors(response?.message);
     } catch (err: any) {
       toast.error(
@@ -120,9 +140,9 @@ const TutorialNavigation: React.FC = () => {
     }
   };
 
-  const validateForm = (values: any) => {
-    return validate(values, constraints) || {};
-  };
+  // const validateForm = (values: any) => {
+  //   return validate(values, constraints) || {};
+  // };
 
   return (
     <div>
@@ -132,14 +152,13 @@ const TutorialNavigation: React.FC = () => {
         <div className="flex space-x-8">
           {tabs.map((tab) => (
             <Link
-              href={RoutePath(tab.value)}
+              href={tab.value}
               key={tab.value}
               className={`text-sm font-medium pb-2 ${
-                activeTab === tab.value
+                pathname === tab.value
                   ? "text-purple-600 border-b-2 border-purple-600"
                   : "text-gray-500"
               }`}
-              onClick={() => setActiveTab(tab.value)}
             >
               {tab.label}
             </Link>
@@ -165,8 +184,8 @@ const TutorialNavigation: React.FC = () => {
 
             <Form
               onSubmit={onSubmit}
-              validate={validateForm}
-              render={({ handleSubmit, form, submitting }) => (
+              // validate={validateForm}
+              render={({ handleSubmit, form, values, submitting }) => (
                 <form
                   onSubmit={handleSubmit}
                   className="w-full mt-6 flex flex-col gap-y-5"
@@ -175,11 +194,7 @@ const TutorialNavigation: React.FC = () => {
                     {({ input, meta }) => (
                       <SelectTag
                         label="Type"
-                        options={[
-                          { value: "video", label: "Video" },
-                          { value: "image", label: "Image" },
-                          { value: "Link", label: "Link" },
-                        ]}
+                        options={apiConstantOptions?.TUTORIAL_TYPES}
                         placeholder="Select a Tutorial type"
                         form={form as any}
                         {...input}
@@ -211,17 +226,19 @@ const TutorialNavigation: React.FC = () => {
                     )}
                   </Field>
 
-                  <div className="pt-2 pb-4">
-                    <Field name="file">
-                      {({ input, meta }) => (
-                        <FileInput
-                          // name="file"
-                          form={form as any}
-                          {...input}
-                        />
-                      )}
-                    </Field>
-                  </div>
+                  <AppCollapse isVisible={values.type != TUTORIAL_ENUM.text}>
+                    <div className="pt-2 pb-4">
+                      <Field name="file">
+                        {({ input, meta }) => (
+                          <FileInput
+                            // name="file"
+                            form={form as any}
+                            {...input}
+                          />
+                        )}
+                      </Field>
+                    </div>
+                  </AppCollapse>
 
                   <Field name="links">
                     {({ input, meta }) => (

@@ -12,7 +12,13 @@ import {
   useUploadResponseOCRMutation,
 } from "@/services/survey.service";
 import { useParams, useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Slide } from "react-awesome-reveal";
 import { SlCloudUpload } from "react-icons/sl";
 import { useSelector, useDispatch } from "react-redux";
@@ -223,7 +229,12 @@ const SurveyResponses = () => {
                 </button>
               </div>
             </div>
-            <small className="text-yellow-600" >Please ensure that the files are uploaded in the format in which the survey was created. You can drag and drop the selected files to reorder them if they are not arranged correctly.</small>
+            <small className="text-yellow-600">
+              Please ensure that the files are uploaded in the format in which
+              the survey was created. You can drag and drop the selected files
+              to reorder them if they are not arranged correctly.
+            </small>
+            {/* @ts-ignore */}
             <DragDropContext onDragEnd={handleDragEnd}>
               <StrictModeDroppable droppableId="files">
                 {(provided) => (

@@ -494,3 +494,24 @@ input[type="radio"].radio:checked:before {
   grid-template-rows: 1fr !important;
   grid-template-columns: 1fr !important;
 }
+
+.app-collapse {
+  display: grid !important;
+  transition: grid-template-rows 500ms !important;
+}
+
+.app-collapse-close {
+  grid-template-rows: 0fr !important;
+}
+
+.app-collapse-open {
+  grid-template-rows: 1fr !important;
+}
+
+.custom-break-words {
+  word-break: break-word !important;
+}
+
+.custom-break-characters {
+  word-break: break-all !important;
+}

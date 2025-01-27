@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { FiEdit2 } from "react-icons/fi";
 import Image from "next/image";
@@ -165,157 +165,162 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
               <p className="text-sm">Question</p>
               <p className="text-sm">Question Type</p>
             </div>
+
+            {/* @ts-ignore */}
             <DragDropContext onDragEnd={handleDragEnd}>
               <StrictModeDroppable droppableId="questions">
                 {(provided) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
                     {questions[0]?.questions.map((item: any, index: any) => (
-                      <Draggable
-                        key={index + 1}
-                        draggableId={index.toString()}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="mb-4"
-                          >
-                            {item.question_type === "multiple_choice" ||
-                            item.question_type === "multi_choice" ? (
-                              <MultiChoiceQuestion
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                EditQuestion={() => EditQuestion(index)}
-                                canUseAI={true}
-                              />
-                            ) : item.question_type === "single_choice" ? (
-                              <SingleChoiceQuestion
-                                index={index + 1}
-                                key={index}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                              />
-                            ) : item.question_type === "comment" ||
-                              item.question_type === "long_text" ? (
-                              <CommentQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                              />
-                            ) : item.question_type ===
-                              "matrix_multiple_choice" ? (
-                              <MatrixQuestion
-                                key={index}
-                                index={index + 1}
-                                // options={item.options}
-                                rows={item.rows}
-                                columns={item.columns}
-                                question={item.question}
-                                questionType={item.question_type}
-                              />
-                            ) : item.question_type === "checkbox" ? (
-                              <CheckboxQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "rating_scale" ? (
-                              <RatingScaleQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "drop_down" ? (
-                              <DropdownQuestion
-                                index={index + 1}
-                                key={index}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "number" ? (
-                              <NumberQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "short_text" ? (
-                              <ShortTextQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "likert_scale" ? (
-                              <LikertScaleQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                              />
-                            ) : item.question_type === "star_rating" ? (
-                              <StarRatingQuestion
-                                question={item.question}
-                                // maxRating={5}
-                                index={index + 1}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "boolean" ? (
-                              <BooleanQuestion
-                                key={index}
-                                index={index + 1}
-                                question={item.question}
-                                options={item.options}
-                                questionType={item.question_type}
-                                // EditQuestion={() => EditQuestion(index)}
-                                // DeleteQuestion={() =>
-                                //   handleDeleteQuestion(index)
-                                // }
-                              />
-                            ) : item.question_type === "slider" ? (
-                              <SliderQuestion
-                                question={item.question}
-                                options={item.options}
-                                // step={item.options.length}
-                                questionType={item.question_type}
-                                index={index + 1}
-                                is_required={item.is_required}
-                              />
-                            ) : null}
-                          </div>
-                        )}
-                      </Draggable>
+                      <Fragment key={index}>
+                        {/* @ts-ignore */}
+                        <Draggable
+                          key={index + 1}
+                          draggableId={index.toString()}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="mb-4"
+                            >
+                              {item.question_type === "multiple_choice" ||
+                              item.question_type === "multi_choice" ? (
+                                <MultiChoiceQuestion
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  EditQuestion={() => EditQuestion(index)}
+                                  canUseAI={true}
+                                />
+                              ) : item.question_type === "single_choice" ? (
+                                <SingleChoiceQuestion
+                                  index={index + 1}
+                                  key={index}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "comment" ||
+                                item.question_type === "long_text" ? (
+                                <CommentQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type ===
+                                "matrix_multiple_choice" ? (
+                                <MatrixQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  // options={item.options}
+                                  rows={item.rows}
+                                  columns={item.columns}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                />
+                              ) : item.question_type === "checkbox" ? (
+                                <CheckboxQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                  // DeleteQuestion={() =>
+                                  //   handleDeleteQuestion(index)
+                                  // }
+                                />
+                              ) : item.question_type === "rating_scale" ? (
+                                <RatingScaleQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                  // DeleteQuestion={() =>
+                                  //   handleDeleteQuestion(index)
+                                  // }
+                                />
+                              ) : item.question_type === "drop_down" ? (
+                                <DropdownQuestion
+                                  index={index + 1}
+                                  key={index}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                  // DeleteQuestion={() =>
+                                  //   handleDeleteQuestion(index)
+                                  // }
+                                />
+                              ) : item.question_type === "number" ? (
+                                <NumberQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "short_text" ? (
+                                <ShortTextQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "likert_scale" ? (
+                                <LikertScaleQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                />
+                              ) : item.question_type === "star_rating" ? (
+                                <StarRatingQuestion
+                                  question={item.question}
+                                  // maxRating={5}
+                                  index={index + 1}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                  // DeleteQuestion={() =>
+                                  //   handleDeleteQuestion(index)
+                                  // }
+                                />
+                              ) : item.question_type === "boolean" ? (
+                                <BooleanQuestion
+                                  key={index}
+                                  index={index + 1}
+                                  question={item.question}
+                                  options={item.options}
+                                  questionType={item.question_type}
+                                  // EditQuestion={() => EditQuestion(index)}
+                                  // DeleteQuestion={() =>
+                                  //   handleDeleteQuestion(index)
+                                  // }
+                                />
+                              ) : item.question_type === "slider" ? (
+                                <SliderQuestion
+                                  question={item.question}
+                                  options={item.options}
+                                  // step={item.options.length}
+                                  questionType={item.question_type}
+                                  index={index + 1}
+                                  is_required={item.is_required}
+                                />
+                              ) : null}
+                            </div>
+                          )}
+                        </Draggable>
+                      </Fragment>
                     ))}
                     {provided.placeholder}
                   </div>

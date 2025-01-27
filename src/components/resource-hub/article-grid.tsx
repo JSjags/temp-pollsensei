@@ -7,6 +7,8 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { FadeLoader } from "react-spinners";
 import PageControl from "../common/PageControl";
+import { TUTORIAL_ENUM } from "@/services/api/constants.api";
+import { useGetTutorials } from "@/hooks/useGetRequests";
 
 type Article = {
   title: string;
@@ -18,10 +20,12 @@ type Article = {
 
 const ArticlesGrid: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error, refetch } = useTutorialQuery({
-    pagesNumber: currentPage,
+  const { data, isLoading, error } = useGetTutorials({
+    page: currentPage,
+    filter: TUTORIAL_ENUM.web,
   });
-  const totalItems = data?.data?.total || 0;
+
+  const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
   const navigatePage = (direction: "next" | "prev") => {
@@ -32,7 +36,6 @@ const ArticlesGrid: React.FC = () => {
         return prevIndex > 1 ? prevIndex - 1 : prevIndex;
       }
     });
-    refetch();
   };
 
   return (
@@ -71,7 +74,7 @@ const ArticlesGrid: React.FC = () => {
             </div>
           </>
         ) : (
-          data?.data?.data?.map((article: ITutorial, index: any) => (
+          data?.data?.map((article: ITutorial, index: any) => (
             <Link
               href={routes.SINGLE_ARTICLE_PAGE(article.slug)}
               key={index}

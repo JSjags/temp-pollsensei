@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 
+import { useGetTutorials } from "@/hooks/useGetRequests";
 import { TUTORIAL_ENUM } from "@/services/api/constants.api";
 import GenericArticlePage from "./GenericArticlePage";
-import { useGetTutorials } from "@/hooks/useGetRequests";
 
-const WebArticle = (): JSX.Element => {
+const TextTutorials = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const pageValue = useGetTutorials({
-    filter: TUTORIAL_ENUM.web,
+    filter: TUTORIAL_ENUM.text,
     page: currentPage,
   });
 
@@ -23,4 +23,4 @@ const WebArticle = (): JSX.Element => {
   );
 };
 
-export default WebArticle;
+export default TextTutorials;

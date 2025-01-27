@@ -16,6 +16,6 @@ export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   if (!enabled) {
     return null;
   }
-
+  // @ts-ignore
   return <Droppable {...props}>{children}</Droppable>;
 };
