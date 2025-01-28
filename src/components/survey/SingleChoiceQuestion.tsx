@@ -32,7 +32,7 @@ interface SingleChoiceQuestionProps {
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
   isEdit?: boolean;
-  surveyData: SurveyData;
+  surveyData?: SurveyData;
 }
 
 const SingleChoiceQuestion: React.FC<SingleChoiceQuestionProps> = ({

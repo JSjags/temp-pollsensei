@@ -62,7 +62,8 @@ const ImageUploader = ({
         setUploadProgress(100);
         setSurveyData((prev: any) => ({
           ...prev,
-          [fileType === "logo" ? "logo_url" : "header_url"]: response.data.url,
+          [fileType === "logo" ? "logo_url" : "header_url"]:
+            response.data.url || null,
         }));
       }
       setIsProcessing(false);
@@ -83,7 +84,7 @@ const ImageUploader = ({
     if (setSurveyData) {
       setSurveyData((prev: any) => ({
         ...prev,
-        [fileType === "logo" ? "logo_url" : "header_url"]: "",
+        [fileType === "logo" ? "logo_url" : "header_url"]: null,
       }));
     }
     setIsProcessing(false);
@@ -131,6 +132,13 @@ const ImageUploader = ({
     if (fileRef.current) {
       fileRef.current.value = "";
     }
+    // Clear URL in surveyData
+    if (setSurveyData) {
+      setSurveyData((prev: any) => ({
+        ...prev,
+        [fileType === "logo" ? "logo_url" : "header_url"]: null,
+      }));
+    }
   };
 
   return (
@@ -147,7 +155,7 @@ const ImageUploader = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          {!selectedImage && !imageUrl ? (
+          {!selectedImage || !imageUrl ? (
             <div className="text-center flex flex-col items-center gap-2 p-4 w-full">
               <IoMdCloudUpload className="text-4xl text-gray-400" />
               <div className="text-sm text-gray-600">
@@ -205,7 +213,7 @@ const ImageUploader = ({
           </div>
         )}
 
-        {selectedImage && (
+        {(selectedImage || imageUrl === "" || imageUrl === null) && (
           <div className="flex flex-wrap gap-2 mt-4">
             <Button
               onClick={handleClear}
@@ -217,7 +225,7 @@ const ImageUploader = ({
               Clear
             </Button>
 
-            {imageUrl && (
+            {imageUrl && imageUrl !== "" && (
               <Button
                 onClick={() => removeMutation()}
                 variant="outline"

@@ -280,6 +280,39 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    validateIndividualResponse: builder.query({
+      query: ({
+        countries,
+        date,
+        start_date,
+        end_date,
+        name,
+        response_id,
+        question,
+        question_type,
+        answer,
+        pagesNumber = 1,
+        id,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (countries) params.append("countries", countries);
+        if (date) params.append("date", date);
+        if (start_date) params.append("start_date", start_date);
+        if (end_date) params.append("end_date", end_date);
+        if (name) params.append("name", name);
+        if (response_id) params.append("response_id", response_id);
+        if (question) params.append("question", question);
+        if (answer) params.append("answer", answer);
+        if (question_type) params.append("question_type", question_type);
+        params.append("page", pagesNumber.toString());
+        return {
+          url: `response/validate/individual/${id}?${params.toString()}&page_size=20`,
+          method: "GET",
+        };
+      },
+    }),
+
     getPublicSurveyById: builder.query({
       query: (id) => ({
         url: `ps/survey/${id}`,
@@ -347,6 +380,7 @@ export const {
   useGetRespondentNameQuery,
   useValidateSurveyResponseQuery,
   useResponseValidateIndividualQuery,
+  useValidateIndividualResponseQuery,
   useCloseSurveyStatusMutation,
   useSurveySettingsQuery,
   useEditSurveySettingsMutation,

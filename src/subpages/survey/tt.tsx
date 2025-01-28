@@ -347,20 +347,16 @@ const AddQuestionPage = () => {
       }
     }
 
-    // console.log(store.getState().survey);
+    console.log(store.getState().survey);
 
-    try {
-      const updatedSurvey = {
-        ...store.getState().survey,
-        logo_url: logoUrl,
-        header_url: headerUrl,
-      };
-      await createSurvey(updatedSurvey).unwrap();
-      setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
-    } catch (e) {
-      console.log(e);
-    }
+    // try {
+    //   const updatedSurvey = store.getState().survey;
+    //   await createSurvey(updatedSurvey).unwrap();
+    //   setSurvey_id(createdSurveyData.data._id);
+    //   setReview(true);
+    // } catch (e) {
+    //   console.log(e);
+    // }
   };
 
   useEffect(() => {
@@ -444,68 +440,56 @@ const AddQuestionPage = () => {
   };
 
   return (
-    <div className={`${theme} flex flex-col gap-5 w-full`}>
+    <div className={`${theme} flex flex-col gap-5 w-full px-5 pr-0 lg:pl-10`}>
       <div className={`flex flex-1 justify-between gap-10 w-full`}>
-        <motion.div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-5 pr-0 lg:pl-10">
+        <motion.div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
           {/* ... existing content ... */}
-          <motion.div className="h-fit">
-            {surveyData?.logo_url &&
-              typeof surveyData.logo_url === "string" &&
-              surveyData.logo_url.trim() !== "" &&
-              !surveyData.logo_url.match(
-                /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
-              ) && (
-                <motion.div
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.2 }}
-                  className="bg-gradient-to-r rounded-lg w-16 my-5 text-white flex items-center flex-col shadow-lg hover:shadow-xl transform"
-                >
-                  <Image
-                    src={
-                      (surveyData as any)?.logo_url instanceof File
-                        ? URL.createObjectURL((surveyData as any)?.logo_url)
-                        : typeof surveyData?.logo_url === "string"
-                        ? surveyData?.logo_url
-                        : sparkly
-                    }
-                    alt=""
-                    className="w-full object-cover rounded-lg bg-no-repeat h-16 transition-transform duration-300"
-                    width={100}
-                    height={200}
-                  />
-                </motion.div>
-              )}
+          {logoUrl && (
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+              className="bg-gradient-to-r from-[#9D50BB] to-[#6E48AA] rounded-lg w-16 my-5 text-white flex items-center flex-col shadow-lg hover:shadow-xl transform"
+            >
+              <Image
+                src={
+                  logoUrl instanceof File
+                    ? URL.createObjectURL(logoUrl)
+                    : typeof logoUrl === "string"
+                    ? logoUrl
+                    : sparkly
+                }
+                alt=""
+                className="w-full object-cover rounded-lg bg-no-repeat h-16 transition-transform duration-300"
+                width={100}
+                height={200}
+              />
+            </motion.div>
+          )}
 
-            {surveyData?.header_url &&
-              typeof surveyData.header_url === "string" &&
-              surveyData.header_url.trim() !== "" &&
-              !surveyData.header_url.match(
-                /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
-              ) && (
-                <motion.div
-                  initial={{ scale: 0.95 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-gradient-to-r rounded-lg w-full my-4 text-white h-24 flex items-center flex-col shadow-lg overflow-hidden"
-                >
-                  <Image
-                    src={
-                      (surveyData as any)?.header_url instanceof File
-                        ? URL.createObjectURL((surveyData as any)?.header_url)
-                        : typeof (surveyData as any)?.header_url === "string"
-                        ? (surveyData as any)?.header_url
-                        : sparkly
-                    }
-                    alt=""
-                    className="w-full object-cover bg-no-repeat h-24 rounded-lg transition-transform duration-300 hover:scale-105"
-                    width={100}
-                    height={200}
-                  />
-                </motion.div>
-              )}
-          </motion.div>
+          {headerUrl && (
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gradient-to-r from-[#9D50BB] to-[#6E48AA] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col shadow-lg overflow-hidden"
+            >
+              <Image
+                src={
+                  headerUrl instanceof File
+                    ? URL.createObjectURL(headerUrl)
+                    : typeof headerUrl === "string"
+                    ? headerUrl
+                    : sparkly
+                }
+                alt=""
+                className="w-full object-cover bg-no-repeat h-24 rounded-lg transition-transform duration-300 hover:scale-105"
+                width={100}
+                height={200}
+              />
+            </motion.div>
+          )}
           <AnimatePresence mode="wait">
             {isEditing && (
               <motion.div
@@ -524,10 +508,7 @@ const AddQuestionPage = () => {
                     >
                       <Textarea
                         value={sectionTitle}
-                        onChange={(e) => {
-                          setSectionTitle(e.target.value);
-                          dispatch(updateSectionTopic(e.target.value));
-                        }}
+                        onChange={(e) => setSectionTitle(e.target.value)}
                         placeholder="Untitled Section"
                         className={cn(
                           "resize-none",
@@ -551,10 +532,7 @@ const AddQuestionPage = () => {
                     >
                       <Textarea
                         value={sDescription}
-                        onChange={(e) => {
-                          setsDescription(e.target.value);
-                          dispatch(updateSectionDescription(e.target.value));
-                        }}
+                        onChange={(e) => setsDescription(e.target.value)}
                         placeholder="Describe section (optional)"
                         className={cn(
                           "resize-none",
@@ -957,14 +935,14 @@ const AddQuestionPage = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full flex gap-2 items-center justify-center"
+                  className="group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full"
                   onClick={() => setAddQuestions((prev) => !prev)}
                 >
                   <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
                   Add Question
                 </Button>
 
-                {/* <Tooltip>
+                <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"
@@ -994,7 +972,7 @@ const AddQuestionPage = () => {
                     <RiDeleteBin6Line className="mr-2 h-4 w-4 group-hover:text-red-500" />
                     Delete Section
                   </Button>
-                )} */}
+                )}
 
                 <Button
                   variant="outline"
@@ -1049,10 +1027,10 @@ const AddQuestionPage = () => {
                   Publishing...
                 </>
               ) : (
-                <div className="flex gap-2 items-center justify-center">
+                <>
                   <VscLayersActive className="mr-2 h-5 w-5 animate-pulse" />
                   Publish Survey
-                </div>
+                </>
               )}
             </Button>
           </div>

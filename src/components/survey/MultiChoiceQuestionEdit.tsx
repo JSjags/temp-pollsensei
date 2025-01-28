@@ -263,6 +263,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     columns,
   ]);
 
+  console.log(isValid);
+
   const handleTypeChange = (value: string) => {
     setEditedQuestionType(value);
     dispatch(setCurrentQuestionType(value));
