@@ -1,20 +1,11 @@
-import CommentQuestion from "@/components/survey/CommentQuestion";
-import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
-import LinearScaleQuestion from "@/components/survey/LinearScaleQuestion";
-import MultiChoiceQuestion from "@/components/survey/MultiChoiceQuestion";
-import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
-import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
 import { RootState } from "@/redux/store";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import StyleEditor from "./StyleEditor";
 import QuestionType from "./QuestionType";
-import Image from "next/image";
-import { pollsensei_new_logo, sparkly, stars } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { IoDocumentOutline } from "react-icons/io5";
-import MatrixQuestion from "@/components/survey/MatrixQuestion";
 import {
   useCreateSurveyMutation,
   useGenerateSingleSurveyMutation,
@@ -22,8 +13,6 @@ import {
 } from "@/services/survey.service";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
-import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
-import { VscLayersActive } from "react-icons/vsc";
 import CreateNewSection from "./CreateNewSection";
 import { useRouter } from "next/navigation";
 import {
@@ -32,20 +21,10 @@ import {
   updateSection,
 } from "@/redux/slices/survey.slice";
 import store from "@/redux/store";
-import Sensei from "@/components/ui/Sensei";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import { AnimatePresence, motion } from "framer-motion";
 import SenseiMaster from "@/components/sensei-master/SenseiMaster";
-import ModalComponent from "@/components/ui/ModalComponent";
 import WaitingMessagesModal from "@/components/modals/WaitingModal";
-import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
-import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
-import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
-import DropdownQuestion from "@/components/survey/DropdownQuestion";
-import NumberQuestion from "@/components/survey/NumberQuestion";
-import ShortTextQuestion from "@/components/survey/LongTextQuestion";
-import BooleanQuestion from "@/components/survey/BooleanQuestion";
-import SliderQuestion from "@/components/survey/SliderQuestion";
 import ReviewModal from "@/components/modals/ReviewModal";
 import {
   Dialog,
@@ -53,7 +32,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";

@@ -67,6 +67,9 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
   );
 
   console.log(surveyData);
+  console.log(headerFont);
+  console.log(bodyFont);
+  console.log(questionFont);
 
   // Update state when props change
   useEffect(() => {
@@ -81,7 +84,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     if (setSurveyData) {
       setSurveyData((prev: any) => ({
         ...prev,
-        header_text: headerFont,
+        // header_text: headerFont,
       }));
     }
   }, [headerFont, dispatch, setSurveyData]);
@@ -91,7 +94,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     if (setSurveyData) {
       setSurveyData((prev: any) => ({
         ...prev,
-        question_text: questionFont,
+        // question_text: questionFont,
       }));
     }
   }, [questionFont, dispatch, setSurveyData]);
@@ -101,7 +104,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     if (setSurveyData) {
       setSurveyData((prev: any) => ({
         ...prev,
-        body_text: bodyFont,
+        // body_text: bodyFont,
       }));
     }
   }, [bodyFont, dispatch, setSurveyData]);
