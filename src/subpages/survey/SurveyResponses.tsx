@@ -5,8 +5,6 @@ import UploadedItem from "@/components/ui/UploadedItem";
 import { setSurvey } from "@/redux/slices/answer.slice";
 import {
   closeUpload,
-  openUpload,
-  toggleUpload,
 } from "@/redux/slices/upload.slice";
 import { RootState } from "@/redux/store";
 import {
@@ -14,12 +12,20 @@ import {
   useUploadResponseOCRMutation,
 } from "@/services/survey.service";
 import { useParams, useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Slide } from "react-awesome-reveal";
 import { SlCloudUpload } from "react-icons/sl";
 import { useSelector, useDispatch } from "react-redux";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
+import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
 
 const SurveyResponses = () => {
   const params = useParams();
@@ -28,8 +34,7 @@ const SurveyResponses = () => {
   const uploadState = useSelector(
     (state: RootState) => state?.upload?.isUploadOpen
   );
-  const { data } = useFetchASurveyQuery(params.id);   
-  const [isToggled, setIsToggled] = useState<boolean>(false);
+  const { data } = useFetchASurveyQuery(params.id);
   const [
     uploadResponseOCR,
     {
@@ -47,6 +52,16 @@ const SurveyResponses = () => {
     if (inputRef.current) {
       inputRef.current.click();
     }
+  };
+
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const items = Array.from(selectedFiles);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setSelectedFiles(items);
   };
 
   const handleToggle = useCallback(() => {
@@ -79,8 +94,17 @@ const SurveyResponses = () => {
 
           reader.onloadend = () => {
             const base64String = reader.result?.toString().split(",")[1];
+            const image_name = file.name
+            console.log(image_name)
             if (base64String) {
-              resolve(`data:${file.type};base64,${base64String}`);
+              console.log({
+                image_name: image_name,
+                base64: `data:${file.type};base64,${base64String}`, //`data:${file.type};base64,${base64String}`
+              })
+              resolve(
+                // image_name: image_name,
+                `data:${file.type};base64,${base64String}`, //`data:${file.type};base64,${base64String}`
+              );
             } else {
               reject(new Error("Failed to convert file to Base64."));
             }
@@ -114,11 +138,13 @@ const SurveyResponses = () => {
     if (successOCRUpload) {
       toast.success("OCR processed successfully");
       setSelectedItem(null);
-      dispatch(setSurvey({
-        survey: uploadOCR?.data.survey,
-        extracted_answers:uploadOCR?.data.extracted_answers,
-        uploaded_files:uploadOCR?.data.uploaded_files,
-      }));
+      dispatch(
+        setSurvey({
+          survey: uploadOCR?.data.survey,
+          extracted_answers: uploadOCR?.data.extracted_answers,
+          uploaded_files: uploadOCR?.data.uploaded_files,
+        })
+      );
       handleToggle();
       router.push("validate-response");
     }
@@ -145,7 +171,7 @@ const SurveyResponses = () => {
     <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10 flex flex-col justify-center min-h-[60vh]">
       {data?.data?.response_count === 0 && <NoResponse />}
 
-      {data?.data?.response_count > 0 && <Responses data={data?.data}/>}
+      {data?.data?.response_count > 0 && <Responses data={data?.data} />}
 
       {/* Responses */}
       <Slide direction="up" duration={200}>
@@ -203,23 +229,52 @@ const SurveyResponses = () => {
                 </button>
               </div>
             </div>
-
-            {selectedFiles && (
-              <div
-                className={`${
-                  selectedFiles ? "flex" : "hidden"
-                } pt-2 rounded-md max-h-80 overflow-y-auto flex-wrap w-full`}
-              >
-                {[...selectedFiles].map((item, index) => (
-                  <UploadedItem
-                    key={index}
-                    item={item}
-                    onRemove={handleRemove}
-                    onItemSelect={handleItemSelect}
-                  />
-                ))}
-              </div>
-            )}
+            <small className="text-yellow-600">
+              Please ensure that the files are uploaded in the format in which
+              the survey was created. You can drag and drop the selected files
+              to reorder them if they are not arranged correctly.
+            </small>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <StrictModeDroppable droppableId="files">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                    {selectedFiles && (
+                      <div
+                        className={`${
+                          selectedFiles ? "flex" : "hidden"
+                        } pt-2 rounded-md max-h-80 overflow-y-auto flex-wrap w-full`}
+                      >
+                        {[...selectedFiles].map((item, index) => (
+                          <Draggable
+                            key={item.name}
+                            // key={index + 1}
+                            // draggableId={index.toString()}
+                            draggableId={item.name}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="mb-4"
+                              >
+                                <UploadedItem
+                                  key={index}
+                                  item={item}
+                                  onRemove={handleRemove}
+                                  onItemSelect={handleItemSelect}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </StrictModeDroppable>
+            </DragDropContext>
 
             <div className="flex justify-end w-full mt-5">
               <div className="flex justify-between items-center gap-4">
@@ -245,7 +300,7 @@ const SurveyResponses = () => {
       <Slide direction="up" duration={200}>
         <ModalComponent titleClassName={"pl-0"} openModal={OCRloading}>
           <div className="flex flex-col items-center text-center min-h-[7.5rem]">
-            <BeatLoader  />
+            <BeatLoader />
             <h2 className="font-normal text-lg">
               Uploading... Please be patient
             </h2>

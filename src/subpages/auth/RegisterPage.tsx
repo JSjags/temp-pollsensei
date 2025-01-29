@@ -1,30 +1,30 @@
 "use client";
+import { dark_theme_logo } from "@/assets/images";
+import Input from "@/components/ui/Input";
 import { useGoogleLogin } from "@react-oauth/google";
-import { Form, Field } from "react-final-form";
-import validate from "validate.js";
-import Link from "next/link";
-import { ClipLoader } from "react-spinners";
 import Image from "next/image";
-import steps from "../../assets/auth/steps2.svg";
-import logo from "../../assets/auth/logo.svg";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Field, Form } from "react-final-form";
+import { FaTimesCircle } from "react-icons/fa";
+import { IoCheckmarkCircle } from "react-icons/io5";
+import { ClipLoader } from "react-spinners";
+import validate from "validate.js";
 import google from "../../assets/auth/goggle.svg";
 import facebook from "../../assets/auth/facebook.svg";
 import chat from "../../assets/auth/chat.svg";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "../../assets/auth/logo.svg";
+import steps from "../../assets/auth/steps2.svg";
+import PasswordField from "../../components/ui/PasswordField";
+import mixpanel from "mixpanel-browser";
 import {
-  useRegisterUserMutation,
   useFacebookRegisterMutation,
   useGooleRegisterMutation,
+  useRegisterUserMutation,
 } from "../../services/user.service";
-import PasswordField from "../../components/ui/PasswordField";
-import Input from "@/components/ui/Input";
-import { FaTimesCircle } from "react-icons/fa";
-import { IoCheckmarkCircle } from "react-icons/io5";
-import { dark_theme_logo } from "@/assets/images";
-import { useRouter, useSearchParams } from "next/navigation";
-import mixpanel from "mixpanel-browser";
 import { useGeoLocation } from "../settings/subscription/PricingCards";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -79,6 +79,9 @@ const RegisterPage = () => {
     }
   }, [user, router]);
 
+  const searchParams = useSearchParams();
+  const refValue = searchParams.get("ref");
+  const [refCode, setRefCode] = useState(refValue ?? "");
   const [registerUser, { isSuccess, isError, error, isLoading }] =
     useRegisterUserMutation();
 
@@ -93,7 +96,6 @@ const RegisterPage = () => {
   const [pwdFocus, setPwdFocus] = useState(false);
   const [matchFocus, setMatchFocus] = useState(false);
 
-  const searchParams = useSearchParams();
   const ed = searchParams.get("ed");
 
   const pattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
@@ -116,6 +118,7 @@ const RegisterPage = () => {
       await registerUser({
         ...values,
         country: locationData?.isSuccess ? locationData?.country : "null",
+        ...(refCode ? { referral_code: refCode } : {}),
       }).unwrap();
       toast.success(
         "User registered successfully, check your email to continue"
@@ -422,6 +425,17 @@ const RegisterPage = () => {
                           )}
                         </Field>
 
+                        <div className="pt-3">
+                          <label className="auth-label font-sans pb-2">
+                            Referral Code
+                          </label>
+                          <input
+                            value={refCode}
+                            onChange={(e) => setRefCode(e?.target?.value)}
+                            type="text"
+                            className="auth-input w-full  focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground placeholder:text-foreground/40"
+                          />
+                        </div>
                         <motion.div
                           initial={{ y: 10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}

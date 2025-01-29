@@ -1,12 +1,11 @@
-"use client"
-
+"use client";
 
 import NavBar from "@/components/blocks/NavBar";
 import ChatWidget from "@/components/resource-hub/chat-widget";
 import ContactUs from "@/components/resource-hub/contact-us";
 // import FeatureComing from "@/components/common/FeatureComing";
 import Help from "@/components/resource-hub/hero";
-import KnowledgeBase from "@/components/resource-hub/knowledge-base";
+import KnowledgeBase from "@/components/resource-hub/knowledge-base/knowledge-base";
 import ResourceActions from "@/components/resource-hub/resoure-action";
 import React, { useState } from "react";
 
@@ -24,15 +23,18 @@ const Page = (props: Props) => {
   };
   return (
     <section className="mt-2 min-h-[50vh] relative">
-      {/* <NavBar /> */}
-    {/* <FeatureComing height="min-h-[70vh]" /> */}
-    <Help />
-    <ResourceActions onClick={toggleChat} />
-    <KnowledgeBase />
-    <ContactUs />
-    <ChatWidget isChatMinimized={isChatMinimized} isChatOpen={isChatOpen} minimizeChat={minimizeChat} closeChat={closeChat} />
-  </section>
-  )
+      <Help />
+      <ResourceActions onClick={toggleChat} />
+      <KnowledgeBase />
+      <ContactUs />
+      <ChatWidget
+        isChatMinimized={isChatMinimized}
+        isChatOpen={isChatOpen}
+        minimizeChat={minimizeChat}
+        closeChat={closeChat}
+      />
+    </section>
+  );
 };
 
 export default Page;

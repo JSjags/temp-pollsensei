@@ -22,6 +22,7 @@ import LikertScaleQuestion from "./AnswerLikertScale";
 import { useEditTranscriptionMutation } from "@/services/survey.service";
 import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
+import CommentWithMediaQuestion from "./CommentWithMediaQuestion";
 
 interface Answer {
   question?: string;
@@ -152,8 +153,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                 />
               ) : 
               item.question_type === "comment" ||
-               item.question_type === "short_text" ||
-                item.question_type === "long_text" ? (
+               item.question_type === "short_text"  ? (
                 <CommentQuestion
                   key={index}
                   index={index + 1}
@@ -174,7 +174,6 @@ const UserResponses: React.FC<UserResponseProps> = ({
                  question={item.question}
                  response={item.num}
                  status={item?.validation_result?.status}
-                 // EditQuestion={() => EditQuestion(index)}
                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
                />
              ) 
@@ -196,11 +195,27 @@ const UserResponses: React.FC<UserResponseProps> = ({
                 //   handleTranscribe(item?.media?.transcription_id
                 //     )
                 // }}
-                
-                // EditQuestion={() => EditQuestion(index)}
-                // DeleteQuestion={()=>handleDeleteQuestion(index)}
               />
-            )
+            ) :
+       
+         
+                item.question_type === "long_text" ? (
+                <CommentWithMediaQuestion
+                  key={index}
+                  index={index + 1}
+                  questionType={item.question_type}
+                  question={item.question}
+                  response={item?.media?.text || item.text }
+                  mediaUrl={item?.media?.url}
+                  status={item?.validation_result?.status}
+                  audio={item?.media?.url}
+                  onTranscribe={(updatedText) => {
+                    handleTranscribe(item?.media?.transcription_id, updatedText);
+                  }}
+                  // EditQuestion={() => EditQuestion(index)}
+                  // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                />
+              )
                : item.question_type === "linear_Scale" ? (
                 <LinearScaleQuestion
                   question={item.question}

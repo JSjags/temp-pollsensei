@@ -1,5 +1,6 @@
 import { Test, Variable } from "@/components/analysis/AnalysisTests";
 import { type ClassValue, clsx } from "clsx";
+import { toast } from "react-toastify";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -109,3 +110,59 @@ export const generateMilestoneStage = (stage: string): string => {
   }
   return "0";
 };
+
+export const handleApiErrors = (response: any) => {
+  const message = response?.message ?? response?.data?.message;
+  toast.error(message);
+};
+
+export const isValidResponse = (response: any) => {
+  console.log(response);
+  if (response?.success || response?.data?.success) {
+    return true;
+  }
+
+  return false;
+};
+
+
+export function getMonthsFromCurrent(): string[] {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const currentMonthIndex = new Date().getMonth();
+  const orderedMonths = [];
+
+  for (let i = 0; i < 12; i++) {
+    const monthIndex = (currentMonthIndex - i + 12) % 12; // Handle wrapping
+    orderedMonths.push(months[monthIndex]);
+  }
+
+  return orderedMonths;
+}
+
+
+export function getCurrentAndLastYears(): string[] {
+  const currentYear = new Date().getFullYear();
+  const years: string[] = [];
+
+  for (let i = 0; i < 5; i++) {
+    years.push((currentYear - i).toString());
+  }
+
+  return years.reverse(); 
+}
+
+

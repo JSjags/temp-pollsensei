@@ -87,7 +87,6 @@
 //     handleAnswerChange(question, { scale_value: selectedOption });
 //   };
 
-
 //   return (
 //     <div className="p-1 ">
 //       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
@@ -145,17 +144,25 @@ import { useUploadResponseFileMutation } from "@/services/survey.service";
 import React, { useState, useRef } from "react";
 import { AiOutlineAudio } from "react-icons/ai";
 import { toast } from "react-toastify";
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';
 
 const ResponseFile = ({
   question,
   handleAnswerChange,
   selectedValue,
   required,
+  isDisabled,
+  onFocus,
+  onBlur,
 }: {
   question: string;
   handleAnswerChange: (key: string, value: any) => void;
   selectedValue: string;
   required: boolean;
+  isDisabled?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isAudio, setIsAudio] = useState(true);
@@ -165,68 +172,61 @@ const ResponseFile = ({
   const audioChunksRef = useRef<Blob[]>([]);
   const [uploadResponseFile] = useUploadResponseFileMutation();
 
-  // Start Recording
-  // const handleStartRecording = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  //     const mediaRecorder = new MediaRecorder(stream);
-  //     mediaRecorderRef.current = mediaRecorder;
-
-  //     mediaRecorder.ondataavailable = (event) => {
-  //       audioChunksRef.current.push(event.data);
-  //     };
-
-  //     mediaRecorder.onstop = async () => {
-  //       const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-  //       setAudioURL(URL.createObjectURL(audioBlob));
-  //       await uploadFile(audioBlob);
-  //       audioChunksRef.current = [];
-  //     };
-
-  //     mediaRecorder.start();
-  //     setIsRecording(true);
-  //   } catch (error) {
-  //     toast.error("Microphone access denied or not available.");
-  //   }
-  // };
+  const handleDisables = () => {
+    if (isDisabled) {
+      toast.warning("Textarea is active or already has a value.");
+      return;
+    }
+  };
 
   const handleStartRecording = async () => {
+    if (isDisabled) {
+      toast.warning("Textarea is active or already has a value.");
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-  
+
       mediaRecorder.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
       };
-  
+
       mediaRecorder.onstop = async () => {
         const fileName = `audio_${Date.now()}.wav`; // Generate a unique filename
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-  
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/wav",
+        });
+
         // Convert Blob to File
-        const audioFile = new File([audioBlob], fileName, { type: "audio/wav" });
-  
+        const audioFile = new File([audioBlob], fileName, {
+          type: "audio/wav",
+        });
+
         // Optionally, create a URL for playback
         setAudioURL(URL.createObjectURL(audioFile));
-  
+
         // Upload the raw File object
         await uploadFile(audioFile);
-  
+
         // Clear audio chunks
         audioChunksRef.current = [];
       };
-  
+
       mediaRecorder.start();
       setIsRecording(true);
     } catch (error) {
       toast.error("Microphone access denied or not available.");
     }
   };
-  
 
   // Stop Recording
   const handleStopRecording = () => {
+    if (isDisabled) {
+      toast.warning("You text input has been saved already.");
+      return;
+    }
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
@@ -251,8 +251,8 @@ const ResponseFile = ({
       const formData = new FormData();
       formData.append("file", file);
       const response = await uploadResponseFile(formData).unwrap();
-      console.log(response)
-      const mediaUrl = response?.data?.media_url; 
+      console.log(response);
+      const mediaUrl = response?.data?.media_url;
       if (mediaUrl) {
         handleAnswerChange(question, { media_url: mediaUrl });
         toast.success("File uploaded successfully!");
@@ -268,41 +268,64 @@ const ResponseFile = ({
 
   return (
     <div className="p-1">
-
       {uploading && <p className="text-gray-500 text-sm">Uploading...</p>}
-    {
-      isAudio ? (
+      {isAudio ? (
         <>
-      <div className="flex items-center gap-2">
-        {!isRecording ? (
-          <button
-            onClick={handleStartRecording}
-            className="px-4 py-2 rounded-lg text-sm font-semibold bg-purple-600 text-white"
-          >
-            <AiOutlineAudio className="inline-block mr-2" />
-            Record
-          </button>
-        ) : (
-          <button
-            onClick={handleStopRecording}
-            className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white"
-          >
-            Stop Recording
-          </button>
-        )}
-      </div>
+          <div className="flex items-center gap-2">
+            {!isRecording ? (
+              <button
+                type="button"
+                // onClick={handleStartRecording}
+                // className={`px-4 py-2 rounded-lg text-sm font-semibold ${isDisabled ? "bg-gray-600" : "bg-purple-600"}  text-white`}
+                onClick={() => {
+                  isDisabled ? handleDisables() : handleStartRecording();
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+                  isDisabled
+                    ? "bg-gray-600 cursor-not-allowed"
+                    : "bg-purple-600"
+                } text-white`}
+                disabled={isDisabled}
+                onFocus={onFocus}
+                onBlur={onBlur}
+              >
+                <AiOutlineAudio className="inline-block mr-2" />
+                Record
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleStopRecording}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 text-white"
+                disabled={isDisabled}
+                onFocus={onFocus}
+                onBlur={onBlur}
+              >
+                Stop Recording
+              </button>
+            )}
+          </div>
 
-      {audioURL && (
-        <div className="mt-4">
-          <audio controls className="w-full">
-            <source src={audioURL} type="audio/wav" />
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      )}
+          {/* {audioURL && (
+            <div className="mt-4">
+              <audio controls className="w-full">
+                <source src={audioURL} type="audio/wav" />
+                Your browser does not support the audio element.
+              </audio>
+            </div>
+          )} */}
+
+          {audioURL && (
+             <AudioPlayer
+             autoPlay
+             src={audioURL}
+             onPlay={e => console.log("onPlay")}
+
+             // other props here
+           />
+          )}
         </>
       ) : (
-        
         <input
           type="file"
           onChange={handleFileUpload}
@@ -310,9 +333,7 @@ const ResponseFile = ({
           required={required}
           disabled={uploading}
         />
-      )
-    }
-
+      )}
     </div>
   );
 };

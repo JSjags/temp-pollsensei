@@ -4,7 +4,7 @@ import { HiOutlinePlus } from "react-icons/hi";
 import { IoDocumentOutline } from "react-icons/io5";
 
 import { VscLayersActive } from "react-icons/vsc";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -232,69 +232,73 @@ const CreateNewSection = () => {
             </div>
           )}
 
+          {/* @ts-ignore  */}
           <DragDropContext onDragEnd={handleDragEnd}>
             <StrictModeDroppable droppableId="questions">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {questions.map((item: any, index: any) => (
-                    <Draggable
-                      key={index + 1}
-                      draggableId={index.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="mb-4"
-                          // key={index}
-                        >
-                          {item.question_type === "multiple_choice" ? (
-                            <MultiChoiceQuestion
-                              index={index + 1}
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                            />
-                          ) : item.question_type === "long_text" ? (
-                            <CommentQuestion
-                              key={index}
-                              index={index + 1}
-                              question={item.question}
-                              questionType={item.question_type}
-                            />
-                          ) : item.question_type === "likert_scale" ? (
-                            <LikertScaleQuestion
-                              question={item.question}
-                              options={item.options}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          ) : item.question_type === "star_rating" ? (
-                            <StarRatingQuestion
-                              question={item.question}
-                              // maxRating={5}
-                              questionType={item.question_type}
-                              EditQuestion={() => EditQuestion(index)}
-                              // DeleteQuestion={()=>handleDeleteQuestion(index)}
-                            />
-                          ) : item.question_type === "long_text" ? (
-                            <MatrixQuestion
-                              key={index}
-                              index={index + 1}
-                              columns={item.columns}
-                              rows={item.rows}
-                              // options={item.options}
-                              question={item.question}
-                              questionType={item.question_type}
-                            />
-                          ) : null}
-                        </div>
-                      )}
-                    </Draggable>
+                    <Fragment key={index}>
+                      {/* @ts-ignore */}
+                      <Draggable
+                        key={index + 1}
+                        draggableId={index.toString()}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="mb-4"
+                            // key={index}
+                          >
+                            {item.question_type === "multiple_choice" ? (
+                              <MultiChoiceQuestion
+                                index={index + 1}
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                              />
+                            ) : item.question_type === "long_text" ? (
+                              <CommentQuestion
+                                key={index}
+                                index={index + 1}
+                                question={item.question}
+                                questionType={item.question_type}
+                              />
+                            ) : item.question_type === "likert_scale" ? (
+                              <LikertScaleQuestion
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                              />
+                            ) : item.question_type === "star_rating" ? (
+                              <StarRatingQuestion
+                                question={item.question}
+                                // maxRating={5}
+                                questionType={item.question_type}
+                                EditQuestion={() => EditQuestion(index)}
+                                // DeleteQuestion={()=>handleDeleteQuestion(index)}
+                              />
+                            ) : item.question_type === "long_text" ? (
+                              <MatrixQuestion
+                                key={index}
+                                index={index + 1}
+                                columns={item.columns}
+                                rows={item.rows}
+                                // options={item.options}
+                                question={item.question}
+                                questionType={item.question_type}
+                              />
+                            ) : null}
+                          </div>
+                        )}
+                      </Draggable>
+                    </Fragment>
                   ))}
                   {provided.placeholder}
                 </div>

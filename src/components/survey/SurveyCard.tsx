@@ -52,6 +52,7 @@ interface SurveyCardProps {
   status: string;
   number_of_responses: number;
   _id: string;
+  index: number;
 }
 
 const SurveyCard: React.FC<SurveyCardProps> = ({
@@ -60,6 +61,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   status,
   number_of_responses,
   _id,
+  index,
 }) => {
   const [modalStates, setModalStates] = useState({
     delete: false,

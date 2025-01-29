@@ -1,4 +1,5 @@
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
+import AppReactQuill from "@/components/common/forms/AppReactQuill";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import StarRating from "@/components/survey/StarRating";
 import ResponseFile from "@/components/ui/VoiceRecorder";
@@ -55,6 +56,23 @@ const PublicResponse = () => {
   const [respondent_email, setRespondent_email] = useState("");
   const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
   const router = useRouter();
+
+  const [activeInput, setActiveInput] = useState<Record<string, "textarea" | "audio" | null>>({});
+    const [quilValue, setQuilValue] = useState("");
+  
+
+
+  const handleInputFocus = (question: string, inputType: "textarea" | "audio") => {
+    setActiveInput((prev) => ({ ...prev, [question]: inputType }));
+  };
+
+  const handleInputBlur = (question: string) => {
+    setActiveInput((prev) => ({ ...prev, [question]: null }));
+  };
+
+  const isTextareaDisabled = (question: string) => activeInput[question] === "audio";
+  const isAudioDisabled = (question: string) =>
+    activeInput[question] === "textarea" || !!answers[question]?.text;
 
   const handleAnswerChange = (key: string, value: any) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -453,15 +471,61 @@ const PublicResponse = () => {
                             );
                           case "long_text":
                             return (
-                              <textarea
-                                rows={4}
-                                className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
-                                onChange={(e) =>
-                                  handleAnswerChange(quest.question, {
-                                    text: e.target.value,
-                                  })
+                              <div className="flex flex-col">
+                                <textarea
+                                  rows={4}
+                                  className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                                  // onFocus={handleTextareaFocus}
+                                  // onBlur={resetActiveInput}
+                                  // disabled={activeInput === "audio"}
+                                  onFocus={() => handleInputFocus(quest.question, "textarea")}
+                                  onBlur={() => handleInputBlur(quest.question)}
+                                  readOnly={isTextareaDisabled(quest.question)}
+                                  value={answers[quest.question]?.text || ""}
+                                  onChange={(e) =>
+                                    handleAnswerChange(quest.question, {
+                                      text: e.target.value,
+                                    })
+                                  }
+                                />
+                                <div className="py-8">
+                            {/* <AppReactQuill
+                              quilValue={quilValue}
+                              setQuilValue={setQuilValue}
+                            /> */}
+                          </div>
+                                {
+                                  quest.can_accept_media &&   <ResponseFile
+                                  question={quest.question}
+                                  handleAnswerChange={handleAnswerChange}
+                                  selectedValue={
+                                    answers[quest.question]?.media_url || ""
+                                  }
+                                  required={quest.is_required}
+                                  // onFocus={handleAudioFocus}
+                                  // onBlur={resetActiveInput} 
+                                  // isDisabled={activeInput === "textarea"} 
+                                  onFocus={() => handleInputFocus(quest.question, "audio")}
+                                  onBlur={() => handleInputBlur(quest.question)}
+                                  isDisabled={isAudioDisabled(quest.question)}
+                                />
                                 }
-                              />
+                            
+                            </div>
+                            );
+                          case "short_text":
+                            return (
+                              <div className="flex flex-col">
+                                <input
+                                  placeholder="Your response here..."
+                                  className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                                  onChange={(e) =>
+                                    handleAnswerChange(quest.question, {
+                                      text: e.target.value,
+                                    })
+                                  }
+                                />
+                            </div>
                             );
                           case "star_rating":
                             return (

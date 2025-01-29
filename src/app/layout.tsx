@@ -8,20 +8,21 @@ import {
   Lora,
   Merriweather,
 } from "next/font/google";
-import "./globals.css";
-import ReduxContext from "@/contexts/ReduxContext";
-import { cn } from "@/lib/utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AOSInit } from "@/components/ui/Aos";
-import { TanstackProvider } from "@/providers/TanstackProvider";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { CookieConsent } from "@/components/primitives/CookieConsent";
-import { MixPanelProvider } from "@/contexts/MixpanelContext";
-import UpgradeModal from "@/components/subscription/modal-upgrade";
-import { SenseiProvider } from "@/contexts/SenseiContext";
+import "./globals.css";
+import Script from "next/script";
 import type { NextFontWithVariable } from "next/dist/compiled/@next/font";
+import { cn } from "@/lib/utils";
+import { MixPanelProvider } from "@/contexts/MixpanelContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { TanstackProvider } from "@/providers/TanstackProvider";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import ReduxContext from "@/contexts/ReduxContext";
+import { SenseiProvider } from "@/contexts/SenseiContext";
+import UpgradeModal from "@/components/subscription/modal-upgrade";
+import { AOSInit } from "@/components/ui/Aos";
+import MetaPixel from "@/components/MetaPixel";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -87,6 +88,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AOSInit />
+      <MetaPixel />
       <head>
         {/* Hotjar Tracking Code (Production Only) */}
         {process.env.NODE_ENV === "production" && (
@@ -103,6 +105,21 @@ export default function RootLayout({
             }}
           />
         )}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=1295383375247111&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+        <script
+          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `var $zoho=$zoho || {};$zoho.salesiq = $zoho.salesiq || {widgetcode:"siqaf0b431e5699faf2a8cb25ad1bd13007939df411b201343c2e60d7efe686c7c491fd08d388e701b42cbb5f13245147eb", values:{},ready:function(){}};var d=document;s=d.createElement("script");s.type="text/javascript";s.id="zsiqscript";s.defer=true;s.src="https://salesiq.zoho.com/widget";t=d.getElementsByTagName("script")[0];t.parentNode.insertBefore(s,t);d.write("<div id='zsiqwidget'></div>");`,
+          }}
+        />
       </head>
       <body
         className={cn(
@@ -120,7 +137,9 @@ export default function RootLayout({
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
-            <ToastContainer className="z-50" bodyClassName="toastBody" />
+            <ToastContainer
+              className={`${cn(fontSans.variable)} !z-[9999999999999]`}
+            />
             <ReduxContext>
               <SenseiProvider>
                 <UpgradeModal />

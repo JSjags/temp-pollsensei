@@ -1,80 +1,3 @@
-// "use client"
-
-// import { useGetReviewQuery } from "@/services/superadmin.service";
-// import React, { useState } from "react";
-
-// interface ReviewData {
-//   _id: string;
-//   survey_id: string;
-//   field_description: string;
-//   suggested_improvement: string;
-//   overall_satisfaction: string;
-//   is_deleted: boolean;
-//   createdAt: string;
-//   updatedAt: string;
-// }
-
-// interface ReviewsProps {
-//   data: ReviewData[];
-// }
-
-// const AdminReviews: React.FC = () => {
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [reviewsPerPage] = useState(5);
-//   const { data } = useGetReviewQuery(currentPage)
-
-//   console.log(data)
-
-//   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-//   return (
-//     <div className="p-6 max-w-5xl mx-auto">
-//       <h1 className="text-2xl font-bold mb-4">Customer Reviews</h1>
-
-//       {/* Reviews List */}
-//       <div className="space-y-4">
-//         {data?.data?.data?.map((review:any) => (
-//           <div
-//             key={review._id}
-//             className="p-4 border border-gray-300 rounded-md shadow-sm bg-white"
-//           >
-//             <div className="mb-2">
-//               <span className="font-semibold text-gray-800">
-//                 Field Description:
-//               </span>{" "}
-//               {review.field_description}
-//             </div>
-//             <div className="mb-2">
-//               <span className="font-semibold text-gray-800">
-//                 Suggested Improvement:
-//               </span>{" "}
-//               {review.suggested_improvement}
-//             </div>
-//             <div className="mb-2">
-//               <span className="font-semibold text-gray-800">
-//                 Overall Satisfaction:
-//               </span>{" "}
-//               {review.overall_satisfaction}
-//             </div>
-//             <div className="text-sm text-gray-500">
-//               <p>
-//                 <span className="font-semibold">Created At:</span>{" "}
-//                 {new Date(review.createdAt).toLocaleString()}
-//               </p>
-//               <p>
-//                 <span className="font-semibold">Updated At:</span>{" "}
-//                 {new Date(review.updatedAt).toLocaleString()}
-//               </p>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-
-//     </div>
-//   );
-// };
-
-// export default AdminReviews;
 
 "use client";
 
@@ -84,6 +7,7 @@ import React, { useState } from "react";
 import { FadeLoader } from "react-spinners";
 import { generateInitials } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { X } from "lucide-react";
 
 interface Answer {
   question: string;
@@ -110,10 +34,23 @@ interface ReviewData {
 const AdminReviews: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [reviewsPerPage] = useState(10);
-  const { data, isLoading, error, refetch } = useGetReviewQuery(currentPage);
+  const { data, isLoading, error, refetch, isFetching } = useGetReviewQuery(currentPage);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<ReviewData | null>(null);
 
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / reviewsPerPage);
+
+  const openModal = (reviews:ReviewData) => {
+    setSelectedReview(reviews);
+    setIsModalOpen(true);
+    console.log(reviews)
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedReview(null);
+  };
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
@@ -143,91 +80,6 @@ const AdminReviews: React.FC = () => {
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Customer Reviews</h1>
 
-      {/* <div className="overflow-x-auto">
-        <table className="min-w-full table-auto border-collapse border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Respondent Name
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Respondent Email
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Country
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Answers
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Created At
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Updated At
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={6} className="text-center ">
-                  <span className="flex justify-center items-center">
-                    <FadeLoader height={10} radius={1} className="mt-3" />
-                  </span>
-                </td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td colSpan={6} className="text-center ">
-                  <span className="flex justify-center items-center text-xs text-red-500">
-                    Something went wrong
-                  </span>
-                </td>
-              </tr>
-            ) : (
-              reviews.map((review) => (
-                <tr key={review._id} className="even:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-2">
-                    {review?.user_id?.name}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {review?.user_id?.email}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {review?.user_id?.country || "Not Provided"}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {review?.reviews?.map((answer) => (
-                      <div key={answer._id} className="mb-2">
-                        <p>
-                          <strong>{answer.question}</strong>
-                        </p>
-                        {answer.question_type === "long_text" ||
-                        answer.question_type === "short_text" ? (
-                          <p>{answer.text}</p>
-                        ) : (
-                          <ul className="list-disc ml-4">
-                            {answer.selected_options?.map((option, index) => (
-                              <li key={index}>{option}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {new Date(review.createdAt).toLocaleString()}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {new Date(review.updatedAt).toLocaleString()}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div> */}
-
       <div className="overflow-x-auto w-full">
         <table className="w-full border-collapse border-gray-200 overflow-x-auto">
           <thead className="bg-gray-100">
@@ -254,7 +106,7 @@ const AdminReviews: React.FC = () => {
           </thead>
           <tbody>
             {
-              isLoading ? (
+              isLoading || isFetching ? (
                 <tr>
                   <td colSpan={6} className="text-center ">
                     <span className="flex justify-center items-center" >
@@ -300,7 +152,7 @@ const AdminReviews: React.FC = () => {
                 <td className="border border-gray-300 px-4 py-2">
                     {new Date(review.createdAt).toLocaleString()}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">
+                  <td className="border border-gray-300 cursor-pointer px-4 py-2"  onClick={() => openModal(review)}>
                     View
                   </td>
               </tr>
@@ -309,25 +161,38 @@ const AdminReviews: React.FC = () => {
         </table>
       </div>
 
-      {/* Pagination */}
-      {/* <div className="mt-6 flex justify-center space-x-4">
-        {Array.from(
-          { length: Math.ceil((data?.data?.total || 0) / reviewsPerPage) },
-          (_, i) => (
+      {isModalOpen && selectedReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white w-11/12 max-w-lg rounded-lg shadow-lg p-6 relative">
             <button
-              key={i}
-              onClick={() => paginate(i + 1)}
-              className={`px-4 py-2 border rounded ${
-                currentPage === i + 1
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-blue-500 border-blue-500"
-              }`}
+              className="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
+              onClick={closeModal}
             >
-              {i + 1}
+              <X className="w-5 h-5 font-extrabold" strokeWidth={3} />
             </button>
-          )
-        )}
-      </div> */}
+            <h3 className="text-lg font-semibold text-blue-600">
+              {selectedReview?.user_id?.name}&apos;s review
+            </h3>
+
+            {selectedReview?.reviews.map((item) => {
+        // Determine the answer key dynamically based on question_type
+        const answer =
+          item.question_type === "short_text"
+            ? item?.text || "No response provided"
+            : item?.selected_options?.[0] || "No response provided";
+
+        return (
+          <div key={item._id} className="flex flex-col py-2">
+            <p className="text-black font-semibold">Q: {item.question}</p>
+            <p className="text-[#5B03B2] font-normal">A: {answer}</p>
+          </div>
+        );
+      })}
+
+           
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">

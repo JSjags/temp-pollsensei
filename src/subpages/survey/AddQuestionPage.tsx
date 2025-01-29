@@ -908,7 +908,8 @@ const AddQuestionPage = () => {
                     min,
                     max,
                     rows,
-                    columns
+                    columns,
+                    can_accept_media
                   ) => {
                     if (questionType === "number") {
                       const newQuestion = {
@@ -930,6 +931,17 @@ const AddQuestionPage = () => {
                         is_required: is_required,
                         rows: rows,
                         columns: columns,
+                      };
+                      console.log(newQuestion);
+                      dispatch(addQuestion(newQuestion));
+                      setAddQuestions((prev) => !prev);
+                    } else if (questionType === "long_text") {
+                      const newQuestion = {
+                        question: question,
+                        question_type: questionType,
+                        options: options,
+                        is_required: is_required,
+                        can_accept_media: can_accept_media,
                       };
                       console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
@@ -1146,7 +1158,7 @@ const AddQuestionPage = () => {
               </DialogTitle>
               <DialogDescription className="text-gray-600">
                 To continue creating your survey and access all features, please
-                log in to your account or sign up if you're new here.
+                log in to your account or sign up if you&apos;re new here.
               </DialogDescription>
             </div>
           </DialogHeader>

@@ -13,7 +13,8 @@ interface AddQuestionProps {
     min?: number,
     max?: number,
     rows?: string[],
-    columns?: string[]
+    columns?: string[],
+    can_accept_media?: boolean
   ) => void;
   onCancel?: () => void;
 }
@@ -39,6 +40,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [questionType] = useState<string>("multiple_choice");
   const [options] = useState<string[] | any>([""]);
   const [is_required] = useState<boolean>(true);
+  const [can_accept_media, setCanAcceptMedia] = useState<boolean>(true);
   const [min] = useState<number | undefined>(undefined);
   const [max] = useState<number | undefined>(undefined);
   const [rows] = useState<string[]>([]);
@@ -78,6 +80,7 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
       maxValue={max}
       matrixRows={rows}
       matrixColumns={columns}
+      can_accept_media={can_accept_media}
     />
   );
 };

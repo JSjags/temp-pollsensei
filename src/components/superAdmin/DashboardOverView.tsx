@@ -1,53 +1,51 @@
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { FaUsers, FaUserCheck, FaPoll, FaEye } from "react-icons/fa";
+import { ScaleLoader } from "react-spinners";
 
 interface OverviewProps {
-items :{
-  free_users_count?: number | string;
-  organizations_count?: number | string;
-  paid_users_count?: number | string;
-  surveys_count?: number | string;
-  total_visit_count?: number | string;
-  users_count?: number | string;
-}
+  items: {
+    free_users_count?: number | string;
+    organizations_count?: number | string;
+    paid_users_count?: number | string;
+    surveys_count?: number | string;
+    total_visit_count?: number | string;
+    users_count?: number | string;
+  };
+  isLoading: boolean;
+  selected: string;
+  setSelected: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const OverviewCards: React.FC<OverviewProps> = ({items}) => {
-  const cards = [
-    {
-      title: "Total Users",
-      count: 0,
-      icon: <FaUsers className="text-xl text-purple-700" />,
-      bgColor: "bg-purple-50",
-    },
-    {
-      title: "Paid Users",
-      count: 0,
-      icon: <FaUserCheck className="text-xl text-purple-500" />,
-      bgColor: "bg-purple-100",
-    },
-    {
-      title: "Surveys Created",
-      count: 0,
-      icon: <FaPoll className="text-xl text-green-500" />,
-      bgColor: "bg-green-50",
-    },
-    {
-      title: "Total Visits",
-      count: 0,
-      icon: <FaEye className="text-xl text-blue-500" />,
-      bgColor: "bg-blue-50",
-    },
-  ];
+const OverviewCards: React.FC<OverviewProps> = ({ items, isLoading, selected, setSelected }) => {
+  const router = useRouter();
+
+  console.log(selected);
 
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-semibold text-gray-800">Overview</h2>
-        <div className="text-gray-600 cursor-pointer">Today ▼</div>
+        <div className="text-gray-600 cursor-pointer">
+          <select
+            name="timeframe"
+            id="timeframe"
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            className="text-xs"
+          >
+            <option value="" selected disabled className="text-gray-400">
+              Select an option
+            </option>
+            <option value="today">Today</option>
+            <option value="1 week">1 Week</option>
+            <option value="2 weeks">2 Weeks</option>
+            <option value="month">1 Month</option>
+            <option value="year">12 Months</option>
+          </select>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* {cards.map((card, index) => ( */}
         <div
           className={`flex flex-col justify-between p-4 rounded-lg shadow-sm bg-purple-50`}
         >
@@ -59,7 +57,11 @@ const OverviewCards: React.FC<OverviewProps> = ({items}) => {
           </div>
           <div className="mt-4">
             <h2 className="text-2xl font-bold text-gray-800">
-              {items?.users_count}
+              {isLoading ? (
+                <ScaleLoader color="#9D50BB" height={10} />
+              ) : (
+                items?.users_count
+              )}
             </h2>
             <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
               <span>--</span>
@@ -78,7 +80,11 @@ const OverviewCards: React.FC<OverviewProps> = ({items}) => {
           </div>
           <div className="mt-4">
             <h2 className="text-2xl font-bold text-gray-800">
-              {items?.paid_users_count}
+              {isLoading ? (
+                <ScaleLoader color="#9D50BB" height={10} />
+              ) : (
+                items?.paid_users_count
+              )}
             </h2>
             <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
               <span>--</span>
@@ -88,7 +94,8 @@ const OverviewCards: React.FC<OverviewProps> = ({items}) => {
         </div>
 
         <div
-          className={`flex flex-col justify-between p-4 rounded-lg shadow-sm bg-green-50`}
+          className={`flex flex-col justify-between p-4 rounded-lg shadow-sm cursor-pointer bg-green-50`}
+          onClick={() => router.push("/super-admin-survey")}
         >
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-600">
@@ -100,7 +107,11 @@ const OverviewCards: React.FC<OverviewProps> = ({items}) => {
           </div>
           <div className="mt-4">
             <h2 className="text-2xl font-bold text-gray-800">
-              {items?.surveys_count}
+              {isLoading ? (
+                <ScaleLoader color="#9D50BB" height={10} />
+              ) : (
+                items?.surveys_count
+              )}
             </h2>
             <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
               <span>--</span>
@@ -118,14 +129,19 @@ const OverviewCards: React.FC<OverviewProps> = ({items}) => {
             </div>
           </div>
           <div className="mt-4">
-            <h2 className="text-2xl font-bold text-gray-800">{items?.total_visit_count}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {isLoading ? (
+                <ScaleLoader color="#9D50BB" height={10} />
+              ) : (
+                items?.total_visit_count
+              )}
+            </h2>
             <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
               <span>--</span>
               <span>↗</span>
             </div>
           </div>
         </div>
-        {/* ))} */}
       </div>
     </div>
   );

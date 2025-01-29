@@ -569,3 +569,57 @@ input[type="radio"].radio:checked:before {
   background: #333f48 !important;
   height: 2px !important;
 }
+
+.ql-editor {
+  @apply !min-h-40;
+}
+
+.app-button {
+  @apply flex w-full max-w-44 items-center justify-center gap-1 rounded-lg bg-purple-700 p-2 text-sm font-medium text-white  transition-all duration-300 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-65;
+}
+
+.app-horizontal-collapse {
+  display: grid !important;
+  transition: grid-template-rows 500ms !important;
+  transition-duration: 700ms;
+  transition: grid-template-columns 500ms !important; /* Might not be as smooth */
+}
+
+.app-horizontal-collapse-close {
+  grid-template-rows: 0fr !important;
+  grid-template-columns: 0fr !important;
+}
+
+.app-horizontal-collapse-open {
+  grid-template-rows: 1fr !important;
+  grid-template-columns: 1fr !important;
+}
+
+.app-collapse {
+  display: grid !important;
+  transition: grid-template-rows 500ms !important;
+}
+
+.app-collapse-close {
+  grid-template-rows: 0fr !important;
+}
+
+.app-collapse-open {
+  grid-template-rows: 1fr !important;
+}
+
+.custom-break-words {
+  word-break: break-word !important;
+}
+
+.custom-break-characters {
+  word-break: break-all !important;
+}
+
+.app-popover-button {
+  @apply flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-black/90 transition-all duration-300 hover:bg-gray-400/10 hover:text-purple-800;
+}
+
+.app-popover-container {
+  @apply flex w-full flex-col gap-y-3 rounded-lg bg-white px-1 py-2 shadow-popoverShadow;
+}

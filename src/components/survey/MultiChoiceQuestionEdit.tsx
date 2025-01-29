@@ -54,6 +54,7 @@ interface MultiChoiceQuestionEditProps {
   matrixRows?: string[];
   matrixColumns?: string[];
   surveyData?: SurveyData;
+  can_accept_media?: boolean 
 }
 
 const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
