@@ -74,6 +74,7 @@ import { DM_Sans } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
+import Script from "next/script";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -124,6 +125,10 @@ export default function RootLayout({
             alt=""
           />
         </noscript>
+        <script
+          src="https://desk.zoho.com/portal/api/feedbackwidget/962073000000470140?orgId=861220932&displayType=popout"
+          defer
+        />
       </head>
       <body
         className={cn(
@@ -146,6 +151,10 @@ export default function RootLayout({
             </ReduxContext>
           </TanstackProvider>
         </GoogleOAuthProvider>
+        <Script
+          src="https://desk.zoho.com/portal/api/feedbackwidget/962073000000470140?orgId=861220932&displayType=popout"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
