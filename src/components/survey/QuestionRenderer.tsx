@@ -109,6 +109,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     ...(item.options && !item.options.Rows && { options: item.options }),
     ...(item.options?.Rows && { rows: item.options.Rows }),
     ...(item.options?.Columns && { columns: item.options.Columns }),
+    isEdit: true,
   };
 
   return <QuestionComponent key={index} {...commonProps} {...extraProps} />;
