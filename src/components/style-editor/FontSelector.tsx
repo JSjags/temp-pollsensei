@@ -123,7 +123,7 @@ const FontSelector = ({
           </SelectContent>
         </Select>
         <Select
-          value={font?.size.toString()}
+          value={font?.size?.toString() ?? font?.size ?? "16"}
           onValueChange={(value) => setFont({ ...font, size: parseInt(value) })}
         >
           <SelectTrigger className="w-[20%]">

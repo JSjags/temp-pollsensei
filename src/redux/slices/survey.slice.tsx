@@ -83,6 +83,28 @@ const surveySlice = createSlice({
         state.sections.push({ questions: [newQuestion] });
       }
     },
+    updateSurvey: (
+      state,
+      action: PayloadAction<{
+        topic?: string;
+        description?: string;
+        sections?: Section[];
+        theme?: string;
+        header_text?: { name: string; size: number };
+        question_text?: { name: string; size: number };
+        body_text?: { name: string; size: number };
+        color_theme?: string;
+        logo_url?: string;
+        header_url?: string;
+      }>
+    ) => {
+      console.log(action.payload);
+
+      return {
+        ...state,
+        ...action.payload,
+      };
+    },
     saveLogoUrl: (state, action: PayloadAction<string>) => {
       state.logo_url = action.payload;
     },
@@ -166,6 +188,7 @@ export const {
   deleteSection,
   updateSurveyType,
   updateConversationId,
+  updateSurvey,
   setQuestionObject,
   updateDescription,
   resetSurvey,

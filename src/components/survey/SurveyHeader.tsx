@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { sparkly } from "@/assets/images";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface SurveyHeaderProps {
   logoUrl: string | File | null;
@@ -24,13 +25,13 @@ const SurveyHeader: React.FC<SurveyHeaderProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {logoUrl && (
+      {logoUrl && !logoUrl.toString().startsWith("#") && (
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.2 }}
-          className="bg-gradient-to-r from-[#9D50BB] to-[#6E48AA] rounded-lg w-16 my-5 text-white flex items-center flex-col shadow-lg hover:shadow-xl transform"
+          className="bg-gradient-to-r bg-white rounded-lg w-16 my-5 text-white flex items-center flex-col shadow-lg hover:shadow-xl transform"
         >
           <Image
             src={
@@ -47,13 +48,12 @@ const SurveyHeader: React.FC<SurveyHeaderProps> = ({
           />
         </motion.div>
       )}
-
-      {headerUrl && (
+      {headerUrl && !headerUrl.toString().startsWith("#") && (
         <motion.div
           initial={{ scale: 0.95 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.3 }}
-          className="bg-gradient-to-r from-[#9D50BB] to-[#6E48AA] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col shadow-lg overflow-hidden"
+          className="bg-gradient-to-r bg-white rounded-lg w-full my-4 text-white h-24 flex items-center flex-col shadow-lg overflow-hidden"
         >
           <Image
             src={
@@ -81,10 +81,12 @@ const SurveyHeader: React.FC<SurveyHeaderProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-[1.5rem] font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent"
+          className={cn(
+            "text-[1.5rem] font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+            `font-${headerText?.name?.split(" ")?.join("-")?.toLowerCase()}`
+          )}
           style={{
             fontSize: `${headerText?.size}px`,
-            fontFamily: `${headerText?.name}`,
           }}
         >
           {survey?.topic}
@@ -93,10 +95,12 @@ const SurveyHeader: React.FC<SurveyHeaderProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="text-gray-600 leading-relaxed"
+          className={cn(
+            "text-gray-600 leading-relaxed",
+            `font-${bodyText?.name?.split(" ")?.join("-")?.toLowerCase()}`
+          )}
           style={{
             fontSize: `${bodyText?.size}px`,
-            fontFamily: `${bodyText?.name}`,
           }}
         >
           {survey?.description}

@@ -19,6 +19,7 @@ import {
   deleteQuestionFromSection,
   resetSurvey,
   updateSection,
+  updateSurvey,
 } from "@/redux/slices/survey.slice";
 import store from "@/redux/store";
 import PaginationBtn from "@/components/common/PaginationBtn";
@@ -46,6 +47,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/shadcn-input";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
 import type { Question } from "@/types/survey";
+import { SurveyData } from "./EditSubmittedSurvey";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -124,6 +126,19 @@ const EditSurvey = () => {
   const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const [surveyData, setSurveyData] = useState<SurveyData>({
+    topic: "",
+    description: "",
+    sections: [],
+    theme: "",
+    header_text: { name: "", size: 24 },
+    question_text: { name: "", size: 18 },
+    body_text: { name: "", size: 16 },
+    color_theme: "#5B03B2",
+    logo_url: "",
+    header_url: "",
+  });
 
   const handleClearSurvey = () => {
     dispatch(resetSurvey());
@@ -345,6 +360,28 @@ const EditSurvey = () => {
       // Process survey to ensure questions match their type structure
       const processedSurvey = {
         ...updatedSurvey,
+        header_text: {
+          ...updatedSurvey.header_text,
+          size: updatedSurvey.header_text?.size || 24,
+        },
+        body_text: {
+          ...updatedSurvey.body_text,
+          size: updatedSurvey.body_text?.size || 16,
+        },
+        question_text: {
+          ...updatedSurvey.question_text,
+          size: updatedSurvey.question_text?.size || 16,
+        },
+        header_url:
+          typeof surveyData.header_url === "string" &&
+          surveyData.header_url.startsWith("#")
+            ? ""
+            : surveyData.header_url,
+        logo_url:
+          typeof surveyData.logo_url === "string" &&
+          surveyData.logo_url.startsWith("#")
+            ? ""
+            : surveyData.logo_url,
         sections: updatedSurvey.sections.map((section) => ({
           ...section,
           questions: section.questions.map((question: Question) => {
@@ -415,8 +452,9 @@ const EditSurvey = () => {
               case "matrix_checkbox":
                 return {
                   ...baseQuestion,
-                  rows: question.rows,
-                  columns: question.columns,
+                  description: question.description || "Matrix Question",
+                  rows: question.rows || [],
+                  columns: question.columns || [],
                 } as Question;
 
               case "number":
@@ -484,26 +522,18 @@ const EditSurvey = () => {
     }
   }, [progressError, progressIsError]);
 
-  console.log(survey);
-  console.log(survey_id);
-  console.log(questions[currentSection]?.questions);
-  console.log(logoUrl);
-  console.log(createdSurveyData);
-
   return (
-    <div
-      className={`${theme} flex flex-col gap-5 w-full px-0 lg:pl-16 relative`}
-    >
+    <div className={`${theme} flex flex-col gap-5 w-full relative`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
-        <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
+        <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-4 sm:px-0 lg:pl-10">
           {isNewSection ? (
             <>
               <SurveyHeader
-                logoUrl={logoUrl}
-                headerUrl={headerUrl}
+                logoUrl={surveyData.logo_url}
+                headerUrl={surveyData.header_url}
                 survey={survey}
-                headerText={headerText}
-                bodyText={bodyText}
+                headerText={survey.header_text}
+                bodyText={survey.body_text}
               />
 
               {questions[currentSection]?.questions.map(
@@ -636,6 +666,7 @@ const EditSurvey = () => {
                 </motion.div>
               </div>
               <WatermarkBanner className="mb-10" />
+              {/* <CreateNewSection /> */}
             </>
           ) : (
             <CreateNewSection />
@@ -644,7 +675,11 @@ const EditSurvey = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {isSidebar ? <StyleEditor /> : <QuestionType />}
+          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
+          <StyleEditor
+            surveyData={survey as SurveyData}
+            setSurveyData={setSurveyData}
+          />
         </div>
       </div>
 

@@ -106,9 +106,9 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   if (!QuestionComponent) return null;
 
   const extraProps = {
-    ...(item.options && { options: item.options }),
-    ...(item.rows && { rows: item.rows }),
-    ...(item.columns && { columns: item.columns }),
+    ...(item.options && !item.options.Rows && { options: item.options }),
+    ...(item.options?.Rows && { rows: item.options.Rows }),
+    ...(item.options?.Columns && { columns: item.options.Columns }),
   };
 
   return <QuestionComponent key={index} {...commonProps} {...extraProps} />;

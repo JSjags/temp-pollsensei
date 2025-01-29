@@ -67,9 +67,6 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
   );
 
   console.log(surveyData);
-  console.log(headerFont);
-  console.log(bodyFont);
-  console.log(questionFont);
 
   // Update state when props change
   useEffect(() => {
@@ -113,7 +110,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     if (setSurveyData) {
       setSurveyData((prev: any) => ({
         ...prev,
-        color_theme: color,
+        // color_theme: color,
       }));
     }
   }, [color, setSurveyData]);

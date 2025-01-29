@@ -404,7 +404,7 @@ const EditSubmittedSurvey = () => {
         <div className={`flex justify-between gap-6 w-full`}>
           <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
             {surveyData?.logo_url && (
-              <div className="bg-[#9D50BB] rounded w-16 my-5 text-white flex items-center flex-col ">
+              <div className="bg-white rounded w-16 my-5 text-white flex items-center flex-col ">
                 <Image
                   src={surveyData?.logo_url}
                   alt=""
@@ -416,7 +416,7 @@ const EditSubmittedSurvey = () => {
             )}
 
             {surveyData?.header_url && (
-              <div className="bg-[#9D50BB] rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+              <div className="bg-white rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
                 <Image
                   src={surveyData?.header_url}
                   alt=""

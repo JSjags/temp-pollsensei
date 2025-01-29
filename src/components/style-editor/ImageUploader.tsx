@@ -155,7 +155,7 @@ const ImageUploader = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          {!selectedImage || !imageUrl ? (
+          {!selectedImage && !imageUrl ? (
             <div className="text-center flex flex-col items-center gap-2 p-4 w-full">
               <IoMdCloudUpload className="text-4xl text-gray-400" />
               <div className="text-sm text-gray-600">
@@ -213,7 +213,7 @@ const ImageUploader = ({
           </div>
         )}
 
-        {(selectedImage || imageUrl === "" || imageUrl === null) && (
+        {(selectedImage || imageUrl) && (
           <div className="flex flex-wrap gap-2 mt-4">
             <Button
               onClick={handleClear}
@@ -225,7 +225,7 @@ const ImageUploader = ({
               Clear
             </Button>
 
-            {imageUrl && imageUrl !== "" && (
+            {imageUrl && (
               <Button
                 onClick={() => removeMutation()}
                 variant="outline"
