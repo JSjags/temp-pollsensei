@@ -21,6 +21,9 @@ import {
   useLazyShareSurveyQuery,
 } from "@/services/survey.service";
 import { Skeleton } from "../ui/skeleton";
+import DownloadPdfButton from "../reusable/DownloadPdfButton";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios-instance";
 
 interface ShareSurveyProps {
   onClick?: () => void;
@@ -52,6 +55,17 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({ onClick, _id }) => {
     isLoading: shareLoading,
   } = useShareSurveyQuery(params.id || _id);
   const [shareLazyLink, { data: shareLazyData }] = useLazyShareSurveyQuery();
+
+  const {
+    data: surveyData,
+    isSuccess: isSurveyDataSuccess,
+    error,
+  } = useQuery({
+    queryKey: ["survey", params.id || _id],
+    queryFn: async () => {
+      return await axiosInstance.get(`survey/${params.id || _id}`);
+    },
+  });
 
   const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "https://pollsensei.ai";
   const [currentUrl, setCurrentUrl] = useState("");
@@ -191,17 +205,10 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({ onClick, _id }) => {
           {pdfLoading ? (
             <Skeleton className="h-12 w-full" />
           ) : (
-            <Link
-              href={data && isSuccess ? data?.data?.url : ""}
-              target="blank"
-              download
-              className="block"
-            >
-              <button className="w-full flex items-center justify-center p-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium text-lg gap-2">
-                <GoDownload size={20} />
-                Download as PDF
-              </button>
-            </Link>
+            <DownloadPdfButton
+              surveyData={surveyData}
+              isSuccess={isSurveyDataSuccess}
+            />
           )}
         </div>
       </div>

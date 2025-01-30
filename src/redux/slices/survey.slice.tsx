@@ -22,7 +22,7 @@ interface Section {
   questions: Question[];
 }
 
-interface SurveyState {
+export interface SurveyState {
   survey_type: string;
   conversation_id: string;
   topic: string;
