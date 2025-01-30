@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 
 const SeePricing: React.FC = () => {
@@ -17,12 +18,12 @@ const SeePricing: React.FC = () => {
 
         {/* Buttons */}
         <div className="mt- flex justify-center items-center gap-4">
-          <button className="px-6 py-2 bg-purple-600 text-white rounded-md font-semibold hover:bg-purple-700 shadow-lg transition">
+          <Link href={"/register"} className="px-6 py-2 bg-purple-600 text-white rounded-md font-semibold hover:bg-purple-700 shadow-lg transition">
             Sign up for Free
-          </button>
-          <button className="px-6 py-2 text-purple-600 border border-purple-600 rounded-md font-semibold hover:bg-purple-50 transition">
+          </Link>
+          <Link href={"/pricing"} className="px-6 py-2 text-purple-600 border border-purple-600 rounded-md font-semibold hover:bg-purple-50 transition">
             See Pricing
-          </button>
+          </Link>
         </div>
       </div>
     </section>
