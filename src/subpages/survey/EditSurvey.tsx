@@ -472,7 +472,7 @@ const EditSurvey = () => {
                 } as Question;
 
               case "short_text":
-              case "media":
+              // case "media":
               default:
                 return baseQuestion;
             }
