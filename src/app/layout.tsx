@@ -74,6 +74,7 @@ import { DM_Sans } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
+import Script from "next/script";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -115,6 +116,21 @@ export default function RootLayout({
             }}
           />
         )}
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=1295383375247111&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+        <script
+          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `var $zoho=$zoho || {};$zoho.salesiq = $zoho.salesiq || {widgetcode:"siqaf0b431e5699faf2a8cb25ad1bd13007939df411b201343c2e60d7efe686c7c491fd08d388e701b42cbb5f13245147eb", values:{},ready:function(){}};var d=document;s=d.createElement("script");s.type="text/javascript";s.id="zsiqscript";s.defer=true;s.src="https://salesiq.zoho.com/widget";t=d.getElementsByTagName("script")[0];t.parentNode.insertBefore(s,t);d.write("<div id='zsiqwidget'></div>");`,
+          }}
+        />
       </head>
       <body
         className={cn(
