@@ -508,7 +508,7 @@ const EditSurvey = () => {
       };
       SaveProgress();
       toast.error(
-        "Failed to create survey, Don't panic, your progress was saved"
+        "Failed to create survey. Don't panic, your progress was saved."
       );
     }
   }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
@@ -518,7 +518,7 @@ const EditSurvey = () => {
       router.push("/surveys/survey-list");
     }
     if (progressIsError || progressError) {
-      toast.error("Failed to save progress, please try again later");
+      toast.error("Failed to save progress, please try again later.");
     }
   }, [progressError, progressIsError]);
 
