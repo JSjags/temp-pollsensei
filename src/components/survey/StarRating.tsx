@@ -26,7 +26,7 @@ const StarRating = ({
           size={24}
           className={`cursor-pointer ${
             options[index] === selectedValue
-              ? "text-yellow-400"
+              ? "text-purple-600"
               : "text-gray-300"
           }`}
           onClick={() => handleStarClick(index)}

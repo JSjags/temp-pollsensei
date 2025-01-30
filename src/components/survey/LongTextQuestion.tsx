@@ -209,6 +209,7 @@ const ShortTextQuestion: React.FC<ComponentQuestionProps> = ({
           {pathname === "/surveys/edit-survey" ||
           pathname.includes("surveys/question") ||
           pathname.includes("validate-response") ||
+          pathname.includes("validate-res") ||
           pathname.includes("survey-response-upload") ||
           pathname.includes("survey-public-response") ? (
             ""

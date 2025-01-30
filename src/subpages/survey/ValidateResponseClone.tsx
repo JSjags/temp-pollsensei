@@ -17,6 +17,18 @@ import MediaQuestion from "@/components/survey/MediaQuestion";
 import StarRatingQuestion from "@/components/survey/ValidateStarRattings";
 import LikertScaleQuestion from "@/components/survey/ValidateLikertScale";
 
+import AppReactQuill from "@/components/common/forms/AppReactQuill";
+import StarRating from "@/components/survey/StarRating";
+import ResponseFile from "@/components/ui/VoiceRecorder";
+import VoiceRecorder from "@/components/ui/VoiceRecorder";
+import {
+  useGetPublicSurveyByIdQuery,
+  useGetPublicSurveyByShortUrlQuery,
+  useSubmitPublicResponseMutation,
+} from "@/services/survey.service";
+import Link from "next/link";
+import { FaStar } from "react-icons/fa6";
+
 
 interface HeaderText {
   name: string;
@@ -81,6 +93,7 @@ interface OCRResponse {
 }
 
 const ValidateResponse = () => {
+    const [answers, setAnswers] = useState<Record<string, any>>({});
   const params = useParams();
   const dispatch = useDispatch();
   const router = useRouter();
