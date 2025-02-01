@@ -25,31 +25,31 @@ const items = [
     url: "/dashboard",
     icon: "/assets/sidebar/home.svg",
   },
-  {
-    title: "Earn",
-    url: "/earn",
-    icon: "/assets/sidebar/earn.svg",
-  },
-  {
-    title: "Shop",
-    url: "/shop",
-    icon: "/assets/sidebar/shop.svg",
-  },
+  // {
+  //   title: "Earn",
+  //   url: "/earn",
+  //   icon: "/assets/sidebar/earn.svg",
+  // },
+  // {
+  //   title: "Shop",
+  //   url: "/shop",
+  //   icon: "/assets/sidebar/shop.svg",
+  // },
   {
     title: "Survey Board",
     url: "/surveys",
     icon: "/assets/sidebar/survey-board.svg",
   },
-  {
-    title: "Payouts",
-    url: "/payouts",
-    icon: "/assets/sidebar/payouts.svg",
-  },
-  {
-    title: "Referrals",
-    url: "/referrals",
-    icon: "/assets/sidebar/referrals.svg",
-  },
+  // {
+  //   title: "Payouts",
+  //   url: "/payouts",
+  //   icon: "/assets/sidebar/payouts.svg",
+  // },
+  // {
+  //   title: "Referrals",
+  //   url: "/referrals",
+  //   icon: "/assets/sidebar/referrals.svg",
+  // },
   {
     title: "Learning Hub",
     url: "/learning-hub",
@@ -57,17 +57,17 @@ const items = [
   },
   {
     title: "Profile",
-    url: "/profile",
+    url: "/settings/profile",
     icon: "/assets/sidebar/profile.svg",
   },
-  {
-    title: "Survey Settings",
-    url: "/survey-settings",
-    icon: "/assets/sidebar/survey-settings.svg",
-  },
+  // {
+  //   title: "Survey Settings",
+  //   url: "/survey-settings",
+  //   icon: "/assets/sidebar/survey-settings.svg",
+  // },
   {
     title: "Settings",
-    url: "/settings",
+    url: "/settings/account-security",
     icon: "/assets/sidebar/settings.svg",
   },
 ];

@@ -1,7 +1,7 @@
 import { default_header } from "@/assets/images";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface TextStyle {
+export interface TextStyle {
   name: string;
   size: string | number;
 }
