@@ -21,9 +21,15 @@ import {
   useLazyShareSurveyQuery,
 } from "@/services/survey.service";
 import { Skeleton } from "../ui/skeleton";
-import DownloadPdfButton from "../reusable/DownloadPdfButton";
+// import DownloadPdfButton from "../reusable/DownloadPdfButton";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
+import dynamic from "next/dynamic";
+
+const DownloadPdfButton = dynamic(
+  () => import("../reusable/DownloadPdfButton"),
+  { ssr: false }
+);
 
 interface ShareSurveyProps {
   onClick?: () => void;
@@ -205,10 +211,12 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({ onClick, _id }) => {
           {pdfLoading ? (
             <Skeleton className="h-12 w-full" />
           ) : (
-            <DownloadPdfButton
-              surveyData={surveyData}
-              isSuccess={isSurveyDataSuccess}
-            />
+            <>
+              <DownloadPdfButton
+                surveyData={surveyData}
+                isSuccess={isSurveyDataSuccess}
+              />
+            </>
           )}
         </div>
       </div>

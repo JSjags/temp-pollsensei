@@ -1,3 +1,5 @@
+"use client";
+
 import SurveyCard from "@/components/survey/SurveyCard";
 import { Key, useState, useCallback, useRef } from "react";
 import Button from "@/components/common/Button";

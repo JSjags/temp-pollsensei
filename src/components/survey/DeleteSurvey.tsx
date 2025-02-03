@@ -14,12 +14,14 @@ import { AlertTriangle } from "lucide-react";
 interface DeleteSurveyProps {
   onClose: () => void;
   openModal: boolean;
-  onDelete?: () => void;
+  isLoading?: boolean;
+  onDelete: () => Promise<any>;
 }
 
 const DeleteSurvey: React.FC<DeleteSurveyProps> = ({
   onClose,
   openModal,
+  isLoading,
   onDelete,
 }) => {
   return (

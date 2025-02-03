@@ -146,7 +146,8 @@ const SurveyResponses = () => {
         })
       );
       handleToggle();
-      router.push("validate-response");
+      router.push("validate-res");
+      // router.push("validate-response");
     }
 
     if (OCRerror) {

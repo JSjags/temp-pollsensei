@@ -130,7 +130,8 @@ const AnswerSingleChoiceQuestion: React.FC<AnswerSingleChoiceQuestionProps> = ({
           {!(
             pathname === "/surveys/edit-survey" ||
             pathname.includes("survey-response-upload") ||
-            pathname.includes("validate-response")
+            pathname.includes("validate-response") ||
+            pathname.includes("validate-res")
           ) && <p>{questionType}</p>}
         </div>
         {options?.map((option, optionIndex) => (

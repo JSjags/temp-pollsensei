@@ -4,8 +4,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { SurveyState } from "@/redux/slices/survey.slice";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import SurveyPDFDocument from "./SurveyPDFDocument";
+import dynamic from "next/dynamic";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  {
+    ssr: false,
+    loading: () => <p>Loading...</p>,
+  }
+);
 
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   const response = await fetch(url);

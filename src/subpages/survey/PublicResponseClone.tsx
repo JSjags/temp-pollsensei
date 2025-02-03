@@ -53,6 +53,12 @@ interface Question {
   is_required?: boolean;
 }
 
+interface FormErrors {
+  respondent_email?: string;
+  respondent_name?: string;
+  questions: Record<string, string>;
+}
+
 const PublicResponse = () => {
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
@@ -85,17 +91,62 @@ const PublicResponse = () => {
   const [quilValue, setQuilValue] = useState("");
   const [showAudio, setShowAudio] = useState<Record<string, boolean>>({});
 
-  // Add validation state
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // Single source of validation errors
+  const [formErrors, setFormErrors] = useState<FormErrors>({
+    questions: {},
+  });
 
   // Validate single question
   const validateQuestion = (question: any, value: any) => {
     const error = validateQuestionResponse(question, value);
-    setErrors((prev) => ({
-      ...prev,
-      [question.question]: error,
-    }));
-    return !error;
+
+    // Additional validation for matrix questions
+    if (
+      (question.question_type === "matrix_checkbox" ||
+        question.question_type === "matrix_multiple_choice") &&
+      question.is_required
+    ) {
+      const matrixAnswers = value?.matrix_answers || [];
+      const answeredRows = new Set(matrixAnswers.map((ans: any) => ans.row));
+
+      // Check if all rows have at least one selection
+      if (question.rows?.length !== answeredRows.size) {
+        const missingRows = question.rows.filter(
+          (row: string) => !answeredRows.has(row)
+        );
+        const errorMessage = `Please select at least one option for the following rows: ${missingRows.join(
+          ", "
+        )}`;
+        setFormErrors((prev) => ({
+          ...prev,
+          questions: {
+            ...prev.questions,
+            [question.question]: errorMessage,
+          },
+        }));
+        return errorMessage;
+      }
+    }
+
+    if (error) {
+      setFormErrors((prev) => ({
+        ...prev,
+        questions: {
+          ...prev.questions,
+          [question.question]: error,
+        },
+      }));
+    } else {
+      setFormErrors((prev) => {
+        const newQuestionErrors = { ...prev.questions };
+        delete newQuestionErrors[question.question];
+        return {
+          ...prev,
+          questions: newQuestionErrors,
+        };
+      });
+    }
+    return error;
   };
 
   const handleInputFocus = (
@@ -130,18 +181,80 @@ const PublicResponse = () => {
   ) => {
     setAnswers((prev) => {
       const matrixAnswers = prev[key]?.matrix_answers || [];
-      const newAnswer = { row, column };
-      const updatedMatrixAnswers =
-        type === "checkbox"
-          ? [
-              ...matrixAnswers.filter(
+
+      if (type === "radio") {
+        // For matrix_multiple_choice, allow multiple selections per row
+        const existingAnswer = matrixAnswers.find(
+          (ans: any) => ans.row === row && ans.column === column
+        );
+
+        if (existingAnswer) {
+          const newAnswers = {
+            ...prev,
+            [key]: {
+              matrix_answers: matrixAnswers.filter(
                 (ans: any) => !(ans.row === row && ans.column === column)
               ),
-              newAnswer,
-            ]
-          : [...matrixAnswers.filter((ans: any) => ans.row !== row), newAnswer];
-      return { ...prev, [key]: { matrix_answers: updatedMatrixAnswers } };
+            },
+          };
+          validateQuestion(
+            {
+              question: key,
+              question_type: "matrix_multiple_choice",
+              rows: prev[key]?.rows,
+            },
+            newAnswers[key]
+          );
+          return newAnswers;
+        } else {
+          const newAnswers = {
+            ...prev,
+            [key]: {
+              matrix_answers: [...matrixAnswers, { row, column }],
+            },
+          };
+          validateQuestion(
+            {
+              question: key,
+              question_type: "matrix_multiple_choice",
+              rows: prev[key]?.rows,
+            },
+            newAnswers[key]
+          );
+          return newAnswers;
+        }
+      } else {
+        // For matrix_checkbox, ensure only one selection per row
+        const newMatrixAnswers = matrixAnswers.filter(
+          (ans: any) => ans.row !== row
+        );
+        const newAnswers = {
+          ...prev,
+          [key]: {
+            matrix_answers: [...newMatrixAnswers, { row, column }],
+          },
+        };
+        validateQuestion(
+          {
+            question: key,
+            question_type: "matrix_checkbox",
+            rows: prev[key]?.rows,
+          },
+          newAnswers[key]
+        );
+        return newAnswers;
+      }
     });
+  };
+
+  const isMatrixOptionSelected = (
+    question: string,
+    row: string,
+    column: string
+  ) => {
+    return answers[question]?.matrix_answers?.some(
+      (ans: any) => ans.row === row && ans.column === column
+    );
   };
 
   const handleAudioToggle = (question: string) => {
@@ -159,7 +272,7 @@ const PublicResponse = () => {
   console.log(textResponses);
   console.log(selectedOptions);
 
-  console.log(params.id);
+  console.log(psId);
   const question =
     typeof params?.id === "string" && params.id.startsWith("ps-")
       ? psId
@@ -178,57 +291,74 @@ const PublicResponse = () => {
 
     const currentQuestions =
       question?.data?.sections[currentSection]?.questions;
-    let isValid = true;
-
-    console.log(currentQuestions);
-    console.log(answers);
-
-    // Validate all questions in current section
-    currentQuestions?.forEach((quest: any) => {
-      const valid = validateQuestion(quest, answers[quest.question]);
-      if (!valid) isValid = false;
-    });
-
-    if (!isValid) {
-      toast.error("Please fix the validation errors before submitting");
+    if (!currentQuestions) {
+      toast.warning("No questions found in this section");
       return;
     }
 
-    const formattedAnswers = question?.data?.sections[
-      currentSection
-    ]?.questions?.map((question: any) => ({
+    // Format answers for current section
+    const formattedAnswers = currentQuestions.map((question: any) => ({
       question: question.question,
       question_type: question.question_type,
       ...answers[question.question],
     }));
 
+    // Validate required fields
+    const newFormErrors: FormErrors = {
+      questions: {},
+    };
+
     if (
-      !formattedAnswers ||
-      (question?.data?.settings?.collect_email_addresses === true &&
-        respondent_email === "") ||
-      (question?.data?.settings?.collect_name_of_respondents === true &&
-        respondent_name === "")
+      question?.data?.settings?.collect_email_addresses &&
+      !respondent_email
     ) {
-      toast.warning("All fields are required");
-      return null;
+      newFormErrors.respondent_email = "Email is required";
     }
 
+    if (
+      question?.data?.settings?.collect_name_of_respondents &&
+      !respondent_name
+    ) {
+      newFormErrors.respondent_name = "Name is required";
+    }
+
+    // Validate all questions in current section
+    currentQuestions.forEach((quest: any) => {
+      // Only validate if question is required
+      if (quest.is_required) {
+        const error = validateQuestionResponse(quest, answers[quest.question]);
+        if (error) {
+          newFormErrors.questions[quest.question] = error;
+        }
+      }
+    });
+
+    setFormErrors(newFormErrors);
+
+    // Check if there are any errors
+    if (
+      Object.keys(newFormErrors.questions).length > 0 ||
+      newFormErrors.respondent_email ||
+      newFormErrors.respondent_name
+    ) {
+      toast.error("Please fix the validation errors before submitting");
+      return;
+    }
+
+    // Submit response
     const responsePayload = {
       survey_id: question?.data?._id,
-      respondent_name: respondent_name,
-      // respondent_phone: respondent_phone,
-      // respondent_country: respondent_country,
-      respondent_email: respondent_email,
+      respondent_name,
+      respondent_email,
       answers: formattedAnswers,
     };
 
-    console.log(responsePayload);
     try {
       await submitPublicResponse(responsePayload).unwrap();
       toast.success("Your response was saved successfully");
       setSubmitSurveySuccess(true);
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.error(error);
       toast.error("An error occurred while submitting your response");
     }
   };
@@ -618,58 +748,72 @@ const PublicResponse = () => {
               case "matrix_multiple_choice":
               case "matrix_checkbox":
                 return (
-                  <div className="w-full mb-4 bg-[#FAFAFA] p-3 rounded space-y-4">
-                    <div className="grid grid-cols-[1fr_repeat(auto-fit,minmax(80px,1fr))] gap-4">
-                      <div className="font-medium"></div>
-                      {quest.columns?.map((col: any) => (
-                        <div key={col} className="font-medium text-center">
-                          {col}
-                        </div>
-                      ))}
-                    </div>
-
-                    {quest.rows?.map((row: any) => (
-                      <div
-                        key={row}
-                        className="grid grid-cols-[1fr_repeat(auto-fit,minmax(80px,1fr))] gap-4 items-center"
-                      >
-                        <div>{row}</div>
-                        {quest.columns?.map((col: any) => (
-                          <div key={col} className="flex justify-center">
-                            {quest.question_type === "matrix_checkbox" ? (
-                              <Checkbox
-                                id={`${quest.question}-${row}-${col}`}
-                                onCheckedChange={() =>
-                                  handleMatrixAnswerChange(
-                                    quest.question,
-                                    row,
-                                    col,
-                                    "checkbox"
-                                  )
-                                }
-                              />
-                            ) : (
-                              <RadioGroup
-                                name={quest.question + row}
-                                onValueChange={() =>
-                                  handleMatrixAnswerChange(
-                                    quest.question,
-                                    row,
-                                    col,
-                                    "radio"
-                                  )
-                                }
-                              >
-                                <RadioGroupItem
-                                  value={col}
-                                  id={`${quest.question}-${row}-${col}`}
-                                />
-                              </RadioGroup>
-                            )}
-                          </div>
+                  <div className="w-full mb-4 bg-[#FAFAFA] p-6 rounded">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="p-3 text-left font-medium text-gray-600"></th>
+                          {quest.columns?.map((col: any) => (
+                            <th
+                              key={col}
+                              className="p-3 text-center font-medium text-gray-600"
+                            >
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {quest.rows?.map((row: any) => (
+                          <tr key={row} className="border-b border-gray-100">
+                            <td className="p-3 text-gray-700">{row}</td>
+                            {quest.columns?.map((col: any) => (
+                              <td key={col} className="p-3">
+                                <div className="flex justify-center">
+                                  {quest.question_type === "matrix_checkbox" ? (
+                                    <Checkbox
+                                      id={`${quest.question}-${row}-${col}`}
+                                      checked={isMatrixOptionSelected(
+                                        quest.question,
+                                        row,
+                                        col
+                                      )}
+                                      onCheckedChange={() =>
+                                        handleMatrixAnswerChange(
+                                          quest.question,
+                                          row,
+                                          col,
+                                          "checkbox"
+                                        )
+                                      }
+                                      className="h-5 w-5"
+                                    />
+                                  ) : (
+                                    <Checkbox
+                                      id={`${quest.question}-${row}-${col}`}
+                                      checked={isMatrixOptionSelected(
+                                        quest.question,
+                                        row,
+                                        col
+                                      )}
+                                      onCheckedChange={() =>
+                                        handleMatrixAnswerChange(
+                                          quest.question,
+                                          row,
+                                          col,
+                                          "radio"
+                                        )
+                                      }
+                                      className="h-5 w-5"
+                                    />
+                                  )}
+                                </div>
+                              </td>
+                            ))}
+                          </tr>
                         ))}
-                      </div>
-                    ))}
+                      </tbody>
+                    </table>
                   </div>
                 );
 
@@ -735,13 +879,13 @@ const PublicResponse = () => {
           })()}
         </motion.div>
 
-        {errors[quest.question] && (
+        {formErrors.questions[quest.question] && (
           <motion.p
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-red-500 text-sm mt-2 px-4 lg:pl-10"
           >
-            {errors[quest.question]}
+            {formErrors.questions[quest.question]}
           </motion.p>
         )}
       </motion.div>

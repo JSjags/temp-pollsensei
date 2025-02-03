@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import React from "react";
 
 const SeePricing: React.FC = () => {
@@ -47,18 +48,20 @@ const SeePricing: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-6"
         >
-          <button
+          <Link
+            href={"/register"}
             onClick={() => router.push("/register")}
             className="px-8 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 shadow-lg hover:shadow-purple-500/30 transition-all duration-300 transform hover:-translate-y-1"
           >
             Sign up for Free
-          </button>
-          <button
+          </Link>
+          <Link
+            href={"/pricing"}
             onClick={() => router.push("/pricing")}
             className="px-8 py-3 text-purple-600 border-2 border-purple-600 rounded-xl font-semibold hover:bg-purple-50 shadow-lg hover:shadow-purple-500/20 transition-all duration-300 transform hover:-translate-y-1"
           >
             See Pricing
-          </button>
+          </Link>
         </motion.div>
       </div>
     </section>

@@ -141,7 +141,10 @@ const RegisterPage = () => {
       const accessToken = response.access_token;
 
       try {
-        await gooleRegister({ code: accessToken }).unwrap();
+        await gooleRegister({
+          code: accessToken,
+          referral_code: refCode,
+        }).unwrap();
         toast.success("Register success");
         router.push("/login");
       } catch (err: any) {
