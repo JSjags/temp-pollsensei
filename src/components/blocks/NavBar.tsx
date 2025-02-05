@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import logo from "@/assets/auth/logo.svg"; // Adjust the path as needed
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useMotionValueEvent,
+} from "framer-motion";
 import { useIsLoggedIn } from "@/lib/helpers";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { pollsensei_new_logo } from "@/assets/images";
 import { usePathname, useRouter } from "next/navigation";
-// import { ThemeToggle } from "../theme-toggle";
+import { cn } from "@/lib/utils";
 
 const NavBar = ({
   scrollToSection,
@@ -16,179 +20,182 @@ const NavBar = ({
   scrollToSection?: (id: string) => void;
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { isLoggedIn } = useIsLoggedIn({ message: "" });
   const state = useSelector((state: RootState) => state.user);
   const pathname = usePathname();
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   const router = useRouter();
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 50);
+  });
+
+  const navItems = ["Benefits", "Features", "Pricing", "Resource Hub", "FAQs"];
 
   const handleLinkClick = (item: string) => {
     const isLandingPage = pathname === "/";
-
     if (item === "Features" || item === "FAQs" || item === "Benefits") {
       const sectionId = item.toLowerCase();
-
       if (isLandingPage) {
-        // If already on the landing page, scroll to the section
-        scrollToSection ? scrollToSection(sectionId) : null;
+        scrollToSection?.(sectionId);
       } else {
-        // If not on the landing page, navigate to the landing page with a query parameter
         router.push(`/?section=${sectionId}`);
       }
     } else {
-      // For other links, navigate normally
       router.push(`/${item.toLowerCase().replace(" ", "-")}`);
     }
+    setIsSidebarOpen(false);
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow-md bg-white">
-      <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div className="flex gap-5 items-center">
-          {/* Logo */}
-          <Link
-            href={"/"}
-            className="flex items-center gap-2 cursor-pointer lg:mr-16"
-          >
-            <Image
-              src={pollsensei_new_logo}
-              alt="Logo"
-              className="h-8 w-auto"
-            />
-          </Link>
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className={cn(
+        "sticky top-0 z-50 transition-all duration-300",
+        isScrolled ? "bg-white/80 backdrop-blur-lg shadow-lg" : "bg-white"
+      )}
+    >
+      <nav className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src={pollsensei_new_logo}
+                  alt="Logo"
+                  className="h-8 w-auto"
+                  priority
+                />
+              </Link>
+            </motion.div>
 
-          {/* Desktop Navigation */}
-          {/* <div className="hidden md:flex items-center space-x-8">
-          {[ "Benefits" , "Features", "Pricing", "Resource Hub", "FAQs"].map((item) => (
-            <Link
-              key={item}
-              href={`/${item.toLowerCase().replace(" ", "-")}`}
-              className="text-gray-600 hover:text-[#5B03B2] relative group"
-            >
-              {item}
-              <span className="absolute left-0 bottom-0 w-full h-0.5 bg-[#5B03B2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-            </Link>
-          ))}
-        </div> */}
-
-          <div className="hidden md:flex items-center space-x-8">
-            {["Benefits", "Features", "Pricing", "Resource Hub", "FAQs"].map(
-              (item) => (
-                <span
+            <div className="hidden md:flex items-center space-x-8">
+              {navItems.map((item) => (
+                <motion.span
                   key={item}
                   onClick={() => handleLinkClick(item)}
-                  className="text-gray-600 hover:text-[#5B03B2] relative group cursor-pointer"
+                  className="relative cursor-pointer group"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  {item}
-                  <span className="absolute left-0 bottom-0 w-full h-0.5 bg-[#5B03B2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                </span>
-              )
+                  <span className="text-gray-600 group-hover:text-[#5B03B2] transition-colors duration-300">
+                    {item}
+                  </span>
+                  <motion.span
+                    className="absolute -bottom-1 left-0 w-full h-0.5 bg-[#5B03B2]"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </motion.span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {(!isLoggedIn ||
+              !state.user ||
+              !state.access_token ||
+              !state.token) && (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link
+                  href="/login"
+                  className="text-gray-600 hover:text-[#5B03B2] transition-colors duration-300"
+                >
+                  Login
+                </Link>
+              </motion.div>
             )}
+
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="hidden md:block"
+            >
+              <Link
+                href={
+                  !isLoggedIn ||
+                  !state.user ||
+                  !state.access_token ||
+                  !state.token
+                    ? "/demo/create-survey"
+                    : "/dashboard"
+                }
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-6 py-2 rounded-full hover:bg-[#4A0291] transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                {!isLoggedIn ||
+                !state.user ||
+                !state.access_token ||
+                !state.token
+                  ? "Try for Free"
+                  : "Dashboard"}
+              </Link>
+            </motion.div>
+
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="md:hidden"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </motion.button>
           </div>
         </div>
-
-        {/* Mobile Menu Button */}
-        <div className="flex gap-5 items-center">
-          {/* Login Button */}
-          {!isLoggedIn ||
-          state.user === null ||
-          state.access_token === null ||
-          state.token === null ? (
-            <Link
-              href="/login"
-              className="text-gray-600 hover:text-[#5B03B2] transition-colors duration-300"
-            >
-              Login
-            </Link>
-          ) : null}
-          {!isLoggedIn ||
-          state.user === null ||
-          state.access_token === null ||
-          state.token === null ? (
-            <div className="hidden md:block">
-              <Link
-                href="/demo/create-survey"
-                className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-md"
-              >
-                Try for Free
-              </Link>
-            </div>
-          ) : (
-            <div className="hidden md:block">
-              <Link
-                href="/dashboard"
-                className="bg-[#5B03B2] text-white px-4 py-2 hover:bg-[#4A0291] transition-colors duration-300 rounded-md"
-              >
-                Dashboard
-              </Link>
-            </div>
-          )}
-          {/* <ThemeToggle /> */}
-        </div>
-        <button className="md:hidden" onClick={toggleSidebar}>
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
       </nav>
 
-      {/* Mobile Sidebar */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
             className="fixed inset-0 z-50 md:hidden"
           >
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
-              onClick={toggleSidebar}
-            ></motion.div>
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsSidebarOpen(false)}
+            />
 
-            {/* Sidebar */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "tween", duration: 0.3 }}
-              className="fixed right-0 top-0 bottom-0 w-64 bg-white shadow-xl"
+              transition={{ type: "spring", damping: 20 }}
+              className="fixed right-0 top-0 bottom-0 w-72 bg-white shadow-2xl"
             >
-              <div className="p-4 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-8">
-                  <Link href={"/"} className="flex items-center gap-2">
-                    <Image src={logo} alt="Logo" className="h-8 w-auto" />
-                    <h2 className="text-lg text-[#5B03B2] bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 font-semibold">
-                      PollSensei
-                    </h2>
-                  </Link>
-                  <button className="rounded-full" onClick={toggleSidebar}>
+              <div className="p-6 flex flex-col h-full">
+                <div className="flex justify-end mb-8">
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setIsSidebarOpen(false)}
+                  >
                     <svg
                       className="w-6 h-6"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         strokeLinecap="round"
@@ -197,36 +204,57 @@ const NavBar = ({
                         d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
-                  </button>
+                  </motion.button>
                 </div>
-                <div className="flex flex-col space-y-4">
-                  {["About Us", "Benefits", "Features", "Pricing", "FAQs"].map(
-                    (item) => (
-                      <Link
-                        key={item}
-                        href={`/${item.toLowerCase().replace(" ", "-")}`}
-                        className="text-gray-600 hover:text-[#5B03B2] py-2 relative group w-fit"
-                        onClick={toggleSidebar}
+
+                <div className="flex flex-col space-y-6">
+                  {navItems.map((item) => (
+                    <motion.div
+                      key={item}
+                      whileHover={{ x: 10 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span
+                        onClick={() => handleLinkClick(item)}
+                        className="text-gray-600 hover:text-[#5B03B2] text-lg font-medium cursor-pointer"
                       >
                         {item}
-                        <span className="absolute left-0 bottom-0 w-full h-0.5 bg-[#5B03B2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                      </Link>
-                    )
-                  )}
-                  <Link
-                    href="/login"
-                    className="bg-[#5B03B2] text-white px-4 py-2 rounded-full hover:bg-[#4A0291] transition-colors duration-300 text-center"
-                    onClick={toggleSidebar}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="mt-auto">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    Login
-                  </Link>
+                    <Link
+                      href={
+                        !isLoggedIn ||
+                        !state.user ||
+                        !state.access_token ||
+                        !state.token
+                          ? "/demo/create-survey"
+                          : "/dashboard"
+                      }
+                      className="block w-full bg-[#5B03B2] text-white px-6 py-3 rounded-full text-center font-medium hover:bg-[#4A0291] transition-all duration-300 shadow-lg"
+                    >
+                      {!isLoggedIn ||
+                      !state.user ||
+                      !state.access_token ||
+                      !state.token
+                        ? "Try for Free"
+                        : "Dashboard"}
+                    </Link>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 };
 

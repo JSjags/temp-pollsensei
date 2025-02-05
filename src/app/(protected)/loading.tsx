@@ -9,7 +9,7 @@ const Loading: React.FC = () => {
       <style jsx>{`
         .loading-container {
           width: 100%;
-          height: 4px;
+          height: 2px;
           background-color: #ffffff;
           overflow: hidden;
         }

@@ -9,6 +9,22 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    searchSurveys: builder.query({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params.search_term)
+          queryParams.set("search_term", params.search_term);
+        if (params.status) queryParams.set("status", params.status);
+        queryParams.set("page", params.page.toString());
+        queryParams.set("page_size", params.page_size.toString());
+
+        return {
+          url: `survey/search?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+    }),
     createAiSurvey: builder.mutation({
       // query: (body) => ({
       //   url: "survey/ai/generate-questions",
@@ -263,6 +279,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+
     validateIndividualResponse: builder.query({
       query: ({
         countries,
@@ -328,11 +345,18 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    getReviewQuestions: builder.query({
+      query: () => ({
+        url: "survey/review-questions",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
 export const {
   useFetchSurveysQuery,
+  useSearchSurveysQuery,
   useCreateSurveyMutation,
   useCreateAiSurveyMutation,
   useGenerateSingleSurveyMutation,
@@ -355,8 +379,8 @@ export const {
   useGetSurveySummaryQuery,
   useGetRespondentNameQuery,
   useValidateSurveyResponseQuery,
-  useValidateIndividualResponseQuery,
   useResponseValidateIndividualQuery,
+  useValidateIndividualResponseQuery,
   useCloseSurveyStatusMutation,
   useSurveySettingsQuery,
   useEditSurveySettingsMutation,
@@ -371,4 +395,5 @@ export const {
   useLazyDownloadAllResponseQuery,
   useLazyDownloadSingleResponseQuery,
   useUploadResponseFileMutation,
+  useGetReviewQuestionsQuery,
 } = surveyApiSlice;

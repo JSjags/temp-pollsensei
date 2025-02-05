@@ -90,80 +90,75 @@ export default function Component() {
   }, [data]);
 
   return data?.data ? (
-    <div className="p-8">
+    <div className="p-0 md:p-8">
       <Card className="border-none w-full">
-        <CardHeader>
-          <CardTitle className="text-2xl md:text-3xl font-bold">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-xl md:text-2xl lg:text-3xl font-bold">
             Notifications
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm md:text-base">
             Be the first to get the scoop on everything happening here. Turn it
             off anytime.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div className="space-y-0.5">
                 <Label className="text-base">Email Notification</Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Get email notifications on what's happening right now. You can
                   turn it off at any time
                 </p>
               </div>
-              {/* <Switch
-                checked={emailEnabled}
-                onCheckedChange={setEmailEnabled}
-                className="data-[state=checked]:bg-purple-600"
-              /> */}
             </div>
-            <div className="space-y-4 ml-1">
-              <div className="flex items-start space-x-4">
+            <div className="space-y-4 ml-0 md:ml-1">
+              <div className="flex flex-col md:flex-row items-start gap-3 md:space-x-4">
                 <Switch
                   checked={settings.news_and_updates}
                   onCheckedChange={() =>
                     handleSettingChange("news_and_updates")
                   }
                   disabled={!emailEnabled}
-                  className="data-[state=checked]:bg-purple-600"
+                  className="data-[state=checked]:bg-purple-600 mt-1"
                 />
                 <div className="space-y-1">
                   <Label>News and Update settings</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Get notified about cool, new features and sleek updates on
                     PollSensei
                   </p>
                 </div>
               </div>
-              <div className="flex items-start space-x-4">
+              <div className="flex flex-col md:flex-row items-start gap-3 md:space-x-4">
                 <Switch
                   checked={settings.tips_and_tutorials}
                   onCheckedChange={() =>
                     handleSettingChange("tips_and_tutorials")
                   }
                   disabled={!emailEnabled}
-                  className="data-[state=checked]:bg-purple-600"
+                  className="data-[state=checked]:bg-purple-600 mt-1"
                 />
                 <div className="space-y-1">
                   <Label>Tips and Tutorials</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Level up your survey game with expertly curated tips and
                     tutorials made just for you
                   </p>
                 </div>
               </div>
-              <div className="flex items-start space-x-4">
+              <div className="flex flex-col md:flex-row items-start gap-3 md:space-x-4">
                 <Switch
                   checked={settings.offers_and_promotions}
                   onCheckedChange={() =>
                     handleSettingChange("offers_and_promotions")
                   }
                   disabled={!emailEnabled}
-                  className="data-[state=checked]:bg-purple-600"
+                  className="data-[state=checked]:bg-purple-600 mt-1"
                 />
                 <div className="space-y-1">
                   <Label>Offers and Promotions</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Everyone loves a good deal. Stay on top of juicy offers and
                     promotions on PollSensei
                   </p>
@@ -173,63 +168,58 @@ export default function Component() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div className="space-y-0.5">
                 <Label className="text-base">More Activity</Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Never miss another direct message! Receive real time email
                   notifications from PollSensei
                 </p>
               </div>
-              {/* <Switch
-                checked={activityEnabled}
-                onCheckedChange={setActivityEnabled}
-                className="data-[state=checked]:bg-purple-600"
-              /> */}
             </div>
-            <div className="space-y-4 ml-1">
-              <div className="flex items-start space-x-4">
+            <div className="space-y-4 ml-0 md:ml-1">
+              <div className="flex flex-col md:flex-row items-start gap-3 md:space-x-4">
                 <Switch
                   checked={settings.all_reminders_and_activities}
                   onCheckedChange={() =>
                     handleSettingChange("all_reminders_and_activities")
                   }
                   disabled={!activityEnabled}
-                  className="data-[state=checked]:bg-purple-600"
+                  className="data-[state=checked]:bg-purple-600 mt-1"
                 />
                 <div className="space-y-1">
                   <Label>All Reminders and Activities</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Notify me about all recent system activities and reminders
                   </p>
                 </div>
               </div>
-              <div className="flex items-start space-x-4">
+              <div className="flex flex-col md:flex-row items-start gap-3 md:space-x-4">
                 <Switch
                   checked={settings.activities_only}
                   onCheckedChange={() => handleSettingChange("activities_only")}
                   disabled={!activityEnabled}
-                  className="data-[state=checked]:bg-purple-600"
+                  className="data-[state=checked]:bg-purple-600 mt-1"
                 />
                 <div className="space-y-1">
                   <Label>Activities only</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Only notify me about latest activity updates
                   </p>
                 </div>
               </div>
-              <div className="flex items-start space-x-4">
+              <div className="flex flex-col md:flex-row items-start gap-3 md:space-x-4">
                 <Switch
                   checked={settings.important_reminder_only}
                   onCheckedChange={() =>
                     handleSettingChange("important_reminder_only")
                   }
                   disabled={!activityEnabled}
-                  className="data-[state=checked]:bg-purple-600"
+                  className="data-[state=checked]:bg-purple-600 mt-1"
                 />
                 <div className="space-y-1">
                   <Label>Important Reminder Only</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs md:text-sm text-muted-foreground">
                     Only notify me about high priority activities and reminders
                   </p>
                 </div>
@@ -238,7 +228,7 @@ export default function Component() {
           </div>
 
           <Button
-            className="w-full auth-btn max-w-sm"
+            className="w-full auth-btn max-w-full md:max-w-sm mx-auto"
             onClick={handleUpdateNotifications}
             disabled={updateNotificationMutation.isPending}
           >

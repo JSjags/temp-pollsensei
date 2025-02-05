@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ClipLoader } from "react-spinners";
+import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
@@ -60,11 +60,64 @@ const StateLoader2: React.FC<StateLoader2Props> = ({
   }, [count, router]);
 
   return (
-    <div className="flex justify-center items-center max-h-screen">
-      <div className="text-center">
-        <ClipLoader size={50} />
-        <p className="text-[1rem]">Preparing your dashboard...</p>
-      </div>
+    <div className="flex flex-col justify-center items-center max-h-screen gap-8">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative w-20 h-20"
+      >
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+        >
+          <svg className="w-full h-full" viewBox="0 0 50 50">
+            <circle
+              cx="25"
+              cy="25"
+              r="15"
+              fill="none"
+              strokeWidth="2"
+              stroke="url(#gradient)"
+              strokeLinecap="round"
+              strokeDasharray="80"
+              style={{
+                animation: "dash 2s ease-in-out infinite",
+              }}
+            />
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#5B03B2" />
+                <stop offset="100%" stopColor="#9D50BB" />
+              </linearGradient>
+            </defs>
+            <style>
+              {`
+                @keyframes dash {
+                  0% {
+                    stroke-dashoffset: 80;
+                  }
+                  50% {
+                    stroke-dashoffset: 0;
+                  }
+                  100% {
+                    stroke-dashoffset: -80;
+                  }
+                }
+              `}
+            </style>
+          </svg>
+        </motion.div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="text-center"
+      >
+        <p className="text-lg font-medium">Preparing your dashboard...</p>
+      </motion.div>
     </div>
   );
 };

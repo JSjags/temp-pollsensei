@@ -1,13 +1,22 @@
 import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { BsExclamation } from "react-icons/bs";
-import { Check } from "lucide-react";
+import { Check, GripVertical } from "lucide-react";
 import { Switch } from "../ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface DropdownQuestionProps {
   question: string;
@@ -27,7 +36,9 @@ interface DropdownQuestionProps {
   canUseAI?: boolean;
   status?: string;
   is_required?: boolean;
+  isEdit?: boolean;
   setIsRequired?: (value: boolean) => void;
+  surveyData?: SurveyData;
 }
 
 const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
@@ -43,7 +54,9 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
   canUseAI = false,
   status,
   is_required,
+  isEdit = false,
   setIsRequired,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -53,15 +66,12 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  // State to store the selected option
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string>("");
 
-  // Handle option selection
-  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = e.target.value;
-    setSelectedOption(selectedValue);
+  const handleOptionChange = (value: string) => {
+    setSelectedOption(value);
     if (onChange) {
-      onChange(selectedValue);
+      onChange(value);
     }
   };
 
@@ -69,14 +79,14 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1.5 mr-3">
+            <Check strokeWidth={1.5} className="text-white w-4 h-4" />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1.5 mr-3">
+            <BsExclamation className="text-white w-4 h-4" />
           </div>
         );
       default:
@@ -86,142 +96,125 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
 
   return (
     <div
-      className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: `${questionText?.name}`,
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <Image
-        src={draggable}
-        alt="draggable icon"
-        className={
-          pathname === "/surveys/create-survey" ? "visible" : "invisible"
-        }
-      />
-      <div className="w-full">
-        <div className="flex justify-between w-full items-center">
-          <h3 className="text-lg font-semibold text-start">
-            <div className="group flex justify-between gap-2 items-start">
-              <p>
-                <span>{index}. </span> {question}
-                {is_required === true && (
-                  <span className="text-2xl ml-2 text-red-500">*</span>
-                )}
-              </p>
-              {
-               !pathname.includes("survey-public-respons") &&
-               <PollsenseiTriggerButton
-                 key={index}
-                 imageUrl={stars}
-                 tooltipText="Rephrase question"
-                 className={"group-hover:inline-block hidden"}
-                 triggerType="rephrase"
-                 question={question}
-                 optionType={questionType}
-                 options={options}
-                 setEditId={setEditId}
-                 onSave={onSave!}
-                 index={index}
-               />
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
 
-              }
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
+                  )}
+
+                  {!pathname.includes("survey-public-response") && isEdit && (
+                    <PollsenseiTriggerButton
+                      key={index}
+                      imageUrl={stars}
+                      tooltipText="Rephrase question"
+                      className="hidden group-hover:inline-block transition transform hover:scale-110"
+                      triggerType="rephrase"
+                      question={question}
+                      optionType={questionType}
+                      options={options}
+                      setEditId={setEditId}
+                      onSave={onSave!}
+                      index={index}
+                    />
+                  )}
+                </div>
+              </h3>
+
+              <div className="mt-4">
+                <Select
+                  value={selectedOption}
+                  onValueChange={handleOptionChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {options?.map((option, idx) => (
+                      <SelectItem key={idx} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </h3>
-        </div>
-
-        {/* Dropdown for Single Choice Options */}
-        <div className="my-2">
-          <select
-            value={selectedOption || ""}
-            onChange={handleOptionChange}
-            className="w-full p-2 border rounded-md"
-            required={is_required}
-            style={{ borderColor: colorTheme }}
-          >
-            <option value="" disabled>
-              Select an option
-            </option>
-            {options?.map((option, optionIndex) => (
-              <option key={optionIndex} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {pathname === "/surveys/edit-survey"  && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
           </div>
-        )}
 
-        { pathname.includes("/edit-submitted-survey") && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-{pathname === "/surveys/add-question-m" && (
-          <div className="flex justify-end gap-4">
-           
-            <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        {pathname.includes("edit-survey") && (
-          <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB]"
-            />
-          </div>
-        )}
-        <div className="flex justify-end">
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "single_choice" ? "Single Choice" : ""}</p>
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey")) && (
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
+
+          {pathname === "/surveys/add-question-m" && (
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
+                onClick={DeleteQuestion}
+              >
+                Delete
+              </button>
+            </div>
+          )}
+
+          {pathname.includes("edit-survey") && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
+              <Switch
+                checked={is_required}
+                onCheckedChange={
+                  setIsRequired && ((checked) => setIsRequired(checked))
+                }
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            {!pathname.includes("edit-survey") &&
+              !pathname.includes("surveys/question") && (
+                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+                  {(questionType === "single_choice" ||
+                    questionType === "drop_down") && (
+                    <span className="flex items-center gap-1 text-xs">
+                      <Check className="text-[#9D50BB] w-3 h-3" />
+                      Single Choice
+                    </span>
+                  )}
+                </p>
+              )}
+          </div>
         </div>
+
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus(status)}</div>
+        )}
       </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
-      )}
     </div>
   );
 };

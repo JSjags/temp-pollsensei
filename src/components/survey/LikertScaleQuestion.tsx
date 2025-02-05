@@ -1,13 +1,17 @@
 import { draggable, stars } from "@/assets/images";
-import Image from "next/image";
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
-import { Check } from "lucide-react";
+import { Check, GripVertical } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
 import { Switch } from "../ui/switch";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { BiSliderAlt } from "react-icons/bi";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface LikertScaleQuestionProps {
   question: string;
@@ -20,6 +24,7 @@ interface LikertScaleQuestionProps {
   canUseAI?: boolean;
   status?: string;
   is_required?: boolean;
+  isEdit?: boolean;
   setIsRequired?: (value: boolean) => void;
   setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
   onSave?: (
@@ -28,6 +33,7 @@ interface LikertScaleQuestionProps {
     updatedQuestionType: string,
     aiEditIndex?: number
   ) => void;
+  surveyData?: SurveyData;
 }
 
 const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
@@ -43,24 +49,25 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
   canUseAI = false,
   status,
   is_required,
+  isEdit = false,
   setIsRequired,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
-    (state: RootState) => state?.survey?.question_text
+    (state: RootState) =>
+      surveyData?.question_text ?? state?.survey?.question_text
   );
   const colorTheme = useSelector(
     (state: RootState) => state?.survey?.color_theme
   );
 
-
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
-  const handleScaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedValue = e.target.value;
-    setSelectedOption(selectedValue);
+  const handleScaleChange = (value: string) => {
+    setSelectedOption(value);
     if (onChange) {
-      onChange(selectedValue);
+      onChange(value);
     }
   };
 
@@ -68,158 +75,144 @@ const LikertScaleQuestion: React.FC<LikertScaleQuestionProps> = ({
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1.5 mr-3">
+            <Check strokeWidth={1.5} className="text-white w-4 h-4" />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1.5 mr-3">
+            <BsExclamation className="text-white w-4 h-4" />
           </div>
         );
-
       default:
         return null;
     }
   };
 
   return (
-    <div className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3" 
-    style={{
-      fontFamily: `${questionText?.name}`,
-      fontSize: `${questionText?.size}px`,
-    }} 
-    >
-      <Image
-        src={draggable}
-        alt="draggable icon"
-        className={
-          pathname === "/surveys/create-survey" ? "visible" : "invisible"
+    <div
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
         }
-      />
-      <div className="w-full">
-        <div className="flex justify-between w-full items-center">
-          <h3 className="group flex text-lg font-semibold text-start">
-            <p>
-              <span>{index}. </span> {question}
-              {is_required === true && (
-                <span className="text-2xl ml-2 text-red-500">*</span>
-              )}
-            </p>
-            {
-               !pathname.includes("survey-public-respons") &&
-            <PollsenseiTriggerButton
-              key={index}
-              imageUrl={stars}
-              tooltipText="Rephrase question"
-              className={"group-hover:inline-block hidden"}
-              triggerType="rephrase"
-              question={question}
-              optionType={questionType!}
-              options={options}
-              setEditId={setEditId}
-              onSave={onSave!}
-              index={index!}
-            />
-            }
-          </h3>
-          {/* {pathname === "/surveys/edit-survey" ? "" : <p>{questionType}</p>} */}
-        </div>
-        <div className="flex justify- gap-5 my-2">
-          {options?.map((option, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <input
-                type="radio"
-                id={`likert-${index}`}
-                name={question}
-                className="text-[#5B03B2]"
-                onChange={handleScaleChange}
-                checked={selectedOption === option}
-                value={option}
-                required={is_required}
-              />
-              <label htmlFor={`likert-${index}`} className="mt-1">
-                {option}
-              </label>
-            </div>
-          ))}
-        </div>
-        {pathname === "/surveys/edit-survey" && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        {pathname.includes("/edit-submitted-survey") && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-
-{pathname === "/surveys/add-question-m" && (
-          <div className="flex justify-end gap-4">
-          
-            <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-
-     
-            {pathname.includes("edit-survey") && (
-          <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB] "
-            />
-          </div>
-        )}
-        <div className="flex justify-end">
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "likert_scale" ? "Likert Scale" : ""}</p>
-          )}
-        </div>
-      </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
       )}
+      style={{
+        fontSize: `${questionText?.size}px`,
+      }}
+    >
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
+
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
+                  )}
+
+                  {!pathname.includes("survey-public-response") && isEdit && (
+                    <PollsenseiTriggerButton
+                      key={index}
+                      imageUrl={stars}
+                      tooltipText="Rephrase question"
+                      className="hidden group-hover:inline-block transition transform hover:scale-110"
+                      triggerType="rephrase"
+                      question={question}
+                      optionType={questionType!}
+                      options={options}
+                      setEditId={setEditId}
+                      onSave={onSave!}
+                      index={index!}
+                    />
+                  )}
+                </div>
+              </h3>
+
+              <div className="flex justify-between gap-5 mt-4">
+                <RadioGroup
+                  onValueChange={handleScaleChange}
+                  value={selectedOption || undefined}
+                  className="flex justify-between gap-5 w-full"
+                >
+                  {options?.map((option, idx) => (
+                    <div key={idx} className="flex flex-col items-center">
+                      <RadioGroupItem
+                        value={option}
+                        id={`likert-${idx}`}
+                        className="accent-[#5B03B2]"
+                      />
+                      <label htmlFor={`likert-${idx}`} className="mt-1 text-sm">
+                        {option}
+                      </label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            </div>
+          </div>
+
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey")) && (
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
+          )}
+
+          {pathname === "/surveys/add-question-m" && (
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
+                onClick={DeleteQuestion}
+              >
+                Delete
+              </button>
+            </div>
+          )}
+
+          {pathname.includes("edit-survey") && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
+              <Switch
+                checked={is_required}
+                onCheckedChange={
+                  setIsRequired && ((checked) => setIsRequired(checked))
+                }
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            {!pathname.includes("edit-survey") &&
+              !pathname.includes("surveys/question") && (
+                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+                  {questionType === "likert_scale" && (
+                    <span className="flex items-center gap-1 text-xs">
+                      <BiSliderAlt className="text-[#9D50BB] w-4 h-4" />
+                      Likert Scale
+                    </span>
+                  )}
+                </p>
+              )}
+          </div>
+        </div>
+
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus(status)}</div>
+        )}
+      </div>
     </div>
   );
 };

@@ -53,7 +53,7 @@ const SettingsSidebar: React.FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative max-w-[100vw]">
       <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#F4F4F4] to-transparent pointer-events-none z-10 lg:hidden"></div>
       <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#F4F4F4] to-transparent pointer-events-none z-10 lg:hidden"></div>
       <nav className="flex overflow-x-auto lg:block lg:w-[13rem] lg:overflow-x-visible hide-scrollbar px-4">

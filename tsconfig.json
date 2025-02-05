@@ -27,7 +27,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/services/dashboard.service.js",
-    "src/app/(protected)/surveys/survey-list"
+    "src/app/(protected)/(survey-board)/surveys/survey-list"
   ],
   "exclude": ["node_modules"]
 }

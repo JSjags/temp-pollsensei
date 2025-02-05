@@ -1,6 +1,12 @@
 "use client";
 
-import CreatedSurveysPage from "@/subpages/survey/CreatedSurveysPage";
+import dynamic from "next/dynamic";
+
+// Dynamically import CreatedSurveysPage with SSR disabled
+const CreatedSurveysPage = dynamic(
+  () => import("@/subpages/survey/CreatedSurveysPage"),
+  { ssr: false }
+);
 
 type Props = {};
 

@@ -55,17 +55,19 @@ const AccountSecurityPage = () => {
   }, [resetCodeQuery.isSuccess]);
 
   return (
-    <div className="px-[2rem] lg:px-[4.4rem] flex flex-col py-[3.88rem]">
-      <div className="lg:flex justify-between items-center pb-5">
+    <div className="px-4 sm:px-6 lg:px-[4.4rem] flex flex-col py-6 sm:py-8 lg:py-[3.88rem]">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center pb-5 space-y-4 lg:space-y-0">
         <div className="flex flex-col lg:w-2/3">
-          <h3 className="text-[calc(1rem+4px)] font-bold ">Change Password</h3>
-          <p className="text-[#898989] text-[1rem]">
+          <h3 className="text-lg sm:text-xl lg:text-[calc(1rem+4px)] font-bold">
+            Change Password
+          </h3>
+          <p className="text-[#898989] text-sm sm:text-base mt-2">
             Regularly updating your password helps protect your account from
             unauthorized access and enhances overall security.
           </p>
         </div>
         <button
-          className="shadow-md text-sm rounded text-[#898989] px-4 py-2"
+          className="shadow-md text-sm rounded text-[#898989] px-4 py-2 w-full lg:w-auto mt-4 lg:mt-0"
           onClick={() => handlePasswordReset()}
           disabled={resetCodeQuery.isLoading}
         >
@@ -78,12 +80,12 @@ const AccountSecurityPage = () => {
           showPasswordModal={showPasswordModal}
         />
       </div>
-      {/* <div className="lg:flex justify-between items-center">
+      {/* <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
         <div className="flex flex-col lg:w-2/3">
-          <h3 className="text-[calc(1rem+4px)] font-bold ">
+          <h3 className="text-lg sm:text-xl lg:text-[calc(1rem+4px)] font-bold">
             Two-Factor Authentication
           </h3>
-          <p className="text-[#898989] text-[1rem]">
+          <p className="text-[#898989] text-sm sm:text-base mt-2">
             Regularly updating your password helps protect your account from
             unauthorized access and enhances overall security.
           </p>
@@ -144,46 +146,57 @@ const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({
 
   return (
     <Dialog open={showPasswordModal} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[95%] max-w-[425px] mx-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl text-center">
+            Change Password
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="code">Reset Code</Label>
+            <Label htmlFor="code" className="text-sm sm:text-base">
+              Reset Code
+            </Label>
             <Input
               id="code"
               type="text"
+              className="w-full"
               {...register("code", { required: "Reset code is required" })}
             />
             {errors.code && (
-              <p className="text-sm text-red-500 flex items-center">
-                <AlertCircle className="h-4 w-4 mr-1" />
+              <p className="text-xs sm:text-sm text-red-500 flex items-center">
+                <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 {errors.code.message}
               </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">Current Password</Label>
+            <Label htmlFor="currentPassword" className="text-sm sm:text-base">
+              Current Password
+            </Label>
             <Input
               id="currentPassword"
               type="password"
+              className="w-full"
               {...register("currentPassword", {
                 required: "Current password is required",
               })}
             />
             {errors.currentPassword && (
-              <p className="text-sm text-red-500 flex items-center">
-                <AlertCircle className="h-4 w-4 mr-1" />
+              <p className="text-xs sm:text-sm text-red-500 flex items-center">
+                <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 {errors.currentPassword.message}
               </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+            <Label htmlFor="newPassword" className="text-sm sm:text-base">
+              New Password
+            </Label>
             <Input
               id="newPassword"
               type="password"
+              className="w-full"
               {...register("newPassword", {
                 required: "New password is required",
                 pattern: {
@@ -195,17 +208,20 @@ const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({
               })}
             />
             {errors.newPassword && (
-              <p className="text-sm text-red-500 flex items-center">
-                <AlertCircle className="h-4 w-4 mr-1" />
+              <p className="text-xs sm:text-sm text-red-500 flex items-center">
+                <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 {errors.newPassword.message}
               </p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Label htmlFor="confirmPassword" className="text-sm sm:text-base">
+              Confirm New Password
+            </Label>
             <Input
               id="confirmPassword"
               type="password"
+              className="w-full"
               {...register("confirmPassword", {
                 required: "Please confirm your new password",
                 validate: (value) =>
@@ -213,15 +229,15 @@ const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({
               })}
             />
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500 flex items-center">
-                <AlertCircle className="h-4 w-4 mr-1" />
+              <p className="text-xs sm:text-sm text-red-500 flex items-center">
+                <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 {errors.confirmPassword.message}
               </p>
             )}
           </div>
           <Button
             type="submit"
-            className="w-full"
+            className="w-full mt-6"
             disabled={!isValid || submitPasswordQuery.isPending}
           >
             {submitPasswordQuery.isPending ? "Hang on ..." : "Change Password"}

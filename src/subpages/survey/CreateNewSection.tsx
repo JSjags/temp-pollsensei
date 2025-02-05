@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import store from "@/redux/store";
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import { GiCardDiscard } from "react-icons/gi";
+import { Button } from "@/components/ui/button";
 
 const CreateNewSection = () => {
   const dispatch = useDispatch();
@@ -337,12 +338,16 @@ const CreateNewSection = () => {
 
           <div className="flex justify-between items-center pb-10">
             <div className="flex gap-2 items-center">
-              <button
-                className="bg-white rounded-full px-5 py-1"
+              <Button
+                variant="outline"
+                className="group relative rounded-full transition-all duration-200 hover:scale-105"
                 onClick={() => setAddQuestions((prev) => !prev)}
               >
-                <HiOutlinePlus className="inline-block mr-2" /> Add Question
-              </button>
+                <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                <span className="group-hover:tracking-wide transition-all duration-200">
+                  Add Questions
+                </span>
+              </Button>
               {/* <div className="bg-white rounded-full px-5 py-1" 
               onClick={()=>{
                 dispatch(addSection({
@@ -356,26 +361,32 @@ const CreateNewSection = () => {
                 <IoDocumentOutline className="inline-block mr-2" />
                 New Section
               </div> */}
-              <button
+              <Button
+                variant="outline"
                 disabled={isLoading}
-                className="bg-white inline-block rounded-full px-5 py-1"
+                className="group relative rounded-full transition-all duration-200 hover:scale-105 hover:bg-destructive hover:text-destructive-foreground"
                 onClick={() => {
                   dispatch(resetQuestion());
                   dispatch(resetSurvey());
                   router.push("/surveys/create-survey");
                 }}
               >
-                <GiCardDiscard className="inline-block mr-2" />
-                Discard
-              </button>
-              <button
+                <GiCardDiscard className="mr-2 h-4 w-4 group-hover:-translate-y-0.5 transition-transform duration-200" />
+                <span className="group-hover:tracking-wide transition-all duration-200">
+                  Discard
+                </span>
+              </Button>
+              <Button
+                variant="outline"
                 disabled={isLoading}
-                className="bg-white rounded-full px-5 py-1"
+                className="group relative rounded-full transition-all duration-200 hover:scale-105 hover:bg-primary hover:text-primary-foreground"
                 onClick={handleSurveyCreation}
               >
-                <VscLayersActive className="inline-block mr-2" />
-                Publish Survey
-              </button>
+                <VscLayersActive className="mr-2 h-4 w-4 group-hover:animate-pulse" />
+                <span className="group-hover:tracking-wide transition-all duration-200">
+                  Publish Survey
+                </span>
+              </Button>
             </div>
             <div>Pagination</div>
           </div>

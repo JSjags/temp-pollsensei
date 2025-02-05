@@ -2,13 +2,18 @@ import React, { useState, useEffect } from "react";
 import ButtonAuto from "../common/ButtonAuto";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion"; // Import motion from framer-motion
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Button } from "../ui/button";
 
 interface FilterButtonProps {
   text?: string;
+  type?: string;
   buttonClassName?: string;
   onClick?: (val: string) => void;
   icon?: React.ReactNode;
   setFilter?: React.Dispatch<React.SetStateAction<string>>;
+  onFilterChange?: (status: string) => void;
+  currentStatus?: string;
 }
 
 const roles = [
@@ -19,47 +24,96 @@ const roles = [
   "Data Editor",
 ];
 
+const surveyStatuses = ["On going", "Closed", "Drafts"];
+
 const FilterButton: React.FC<FilterButtonProps> = ({
   onClick,
   text,
   icon,
   buttonClassName,
   setFilter,
+  type,
+  onFilterChange,
+  currentStatus,
 }) => {
   const [filterArray, setFilterArray] = useState<string[]>([]);
+  const [tempFilterArray, setTempFilterArray] = useState<string[]>([]);
   const [showFilter, setShowFilter] = useState<boolean>(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (type === "survey") {
+      const statusParam = searchParams.get("status");
+      if (statusParam) {
+        const statusArray = [statusParam]; // Only store single status for survey
+        setFilterArray(statusArray);
+        setTempFilterArray(statusArray);
+      } else {
+        setFilterArray([]);
+        setTempFilterArray([]);
+      }
+    }
+  }, [searchParams, type]);
 
   const handleShowFilter = () => {
     setShowFilter(!showFilter);
-    // onClick();
+    setTempFilterArray(filterArray);
   };
 
   const handleClearFilter = () => {
     setFilterArray([]);
+    setTempFilterArray([]);
     if (setFilter) {
       setFilter("");
+    }
+    if (type === "survey") {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("status");
+      router.push(`${pathname}?${params.toString()}`);
     }
     setShowFilter(false);
   };
 
-  // For multiple filters
-  // const handleFilterArray = (role: string) => {
-  //   setFilterArray((prevArray) =>
-  //     prevArray.includes(role)
-  //       ? prevArray.filter((r) => r !== role)
-  //       : [...prevArray, role]
-  //   );
-  // };
-
   const handleFilterArray = (role: string) => {
-    setFilterArray((prevArray) => (prevArray.includes(role) ? [] : [role]));
+    if (type === "survey") {
+      // For survey, only allow one selection
+      setTempFilterArray([role]);
+    } else {
+      setTempFilterArray((prevArray) => {
+        return prevArray.includes(role)
+          ? prevArray.filter((item) => item !== role)
+          : [...prevArray, role];
+      });
+    }
+  };
+
+  const handleApplyFilter = () => {
+    setFilterArray(tempFilterArray);
+    if (type === "survey") {
+      const params = new URLSearchParams(searchParams.toString());
+      if (tempFilterArray.length > 0) {
+        params.set("status", tempFilterArray[0]); // Only use first status for survey
+      } else {
+        params.delete("status");
+      }
+      router.push(`${pathname}?${params.toString()}`);
+    }
+    onClick && onClick(tempFilterArray.join(","));
+    setShowFilter(false);
+  };
+
+  const handleStatusSelect = (status: string) => {
+    onFilterChange?.(status);
   };
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement; // Cast target to HTMLElement
+      const target = event.target as HTMLElement;
       if (!target.closest(".filter-button-container")) {
         setShowFilter(false);
+        setTempFilterArray(filterArray);
       }
     };
 
@@ -70,7 +124,9 @@ const FilterButton: React.FC<FilterButtonProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
-  }, [showFilter]);
+  }, [showFilter, filterArray]);
+
+  const options = type === "survey" ? surveyStatuses : roles;
 
   return (
     <div className="relative filter-button-container">
@@ -107,7 +163,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="ml-2 w-[28px] h-[28px] text-white font-semibold flex items-center justify-center rounded-full bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
+            className="ml-2 size-5 text-white font-semibold flex items-center justify-center rounded-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
           >
             {filterArray.length}
           </motion.span>
@@ -135,9 +191,12 @@ const FilterButton: React.FC<FilterButtonProps> = ({
                 transition={{ duration: 0.5, delay: 0.3 }}
                 className="ml-2 w-[28px] h-[28px] text-[#333333] font-semibold flex items-center justify-center rounded-full bg-[#f2f2f2]"
               >
-                {filterArray.length}
+                {tempFilterArray.length}
               </motion.span>
-              <p className="pl-2">{"   "}roles</p>
+              <p className="pl-2">
+                {"   "}
+                {type === "survey" ? "status" : "roles"}
+              </p>
             </motion.div>
             <motion.div
               initial={{ y: 10, opacity: 0 }}
@@ -145,22 +204,22 @@ const FilterButton: React.FC<FilterButtonProps> = ({
               transition={{ duration: 0.5, delay: 0.3 }}
               className="px-[30px] py-[20px] flex flex-col gap-5"
             >
-              {roles.map((role, i) => (
+              {options.map((option, i) => (
                 <motion.div
-                  key={role}
+                  key={option}
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
                   className="flex items-center gap-3"
                 >
                   <input
-                    onClick={() => handleFilterArray(role)}
+                    onClick={() => handleFilterArray(option)}
                     className="accent-[#9D50BB] accent-text-red-300 cursor-pointer"
                     type="checkbox"
-                    checked={filterArray.includes(role)}
+                    checked={tempFilterArray.includes(option)}
                   />
                   <label className="text-[16px] text-[#333333] font-normal">
-                    {role}
+                    {option}
                   </label>
                 </motion.div>
               ))}
@@ -169,28 +228,17 @@ const FilterButton: React.FC<FilterButtonProps> = ({
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.7 }}
-              className="flex items-center gap-3 mt-4 mb-2"
+              className="flex items-center gap-3 mt-4 mb-2 px-[30px]"
             >
-              <button
+              <Button
                 onClick={handleClearFilter}
-                className="flex items-center justify-center text-[#333333] text-[16px] rounded-[6px] px-[24px] py-[16px] max-h-[52px]"
+                variant="ghost"
+                className="text-[16px]"
               >
                 Clear
-              </button>
+              </Button>
 
-              <ButtonAuto
-                label="Filter"
-                onClick={() => {
-                  onClick && onClick(filterArray[0]);
-                  setShowFilter(false);
-                }}
-              />
-              {/* <button
-                onClick={onClick}
-                className="flex items-center justify-center text-white text-[16px] rounded-[6px] px-[24px] py-[16px] h-[40px] bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
-              >
-                Filter
-              </button> */}
+              <ButtonAuto label="Filter" onClick={handleApplyFilter} />
             </motion.div>
           </motion.div>
         )}

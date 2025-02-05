@@ -72,7 +72,7 @@ export default function PrivacyPolicy() {
         {
           title: "Contact Information",
           content:
-            "For questions or concerns about this Privacy Policy, please contact us at:\n\nOaks Intelligence Ltd.\n\nEmail: security@oaksintelligence.co\n\nAddress:\nOaks Intelligence Limited\n20 Foxborough Gardens\nBristol BS32 0BT\nUnited Kingdom",
+            "For questions or concerns about this Privacy Policy, please contact us at:\n\nOaks Intelligence Ltd.\n\nEmail: security@oaksintelligence.co\n\nAddress:\nOaks Intelligence Limited\n#27 Iwaya Road, Onike, Yaba, Lagos\n100213\nNigeria",
         },
       ].map((section, index) => (
         <Card key={index} className="mb-4 shadow-none border-none">
