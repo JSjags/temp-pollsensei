@@ -1,18 +1,52 @@
+/* 
+Rating Scale Question Component Design Explanation:
+------------------------------------------------
+This component creates a rating scale question format where users can select one rating
+from a horizontal scale. The design follows the same pattern as other question types,
+with consistent styling and behavior.
+
+Visual representation:
+
+[Component Container - Gray bg, rounded corners, shadow on hover]
+┌──────────────────────────────────────────────────────────────┐
+│ ⋮ [Grip Handle - Only visible in create mode]                │
+│                                                              │
+│ 1. Question Text Here (Rate from 1-5)                     *  │
+│    [AI Rephrase Button - Shows on hover]                     │
+│                                                              │
+│    [Rating Scale - Horizontal radio buttons with labels]     │
+│    ┌──────────────────────────────────────────────────────┐  │
+│    │   ○         ○         ○         ○         ○          │  │
+│    │   1         2         3         4         5          │  │
+│    │  Poor     Fair     Good    Very Good  Excellent      │  │
+│    └──────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+
+Key Features:
+- Dynamic rating scale based on question text or provided options
+- Extracts rating range from question text (e.g. "Rate from 1-5")
+- Falls back to default options if no range specified
+*/
+
 import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
-import { Check } from "lucide-react";
+import { Check, Star, StarHalf, GripVertical } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
 import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import ActionButtons from "./ActionButtons";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { cn } from "@/lib/utils";
 
 interface RatingScaleQuestionProps {
   question: string;
   questionType: string;
-  options: string[] | undefined; // Options represent each rating level
+  options: string[] | undefined;
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
@@ -28,6 +62,8 @@ interface RatingScaleQuestionProps {
   status?: string;
   is_required?: boolean;
   setIsRequired?: (value: boolean) => void;
+  isEdit?: boolean;
+  surveyData?: SurveyData;
 }
 
 const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
@@ -44,6 +80,8 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
   status,
   is_required,
   setIsRequired,
+  isEdit = false,
+  surveyData,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -53,14 +91,83 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  // State to store the selected rating
-  const [selectedRating, setSelectedRating] = useState<string | null>(null);
+  const [selectedRating, setSelectedRating] = useState<string>("");
+  const [dynamicOptions, setDynamicOptions] = useState<string[]>([]);
 
-  // Handle rating selection
-  const handleRatingChange = (option: string) => {
-    setSelectedRating(option);
+  // Extract range from question text
+  const extractRange = (question: string) => {
+    const numberWords: { [key: string]: number } = {
+      one: 1,
+      two: 2,
+      three: 3,
+      four: 4,
+      five: 5,
+      six: 6,
+      seven: 7,
+      eight: 8,
+      nine: 9,
+      ten: 10,
+    };
+
+    let processedQuestion = question.toLowerCase();
+    Object.entries(numberWords).forEach(([word, num]) => {
+      processedQuestion = processedQuestion.replace(
+        new RegExp(word, "g"),
+        num.toString()
+      );
+    });
+
+    const patterns = [
+      /(\d+)\s*-\s*(\d+)/,
+      /(\d+)\s*to\s*(\d+)/,
+      /rate.*?(\d+).*?to.*?(\d+)/i,
+      /scale.*?(\d+).*?to.*?(\d+)/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = processedQuestion.match(pattern);
+      if (match) {
+        const [_, start, end] = match;
+        return {
+          min: parseInt(start),
+          max: parseInt(end),
+        };
+      }
+    }
+
+    return null;
+  };
+
+  // Generate default labels for a rating scale
+  const generateRatingLabels = (min: number, max: number) => {
+    const defaultLabels = ["Poor", "Fair", "Good", "Very Good", "Excellent"];
+    const range = max - min + 1;
+
+    if (range <= defaultLabels.length) {
+      return defaultLabels.slice(0, range);
+    }
+
+    return Array.from({ length: range }, (_, i) => (i + min).toString());
+  };
+
+  useEffect(() => {
+    const range = extractRange(question);
+    if (range) {
+      const { min, max } = range;
+      const labels = generateRatingLabels(min, max);
+      setDynamicOptions(labels);
+    } else if (options && options.length > 0) {
+      setDynamicOptions(options);
+    } else {
+      // Default 5-point scale if no range or options provided
+      setDynamicOptions(generateRatingLabels(1, 5));
+    }
+  }, [question, options]);
+
+  const handleRatingChange = (value: string) => {
+    setSelectedRating(value);
     if (onChange) {
-      onChange(option);
+      onChange(value);
     }
   };
 
@@ -68,14 +175,14 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1.5 mr-3">
+            <Check strokeWidth={1.5} className="text-white w-4 h-4" />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1.5 mr-3">
+            <BsExclamation className="text-white w-4 h-4" />
           </div>
         );
       default:
@@ -85,152 +192,131 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
 
   return (
     <div
-      className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: `${questionText?.name}`,
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <Image
-        src={draggable}
-        alt="draggable icon"
-        className={
-          pathname === "/surveys/create-survey" ? "visible" : "invisible"
-        }
-      />
-      <div className="w-full">
-        <div className="flex justify-between w-full items-center">
-          <h3 className="text-lg font-semibold text-start">
-            <div className="group flex justify-between gap-2 items-start">
-              <p>
-                <span>{index}. </span> {question}
-                {is_required === true && (
-                  <span className="text-2xl ml-2 text-red-500">*</span>
-                )}
-              </p>
-              {!pathname.includes("survey-public-response") &&
-                !pathname.includes("create-survey") && (
-                  <PollsenseiTriggerButton
-                    key={index}
-                    imageUrl={stars}
-                    tooltipText="Rephrase question"
-                    className={"group-hover:inline-block hidden"}
-                    triggerType="rephrase"
-                    question={question}
-                    optionType={questionType}
-                    options={options}
-                    setEditId={setEditId}
-                    onSave={onSave!}
-                    index={index}
-                  />
-                )}
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
+
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
+                  )}
+
+                  {!pathname.includes("survey-public-response") && isEdit && (
+                    <PollsenseiTriggerButton
+                      key={index}
+                      imageUrl={stars}
+                      tooltipText="Rephrase question"
+                      className="hidden group-hover:inline-block transition transform hover:scale-110"
+                      triggerType="rephrase"
+                      question={question}
+                      optionType={questionType}
+                      options={options}
+                      setEditId={setEditId}
+                      onSave={onSave!}
+                      index={index}
+                    />
+                  )}
+                </div>
+              </h3>
+
+              <div className="mt-4">
+                <RadioGroup
+                  value={selectedRating}
+                  onValueChange={handleRatingChange}
+                  className="flex items-center justify-between gap-2 w-full"
+                >
+                  {dynamicOptions.map((option, optionIndex) => (
+                    <div
+                      className="flex flex-col justify-center items-center gap-2"
+                      key={optionIndex}
+                    >
+                      <RadioGroupItem
+                        value={option}
+                        id={`rating-${optionIndex}`}
+                        className="h-6 w-6 data-[state=checked]:bg-purple-600 data-[state=checked]:text-white"
+                      />
+                      <label
+                        htmlFor={`rating-${optionIndex}`}
+                        className="text-sm text-gray-600"
+                      >
+                        {option}
+                      </label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
             </div>
-          </h3>
-        </div>
-
-        {/* Rating Scale UI */}
-        <div className="flex items-center justify-between gap-2 my-4 w-full">
-          {options?.map((option, optionIndex) => (
-            <div
-              className="flex flex-col justify-center items-center"
-              key={optionIndex}
-            >
-              <button
-                type="button"
-                className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  selectedRating === option
-                    ? "bg-purple-600 text-white"
-                    : "bg-gray-200 text-gray-600"
-                } hover:bg-purple-600 hover:text-white transition-colors duration-200`}
-                onClick={() => handleRatingChange(option)}
-              ></button>
-              <span className="flex items-center justify-center">
-                {" "}
-                {option}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Edit and Delete Buttons */}
-        {pathname === "/surveys/edit-survey" 
-        && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
           </div>
-        )}
 
-        {
-         pathname.includes("/edit-submitted-survey") && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-{pathname === "/surveys/add-question-m" && (
-          <div className="flex justify-end gap-4">
-           
-            <button
-              className="text-red-500 bg-whte px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-
-        {/* Required Toggle */}
-        {pathname.includes("edit-survey") && (
-          <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB] "
-            />
-          </div>
-        )}
-
-        {/* Display Question Type Label */}
-        <div className="flex justify-end">
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "rating_scale" ? "Rating Scale" : ""}</p>
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey")) && (
+            <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
+
+          {pathname === "/surveys/add-question-m" && (
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-6 py-2 text-red-500 border border-red-500 rounded-full hover:bg-red-50 transition-colors"
+                onClick={DeleteQuestion}
+              >
+                Delete
+              </button>
+            </div>
+          )}
+
+          {pathname.includes("edit-survey") && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Required</span>
+              <Switch
+                checked={is_required}
+                onCheckedChange={
+                  setIsRequired && ((checked) => setIsRequired(checked))
+                }
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            {!pathname.includes("edit-survey") &&
+              !pathname.includes("surveys/question") && (
+                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+                  <span className="flex items-center gap-1 text-xs">
+                    <StarHalf className="text-[#9D50BB] w-3 h-3" />
+                    Rating Scale
+                  </span>
+                </p>
+              )}
+          </div>
         </div>
+
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus(status)}</div>
+        )}
       </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
-      )}
     </div>
   );
 };

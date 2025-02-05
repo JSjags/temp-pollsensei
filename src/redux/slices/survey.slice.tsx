@@ -1,7 +1,7 @@
 import { default_header } from "@/assets/images";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface TextStyle {
+export interface TextStyle {
   name: string;
   size: string | number;
 }
@@ -22,7 +22,7 @@ interface Section {
   questions: Question[];
 }
 
-interface SurveyState {
+export interface SurveyState {
   survey_type: string;
   conversation_id: string;
   topic: string;
@@ -45,9 +45,9 @@ const initialState: SurveyState = {
   description: "",
   sections: [],
   theme: "default",
-  header_text: { name: "Helvetica", size: "24" },
-  question_text: { name: "Helvetica", size: "18" },
-  body_text: { name: "Helvetica", size: "18" },
+  header_text: { name: "DM Sans", size: "24" },
+  question_text: { name: "DM Sans", size: "18" },
+  body_text: { name: "DM Sans", size: "18" },
   color_theme: "#EEE",
   logo_url: "",
   header_url: "",
@@ -82,6 +82,28 @@ const surveySlice = createSlice({
       } else {
         state.sections.push({ questions: [newQuestion] });
       }
+    },
+    updateSurvey: (
+      state,
+      action: PayloadAction<{
+        topic?: string;
+        description?: string;
+        sections?: Section[];
+        theme?: string;
+        header_text?: { name: string; size: number };
+        question_text?: { name: string; size: number };
+        body_text?: { name: string; size: number };
+        color_theme?: string;
+        logo_url?: string;
+        header_url?: string;
+      }>
+    ) => {
+      console.log(action.payload);
+
+      return {
+        ...state,
+        ...action.payload,
+      };
     },
     saveLogoUrl: (state, action: PayloadAction<string>) => {
       state.logo_url = action.payload;
@@ -166,6 +188,7 @@ export const {
   deleteSection,
   updateSurveyType,
   updateConversationId,
+  updateSurvey,
   setQuestionObject,
   updateDescription,
   resetSurvey,

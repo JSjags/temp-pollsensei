@@ -222,7 +222,7 @@ const TeamMembersPage: React.FC = () => {
                     </div>
                   }
                   onClick={handleToggle}
-                  className="h-10 sm:h-12 min-w-fit sm:min-w-[188px]"
+                  className="h-10 min-w-fit sm:min-w-[188px]"
                 />
               </Slide>
             )}
@@ -243,7 +243,7 @@ const TeamMembersPage: React.FC = () => {
 
               <div className="flex flex-1 items-center px-4 gap-2 rounded-[2rem] border-[1px] border-[#d9d9d9] w-full max-w-[420px] h-[40px]">
                 <input
-                  className="ring-0 text-[#838383] flex-1 outline-none"
+                  className="ring-0 text-[#838383] flex-1 outline-none bg-transparent"
                   type="text"
                   placeholder="Search team members by name, email address"
                   onChange={(e) => setQuery(e.target.value)}
@@ -255,9 +255,47 @@ const TeamMembersPage: React.FC = () => {
           </div>
 
           {teamMembers.isLoading && (
-            <div className="mt-10 flex justify-center items-center">
-              <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-                <Loading />
+            <div className="w-full">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="p-4">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-24" />
+                      </th>
+                      <th className="p-4">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
+                      </th>
+                      <th className="p-4">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-28" />
+                      </th>
+                      <th className="p-4">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...Array(5)].map((_, i) => (
+                      <tr key={i} className="border-b">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-40" />
+                        </td>
+                        <td className="p-4">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-24" />
+                        </td>
+                        <td className="p-4">
+                          <div className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

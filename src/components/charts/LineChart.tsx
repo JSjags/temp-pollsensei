@@ -1,219 +1,238 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import dynamic from "next/dynamic";
-import dayjs from "dayjs";
-import "./style.css";
+import * as React from "react";
+import { format, parse } from "date-fns";
+import {
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const ReactApexChart = dynamic(() => import("react-apexcharts"), {
-  ssr: false,
-});
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { useQuery } from "@tanstack/react-query";
+import { getPasswordResetCode, getResponseRate } from "@/services/admin";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
-interface DataItem {
-  [key: string]: string | number;
-}
+type Period = "week" | "month" | "year";
 
-interface GroupedData {
-  [year: string]: {
-    [month: string]: number;
-  };
-}
+export default function ResponseRateDashboard() {
+  const [period, setPeriod] = React.useState<Period>("year");
+  const { width } = useWindowSize();
+  const isMobile = width < 640;
+  const isTablet = width >= 640 && width < 1024;
 
-const groupDataByMonth = (
-  data: DataItem[],
-  xKey: string,
-  yKey: string
-): GroupedData => {
-  const groupedData: GroupedData = {};
-
-  data?.forEach((item) => {
-    const date = dayjs(item[xKey] as string);
-    const month = date.format("MMM");
-    const year = date.format("YYYY");
-
-    if (!groupedData[year]) {
-      groupedData[year] = {};
-    }
-    if (!groupedData[year][month]) {
-      groupedData[year][month] = 0;
-    }
-    groupedData[year][month] += parseFloat(item[yKey] as string);
+  const { data, isLoading } = useQuery({
+    queryKey: ["response-rate", period],
+    queryFn: () => getResponseRate(period),
   });
 
-  return groupedData;
-};
+  const chartData = React.useMemo(() => {
+    if (!data?.data.data || data.data.data.length === 0) return [];
 
-interface LineChartProps {
-  data: DataItem[];
-  xKey: string;
-  yKey: string;
-}
+    return data.data.data
+      .map((item: any) => {
+        try {
+          let date;
+          if (item.date) {
+            date = new Date(item.date);
+          } else if (item.month_name && item.year) {
+            date = parse(item.month_name, "MMMM", new Date(item.year, 0));
+          } else {
+            date = new Date(item.year, item.month ? item.month - 1 : 0);
+          }
 
-const LineChart: React.FC<LineChartProps> = ({ data, xKey, yKey }) => {
-  const [filter, setFilter] = useState<string>("year");
-  const [selectedYear, setSelectedYear] = useState<string>(
-    dayjs().format("YYYY")
-  );
-  const [isMounted, setIsMounted] = useState(false);
+          if (isNaN(date.getTime())) {
+            console.warn("Invalid date encountered:", item);
+            return null;
+          }
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+          return {
+            date,
+            value: item.response_count,
+            label: isMobile
+              ? format(date, "MMM") // Shorter format for mobile
+              : item.month_name || item.day_name || format(date, "yyyy"),
+          };
+        } catch (error) {
+          console.warn("Error processing chart data item:", item, error);
+          return null;
+        }
+      })
+      .filter(Boolean);
+  }, [data, isMobile]);
 
-  const groupedData = useMemo(
-    () => groupDataByMonth(data, xKey, yKey),
-    [data, xKey, yKey]
-  );
+  const loadingData = React.useMemo(() => {
+    const count = period === "year" ? 12 : period === "month" ? 30 : 7;
+    return Array(count).fill({ value: 0, label: "" });
+  }, [period]);
 
-  const filteredData = useMemo(() => {
-    let result: { x: string; y: number }[] = [];
+  const emptyData = React.useMemo(() => {
+    const count = period === "year" ? 12 : period === "month" ? 30 : 7;
+    return Array(count).fill({ value: 0, label: "" });
+  }, [period]);
 
-    if (filter === "year" && groupedData[selectedYear]) {
-      result = Object.entries(groupedData[selectedYear]).map(
-        ([month, value]) => ({
-          x: month,
-          y: value,
-        })
-      );
-    } else if (filter === "30-days") {
-      const endDate = dayjs();
-      const startDate = endDate.subtract(30, "day");
-      result = data
-        .filter((item) => {
-          const date = dayjs(item[xKey] as string);
-          return date.isAfter(startDate) && date.isBefore(endDate);
-        })
-        .map((item) => ({
-          x: dayjs(item[xKey] as string).format("MMM D"),
-          y: parseFloat(item[yKey] as string),
-        }));
-    } else if (filter === "7-days") {
-      const endDate = dayjs();
-      const startDate = endDate.subtract(7, "day");
-      result = data
-        .filter((item) => {
-          const date = dayjs(item[xKey] as string);
-          return date.isAfter(startDate) && date.isBefore(endDate);
-        })
-        .map((item) => ({
-          x: dayjs(item[xKey] as string).format("MMM D"),
-          y: parseFloat(item[yKey] as string),
-        }));
-    }
+  const displayData = isLoading
+    ? loadingData
+    : chartData.length === 0
+    ? emptyData
+    : chartData;
 
-    return result;
-  }, [filter, data, xKey, yKey, groupedData, selectedYear]);
-
-  const options: ApexCharts.ApexOptions = {
-    chart: {
-      height: 350,
-      toolbar: {
-        show: false,
-      },
-    },
-    xaxis: {
-      type: "category",
-      categories: filteredData.map((item) => item.x),
-      labels: {
-        style: {
-          fontSize: "12px",
-          fontFamily: "Inter",
-        },
-      },
-    },
-    yaxis: {
-      tickAmount: 5,
-      labels: {
-        formatter: (value: number) => `${value}`,
-        style: {
-          fontSize: "12px",
-          fontFamily: "Inter",
-        },
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      curve: "smooth",
-      width: 2,
-    },
-    fill: {
-      type: "gradient",
-    },
-    colors: ["#091E42"],
-    tooltip: {
-      x: {
-        format: "MMM D",
-      },
-      y: {
-        formatter: (value: number) => `${value}k`,
-      },
-    },
+  const getChartHeight = () => {
+    if (isMobile) return 180;
+    if (isTablet) return 200;
+    return 220;
   };
-
-  const handleButtonClick = (value: string) => {
-    setFilter(value);
-  };
-
-  if (!isMounted) {
-    return null;
-  }
 
   return (
-    <div className="flex flex-col w-full justify-between items-center">
-      <div className="mt-5 flex justify-between items-center w-full px-5">
-        <p className="chart-title hidden lg:block">Form response rate</p>
-        <div className="flex gap-2">
-          <button
-            className={`filter-button ${filter === "year" ? "active" : ""}`}
-            onClick={() => handleButtonClick("year")}
+    <Card className="col-span-4 w-full">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0 pb-4 sm:pb-7">
+        <CardTitle className="text-sm sm:text-base font-normal">
+          Form response rate
+        </CardTitle>
+        <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
+          <Button
+            variant={period === "year" ? "secondary" : "ghost"}
+            onClick={() => setPeriod("year")}
+            className="text-[10px] sm:text-xs p-1 sm:p-2 h-7 sm:h-8 flex-1 sm:flex-none"
+            disabled={isLoading}
           >
             12 months
-          </button>
-          <button
-            className={`filter-button ${filter === "30-days" ? "active" : ""}`}
-            onClick={() => handleButtonClick("30-days")}
+          </Button>
+          <Button
+            variant={period === "month" ? "secondary" : "ghost"}
+            onClick={() => setPeriod("month")}
+            className="text-[10px] sm:text-xs p-1 sm:p-2 h-7 sm:h-8 flex-1 sm:flex-none"
+            disabled={isLoading}
           >
             30 days
-          </button>
-          <button
-            className={`filter-button ${filter === "7-days" ? "active" : ""}`}
-            onClick={() => handleButtonClick("7-days")}
+          </Button>
+          <Button
+            variant={period === "week" ? "secondary" : "ghost"}
+            onClick={() => setPeriod("week")}
+            className="text-[10px] sm:text-xs p-1 sm:p-2 h-7 sm:h-8 flex-1 sm:flex-none"
+            disabled={isLoading}
           >
             7 days
-          </button>
-          {filter === "year" && (
-            <select
-              className="filter-button"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-            >
-              {Object.keys(groupedData).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          )}
+          </Button>
         </div>
-      </div>
+      </CardHeader>
+      <CardContent className="pb-2 sm:pb-4 px-2 sm:px-4">
+        <div style={{ height: getChartHeight() }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={displayData}
+              margin={{
+                top: 5,
+                right: isMobile ? 5 : 10,
+                left: isMobile ? 0 : 0,
+                bottom: 0,
+              }}
+            >
+              <defs>
+                <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="0%"
+                    stopColor="rgb(75 85 99)"
+                    stopOpacity={0.2}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="rgb(75 85 99)"
+                    stopOpacity={0}
+                  />
+                </linearGradient>
+              </defs>
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={true}
+                dy={isMobile ? 5 : 10}
+                tick={{
+                  fill: "rgb(107 114 128)",
+                  fontSize: isMobile ? "0.625rem" : "0.75rem",
+                }}
+                stroke="rgb(229 231 235)"
+                strokeOpacity={0.4}
+                interval={isMobile ? 2 : 0}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                dx={isMobile ? -5 : -10}
+                tick={{
+                  fill: "rgb(107 114 128)",
+                  fontSize: isMobile ? "0.625rem" : "0.75rem",
+                }}
+                width={isMobile ? 30 : 40}
+              />
+              <ChartTooltip
+                content={({ active, payload }) => {
+                  if (
+                    !active ||
+                    !payload ||
+                    isLoading ||
+                    chartData.length === 0
+                  )
+                    return null;
+                  try {
+                    const date = payload[0]?.payload?.date;
+                    const dateDisplay =
+                      period === "year"
+                        ? format(date, isMobile ? "MMM yyyy" : "MMMM yyyy")
+                        : format(date, isMobile ? "MM/dd/yy" : "PPP");
 
-      <div id="chart" className="w-full">
-        <ReactApexChart
-          options={options}
-          series={[
-            {
-              name: "Sale",
-              data: filteredData.map((item) => item.y),
-            },
-          ]}
-          type="area"
-          height={208}
-        />
-      </div>
-    </div>
+                    return (
+                      <div className="rounded-lg border bg-background p-1.5 sm:p-2 shadow-sm">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] sm:text-xs uppercase text-muted-foreground">
+                            {dateDisplay}
+                          </span>
+                          <span className="text-[10px] sm:text-xs font-bold">
+                            {payload[0].value} responses
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  } catch (error) {
+                    console.warn("Error rendering tooltip:", error);
+                    return null;
+                  }
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={
+                  isLoading || chartData.length === 0
+                    ? "rgb(107 114 128)"
+                    : "rgb(0 0 0)"
+                }
+                strokeWidth={1}
+                fill={
+                  isLoading || chartData.length === 0
+                    ? "none"
+                    : "url(#gradient)"
+                }
+                dot={false}
+                style={
+                  isLoading || chartData.length === 0
+                    ? { opacity: 0.5 }
+                    : undefined
+                }
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
   );
-};
-
-export default LineChart;
+}

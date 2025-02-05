@@ -113,7 +113,20 @@ export const generateMilestoneStage = (stage: string): string => {
 
 export const handleApiErrors = (response: any) => {
   const message = response?.message ?? response?.data?.message;
-  toast.error(message);
+
+  if (
+    message?.toLowerCase().includes("not authenticated") ||
+    message?.toLowerCase().includes("unauthenticated") ||
+    message?.toLowerCase().includes("unauthorized")
+  ) {
+    // Clear any auth state/tokens
+    localStorage.clear();
+    // Redirect to login page
+    window.location.href = "/login";
+    return;
+  }
+
+  // toast.error(message);
 };
 
 export const isValidResponse = (response: any) => {
@@ -124,7 +137,6 @@ export const isValidResponse = (response: any) => {
 
   return false;
 };
-
 
 export function getMonthsFromCurrent(): string[] {
   const months = [
@@ -153,7 +165,6 @@ export function getMonthsFromCurrent(): string[] {
   return orderedMonths;
 }
 
-
 export function getCurrentAndLastYears(): string[] {
   const currentYear = new Date().getFullYear();
   const years: string[] = [];
@@ -162,7 +173,5 @@ export function getCurrentAndLastYears(): string[] {
     years.push((currentYear - i).toString());
   }
 
-  return years.reverse(); 
+  return years.reverse();
 }
-
-

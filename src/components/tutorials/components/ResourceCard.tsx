@@ -5,6 +5,9 @@ import Image from "next/image";
 import { ITutorial } from "@/types/api/tutorials.types";
 import AppLoadingSkeleton from "@/components/common/AppLoadingSkeleton";
 import { ChatBotIcon } from "@/components/icons";
+import { pollsensei_new_logo } from "@/assets/images";
+import { useRouter } from "next/navigation";
+import { learningHubRoutes } from "@/config/routes";
 
 export function ResourceCard({
   resource,
@@ -13,6 +16,7 @@ export function ResourceCard({
   resource: ITutorial;
   index: number;
 }) {
+  const router = useRouter();
   const colors = [
     "bg-green-200",
     "bg-yellow-200",
@@ -27,6 +31,9 @@ export function ResourceCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1, ease: "linear" }}
+      onClick={() =>
+        router.push(learningHubRoutes.SINGLE_ARTICLE_PAGE(resource.slug))
+      }
       className="bg-white rounded-xl scale-100 shadow-md overflow-hidden cursor-pointer border-2 hover:border-2 border-transparent hover:shadow-[#9D50BB50] hover:border-[#9D50BB] p-4 hover:!scale-105 hover:shadow-2xl transition-all"
     >
       <div
@@ -38,7 +45,7 @@ export function ResourceCard({
           <Image
             height={100}
             width={100}
-            className="w-full object-cover aspect-video"
+            className="w-full object-cover aspect-video rounded-lg"
             src={resource?.media?.[0]?.url}
             alt=""
           />
@@ -49,7 +56,11 @@ export function ResourceCard({
           </video>
         ) : (
           <div className="w-full bg-white/90 text-3xl md:text-4xl lg:text-5xl aspect-video flex items-center justify-center">
-            <ChatBotIcon />
+            <Image
+              src={pollsensei_new_logo}
+              alt="Loading..."
+              className="relative z-10 size-32 object-contain"
+            />
           </div>
           // <PlayCircle className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white h-12 w-12" />
           // <FileText className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white h-12 w-12" />

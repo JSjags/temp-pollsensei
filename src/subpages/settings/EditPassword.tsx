@@ -55,7 +55,6 @@ const EditPassword: React.FC = () => {
   const [validPwd] = useState(false);
 
   const [matchFocus, setMatchFocus] = useState(false);
-  console.log(matchFocus);
 
   const pattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
 
@@ -67,17 +66,14 @@ const EditPassword: React.FC = () => {
   };
 
   const onSubmit = async (values: any) => {
-    console.log(values);
     try {
       await updateUserPassword(values).unwrap();
       toast.success("User password updated successfully");
       router.push("/settings/account-settings");
-      console.log("User password updated successfully");
     } catch (err: any) {
       toast.error(
         "Failed to update user password " + err?.data?.message || err.message
       );
-      console.error("Failed to update user password", err);
     }
   };
 
@@ -86,16 +82,20 @@ const EditPassword: React.FC = () => {
   };
 
   return (
-    <div className="px-[2rem] lg:px-[4.4rem] flex flex-col py-[3.88rem]">
-      <div onClick={() => router.back()} className="cursor-pointer">
-        <HiArrowNarrowLeft className="text-2xl" />
+    <div className="min-h-screen w-full px-4 sm:px-6 md:px-8 lg:px-[4.4rem] py-6 md:py-8 lg:py-[3.88rem]">
+      <div
+        onClick={() => router.back()}
+        className="cursor-pointer mb-4 md:mb-6"
+      >
+        <HiArrowNarrowLeft className="text-xl md:text-2xl" />
       </div>
-      <div className="flex flex-col w-full lg:w-2/3 pb-5 mt-5 lg:px-4">
+
+      <div className="w-full max-w-2xl mx-auto">
         <Form
           onSubmit={onSubmit}
           validate={validateForm}
           render={({ handleSubmit, form, submitting, values }) => (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="space-y-6">
               <Field name="oldPassword">
                 {({ input, meta }) => (
                   <PasswordField
@@ -106,7 +106,6 @@ const EditPassword: React.FC = () => {
                     label="Old Password"
                     form={form}
                     {...input}
-                    // error={meta.touched && meta.error}
                   />
                 )}
               </Field>
@@ -121,7 +120,6 @@ const EditPassword: React.FC = () => {
                     label="New Password"
                     form={form}
                     {...input}
-                    // error={meta.touched && meta.error}
                     onFocus={() => {
                       input.onFocus();
                       setPwdFocus(true);
@@ -150,10 +148,10 @@ const EditPassword: React.FC = () => {
                 )}
               </Field>
 
-              <p className="text-xs flex items-center my-3 gap-2">
-                {" "}
-                <CiCircleQuestion className="text-2xl" /> Your password must be
-                different from the previously used passwords.
+              <p className="text-xs sm:text-sm flex items-center gap-2 text-gray-600">
+                <CiCircleQuestion className="text-xl sm:text-2xl" />
+                Your password must be different from the previously used
+                passwords.
               </p>
 
               <Field name="confirmNewPassword">
@@ -166,7 +164,6 @@ const EditPassword: React.FC = () => {
                     label="Confirm New Password"
                     form={form}
                     {...input}
-                    // error={meta.touched && meta.error}
                     onFocus={() => {
                       input.onFocus();
                       setMatchFocus(true);
@@ -197,11 +194,15 @@ const EditPassword: React.FC = () => {
 
               <div
                 id="pwdnote"
-                className={pwdFocus && !validPwd ? "instructions" : "offscreen"}
+                className={`${
+                  pwdFocus && !validPwd ? "block" : "hidden"
+                } bg-gray-50 p-4 rounded-lg`}
               >
-                <h5 className="text-[#979DA3] ">YOUR PASSWORD MUST CONTAIN</h5>
-                <ul className="text-[#979DA3] mt-">
-                  <li className="flex mb-3 items-center gap-2">
+                <h5 className="text-[#979DA3] text-sm font-medium mb-3">
+                  YOUR PASSWORD MUST CONTAIN
+                </h5>
+                <ul className="text-[#979DA3] space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
                     <ValidatePwdIcon
                       color={
                         values.newPassword?.length >= 8 ? "#2ECC71" : "#E66767"
@@ -209,7 +210,7 @@ const EditPassword: React.FC = () => {
                     />
                     Between 8 and 20 characters
                   </li>
-                  <li className="flex mb-3 items-center gap-2">
+                  <li className="flex items-center gap-2">
                     <ValidatePwdIcon
                       color={
                         /[A-Z]/.test(values.newPassword) ? "#2ECC71" : "#E66767"
@@ -217,7 +218,7 @@ const EditPassword: React.FC = () => {
                     />
                     1 upper case letter
                   </li>
-                  <li className="flex mb-3 items-center gap-2">
+                  <li className="flex items-center gap-2">
                     <ValidatePwdIcon
                       color={
                         /\d/.test(values.newPassword) ? "#2ECC71" : "#E66767"
@@ -225,7 +226,7 @@ const EditPassword: React.FC = () => {
                     />
                     1 or more numbers
                   </li>
-                  <li className="flex mb-3 items-center gap-2">
+                  <li className="flex items-center gap-2">
                     <ValidatePwdIcon
                       color={
                         /[@#&$!]/.test(values.newPassword)
@@ -238,14 +239,14 @@ const EditPassword: React.FC = () => {
                 </ul>
               </div>
 
-              <div className="mt-4">
+              <div className="pt-4">
                 <button
-                  className="auth-btn w-full lg:w-1/2 justify-center"
+                  className="w-full sm:w-auto px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[150px]"
                   type="submit"
                   disabled={submitting || isLoading}
                 >
                   {submitting || isLoading ? (
-                    <ClipLoader size={20} />
+                    <ClipLoader size={20} color="#ffffff" />
                   ) : (
                     "Save Changes"
                   )}

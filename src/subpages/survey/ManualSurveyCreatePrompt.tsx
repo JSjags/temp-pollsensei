@@ -1,14 +1,13 @@
-import { stars } from "@/assets/images";
+import React, { useState } from "react";
 import { updateDescription, updateTopic } from "@/redux/slices/survey.slice";
-import Image from "next/image";
-import { useState } from "react";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import { Button as ShadButton } from "@/components/ui/button";
-import { useDispatch } from "react-redux";
+import { Button } from "@/components/ui/button";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { Textarea } from "@/components/ui/shadcn-textarea";
+import { Input } from "@/components/ui/shadcn-input";
 
 const ManualSurveyCreatePrompt = () => {
   const [surveyPrompt, setSurveyPrompt] = useState("");
@@ -22,148 +21,108 @@ const ManualSurveyCreatePrompt = () => {
   );
   const user = useSelector((state: RootState) => state?.user?.user);
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.2,
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      transition: {
+        duration: 0.4,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.4,
+      },
+    },
+  };
+
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
-        initial={{ opacity: 0, scale: 1, y: 100 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 1, y: 100 }}
-        transition={{
-          duration: 0.5,
-          ease: [0.43, 0.13, 0.23, 0.96],
-        }}
-        className="p-0 m-0 bg-transparent rounded-lg shadow-lg min-h-screen"
+        className="flex flex-col justify-center items-center gap-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white pb-20 scroll-smooth"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
       >
-        <div className="flex flex-col justify-center items-center gap-10 py-10 min-h-[80vh] ">
-          <div className="text-center">
-            <h1 className="text-2xl mt-10 md:mt-10 font-normal">
-              What’s your survey about?
-            </h1>
-            <p className="text-lg">
-              Provide a suitable title and description for the survey you want
-              to create
-            </p>
+        <motion.div variants={itemVariants} className="text-center">
+          <h1 className="text-3xl md:text-4xl mt-10 md:mt-10 font-bold bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent">
+            What's your survey about?
+          </h1>
+          <p className="text-base md:text-lg text-gray-600 mt-4">
+            Provide a suitable title and description for the survey you want to
+            create
+          </p>
+        </motion.div>
+
+        <motion.form
+          variants={itemVariants}
+          className="flex flex-col w-full max-w-2xl text-start justify-start gap-4"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <label className="text-lg font-medium text-gray-700">
+            Title
+            <Input
+              type="text"
+              className="rounded-lg py-3 px-4 border-2 w-full !text-sm h-12 border-[#5B03B230] focus:border-[#5B03B2] focus:ring-2 focus:ring-[#5B03B230] transition-all duration-200 resize-none scroll-smooth"
+              placeholder="Enter Title of Survey here"
+              value={manualSurveyTitle}
+              onChange={(e) => setManualSurveyTitle(e.target.value)}
+            />
+          </label>
+
+          <label className="text-lg font-medium text-gray-700">
+            Survey Summary
+          </label>
+          <div className="flex flex-col gap-2 relative">
+            <Textarea
+              value={surveyPrompt}
+              placeholder="Provide a brief description of the survey"
+              className="rounded-lg py-3 px-4 border-2 w-full !text-sm h-40 border-[#5B03B230] focus:border-[#5B03B2] focus:ring-2 focus:ring-[#5B03B230] transition-all duration-200 resize-none scroll-smooth"
+              onChange={(e) => {
+                if (e.target.value.length === maxCharacters) {
+                  toast.warning("Prompt shouldn't exceed 3000 characters");
+                }
+                setSurveyPrompt(e.target.value);
+              }}
+              maxLength={maxCharacters}
+            />
+            <div className="text-sm text-gray-500 text-right">
+              {surveyPrompt.length}/{maxCharacters}
+            </div>
           </div>
 
-          <form
-            className={`flex flex-col mx-auto w-full md:w-2/3 lg:w-1/2 text-start justify-start gap-2`}
-            onSubmit={(e) => {
-              e.preventDefault();
+          <Button
+            disabled={!surveyPrompt || !manualSurveyTitle}
+            className="w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white"
+            onClick={() => {
+              dispatch(updateTopic(manualSurveyTitle));
+              dispatch(updateDescription(surveyPrompt));
+              router.push(
+                userToken && user
+                  ? "/surveys/manual-survey-create"
+                  : "/demo/add-question-m"
+              );
             }}
           >
-            <label htmlFor="">
-              Title
-              <input
-                type="text"
-                className="rounded-md py-2 px-3 border-[#BDBDBD] border w-full"
-                placeholder="Enter Title of Survey here"
-                style={{ border: "2px  solid #BDBDBD" }}
-                value={manualSurveyTitle}
-                onChange={(e) => {
-                  setManualSurveyTitle(e.target.value);
-                }}
-              />
-            </label>
-            <label htmlFor="Your Prompt">Survey Summary</label>
-            <div className="flex flex-col gap-2 relative">
-              <textarea
-                value={surveyPrompt}
-                name=""
-                id=""
-                placeholder="Provide a brief description of the survey"
-                className="rounded-md py-2 px-3 border w-full h-36 border-[#BDBDBD]"
-                style={{ border: "2px  solid #BDBDBD" }}
-                onChange={(e) => {
-                  if (e.target.value.length === 3000) {
-                    toast.warning("Prompt shouldn't exceed 3000 characters");
-                  }
-                  setSurveyPrompt(e.target.value);
-                }}
-                maxLength={3000}
-              ></textarea>
-              <div className="text-sm text-gray-500 mt-1 absolute bottom-2 right-4">
-                {surveyPrompt.length}/{maxCharacters} characters
-              </div>
-            </div>
-            {/* <button
-            className="gradient-border gradient-text px-6 py-3 w-1/3 rounded-lg flex items-center space-x-2"
-            disabled={!surveyPrompt ? true : false}
-          >
-            <span
-              className={!surveyPrompt ? "text-gray-300" : ""}
-            >
-              Continue
-            </span>
-            <Image src={stars} alt="stars" className={``} />
-          </button> */}
-            <ShadButton
-              disabled={!surveyPrompt && !manualSurveyTitle ? true : false}
-              className="auth-btn"
-              onClick={() => {
-                dispatch(updateTopic(manualSurveyTitle));
-                dispatch(updateDescription(surveyPrompt));
-                router.push(
-                  userToken && user
-                    ? "/surveys/add-question-m"
-                    : "/demo/add-question-m"
-                );
-              }}
-            >
-              Continue{" "}
-            </ShadButton>
-          </form>
-
-          {/* <div className="flex flex-col justify-center items-center gap-10 ">
-          <div>
-            <h1 className="text-lg mt-10">Try any of our Sample prompts.</h1>
-            <p className="text-sm">
-              Select one of our Pre-generated AI surveys
-            </p>
-          </div>
-
-          <div className={`md:flex justify-center gap-5 pb-4 items-center`}>
-            <div
-              className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-start mt-4 md:mt-0`}
-            >
-              <h1 className="text-lg text-start">
-                Student Satisfaction Survey
-              </h1>
-
-              <p className="text-start">
-                Assess learning experiences, teaching quality,{" "}
-                <br className="hidden lg:block" /> and academic support,
-                helping educational <br className="hidden lg:block" />{" "}
-                institutions improve student outcomes.
-              </p>
-            </div>
-
-            <div
-              className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0 `}
-            >
-              <h1 className="text-lg text-start">
-                Employee Engagement Survey
-              </h1>
-              <p className="text-start">
-                Measure staff satisfaction, motivation, and{" "}
-                <br className="hidden lg:block" /> workplace culture, helping
-                organizations <br className="hidden lg:block" /> improve
-                internal dynamics.
-              </p>
-            </div>
-            <div
-              className={`flex flex-col items-center pb-4 justify-center gap-5 border border-[#CC9BFD] bg-[#FAFAFA] rounded-md px-10 pt-10 text-center mt-4 md:mt-0`}
-            >
-              <h1 className="text-lg text-start">Event Feedback Survey</h1>
-              <p className="text-start">
-                Evaluate the success of events, conferences, or{" "}
-                <br className="hidden lg:block" /> meetings, gathering input
-                on content, <br className="hidden lg:block" /> organization,
-                and overall experience.
-              </p>
-            </div>
-          </div>
-        </div> */}
-        </div>
+            Continue
+          </Button>
+        </motion.form>
       </motion.div>
     </AnimatePresence>
   );

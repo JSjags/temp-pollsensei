@@ -152,7 +152,7 @@ export default function PollsenseiTriggerButton({
                 alt=""
                 width={16}
                 height={16}
-                className="size-4 w-auto"
+                className="size-4 w-auto -translate-y-1"
               />
             </motion.div>
           </Button>

@@ -3,6 +3,16 @@
 @tailwind utilities;
 @import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Playwrite+HR+Lijeva:wght@100..400&family=Yuji+Mai&display=swap");
 
+:root {
+  --font-lexend: "Lexend", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-lora: "Lora", serif;
+  --font-merriweather: "Merriweather", serif;
+  --font-sans: "DM Sans", sans-serif;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -30,6 +40,21 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --font-lexend: "Lexend", sans-serif;
+    --font-roboto: "Roboto", sans-serif;
+    --font-playfair: "Playfair Display", serif;
+    --font-montserrat: "Montserrat", sans-serif;
+    --font-lora: "Lora", serif;
+    --font-merriweather: "Merriweather", serif;
+    --font-sans: "DM Sans", sans-serif;
   }
 
   .dark {
@@ -57,6 +82,21 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --font-lexend: "Lexend", sans-serif;
+    --font-roboto: "Roboto", sans-serif;
+    --font-playfair: "Playfair Display", serif;
+    --font-montserrat: "Montserrat", sans-serif;
+    --font-lora: "Lora", serif;
+    --font-merriweather: "Merriweather", serif;
+    --font-sans: "DM Sans", sans-serif;
   }
 }
 
@@ -78,6 +118,7 @@
 html,
 body {
   height: 100%;
+  scroll-behavior: smooth;
 }
 
 .instructions {
@@ -306,7 +347,7 @@ input[type="number"] {
 .rate-id {
   width: 27px;
   height: 27px;
-  border: 1px solid #f0f2f5;
+  /* border: 1px solid #f0f2f5; */
   /* font-family: Helvetica; */
   font-size: 16px;
   font-weight: 700;
@@ -468,6 +509,65 @@ input[type="radio"].radio:checked:before {
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
+}
+
+/* Fonts declaration */
+
+.font-arial {
+  font-family: Arial, sans-serif;
+}
+
+.font-times {
+  font-family: "Times New Roman", Times, serif;
+}
+
+.font-monospace {
+  font-family: monospace;
+}
+
+.font-brush-script {
+  font-family: "Brush Script MT", cursive;
+}
+
+.font-lexend {
+  font-family: var(--font-lexend);
+}
+
+.font-roboto {
+  font-family: var(--font-roboto);
+}
+
+.font-playfair-display {
+  font-family: var(--font-playfair);
+}
+
+.font-brush-script-mt {
+  font-family: "Brush Script MT", cursive;
+}
+.font-times-new-roman {
+  font-family: "Times New Roman", Times, serif;
+}
+
+.font-montserrat {
+  font-family: var(--font-montserrat);
+}
+
+.font-lora {
+  font-family: var(--font-lora);
+}
+
+.font-merriweather {
+  font-family: var(--font-merriweather);
+}
+
+/* React toastify */
+
+.toastBody {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+.toastProgress {
+  background: #333f48 !important;
+  height: 2px !important;
 }
 
 .ql-editor {

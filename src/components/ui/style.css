@@ -47,10 +47,10 @@
 .rate-id {
   width: 27px;
   height: 27px;
-  border: 1px solid #f0f2f5;
+  /* border: 1px solid #f0f2f5; */
   /* font-family: Helvetica; */
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 900;
   line-height: 18.4px;
   color: #333333;
 }

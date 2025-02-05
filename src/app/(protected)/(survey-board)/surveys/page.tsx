@@ -52,7 +52,7 @@ const Page = (props: Props) => {
                 <div className="container px:2 sm:px-4 flex justify-end items-center gap-4">
                   <div className="flex justify-between items-center gap-4">
                     <ShadButton
-                      className="auth-btn"
+                      className="auth-btn !text-sm"
                       onClick={() => {
                         router.push("/surveys/create-survey");
                       }}

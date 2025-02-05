@@ -7,12 +7,12 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#F4F4F4] px-0 lg:px-10 py-6 min-h-screen">
-      <div className="px-2 sm:px-5 lg:px-0 lg:flex justify-between gap-3 items-start">
+    <div className="pt-0 py-6 sm:py-6 min-h-screen max-w-[1400px] mx-auto">
+      <div className="lg:flex justify-between gap-3 items-start">
         <aside className="">
           <SettingsSidebar />
         </aside>
-        <div className="flex flex-col min-h-[70vh] w-full mr-[9rem] rounded bg-[#FFFFFF]">
+        <div className="flex flex-1 flex-col min-h-[70vh] w-full max-w-[1000px] mr-4 rounded lg:bg-[#FFFFFF]">
           {children}
         </div>
       </div>

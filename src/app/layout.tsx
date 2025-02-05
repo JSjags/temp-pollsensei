@@ -1,86 +1,75 @@
-// import type { Metadata } from "next";
-// import { DM_Sans } from "next/font/google";
-// import "./globals.css";
-// import ReduxContext from "@/contexts/ReduxContext";
-// import { cn } from "@/lib/utils";
-// import { ToastContainer } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-// import { AOSInit } from "@/components/ui/Aos";
-// import { TanstackProvider } from "@/providers/TanstackProvider";
-// import { GoogleOAuthProvider } from "@react-oauth/google";
-// import { GoogleAnalytics } from "@next/third-parties/google";
-// import { CookieConsent } from "@/components/primitives/CookieConsent";
-// import { MixPanelProvider } from "@/contexts/MixpanelContext";
-// import UpgradeModal from "@/components/subscription/modal-upgrade";
-// import { SenseiProvider } from "@/contexts/SenseiContext";
-
-// const fontSans = DM_Sans({
-//   subsets: ["latin"],
-//   // weight: ["400", "500", "700"],
-//   variable: "--font-sans",
-// });
-// export const metadata: Metadata = {
-//   icons: "/favicon.ico?v=1",
-//   title: "PollSensei - Your end-to-end AI survey assistant",
-//   description:
-//     "Create surveys effortlessly with manual input or AI assistance. Streamline your survey creation process with our intuitive web app.",
-// };
-
-// export default function RootLayout({
-//   children,
-// }: Readonly<{
-//   children: React.ReactNode;
-// }>) {
-//   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-//   return (
-//     <html lang="en">
-//       <AOSInit />
-//       <body
-//         className={cn(
-//           "min-h-screen bg-background font-sans antialiased",
-//           fontSans.variable
-//         )}
-//       >
-//         <CookieConsent />
-//         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
-//         <GoogleOAuthProvider clientId={googleClientId}>
-//           <TanstackProvider>
-//             <ToastContainer className={`${cn(fontSans.variable)} z-50`} />
-//             <ReduxContext>
-//               <SenseiProvider>
-//                 <UpgradeModal />
-//                 <MixPanelProvider>{children}</MixPanelProvider>
-//               </SenseiProvider>
-//             </ReduxContext>
-//           </TanstackProvider>
-//         </GoogleOAuthProvider>
-//       </body>
-//     </html>
-//   );
-// }
-
-import MetaPixel from "@/components/MetaPixel";
-import UpgradeModal from "@/components/subscription/modal-upgrade";
-import { AOSInit } from "@/components/ui/Aos";
-import { MixPanelProvider } from "@/contexts/MixpanelContext";
-import ReduxContext from "@/contexts/ReduxContext";
-import { SenseiProvider } from "@/contexts/SenseiContext";
-import { cn } from "@/lib/utils";
-import { TanstackProvider } from "@/providers/TanstackProvider";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import {
+  DM_Sans,
+  Lexend,
+  Roboto,
+  Playfair_Display,
+  Montserrat,
+  Lora,
+  Merriweather,
+} from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import Script from "next/script";
+import type { NextFontWithVariable } from "next/dist/compiled/@next/font";
+import { cn } from "@/lib/utils";
+import { MixPanelProvider } from "@/contexts/MixpanelContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { TanstackProvider } from "@/providers/TanstackProvider";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import ReduxContext from "@/contexts/ReduxContext";
+import { SenseiProvider } from "@/contexts/SenseiContext";
+import UpgradeModal from "@/components/subscription/modal-upgrade";
+import { AOSInit } from "@/components/ui/Aos";
+import MetaPixel from "@/components/MetaPixel";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
-  // weight: ["400", "500", "700"],
   variable: "--font-sans",
-});
+  display: "swap",
+  preload: true,
+  adjustFontFallback: false,
+}) as NextFontWithVariable;
+
+const lexend = Lexend({
+  subsets: ["latin"],
+  variable: "--font-lexend",
+  display: "swap",
+  preload: true,
+}) as NextFontWithVariable;
+const roboto = Roboto({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-roboto",
+  display: "swap",
+  preload: true,
+}) as NextFontWithVariable;
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+  preload: true,
+}) as NextFontWithVariable;
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+  variable: "--font-montserrat",
+}) as NextFontWithVariable;
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-lora",
+  display: "swap",
+  preload: true,
+}) as NextFontWithVariable;
+const merriweather = Merriweather({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-merriweather",
+  display: "swap",
+  preload: true,
+}) as NextFontWithVariable;
 
 export const metadata: Metadata = {
   icons: "/favicon.ico?v=1",
@@ -135,7 +124,13 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
+          fontSans.variable,
+          lexend.variable,
+          roboto.variable,
+          playfair.variable,
+          montserrat.variable,
+          lora.variable,
+          merriweather.variable
         )}
       >
         {/* <CookieConsent /> */}
