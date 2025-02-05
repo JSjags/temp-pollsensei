@@ -2,6 +2,8 @@ import { get_android, get_ios, phone_1, phone_2 } from "@/assets/images";
 import Image from "next/image";
 import React from "react";
 import { motion } from "framer-motion";
+import { BiLogoPlayStore } from "react-icons/bi";
+import { FaAppStore } from "react-icons/fa";
 
 const GetAppSection: React.FC = () => {
   return (
@@ -49,21 +51,19 @@ const GetAppSection: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            className="flex items-center gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
           >
-            <Image src={get_ios} alt="Apple Store" className="w-32 md:w-36" />
+            <FaAppStore />
+            <span className="text-sm font-medium">Get on iPhone</span>
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            className="flex items-center gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
           >
-            <Image
-              src={get_android}
-              alt="Play Store"
-              className="w-32 md:w-36"
-            />
+            <BiLogoPlayStore />
+            <span className="text-sm font-medium">Get on Android</span>
           </motion.button>
         </motion.div>
       </motion.div>
