@@ -38,7 +38,7 @@ const Login = (props: Props) => {
             ? ed === "2"
               ? "/surveys/edit-survey"
               : ed === "3"
-              ? "/surveys/add-question-m"
+              ? "/surveys/manual-survey-create"
               : "/dashboard"
             : "/dashboard"
         }`

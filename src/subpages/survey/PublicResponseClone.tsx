@@ -375,6 +375,19 @@ const PublicResponse = () => {
     });
   };
 
+  // Helper function to check if an option is "Other" type
+  const isOtherOption = (option: string) => {
+    const otherOptions = [
+      "Others (please specify)",
+      "Other (please specify)",
+      "Others",
+      "Other",
+      "other",
+      "others",
+    ];
+    return otherOptions.includes(option);
+  };
+
   // Question rendering with enhanced UI and animations
   const renderQuestion = (quest: any, index: number, theme: string) => {
     return (
@@ -477,6 +490,22 @@ const PublicResponse = () => {
                         </Label>
                       </motion.div>
                     ))}
+                    {answers[quest.question]?.selected_options?.some(
+                      isOtherOption
+                    ) && (
+                      <Input
+                        type="text"
+                        placeholder="Please specify"
+                        className="mt-2"
+                        value={answers[quest.question]?.other_value || ""}
+                        onChange={(e) =>
+                          handleAnswerChange(quest.question, {
+                            ...answers[quest.question],
+                            other_value: e.target.value,
+                          })
+                        }
+                      />
+                    )}
                   </div>
                 );
 
@@ -516,6 +545,22 @@ const PublicResponse = () => {
                         </Label>
                       </motion.div>
                     ))}
+                    {answers[quest.question]?.selected_options?.some(
+                      isOtherOption
+                    ) && (
+                      <Input
+                        type="text"
+                        placeholder="Please specify"
+                        className="mt-2"
+                        value={answers[quest.question]?.other_value || ""}
+                        onChange={(e) =>
+                          handleAnswerChange(quest.question, {
+                            ...answers[quest.question],
+                            other_value: e.target.value,
+                          })
+                        }
+                      />
+                    )}
                   </RadioGroup>
                 );
 
@@ -553,45 +598,79 @@ const PublicResponse = () => {
                         </div>
                       ))}
                     </div>
+                    {answers[quest.question]?.scale_value &&
+                      isOtherOption(answers[quest.question]?.scale_value) && (
+                        <Input
+                          type="text"
+                          placeholder="Please specify"
+                          className="mt-2"
+                          value={answers[quest.question]?.other_value || ""}
+                          onChange={(e) =>
+                            handleAnswerChange(quest.question, {
+                              ...answers[quest.question],
+                              other_value: e.target.value,
+                            })
+                          }
+                        />
+                      )}
                   </RadioGroup>
                 );
 
               case "drop_down":
                 return (
-                  <Select
-                    onValueChange={(value) =>
-                      handleAnswerChange(quest.question, {
-                        drop_down_value: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger
-                      className="mb-4 bg-[#FAFAFA] w-full"
-                      style={{
-                        fontSize: `${question?.data?.question_text?.size}px`,
-                      }}
+                  <>
+                    <Select
+                      onValueChange={(value) =>
+                        handleAnswerChange(quest.question, {
+                          drop_down_value: value,
+                        })
+                      }
                     >
-                      <SelectValue
-                        placeholder="Select an option"
+                      <SelectTrigger
+                        className="mb-4 bg-[#FAFAFA] w-full"
                         style={{
                           fontSize: `${question?.data?.question_text?.size}px`,
                         }}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {quest.options?.map((option: any) => (
-                        <SelectItem
-                          key={option}
-                          value={option}
+                      >
+                        <SelectValue
+                          placeholder="Select an option"
                           style={{
                             fontSize: `${question?.data?.question_text?.size}px`,
                           }}
-                        >
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {quest.options?.map((option: any) => (
+                          <SelectItem
+                            key={option}
+                            value={option}
+                            style={{
+                              fontSize: `${question?.data?.question_text?.size}px`,
+                            }}
+                          >
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {answers[quest.question]?.drop_down_value &&
+                      isOtherOption(
+                        answers[quest.question]?.drop_down_value
+                      ) && (
+                        <Input
+                          type="text"
+                          placeholder="Please specify"
+                          className="mt-2"
+                          value={answers[quest.question]?.other_value || ""}
+                          onChange={(e) =>
+                            handleAnswerChange(quest.question, {
+                              ...answers[quest.question],
+                              other_value: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                  </>
                 );
 
               case "boolean":
@@ -742,6 +821,21 @@ const PublicResponse = () => {
                         </div>
                       ))}
                     </div>
+                    {answers[quest.question]?.scale_value &&
+                      isOtherOption(answers[quest.question]?.scale_value) && (
+                        <Input
+                          type="text"
+                          placeholder="Please specify"
+                          className="mt-2"
+                          value={answers[quest.question]?.other_value || ""}
+                          onChange={(e) =>
+                            handleAnswerChange(quest.question, {
+                              ...answers[quest.question],
+                              other_value: e.target.value,
+                            })
+                          }
+                        />
+                      )}
                   </RadioGroup>
                 );
 

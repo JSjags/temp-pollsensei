@@ -54,7 +54,7 @@ interface MultiChoiceQuestionEditProps {
   matrixRows?: string[];
   matrixColumns?: string[];
   surveyData?: SurveyData;
-  can_accept_media?: boolean 
+  can_accept_media?: boolean;
 }
 
 const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
@@ -87,6 +87,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   }>({});
   const [previewValue, setPreviewValue] = useState<any>("");
   const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [ratingLabels, setRatingLabels] = useState<string[]>([]);
 
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
@@ -293,6 +294,12 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       case "likert_scale":
         setEditedOptions([...defaultLikertOptions]);
         break;
+      case "rating_scale":
+        const range = extractRange(editedQuestion);
+        const { min = 1, max = 5 } = range || {};
+        const labels = generateRatingLabels(min, max);
+        setRatingLabels(labels);
+        break;
       default:
         setEditedOptions([]);
     }
@@ -302,6 +309,12 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     const newOptions = [...editedOptions];
     newOptions[index] = value;
     setEditedOptions(newOptions);
+  };
+
+  const handleRatingLabelChange = (index: number, value: string) => {
+    const newLabels = [...ratingLabels];
+    newLabels[index] = value;
+    setRatingLabels(newLabels);
   };
 
   const handleAddOption = () => {
@@ -366,6 +379,13 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           undefined,
           rows.filter((r) => r.trim()),
           columns.filter((c) => c.trim())
+        );
+      } else if (editedQuestionType === "rating_scale") {
+        onSave(
+          editedQuestion,
+          ratingLabels.filter((label) => label.trim()),
+          editedQuestionType,
+          isRequired
         );
       } else {
         onSave(
@@ -554,7 +574,10 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       case "rating_scale":
         const range = extractRange(editedQuestion);
         const { min, max } = range || { min: 1, max: 5 };
-        const labels = generateRatingLabels(min ?? 1, max ?? 5);
+        const labels =
+          ratingLabels.length > 0
+            ? ratingLabels
+            : generateRatingLabels(min ?? 1, max ?? 5);
 
         return (
           <RadioGroup
@@ -574,12 +597,12 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
                 />
                 <Input
                   value={label}
-                  onChange={(e) => {
-                    const newLabels = [...labels];
-                    newLabels[idx] = e.target.value;
-                    // Update labels logic here
-                  }}
-                  className="border-none shadow-none text-center w-20 text-sm"
+                  onChange={(e) => handleRatingLabelChange(idx, e.target.value)}
+                  readOnly
+                  className={cn(
+                    "border-none shadow-none text-center text-sm px-0",
+                    `min-w-20 max-w-20`
+                  )}
                 />
               </div>
             ))}

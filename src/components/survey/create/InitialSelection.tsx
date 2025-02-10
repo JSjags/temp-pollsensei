@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { saveGeneratedBy, updateSurveyType } from "@/redux/slices/survey.slice";
 import { motion, AnimatePresence } from "framer-motion";
-import store from "@/redux/store";
+import store, { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
 
 interface InitialSelectionProps {
   selectedDiv: string | null;
@@ -20,6 +21,8 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({
 }) => {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const { user } = useSelector((state: RootState) => state.user);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -115,7 +118,10 @@ const InitialSelection: React.FC<InitialSelectionProps> = ({
                 dispatch(saveGeneratedBy("manually"));
                 dispatch(updateSurveyType("Both"));
               },
-              buttonAction: () => router.push("/surveys/create-manual"),
+              buttonAction: () =>
+                router.push(
+                  user ? "/surveys/create-manual" : "/demo/create-manual"
+                ),
               isSelected: selectedDiv === "2",
             },
           ].map((card, index) => (
