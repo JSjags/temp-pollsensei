@@ -42,6 +42,10 @@ import InitialSelection from "@/components/survey/create/InitialSelection";
 import SurveyTypeSelection from "@/components/survey/create/SurveyTypeSelection";
 import PromptForm from "@/components/survey/create/PromptForm";
 import TopicSelectionModal from "@/components/survey/create/TopicSelectionModal";
+import {
+  useUnAuthCreateAiSurveyMutation,
+  useUnAuthGenerateTopicsMutation,
+} from "@/services/unauth-survey.service";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -80,7 +84,7 @@ const UnAuthCreateSurveyPage = () => {
   );
   const dispatch = useDispatch();
   const [createAiSurvey, { data, isLoading, isSuccess }] =
-    useCreateAiSurveyMutation();
+    useUnAuthCreateAiSurveyMutation();
   const [
     generateTopics,
     {
@@ -90,7 +94,7 @@ const UnAuthCreateSurveyPage = () => {
       isError: isTopicError,
       error: topicError,
     },
-  ] = useGenerateTopicsMutation();
+  ] = useUnAuthGenerateTopicsMutation();
 
   // Get all URL params
   const params = new URLSearchParams(searchParams.toString());
