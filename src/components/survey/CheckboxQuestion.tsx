@@ -193,7 +193,7 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-4">
               <span className="text-sm text-gray-500">Required</span>
               <Switch
                 checked={is_required}

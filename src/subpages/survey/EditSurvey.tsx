@@ -823,26 +823,26 @@ const EditSurvey = () => {
         open={(!userToken || !user) && showAuthModal}
         onOpenChange={() => setShowAuthModal(false)}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white rounded-2xl shadow-xl">
           <DialogHeader>
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                <IoDocumentOutline className="w-8 h-8 text-purple-600" />
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center shadow-inner transform hover:scale-105 transition-transform duration-200">
+                <IoDocumentOutline className="w-10 h-10 text-purple-600" />
               </div>
-              <DialogTitle className="text-2xl font-semibold text-gray-900">
+              <DialogTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-purple-900">
                 Authentication Required
               </DialogTitle>
-              <DialogDescription className="text-gray-600">
+              <DialogDescription className="text-gray-600 text-lg leading-relaxed max-w-sm">
                 To continue creating your survey and access all features, please
                 log in to your account or sign up if you're new here.
               </DialogDescription>
             </div>
           </DialogHeader>
 
-          <div className="flex flex-col w-full gap-3 pt-2">
+          <div className="flex flex-col w-full gap-4 pt-6">
             <Button
               onClick={() => router.push("/login?ed=2")}
-              className="w-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white hover:opacity-90 transition-opacity"
+              className="w-full h-12 bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white text-lg font-medium rounded-xl hover:opacity-90 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg"
             >
               Log In
             </Button>
@@ -850,14 +850,22 @@ const EditSurvey = () => {
             <Button
               onClick={() => router.push("/register?ed=2")}
               variant="outline"
-              className="w-full border border-purple-600 text-purple-600 hover:bg-purple-50 transition-colors"
+              className="w-full h-12 border-2 border-purple-600 text-purple-600 text-lg font-medium rounded-xl hover:bg-purple-50 transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md"
             >
               Sign Up
             </Button>
           </div>
 
-          <p className="text-sm text-gray-500 text-center pt-4">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
+          <p className="text-sm text-gray-500 text-center pt-6 px-4 leading-relaxed">
+            By continuing, you agree to our{" "}
+            <span className="text-purple-600 hover:text-purple-700 cursor-pointer">
+              Terms of Service
+            </span>{" "}
+            and{" "}
+            <span className="text-purple-600 hover:text-purple-700 cursor-pointer">
+              Privacy Policy
+            </span>
+            .
           </p>
         </DialogContent>
       </Dialog>

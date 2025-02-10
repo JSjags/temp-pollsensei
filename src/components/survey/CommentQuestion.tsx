@@ -170,29 +170,29 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           )}
 
           {pathname.includes("edit-survey") && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Required</span>
-              <Switch
-                checked={is_required}
-                onCheckedChange={
-                  setIsRequired && ((checked) => setIsRequired(checked))
-                }
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
-              />
-            </div>
-          )}
-          {pathname.includes("edit-survey") && (
             <div className="flex items-center gap-4">
-              <span>Allow Audio</span>
-              <Switch
-                checked={can_accept_media}
-                onCheckedChange={
-                  setCanAcceptMedia
-                    ? (checked: boolean) => setCanAcceptMedia(checked)
-                    : undefined
-                }
-                className="bg-[#9D50BB] "
-              />
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Required</span>
+                <Switch
+                  checked={is_required}
+                  onCheckedChange={
+                    setIsRequired && ((checked) => setIsRequired(checked))
+                  }
+                  className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+                />
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-500">Allow Audio</span>
+                <Switch
+                  checked={can_accept_media}
+                  onCheckedChange={
+                    setCanAcceptMedia
+                      ? (checked: boolean) => setCanAcceptMedia(checked)
+                      : undefined
+                  }
+                  className="bg-[#9D50BB] "
+                />
+              </div>
             </div>
           )}
 

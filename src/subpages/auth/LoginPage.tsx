@@ -67,6 +67,15 @@ const LoginPage = () => {
       toast.success("Login successful");
       setState(true);
       setLoginState(false);
+      if (ed) {
+        if (ed === "2") {
+          router.push("/surveys/edit-survey");
+        } else if (ed === "3") {
+          router.push("/surveys/manual-survey-create");
+        }
+      } else {
+        router.push("/dashboard");
+      }
     },
     onError: (error: any) => {
       // toast.error(
@@ -84,6 +93,15 @@ const LoginPage = () => {
     onSuccess: (response) => {
       dispatch(updateUser(response.data.data));
       toast.success("Sign in success");
+      if (ed) {
+        if (ed === "2") {
+          router.push("/surveys/edit-survey");
+        } else if (ed === "3") {
+          router.push("/surveys/manual-survey-create");
+        }
+      } else {
+        router.push("/dashboard");
+      }
     },
     onError: (error: any) => {
       toast.error(
@@ -95,9 +113,17 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (user) {
-      router.push("/dashboard");
+      if (ed) {
+        if (ed === "2") {
+          router.push("/surveys/edit-survey");
+        } else if (ed === "3") {
+          router.push("/surveys/manual-survey-create");
+        }
+      } else {
+        router.push("/dashboard");
+      }
     }
-  }, [user, router]);
+  }, [user, router, ed]);
 
   const onSubmit = (values: { email: string; password: string }) => {
     setLoginState(true);
@@ -219,7 +245,7 @@ const LoginPage = () => {
                     ? ed === "2"
                       ? "/surveys/edit-survey"
                       : ed === "3"
-                      ? "/surveys/add-question-m"
+                      ? "/surveys/manual-survey-create"
                       : undefined
                     : undefined
                 }
@@ -307,7 +333,7 @@ const LoginPage = () => {
               transition={{ delay: 0.4 }}
               className="auth-subtitle text-center text-white/90"
             >
-              PollSensei helps you to Create suggest questions, <br /> formats,
+              PollSensei helps you to create suggest questions, <br /> formats,
               methodologies
             </motion.h5>
           </div>
@@ -501,7 +527,7 @@ const LoginPage = () => {
                     ? ed === "2"
                       ? "/surveys/edit-survey"
                       : ed === "3"
-                      ? "/surveys/add-question-m"
+                      ? "/surveys/manual-survey-create"
                       : undefined
                     : undefined
                 }

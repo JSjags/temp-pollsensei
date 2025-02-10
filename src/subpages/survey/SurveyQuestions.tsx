@@ -99,13 +99,13 @@ const SurveyQuestions = () => {
   return (
     <div
       className={cn(
-        `flex flex-col gap-5 w-full`,
+        `flex flex-col gap-5 w-full min-h-screen`,
         data?.data?.theme && data?.data?.theme
       )}
     >
       {data && data?.data && (
         <div
-          className={`flex justify-center items-center mx-auto gap-10 w-full lg:px-16`}
+          className={`flex justify-center items-center mx-auto gap-10 w-full lg:px-16 max-w-[80%]`}
         >
           <div
             className={`w-full flex flex-col overflow-y-auto max-h-screen custom-scrollbar`}
