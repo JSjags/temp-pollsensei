@@ -337,7 +337,9 @@ const FeaturesSection: React.FC = () => {
         className="py-16 px-6 lg:px-24 bg-white"
       >
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-medium mb-4">Explore PollSensei</h2>
+          <h2 className="text-4xl font-medium mb-4 text-black">
+            Explore PollSensei
+          </h2>
           <p className="text-gray-600 mb-8">How PollSensei Works</p>
           <div className="rounded-xl overflow-hidden shadow-2xl">
             <EmbedVideo />

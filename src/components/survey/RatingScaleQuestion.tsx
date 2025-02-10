@@ -156,13 +156,22 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
       const { min, max } = range;
       const labels = generateRatingLabels(min, max);
       setDynamicOptions(labels);
+      // Save the generated options when they change
+      if (onSave) {
+        onSave(question, labels, questionType, index);
+      }
     } else if (options && options.length > 0) {
       setDynamicOptions(options);
     } else {
       // Default 5-point scale if no range or options provided
-      setDynamicOptions(generateRatingLabels(1, 5));
+      const defaultOptions = generateRatingLabels(1, 5);
+      setDynamicOptions(defaultOptions);
+      // Save the default options
+      if (onSave) {
+        onSave(question, defaultOptions, questionType, index);
+      }
     }
-  }, [question, options]);
+  }, [question, options, onSave, questionType, index]);
 
   const handleRatingChange = (value: string) => {
     setSelectedRating(value);

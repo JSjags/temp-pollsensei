@@ -90,6 +90,7 @@ const AddQuestionPage = () => {
   const selectedSurveyType = useSelector(
     (state: RootState) => state?.survey?.survey_type
   );
+  const qq = useSelector((state: RootState) => state?.question);
   const [sections, setSections] = useState<any[][]>([[]]); // Initialize with one empty section
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -263,9 +264,6 @@ const AddQuestionPage = () => {
     setIsEditing(false);
   };
 
-  console.log(sectionTopic);
-  console.log(sectionDescription);
-
   const handleSaveEdittedQuestion = (
     updatedQuestion: string,
     updatedOptions: string[],
@@ -296,7 +294,8 @@ const AddQuestionPage = () => {
     setIsEdit(false);
   };
 
-  console.log(survey);
+  console.log(surveyData);
+  console.log(surveyData);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -347,7 +346,7 @@ const AddQuestionPage = () => {
       }
     }
 
-    // console.log(store.getState().survey);
+    console.log(store.getState().survey);
 
     try {
       const updatedSurvey = {
@@ -366,7 +365,6 @@ const AddQuestionPage = () => {
   useEffect(() => {
     if (isSuccess) {
       setReview((prev) => !prev);
-      toast.success("Survey created successfully");
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
@@ -1056,10 +1054,10 @@ const AddQuestionPage = () => {
               onClick={handleSurveyCreation}
             >
               {isLoading ? (
-                <>
+                <div className="flex gap-2 items-center">
                   <div className="h-4 w-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
                   Publishing...
-                </>
+                </div>
               ) : (
                 <div className="flex gap-2 items-center justify-center">
                   <VscLayersActive className="mr-2 h-5 w-5 animate-pulse" />
