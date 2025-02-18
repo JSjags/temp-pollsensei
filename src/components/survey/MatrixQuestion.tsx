@@ -17,9 +17,9 @@ Visual representation:
 │    [Matrix Table - White bg, rounded corners, light shadow]  │
 │    ┌──────────────────────────────────────────────────────┐  │
 │    │           Col 1     Col 2     Col 3     Col 4        │  │
-│    │ Row 1      □         □         □         □          │  │
-│    │ Row 2      □         □         □         □          │  │
-│    │ Row 3      □         □         □         □          │  │
+│    │ Row 1      ○         ○         ○         ○          │  │
+│    │ Row 2      ○         ○         ○         ○          │  │
+│    │ Row 3      ○         ○         ○         ○          │  │
 │    └──────────────────────────────────────────────────────┘  │
 │                                                              │
 │    [Edit/Delete Buttons - If in edit mode]                   │
@@ -48,7 +48,7 @@ import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
 import { Check, GripVertical, Grid, SquareMousePointer } from "lucide-react";
 import { Switch } from "../ui/switch";
-import { Checkbox } from "../ui/shadcn-checkbox";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import ActionButtons from "./ActionButtons";
 import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
@@ -75,6 +75,7 @@ interface MatrixQuestionProps {
   ) => void;
   isEdit?: boolean;
   surveyData?: SurveyData;
+  response?: { [key: string]: string };
 }
 
 const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
@@ -93,6 +94,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
   setIsRequired,
   isEdit = false,
   surveyData,
+  response,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -103,36 +105,18 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
   );
 
   const [selectedItems, setSelectedItems] = useState<{
-    [key: string]: boolean;
-  }>({});
+    [key: string]: string;
+  }>(response || {});
 
-  const handleMatrixItemSelect = (rowIndex: number, colIndex: number) => {
-    if (questionType === "matrix_multiple_choice") {
-      // For matrix_multiple_choice, allow multiple selections
-      const key = `${rowIndex}-${colIndex}`;
-      setSelectedItems((prev) => ({
-        ...prev,
-        [key]: !prev[key],
-      }));
-    } else {
-      // For matrix_checkbox, only allow one selection per row
-      const newSelectedItems = { ...selectedItems };
+  const handleMatrixItemSelect = (rowIndex: number, value: string) => {
+    if (response) return; // Prevent changes if response exists
 
-      // Clear all selections in the current row
-      columns?.forEach((_, columnIndex) => {
-        const key = `${rowIndex}-${columnIndex}`;
-        newSelectedItems[key] = false;
-      });
-
-      // Set the new selection
-      const key = `${rowIndex}-${colIndex}`;
-      newSelectedItems[key] = true;
-
-      setSelectedItems(newSelectedItems);
-    }
+    const newSelectedItems = { ...selectedItems };
+    newSelectedItems[rowIndex] = value;
+    setSelectedItems(newSelectedItems);
 
     if (onChange) {
-      onChange(rowIndex, colIndex);
+      onChange(rowIndex, columns?.indexOf(value) || 0);
     }
   };
 
@@ -239,22 +223,36 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                         >
                           {rowLabel}
                         </td>
-                        {columns?.map((_, columnIndex) => (
-                          <td
-                            key={columnIndex}
-                            className="border-b border-gray-200 text-center p-2"
+                        <td
+                          colSpan={columns?.length}
+                          className="border-b border-gray-200 p-2"
+                        >
+                          <RadioGroup
+                            value={selectedItems[rowIndex]}
+                            onValueChange={(value) =>
+                              handleMatrixItemSelect(rowIndex, value)
+                            }
+                            className="flex justify-around"
+                            disabled={!!response}
                           >
-                            <Checkbox
-                              checked={
-                                selectedItems[`${rowIndex}-${columnIndex}`]
-                              }
-                              onCheckedChange={() =>
-                                handleMatrixItemSelect(rowIndex, columnIndex)
-                              }
-                              className="w-4 h-4"
-                            />
-                          </td>
-                        ))}
+                            {columns?.map((col) => (
+                              <div
+                                key={col}
+                                className="flex items-center space-x-2"
+                              >
+                                <RadioGroupItem
+                                  value={col}
+                                  id={`${rowIndex}-${col}`}
+                                  className={
+                                    response
+                                      ? "cursor-not-allowed opacity-50"
+                                      : ""
+                                  }
+                                />
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -291,23 +289,19 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
               />
             </div>
           )}
-
-          <div className="flex justify-end">
-            {!pathname.includes("edit-survey") &&
-              !pathname.includes("surveys/question") && (
-                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
-                  <span className="flex items-center gap-1 text-xs">
-                    <Grid className="text-[#9D50BB] w-3 h-3" />
-                    Matrix Question
-                  </span>
-                </p>
-              )}
-          </div>
         </div>
 
         {pathname.includes("survey-response-upload") && status && (
           <div>{getStatus(status)}</div>
         )}
+      </div>
+      <div className="flex justify-end mt-4">
+        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1 text-xs">
+            <Grid className="text-[#9D50BB] w-3 h-3" />
+            Matrix Question
+          </span>
+        </p>
       </div>
     </div>
   );

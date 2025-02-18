@@ -424,9 +424,9 @@ const PublicResponse = () => {
                 </span>
               )}
             </p>
-            {quest.description && (
+            {/* {quest.description && (
               <p className="text-gray-600 text-sm mt-1">{quest.description}</p>
-            )}
+            )} */}
           </div>
         </motion.div>
 

@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { BsExclamation } from "react-icons/bs";
-import { Check } from "lucide-react";
+import {
+  Check,
+  CheckSquare,
+  CircleCheck,
+  SquareMousePointer,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Checkbox } from "../ui/shadcn-checkbox";
 
 interface AnswerMultiChoiceQuestionProps {
   question: string;
@@ -49,34 +56,38 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   }, [selectedOptions]);
 
   const handleOptionChange = (option: string) => {
-    const isSelected = localSelectedOptions.includes(option);
-    const updatedOptions = isSelected
-      ? localSelectedOptions.filter((item) => item !== option)
-      : [...localSelectedOptions, option];
-
-    setLocalSelectedOptions(updatedOptions);
-
-    if (onChange) {
-      onChange(updatedOptions);
-    }
-
-  
+    // Prevent changes since these are user responses
+    return;
   };
-
-
 
   const getStatus = useMemo(() => {
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1 transition-all duration-200 hover:bg-green-600">
+            <Check
+              strokeWidth={1.5}
+              className="w-4 h-4 text-white"
+              aria-label="Passed validation"
+            />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-1 mr-3">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1 transition-all duration-200 hover:bg-red-600">
+            <BsExclamation
+              className="w-4 h-4 text-white"
+              aria-label="Failed validation"
+            />
+          </div>
+        );
+      case "pending":
+        return (
+          <div className="bg-yellow-500 rounded-full p-1 transition-all duration-200 hover:bg-yellow-600">
+            <span
+              className="block w-4 h-4 animate-pulse"
+              aria-label="Validation pending"
+            />
           </div>
         );
       default:
@@ -86,9 +97,17 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
 
   return (
     <div
-      className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: `${questionText?.name}`,
         fontSize: `${questionText?.size}px`,
       }}
     >
@@ -100,37 +119,31 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
         }
       />
       <div className="w-full">
-        <div className="flex justify-between w-full items-center">
+        <div className="flex justify-between w-full items-start gap-2">
           <h3 className="text-lg font-semibold text-start">
             <span>{index}. </span> {question}
           </h3>
-          {!(
-            pathname === "/surveys/edit-survey" ||
-            pathname.includes("survey-response-upload") ||
-            pathname.includes("validate-response") ||
-            pathname.includes("validate-res")
-          ) && <p>{questionType}</p>}
+          {pathname.includes("survey-response-upload") && status && (
+            <div>{getStatus}</div>
+          )}
         </div>
         {options?.map((option, optionIndex) => (
           <div key={optionIndex} className="flex items-center my-2">
             <label
-              className="relative flex items-center cursor-pointer"
+              className={cn(
+                "relative flex items-center w-full",
+                "cursor-not-allowed opacity-75"
+              )}
               htmlFor={`option-${optionIndex}`}
               aria-label={option}
             >
-              <input
-                type="checkbox"
+              <Checkbox
                 id={`option-${optionIndex}`}
-                name={question}
                 checked={localSelectedOptions?.includes(option)}
-                onChange={() => handleOptionChange(option)}
-                className="mr-2 text-[#5B03B2] hidden peer"
-                aria-checked={localSelectedOptions?.includes(option)}
+                onCheckedChange={() => handleOptionChange(option)}
+                disabled={true}
+                className="mr-2 data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-[#5B03B2]"
               />
-              <span
-                className={`w-5 h-5 border-2  shadow-inner flex flex-col peer-checked:before:bg-black peer-hover:shadow-[0_0_5px_0px_rgba(255,165,0,0.8)_inset] before:content-[''] before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full`}
-                style={{ borderColor: colorTheme }}
-              ></span>
               <span className="ml-2">{option}</span>
             </label>
           </div>
@@ -152,9 +165,21 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
           </div>
         )}
       </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus}</div>
-      )}
+
+      <div className="flex justify-end">
+        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1 text-xs capitalize">
+            {questionType === "multiple_choice" ? (
+              <SquareMousePointer className="text-[#9D50BB] w-3 h-3" />
+            ) : questionType === "checkbox" ? (
+              <CheckSquare className="text-[#9D50BB] w-3 h-3" />
+            ) : (
+              <CircleCheck className="text-[#9D50BB] w-3 h-3" />
+            )}
+            {questionType.split("_").join(" ")}
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

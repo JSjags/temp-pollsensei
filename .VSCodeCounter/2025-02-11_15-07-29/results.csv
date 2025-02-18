@@ -1,0 +1,736 @@
+"filename", "language", "TypeScript", "JavaScript", "TypeScript JSX", "XML", "JSON", "CSS", "JavaScript JSX", "JSON with Comments", "Markdown", "YAML", "(Read Error)", "comment", "blank", "total"
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/.eslintrc.json", "JSON", 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/.github/workflows/deploy.yml", "YAML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 0, 0, 6, 34
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 0, 58, 0, 0, 0, 29, 87
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/components.json", "JSON", 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/mixpanel-browser.d.ts", "TypeScript", 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/next.config.mjs", "JavaScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/package-lock.json", "JSON", 0, 0, 0, 0, 11290, 0, 0, 0, 0, 0, 0, 0, 1, 11291
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/package.json", "JSON", 0, 0, 0, 0, 146, 0, 0, 0, 0, 0, 0, 0, 1, 147
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/postcss.config.mjs", "JavaScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 9
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/analysis/no-data.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/background.svg", "XML", 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 1, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/chat.svg", "XML", 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 1, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/facebook.svg", "XML", 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/goggle.svg", "XML", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 1, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/index.js", "JavaScript", 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/logo.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/step2.svg", "XML", 0, 0, 0, 189, 0, 0, 0, 0, 0, 0, 0, 0, 1, 190
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/steps.svg", "XML", 0, 0, 0, 297, 0, 0, 0, 0, 0, 0, 0, 0, 1, 298
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/auth/steps2.svg", "XML", 0, 0, 0, 189, 0, 0, 0, 0, 0, 0, 0, 0, 1, 190
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/coming-soon.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/contact-us/map.svg", "XML", 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/help-centre/contact.svg", "XML", 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/help-centre/faqs.svg", "XML", 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 1, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/help-centre/hero-bg.svg", "XML", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/help-centre/poll-professor.svg", "XML", 0, 0, 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 1, 60
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/help-centre/video-tutorials.svg", "XML", 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/illustrations/editor.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones-bg.svg", "XML", 0, 0, 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 1, 97
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/Analysis.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/Design.svg", "XML", 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/Finish flag.svg", "XML", 0, 0, 0, 92, 0, 0, 0, 0, 0, 0, 0, 0, 1, 93
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/Report.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/Share.svg", "XML", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/Start.svg", "XML", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/Survey.svg", "XML", 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/admin.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/chatbot.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/money.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/milestones/validate.svg", "XML", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/no-data.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/payment/paystack.svg", "XML", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/close.svg", "XML", 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/earn.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/home.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/learning-hub.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/open.svg", "XML", 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/payouts.svg", "XML", 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/profile.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/referrals.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/settings.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/shop.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/survey-board.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/sidebar/survey-settings.svg", "XML", 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/subscription/bags.svg", "(Read Error)", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/subscription/billings.svg", "(Read Error)", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/survey-list/no-survey.svg", "XML", 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 1, 110
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/svg/closeToast.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/svg/errorToast.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/svg/successToast.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/assets/svg/warnToast.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/next.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/public/vercel.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/@types/reactjs-social-login.d.ts", "TypeScript", 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 7
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(auth)/forgot-password/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(auth)/globals.css", "CSS", 0, 0, 0, 0, 0, 68, 0, 0, 0, 0, 0, 8, 3, 79
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(auth)/invite/complete-setup/page.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(auth)/invite/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(auth)/layout.tsx", "TypeScript JSX", 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(auth)/login/page.tsx", "TypeScript JSX", 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 54
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(auth)/register/page.tsx", "TypeScript JSX", 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 27
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/help-centre/contact-us/page.tsx", "TypeScript JSX", 0, 0, 158, 0, 0, 0, 0, 0, 0, 0, 0, 3, 7, 168
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/help-centre/faqs/page.tsx", "TypeScript JSX", 0, 0, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 70
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/help-centre/layout.tsx", "TypeScript JSX", 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 23, 4, 56
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/help-centre/page.tsx", "TypeScript JSX", 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 109
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/help-centre/tutorials/page.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/layout.tsx", "TypeScript JSX", 0, 0, 160, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10, 172
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/account-security/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/layout.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/notifications/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/page.tsx", "TypeScript JSX", 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/payment/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/profile/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/subscription/checkout/page.tsx", "TypeScript JSX", 0, 0, 130, 0, 0, 0, 0, 0, 0, 0, 0, 2, 20, 152
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/subscription/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/settings/subscription/success/page.tsx", "TypeScript JSX", 0, 0, 103, 0, 0, 0, 0, 0, 0, 0, 0, 9, 13, 125
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/[id]/analysis/page.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/[id]/page.tsx", "TypeScript JSX", 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/[id]/survey-response-upload/page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/[id]/validate-response/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/add-new-section/page.tsx", "TypeScript JSX", 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/create-manual/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/create-survey/page.tsx", "TypeScript JSX", 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/edit-submitted-survey/[id]/page.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/edit-survey/page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 24
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/layout.tsx", "TypeScript JSX", 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 55
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/loading.tsx", "TypeScript JSX", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 36
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/manual-survey-create/page.tsx", "TypeScript JSX", 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/page.tsx", "TypeScript JSX", 0, 0, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 94
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/preview-survey/page.tsx", "TypeScript JSX", 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/question/[id]/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/surveys/survey-list/page.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/(survey-board)/team-members/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/analysis/page.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/calendar/page.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 28
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/dashboard/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/earn/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/layout.tsx", "TypeScript JSX", 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/learning-hub/(sub-learning-hub)/articles/[id]/ArticleDetailsPage.tsx", "TypeScript JSX", 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 41, 10, 141
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/learning-hub/(sub-learning-hub)/articles/[id]/page.tsx", "TypeScript JSX", 0, 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 3, 12, 72
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/learning-hub/(sub-learning-hub)/articles/page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/learning-hub/(sub-learning-hub)/layout.tsx", "TypeScript JSX", 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 51
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/learning-hub/(sub-learning-hub)/tutorials/page.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 19
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/learning-hub/page.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/loading.tsx", "TypeScript JSX", 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 37
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/milestone/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/payouts/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/profile/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/referrals/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/shop/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/survey-settings/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/surveys/[id]/validate-res/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(protected)/user-review/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/about-us/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 170, 15, 196
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/contact/page.tsx", "TypeScript JSX", 0, 0, 175, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 185
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/create-manual/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/create-survey/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/edit-survey/page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 24
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/layout.tsx", "TypeScript JSX", 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 6, 8, 141
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/manual-survey-create/page.tsx", "TypeScript JSX", 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/[id]/analysis/page.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/[id]/page.tsx", "TypeScript JSX", 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/[id]/survey-response-upload/page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/[id]/validate-response/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/add-new-section/page.tsx", "TypeScript JSX", 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/create-manual/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/create-survey/page.tsx", "TypeScript JSX", 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/edit-submitted-survey/[id]/page.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/edit-survey/page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 4, 6, 24
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/layout.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 27
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/loading.tsx", "TypeScript JSX", 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 37
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/page.tsx", "TypeScript JSX", 0, 0, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 94
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/preview-survey/page.tsx", "TypeScript JSX", 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/question/[id]/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/demo/surveys/survey-list/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 18
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/features/page.tsx", "TypeScript JSX", 0, 0, 135, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 145
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/layout.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 7, 2, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/pricing/page.tsx", "TypeScript JSX", 0, 0, 122, 0, 0, 0, 0, 0, 0, 0, 0, 98, 16, 236
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/privacy-policy/page.tsx", "TypeScript JSX", 0, 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 90
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/resource-hub/(sub-resource-hub)/articles/[id]/ArticleDetailsPage.tsx", "TypeScript JSX", 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 41, 10, 141
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/resource-hub/(sub-resource-hub)/articles/[id]/page.tsx", "TypeScript JSX", 0, 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 3, 12, 72
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/resource-hub/(sub-resource-hub)/articles/page.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/resource-hub/(sub-resource-hub)/layout.tsx", "TypeScript JSX", 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 51
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/resource-hub/(sub-resource-hub)/tutorials/page.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 19
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/resource-hub/layout.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/resource-hub/page.tsx", "TypeScript JSX", 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 41
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/survey-public-response/[id]/page.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9, 18
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/terms-of-service/page.tsx", "TypeScript JSX", 0, 0, 126, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 131
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/verify-email/loading.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(public)/verify-email/page.tsx", "TypeScript JSX", 0, 0, 129, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 142
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/faqs/drafts/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/faqs/layout.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 18
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/faqs/live-faqs/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/faqs/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/layout.tsx", "TypeScript JSX", 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 31
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/referrers/CreateOrEditReferrerSheet.tsx", "TypeScript JSX", 0, 0, 164, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 180
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/referrers/[id]/page.tsx", "TypeScript JSX", 0, 0, 231, 0, 0, 0, 0, 0, 0, 0, 0, 6, 13, 250
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/referrers/page.tsx", "TypeScript JSX", 0, 0, 291, 0, 0, 0, 0, 0, 0, 0, 0, 3, 31, 325
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/reviews/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/subscriptions/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/super-admin-survey/page.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/super-admin/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/tutorials/layout.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 18
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/tutorials/page.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/tutorials/text-tutorials/page.tsx", "TypeScript JSX", 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/tutorials/video-tutorial/page.tsx", "TypeScript JSX", 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/tutorials/web-articles/page.tsx", "TypeScript JSX", 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/(superadmin)/users/page.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 13
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/globals.css", "CSS", 0, 0, 0, 0, 0, 530, 0, 0, 0, 0, 0, 20, 76, 626
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/layout.tsx", "TypeScript JSX", 0, 0, 147, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 155
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/not-found.tsx", "TypeScript JSX", 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 34
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/app/page.tsx", "TypeScript JSX", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 290, 19, 321
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/background.svg", "XML", 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 1, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/chat.svg", "XML", 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 1, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/facebook.svg", "XML", 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/goggle.svg", "XML", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 1, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/index.js", "JavaScript", 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/logo.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/step2.svg", "XML", 0, 0, 0, 189, 0, 0, 0, 0, 0, 0, 0, 0, 1, 190
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/steps.svg", "XML", 0, 0, 0, 297, 0, 0, 0, 0, 0, 0, 0, 0, 1, 298
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/auth/steps2.svg", "XML", 0, 0, 0, 189, 0, 0, 0, 0, 0, 0, 0, 0, 1, 190
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/1.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/2.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/3.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/4.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/5.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/6.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Carbonible.svg", "XML", 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Collect_data.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Design.svg", "XML", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Escro_tech.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/InvEmt.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Mail.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Oaks_intelligence.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/PollSensei_avatar.svg", "XML", 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 1, 79
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Quantitative_survey.svg", "XML", 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 1, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/Sparkly.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/User_Setting.svg", "XML", 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 1, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/aiReportingIcon.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/ai_powered.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/analyse_survey.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/analysis.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/assign_role.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/bar_chart.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/built_for_you.svg", "XML", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/chart.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/chatbot.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/collect_data_.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/craft.svg", "(Read Error)", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/dataAnalysisIcon.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/default.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/default_header.svg", "XML", 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/draggable.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/ellipsisVertical.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/eyes.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/feature_img_1.svg", "XML", 0, 0, 0, 225, 0, 0, 0, 0, 0, 0, 0, 0, 1, 226
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/feature_img_2.svg", "XML", 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 1, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/feature_img_4.svg", "XML", 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 1, 110
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/footer_logo.svg", "XML", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 1, 40
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/get_android.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/get_ios.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/gidiOaks.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/help.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/helpActive.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/hero-bg.svg", "XML", 0, 0, 0, 318, 0, 0, 0, 0, 0, 0, 0, 0, 1, 319
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/hero-icon-1.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/hero-icon-2.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/hypen.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/index.js", "JavaScript", 0, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 154
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/integration_1.svg", "XML", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/integration_2.svg", "XML", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/integration_3.svg", "XML", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/kickstart_Y.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/landing-img.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/landing_img.svg", "XML", 0, 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 1, 66
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/logo_white_bg.svg", "XML", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 1, 40
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/neon.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/neon_header.svg", "XML", 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/nextButton.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/no_survey_state.svg", "XML", 0, 0, 0, 297, 0, 0, 0, 0, 0, 0, 0, 0, 1, 298
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/notification.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/offlinePrintingIcon.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/overview-active.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/overview.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/paper_1.svg", "XML", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 1, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/pdf-svgrepo-com.svg", "XML", 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 1, 0, 45
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/phone_1.svg", "XML", 0, 0, 0, 226, 0, 0, 0, 0, 0, 0, 0, 0, 1, 227
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/phone_2.svg", "XML", 0, 0, 0, 267, 0, 0, 0, 0, 0, 0, 0, 0, 1, 268
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/pie_chart.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/poll_video.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/pollsensei-icon.svg", "XML", 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 1, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/pollsensei_new_logo.svg", "XML", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 1, 40
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/prevButton.svg", "XML", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/profile_2user.svg", "XML", 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/qualitative_survey.svg", "XML", 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 1, 70
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/quantitative_qualitative_survey.svg", "XML", 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/question_mark.svg", "XML", 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 1, 42
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/search.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/settings.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/settingsActive.svg", "XML", 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/share.svg", "XML", 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/smile1.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/sparkly_header.svg", "XML", 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/stars.svg", "XML", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/surveyCreationIcon.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/survey_welcome_illustration.svg", "XML", 0, 0, 0, 73, 0, 0, 0, 0, 0, 0, 0, 0, 1, 74
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/tooltip_icon.svg", "XML", 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/trophy.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/tut1.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/tut2.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/tut4.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/ui/aright-arrow.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/users.svg", "XML", 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/usersActive.svg", "XML", 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/images/voiceToTextIcon.svg", "XML", 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/react.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/assets/videos/index.js", "JavaScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/MetaPixel.tsx", "TypeScript JSX", 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 46
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ai/PollProfessor.tsx", "TypeScript JSX", 0, 0, 187, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 203
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ai/SenseiMasterChat.tsx", "TypeScript JSX", 0, 0, 494, 0, 0, 0, 0, 0, 0, 0, 0, 88, 52, 634
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/analysis/AnalysisReport.tsx", "TypeScript JSX", 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 50
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/analysis/AnalysisTests.tsx", "TypeScript JSX", 0, 0, 649, 0, 0, 0, 0, 0, 0, 0, 0, 96, 42, 787
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/analysis/DynamicCharts.tsx", "TypeScript JSX", 0, 0, 201, 0, 0, 0, 0, 0, 0, 0, 0, 2, 19, 222
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/analysis/TestAnalysisReport.tsx", "TypeScript JSX", 0, 0, 278, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 295
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/blocks/Footer.tsx", "TypeScript JSX", 0, 0, 148, 0, 0, 0, 0, 0, 0, 0, 0, 12, 5, 165
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/blocks/NavBar.tsx", "TypeScript JSX", 0, 0, 247, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 262
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/calendar-body-header.tsx", "TypeScript JSX", 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 36
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/calendar-body.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/day/calendar-body-day-calendar.tsx", "TypeScript JSX", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/day/calendar-body-day-content.tsx", "TypeScript JSX", 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 28
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/day/calendar-body-day-events.tsx", "TypeScript JSX", 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 36
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/day/calendar-body-day.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/day/calendar-body-margin-day-margin.tsx", "TypeScript JSX", 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 33
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/month/calendar-body-month.tsx", "TypeScript JSX", 0, 0, 124, 0, 0, 0, 0, 0, 0, 0, 0, 6, 10, 140
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/body/week/calendar-body-week.tsx", "TypeScript JSX", 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/calendar-context.tsx", "TypeScript JSX", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/calendar-event.tsx", "TypeScript JSX", 0, 0, 139, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 152
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/calendar-mode-icon-map.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/calendar-provider.tsx", "TypeScript JSX", 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 54
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/calendar-tailwind-classes.ts", "TypeScript", 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 70
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/calendar-types.ts", "TypeScript", 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/calendar.tsx", "TypeScript JSX", 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 40
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/dialog/calendar-manage-event-dialog.tsx", "TypeScript JSX", 0, 0, 207, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 222
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/dialog/calendar-new-event-dialog.tsx", "TypeScript JSX", 0, 0, 134, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 145
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/actions/calendar-header-actions-add.tsx", "TypeScript JSX", 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/actions/calendar-header-actions-mode.tsx", "TypeScript JSX", 0, 0, 126, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 130
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/actions/calendar-header-actions.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/calendar-header.tsx", "TypeScript JSX", 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/date/calendar-header-date-badge.tsx", "TypeScript JSX", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/date/calendar-header-date-chevrons.tsx", "TypeScript JSX", 0, 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 69
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/date/calendar-header-date-icon.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/calendar/header/date/calendar-header-date.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/BarChart.tsx", "TypeScript JSX", 0, 0, 91, 0, 0, 0, 0, 0, 0, 0, 0, 5, 9, 105
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/CircleCharts.tsx", "TypeScript JSX", 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 65
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/DashboardBarChart.tsx", "TypeScript JSX", 0, 0, 186, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 194
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/DataVisualization.tsx", "TypeScript JSX", 0, 0, 680, 0, 0, 0, 0, 0, 0, 0, 0, 35, 60, 775
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/DonutChart.tsx", "TypeScript JSX", 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 51
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/Horizontalbat.tsx", "TypeScript JSX", 0, 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/KruskalWallisChart.tsx", "TypeScript JSX", 0, 0, 271, 0, 0, 0, 0, 0, 0, 0, 0, 10, 31, 312
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/LineChart.tsx", "TypeScript JSX", 0, 0, 225, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 241
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/MannWhitneyChart.tsx", "TypeScript JSX", 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 46, 11, 97
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/MultipleChart.tsx", "TypeScript JSX", 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 6, 10, 88
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/MultipleLineChart.tsx", "TypeScript JSX", 0, 0, 74, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 85
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/OverlappingCircle.tsx", "TypeScript JSX", 0, 0, 149, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 159
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/Pie.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/Piechart.tsx", "TypeScript JSX", 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 57
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/SuperAdminPieChart.tsx", "TypeScript JSX", 0, 0, 192, 0, 0, 0, 0, 0, 0, 0, 0, 173, 18, 383
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/SuperAdminPieChart2.tsx", "TypeScript JSX", 0, 0, 178, 0, 0, 0, 0, 0, 0, 0, 0, 10, 11, 199
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/SurveyLineChart.tsx", "TypeScript JSX", 0, 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 64
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/WordFrequencyChart.tsx", "TypeScript JSX", 0, 0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 6, 11, 92
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/charts/style.css", "CSS", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 2, 1, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/Accordion.tsx", "TypeScript JSX", 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/AppLoadingSkeleton.tsx", "TypeScript JSX", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/AppTabs.tsx", "TypeScript JSX", 0, 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 42
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/Button.tsx", "TypeScript JSX", 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/ButtonAuto.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/ButtonDelete.tsx", "TypeScript JSX", 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/ButtonOutline.tsx", "TypeScript JSX", 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/DuplicateLoader.tsx", "TypeScript JSX", 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 18
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/EmptyTableData.tsx", "TypeScript JSX", 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 33
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/ErrorMessage.tsx", "TypeScript JSX", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/FeatureComing.tsx", "TypeScript JSX", 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 24
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/MarqueSlider.tsx", "TypeScript JSX", 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 18
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/PageControl.tsx", "TypeScript JSX", 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 3, 7, 75
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/PaginationBtn.tsx", "TypeScript JSX", 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 45
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/PaginationControls.tsx", "TypeScript JSX", 0, 0, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 73
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/StateLoader.tsx", "TypeScript JSX", 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 50, 24, 107
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/StateLoader2.tsx", "TypeScript JSX", 0, 0, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 126
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/ToggleMonth.tsx", "TypeScript JSX", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 38
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/WatermarkBanner.tsx", "TypeScript JSX", 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 52
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/common/forms/AppReactQuill.tsx", "TypeScript JSX", 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 59
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/custom/AppCollapse.tsx", "TypeScript JSX", 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/custom/EarlybedMessage.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/custom/GenericRowPopover.tsx", "TypeScript JSX", 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 51
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/custom/MatrixRain.tsx", "TypeScript JSX", 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 64
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/custom/SocialAuth.tsx", "TypeScript JSX", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11, 47
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/filter/FilterButton.tsx", "TypeScript JSX", 0, 0, 232, 0, 0, 0, 0, 0, 0, 0, 0, 1, 18, 251
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/filter/ThreeStepDropdown.tsx", "TypeScript JSX", 0, 0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 29, 14, 156
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/form/color-picker.tsx", "TypeScript JSX", 0, 0, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 126
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/form/date-time-picker.tsx", "TypeScript JSX", 0, 0, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 160
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/header/header-github.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 19
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/header/header-theme-toggle.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 57
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/header/header.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/icons/index.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/landing-page/AnimatedCTAButtons.tsx", "TypeScript JSX", 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 7, 10, 117
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/landing-page/BenefitsSection.tsx", "TypeScript JSX", 0, 0, 209, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11, 224
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/landing-page/FAQSection.tsx", "TypeScript JSX", 0, 0, 189, 0, 0, 0, 0, 0, 0, 0, 0, 1, 16, 206
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/landing-page/FeaturesSection.tsx", "TypeScript JSX", 0, 0, 328, 0, 0, 0, 0, 0, 0, 0, 0, 2, 24, 354
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/landing-page/HeroSection.tsx", "TypeScript JSX", 0, 0, 199, 0, 0, 0, 0, 0, 0, 0, 0, 7, 22, 228
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/layouts/AppLayout.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/loaders/page-loaders/AnalysisError.tsx", "TypeScript JSX", 0, 0, 76, 0, 0, 0, 0, 0, 0, 0, 0, 3, 7, 86
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/loaders/page-loaders/AnalysisPageLoader.tsx", "TypeScript JSX", 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 84
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/milestone/customEdge.tsx", "TypeScript JSX", 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 5, 7, 37
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/IsGenerating.tsx", "TypeScript JSX", 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 101
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/IsLoadingModal.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 61
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/Modal.tsx", "TypeScript JSX", 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 61
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/ReviewModal.tsx", "TypeScript JSX", 0, 0, 306, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 328
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/Subsribe.tsx", "TypeScript JSX", 0, 0, 117, 0, 0, 0, 0, 0, 0, 0, 0, 3, 13, 133
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/WaitingModal.tsx", "TypeScript JSX", 0, 0, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 106
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/close.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/modals/style.css", "CSS", 0, 0, 0, 0, 0, 67, 0, 0, 0, 0, 0, 5, 1, 73
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/nav/app-sidebar.tsx", "TypeScript JSX", 0, 0, 132, 0, 0, 0, 0, 0, 0, 0, 0, 28, 7, 167
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/navbar/DesktopNavigation.tsx", "TypeScript JSX", 0, 0, 199, 0, 0, 0, 0, 0, 0, 0, 0, 1, 11, 211
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/navbar/MobileNavbar.tsx", "TypeScript JSX", 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 39
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/navbar/Navbar.tsx", "TypeScript JSX", 0, 0, 331, 0, 0, 0, 0, 0, 0, 0, 0, 45, 18, 394
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/navbar/SurveyCreationNav.tsx", "TypeScript JSX", 0, 0, 1063, 0, 0, 0, 0, 0, 0, 0, 0, 9, 23, 1095
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/navbar/styles.css", "CSS", 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 8
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/pdf/Questions.tsx", "TypeScript JSX", 0, 0, 480, 0, 0, 0, 0, 0, 0, 0, 0, 59, 32, 571
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/primitives/CookieConsent.tsx", "TypeScript JSX", 0, 0, 111, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10, 123
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/primitives/Loader.tsx", "TypeScript JSX", 0, 0, 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 77
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/protected/PrivateRoute.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 33
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/ContactusCard.tsx", "TypeScript JSX", 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 52
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/EmbedVideo.tsx", "TypeScript JSX", 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/FeatureCard2.tsx", "TypeScript JSX", 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/GetApp.tsx", "TypeScript JSX", 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 110
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/Home.tsx", "TypeScript JSX", 0, 0, 279, 0, 0, 0, 0, 0, 0, 0, 0, 11, 13, 303
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/LandingPage.tsx", "TypeScript JSX", 0, 0, 133, 0, 0, 0, 0, 0, 0, 0, 0, 41, 24, 198
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/NeedAssistance.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 34
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/Pricing.tsx", "TypeScript JSX", 0, 0, 130, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 138
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/PricingTable.tsx", "TypeScript JSX", 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 51
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/publicPages/SeePricing.tsx", "TypeScript JSX", 0, 0, 61, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 72
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/TextTutorial.tsx", "TypeScript JSX", 0, 0, 111, 0, 0, 0, 0, 0, 0, 0, 0, 5, 8, 124
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/VideoTutorial.tsx", "TypeScript JSX", 0, 0, 116, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8, 126
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/article-grid.tsx", "TypeScript JSX", 0, 0, 117, 0, 0, 0, 0, 0, 0, 0, 0, 14, 8, 139
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/chat-widget.tsx", "TypeScript JSX", 0, 0, 248, 0, 0, 0, 0, 0, 0, 0, 0, 20, 13, 281
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/contact-us.tsx", "TypeScript JSX", 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 6, 10, 87
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/hero.tsx", "TypeScript JSX", 0, 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 40
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/knowledge-base/components/ArticlesSection.tsx", "TypeScript JSX", 0, 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 76
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/knowledge-base/components/VideosSection.tsx", "TypeScript JSX", 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 80
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/knowledge-base/knowledge-base.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/resoure-action.tsx", "TypeScript JSX", 0, 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 55
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/resource-hub/tutorials.tsx", "TypeScript JSX", 0, 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 56
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/reusable/DownloadPdfButton.tsx", "TypeScript JSX", 0, 0, 102, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 115
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/reusable/DynamicPDFComponents.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/reusable/SurveyPDFDocument.tsx", "TypeScript JSX", 0, 0, 291, 0, 0, 0, 0, 0, 0, 0, 0, 8, 16, 315
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/reusable/coming-soon.tsx", "TypeScript JSX", 0, 0, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 70
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/reusable/data-table.tsx", "TypeScript JSX", 0, 0, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 91
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/sensei-master/SenseiMaster.tsx", "TypeScript JSX", 0, 0, 275, 0, 0, 0, 0, 0, 0, 0, 0, 321, 64, 660
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/settings/SettingsSidebar.tsx", "TypeScript JSX", 0, 0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 5, 9, 89
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/settings/Switch.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 27
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/style-editor/ColorPicker.tsx", "TypeScript JSX", 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 71
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/style-editor/FontSelector.tsx", "TypeScript JSX", 0, 0, 134, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 146
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/style-editor/ImageUploader.tsx", "TypeScript JSX", 0, 0, 241, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 268
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/style-editor/ThemeSelector.tsx", "TypeScript JSX", 0, 0, 79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 88
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/subscription/modal-upgrade.tsx", "TypeScript JSX", 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 85
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/subscription/modal.tsx", "TypeScript JSX", 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 44
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/super-admin-tutorial/TutorialCard.tsx", "TypeScript JSX", 0, 0, 354, 0, 0, 0, 0, 0, 0, 0, 0, 19, 21, 394
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/super-admin-tutorial/TutorialNavigation.tsx", "TypeScript JSX", 0, 0, 261, 0, 0, 0, 0, 0, 0, 0, 0, 6, 28, 295
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/CreationMethodDistribution.tsx", "TypeScript JSX", 0, 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 85
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/DashboardAnalytics.tsx", "TypeScript JSX", 0, 0, 242, 0, 0, 0, 0, 0, 0, 0, 0, 6, 18, 266
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/DashboardOverView.tsx", "TypeScript JSX", 0, 0, 144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 151
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/DropdownFilter.tsx", "TypeScript JSX", 0, 0, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 111
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/SubscriptionTrend.tsx", "TypeScript JSX", 0, 0, 94, 0, 0, 0, 0, 0, 0, 0, 0, 169, 26, 289
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/SuperAdminSidebar.tsx", "TypeScript JSX", 0, 0, 128, 0, 0, 0, 0, 0, 0, 0, 0, 61, 9, 198
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/SurveyTypeChart.tsx", "TypeScript JSX", 0, 0, 142, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 154
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/TopNavigation.tsx", "TypeScript JSX", 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 4, 5, 47
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/TrafficByDevice.tsx", "TypeScript JSX", 0, 0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 80
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superAdmin/UsersByLocation.tsx", "TypeScript JSX", 0, 0, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 106
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superadmin-faqs/DeleteFaq.tsx", "TypeScript JSX", 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 88
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superadmin-faqs/FAQNavigation.tsx", "TypeScript JSX", 0, 0, 162, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15, 178
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superadmin-faqs/FaqAccordion.tsx", "TypeScript JSX", 0, 0, 288, 0, 0, 0, 0, 0, 0, 0, 0, 3, 24, 315
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superadmin-faqs/Modal.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superadmin-faqs/Publish.tsx", "TypeScript JSX", 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 88
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superadmin-faqs/UnpublishFaq.tsx", "TypeScript JSX", 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 88
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/superadmin-faqs/close.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ActionButtons.tsx", "TypeScript JSX", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 36
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/AnswerBoolean.tsx", "TypeScript JSX", 0, 0, 147, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10, 160
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/AnswerCommentQuestion.tsx", "TypeScript JSX", 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 98
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/AnswerDropdownQuestion.tsx", "TypeScript JSX", 0, 0, 182, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12, 198
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/AnswerLikertScale.tsx", "TypeScript JSX", 0, 0, 210, 0, 0, 0, 0, 0, 0, 0, 0, 213, 23, 446
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/AnswerMuiltipleChoice.tsx", "TypeScript JSX", 0, 0, 148, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 163
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/AnswerSingleChoice.tsx", "TypeScript JSX", 0, 0, 152, 0, 0, 0, 0, 0, 0, 0, 0, 18, 17, 187
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/AnswerStarRating.tsx", "TypeScript JSX", 0, 0, 188, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10, 200
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/BooleanQuestion.tsx", "TypeScript JSX", 0, 0, 198, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 214
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ChangeSurveyStatus.tsx", "TypeScript JSX", 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 67
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/CheckboxQuestion.tsx", "TypeScript JSX", 0, 0, 215, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 230
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/CommentQuestion.tsx", "TypeScript JSX", 0, 0, 207, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 221
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/CommentQuestionEdit.tsx", "TypeScript JSX", 0, 0, 169, 0, 0, 0, 0, 0, 0, 0, 0, 4, 14, 187
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/CommentWithMediaQuestion.tsx", "TypeScript JSX", 0, 0, 239, 0, 0, 0, 0, 0, 0, 0, 0, 11, 16, 266
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/DeleteSurvey.tsx", "TypeScript JSX", 0, 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 66
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/DropdownQuestion.tsx", "TypeScript JSX", 0, 0, 207, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 223
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/DuplicateSurvey.tsx", "TypeScript JSX", 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 67
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/EditCreatedSurvey.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/EditQuestionClone.tsx", "TypeScript JSX", 0, 0, 310, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20, 335
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/LikertScaleQuestion.tsx", "TypeScript JSX", 0, 0, 205, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 221
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/LinearScaleQuestion.tsx", "TypeScript JSX", 0, 0, 179, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 193
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/LongTextQuestion.tsx", "TypeScript JSX", 0, 0, 197, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 211
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/MatrixQuestion.tsx", "TypeScript JSX", 0, 0, 251, 0, 0, 0, 0, 0, 0, 0, 0, 44, 22, 317
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/MatrixQuestionEdit.tsx", "TypeScript JSX", 0, 0, 462, 0, 0, 0, 0, 0, 0, 0, 0, 4, 30, 496
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/MediaQuestion.tsx", "TypeScript JSX", 0, 0, 196, 0, 0, 0, 0, 0, 0, 0, 0, 227, 24, 447
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/Milestones.tsx", "TypeScript JSX", 0, 0, 734, 0, 0, 0, 0, 0, 0, 0, 0, 38, 22, 794
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/MilestonesCopy.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 442, 22, 464
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/MultiChoiceQuestion.tsx", "TypeScript JSX", 0, 0, 208, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 224
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/MultiChoiceQuestionEdit.tsx", "TypeScript JSX", 0, 0, 834, 0, 0, 0, 0, 0, 0, 0, 0, 15, 57, 906
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/NoResponse.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/NumberQuestion.tsx", "TypeScript JSX", 0, 0, 214, 0, 0, 0, 0, 0, 0, 0, 0, 32, 20, 266
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/OpenSurvey.tsx", "TypeScript JSX", 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 67
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/PreviewFile.tsx", "TypeScript JSX", 0, 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 81, 20, 163
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/QuestionRenderer.tsx", "TypeScript JSX", 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 119
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/RatingScaleQuestion.tsx", "TypeScript JSX", 0, 0, 274, 0, 0, 0, 0, 0, 0, 0, 0, 34, 26, 334
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/RenameSurvey.tsx", "TypeScript JSX", 0, 0, 106, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 111
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/RespondentDetails.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 0, 0, 0, 0, 0, 0, 30, 7, 90
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ResponseAction.tsx", "TypeScript JSX", 0, 0, 114, 0, 0, 0, 0, 0, 0, 0, 0, 4, 11, 129
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ResponseHeader.tsx", "TypeScript JSX", 0, 0, 312, 0, 0, 0, 0, 0, 0, 0, 0, 176, 27, 515
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/Responses.tsx", "TypeScript JSX", 0, 0, 201, 0, 0, 0, 0, 0, 0, 0, 0, 2, 32, 235
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ShareSurvey.tsx", "TypeScript JSX", 0, 0, 202, 0, 0, 0, 0, 0, 0, 0, 0, 8, 18, 228
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ShareSurveyModal.tsx", "TypeScript JSX", 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 56
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/SingleChoiceQuestion.tsx", "TypeScript JSX", 0, 0, 197, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 213
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/SliderQuestion.tsx", "TypeScript JSX", 0, 0, 235, 0, 0, 0, 0, 0, 0, 0, 0, 5, 25, 265
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/StarRating.tsx", "TypeScript JSX", 0, 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 39
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/StarRatingQuestion.tsx", "TypeScript JSX", 0, 0, 194, 0, 0, 0, 0, 0, 0, 0, 0, 4, 14, 212
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/StatusTag.tsx", "TypeScript JSX", 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 37
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/Summary.tsx", "TypeScript JSX", 0, 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 18, 13, 100
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/SurveyCard.tsx", "TypeScript JSX", 0, 0, 353, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 383
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/SurveyHeader.tsx", "TypeScript JSX", 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 114
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/SurveyWelcomeAlertDialog.tsx", "TypeScript JSX", 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 98
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/UserResponses.tsx", "TypeScript JSX", 0, 0, 270, 0, 0, 0, 0, 0, 0, 0, 0, 53, 23, 346
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ValidateLikertScale.tsx", "TypeScript JSX", 0, 0, 191, 0, 0, 0, 0, 0, 0, 0, 0, 3, 11, 205
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/ValidateStarRattings.tsx", "TypeScript JSX", 0, 0, 195, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12, 209
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/close.svg", "XML", 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/create/InitialSelection.tsx", "TypeScript JSX", 0, 0, 187, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 197
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/create/PromptForm.tsx", "TypeScript JSX", 0, 0, 230, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14, 245
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/create/SurveyTypeSelection.tsx", "TypeScript JSX", 0, 0, 234, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 250
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/create/TopicSelectionModal.tsx", "TypeScript JSX", 0, 0, 182, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 194
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/share/CopyLink.tsx", "TypeScript JSX", 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 35
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/share/DownloadPDF.tsx", "TypeScript JSX", 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/share/ShareSurvey.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 28
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/share/SocialMediaIcons.tsx", "TypeScript JSX", 0, 0, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 73
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/survey/share/types.ts", "TypeScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/theme-provider.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/theme-toggle.tsx", "TypeScript JSX", 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 41
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/tutorials/AllResources.tsx", "TypeScript JSX", 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/tutorials/LearningResources.tsx", "TypeScript JSX", 0, 0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 10, 7, 114
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/tutorials/TextResource.tsx", "TypeScript JSX", 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/tutorials/VideoResource.tsx", "TypeScript JSX", 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/tutorials/WebArticles.tsx", "TypeScript JSX", 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/tutorials/components/ResourceCard.tsx", "TypeScript JSX", 0, 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 9, 6, 99
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/Aos.tsx", "TypeScript JSX", 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/BreadcrumsIcon.tsx", "TypeScript JSX", 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/Checkbox.tsx", "TypeScript JSX", 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/FileInput.tsx", "TypeScript JSX", 0, 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 69, 15, 172
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/Input.tsx", "TypeScript JSX", 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 55
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/InputEdit.tsx", "TypeScript JSX", 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 47
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/InviteSuccess.tsx", "TypeScript JSX", 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 34
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/LoadRedirect.tsx", "TypeScript JSX", 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 38
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/ModalComponent.tsx", "TypeScript JSX", 0, 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 108
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/MultipleSelect.tsx", "TypeScript JSX", 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 63
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/NoSurvey.tsx", "TypeScript JSX", 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 74
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/NoTeam.tsx", "TypeScript JSX", 0, 0, 209, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 227
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/PasswordField.tsx", "TypeScript JSX", 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 68
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/PublicVoiceRecorder.tsx", "TypeScript JSX", 0, 0, 330, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 366
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/SelectTag.tsx", "TypeScript JSX", 0, 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 69
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/Sensei.tsx", "TypeScript JSX", 0, 0, 204, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14, 220
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/StrictModeDroppable.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/SurveyEmptyPage.tsx", "TypeScript JSX", 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/SurveyTable.tsx", "TypeScript JSX", 0, 0, 153, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 162
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/TableHead.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/TextArea.tsx", "TypeScript JSX", 0, 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 41
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/TopResponse.tsx", "TypeScript JSX", 0, 0, 61, 0, 0, 0, 0, 0, 0, 0, 0, 33, 8, 102
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/UploadedItem.tsx", "TypeScript JSX", 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 78
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/VoiceRecorder.tsx", "TypeScript JSX", 0, 0, 163, 0, 0, 0, 0, 0, 0, 0, 0, 144, 35, 342
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/accordion.tsx", "TypeScript JSX", 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 67
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/alert-dialog.tsx", "TypeScript JSX", 0, 0, 133, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 148
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/alert.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 60
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/autosize-textarea.tsx", "TypeScript JSX", 0, 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10, 109
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/avatar.tsx", "TypeScript JSX", 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 51
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/badge.tsx", "TypeScript JSX", 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 37
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/button.tsx", "TypeScript JSX", 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 57
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/calendar.tsx", "TypeScript JSX", 0, 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 71
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/card.tsx", "TypeScript JSX", 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 80
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/chart.tsx", "TypeScript JSX", 0, 0, 327, 0, 0, 0, 0, 0, 0, 0, 0, 2, 37, 366
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/combobox.tsx", "TypeScript JSX", 0, 0, 79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 84
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/command.tsx", "TypeScript JSX", 0, 0, 136, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 154
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/dialog.tsx", "TypeScript JSX", 0, 0, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 135
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/drawer.tsx", "TypeScript JSX", 0, 0, 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 119
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/dropdown-menu.tsx", "TypeScript JSX", 0, 0, 182, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 201
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/form.tsx", "TypeScript JSX", 0, 0, 153, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 179
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/label.tsx", "TypeScript JSX", 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 27
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/pagination.tsx", "TypeScript JSX", 0, 0, 107, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 118
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/paginator-buttons.tsx", "TypeScript JSX", 0, 0, 184, 0, 0, 0, 0, 0, 0, 0, 0, 7, 11, 202
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/pollsensei-trigger-button.tsx", "TypeScript JSX", 0, 0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 52, 11, 176
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/popover.tsx", "TypeScript JSX", 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/progress.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/radio-group.tsx", "TypeScript JSX", 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 45
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/scroll-area.tsx", "TypeScript JSX", 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 49
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/select.tsx", "TypeScript JSX", 0, 0, 146, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 161
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/separator.tsx", "TypeScript JSX", 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/shadcn-checkbox.tsx", "TypeScript JSX", 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 31
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/shadcn-input.tsx", "TypeScript JSX", 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 34
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/shadcn-textarea.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/sheet.tsx", "TypeScript JSX", 0, 0, 134, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 150
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/sidebar.tsx", "TypeScript JSX", 0, 0, 718, 0, 0, 0, 0, 0, 0, 0, 0, 14, 57, 789
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/skeleton.tsx", "TypeScript JSX", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/slider.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/style.css", "CSS", 0, 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 8, 1, 57
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/switch.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 4, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/switch.tsx", "TypeScript JSX", 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/table.tsx", "TypeScript JSX", 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 121
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/tabs.tsx", "TypeScript JSX", 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 56
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/toast.tsx", "TypeScript JSX", 0, 0, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 130
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/toaster.tsx", "TypeScript JSX", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 36
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/toggle-group.tsx", "TypeScript JSX", 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 62
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/toggle.tsx", "TypeScript JSX", 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 46
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/components/ui/tooltip.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 31
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/config/fonts.ts", "TypeScript", 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 50
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/config/mixpanel.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/config/routes.ts", "TypeScript", 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/constants/fonts.ts", "TypeScript", 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/constants/multi-select.ts", "TypeScript", 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 72
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/contexts/MixpanelContext.tsx", "TypeScript JSX", 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 5, 16, 111
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/contexts/ReduxContext.tsx", "TypeScript JSX", 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 36
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/contexts/SenseiContext.tsx", "TypeScript JSX", 0, 0, 137, 0, 0, 0, 0, 0, 0, 0, 0, 137, 46, 320
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/contexts/SocketIOTester.tsx", "TypeScript JSX", 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 79, 27, 218
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/data/chat-data.ts", "TypeScript", 126, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 127
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/data/faqs.json", "JSON", 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 21
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/data/faqs.tsx", "TypeScript JSX", 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 47, 2, 83
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/data/learning-resources.ts", "TypeScript", 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 70
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/data/rate.ts", "TypeScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/use-main-toast.ts", "TypeScript", 157, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 32, 192
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/use-mobile.tsx", "TypeScript JSX", 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/use-toast.ts", "TypeScript", 157, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 32, 193
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/useBreadcrumbs.ts", "TypeScript", 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 46
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/useDebouncer.ts", "TypeScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 20
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/useGetRequests.ts", "TypeScript", 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 27
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/useMediaQuery.ts", "TypeScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 18
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/useSocket.ts", "TypeScript", 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 15, 76
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/useUpgradeModal.tsx", "TypeScript JSX", 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/hooks/useWindowSize.ts", "TypeScript", 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 28
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/lib/axios-instance-without-token.ts", "TypeScript", 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 47
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/lib/axios-instance.ts", "TypeScript", 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 9, 97
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/lib/convertToSubcurrency.ts", "TypeScript", 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/lib/helpers.ts", "TypeScript", 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 23, 105
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/lib/mock-calendar-events.ts", "TypeScript", 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 11, 65
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/lib/socket/sensei.socket.ts", "TypeScript", 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 15, 76
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/lib/utils.ts", "TypeScript", 136, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 28, 178
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/providers/TanstackProvider.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 25, 8, 53
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/answer.slice.ts", "TypeScript", 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15, 100
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/filter.slice.ts", "TypeScript", 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 38
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/form.slice.ts", "TypeScript", 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/invite.slice.ts", "TypeScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 25
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/modal.slice.ts", "TypeScript", 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/name.slice.ts", "TypeScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 28
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/questions.slice.ts", "TypeScript", 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 14, 145
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/sensei-master.slice.ts", "TypeScript", 106, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 114
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/survey.slice.tsx", "TypeScript JSX", 0, 0, 188, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 199
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/survey_settings.slice.ts", "TypeScript", 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/theme.slice.ts", "TypeScript", 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 78
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/upload.slice.ts", "TypeScript", 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/slices/user.slice.ts", "TypeScript", 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 104
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/storage.ts", "TypeScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 24
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/redux/store.ts", "TypeScript", 105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 22, 227
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/admin.ts", "TypeScript", 94, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 108
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/analysis.ts", "TypeScript", 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 78
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/api/constants.api.ts", "TypeScript", 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/api/referrals.api.ts", "TypeScript", 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 47
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/api/tutorial.ts", "TypeScript", 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/builder/query.ts", "TypeScript", 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 60
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/config/apiSlice.ts", "TypeScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 4, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/config/base.ts", "TypeScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 7, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/dashboard.service.js", "JavaScript", 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 46
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/subscribtion.service.ts", "TypeScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/superadmin.service.ts", "TypeScript", 294, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 8, 320
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/survey.service.ts", "TypeScript", 352, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 20, 400
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/team.service.ts", "TypeScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 23
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/unauth-survey.service.ts", "TypeScript", 305, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 311
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/services/user.service.ts", "TypeScript", 162, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 172
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/styles/globals.css", "CSS", 0, 0, 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 23, 79
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/admin/DashboardPage.tsx", "TypeScript JSX", 0, 0, 336, 0, 0, 0, 0, 0, 0, 0, 0, 2, 21, 359
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/admin/SurveysPage.tsx", "TypeScript JSX", 0, 0, 130, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 140
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/admin/style.css", "CSS", 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 1, 1, 83
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/auth/CompleteInvitedMemberSetup.tsx", "TypeScript JSX", 0, 0, 270, 0, 0, 0, 0, 0, 0, 0, 0, 6, 22, 298
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/auth/ForgotPasswordPage.tsx", "TypeScript JSX", 0, 0, 582, 0, 0, 0, 0, 0, 0, 0, 0, 3, 39, 624
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/auth/LoginPage.tsx", "TypeScript JSX", 0, 0, 512, 0, 0, 0, 0, 0, 0, 0, 0, 8, 35, 555
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/auth/RegisterPage.tsx", "TypeScript JSX", 0, 0, 575, 0, 0, 0, 0, 0, 0, 0, 0, 3, 37, 615
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/auth/ValidatePwdIcon.tsx", "TypeScript JSX", 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 19
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/milestone/KickStart.tsx", "TypeScript JSX", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 36
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/milestone/Milestone.tsx", "TypeScript JSX", 0, 0, 53, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 60
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/milestone/MilestoneCTA.tsx", "TypeScript JSX", 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 32
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/milestone/Test.tsx", "TypeScript JSX", 0, 0, 249, 0, 0, 0, 0, 0, 0, 0, 0, 98, 26, 373
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/payment/CheckoutPage.tsx", "TypeScript JSX", 0, 0, 66, 0, 0, 0, 0, 0, 0, 0, 0, 4, 15, 85
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/payment/StripeRedirect.tsx", "TypeScript JSX", 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 41
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/AccountSecurityPage.tsx", "TypeScript JSX", 0, 0, 213, 0, 0, 0, 0, 0, 0, 0, 0, 21, 16, 250
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/EditPassword.tsx", "TypeScript JSX", 0, 0, 246, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 264
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/NotificationsPage.tsx", "TypeScript JSX", 0, 0, 233, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 244
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/PaymentPage.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 24
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/ProfilePage.tsx", "TypeScript JSX", 0, 0, 298, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 313
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/SubscriptionPage.tsx", "TypeScript JSX", 0, 0, 133, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 141
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/subscription/BillingHistoryCard.tsx", "TypeScript JSX", 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 53
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/subscription/CurrentPlanCard.tsx", "TypeScript JSX", 0, 0, 111, 0, 0, 0, 0, 0, 0, 0, 0, 16, 8, 135
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/settings/subscription/PricingCards.tsx", "TypeScript JSX", 0, 0, 500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 520
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/AdminReviews.tsx", "TypeScript JSX", 0, 0, 191, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25, 217
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/GenericArticlePage.tsx", "TypeScript JSX", 0, 0, 567, 0, 0, 0, 0, 0, 0, 0, 0, 150, 37, 754
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/SuperAdminDraftFaqs.tsx", "TypeScript JSX", 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 54
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/SuperAdminFaq.tsx", "TypeScript JSX", 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 68
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/SuperAdminLiveFaqs.tsx", "TypeScript JSX", 0, 0, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 69
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/SuperAdminSurveys.tsx", "TypeScript JSX", 0, 0, 161, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 170
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/SuperadminDashboard.tsx", "TypeScript JSX", 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 31
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/TextTutorials.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 27
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/TutorialPage.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 610, 47, 677
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/UserRegistry.tsx", "TypeScript JSX", 0, 0, 351, 0, 0, 0, 0, 0, 0, 0, 0, 28, 25, 404
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/VideoTutorial.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 118, 17, 155
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/superadmin/WebArticle.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 26
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/AddQuestion.tsx", "TypeScript JSX", 0, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 89
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/AddQuestionPage.tsx", "TypeScript JSX", 0, 0, 1081, 0, 0, 0, 0, 0, 0, 0, 0, 54, 56, 1191
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/CreateNewSection.tsx", "TypeScript JSX", 0, 0, 369, 0, 0, 0, 0, 0, 0, 0, 0, 22, 24, 415
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/CreateSurveyPage.tsx", "TypeScript JSX", 0, 0, 310, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29, 343
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/CreatedSurveysPage.tsx", "TypeScript JSX", 0, 0, 460, 0, 0, 0, 0, 0, 0, 0, 0, 5, 25, 490
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/EditCreatedSurvey.tsx", "TypeScript JSX", 0, 0, 270, 0, 0, 0, 0, 0, 0, 0, 0, 401, 78, 749
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/EditSubmittedSurvey.tsx", "TypeScript JSX", 0, 0, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 57, 77, 1134
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/EditSurvey.tsx", "TypeScript JSX", 0, 0, 810, 0, 0, 0, 0, 0, 0, 0, 0, 8, 59, 877
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/GeneratedSurvey.tsx", "TypeScript JSX", 0, 0, 521, 0, 0, 0, 0, 0, 0, 0, 0, 11, 16, 548
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/ManualSurveyCreatePrompt.tsx", "TypeScript JSX", 0, 0, 122, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 132
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/Preview.tsx", "TypeScript JSX", 0, 0, 188, 0, 0, 0, 0, 0, 0, 0, 0, 5, 10, 203
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/PublicResponse.tsx", "TypeScript JSX", 0, 0, 490, 0, 0, 0, 0, 0, 0, 0, 0, 80, 23, 593
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/PublicResponseClone.tsx", "TypeScript JSX", 0, 0, 1201, 0, 0, 0, 0, 0, 0, 0, 0, 17, 65, 1283
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/QuestionType.tsx", "TypeScript JSX", 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 54, 3, 96
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/SingleSurvey.tsx", "TypeScript JSX", 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 43
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/StyleEditor.tsx", "TypeScript JSX", 0, 0, 181, 0, 0, 0, 0, 0, 0, 0, 0, 5, 19, 205
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/SurveyQuestions.tsx", "TypeScript JSX", 0, 0, 324, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 335
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/SurveyResponses.tsx", "TypeScript JSX", 0, 0, 284, 0, 0, 0, 0, 0, 0, 0, 0, 5, 27, 316
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/SurveySettings.tsx", "TypeScript JSX", 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 25, 6, 52
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/UserReview.tsx", "TypeScript JSX", 0, 0, 169, 0, 0, 0, 0, 0, 0, 0, 0, 50, 20, 239
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/ValidateRes.tsx", "TypeScript JSX", 0, 0, 488, 0, 0, 0, 0, 0, 0, 0, 0, 124, 42, 654
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/ValidateResponse.tsx", "TypeScript JSX", 0, 0, 502, 0, 0, 0, 0, 0, 0, 0, 0, 14, 55, 571
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/ValidateResponseClone.tsx", "TypeScript JSX", 0, 0, 450, 0, 0, 0, 0, 0, 0, 0, 0, 40, 35, 525
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/ValidateResponseNew.tsx", "TypeScript JSX", 0, 0, 661, 0, 0, 0, 0, 0, 0, 0, 0, 19, 29, 709
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/survey/tt.tsx", "TypeScript JSX", 0, 0, 1070, 0, 0, 0, 0, 0, 0, 0, 0, 31, 58, 1159
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/team-members/MembersTable.tsx", "TypeScript JSX", 0, 0, 364, 0, 0, 0, 0, 0, 0, 0, 0, 13, 13, 390
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/team-members/TeamMembers.tsx", "TypeScript JSX", 0, 0, 564, 0, 0, 0, 0, 0, 0, 0, 0, 10, 39, 613
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/subpages/unauth-survey/UnAuthCreateSurveyPage.tsx", "TypeScript JSX", 0, 0, 331, 0, 0, 0, 0, 0, 0, 0, 0, 41, 29, 401
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/types/api/index.ts", "TypeScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 22
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/types/api/referrals.types.ts", "TypeScript", 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 89
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/types/api/tutorials.types.ts", "TypeScript", 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/types/canvas-confetti.d.ts", "TypeScript", 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/types/style-editor.types.ts", "TypeScript", 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/types/survey.ts", "TypeScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 16
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/utils/analytics.ts", "TypeScript", 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7, 57
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/utils/animations.ts", "TypeScript", 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 37
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/utils/fileUtils.ts", "TypeScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/utils/shema.ts", "TypeScript", 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 30
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/utils/surveyUtils.ts", "TypeScript", 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 83
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/src/utils/validation.ts", "TypeScript", 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 87
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/tailwind.config.ts", "TypeScript", 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 107
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/tsconfig.json", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 1, 34
+"/Users/jesseabuaja/Desktop/Projects/Oaks/pollsensei-web-v2/types.d.ts", "TypeScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 23
+"Total", "-", 4127, 226, 58255, 4885, 11476, 880, 21, 33, 58, 28, 0, 6950, 6274, 93213

@@ -62,7 +62,7 @@ const ValidateResponse = () => {
         extracted_answers: OCRresponses.extracted_answers || [],
         uploaded_files: OCRresponses.uploaded_files || [],
       });
-  
+
       // Pre-fill answers with existing responses
       const existingAnswers: Record<string, any> = {};
       OCRresponses.extracted_answers.forEach((item: any) => {
@@ -70,8 +70,8 @@ const ValidateResponse = () => {
           selected_options: item?.selected_options || [],
           scale_value: item?.scale_value || "",
           drop_down_value: Array.isArray(item?.drop_down_value)
-            ? item.drop_down_value[0] || "" 
-            : item?.drop_down_value || "", 
+            ? item.drop_down_value[0] || ""
+            : item?.drop_down_value || "",
           boolean_value:
             item?.boolean_value !== undefined ? item.boolean_value : null,
           text: item?.text || "",
@@ -79,11 +79,10 @@ const ValidateResponse = () => {
           media_url: item?.media_url || "",
         };
       });
-  
+
       setAnswers(existingAnswers);
     }
   }, [OCRresponses]);
-  
 
   const handleAnswerChange = (key: string, value: any) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
@@ -155,9 +154,11 @@ const ValidateResponse = () => {
   }, [isSuccess, isError, error, router]);
 
   return (
-    <div className={`${
-      (ocrRes as any)?.survey?.theme
-    } flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}>
+    <div
+      className={`${
+        (ocrRes as any)?.survey?.theme
+      } flex flex-col gap-5 w-full px-5 lg:pl-16 relative`}
+    >
       <div className="flex justify-between gap-10 w-full">
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar">
           {ocrRes?.survey?.logo_url && (
@@ -247,7 +248,10 @@ const ValidateResponse = () => {
                     return (
                       <div className=" flex-col mb-4 bg-[#FAFAFA] flex w-full p-3 gap-3 rounded">
                         {item.options?.map((option: any) => (
-                          <label key={option} className="flex relative  cursor-pointer items-center">
+                          <label
+                            key={option}
+                            className="flex relative  cursor-pointer items-center"
+                          >
                             <input
                               type="checkbox"
                               value={option}
@@ -373,7 +377,7 @@ const ValidateResponse = () => {
                         value={answers[item.question]?.drop_down_value || ""}
                         onChange={(e) =>
                           handleAnswerChange(item.question, {
-                            drop_down_value: e.target.value, 
+                            drop_down_value: e.target.value,
                           })
                         }
                       >
@@ -385,25 +389,22 @@ const ValidateResponse = () => {
                         ))}
                       </select>
                     );
-                  
-                  
 
                   case "long_text":
                   case "short_text":
                     return (
                       <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded ">
-
-                      <textarea
-                        rows={4}
-                        className="w-full p-2 border rounded"
-                        value={answers[item.question]?.text || ""}
-                        onChange={(e) =>
-                          handleAnswerChange(item.question, {
-                            text: e.target.value,
-                          })
-                        }
+                        <textarea
+                          rows={4}
+                          className="w-full p-2 border rounded"
+                          value={answers[item.question]?.text || ""}
+                          onChange={(e) =>
+                            handleAnswerChange(item.question, {
+                              text: e.target.value,
+                            })
+                          }
                         />
-                        </div>
+                      </div>
                     );
 
                   case "rating_scale":
@@ -577,7 +578,9 @@ const ValidateResponse = () => {
                           min={item.min}
                           max={item.max}
                           step={item.step}
-                          value={answers[item.question]?.scale_value || item.min}
+                          value={
+                            answers[item.question]?.scale_value || item.min
+                          }
                           onChange={(e) =>
                             handleAnswerChange(item.question, {
                               scale_value: e.target.value,
@@ -604,7 +607,6 @@ const ValidateResponse = () => {
                             })
                           }
                         />
-
                       </div>
                     );
 

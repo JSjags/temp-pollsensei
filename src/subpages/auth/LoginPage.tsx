@@ -27,6 +27,7 @@ import google from "../../assets/auth/goggle.svg";
 import chat from "../../assets/auth/chat.svg";
 import { dark_theme_logo } from "@/assets/images";
 import axiosInstance from "@/lib/axios-instance";
+import { useGoogleLoginMutation } from "@/services/user.service";
 
 const constraints = {
   email: {
@@ -57,6 +58,8 @@ const LoginPage = () => {
   const [loginState, setLoginState] = useState(true);
   const [state, setState] = useState(false);
   const [eyeState, setEyeState] = useState(false);
+  const [googleLogin, { data: register, error: registerError }] =
+    useGoogleLoginMutation();
 
   const loginMutation = useMutation({
     mutationFn: (values: { email: string; password: string }) => {
@@ -135,15 +138,23 @@ const LoginPage = () => {
   };
 
   const googleSignUp = useGoogleLogin({
-    onSuccess: (response) => {
-      const accessToken = response.access_token;
-      setState(true);
-      setLoginState(false);
-      googleLoginMutation.mutate(accessToken);
+    onSuccess: async (response) => {
+      const accessToken = response.access_token; // Directly get the access token
+
+      try {
+        const userData = await googleLogin({ code: accessToken }).unwrap();
+        toast.success("Sign in  success");
+        dispatch(updateUser(userData.data));
+        setState(true);
+        setLoginState(false);
+      } catch (err: any) {
+        toast.error(
+          "Failed to register user " + (err?.data?.message || err.message)
+        );
+        console.error("Failed to sign up user", err);
+      }
     },
-    onError: () => {
-      toast.error("Google Sign-In Failed");
-    },
+    onError: () => console.log("Google Sign-In Failed"),
     flow: "implicit",
   });
 
@@ -465,9 +476,9 @@ const LoginPage = () => {
                     onClick={() => {
                       try {
                         googleSignUp();
-                        mixpanel.track("Google Sign-In Clicked", {
-                          timestamp: new Date().toISOString(),
-                        });
+                        // mixpanel.track("Google Sign-In Clicked", {
+                        //   timestamp: new Date().toISOString(),
+                        // });
                       } catch (err) {
                         console.error("Error during Google sign up:", err);
                         toast.error("Failed to sign in with Google");

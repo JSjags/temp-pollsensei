@@ -15,7 +15,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { useFetchASurveyQuery } from "@/services/survey.service";
 import { useDispatch } from "react-redux";
 import { openUpload } from "@/redux/slices/upload.slice";
-import { FiShare2 } from "react-icons/fi";
+import { FiShare2, FiUpload } from "react-icons/fi";
 import ShareSurvey from "../survey/ShareSurvey";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -289,7 +289,7 @@ const SurveyCreationNav = () => {
                     </DialogContent>
                   </Dialog>
                 )}
-                <Image
+                {/* <Image
                   src={hyphen}
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
@@ -302,7 +302,7 @@ const SurveyCreationNav = () => {
                   <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
                     Report
                   </span>
-                </Link>
+                </Link> */}
                 {/* <Image src={hyphen} alt="hyphen" className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto" /> */}
               </nav>
             </div>
@@ -560,14 +560,15 @@ const SurveyCreationNav = () => {
           </nav>
 
           {path.includes("survey-response-upload") ? (
-            <button
+            <Button
               className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-5 py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
               onClick={() => {
                 dispatch(openUpload());
               }}
             >
+              <FiUpload className="w-5 h-5" />
               Upload Results
-            </button>
+            </Button>
           ) : (
             <div className="flex justify-between items-center gap-3">
               {path === "/surveys/create-survey" ||
@@ -1042,14 +1043,15 @@ const SurveyCreationNav = () => {
           </nav>
 
           {path.includes("survey-response-upload") ? (
-            <button
+            <Button
               className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-5 py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
               onClick={() => {
                 dispatch(openUpload());
               }}
             >
+              <FiUpload className="w-5 h-5" />
               Upload Results
-            </button>
+            </Button>
           ) : (
             <div className="flex justify-between items-center gap-3">
               {path === "/surveys/create-survey" ||

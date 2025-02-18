@@ -341,10 +341,9 @@
 
 // export default SenseiMaster;
 
-import React, { useEffect, useMemo, useState } from "react";
-import Draggable from "react-draggable";
+import React, { useEffect, useState, useCallback } from "react";
+import { Rnd } from "react-rnd";
 import { useRive } from "@rive-app/react-canvas";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -352,15 +351,20 @@ import {
   setAnimationState,
   toggleCollapse,
   setIsPinned,
-  setIsDragging,
-  setStartPos,
-  setDefaultPosition,
   setWindowWidth,
   setWindowHeight,
 } from "@/redux/slices/sensei-master.slice";
 import { RootState } from "@/redux/store";
 import SenseiMasterChat from "../ai/SenseiMasterChat";
-import { useSensei } from "@/contexts/SenseiContext";
+import { motion, AnimatePresence } from "framer-motion";
+
+const CHAT_WIDTH = 400;
+const CHAT_HEIGHT = 600;
+const SENSEI_SIZE = 96;
+const PADDING = 20;
+const TRANSITION_DURATION = 0.3;
+
+type Direction = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 const SenseiMaster = ({
   type = "generation",
@@ -385,22 +389,21 @@ const SenseiMaster = ({
   setEditId?: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
   const dispatch = useDispatch();
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [mouseDownTime, setMouseDownTime] = useState<number>(0);
+  const [mouseDownPosition, setMouseDownPosition] = useState({ x: 0, y: 0 });
+  const [isRepositioning, setIsRepositioning] = useState(false);
+  const [openDirection, setOpenDirection] = useState<Direction>("bottom-right");
 
   const {
-    count = 0, // Fallback to 0 if undefined
+    count = 0,
     animationState = "Sleeping",
-    isCollapsed,
+    isCollapsed = true,
     isPinned,
-    isDragging,
-    startPos,
-    defaultPosition,
     windowWidth,
     windowHeight,
-  } = useSelector((state: RootState) => {
-    return state.senseiMaster || {};
-  });
-
-  const [showSensei, setShowSensei] = useState(false);
+  } = useSelector((state: RootState) => state.senseiMaster || {});
 
   const { rive, RiveComponent } = useRive({
     src: "/assets/rive/pollsensei_master.riv",
@@ -411,273 +414,257 @@ const SenseiMaster = ({
     },
   });
 
-  // const rightBound = useMemo(
-  //   () => windowWidth - (isCollapsed ? 96 : 400),
-  //   [windowWidth, isCollapsed]
-  // );
-  // const bottomBound = useMemo(
-  //   () => windowHeight - (isCollapsed ? 226 : 600),
-  //   [windowHeight, isCollapsed]
-  // );
+  // Calculate best position based on available space
+  const calculateLayout = useCallback((x: number, y: number) => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
 
-  const handleMouseDown = (event: React.MouseEvent) => {
-    dispatch(setStartPos({ x: event.clientX, y: event.clientY }));
-    dispatch(setIsDragging(false));
-  };
+    // Calculate available space in each direction
+    const hasSpaceLeft = x >= CHAT_WIDTH + PADDING;
+    const hasSpaceRight =
+      windowWidth - (x + SENSEI_SIZE) >= CHAT_WIDTH + PADDING;
+    const hasSpaceTop = y >= CHAT_HEIGHT + PADDING;
+    const hasSpaceBottom =
+      windowHeight - (y + SENSEI_SIZE) >= CHAT_HEIGHT + PADDING;
 
-  const handleMouseMove = (event: React.MouseEvent) => {
-    const distanceMoved = Math.sqrt(
-      Math.pow(event.clientX - startPos.x, 2) +
-        Math.pow(event.clientY - startPos.y, 2)
-    );
-    if (distanceMoved > 5) {
-      dispatch(setIsDragging(true));
+    let direction: Direction = "bottom-right";
+
+    // Determine best position based on available space
+    if (hasSpaceLeft && hasSpaceBottom) {
+      direction = "bottom-left";
+    } else if (hasSpaceRight && hasSpaceBottom) {
+      direction = "bottom-right";
+    } else if (hasSpaceLeft && hasSpaceTop) {
+      direction = "top-left";
+    } else if (hasSpaceRight && hasSpaceTop) {
+      direction = "top-right";
     }
-  };
 
-  const handleMouseUp = (event: React.MouseEvent) => {
-    dispatch(
-      setDefaultPosition({
-        x: event.clientX - (isCollapsed ? 40 : 40),
-        y:
-          event.clientY -
-          (isCollapsed
-            ? 150
-            : event.clientY - 150 > windowHeight - 600
-            ? 100
-            : 150),
-      })
-    );
-    if (!isDragging) {
-      dispatch(toggleCollapse());
-    }
-  };
-
-  const toggleStates = (stage?: number) => {
-    if (rive) {
-      const statesLength = rive?.animationNames.length;
-      // dispatch(setAnimationState(animationState === "idle" ? "chat" : "idle"));
-      if (count >= statesLength - 1) {
-        dispatch(setCount(stage ?? 1));
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "stop talking");
-
-        trigger!.fire();
-      } else {
-        dispatch(setCount(count + 1));
-      }
-    }
-  };
-
-  const senseiStateSetter = (
-    state:
-      | "sleep"
-      | "be idle"
-      | "start thinking"
-      | "start talking"
-      | "stop talking"
-  ) => {
-    if (rive) {
-      if (state === "sleep") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "sleep");
-        trigger?.fire();
-      }
-      if (state === "be idle") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "be idle");
-        trigger?.fire();
-      }
-      if (state === "start thinking") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "start thinking");
-        trigger?.fire();
-      }
-      if (state === "start talking") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "start talking");
-        trigger?.fire();
-      }
-      if (state === "stop talking") {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "stop talking");
-        trigger?.fire();
-      }
-    }
-  };
-
-  const pinToSide = () => {
-    console.log(defaultPosition);
-
-    setDefaultPosition(defaultPosition);
-    setIsPinned(true);
-  };
-
-  // Update window dimensions on resize
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const handleResize = () => {
-        dispatch(setWindowWidth(window.innerWidth));
-        dispatch(setWindowHeight(window.innerHeight));
-      };
-
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (rive) {
-      const statesLength = rive?.animationNames.length;
-
-      if (count >= statesLength) {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-        const trigger = inputs.find((i) => i.name === "sleep");
-        trigger?.fire();
-      } else {
-        const inputs = rive?.stateMachineInputs("sensei-states");
-
-        if (count === 0) {
-          const trigger = inputs.find((i) => i.name === "sleep");
-          trigger!.fire();
-          if (animationState) {
-            setTimeout(() => {
-              const trigger = inputs.find((i) => i.name === "sleep");
-              trigger!.fire();
-            }, 10000);
-          }
-        }
-        if (count === 1) {
-          const trigger = inputs.find((i) => i.name === "be idle");
-          console.log(trigger);
-
-          trigger!.fire();
-        }
-        if (count === 2) {
-          const trigger = inputs.find((i) => i.name === "start thinking");
-          console.log(trigger);
-          trigger!.fire();
-        }
-        if (count === 3) {
-          const trigger = inputs.find((i) => i.name === "start talking");
-          console.log(trigger);
-          trigger!.fire();
-        }
-      }
-    }
-  }, [count, rive]);
-
-  useEffect(() => {
-    let timeout;
-
-    timeout = setTimeout(() => {
-      setShowSensei(true);
-    }, 0);
-
-    return () => {
-      clearTimeout(timeout);
+    setOpenDirection(direction);
+    const newX = x;
+    const newY = y;
+    return {
+      x: newX,
+      y: newY,
+      direction,
     };
   }, []);
-  // Update window dimensions on resize
+
+  // Get chat position styles based on direction
+  const getChatPositionStyles = useCallback((direction: Direction) => {
+    switch (direction) {
+      case "top-left":
+        return {
+          right: "100%",
+          bottom: "100%",
+          marginRight: 10,
+          marginBottom: 10,
+        };
+      case "top-right":
+        return {
+          left: "100%",
+          bottom: "100%",
+          marginLeft: 10,
+          marginBottom: 10,
+        };
+      case "bottom-left":
+        return {
+          right: "100%",
+          top: 0,
+          marginRight: 10,
+        };
+      case "bottom-right":
+      default:
+        return {
+          left: "100%",
+          top: 0,
+          marginLeft: 10,
+        };
+    }
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setMouseDownTime(Date.now());
+    setMouseDownPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    const mouseUpTime = Date.now();
+    const timeDiff = mouseUpTime - mouseDownTime;
+    const distanceMoved = Math.sqrt(
+      Math.pow(e.clientX - mouseDownPosition.x, 2) +
+        Math.pow(e.clientY - mouseDownPosition.y, 2)
+    );
+
+    if (timeDiff < 200 && distanceMoved < 5) {
+      if (!isCollapsed) {
+        dispatch(toggleCollapse());
+        return;
+      }
+
+      setIsRepositioning(true);
+      const {
+        x: newX,
+        y: newY,
+        direction,
+      } = calculateLayout(position.x, position.y);
+      setPosition({ x: newX, y: newY });
+
+      setTimeout(() => {
+        setIsRepositioning(false);
+        dispatch(toggleCollapse());
+      }, TRANSITION_DURATION * 1000);
+    }
+  };
+
+  // Pin to bottom right
+  const pinToSide = useCallback(() => {
+    const x = window.innerWidth - (SENSEI_SIZE + PADDING);
+    const y = window.innerHeight - (SENSEI_SIZE + PADDING);
+    setPosition({ x, y });
+  }, []);
+
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       dispatch(setWindowWidth(window.innerWidth));
       dispatch(setWindowHeight(window.innerHeight));
+
+      if (isPinned) {
+        pinToSide();
+      } else if (!isCollapsed) {
+        const {
+          x: newX,
+          y: newY,
+          direction,
+        } = calculateLayout(position.x, position.y);
+        setPosition({ x: newX, y: newY });
+      }
     };
+
     window.addEventListener("resize", handleResize);
-    handleResize(); // Initial call
     return () => window.removeEventListener("resize", handleResize);
-  }, [dispatch]);
+  }, [dispatch, isPinned, isCollapsed, position, calculateLayout, pinToSide]);
 
-  // Right and bottom bounds based on window size and component size
-  const rightBound = useMemo(
-    () => windowWidth - (isCollapsed ? 96 : 400),
-    [windowWidth, isCollapsed]
-  );
-  const bottomBound = useMemo(
-    () => windowHeight - (isCollapsed ? 226 : 600),
-    [windowHeight, isCollapsed]
-  );
-  const x = useMemo(
-    () => windowWidth - (windowWidth <= 1024 ? 100 : 530),
-    [windowWidth, window.innerWidth, isCollapsed]
-  );
-  const y = useMemo(
-    () => windowHeight - 500,
-    [windowHeight, window.innerWidth, isCollapsed]
+  // Set initial position
+  useEffect(() => {
+    setPosition({
+      x: window.innerWidth - (SENSEI_SIZE + PADDING),
+      y: window.innerHeight - (SENSEI_SIZE + PADDING),
+    });
+  }, []);
+
+  const senseiStateSetter = useCallback(
+    (
+      state:
+        | "sleep"
+        | "be idle"
+        | "start thinking"
+        | "start talking"
+        | "stop talking"
+    ) => {
+      if (!rive) return;
+      const inputs = rive.stateMachineInputs("sensei-states");
+      const trigger = inputs.find((i) => i.name === state);
+      trigger?.fire();
+    },
+    [rive]
   );
 
-  return showSensei ? (
-    <Draggable
-      defaultPosition={{
-        x,
-        y,
+  // Update position and direction while dragging
+  const handleDrag = useCallback(
+    (x: number, y: number) => {
+      if (isCollapsed) return;
+
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      // Calculate available space in each direction
+      const hasSpaceLeft = x >= CHAT_WIDTH + PADDING;
+      const hasSpaceRight =
+        windowWidth - (x + SENSEI_SIZE) >= CHAT_WIDTH + PADDING;
+      const hasSpaceTop = y >= CHAT_HEIGHT + PADDING;
+      const hasSpaceBottom =
+        windowHeight - (y + SENSEI_SIZE) >= CHAT_HEIGHT + PADDING;
+
+      let newDirection: Direction;
+
+      // Determine best position based on available space
+      if (hasSpaceLeft && hasSpaceTop) {
+        newDirection = "top-left";
+      } else if (hasSpaceRight && hasSpaceTop) {
+        newDirection = "top-right";
+      } else if (hasSpaceLeft && hasSpaceBottom) {
+        newDirection = "bottom-left";
+      } else {
+        newDirection = "bottom-right";
+      }
+
+      setOpenDirection(newDirection);
+      setPosition({ x, y });
+    },
+    [isCollapsed]
+  );
+
+  return (
+    <Rnd
+      position={position}
+      size={{
+        width: SENSEI_SIZE,
+        height: SENSEI_SIZE,
       }}
-      bounds={{ top: 0, left: 0, right: rightBound, bottom: bottomBound }}
+      bounds="window"
+      enableResizing={false}
+      disableDragging={isPinned}
+      onDrag={(_e, d) => {
+        setPosition({ x: d.x, y: d.y });
+        handleDrag(d.x, d.y);
+      }}
+      dragHandleClassName="drag-handle"
+      style={{ zIndex: 9999999 }}
     >
-      <div
-        className={cn(
-          `fixed z-50 shadow-none bg-transparent rounded-full transition-all duration-300`,
-          isCollapsed ? "size-24" : "w-[300px] h-[calc(100vh-100px)] rounded-md"
-        )}
-        style={{
-          willChange: "transform",
-        }}
-      >
-        {/* Header with Rive Animation and Collapse Button */}
-        <div className="flex items-center justify-between bg-transparent cursor-move w-fit h-fit relative">
-          <div
-            className={cn(
-              "rive-animation size-24 max-w-24 max-h-24 transition-all rounded-full",
-              !isCollapsed
-                ? "absolute top-[calc(40vh-30px)] -right-[420px] -translate-y-1/2 transition-all"
-                : "transition-all"
-            )}
-          >
-            <RiveComponent
-              className="absolute inset-0 size-[100%] object-cover rounded-full cursor-pointer flex justify-center items-center mx-auto"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-            />
-          </div>
-          {/* <Button
-            onClick={() => {
-              toggleStates();
-            }}
-            className="ml-auto w-fit bg-blue-500 h-6 auth-btn text-white px-2 py-1 rounded-full absolute -bottom-8 left-0 !text-xs"
-          >
-            {animationState}
-          </Button> */}
-        </div>
-
-        {/* Chat Box Content (shown if not collapsed) */}
-        <div
-          className={cn(
-            "chat-content overflow-auto h-[calc(80%-60px)] shadow-lg rounded-md relative bg-white",
-            !isCollapsed ? "block" : "hidden"
+      <div className="relative">
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute bg-white rounded-lg shadow-lg overflow-hidden"
+              style={{
+                width: CHAT_WIDTH,
+                height: CHAT_HEIGHT,
+                ...getChatPositionStyles(openDirection),
+              }}
+            >
+              <SenseiMasterChat
+                isOpen={isCollapsed}
+                toggleCollapse={toggleCollapse}
+                senseiStateSetter={senseiStateSetter}
+                isPinned={isPinned}
+                setIsPinned={setIsPinned}
+                pinToSide={pinToSide}
+                setDefaultPosition={setPosition}
+                type={type}
+                onSave={onSave}
+                aiSave={aiSave}
+                setEditId={setEditId!}
+              />
+            </motion.div>
           )}
-          // onMouseDown={handleChatOpenMouseDown}
-          // onMouseMove={handleChatOpenMouseMove}
-          // onMouseUp={handleChatOpenMouseUp}
-        >
-          <SenseiMasterChat
-            isOpen={isCollapsed}
-            toggleCollapse={toggleCollapse}
-            senseiStateSetter={senseiStateSetter}
-            isPinned={isPinned}
-            setIsPinned={setIsPinned}
-            pinToSide={pinToSide}
-            setDefaultPosition={setDefaultPosition}
-            type={type}
-            onSave={onSave}
-            aiSave={aiSave}
-            setEditId={setEditId!}
+        </AnimatePresence>
+
+        <div className="size-24 cursor-move drag-handle">
+          <RiveComponent
+            className="size-full rounded-full"
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
           />
         </div>
       </div>
-    </Draggable>
-  ) : null;
+    </Rnd>
+  );
 };
 
 export default SenseiMaster;

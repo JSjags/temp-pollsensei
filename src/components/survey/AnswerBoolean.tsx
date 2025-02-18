@@ -1,18 +1,20 @@
 import { draggable } from "@/assets/images";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { BsExclamation } from "react-icons/bs";
-import { Check } from "lucide-react";
+import { Check, GripVertical, ToggleLeft } from "lucide-react";
 import { Switch } from "../ui/switch";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { cn } from "@/lib/utils";
 
 interface BooleanQuestionProps {
   question: string;
   questionType: string;
   options?: string[];
-  boolean_value?: boolean; // Added boolean_value prop
+  boolean_value?: boolean;
   onChange?: (value: boolean) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
@@ -24,9 +26,9 @@ interface BooleanQuestionProps {
 
 const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
   question,
-  options = ["Yes", "No"], // Default options
+  options = ["Yes", "No"],
   questionType,
-  boolean_value = null, // Default to null
+  boolean_value = null,
   EditQuestion,
   DeleteQuestion,
   index,
@@ -43,115 +45,148 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  // State to store the selected boolean value
-  const [selectedValue, setSelectedValue] = useState<boolean | null>(boolean_value);
+  const [selectedValue, setSelectedValue] = useState<boolean | null>(
+    boolean_value
+  );
 
-  // Sync the boolean_value prop with state
   useEffect(() => {
     setSelectedValue(boolean_value);
   }, [boolean_value]);
 
-  // Handle option selection
-  const handleOptionChange = (value: boolean) => {
-    setSelectedValue(value); // Update selected value
+  const handleOptionChange = (value: string) => {
+    const boolValue = value.toLowerCase() === "yes";
+    setSelectedValue(boolValue);
     if (onChange) {
-      onChange(value); // Trigger onChange callback if provided
+      onChange(boolValue);
     }
   };
 
-    const getStatus = (status: string) => {
-      switch (status) {
-        case "passed":
-          return (
-            <div className="bg-green-500 rounded-full p-1 mr-3">
-              <Check strokeWidth={1} className="text-xs text-white" />
-            </div>
-          );
-        case "failed":
-          return (
-            <div className="bg-red-500 rounded-full text-white p-2 mr-3">
-              <BsExclamation />
-            </div>
-          );
-  
-        default:
-          return null;
-      }
-    };
+  const getStatus = useMemo(() => {
+    switch (status) {
+      case "passed":
+        return (
+          <div className="bg-green-500 rounded-full p-1 transition-all duration-200 hover:bg-green-600">
+            <Check
+              strokeWidth={1.5}
+              className="w-4 h-4 text-white"
+              aria-label="Passed validation"
+            />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="bg-red-500 rounded-full p-1 transition-all duration-200 hover:bg-red-600">
+            <BsExclamation
+              className="w-4 h-4 text-white"
+              aria-label="Failed validation"
+            />
+          </div>
+        );
+      case "pending":
+        return (
+          <div className="bg-yellow-500 rounded-full p-1 transition-all duration-200 hover:bg-yellow-600">
+            <span
+              className="block w-4 h-4 animate-pulse"
+              aria-label="Validation pending"
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  }, [status]);
 
   return (
     <div
-      className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: `${questionText?.name}`,
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <Image
-        src={draggable}
-        alt="draggable icon"
-        className={
-          pathname === "/surveys/create-survey" ? "visible" : "invisible"
-        }
-      />
-      <div className="w-full">
-        <h3 className="text-lg font-semibold text-start">
-          <p>
-            <span>{index}. </span> {question}
-            {is_required && <span className="text-2xl ml-2 text-red-500">*</span>}
-          </p>
-        </h3>
-        <div className="flex items-center my-2">
-          {options.map((option, optionIndex) => (
-            <label
-              key={optionIndex}
-              className="relative flex items-center cursor-pointer mr-4"
-            >
-              <input
-                type="radio"
-                name={question}
-                value={option}
-                className="hidden"
-                checked={
-                  (option.toLowerCase() === "yes" || option.toLowerCase() === "true") && selectedValue === true ||
-                  (option.toLowerCase() === "no" || option.toLowerCase() === "false") && selectedValue === false
-                }
-                onChange={() =>
-                  handleOptionChange(option.toLowerCase() === "yes" || option.toLowerCase() === "true")
-                }
-                required={is_required}
-              />
-              <span
-                className={`w-5 h-5 border-2 rounded-full shadow-inner flex flex-col before:block before:w-3/5 before:h-3/5 before:m-auto before:rounded-full ${
-                  (option.toLowerCase() === "yes" || option.toLowerCase() === "true") && selectedValue === true ||
-                  (option.toLowerCase() === "no" || option.toLowerCase() === "false") && selectedValue === false
-                    ? "bg-[#5B03B2]"
-                    : "bg-transparent"
-                }`}
-                style={{ borderColor: colorTheme }}
-              ></span>
-              <span className="ml-2">{option}</span>
-            </label>
-          ))}
-        </div>
-        {pathname === "/surveys/edit-survey" && (
-          <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB]"
-            />
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
+                  )}
+                </div>
+              </h3>
+            </div>
           </div>
+          <RadioGroup
+            className="flex gap-6"
+            value={
+              boolean_value === null
+                ? undefined
+                : boolean_value
+                ? "True"
+                : "False"
+            }
+            disabled
+          >
+            {options.map((option) => (
+              <div key={option} className="flex items-center space-x-2">
+                <RadioGroupItem
+                  value={option}
+                  id={option}
+                  disabled
+                  className="opacity-50"
+                />
+                <label
+                  htmlFor={option}
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {option}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+          {pathname === "/surveys/edit-survey" && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Required</span>
+                <Switch
+                  checked={is_required}
+                  onCheckedChange={
+                    setIsRequired && ((checked) => setIsRequired(checked))
+                  }
+                  className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus}</div>
         )}
       </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
-      )}
+      <div className="flex justify-end">
+        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1 text-xs">
+            <ToggleLeft className="text-[#9D50BB] w-3 h-3" />
+            Boolean
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

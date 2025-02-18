@@ -25,6 +25,11 @@ import { useSensei } from "@/contexts/SenseiContext";
 import { usePathname } from "next/navigation";
 import { setActionMessage } from "@/redux/slices/sensei-master.slice";
 
+// Add these constants at the top of the file, after imports
+const CHAT_WIDTH = 400; // Width of chat window
+const CHAT_HEIGHT = 580; // Height of chat window
+const PADDING = 20; // Padding from window edges
+
 // The AI message is being added twice because:
 // 1. It's added once in the `addAiMessage` function
 // 2. It's added again when the socket receives the "ai_message" event
@@ -131,6 +136,9 @@ const SenseiMasterChat: React.FC<Props> = ({
 
   const { aiResponse, loading, isConnected, emitEvent, socketIo, setLoading } =
     useSensei();
+
+  // Add state for tracking last position
+  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     socketIo?.onAny((eventName: string, ...args: any) => {
@@ -440,40 +448,60 @@ const SenseiMasterChat: React.FC<Props> = ({
     //   );
     // }
   };
+
+  const handlePinClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (isPinned) {
+      // When unpinning, return to last position
+      setIsPinned(false);
+      if (lastPosition.x !== 0 || lastPosition.y !== 0) {
+        setDefaultPosition(lastPosition);
+      }
+    } else {
+      // When pinning, save current position and move to bottom right
+      const chatElement = document.querySelector(
+        ".draggable-chat"
+      ) as HTMLElement;
+      if (chatElement) {
+        const rect = chatElement.getBoundingClientRect();
+        setLastPosition({ x: rect.left, y: rect.top });
+      }
+      pinToSide();
+      setIsPinned(true);
+    }
+  };
+
+  // Add resize handler to maintain position when pinned
+  useEffect(() => {
+    const handleResize = () => {
+      if (isPinned) {
+        pinToSide();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isPinned]);
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#5b03b2] rounded-t-md to-[#9d50bb] text-white p-4 pt-10 cursor-move">
+    <div
+      className={`draggable-chat flex flex-col h-full ${
+        isPinned ? "pointer-events-none" : ""
+      }`}
+    >
+      <div
+        className={`bg-gradient-to-r from-[#5b03b2] rounded-t-md to-[#9d50bb] text-white p-4 pt-10 ${
+          isPinned ? "" : "cursor-move"
+        }`}
+      >
         <p className="text-xl font-bold text-white text-left">Sensei</p>
-        <div
-          className="absolute right-4 top-3 p-0 flex justify-end gap-2"
-          onMouseDown={(event) => {
-            setStartPos({ x: event.clientX, y: event.clientY });
-            setIsDragging(false);
-          }}
-          onMouseMove={(event) => {
-            const distanceMoved = Math.sqrt(
-              Math.pow(event.clientX - startPos.x, 2) +
-                Math.pow(event.clientY - startPos.y, 2)
-            );
-            if (distanceMoved > 5) setIsDragging(true);
-          }}
-          onMouseUp={() => {
-            if (!isDragging) dispatch(toggleCollapse());
-          }}
-        >
-          {/* Pin Button */}
+        <div className="absolute right-4 top-3 p-0 flex justify-end gap-2 pointer-events-auto">
           <Button
             variant="ghost"
             size="icon"
             className="p-0 size-8 text-white rounded-full hover:bg-white/20 hover:text-white"
-            onClick={() => {
-              if (isPinned) {
-                setIsPinned(false);
-              } else {
-                pinToSide();
-              }
-            }}
+            onClick={handlePinClick}
           >
             {isPinned ? (
               <PinOff className="size-5 rotate-45" />
@@ -487,6 +515,10 @@ const SenseiMasterChat: React.FC<Props> = ({
             variant="ghost"
             size="icon"
             className="p-0 size-8 text-white rounded-full hover:bg-white/20 hover:text-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(toggleCollapse());
+            }}
           >
             <X className="size-5" />
           </Button>
