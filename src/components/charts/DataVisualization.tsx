@@ -44,7 +44,18 @@ import { Button } from "../ui/button";
 import { ChartContainer, ChartLegend } from "@/components/ui/chart";
 import { Alert, AlertDescription } from "../ui/alert";
 import ViolinPlot from "./KruskalWallisChart";
-import WordFrequencyChart from "./WordFrequencyChart";
+import WordFrequencyAnalysisComponent from "./WordFrequencyAnalysis";
+import Image from "next/image";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { FileDown } from "lucide-react";
+import html2pdf from "html2pdf.js";
+import { pollsensei_new_logo } from "@/assets/images";
+import ChiSquareComponent from "./ChiSquare";
+import SentimentAnalysisComponent from "./SentimentAnalysis";
+import WilcoxonTestComponent from "./WilcoxonTest";
+import MannWhitneyUComponent from "./MannWhitneyU";
+import KruskalWallisComponent from "./KruskalWallis";
 
 type TestResult = {
   status: string;
@@ -53,7 +64,7 @@ type TestResult = {
 
 type TestData = {
   test_name: string;
-  test_results: Record<string, TestResult>;
+  test_results: Record<string, TestResult>[];
   variable_id: string;
   survey_id: string;
   data: Array<{
@@ -112,10 +123,11 @@ export type TSurvey = {
 };
 
 type Props = {
-  data: TestData[];
+  data: TestData;
   survey: TSurvey;
   rerunTests: () => void;
 };
+
 interface DensityPoint {
   value: number;
   density: number;
@@ -184,285 +196,259 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const VerticalDataVisualization: React.FC<Props> = ({ data, survey }) => {
-  const renderChart = (testData: TestData) => {
-    if (
-      testData.test_name !== "Kruskal-Wallis Test" &&
-      testData.test_name !== "Mann-Whitney U Test" &&
-      Object.values(testData.test_results).every(
-        (result) => result.status === "error"
-      )
-    ) {
-      return renderErrorComponent(testData);
-    }
+const TestChartRenderer = ({ testData }: { testData: any }) => {
+  const { test_name, test_results } = testData;
 
-    switch (testData.test_name) {
-      case "Thematic Analysis":
-        const words = Object.keys(testData.test_results).map((key) => ({
-          text: formatText(key),
-          value: Math.floor(Math.random() * 100) + 1,
-        }));
-        return (
-          <div className="h-[400px] w-full">
-            <ReactWordcloud words={words} options={wordCloudOptions as any} />
+  switch (test_name) {
+    case "Chi-Square Test":
+      return <ChiSquareComponent data={testData} />;
+
+    case "Sentiment Analysis":
+      return <SentimentAnalysisComponent data={testData} />;
+
+    case "Word Frequency Analysis":
+      return <WordFrequencyAnalysisComponent data={testData} />;
+
+    case "Wilcoxon Signed-Rank Test":
+      return <WilcoxonTestComponent data={testData} />;
+
+    case "Mann-Whitney U Test":
+      return <MannWhitneyUComponent data={testData} />;
+
+    case "Kruskal-Wallis Test":
+      return <KruskalWallisComponent data={testData} />;
+
+    default:
+      return (
+        <Card className="p-6">
+          <div className="flex items-center gap-4 text-yellow-600">
+            <AlertCircle className="h-5 w-5" />
+            <p>Chart visualization not yet implemented for {test_name}</p>
           </div>
-        );
-      case "Sentiment Analysis":
-        const sentimentData = Object.entries(testData.test_results).map(
-          (key) => ({
-            name: formatText(key[0]),
-            Polarity: (key[1] as any).polarity,
-            Subjectivity: (key[1] as any).subjectivity,
-            //   Negative: Math.floor(Math.random() * 30),
-          })
-        );
-        return (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={sentimentData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend formatter={(value) => formatText(value)} />
-              <Bar dataKey="Polarity" stackId="a" fill="#8b5cf6" />
-              <Bar dataKey="Subjectivity" stackId="a" fill="#6366f1" />
-              {/* <Bar dataKey="Negative" stackId="a" fill="#3b82f6" /> */}
-            </BarChart>
-          </ResponsiveContainer>
-        );
-      case "Word Frequency Analysis":
-        console.log(testData.test_results);
+        </Card>
+      );
+  }
+};
 
-        return <WordFrequencyChart testData={[testData.test_results] as any} />;
-      case "Spearman":
-        const generateData = () => {
-          const data = [];
-          for (let i = 0; i < 100; i++) {
-            const x = Math.random() * 4 - 2;
-            // Add some noise to create scatter effect while maintaining correlation
-            const y = 1.5 * x + (Math.random() - 0.5) * 1.5;
-            data.push({ x, y });
-          }
-          // Add some outlier points similar to the original
-          data.push({ x: 2.5, y: 13 });
-          data.push({ x: 2.2, y: 10.2 });
-          return data;
-        };
-        const data = generateData();
-
-        const chartConfig = {
-          data: {
-            color: "hsl(271, 91%, 65%)", // Adjusted to match the purple in the image
-          },
-        };
-
-        return (
-          <Card className="w-full max-w-3xl">
-            <CardHeader className="space-y-0 pb-2">
-              <CardTitle className="text-center text-xl font-normal">
-                Spearman&apos;s Rank Correlation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <div className="absolute left-8 top-4 rounded-md bg-purple-50 px-2 py-1 text-sm text-purple-900">
-                  ρ = 0.82, p &lt; 0.001
-                </div>
-                <ChartContainer config={chartConfig} className="h-[600px]">
-                  <ScatterChart
-                    margin={{
-                      top: 60,
-                      right: 30,
-                      left: 40,
-                      bottom: 20,
-                    }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                    <XAxis
-                      type="number"
-                      dataKey="x"
-                      name="X"
-                      domain={[-2.5, 3]}
-                      tickCount={7}
-                      stroke="#666"
-                    />
-                    <YAxis
-                      type="number"
-                      dataKey="y"
-                      name="Y"
-                      domain={[-2, 14]}
-                      tickCount={9}
-                      stroke="#666"
-                    />
-                    <ZAxis range={[50]} />
-                    <Scatter
-                      data={data}
-                      fill="rgb(147, 51, 234)"
-                      line={{
-                        stroke: "rgb(147, 51, 234)",
-                        strokeWidth: 2,
-                      }}
-                      lineType="fitting"
-                    />
-                  </ScatterChart>
-                </ChartContainer>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case "Wilcoxon Signed-Rank Test":
-        // Generate placeholder data with similar distribution
-        return <Wilcoxon test_data={testData.test_results as any} />;
-      case "Kruskal-Wallis Test":
-        // Generate normal distribution data points
-        return <ViolinPlot test_data={testData.test_results as any} />;
-      case "Mann-Whitney U Test":
-        // Generate normal distribution data points
-        return (
-          <MannWhitney
-            test_name={testData.test_name}
-            // test_results={Object.entries(testData.test_results).map(
-            //   ([key, value]) => ({
-            //     [key]: {
-            //       u_statistic: (value as any).u_statistic, // Ensure this property exists in TestResult
-            //       p_value: (value as any).p_value, // Ensure this property exists in TestResult
-            //     },
-            //   })
-            // )}
-            test_results={
-              (testData?.test_results as any) ?? [
-                {
-                  "example-comparison": {
-                    u_statistic: 300,
-                    p_value: 0.04,
-                  },
-                },
-              ]
-            }
-          />
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  const renderErrorComponent = (testData: TestData) => {
-    return (
-      <div className="flex flex-col items-center justify-center h-[400px] bg-gray-100 rounded-lg p-6 text-center">
-        <AlertCircle className="w-16 h-16 text-yellow-500 mb-4" />
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">
-          Unable to Render Chart
-        </h3>
-        <p className="text-gray-600 mb-4">
-          We couldn't generate the chart for {formatText(testData.test_name)}{" "}
-          due to incompatible data.
-        </p>
-        <div className="bg-white p-4 rounded-md shadow-md">
-          <h4 className="font-semibold text-gray-700 mb-2">Reasons:</h4>
-          <ul className="list-disc list-inside text-left">
-            {Object.entries(testData.test_results).map(([key, value]) => (
-              <li key={key} className="text-gray-600">
-                {formatText(key)}: {formatText(value.reason)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  };
-
-  const getIcon = (testName: string) => {
-    switch (testName) {
-      case "Thematic Analysis":
-        return <CloudIcon className="h-6 w-6 text-white" />;
-      case "Sentiment Analysis":
-        return <MessageSquare className="h-6 w-6 text-white" />;
-      case "Word Frequency Analysis":
-        return <BarChart2 className="h-6 w-6 text-white" />;
-      case "Mann-Whitney U Test":
-        return <RectangleHorizontalIcon className="h-6 w-6 text-white" />;
-      case "Wilcoxon Signed-Rank Test":
-        return <LineChartIcon className="h-6 w-6 text-white" />;
-      default:
-        return null;
-    }
-  };
-
+const VerticalDataVisualization: React.FC<Props> = ({
+  data,
+  survey,
+  rerunTests,
+}) => {
   return (
-    <div className="p-6 min-h-screen max-w-4xl">
-      <h1 className="text-2xl font-extrabold text-left mb-4 text-gray-800">
-        Analysis Results
-      </h1>
-      <Card className="w-full bg-transparent border-none p-0">
-        <CardContent className="p-0">
-          <div className="bg-white p-6 rounded-lg shadow-sm my-6 mt-0">
-            <h2 className="text-xl font-semibold mb-2">{survey.topic}</h2>
-            <p className="text-gray-600">{survey.description}</p>
-          </div>
-        </CardContent>
-      </Card>
-      <div className="space-y-8">
-        {data.map((testData, index) => (
-          <motion.div
-            key={testData.test_name}
-            initial="hidden"
-            animate="visible"
-            variants={chartAnimation}
-          >
-            <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-500 text-white">
-                <div className="flex items-center space-x-2">
-                  {getIcon(testData.test_name)}
-                  <CardTitle className="text-xl">
-                    {formatText(testData.test_name)}
-                  </CardTitle>
-                </div>
-                <CardDescription className="text-purple-100">
-                  {Object.values(testData.test_results).every(
-                    (result) => result.status === "error"
-                  )
-                    ? "Test not compatible"
-                    : "Analysis Results"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">{renderChart(testData)}</CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+    <div className="space-y-8 p-0 ">
+      {data?.test_results.map((testData, index) => (
+        <motion.div
+          key={index}
+          initial="hidden"
+          animate="visible"
+          variants={chartAnimation}
+        >
+          <TestChartRenderer testData={testData} />
+        </motion.div>
+      ))}
     </div>
   );
 };
 
-export default function Component({ data = [], survey, rerunTests }: Props) {
+const pdfStyles = StyleSheet.create({
+  page: {
+    flexDirection: "column",
+    backgroundColor: "#ffffff",
+    padding: 30,
+  },
+  header: {
+    marginBottom: 20,
+    borderBottom: "1 solid #666",
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 10,
+    color: "#5B03B2",
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+  },
+  chart: {
+    marginVertical: 15,
+  },
+  text: {
+    fontSize: 12,
+    marginBottom: 5,
+  },
+});
+
+// const AnalysisPDFDocument = ({ data, survey }: Props) => (
+//   <Document>
+//     <Page size="A4" style={pdfStyles.page}>
+//       <View style={pdfStyles.header}>
+//         <Text style={pdfStyles.title}>{survey.topic} - Analysis Report</Text>
+//         <Text style={pdfStyles.text}>Generated by PollSensei</Text>
+//       </View>
+//       {data.test_results.map((testData, index) => (
+//         <View key={index} style={pdfStyles.section}>
+//           <Text style={pdfStyles.title}>{testData.test_name}</Text>
+//           {Object.entries(testData.test_results || {}).map(
+//             ([key, value], idx) => (
+//               <View key={idx}>
+//                 <Text style={pdfStyles.text}>
+//                   {formatText(key)}:{" "}
+//                   {typeof value === "object" ? JSON.stringify(value) : value}
+//                 </Text>
+//               </View>
+//             )
+//           )}
+//         </View>
+//       ))}
+//     </Page>
+//   </Document>
+// );
+
+export default function Component({ data, survey, rerunTests }: Props) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generatePDF = async () => {
+    if (!contentRef.current) return;
+
+    setIsGenerating(true);
+    try {
+      const buttons = contentRef.current.querySelectorAll(".action-buttons");
+      buttons.forEach((btn) => ((btn as HTMLElement).style.display = "none"));
+
+      const watermark = document.createElement("div");
+      watermark.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-45deg);
+          font-size: 96px;
+          opacity: 0.05;
+          pointer-events: none;
+          z-index: 1000;
+          white-space: nowrap;
+        ">
+          PollSensei Analytics
+        </div>
+      `;
+      contentRef.current.prepend(watermark);
+
+      const header = document.createElement("div");
+      header.innerHTML = `
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 2rem;
+          border-bottom: 2px solid #e5e7eb;
+          margin-bottom: 2rem;
+        ">
+          <img 
+            src="${pollsensei_new_logo.src}" 
+            style="width: 64px; height: 64px; border-radius: 9999px;"
+          />
+          <div>
+            <h1 style="
+              font-size: 24px;
+              font-weight: bold;
+              color: #5B03B2;
+              margin: 0;
+            ">Analysis Report</h1>
+            <p style="
+              color: #6B7280;
+              margin: 0;
+            ">Generated on ${new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
+      `;
+      contentRef.current.prepend(header);
+
+      const element = contentRef.current;
+      const opt = {
+        margin: [15, 15],
+        filename: `${survey.topic
+          .toLowerCase()
+          .replace(/\s+/g, "-")}-analysis.pdf`,
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          letterRendering: true,
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+        },
+      };
+
+      await html2pdf().set(opt).from(element).save();
+
+      watermark.remove();
+      header.remove();
+      buttons.forEach((btn) => ((btn as HTMLElement).style.display = "flex"));
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
-    <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="mb-20">
-        <VerticalDataVisualization
-          data={data}
-          survey={survey}
-          rerunTests={rerunTests}
+    <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-10 max-w-">
+      <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Image
+          src={pollsensei_new_logo}
+          alt="PollSensei Logo"
+          className="min-w-[160px]"
+          width={64}
+          height={64}
         />
-        ;
-        <div className="flex justify-start space-x-4 p-6">
-          <Button
-            disabled
-            className="bg-gradient-to-r from-purple-900 to-purple-600 hover:bg-purple-700 text-white"
-          >
-            Generate Report
-          </Button>
-          <Button
-            onClick={() => {
-              rerunTests();
-            }}
-            variant="outline"
-            className="flex gap-2 items-center"
-          >
-            <RefreshCcw size={18} />
-            <span>Regenerate</span>
-          </Button>
+        <div className="flex items-center justify-between py-8 gap-6">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                {survey.topic}
+              </h1>
+              <p>{survey.description}</p>
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-center justify-end">
+            <Button
+              onClick={rerunTests}
+              variant="outline"
+              className="flex gap-2 items-center"
+            >
+              <RefreshCcw size={18} />
+              <span>Regenerate</span>
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+              onClick={generatePDF}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                "Preparing PDF..."
+              ) : (
+                <>
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Download Report
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div ref={contentRef} className="mb-20">
+          <VerticalDataVisualization
+            data={data}
+            survey={survey}
+            rerunTests={rerunTests}
+          />
         </div>
       </div>
     </div>
@@ -494,23 +480,19 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
   test_name,
   test_results = DEFAULT_TEST_RESULT,
 }) => {
-  // Use default results if test_results is empty
   const resultsToUse =
     test_results.length === 0 ? DEFAULT_TEST_RESULT : test_results;
 
   const firstResult = resultsToUse[0];
   const [variableName, testResult] = Object.entries(firstResult)[0];
 
-  // Format p-value for display
   const formatPValue = (p: number): string => {
     if (p < 0.001) return "p < 0.001";
     return `p = ${p.toFixed(3)}`;
   };
 
-  // Determine statistical significance
   const isSignificant = testResult.p_value < 0.05;
 
-  // Calculate effect size interpretation based on U statistic
   const getEffectSize = (u: number): string => {
     if (u < 200) return "Large";
     if (u < 400) return "Medium";
@@ -519,12 +501,10 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
 
   const effectSize = getEffectSize(testResult.u_statistic);
 
-  // Color coding for significance
   const getSignificanceColor = (significant: boolean): string => {
     return significant ? "bg-green-100" : "bg-yellow-100";
   };
 
-  // Add notice when using default data
   const isUsingDefault = test_results.length === 0;
 
   return (
@@ -544,12 +524,10 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
           </Alert>
         )}
 
-        {/* Variable Name */}
         <div className="text-lg font-medium capitalize">
           Variable: {variableName.replace(/[-_]/g, " ")}
         </div>
 
-        {/* Test Statistics */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-lg bg-blue-50 p-4">
             <div className="text-sm text-gray-600">U Statistic</div>
@@ -572,7 +550,6 @@ const MannWhitney: React.FC<MannWhitneyProps> = ({
           </div>
         </div>
 
-        {/* Interpretation */}
         <Alert className="mt-4">
           <AlertDescription>
             {isSignificant
@@ -605,34 +582,22 @@ interface WilcoxinTestResult {
 
 const generateDeterministicData = (wStatistic: number, pValue: number) => {
   const data = [];
-
-  // Normalize w_statistic to create a more meaningful effect size
-  const effectSize = (wStatistic / 1000) * 2; // Doubled for more visible effect
-
-  // Use p_value to determine variance (smaller p-value = tighter clustering)
+  const effectSize = (wStatistic / 1000) * 2;
   const variance = Math.max(0.1, pValue) * 1.5;
 
-  // Generate points that better reflect the statistical properties
   for (let i = 0; i < 50; i++) {
-    // Create more consistent base values across the range
     const baseValue = (i / 50) * 12;
-
-    // Add controlled random variation
     const seed = Math.sin(i * 13.37);
     const variation = seed * variance;
-
-    // Calculate before and after values
     const before = baseValue + variation;
     const after = before + effectSize + seed * variance * 0.5;
 
-    // Ensure values stay within bounds while maintaining relationship
     data.push({
       before: Math.max(0, Math.min(12, before)),
       after: Math.max(0, Math.min(12, after)),
     });
   }
 
-  // Sort by 'before' value for smoother visualization
   return data.sort((a, b) => a.before - b.before);
 };
 
@@ -642,7 +607,6 @@ const Wilcoxon: React.FC<{ test_data: WilcoxinTestResult[] }> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
-  // Update width on resize
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
@@ -689,11 +653,9 @@ const Wilcoxon: React.FC<{ test_data: WilcoxinTestResult[] }> = ({
 
   const isUsingDefault = test_data.length === 0;
 
-  // Calculate aspect ratio based on container width
   const aspectRatio = Math.min(1.2, Math.max(0.8, containerWidth / 800));
   const height = containerWidth * aspectRatio;
 
-  // Calculate dynamic margins based on container size
   const margins = {
     top: Math.max(20, containerWidth * 0.05),
     right: Math.max(15, containerWidth * 0.03),
@@ -718,7 +680,9 @@ const Wilcoxon: React.FC<{ test_data: WilcoxinTestResult[] }> = ({
         )}
         <div className="relative" ref={containerRef}>
           <div className="absolute left-8 top-4 z-10 rounded-md bg-purple-50 px-2 py-1 text-sm text-purple-900">
-            {stats && typeof stats !== "string"
+            {stats &&
+            typeof stats !== "string" &&
+            (stats as any).p_value !== undefined
               ? `W = ${(stats as any).w_statistic}, p ${
                   (stats as any).p_value < 0.001
                     ? "< 0.001"

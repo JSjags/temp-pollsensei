@@ -148,13 +148,17 @@ const RegisterPage = () => {
         toast.success("Register success");
         router.push("/login");
       } catch (err: any) {
+        console.log(err);
+
         toast.error(
           "Failed to register user " + (err?.data?.message || err.message)
         );
         console.error("Failed to sign up user", err);
       }
     },
-    onError: () => console.log("Google Sign-In Failed"),
+    onError: (err) => {
+      console.log(error);
+    },
     flow: "implicit",
   });
 
@@ -560,9 +564,9 @@ const RegisterPage = () => {
                     onClick={() => {
                       try {
                         googleSignUp();
-                        mixpanel.track("Google Sign-In Clicked", {
-                          timestamp: new Date().toISOString(),
-                        });
+                        // mixpanel.track("Google Sign-In Clicked", {
+                        //   timestamp: new Date().toISOString(),
+                        // });
                       } catch (err) {
                         console.error("Error during Google sign up:", err);
                         toast.error("Failed to sign in with Google");

@@ -173,6 +173,8 @@ export default function ResponseRateDashboard() {
                   fontSize: isMobile ? "0.625rem" : "0.75rem",
                 }}
                 width={isMobile ? 30 : 40}
+                tickFormatter={(value) => Math.round(value).toString()}
+                allowDecimals={false}
               />
               <ChartTooltip
                 content={({ active, payload }) => {
