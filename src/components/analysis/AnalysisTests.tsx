@@ -686,14 +686,13 @@ export default function DragAndDropPage() {
       )}
     </Fragment>
   ) : (
-    <>
+    <div>
       {runTestMutation.isPending && (
         <LoadingOverlay
           title="Regenerating analysis"
           subtitle="Hold on! Let PollSensei cook."
         />
       )}
-      {console.log(runTestMutation)}
       {runTestMutation.isSuccess && (
         <DataVisualizationComponent
           data={runTestMutation?.data ?? {}}
@@ -713,7 +712,7 @@ export default function DragAndDropPage() {
           <SenseiMaster type={"analysis"} />
         </motion.div>
       </AnimatePresence>
-    </>
+    </div>
   );
 }
 
