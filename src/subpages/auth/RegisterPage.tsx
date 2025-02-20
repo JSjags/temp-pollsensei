@@ -1,5 +1,5 @@
 "use client";
-import { dark_theme_logo } from "@/assets/images";
+import { dark_theme_logo, pollsensei_new_logo } from "@/assets/images";
 import Input from "@/components/ui/Input";
 import { useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
@@ -245,11 +245,17 @@ const RegisterPage = () => {
             <motion.div
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="auth-bg md:hidden flex items-center justify-center p-4"
+              className="md:hidden flex items-center justify-center p-4 shadow"
             >
               <div className="flex items-center justify-center gap-3">
-                <Image src={logo} alt="Logo" width={32} height={32} />
-                <h1 className="auth-head">PollSensei</h1>
+                <Link href="/">
+                  <Image
+                    src={pollsensei_new_logo}
+                    alt="Logo"
+                    width={100}
+                    height={100}
+                  />
+                </Link>
               </div>
             </motion.div>
             <motion.div
@@ -319,7 +325,7 @@ const RegisterPage = () => {
                   transition={{ delay: 0.3 }}
                   className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10"
                 >
-                  <h2 className="auth-header font-sans text-center md:text-left">
+                  <h2 className="auth-header !text-2xl md:!text-4xl font-sans text-center md:text-left">
                     Welcome to PollSensei
                   </h2>
                   <p className="auth-title font-sans pt-3 text-center md:text-left">

@@ -37,20 +37,25 @@ const customBaseQuery: BaseQueryFn<
     const { status } = result.error;
     const errorMessage = (result.error.data as { message: string })?.message;
 
-    toast.dismiss(); // Dismiss any existing toasts before showing a new one
-
+    // Create error message based on status
+    let toastMessage = "";
     if (status === 406) {
       api.dispatch(logoutUser());
-      toast.error(
-        `Inactive for too long. Please login again to continue. ${errorMessage}`
-      );
+      toastMessage = `Inactive for too long. Please login again to continue. ${errorMessage}`;
     } else if (status === 401) {
       api.dispatch(logoutUser());
-      toast.error(`Error: ${errorMessage}`);
+      toastMessage = `Error: ${errorMessage}`;
     } else if (status === 400) {
-      toast.error(`Something went wrong ${errorMessage}`);
+      toastMessage = `Something went wrong ${errorMessage}`;
     } else if (status === 404) {
-      toast.error(`Page not found ${errorMessage}`);
+      toastMessage = `Page not found ${errorMessage}`;
+    }
+
+    // Only show toast if we have an error message
+    if (toastMessage) {
+      // Dismiss existing toasts and show new one with consistent toastId
+      toast.dismiss();
+      toast.error(toastMessage, { toastId: "api-error" });
     }
   }
   return result;

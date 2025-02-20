@@ -438,6 +438,14 @@ const SenseiMaster = ({
       direction = "top-left";
     } else if (hasSpaceRight && hasSpaceTop) {
       direction = "top-right";
+    } else if (hasSpaceLeft) {
+      direction = "bottom-left";
+    } else if (hasSpaceRight) {
+      direction = "bottom-left";
+    } else if (hasSpaceTop) {
+      direction = "top-right";
+    } else {
+      direction = "bottom-right"; // Default fallback
     }
 
     setOpenDirection(direction);

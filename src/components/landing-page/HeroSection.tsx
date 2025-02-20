@@ -144,10 +144,10 @@ const EnhancedHero = () => {
       <motion.div
         style={{ y: riveY }}
         className={cn(
-          "rive-animation size-60 max-w-60 max-h-60 transition-all flex justify-center items-center"
+          "rive-animation size-60 max-w-60 max-h-40 md:max-h-60 transition-all flex justify-center items-center"
         )}
       >
-        <RiveComponent className="size-[100%] object-cover rounded-full cursor-pointer flex justify-center items-center mx-auto translate-x-[15%]" />
+        <RiveComponent className="size-52 md:size-[100%] object-cover rounded-full cursor-pointer flex justify-center items-center mx-auto translate-x-[15%] -translate-y-[15%] sm:translate-y-[0%]" />
       </motion.div>
 
       <motion.div className="text-center relative z-10">
@@ -156,7 +156,7 @@ const EnhancedHero = () => {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-[500] mb-6 leading-10 md:leading-loose 
+          className="text-3xl sm:text-3xl md:text-5xl lg:text-6xl font-[500] mb-6 md:leading-relaxed 
           text-black font-inter lg:leading-[96px]"
         >
           Redefining Survey Creation for <br className="hidden lg:block" />{" "}
@@ -168,7 +168,7 @@ const EnhancedHero = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-xs sm:text-sm md:text-lg mb-12 max-w-3xl mx-auto text-black"
+          className="text-base sm:text-base md:text-lg mb-12 max-w-3xl mx-auto text-black"
         >
           Experience AI-powered surveys that make every response meaningful and{" "}
           <br className="hidden lg:block" /> every decision impactful.

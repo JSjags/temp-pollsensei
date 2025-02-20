@@ -54,7 +54,11 @@ const NavBar = ({
       animate={{ y: 0 }}
       className={cn(
         "sticky top-0 z-50 transition-all duration-300",
-        isScrolled ? "bg-white/80 backdrop-blur-lg shadow-lg" : "bg-white"
+        isScrolled
+          ? `bg-white/80 backdrop-blur-lg shadow-lg ${
+              isSidebarOpen ? "h-screen" : "md:h-auto"
+            }`
+          : `bg-white ${isSidebarOpen && "h-screen"}`
       )}
     >
       <nav className="container mx-auto px-4 py-4">
@@ -167,7 +171,7 @@ const NavBar = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 md:hidden"
+            className="fixed inset-0 z-[2147483647] md:hidden"
           >
             <motion.div
               initial={{ opacity: 0 }}

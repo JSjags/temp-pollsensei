@@ -42,12 +42,24 @@ import {
   handleRequiredToggle,
   processNewSurveyQuestions,
 } from "@/utils/surveyUtils";
-import { ArrowRight, Loader2, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+  PencilIcon,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/shadcn-input";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
 import type { Question } from "@/types/survey";
 import { SurveyData } from "./EditSubmittedSurvey";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -567,20 +579,80 @@ const EditSurvey = () => {
                 <div className="flex gap-2 items-center">
                   <Button
                     variant="outline"
-                    className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                    onClick={() => setAddMoreQuestion((prev) => !prev)}
+                    className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                    // onClick={() => setAddMoreQuestion((prev) => !prev)}
                     disabled={generatingSingleSurvey}
                   >
                     {generatingSingleSurvey ? (
                       <ClipLoader size={24} />
                     ) : (
-                      <>
-                        <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
-                        <span className="group-hover:tracking-wide transition-all duration-200">
-                          Add Question
-                        </span>
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
-                      </>
+                      <div className="flex gap-2 items-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                            >
+                              <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                              <span className="group-hover:tracking-wide transition-all duration-200">
+                                Add Question
+                              </span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            collisionPadding={{ bottom: 40 }}
+                            className="w-56"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const newQuestion = {
+                                  question: "New Question",
+                                  description: "Question description",
+                                  question_type: "short_text",
+                                  is_required: false,
+                                  options: [],
+                                };
+
+                                const updatedSections = [...questions];
+                                const currentSectionData =
+                                  updatedSections[currentSection];
+
+                                const updatedSection = {
+                                  ...currentSectionData,
+                                  questions: [
+                                    ...currentSectionData.questions,
+                                    newQuestion,
+                                  ],
+                                };
+
+                                dispatch(
+                                  updateSection({
+                                    index: currentSection,
+                                    newSection: updatedSection,
+                                  })
+                                );
+                                setEditIndex(
+                                  currentSectionData.questions.length
+                                );
+                                setIsEdit(true);
+                              }}
+                              className="gap-2"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                              <span>Add Manually</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setAddMoreQuestion(true)}
+                              className="gap-2"
+                            >
+                              <Sparkles className="h-4 w-4" />
+                              <span>Generate with AI</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     )}
                   </Button>
 
