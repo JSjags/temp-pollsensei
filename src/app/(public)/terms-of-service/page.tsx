@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function TermsAndConditions() {
   return (
-    <div className="container max-w-5xl mx-auto py-8 px-0">
+    <div className="container max-w-5xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center">
         TERMS AND CONDITIONS FOR THE USE OF POLLSENSEI
       </h1>

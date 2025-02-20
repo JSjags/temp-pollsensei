@@ -38,57 +38,37 @@ axiosInstance.interceptors.response.use(
     return response?.data ?? response;
   },
   function (error) {
+    // Dismiss any existing error toasts
+    toast.dismiss();
+
+    const formatErrorMessage = (error: any) => {
+      return error?.response?.data?.errors
+        ? (
+            error?.response?.data?.errors as { [key: string]: unknown }[]
+          ).reduce(
+            (prev, curr, i, arr) =>
+              i < arr.length - 1
+                ? prev + `${i === 0 ? "" : ", "}${curr.msg}`
+                : `${prev}, ${curr.msg}.`,
+            ""
+          )
+        : error?.response?.data?.msg ??
+            error?.response?.data?.message ??
+            error?.message ??
+            "You are not Authorized. Log in to continue";
+    };
+
     if (error.request.status === 401 || error.response.status === 401) {
       localStorage.removeItem("token");
-      toast.error(
-        error?.response?.data?.errors
-          ? (
-              error?.response?.data?.errors as { [key: string]: unknown }[]
-            ).reduce(
-              (prev, curr, i, arr) =>
-                i < arr.length - 1
-                  ? prev + `${i === 0 ? "" : ", "}${curr.msg}`
-                  : `${prev}, ${curr.msg}.`,
-              ""
-            )
-          : error?.response?.data?.msg ??
-              error?.response?.data?.message ??
-              error?.message ??
-              "You are not Authorized. Log in to continue"
-      );
+      toast.error(formatErrorMessage(error), { toastId: "error" });
       // return window.location.assign("/login");
-    }
-
-    if (
+    } else if (
       (error?.response?.data?.msg ||
         error?.response?.data?.message ||
         error?.message) &&
-      error?.response?.data?.message.includes("Survey milestone not found")
+      !error?.response?.data?.message?.includes("Survey milestone not found")
     ) {
-    }
-
-    if (
-      (error?.response?.data?.msg ||
-        error?.response?.data?.message ||
-        error?.message) &&
-      !error?.response?.data?.message.includes("Survey milestone not found")
-    ) {
-      toast.error(
-        error?.response?.data?.errors
-          ? (
-              error?.response?.data?.errors as { [key: string]: unknown }[]
-            ).reduce(
-              (prev, curr, i, arr) =>
-                i < arr.length - 1
-                  ? prev + `${i === 0 ? "" : ", "}${curr.msg}`
-                  : `${prev}, ${curr.msg}.`,
-              ""
-            )
-          : error?.response?.data?.msg ??
-              error?.response?.data?.message ??
-              error?.message ??
-              "You are not Authorized. Log in to continue"
-      );
+      toast.error(formatErrorMessage(error), { toastId: "error" });
     }
 
     return Promise.reject(error);

@@ -139,6 +139,7 @@ export default function RootLayout({
           <TanstackProvider>
             <ToastContainer
               className={`${cn(fontSans.variable)} !z-[9999999999999]`}
+              limit={1}
             />
             <ReduxContext>
               <SenseiProvider>

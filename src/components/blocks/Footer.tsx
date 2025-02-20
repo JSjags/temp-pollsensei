@@ -20,7 +20,7 @@ type Props = {
 const Footer: React.FC<Props> = ({ onClick }) => {
   return (
     <footer className="bg-gray-90 text-[#F9F9F9] pt-12 pb-32 px-4 sm:px-6 lg:px-8 w-full relative overflow-hidden">
-      <div className="container mx-auto w-full">
+      <div className="container px-0 sm:px-8 mx-auto w-full">
         <div className="grid grid-cols-1 md:grid-cols-10 xl:grid-cols-2 flex-col gap-y-10  w-full">
           <div className="w-full col-span-1 md:col-span-3 xl:col-span-1 ">
             <Image src={pollsensei_new_logo} alt="Logo" />
@@ -126,11 +126,11 @@ const Footer: React.FC<Props> = ({ onClick }) => {
               <h4 className="text-lg font-semibold text-[#606060] mb-4">
                 Contact
               </h4>
-              <div className="flex gap-y-4 flex-col">
+              <div className="flex gap-y-4 flex-col ">
                 <Link
                   target="_blank"
                   href={`mailto:support@pollsensei.ai`}
-                  className="text-black hover:text-purple-600"
+                  className="text-black hover:text-purple-600 break-words"
                 >
                   support@pollsensei.ai
                 </Link>

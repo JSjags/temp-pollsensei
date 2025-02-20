@@ -34,7 +34,7 @@ const CTAButtons: React.FC<CTAButtonsProps> = ({ className = "" }) => {
 
   return (
     <div
-      className={`flex justify-center items-center gap-5 ${className} rounded-full`}
+      className={`flex flex-col sm:flex-row justify-center items-center gap-5 ${className} rounded-full`}
     >
       {/* Primary Button - Write your First Prompt */}
       <ButtonWrapper>
@@ -67,7 +67,7 @@ const CTAButtons: React.FC<CTAButtonsProps> = ({ className = "" }) => {
             ))}
 
             {/* Button Text */}
-            <span className="relative z-10 text-white flex items-center gap-2">
+            <span className="relative z-10 text-white text-base flex items-center gap-2">
               Write your First Prompt
             </span>
           </motion.div>
@@ -102,7 +102,7 @@ const CTAButtons: React.FC<CTAButtonsProps> = ({ className = "" }) => {
             </div>
 
             {/* Button Text */}
-            <span className="relative z-10 text-[#5B03B2] flex items-center gap-2">
+            <span className="relative z-10 text-[#5B03B2] text-base flex items-center gap-2">
               Watch Video
               <Play size={15} />
             </span>
