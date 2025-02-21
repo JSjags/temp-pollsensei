@@ -284,6 +284,7 @@ export default function DragAndDropPage() {
           "Wilcoxon Signed-Rank Test",
           "Kruskal-Wallis Test",
           "Chi-Square Test",
+          "ANOVA (Analysis of Variance)",
           // "Spearman's Rank Correlation",
           "Mann-Whitney U Test",
           "Sentiment Analysis",
@@ -324,6 +325,7 @@ export default function DragAndDropPage() {
         "Wilcoxon Signed-Rank Test",
         "Kruskal-Wallis Test",
         "Chi-Square Test",
+        "ANOVA (Analysis of Variance)",
         // "Spearman's Rank Correlation",
         "Mann-Whitney U Test",
         "Sentiment Analysis",
@@ -367,6 +369,11 @@ export default function DragAndDropPage() {
       console.log(allVariables);
     }
   }, [createTestsQuery.isSuccess]);
+
+  // Add this handler to toggle back to test suite view
+  const handleBackToTests = () => {
+    setShowReport(false);
+  };
 
   // Check if survey has less than 3 responses
   if (getSurvey.isSuccess && getSurvey.data?.response_count < 10) {
@@ -412,294 +419,8 @@ export default function DragAndDropPage() {
     );
   }
 
-  return !showReport ? (
-    <Fragment>
-      {(variablesQuery.isLoading || testsLibraryQuery.isLoading) && (
-        <AnalysisLoadingScreen />
-      )}
-      {variablesQuery.isError && <AnalysisErrorComponent />}
-      {variablesQuery.isSuccess && (
-        <>
-          {/* Keep the error dialog the same */}
-
-          {runTestMutation.isPending && (
-            <LoadingOverlay
-              title="Analyzing Survey"
-              subtitle="Hold on! Let PollSensei cook."
-            />
-          )}
-
-          {/* Sensei Master */}
-          <AnimatePresence>
-            <motion.div
-              key="senseiMaster"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              variants={mascotVariants}
-              className="bg-blue-500 z-[1000000] fixed top-0 left-0"
-            >
-              <SenseiMaster type={"analysis"} />
-            </motion.div>
-          </AnimatePresence>
-          <DndProvider backend={HTML5Backend}>
-            <div className="p-4 max-w-7xl mx-auto">
-              {/* Variables Found Section */}
-              <div className="mb-6">
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                    <div className="bg-[#F5EDF8] rounded-md p-4 text-center min-w-[120px]">
-                      <p className="text-3xl font-bold">{variables.length}</p>
-                      <p className="text-sm mt-1">Variables</p>
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-lg font-semibold mb-3">
-                        Variables Found
-                      </h2>
-                      <div className="flex flex-wrap gap-2">
-                        {variables.map((variable) => (
-                          <VariableItem
-                            key={variable.id}
-                            variable={variable}
-                            testsLibrary={testsLibrary}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Main Content */}
-                <div className="flex-1">
-                  {/* Test Zones Grid */}
-                  <div className="mb-4 flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">Selected Tests</h2>
-                    <div className="flex gap-3">
-                      <Button
-                        disabled={!hasVariablesInTestsLibrary(testsLibrary)}
-                        className="auth-btn"
-                        onClick={() => runTestMutation.mutate()}
-                      >
-                        Start Analysis
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        className="flex gap-2 lg:hidden"
-                      >
-                        <Sheet>
-                          <SheetTrigger asChild>
-                            <div className="flex items-center">
-                              <Library className="h-4 w-4" />
-                              <span className="hidden sm:inline ml-2">
-                                Test Library
-                              </span>
-                            </div>
-                          </SheetTrigger>
-                          <SheetContent className="w-full sm:max-w-">
-                            <SheetHeader>
-                              <SheetTitle>Available Tests</SheetTitle>
-                            </SheetHeader>
-                            <div className="mt-4 overflow-y-auto max-h-[calc(100vh-120px)]">
-                              {Object.entries(
-                                testLibrary.reduce((acc, test) => {
-                                  if (!acc[test.category as any])
-                                    acc[test.category as any] = [];
-                                  acc[test.category as any].push(test);
-                                  return acc;
-                                }, {} as Record<string, typeof testLibrary>)
-                              ).map(([category, tests], i) => (
-                                <div key={category} className="mb-6">
-                                  <h3 className="font-bold mb-3">{category}</h3>
-                                  <div className="space-y-2">
-                                    {tests.map((test) => (
-                                      <div
-                                        key={test.id}
-                                        className="flex items-start"
-                                      >
-                                        <Checkbox
-                                          id={`sheet-${test.id}`}
-                                          checked={testsLibrary.some(
-                                            (t) => t.id === test.id
-                                          )}
-                                          onCheckedChange={() =>
-                                            toggleTest(test.id)
-                                          }
-                                          className="mr-2 mt-1 data-[state=checked]:bg-purple-800 data-[state=checked]:border-purple-800"
-                                        />
-                                        <label
-                                          htmlFor={`sheet-${test.id}`}
-                                          className="text-sm"
-                                        >
-                                          {test.name}
-                                        </label>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </SheetContent>
-                        </Sheet>
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(createTestsQuery.fetchStatus === "paused" ||
-                      createTestsQuery.isLoading) && (
-                      <div className="col-span-full flex justify-center">
-                        <motion.div
-                          initial={{ scale: 0.9, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg"
-                        >
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              ease: "linear",
-                            }}
-                          >
-                            <Spinner />
-                          </motion.div>
-                          <h2 className="mt-4 text-xl font-semibold">
-                            Generating Tests
-                          </h2>
-                          <p className="mt-2 text-sm text-gray-500">
-                            Please wait...
-                          </p>
-                        </motion.div>
-                      </div>
-                    )}
-
-                    {!createTestsQuery.isLoading &&
-                      !testsLibraryQuery.isLoading &&
-                      !variablesQuery.isLoading && (
-                        <>
-                          {testsLibrary.length === 0 &&
-                          (createTestsQuery.fetchStatus !== "paused" ||
-                            !createTestsQuery.isLoading) ? (
-                            <div className="col-span-full">
-                              <div className="bg-white rounded-lg p-8 text-center border-2 border-dashed border-gray-300">
-                                <h3 className="text-2xl font-semibold mb-4 text-gray-800">
-                                  Let's Start Your Analysis Journey!
-                                </h3>
-                                <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-                                  Select tests from the Test Library on the
-                                  right and drag variables into them. Each test
-                                  will help you uncover different insights from
-                                  your survey data.
-                                </p>
-                                <div className="flex flex-col gap-4 max-w-md mx-auto text-left bg-gray-50 p-4 rounded-lg">
-                                  <div className="flex items-start gap-3">
-                                    <div className="bg-purple-100 p-2 rounded-full">
-                                      <Library className="h-5 w-5 text-purple-600" />
-                                    </div>
-                                    <div>
-                                      <h4 className="font-medium text-gray-800">
-                                        1. Choose Your Tests
-                                      </h4>
-                                      <p className="text-sm text-gray-600">
-                                        Select from our curated list of
-                                        statistical and analytical tests
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-start gap-3">
-                                    <div className="bg-purple-100 p-2 rounded-full">
-                                      <RxDragHandleDots2 className="h-5 w-5 text-purple-600" />
-                                    </div>
-                                    <div>
-                                      <h4 className="font-medium text-gray-800">
-                                        2. Drag Variables
-                                      </h4>
-                                      <p className="text-sm text-gray-600">
-                                        Drag and drop variables from above into
-                                        your selected tests
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            testsLibrary.map((test) => (
-                              <TestZone
-                                key={test.id}
-                                test={test}
-                                onDrop={(variable: Variable) =>
-                                  handleDrop(variable, test.id)
-                                }
-                                onRemoveVariable={handleRemoveVariable}
-                                toggleTest={toggleTest}
-                              />
-                            ))
-                          )}
-                        </>
-                      )}
-                  </div>
-                </div>
-
-                {/* Permanent Test Library for larger screens */}
-                <div className="hidden lg:block w-80 bg-white p-4 rounded-lg border border-[#BDBDBD] h-fit sticky top-4">
-                  <h2 className="font-semibold mb-4">Test Library</h2>
-                  <div className="space-y-6">
-                    {Object.entries(
-                      testLibrary.reduce((acc, test) => {
-                        if (!acc[test.category as any])
-                          acc[test.category as any] = [];
-                        acc[test.category as any].push(test);
-                        return acc;
-                      }, {} as Record<string, typeof testLibrary>)
-                    ).map(([category, tests]) => (
-                      <div key={category}>
-                        <h3 className="font-bold mb-3">{category}</h3>
-                        <div className="space-y-2">
-                          {tests.map((test) => (
-                            <div key={test.id} className="flex items-start">
-                              <Checkbox
-                                id={test.id}
-                                checked={testsLibrary.some(
-                                  (t) => t.id === test.id
-                                )}
-                                onCheckedChange={() => toggleTest(test.id)}
-                                className="mr-2 mt-1 data-[state=checked]:bg-purple-800 data-[state=checked]:border-purple-800"
-                              />
-                              <label htmlFor={test.id} className="text-sm">
-                                {test.name}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DndProvider>
-        </>
-      )}
-    </Fragment>
-  ) : (
-    <div>
-      {runTestMutation.isPending && (
-        <LoadingOverlay
-          title="Regenerating analysis"
-          subtitle="Hold on! Let PollSensei cook."
-        />
-      )}
-      {runTestMutation.isSuccess && (
-        <DataVisualizationComponent
-          data={runTestMutation?.data ?? {}}
-          survey={getSurvey.data}
-          rerunTests={() => runTestMutation.mutate()}
-        />
-      )}
+  return (
+    <>
       <AnimatePresence>
         <motion.div
           key="senseiMaster"
@@ -712,7 +433,290 @@ export default function DragAndDropPage() {
           <SenseiMaster type={"analysis"} />
         </motion.div>
       </AnimatePresence>
-    </div>
+      {!showReport ? (
+        <Fragment>
+          {(variablesQuery.isLoading || testsLibraryQuery.isLoading) && (
+            <AnalysisLoadingScreen />
+          )}
+          {variablesQuery.isError && <AnalysisErrorComponent />}
+          {variablesQuery.isSuccess && (
+            <>
+              {/* Keep the error dialog the same */}
+
+              {runTestMutation.isPending && (
+                <LoadingOverlay
+                  title="Analyzing Survey"
+                  subtitle="Hold on! Let PollSensei cook."
+                />
+              )}
+              <DndProvider backend={HTML5Backend}>
+                <div className="p-4 max-w-7xl mx-auto">
+                  {/* Variables Found Section */}
+                  <div className="mb-6">
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                        <div className="bg-[#F5EDF8] rounded-md p-4 text-center min-w-[120px]">
+                          <p className="text-3xl font-bold">
+                            {variables.length}
+                          </p>
+                          <p className="text-sm mt-1">Variables</p>
+                        </div>
+                        <div className="flex-1">
+                          <h2 className="text-lg font-semibold mb-3">
+                            Variables Found
+                          </h2>
+                          <div className="flex flex-wrap gap-2">
+                            {variables.map((variable) => (
+                              <VariableItem
+                                key={variable.id}
+                                variable={variable}
+                                testsLibrary={testsLibrary}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col lg:flex-row gap-4">
+                    {/* Main Content */}
+                    <div className="flex-1">
+                      {/* Test Zones Grid */}
+                      <div className="mb-4 flex justify-between items-center">
+                        <h2 className="text-xl font-semibold">
+                          Selected Tests
+                        </h2>
+                        <div className="flex gap-3">
+                          <Button
+                            disabled={!hasVariablesInTestsLibrary(testsLibrary)}
+                            className="auth-btn"
+                            onClick={() => runTestMutation.mutate()}
+                          >
+                            Start Analysis
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="flex gap-2 lg:hidden"
+                          >
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <div className="flex items-center">
+                                  <Library className="h-4 w-4" />
+                                  <span className="hidden sm:inline ml-2">
+                                    Test Library
+                                  </span>
+                                </div>
+                              </SheetTrigger>
+                              <SheetContent className="w-full sm:max-w-">
+                                <SheetHeader>
+                                  <SheetTitle>Available Tests</SheetTitle>
+                                </SheetHeader>
+                                <div className="mt-4 overflow-y-auto max-h-[calc(100vh-120px)]">
+                                  {Object.entries(
+                                    testLibrary.reduce((acc, test) => {
+                                      if (!acc[test.category as any])
+                                        acc[test.category as any] = [];
+                                      acc[test.category as any].push(test);
+                                      return acc;
+                                    }, {} as Record<string, typeof testLibrary>)
+                                  ).map(([category, tests], i) => (
+                                    <div key={category} className="mb-6">
+                                      <h3 className="font-bold mb-3">
+                                        {category}
+                                      </h3>
+                                      <div className="space-y-2">
+                                        {tests.map((test) => (
+                                          <div
+                                            key={test.id}
+                                            className="flex items-start"
+                                          >
+                                            <Checkbox
+                                              id={`sheet-${test.id}`}
+                                              checked={testsLibrary.some(
+                                                (t) => t.id === test.id
+                                              )}
+                                              onCheckedChange={() =>
+                                                toggleTest(test.id)
+                                              }
+                                              className="mr-2 mt-1 data-[state=checked]:bg-purple-800 data-[state=checked]:border-purple-800"
+                                            />
+                                            <label
+                                              htmlFor={`sheet-${test.id}`}
+                                              className="text-sm"
+                                            >
+                                              {test.name}
+                                            </label>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </SheetContent>
+                            </Sheet>
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {(createTestsQuery.fetchStatus === "paused" ||
+                          createTestsQuery.isLoading) && (
+                          <div className="col-span-full flex justify-center">
+                            <motion.div
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg"
+                            >
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: "linear",
+                                }}
+                              >
+                                <Spinner />
+                              </motion.div>
+                              <h2 className="mt-4 text-xl font-semibold">
+                                Generating Tests
+                              </h2>
+                              <p className="mt-2 text-sm text-gray-500">
+                                Please wait...
+                              </p>
+                            </motion.div>
+                          </div>
+                        )}
+
+                        {!createTestsQuery.isLoading &&
+                          !testsLibraryQuery.isLoading &&
+                          !variablesQuery.isLoading && (
+                            <>
+                              {testsLibrary.length === 0 &&
+                              (createTestsQuery.fetchStatus !== "paused" ||
+                                !createTestsQuery.isLoading) ? (
+                                <div className="col-span-full">
+                                  <div className="bg-white rounded-lg p-8 text-center border-2 border-dashed border-gray-300">
+                                    <h3 className="text-2xl font-semibold mb-4 text-gray-800">
+                                      Let's Start Your Analysis Journey!
+                                    </h3>
+                                    <p className="text-gray-600 mb-6 max-w-lg mx-auto">
+                                      Select tests from the Test Library on the
+                                      right and drag variables into them. Each
+                                      test will help you uncover different
+                                      insights from your survey data.
+                                    </p>
+                                    <div className="flex flex-col gap-4 max-w-md mx-auto text-left bg-gray-50 p-4 rounded-lg">
+                                      <div className="flex items-start gap-3">
+                                        <div className="bg-purple-100 p-2 rounded-full">
+                                          <Library className="h-5 w-5 text-purple-600" />
+                                        </div>
+                                        <div>
+                                          <h4 className="font-medium text-gray-800">
+                                            1. Choose Your Tests
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            Select from our curated list of
+                                            statistical and analytical tests
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-start gap-3">
+                                        <div className="bg-purple-100 p-2 rounded-full">
+                                          <RxDragHandleDots2 className="h-5 w-5 text-purple-600" />
+                                        </div>
+                                        <div>
+                                          <h4 className="font-medium text-gray-800">
+                                            2. Drag Variables
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            Drag and drop variables from above
+                                            into your selected tests
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                testsLibrary.map((test) => (
+                                  <TestZone
+                                    key={test.id}
+                                    test={test}
+                                    onDrop={(variable: Variable) =>
+                                      handleDrop(variable, test.id)
+                                    }
+                                    onRemoveVariable={handleRemoveVariable}
+                                    toggleTest={toggleTest}
+                                  />
+                                ))
+                              )}
+                            </>
+                          )}
+                      </div>
+                    </div>
+
+                    {/* Permanent Test Library for larger screens */}
+                    <div className="hidden lg:block w-80 bg-white p-4 rounded-lg border border-[#BDBDBD] h-fit sticky top-4">
+                      <h2 className="font-semibold mb-4">Test Library</h2>
+                      <div className="space-y-6">
+                        {Object.entries(
+                          testLibrary.reduce((acc, test) => {
+                            if (!acc[test.category as any])
+                              acc[test.category as any] = [];
+                            acc[test.category as any].push(test);
+                            return acc;
+                          }, {} as Record<string, typeof testLibrary>)
+                        ).map(([category, tests]) => (
+                          <div key={category}>
+                            <h3 className="font-bold mb-3">{category}</h3>
+                            <div className="space-y-2">
+                              {tests.map((test) => (
+                                <div key={test.id} className="flex items-start">
+                                  <Checkbox
+                                    id={test.id}
+                                    checked={testsLibrary.some(
+                                      (t) => t.id === test.id
+                                    )}
+                                    onCheckedChange={() => toggleTest(test.id)}
+                                    className="mr-2 mt-1 data-[state=checked]:bg-purple-800 data-[state=checked]:border-purple-800"
+                                  />
+                                  <label htmlFor={test.id} className="text-sm">
+                                    {test.name}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </DndProvider>
+            </>
+          )}
+        </Fragment>
+      ) : (
+        <div>
+          {runTestMutation.isPending && (
+            <LoadingOverlay
+              title="Regenerating analysis"
+              subtitle="Hold on! Let PollSensei cook."
+            />
+          )}
+          {runTestMutation.isSuccess && (
+            <DataVisualizationComponent
+              data={runTestMutation?.data ?? {}}
+              survey={getSurvey.data}
+              rerunTests={() => runTestMutation.mutate()}
+              onBack={handleBackToTests}
+            />
+          )}
+        </div>
+      )}
+    </>
   );
 }
 

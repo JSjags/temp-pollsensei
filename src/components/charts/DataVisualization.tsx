@@ -39,6 +39,7 @@ import {
   MessageSquare,
   RectangleHorizontalIcon,
   RefreshCcw,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { ChartContainer, ChartLegend } from "@/components/ui/chart";
@@ -56,6 +57,18 @@ import SentimentAnalysisComponent from "./SentimentAnalysis";
 import WilcoxonTestComponent from "./WilcoxonTest";
 import MannWhitneyUComponent from "./MannWhitneyU";
 import KruskalWallisComponent from "./KruskalWallis";
+import { saveAs } from "file-saver";
+import {
+  Document as DocxDocument,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  ImageRun,
+  convertInchesToTwip,
+} from "docx";
+import html2canvas from "html2canvas";
+import AnovaAnalysis from "./AnovaAnalysis";
 
 type TestResult = {
   status: string;
@@ -126,6 +139,7 @@ type Props = {
   data: TestData;
   survey: TSurvey;
   rerunTests: () => void;
+  onBack?: () => void;
 };
 
 interface DensityPoint {
@@ -199,28 +213,63 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const TestChartRenderer = ({ testData }: { testData: any }) => {
   const { test_name, test_results } = testData;
 
+  const chartProps = {
+    "data-test-id": test_name,
+  };
+
   switch (test_name) {
     case "Chi-Square Test":
-      return <ChiSquareComponent data={testData} />;
+      return (
+        <div {...chartProps}>
+          <ChiSquareComponent data={testData} />
+        </div>
+      );
 
     case "Sentiment Analysis":
-      return <SentimentAnalysisComponent data={testData} />;
+      return (
+        <div {...chartProps}>
+          <SentimentAnalysisComponent data={testData} />
+        </div>
+      );
 
     case "Word Frequency Analysis":
-      return <WordFrequencyAnalysisComponent data={testData} />;
+      return (
+        <div {...chartProps}>
+          <WordFrequencyAnalysisComponent data={testData} />
+        </div>
+      );
 
     case "Wilcoxon Signed-Rank Test":
-      return <WilcoxonTestComponent data={testData} />;
+      return (
+        <div {...chartProps}>
+          <WilcoxonTestComponent data={testData} />
+        </div>
+      );
 
     case "Mann-Whitney U Test":
-      return <MannWhitneyUComponent data={testData} />;
+      return (
+        <div {...chartProps}>
+          <MannWhitneyUComponent data={testData} />
+        </div>
+      );
 
     case "Kruskal-Wallis Test":
-      return <KruskalWallisComponent data={testData} />;
+      return (
+        <div {...chartProps}>
+          <KruskalWallisComponent data={testData} />
+        </div>
+      );
+
+    case "ANOVA (Analysis of Variance)":
+      return (
+        <div {...chartProps}>
+          <AnovaAnalysis data={testData} />
+        </div>
+      );
 
     default:
       return (
-        <Card className="p-6">
+        <Card className="p-6" {...chartProps}>
           <div className="flex items-center gap-4 text-yellow-600">
             <AlertCircle className="h-5 w-5" />
             <p>Chart visualization not yet implemented for {test_name}</p>
@@ -234,6 +283,7 @@ const VerticalDataVisualization: React.FC<Props> = ({
   data,
   survey,
   rerunTests,
+  onBack,
 }) => {
   return (
     <div className="space-y-8 p-0 ">
@@ -305,93 +355,193 @@ const pdfStyles = StyleSheet.create({
 //   </Document>
 // );
 
-export default function Component({ data, survey, rerunTests }: Props) {
+export default function Component({ data, survey, rerunTests, onBack }: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generatePDF = async () => {
+  const generateDocument = async () => {
     if (!contentRef.current) return;
 
     setIsGenerating(true);
     try {
-      const buttons = contentRef.current.querySelectorAll(".action-buttons");
-      buttons.forEach((btn) => ((btn as HTMLElement).style.display = "none"));
+      const sections = [];
 
-      const watermark = document.createElement("div");
-      watermark.innerHTML = `
-        <div style="
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-45deg);
-          font-size: 96px;
-          opacity: 0.05;
-          pointer-events: none;
-          z-index: 1000;
-          white-space: nowrap;
-        ">
-          PollSensei Analytics
-        </div>
-      `;
-      contentRef.current.prepend(watermark);
+      // Add title
+      sections.push(
+        new Paragraph({
+          text: `${survey.topic} - Analysis Report`,
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 400 },
+        })
+      );
 
-      const header = document.createElement("div");
-      header.innerHTML = `
-        <div style="
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 2rem;
-          border-bottom: 2px solid #e5e7eb;
-          margin-bottom: 2rem;
-        ">
-          <img 
-            src="${pollsensei_new_logo.src}" 
-            style="width: 64px; height: 64px; border-radius: 9999px;"
-          />
-          <div>
-            <h1 style="
-              font-size: 24px;
-              font-weight: bold;
-              color: #5B03B2;
-              margin: 0;
-            ">Analysis Report</h1>
-            <p style="
-              color: #6B7280;
-              margin: 0;
-            ">Generated on ${new Date().toLocaleDateString()}</p>
-          </div>
-        </div>
-      `;
-      contentRef.current.prepend(header);
+      // Add date
+      sections.push(
+        new Paragraph({
+          text: `Generated on ${new Date().toLocaleDateString()}`,
+          spacing: { after: 400 },
+        })
+      );
 
-      const element = contentRef.current;
-      const opt = {
-        margin: [15, 15],
-        filename: `${survey.topic
-          .toLowerCase()
-          .replace(/\s+/g, "-")}-analysis.pdf`,
-        image: { type: "jpeg", quality: 1 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          letterRendering: true,
-        },
-        jsPDF: {
-          unit: "mm",
-          format: "a4",
-          orientation: "portrait",
-        },
-      };
+      // Process each test result
+      for (const testData of data.test_results) {
+        // Add test name as heading
+        sections.push(
+          new Paragraph({
+            text: testData.test_name as any,
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 400, after: 200 },
+          })
+        );
 
-      await html2pdf().set(opt).from(element).save();
+        // Format test results in a readable way
+        Object.entries(testData.test_results || {}).forEach(([key, value]) => {
+          if (typeof value === "object") {
+            // Handle statistical results
+            if ((value as any).p_value !== undefined) {
+              sections.push(
+                new Paragraph({
+                  text: `${formatText(key)}:`,
+                  spacing: { before: 200, after: 100 },
+                })
+              );
 
-      watermark.remove();
-      header.remove();
-      buttons.forEach((btn) => ((btn as HTMLElement).style.display = "flex"));
+              // Format p-value with proper scientific notation
+              const pValue =
+                (value as any).p_value < 0.001
+                  ? "p < 0.001"
+                  : `p = ${(value as any).p_value.toFixed(3)}`;
+
+              sections.push(
+                new Paragraph({
+                  text: `• ${pValue}`,
+                  spacing: { before: 100, after: 100 },
+                })
+              );
+
+              if ((value as any).statistic !== undefined) {
+                sections.push(
+                  new Paragraph({
+                    text: `• Test statistic: ${(value as any).statistic.toFixed(
+                      3
+                    )}`,
+                    spacing: { before: 100, after: 100 },
+                  })
+                );
+              }
+            }
+          } else {
+            // Handle simple key-value pairs
+            sections.push(
+              new Paragraph({
+                text: `${formatText(key)}: ${value}`,
+                spacing: { before: 100, after: 100 },
+              })
+            );
+          }
+        });
+
+        // Find and capture the chart
+        const chartContainer = contentRef.current.querySelector(
+          `[data-test-id="${testData.test_name}"]`
+        );
+
+        if (chartContainer) {
+          try {
+            // Capture the chart as an image with better quality
+            const canvas = await html2canvas(chartContainer as HTMLElement, {
+              scale: 2, // Increase scale for better quality
+              logging: false,
+              useCORS: true,
+              backgroundColor: "#ffffff",
+            });
+
+            // Convert canvas to base64 image
+            const base64Image = canvas.toDataURL("image/png");
+
+            // Convert base64 to binary
+            const imageBase64Data = base64Image.replace(
+              "data:image/png;base64,",
+              ""
+            );
+            const imageBuffer = Buffer.from(imageBase64Data, "base64");
+
+            // Add a paragraph for spacing
+            sections.push(new Paragraph({ spacing: { before: 300 } }));
+
+            // Calculate dimensions while maintaining aspect ratio
+            const aspectRatio = canvas.width / canvas.height;
+            const maxWidth = convertInchesToTwip(6.5); // 6.5 inches max width
+            const maxHeight = convertInchesToTwip(5); // 5 inches max height
+
+            let width = maxWidth;
+            let height = width / aspectRatio;
+
+            if (height > maxHeight) {
+              height = maxHeight;
+              width = height * aspectRatio;
+            }
+
+            // Add the image to the document with better dimensions
+            sections.push(
+              new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: imageBuffer,
+                    transformation: {
+                      width,
+                      height,
+                    },
+                    type: "png",
+                  }),
+                ],
+                spacing: { after: 300 },
+              })
+            );
+          } catch (err) {
+            console.error("Failed to capture chart:", err);
+            sections.push(
+              new Paragraph({
+                text: "Chart image could not be captured",
+                spacing: { before: 100, after: 100 },
+              })
+            );
+          }
+        }
+
+        // Add a page break after each test (except the last one)
+        if (testData !== data.test_results[data.test_results.length - 1]) {
+          sections.push(
+            new Paragraph({
+              text: "",
+              spacing: { after: 500 },
+              pageBreakBefore: true,
+            })
+          );
+        }
+      }
+
+      // Create document
+      const doc = new DocxDocument({
+        sections: [
+          {
+            properties: {},
+            children: sections,
+          },
+        ],
+      });
+
+      // Generate and save document
+      const buffer = await Packer.toBuffer(doc);
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      saveAs(
+        blob,
+        `${survey.topic.toLowerCase().replace(/\s+/g, "-")}-analysis.docx`
+      );
     } catch (error) {
-      console.error("PDF generation failed:", error);
+      console.error("Document generation failed:", error);
     } finally {
       setIsGenerating(false);
     }
@@ -400,55 +550,73 @@ export default function Component({ data, survey, rerunTests }: Props) {
   return (
     <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-10 max-w-">
       <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Image
-          src={pollsensei_new_logo}
-          alt="PollSensei Logo"
-          className="min-w-[160px]"
-          width={64}
-          height={64}
-        />
-        <div className="flex items-center justify-between py-8 gap-6">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                {survey.topic}
-              </h1>
-              <p>{survey.description}</p>
-            </div>
+        <div className="flex justify-between items-center mb-6 sm:mb-10">
+          <div className="w-full flex items-center">
+            {onBack && (
+              <Button
+                onClick={onBack}
+                variant="outline"
+                className="flex gap-2 items-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 hover:border-purple-300 hover:text-purple-700 active:scale-95"
+              >
+                <ArrowLeft
+                  size={18}
+                  className="transition-transform duration-300 group-hover:-translate-x-1"
+                />
+                <span className="font-medium">Back to Test Suite</span>
+              </Button>
+            )}
           </div>
-
-          <div className="flex gap-4 items-center justify-end">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center sm:justify-end">
             <Button
               onClick={rerunTests}
               variant="outline"
-              className="flex gap-2 items-center"
+              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 hover:border-purple-300 hover:text-purple-700 active:scale-95 group w-full sm:w-auto"
             >
-              <RefreshCcw size={18} />
-              <span>Regenerate</span>
+              <RefreshCcw
+                size={18}
+                className="transition-transform duration-300 group-hover:rotate-180"
+              />
+              <span className="font-medium">Regenerate</span>
             </Button>
             <Button
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
-              onClick={generatePDF}
+              className="flex gap-2 items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:from-purple-700 hover:to-indigo-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group w-full sm:w-auto"
+              onClick={generateDocument}
               disabled={isGenerating}
             >
               {isGenerating ? (
-                "Preparing PDF..."
+                <span className="flex items-center gap-2">
+                  <RefreshCcw size={18} className="animate-spin" />
+                  Preparing Document...
+                </span>
               ) : (
                 <>
-                  <FileDown className="mr-2 h-4 w-4" />
-                  Download Report
+                  <FileDown className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />
+                  <span className="font-medium">Download Report</span>
                 </>
               )}
             </Button>
           </div>
         </div>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between py-8 gap-6">
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  {survey.topic}
+                </h1>
+                <p>{survey.description}</p>
+              </div>
+            </div>
+          </div>
 
-        <div ref={contentRef} className="mb-20">
-          <VerticalDataVisualization
-            data={data}
-            survey={survey}
-            rerunTests={rerunTests}
-          />
+          <div ref={contentRef} className="mb-20">
+            <VerticalDataVisualization
+              data={data}
+              survey={survey}
+              rerunTests={rerunTests}
+              onBack={onBack}
+            />
+          </div>
         </div>
       </div>
     </div>
