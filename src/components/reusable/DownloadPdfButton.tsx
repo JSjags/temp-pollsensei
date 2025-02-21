@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { SurveyState } from "@/redux/slices/survey.slice";
 import SurveyPDFDocument from "./SurveyPDFDocument";
 import dynamic from "next/dynamic";
-import { Font } from "@react-pdf/renderer";
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
@@ -19,6 +18,15 @@ const PDFDownloadLink = dynamic(
 const fetchImageAsBase64 = async (url: string): Promise<string> => {
   const response = await fetch(url);
   const blob = await response.blob();
+  console.log(
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    })
+  );
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(reader.result as string);
@@ -81,17 +89,15 @@ const DownloadPdfButton = ({ surveyData, isSuccess }: Props) => {
               ...surveyData.data,
               logo_url: logoBase64,
               header_url: headerBase64,
-            } as SurveyState
+            } as any
           }
         />
       }
       fileName={`${surveyData.data?.topic}.pdf`}
     >
-      {({ loading, url, error }) => {
-        if (error) {
-          console.error("PDF generation error:", error);
-        }
-        return (
+      {/* @ts-ignore */}
+      {({ loading }) =>
+        (
           <Button
             className="w-full flex items-center justify-center p-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium text-lg gap-2"
             disabled={loading}
@@ -99,8 +105,8 @@ const DownloadPdfButton = ({ surveyData, isSuccess }: Props) => {
             <GoDownload size={20} />
             {loading ? "Generating PDF..." : "Download as PDF"}
           </Button>
-        );
-      }}
+        ) as any
+      }
     </PDFDownloadLink>
   );
 };
