@@ -874,7 +874,7 @@ const EditSurvey = () => {
           className="bg-blue-500 z-[1000000] fixed top-0 left-0"
         >
           <SenseiMaster
-            type="generation"
+            type="analysis"
             onSave={handleSave}
             setEditId={setEditIndex}
             aiSave={handleAISave}

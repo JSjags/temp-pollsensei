@@ -18,6 +18,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import ReactWordcloud from "react-wordcloud";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import html2canvas from "html2canvas";
 
 interface WordData {
   words: string[];
@@ -64,6 +67,29 @@ const WordFrequencyAnalysisComponent: React.FC<{ data: TestProps }> = ({
     }))
     .sort((a, b) => b.frequency - a.frequency);
 
+  // Add download function for Recharts
+  const downloadChart = (chartId: string, filename: string) => {
+    const chartSvg = document
+      .querySelector(`#${chartId}`)
+      ?.querySelector("svg");
+    if (chartSvg) {
+      const svgData = new XMLSerializer().serializeToString(chartSvg);
+      const svgBlob = new Blob([svgData], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const downloadUrl = URL.createObjectURL(svgBlob);
+
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `${filename}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    }
+  };
+
+  // Fix word cloud options type
   const wordCloudOptions = {
     colors: [
       "#8b5cf6",
@@ -73,7 +99,7 @@ const WordFrequencyAnalysisComponent: React.FC<{ data: TestProps }> = ({
       "#06b6d4",
       "#0891b2",
       "#4f46e5",
-    ],
+    ] as string[],
     enableTooltip: true,
     deterministic: false,
     fontFamily: "Inter",
@@ -86,27 +112,32 @@ const WordFrequencyAnalysisComponent: React.FC<{ data: TestProps }> = ({
     scale: "sqrt" as const,
     spiral: "archimedean" as const,
     transitionDuration: 1000,
-    tooltipOptions: {
-      background: "rgba(255, 255, 255, 0.95)",
-      border: "none",
-      borderRadius: "8px",
-      padding: "12px 16px",
-      boxShadow:
-        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-      fontFamily: "Inter",
-      fontSize: "14px",
-      fontWeight: 500,
-      lineHeight: 1.4,
-      color: "#1f2937",
-      getTooltipContent: (word: { text: string; value: number }) => {
-        return `
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <div style="font-weight: 600; color: #4b5563">${word.text}</div>
-            <div style="color: #6366f1">Frequency: ${word.value}</div>
-          </div>
-        `;
-      },
-    },
+  };
+
+  // Replace downloadWordCloud function
+  const downloadWordCloud = async () => {
+    const element = document.querySelector("#word-cloud-content");
+    if (!element) {
+      console.error("Element not found");
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(element as HTMLElement, {
+        backgroundColor: "#FFFFFF",
+        scale: 2, // Higher quality
+      });
+
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = "word-cloud.png";
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading word cloud:", error);
+    }
   };
 
   return (
@@ -139,27 +170,53 @@ const WordFrequencyAnalysisComponent: React.FC<{ data: TestProps }> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="overflow-hidden lg:col-span-2">
-          <CardHeader className="bg-gray-50 border-b py-4">
-            <h3 className="text-xl font-semibold text-gray-900">Word Cloud</h3>
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Word Cloud
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadWordCloud}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download</span>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[500px] w-full">
+            <div id="word-cloud-content" className="h-[500px] w-full bg-white">
               <ReactWordcloud
                 words={wordCloudData}
-                options={wordCloudOptions as any}
+                options={wordCloudOptions}
               />
             </div>
           </CardContent>
         </Card>
 
         <Card className="overflow-hidden lg:col-span-2">
-          <CardHeader className="bg-gray-50 border-b py-4">
-            <h3 className="text-xl font-semibold text-gray-900">
-              Word Frequency Distribution
-            </h3>
+          <CardHeader className="bg-gray-50 border-b">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Word Frequency Distribution
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  downloadChart("frequency-chart", "word-frequency")
+                }
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download</span>
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="h-[600px]">
+            <div className="h-[600px]" id="frequency-chart">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={barChartData}

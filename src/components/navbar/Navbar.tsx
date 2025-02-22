@@ -179,20 +179,19 @@ const Navbar = () => {
             </div>
 
             <DropdownMenu open={open} onOpenChange={setOpen}>
-              <DropdownMenuTrigger
-                asChild
-                className="cursor-pointerflex justify-center items-center size-12"
-              >
-                <Avatar className="size-8">
-                  <AvatarImage
-                    src={(user as any)?.photo_url ?? ""}
-                    alt="@johndoe"
-                    className="size-8"
-                  />
-                  <AvatarFallback className="font-semibold">
-                    {generateInitials((user as any)?.name ?? "")}
-                  </AvatarFallback>
-                </Avatar>
+              <DropdownMenuTrigger asChild>
+                <div className="cursor-pointer flex justify-center items-center size-12">
+                  <Avatar className="size-8">
+                    <AvatarImage
+                      src={(user as any)?.photo_url ?? ""}
+                      alt="@johndoe"
+                      className="size-8"
+                    />
+                    <AvatarFallback className="font-semibold">
+                      {generateInitials((user as any)?.name ?? "")}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-56 z-[10000000]"

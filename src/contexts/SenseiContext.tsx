@@ -77,13 +77,20 @@ export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
 
     const socketIo = io(SOCKET_URL, {
       transports: ["websocket"],
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
       auth: {
-        user_id: user_id, // Add user_id to auth instead of headers
+        user_id: user_id,
+      },
+      query: {
+        user_id: user_id,
       },
       extraHeaders: {
-        user_id: user_id, // Add as header too for redundancy
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true",
       },
-      withCredentials: true,
     });
 
     setSocket(socketIo);
@@ -94,6 +101,14 @@ export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
       // alert(`Socket connected with user ID:, ${user_id}`);
       setIsConnected(true);
       addMessage(`Connected to server with user ID: ${user_id}`);
+    });
+
+    socketIo.on("reconnect_attempt", (attempt) => {
+      console.log(`Reconnection attempt ${attempt}`);
+    });
+
+    socketIo.on("reconnect_failed", () => {
+      setError("Failed to reconnect to server after multiple attempts");
     });
 
     socketIo.on("connect_error", (error) => {
