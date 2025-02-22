@@ -43,6 +43,8 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 import { RxDragHandleDots2 } from "react-icons/rx";
+import { useDispatch } from "react-redux";
+import { toggleCollapse } from "@/redux/slices/sensei-master.slice";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -152,6 +154,7 @@ export default function DragAndDropPage() {
   const [testLibrary, setTestLibrary] = useState<Test[]>([]);
   const [showReport, setShowReport] = useState<boolean>(false);
   const [showErrorDialog, setShowErrorDialog] = useState<boolean>(false);
+  const dispatch = useDispatch();
 
   // Extract surveyId regardless of path
   const surveyId = extractMongoId(path);
@@ -491,7 +494,10 @@ export default function DragAndDropPage() {
                           <Button
                             disabled={!hasVariablesInTestsLibrary(testsLibrary)}
                             className="auth-btn"
-                            onClick={() => runTestMutation.mutate()}
+                            onClick={() => {
+                              dispatch(toggleCollapse());
+                              runTestMutation.mutate();
+                            }}
                           >
                             Start Analysis
                           </Button>

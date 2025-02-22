@@ -394,7 +394,7 @@ const SenseiMaster = ({
   const [mouseDownTime, setMouseDownTime] = useState<number>(0);
   const [mouseDownPosition, setMouseDownPosition] = useState({ x: 0, y: 0 });
   const [isRepositioning, setIsRepositioning] = useState(false);
-  const [openDirection, setOpenDirection] = useState<Direction>("bottom-right");
+  const [openDirection, setOpenDirection] = useState<Direction>("bottom-left");
 
   const {
     count = 0,
@@ -427,33 +427,29 @@ const SenseiMaster = ({
     const hasSpaceBottom =
       windowHeight - (y + SENSEI_SIZE) >= CHAT_HEIGHT + PADDING;
 
-    let direction: Direction = "bottom-right";
+    let direction: Direction;
 
-    // Determine best position based on available space
-    if (hasSpaceLeft && hasSpaceBottom) {
-      direction = "bottom-left";
-    } else if (hasSpaceRight && hasSpaceBottom) {
-      direction = "bottom-right";
-    } else if (hasSpaceLeft && hasSpaceTop) {
-      direction = "top-left";
-    } else if (hasSpaceRight && hasSpaceTop) {
-      direction = "top-right";
-    } else if (hasSpaceLeft) {
-      direction = "bottom-left";
-    } else if (hasSpaceRight) {
-      direction = "bottom-left";
-    } else if (hasSpaceTop) {
-      direction = "top-right";
+    // If sensei is on the right side or there's not enough space on the right,
+    // force the chat to open on the left
+    if (x > windowWidth / 2 || !hasSpaceRight) {
+      direction = hasSpaceTop ? "top-left" : "bottom-left";
     } else {
-      direction = "bottom-right"; // Default fallback
+      // Otherwise use the normal logic for other positions
+      if (hasSpaceLeft && hasSpaceTop) {
+        direction = "top-left";
+      } else if (hasSpaceLeft && hasSpaceBottom) {
+        direction = "bottom-left";
+      } else if (hasSpaceRight && hasSpaceTop) {
+        direction = "top-right";
+      } else {
+        direction = "bottom-right";
+      }
     }
 
     setOpenDirection(direction);
-    const newX = x;
-    const newY = y;
     return {
-      x: newX,
-      y: newY,
+      x,
+      y,
       direction,
     };
   }, []);
@@ -511,12 +507,7 @@ const SenseiMaster = ({
       }
 
       setIsRepositioning(true);
-      const {
-        x: newX,
-        y: newY,
-        direction,
-      } = calculateLayout(position.x, position.y);
-      setPosition({ x: newX, y: newY });
+      const { direction } = calculateLayout(position.x, position.y);
 
       setTimeout(() => {
         setIsRepositioning(false);
@@ -530,7 +521,9 @@ const SenseiMaster = ({
     const x = window.innerWidth - (SENSEI_SIZE + PADDING);
     const y = window.innerHeight - (SENSEI_SIZE + PADDING);
     setPosition({ x, y });
-  }, []);
+    // Recalculate direction when pinning
+    calculateLayout(x, y);
+  }, [calculateLayout]);
 
   // Handle window resize
   useEffect(() => {
@@ -541,12 +534,7 @@ const SenseiMaster = ({
       if (isPinned) {
         pinToSide();
       } else if (!isCollapsed) {
-        const {
-          x: newX,
-          y: newY,
-          direction,
-        } = calculateLayout(position.x, position.y);
-        setPosition({ x: newX, y: newY });
+        calculateLayout(position.x, position.y);
       }
     };
 
@@ -556,11 +544,11 @@ const SenseiMaster = ({
 
   // Set initial position
   useEffect(() => {
-    setPosition({
-      x: window.innerWidth - (SENSEI_SIZE + PADDING),
-      y: window.innerHeight - (SENSEI_SIZE + PADDING),
-    });
-  }, []);
+    const x = window.innerWidth - (SENSEI_SIZE + PADDING);
+    const y = window.innerHeight - (SENSEI_SIZE + PADDING);
+    setPosition({ x, y });
+    calculateLayout(x, y);
+  }, [calculateLayout]);
 
   const senseiStateSetter = useCallback(
     (
@@ -583,36 +571,18 @@ const SenseiMaster = ({
   const handleDrag = useCallback(
     (x: number, y: number) => {
       if (isCollapsed) return;
-
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-
-      // Calculate available space in each direction
-      const hasSpaceLeft = x >= CHAT_WIDTH + PADDING;
-      const hasSpaceRight =
-        windowWidth - (x + SENSEI_SIZE) >= CHAT_WIDTH + PADDING;
-      const hasSpaceTop = y >= CHAT_HEIGHT + PADDING;
-      const hasSpaceBottom =
-        windowHeight - (y + SENSEI_SIZE) >= CHAT_HEIGHT + PADDING;
-
-      let newDirection: Direction;
-
-      // Determine best position based on available space
-      if (hasSpaceLeft && hasSpaceTop) {
-        newDirection = "top-left";
-      } else if (hasSpaceRight && hasSpaceTop) {
-        newDirection = "top-right";
-      } else if (hasSpaceLeft && hasSpaceBottom) {
-        newDirection = "bottom-left";
-      } else {
-        newDirection = "bottom-right";
-      }
-
-      setOpenDirection(newDirection);
+      calculateLayout(x, y);
       setPosition({ x, y });
     },
-    [isCollapsed]
+    [isCollapsed, calculateLayout]
   );
+
+  // Effect to handle direction updates when collapse state changes
+  useEffect(() => {
+    if (!isCollapsed) {
+      calculateLayout(position.x, position.y);
+    }
+  }, [isCollapsed, position.x, position.y, calculateLayout]);
 
   return (
     <Rnd

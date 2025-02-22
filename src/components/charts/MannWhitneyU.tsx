@@ -8,8 +8,9 @@ import {
 } from "@/components/ui/select";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, Download } from "lucide-react";
 import * as d3 from "d3";
+import { Button } from "@/components/ui/button";
 
 interface DistributionData {
   min: number;
@@ -296,8 +297,37 @@ const MannWhitneyUComponent: React.FC<{ data: TestProps }> = ({ data }) => {
         .style("font-size", "12px");
     }, [plotData, dimensions]);
 
+    const downloadPlot = () => {
+      if (svgRef.current) {
+        const svgData = new XMLSerializer().serializeToString(svgRef.current);
+        const svgBlob = new Blob([svgData], {
+          type: "image/svg+xml;charset=utf-8",
+        });
+        const downloadUrl = URL.createObjectURL(svgBlob);
+
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "mann-whitney-plot.svg";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+      }
+    };
+
     return (
       <div ref={containerRef} className="w-full">
+        <div className="flex justify-end mb-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={downloadPlot}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            <span>Download</span>
+          </Button>
+        </div>
         <svg ref={svgRef} className="w-full" />
       </div>
     );

@@ -62,6 +62,20 @@ const SurveyCreationNav = () => {
     queryClient.invalidateQueries({ queryKey: ["get-survey-responses"] });
   }, [queryClient]);
 
+  // Move state updates to useEffect
+  useEffect(() => {
+    if (
+      path === "/surveys/create-survey" ||
+      path === "/surveys/add-question-m" ||
+      path === "/surveys/survey-list" ||
+      path.includes("validate-response") ||
+      path.includes("validate-res") ||
+      path.includes("/surveys/question")
+    ) {
+      // Handle path-based logic here
+    }
+  }, [path]);
+
   const activeLink = path.includes("survey-response-upload")
     ? "Reponses"
     : path.includes("preview-survey")
@@ -583,19 +597,14 @@ const SurveyCreationNav = () => {
                   {userRoles.includes("Admin") && (
                     <button
                       className="border-2 px-4 py-1 rounded-lg text-[#5B03B2] border-[#5B03B2] flex items-center transition-all duration-300 hover:bg-[#5B03B2] hover:text-white hover:scale-105"
-                      onClick={() => {
-                        setShareSurvey(!shareSurvey);
-                      }}
+                      onClick={() => setShareSurvey((prev) => !prev)}
                     >
                       <FiShare2 className="mr-2" />
                       <span className="hidden xl:flex"> Share </span>
                     </button>
                   )}
                   <Dialog open={shareSurvey} onOpenChange={setShareSurvey}>
-                    <DialogContent
-                      className="w-[23rem] lg:w-[25rem] z-[100000]"
-                      overlayClassName="z-[100000]"
-                    >
+                    <DialogContent className="w-[23rem] lg:w-[25rem] z-[100000]">
                       <ShareSurvey onClick={() => setShareSurvey(false)} />
                     </DialogContent>
                   </Dialog>
@@ -1067,19 +1076,14 @@ const SurveyCreationNav = () => {
                   {userRoles.includes("Admin") && (
                     <button
                       className="border-2 px-4 py-1 rounded-lg text-[#5B03B2] border-[#5B03B2] flex items-center transition-all duration-300 hover:bg-[#5B03B2] hover:text-white hover:scale-105"
-                      onClick={() => {
-                        setShareSurvey(!shareSurvey);
-                      }}
+                      onClick={() => setShareSurvey((prev) => !prev)}
                     >
                       <FiShare2 className="mr-2" />
                       <span className="hidden xl:flex"> Share </span>
                     </button>
                   )}
                   <Dialog open={shareSurvey} onOpenChange={setShareSurvey}>
-                    <DialogContent
-                      className="w-[23rem] lg:w-[25rem] z-[100000]"
-                      overlayClassName="z-[100000]"
-                    >
+                    <DialogContent className="w-[23rem] lg:w-[25rem] z-[100000]">
                       <ShareSurvey onClick={() => setShareSurvey(false)} />
                     </DialogContent>
                   </Dialog>
