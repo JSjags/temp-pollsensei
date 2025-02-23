@@ -40,6 +40,8 @@ import {
   RectangleHorizontalIcon,
   RefreshCcw,
   ArrowLeft,
+  Download,
+  Loader2,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { ChartContainer, ChartLegend } from "@/components/ui/chart";
@@ -69,6 +71,10 @@ import {
 } from "docx";
 import html2canvas from "html2canvas";
 import AnovaAnalysis from "./AnovaAnalysis";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import axiosInstance from "@/lib/axios-instance";
+import { useRouter } from "next/navigation";
 
 type TestResult = {
   status: string;
@@ -135,12 +141,20 @@ export type TSurvey = {
   response_count: number;
 };
 
-type Props = {
-  data: TestData;
-  survey: TSurvey;
+interface DataVisualizationProps {
+  data: {
+    test_results: any[];
+    [key: string]: any;
+  };
+  survey: {
+    _id: string;
+    topic: string;
+    description: string;
+    [key: string]: any;
+  };
   rerunTests: () => void;
   onBack?: () => void;
-};
+}
 
 interface DensityPoint {
   value: number;
@@ -168,22 +182,6 @@ interface Quartiles {
 interface BoxPlotData extends Quartiles {
   group: string;
 }
-
-const wordCloudOptions = {
-  colors: ["#8b5cf6", "#6366f1", "#3b82f6", "#0ea5e9", "#06b6d4", "#14b8a6"],
-  enableTooltip: true,
-  deterministic: false,
-  fontFamily: "Inter, sans-serif",
-  fontSizes: [20, 60],
-  fontStyle: "normal",
-  fontWeight: "bold",
-  padding: 1,
-  rotations: 3,
-  rotationAngles: [0, 90],
-  scale: "sqrt",
-  spiral: "archimedean",
-  transitionDuration: 1000,
-};
 
 const chartAnimation = {
   hidden: { opacity: 0, y: 20 },
@@ -279,7 +277,7 @@ const TestChartRenderer = ({ testData }: { testData: any }) => {
   }
 };
 
-const VerticalDataVisualization: React.FC<Props> = ({
+const VerticalDataVisualization: React.FC<DataVisualizationProps> = ({
   data,
   survey,
   rerunTests,
@@ -355,197 +353,42 @@ const pdfStyles = StyleSheet.create({
 //   </Document>
 // );
 
-export default function Component({ data, survey, rerunTests, onBack }: Props) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const generateDocument = async () => {
-    if (!contentRef.current) return;
-
-    setIsGenerating(true);
-    try {
-      const sections = [];
-
-      // Add title
-      sections.push(
-        new Paragraph({
-          text: `${survey.topic} - Analysis Report`,
-          heading: HeadingLevel.HEADING_1,
-          spacing: { after: 400 },
-        })
-      );
-
-      // Add date
-      sections.push(
-        new Paragraph({
-          text: `Generated on ${new Date().toLocaleDateString()}`,
-          spacing: { after: 400 },
-        })
-      );
-
-      // Process each test result
-      for (const testData of data.test_results) {
-        // Add test name as heading
-        sections.push(
-          new Paragraph({
-            text: testData.test_name as any,
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 400, after: 200 },
-          })
-        );
-
-        // Format test results in a readable way
-        Object.entries(testData.test_results || {}).forEach(([key, value]) => {
-          if (typeof value === "object") {
-            // Handle statistical results
-            if ((value as any).p_value !== undefined) {
-              sections.push(
-                new Paragraph({
-                  text: `${formatText(key)}:`,
-                  spacing: { before: 200, after: 100 },
-                })
-              );
-
-              // Format p-value with proper scientific notation
-              const pValue =
-                (value as any).p_value < 0.001
-                  ? "p < 0.001"
-                  : `p = ${(value as any).p_value.toFixed(3)}`;
-
-              sections.push(
-                new Paragraph({
-                  text: `• ${pValue}`,
-                  spacing: { before: 100, after: 100 },
-                })
-              );
-
-              if ((value as any).statistic !== undefined) {
-                sections.push(
-                  new Paragraph({
-                    text: `• Test statistic: ${(value as any).statistic.toFixed(
-                      3
-                    )}`,
-                    spacing: { before: 100, after: 100 },
-                  })
-                );
-              }
-            }
-          } else {
-            // Handle simple key-value pairs
-            sections.push(
-              new Paragraph({
-                text: `${formatText(key)}: ${value}`,
-                spacing: { before: 100, after: 100 },
-              })
-            );
-          }
-        });
-
-        // Find and capture the chart
-        const chartContainer = contentRef.current.querySelector(
-          `[data-test-id="${testData.test_name}"]`
-        );
-
-        if (chartContainer) {
-          try {
-            // Capture the chart as an image with better quality
-            const canvas = await html2canvas(chartContainer as HTMLElement, {
-              scale: 2, // Increase scale for better quality
-              logging: false,
-              useCORS: true,
-              backgroundColor: "#ffffff",
-            });
-
-            // Convert canvas to base64 image
-            const base64Image = canvas.toDataURL("image/png");
-
-            // Convert base64 to binary
-            const imageBase64Data = base64Image.replace(
-              "data:image/png;base64,",
-              ""
-            );
-            const imageBuffer = Buffer.from(imageBase64Data, "base64");
-
-            // Add a paragraph for spacing
-            sections.push(new Paragraph({ spacing: { before: 300 } }));
-
-            // Calculate dimensions while maintaining aspect ratio
-            const aspectRatio = canvas.width / canvas.height;
-            const maxWidth = convertInchesToTwip(6.5); // 6.5 inches max width
-            const maxHeight = convertInchesToTwip(5); // 5 inches max height
-
-            let width = maxWidth;
-            let height = width / aspectRatio;
-
-            if (height > maxHeight) {
-              height = maxHeight;
-              width = height * aspectRatio;
-            }
-
-            // Add the image to the document with better dimensions
-            sections.push(
-              new Paragraph({
-                children: [
-                  new ImageRun({
-                    data: imageBuffer,
-                    transformation: {
-                      width,
-                      height,
-                    },
-                    type: "png",
-                  }),
-                ],
-                spacing: { after: 300 },
-              })
-            );
-          } catch (err) {
-            console.error("Failed to capture chart:", err);
-            sections.push(
-              new Paragraph({
-                text: "Chart image could not be captured",
-                spacing: { before: 100, after: 100 },
-              })
-            );
-          }
-        }
-
-        // Add a page break after each test (except the last one)
-        if (testData !== data.test_results[data.test_results.length - 1]) {
-          sections.push(
-            new Paragraph({
-              text: "",
-              spacing: { after: 500 },
-              pageBreakBefore: true,
-            })
-          );
-        }
-      }
-
-      // Create document
-      const doc = new DocxDocument({
-        sections: [
-          {
-            properties: {},
-            children: sections,
-          },
-        ],
-      });
-
-      // Generate and save document
-      const buffer = await Packer.toBuffer(doc);
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      });
-      saveAs(
-        blob,
-        `${survey.topic.toLowerCase().replace(/\s+/g, "-")}-analysis.docx`
-      );
-    } catch (error) {
-      console.error("Document generation failed:", error);
-    } finally {
-      setIsGenerating(false);
-    }
+interface ReportResponse {
+  data: {
+    survey_id: string;
+    report_url: string;
   };
+}
+
+const DataVisualizationComponent = ({
+  data,
+  survey,
+  rerunTests,
+  onBack,
+}: DataVisualizationProps) => {
+  const router = useRouter();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const getReportMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post<ReportResponse>(
+        `/survey/analysis/survey-report`,
+        {
+          survey_id: survey._id,
+        }
+      );
+      return response.data;
+    },
+    onSuccess: async (data) => {
+      router.push((data as any).report_url);
+    },
+    onError: (error) => {
+      console.error("Error downloading report:", error);
+      toast.error("Failed to download report");
+    },
+  });
+
+  console.log(survey);
+  console.log(data);
 
   return (
     <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-10 max-w-">
@@ -570,7 +413,7 @@ export default function Component({ data, survey, rerunTests, onBack }: Props) {
             <Button
               onClick={rerunTests}
               variant="outline"
-              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 hover:border-purple-300 hover:text-purple-700 active:scale-95 group w-full sm:w-auto"
+              className="flex gap-2 items-center justify-center"
             >
               <RefreshCcw
                 size={18}
@@ -579,19 +422,19 @@ export default function Component({ data, survey, rerunTests, onBack }: Props) {
               <span className="font-medium">Regenerate</span>
             </Button>
             <Button
-              className="flex gap-2 items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:from-purple-700 hover:to-indigo-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group w-full sm:w-auto"
-              onClick={generateDocument}
-              disabled={isGenerating}
+              onClick={() => getReportMutation.mutate()}
+              disabled={getReportMutation.isPending}
+              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-none hover:from-purple-700 hover:to-indigo-700 active:scale-95 group w-full sm:w-auto"
             >
-              {isGenerating ? (
-                <span className="flex items-center gap-2">
-                  <RefreshCcw size={18} className="animate-spin" />
-                  Preparing Document...
-                </span>
+              {getReportMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Downloading...</span>
+                </>
               ) : (
                 <>
-                  <FileDown className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-0.5" />
-                  <span className="font-medium">Download Report</span>
+                  <Download className="h-4 w-4" />
+                  <span>Download Report</span>
                 </>
               )}
             </Button>
@@ -621,7 +464,7 @@ export default function Component({ data, survey, rerunTests, onBack }: Props) {
       </div>
     </div>
   );
-}
+};
 
 interface MannTestResult {
   [key: string]: {
@@ -904,3 +747,5 @@ const Wilcoxon: React.FC<{ test_data: WilcoxinTestResult[] }> = ({
     </Card>
   );
 };
+
+export default DataVisualizationComponent;

@@ -165,7 +165,7 @@ export default function DragAndDropPage() {
   });
 
   const variablesQuery = useQuery({
-    queryKey: ["survey-variables"],
+    queryKey: ["survey-variables", surveyId],
     queryFn: () => getSurveyVariableNames({ surveyId: surveyId! }),
     enabled: surveyId !== undefined,
   });
