@@ -78,6 +78,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { Question } from "@/types/survey";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -213,7 +214,8 @@ const AddQuestionPage = () => {
     }
   };
 
-  // ... rest of your existing code ...
+  console.log(survey);
+  console.log(questions);
 
   // Default survey data state
   const [surveyData, setSurveyData] = useState<SurveyData>({
@@ -245,12 +247,13 @@ const AddQuestionPage = () => {
         },
     color_theme: "#000000",
     logo_url:
-      (logoUrl instanceof File ? URL.createObjectURL(logoUrl) : logoUrl) ||
-      "#ffffff",
+      typeof logoUrl === "string" && logoUrl.startsWith("#")
+        ? ""
+        : (logoUrl as string),
     header_url:
-      (headerUrl instanceof File
-        ? URL.createObjectURL(headerUrl)
-        : headerUrl) || "#ffffff",
+      typeof headerUrl === "string" && headerUrl.startsWith("#")
+        ? ""
+        : (headerUrl as string),
   });
 
   const handleSave = () => {
@@ -276,15 +279,18 @@ const AddQuestionPage = () => {
       return;
     }
 
-    // Create the updated question object
+    // Create the updated question object with default options for boolean type
     const updatedQuestionData = {
       question: updatedQuestion,
-      options: updatedOptions,
+      options:
+        updatedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions,
       question_type: updatedQuestionType,
       is_required: isRequired,
     };
 
-    // Dispatch the `updateQuestion` action
+    console.log(updatedQuestionData);
+
+    // Update the question in the store
     dispatch(
       updateQuestion({ index: editIndex, updatedQuestion: updatedQuestionData })
     );
@@ -299,10 +305,18 @@ const AddQuestionPage = () => {
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
+
+    // Create a new array from the questions
     const items = Array.from(questions);
+
+    // Remove the dragged item from its original position
     const [reorderedItem] = items.splice(result.source.index, 1);
+
+    // Insert the dragged item at its new position
     items.splice(result.destination.index, 0, reorderedItem);
-    dispatch(addQuestion(items));
+
+    // Update the questions array in the store with the new order
+    dispatch(updateQuestions(items));
   };
 
   const EditQuestion = async (id: any) => {
@@ -315,46 +329,172 @@ const AddQuestionPage = () => {
     setIsSidebarOpen(false);
   };
 
+  console.log(questions);
+
   const handleSurveyCreation = async () => {
     if (!userToken || !user) {
       setShowAuthModal(true);
       return;
     }
 
-    const sectionExists = survey.sections.some(
-      (section) =>
-        section.section_topic === sectionTitle &&
-        section.section_description === sDescription &&
-        JSON.stringify(section.questions) === JSON.stringify(questions)
-    );
-
-    if (!sectionExists) {
-      if (survey.sections.length === 0) {
-        dispatch(
-          addSection({
-            questions: questions,
-          })
-        );
-      } else {
-        dispatch(
-          addSection({
-            section_topic: sectionTitle,
-            section_description: sDescription,
-            questions: questions,
-          })
-        );
-      }
-    }
-
-    console.log(store.getState().survey);
-
     try {
-      const updatedSurvey = {
-        ...store.getState().survey,
-        logo_url: logoUrl,
-        header_url: headerUrl,
+      // Get base survey state
+      const updatedSurvey = survey;
+
+      // Add current section if it doesn't exist
+      const sectionExists = updatedSurvey.sections.some(
+        (section) =>
+          section.section_topic === sectionTitle &&
+          section.section_description === sDescription &&
+          JSON.stringify(section.questions) === JSON.stringify(questions)
+      );
+
+      if (!sectionExists) {
+        if (updatedSurvey.sections.length === 0) {
+          dispatch(
+            addSection({
+              questions: questions,
+            })
+          );
+        } else {
+          dispatch(
+            addSection({
+              section_topic: sectionTitle,
+              section_description: sDescription,
+              questions: questions,
+            })
+          );
+        }
+      }
+
+      // Process survey to ensure questions match their type structure
+      const processedSurvey = {
+        ...updatedSurvey,
+        header_text: {
+          ...updatedSurvey.header_text,
+          size: updatedSurvey.header_text?.size || 24,
+        },
+        body_text: {
+          ...updatedSurvey.body_text,
+          size: updatedSurvey.body_text?.size || 16,
+        },
+        question_text: {
+          ...updatedSurvey.question_text,
+          size: updatedSurvey.question_text?.size || 16,
+        },
+        header_url:
+          typeof headerUrl === "string" && headerUrl.startsWith("#")
+            ? ""
+            : headerUrl,
+        logo_url:
+          typeof logoUrl === "string" && logoUrl.startsWith("#") ? "" : logoUrl,
+        sections: updatedSurvey.sections.map((section) => ({
+          ...section,
+          questions: section.questions.map((question) => {
+            const baseQuestion = {
+              question: question.question,
+              description: question?.description || question.question,
+              question_type: question.question_type,
+              is_required: question.is_required,
+            };
+
+            switch (question.question_type) {
+              case "slider":
+                const extractRange = (questionText: string) => {
+                  const numberWords: { [key: string]: number } = {
+                    one: 1,
+                    two: 2,
+                    three: 3,
+                    four: 4,
+                    five: 5,
+                    six: 6,
+                    seven: 7,
+                    eight: 8,
+                    nine: 9,
+                    ten: 10,
+                  };
+
+                  let processedText = questionText.toLowerCase();
+                  Object.entries(numberWords).forEach(([word, num]) => {
+                    processedText = processedText.replace(
+                      new RegExp(word, "g"),
+                      num.toString()
+                    );
+                  });
+
+                  const match = processedText.match(
+                    /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
+                  );
+                  return match
+                    ? {
+                        min: parseInt(match[1]),
+                        max: parseInt(match[2]),
+                      }
+                    : { min: 0, max: 10 };
+                };
+
+                const range = extractRange(question.question);
+                return {
+                  ...baseQuestion,
+                  min: range.min,
+                  max: range.max,
+                  step: 1,
+                };
+
+              case "boolean":
+                return {
+                  ...baseQuestion,
+                  options: question.options?.length
+                    ? question.options
+                    : ["Yes", "No"],
+                };
+
+              case "checkbox":
+              case "multiple_choice":
+              case "single_choice":
+              case "drop_down":
+              case "likert_scale":
+              case "rating_scale":
+              case "star_rating":
+                return {
+                  ...baseQuestion,
+                  options: question.options,
+                };
+
+              case "matrix_multiple_choice":
+              case "matrix_checkbox":
+                return {
+                  ...baseQuestion,
+                  description: question.description || "Matrix Question",
+                  rows: question.rows || [],
+                  columns: question.columns || [],
+                };
+
+              case "number":
+                return {
+                  ...baseQuestion,
+                  min: question.min,
+                  max: question.max,
+                };
+
+              case "long_text":
+                return {
+                  ...baseQuestion,
+                  can_accept_media: question.can_accept_media || false,
+                };
+
+              case "short_text":
+              case "media":
+              default:
+                return baseQuestion;
+            }
+          }),
+        })),
       };
-      await createSurvey(updatedSurvey).unwrap();
+
+      console.log(processedSurvey);
+
+      await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
     } catch (e) {
@@ -440,6 +580,10 @@ const AddQuestionPage = () => {
       </motion.div>
     );
   };
+
+  console.log(questions);
+  console.log(surveyData);
+  console.log(survey);
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full`}>

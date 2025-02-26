@@ -1,5 +1,5 @@
 import { RootState } from "@/redux/store";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import StyleEditor from "./StyleEditor";
@@ -14,7 +14,7 @@ import {
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import CreateNewSection from "./CreateNewSection";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   deleteQuestionFromSection,
   resetSurvey,
@@ -60,6 +60,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -105,6 +106,7 @@ const EditSurvey = () => {
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
   const [aiChatbot, setAiChatbot] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -115,6 +117,7 @@ const EditSurvey = () => {
   const [
     saveprogress,
     {
+      isLoading: isSavingProgress,
       isSuccess: progressSuccess,
       isError: progressIsError,
       error: progressError,
@@ -138,6 +141,10 @@ const EditSurvey = () => {
   const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<
+    (() => void) | null
+  >(null);
 
   const [surveyData, setSurveyData] = useState<SurveyData>({
     topic: "",
@@ -155,9 +162,13 @@ const EditSurvey = () => {
   const handleClearSurvey = () => {
     dispatch(resetSurvey());
     setShowClearDialog(false);
+    setShowExitDialog(false);
     toast.success("Survey cleared successfully", {
       position: "bottom-right",
     });
+    if (pendingNavigation) {
+      pendingNavigation();
+    }
     router.push("/surveys/survey-list");
   };
 
@@ -493,6 +504,7 @@ const EditSurvey = () => {
       };
 
       await createSurvey(processedSurvey).unwrap();
+      handleClearSurvey();
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
     } catch (e) {
@@ -533,6 +545,91 @@ const EditSurvey = () => {
       toast.error("Failed to save progress, please try again later");
     }
   }, [progressError, progressIsError]);
+
+  // Update the handleNavigation function
+  const handleNavigation = useCallback(
+    (targetPath: string, e?: any) => {
+      if (survey.sections.length > 0) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        setShowExitDialog(true);
+        setPendingNavigation(() => () => router.push(targetPath));
+        return false;
+      }
+      return true;
+    },
+    [survey.sections.length]
+  );
+
+  // Update the click handler
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest("a");
+      if (link) {
+        const targetPath = link.getAttribute("href");
+        if (targetPath && targetPath !== pathname) {
+          handleNavigation(targetPath, e);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick, true); // Add capture phase
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [handleNavigation, pathname]);
+
+  // Update the popstate handler
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (survey.sections.length > 0) {
+        e.preventDefault();
+        window.history.pushState(null, "", pathname); // Push current path back
+        setShowExitDialog(true);
+        setPendingNavigation(() => () => window.history.back());
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [survey.sections.length, pathname]);
+
+  // Keep the beforeunload handler for tab/window closing
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (survey.sections.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [survey]);
+
+  const handleSaveDraft = async () => {
+    try {
+      await saveprogress(survey);
+      toast.success("Survey saved as draft");
+      if (pendingNavigation) {
+        pendingNavigation();
+      }
+      setShowExitDialog(false);
+    } catch (error) {
+      toast.error("Failed to save draft");
+    }
+  };
+
+  // Add this middleware pattern
+  const handleRouterPush = (url: string) => {
+    if (survey.sections.length > 0) {
+      setShowExitDialog(true);
+      setPendingNavigation(() => () => router.push(url));
+      return;
+    }
+    router.push(url);
+  };
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full relative`}>
@@ -941,6 +1038,17 @@ const EditSurvey = () => {
           </p>
         </DialogContent>
       </Dialog>
+
+      <ExitSurveyDialog
+        isLoading={isSavingProgress}
+        isOpen={showExitDialog}
+        onClose={() => {
+          setShowExitDialog(false);
+          setPendingNavigation(null);
+        }}
+        onSave={handleSaveDraft}
+        onClear={handleClearSurvey}
+      />
     </div>
   );
 };

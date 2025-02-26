@@ -10,11 +10,16 @@ import { motion } from "framer-motion";
 import Loading from "@/components/primitives/Loader";
 import Milestones from "@/components/survey/Milestones";
 import SurveyWelcomeAlertDialog from "@/components/survey/SurveyWelcomeAlertDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { resetSurvey } from "@/redux/slices/survey.slice";
+import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
 
 type Props = {};
 
 const Page = (props: Props) => {
   const router = useRouter();
+  const survey = useSelector((state: RootState) => state.survey);
 
   const latestMilestone = useQuery({
     queryKey: ["latest-milestone"],
@@ -23,8 +28,7 @@ const Page = (props: Props) => {
 
   const [showModal, setShowModal] = useState(true);
 
-  console.log(latestMilestone.isError);
-  console.log(latestMilestone);
+  console.log(survey);
 
   return (
     <>
@@ -51,14 +55,7 @@ const Page = (props: Props) => {
               <div className="bg-white py-3 shadow-md shadow-black/5">
                 <div className="container px:2 sm:px-4 flex justify-end items-center gap-4">
                   <div className="flex justify-between items-center gap-4">
-                    <ShadButton
-                      className="auth-btn !text-sm"
-                      onClick={() => {
-                        router.push("/surveys/create-survey");
-                      }}
-                    >
-                      Create Survey
-                    </ShadButton>
+                    <CreateSurveyButton className="auth-btn !text-sm" />
                     <ShadButton
                       onClick={() => router.push("/surveys/survey-list")}
                       className="border rounded-lg border-[#5b03b2] text-[#5b03b2] hover:bg-[#5b03b210] bg-white"
@@ -74,7 +71,7 @@ const Page = (props: Props) => {
                 exit={{ opacity: 0, scale: 1, y: 100 }}
                 transition={{
                   duration: 0.5,
-                  ease: [0.43, 0.13, 0.23, 0.96], // Custom easing function for a bouncy effect
+                  ease: [0.43, 0.13, 0.23, 0.96],
                 }}
                 className="p-0 m-0 bg-transparent rounded-lg shadow-lg"
               >

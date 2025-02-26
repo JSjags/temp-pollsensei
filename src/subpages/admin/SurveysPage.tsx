@@ -20,15 +20,20 @@ import { useQuery } from "@tanstack/react-query";
 import { getLatestSurveyMilestone, getSingleSurvey } from "@/services/analysis";
 import { generateMilestoneStage } from "@/lib/utils";
 import SurveyWelcomeAlertDialog from "@/components/survey/SurveyWelcomeAlertDialog";
-import { PlusCircle } from "lucide-react";
+import { ClipboardList, Edit2, PlusCircle } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
 
 const SurveysPage = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(true);
   const [showMilestones, setShowMilestones] = useState(true);
+  const [showContinueDialog, setShowContinueDialog] = useState(false);
   const { data, isLoading } = useFetchSurveysQuery(currentPage);
   const router = useRouter();
+  const survey = useSelector((state: RootState) => state.survey);
 
   const latestMilestone = useQuery({
     queryKey: ["latest-milestone"],
@@ -56,15 +61,7 @@ const SurveysPage = () => {
                 </div>
               )}
               <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 sm:gap-4">
-                <ShadButton
-                  className="auth-btn !text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
-                  onClick={() => {
-                    router.push("/surveys/create-survey");
-                  }}
-                >
-                  Create Survey
-                  <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                </ShadButton>
+                <CreateSurveyButton />
                 <ShadButton
                   onClick={() => router.push("/surveys/survey-list")}
                   className="border rounded-lg border-[#5b03b2] text-[#5b03b2] hover:bg-[#5b03b210] bg-white w-full sm:w-auto text-sm"
