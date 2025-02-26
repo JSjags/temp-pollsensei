@@ -143,6 +143,9 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
     backgroundColor: colorTheme ? `${colorTheme}15` : "#F5F0FF",
   };
 
+  console.log(rows);
+  console.log(columns);
+
   return (
     <div
       className={cn(

@@ -2,7 +2,7 @@ import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { VscLayersActive } from "react-icons/vsc";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -33,7 +33,7 @@ import {
   resetSurvey,
   deleteSection,
 } from "@/redux/slices/survey.slice";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
 import StarRatingQuestion from "@/components/survey/StarRatingQuestion";
 import {
@@ -79,10 +79,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Question } from "@/types/survey";
+import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
   const sectionTopic = useSelector((state: RootState) => state?.survey?.topic);
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const sectionDescription = useSelector(
@@ -101,6 +103,10 @@ const AddQuestionPage = () => {
     number | null
   >(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<
+    (() => void) | null
+  >(null);
 
   useEffect(() => {
     // Check if device supports touch
@@ -584,6 +590,75 @@ const AddQuestionPage = () => {
   console.log(questions);
   console.log(surveyData);
   console.log(survey);
+
+  const handleSaveDraft = async () => {
+    try {
+      await saveprogress(survey);
+      toast.success("Survey saved as draft");
+      if (pendingNavigation) {
+        pendingNavigation();
+      }
+      setShowExitDialog(false);
+    } catch (error) {
+      toast.error("Failed to save draft");
+    }
+  };
+
+  const handleRouterPush = useCallback(
+    (url: string) => {
+      if (questions.length > 0) {
+        setShowExitDialog(true);
+        setPendingNavigation(() => () => router.push(url));
+        return;
+      }
+      router.push(url);
+    },
+    [survey.sections.length, router]
+  );
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (questions.length > 0) {
+        e.preventDefault();
+        window.history.pushState(null, "", pathname);
+        setShowExitDialog(true);
+        setPendingNavigation(() => () => window.history.back());
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [survey.sections.length, pathname]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (questions?.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [questions]);
+
+  // Add this effect to intercept clicks on links
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest("a");
+      if (link) {
+        const targetPath = link.getAttribute("href");
+        if (targetPath && targetPath !== pathname) {
+          e.preventDefault();
+          handleRouterPush(targetPath);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick, true); // Use capture phase
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [handleRouterPush, pathname]);
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full`}>
@@ -1327,6 +1402,16 @@ const AddQuestionPage = () => {
           </p>
         </DialogContent>
       </Dialog>
+      <ExitSurveyDialog
+        isLoading={isLoading}
+        isOpen={showExitDialog}
+        onClose={() => {
+          setShowExitDialog(false);
+          setPendingNavigation(null);
+        }}
+        onSave={handleSaveDraft}
+        onClear={handleDiscard}
+      />
     </div>
   );
 };

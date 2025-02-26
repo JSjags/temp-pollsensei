@@ -388,6 +388,8 @@ const PublicResponse = () => {
     return otherOptions.includes(option);
   };
 
+  console.log(question);
+
   // Question rendering with enhanced UI and animations
   const renderQuestion = (quest: any, index: number, theme: string) => {
     return (
@@ -1234,7 +1236,7 @@ const PublicResponse = () => {
 
                 <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
                   <div className="flex gap-2 items-center"></div>
-                  {question?.data?.sections?.length > 1 && (
+                  {/* {question?.data?.sections?.length > 1 && (
                     <div className="flex w-full md:w-auto md:justify-end items-center">
                       <PaginationBtn
                         currentSection={currentSection}
@@ -1242,7 +1244,7 @@ const PublicResponse = () => {
                         onNavigate={navigatePage}
                       />
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">

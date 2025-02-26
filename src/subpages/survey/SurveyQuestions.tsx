@@ -96,6 +96,8 @@ const SurveyQuestions = () => {
     );
   }
 
+  console.log(data?.data?.sections[currentSection]?.questions);
+
   return (
     <div
       className={cn(
@@ -236,6 +238,16 @@ const SurveyQuestions = () => {
                         questionType={item.question_type}
                         is_required={item.is_required}
                       />
+                    ) : item.question_type === "matrix_multiple_choice" ? (
+                      <MatrixQuestion
+                        key={index}
+                        index={index + 1}
+                        rows={item.rows}
+                        columns={item.columns}
+                        questionType={item.question_type}
+                        question={item.question}
+                        is_required={item.is_required}
+                      />
                     ) : item.question_type === "matrix_checkbox" ? (
                       <MatrixQuestion
                         key={index}
@@ -313,7 +325,7 @@ const SurveyQuestions = () => {
                 )
               )}
 
-            {data?.data?.sections?.length > 1 && (
+            {/* {data?.data?.sections?.length > 1 && (
               <div className="flex justify-end items-center pb-10">
                 <PaginationBtn
                   currentSection={currentSection}
@@ -321,7 +333,7 @@ const SurveyQuestions = () => {
                   onNavigate={navigatePage}
                 />
               </div>
-            )}
+            )} */}
 
             <WatermarkBanner className="mb-10" />
           </div>

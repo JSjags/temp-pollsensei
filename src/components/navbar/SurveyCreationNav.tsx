@@ -271,7 +271,10 @@ const SurveyCreationNav = () => {
                           )}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent
+                      className="sm:max-w-[425px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription>
@@ -528,7 +531,10 @@ const SurveyCreationNav = () => {
                           )}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent
+                      className="sm:max-w-[425px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription>
@@ -604,7 +610,10 @@ const SurveyCreationNav = () => {
                     </button>
                   )}
                   <Dialog open={shareSurvey} onOpenChange={setShareSurvey}>
-                    <DialogContent className="w-[23rem] lg:w-[25rem] z-[100000]">
+                    <DialogContent
+                      className="w-[23rem] lg:w-[25rem] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <ShareSurvey onClick={() => setShareSurvey(false)} />
                     </DialogContent>
                   </Dialog>
@@ -754,7 +763,10 @@ const SurveyCreationNav = () => {
                         </span>
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="w-[90%] rounded-lg sm:max-w-[280px]">
+                    <DialogContent
+                      className="w-[90%] rounded-lg sm:max-w-[280px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription className="text-sm mt-2">
@@ -1006,7 +1018,10 @@ const SurveyCreationNav = () => {
                           )}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent
+                      className="sm:max-w-[425px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription>
@@ -1083,7 +1098,10 @@ const SurveyCreationNav = () => {
                     </button>
                   )}
                   <Dialog open={shareSurvey} onOpenChange={setShareSurvey}>
-                    <DialogContent className="w-[23rem] lg:w-[25rem] z-[100000]">
+                    <DialogContent
+                      className="w-[23rem] lg:w-[25rem] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <ShareSurvey onClick={() => setShareSurvey(false)} />
                     </DialogContent>
                   </Dialog>

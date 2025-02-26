@@ -408,6 +408,19 @@ const EditSurvey = () => {
         sections: updatedSurvey.sections.map((section) => ({
           ...section,
           questions: section.questions.map((question: Question) => {
+            // Check if empty question type but has matrix structure
+            if (
+              !question.question_type &&
+              question.rows?.length &&
+              question.columns?.length
+            ) {
+              return {
+                ...question,
+                question_type: "matrix_multiple_choice", // Set default matrix type
+                description: question.description || "Matrix Question",
+              } as Question;
+            }
+
             const baseQuestion = {
               question: question.question,
               description: question?.description || question.question,
@@ -587,7 +600,7 @@ const EditSurvey = () => {
         e.preventDefault();
         window.history.pushState(null, "", pathname); // Push current path back
         setShowExitDialog(true);
-        setPendingNavigation(() => () => window.history.back());
+        // setPendingNavigation(() => () => window.history.back());
       }
     };
 
@@ -644,7 +657,7 @@ const EditSurvey = () => {
                 headerText={survey.header_text}
                 bodyText={survey.body_text}
               />
-
+              {console.log(questions[currentSection])}
               {questions[currentSection]?.questions.map(
                 (item: any, index: number) => (
                   <div key={index} className="mb-4">
@@ -765,7 +778,7 @@ const EditSurvey = () => {
                     <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
                   </Button>
                 </div>
-                {questions?.length > 1 && (
+                {/* {questions?.length > 1 && (
                   <div className="flex w-full md:w-auto md:justify-end items-center">
                     <PaginationBtn
                       currentSection={currentSection}
@@ -773,7 +786,7 @@ const EditSurvey = () => {
                       onNavigate={navigatePage}
                     />
                   </div>
-                )}
+                )} */}
               </div>
               <WaitingMessagesModal
                 otherPossibleCondition={generatingSingleSurvey}

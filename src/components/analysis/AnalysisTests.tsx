@@ -183,7 +183,7 @@ export default function DragAndDropPage() {
   });
 
   const runTestMutation = useMutation({
-    mutationKey: ["create-test"],
+    mutationKey: ["run-test"],
     mutationFn: () =>
       runTest({
         testData: formatTestsLibrary(
@@ -199,8 +199,15 @@ export default function DragAndDropPage() {
     },
     onError: (error) => {
       console.log(error);
-      if ((error as any).response?.data?.message === "Unable to run test") {
+      if ((error as any).response?.status === 503) {
+        toast.error("Service currently unavailable. Please try again later.");
+      } else if (
+        (error as any).response?.data?.message === "Unable to run test"
+      ) {
         setShowErrorDialog(true);
+        toast.error("Unable to run test. Please try again.");
+      } else {
+        toast.error("An error occurred. Please try again.");
       }
     },
   });
