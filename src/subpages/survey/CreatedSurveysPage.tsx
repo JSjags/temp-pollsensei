@@ -20,6 +20,7 @@ import { useSearchSurveysQuery } from "@/services/survey.service";
 import debounce from "lodash/debounce";
 import { SearchIcon, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/shadcn-input";
+import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
 
 const CreatedSurveysPage = () => {
   const [itemsPerPage] = useState(6);
@@ -261,15 +262,7 @@ const CreatedSurveysPage = () => {
             </div>
           </div>
           <div className="hidden md:block mt-2 md:mt-0">
-            {userRoles.includes("Admin") && (
-              <Button
-                label="Create new survey +"
-                onClick={() => {
-                  router.push("/surveys/create-survey");
-                }}
-                className="h-10 !bg-gradient-to-r !from-[#5B03B2] !to-[#9D50BB]"
-              />
-            )}
+            {userRoles.includes("Admin") && <CreateSurveyButton />}
           </div>
           <div className="block md:hidden">
             <FilterButton text="Add filter" />
@@ -355,15 +348,7 @@ const CreatedSurveysPage = () => {
             </div>
           </div>
           <div className="hidden md:block mt-2 md:mt-0">
-            {userRoles.includes("Admin") && (
-              <Button
-                label="Create new survey +"
-                onClick={() => {
-                  router.push("/surveys/create-survey");
-                }}
-                className="h-10 !bg-gradient-to-r !from-[#5B03B2] !to-[#9D50BB]"
-              />
-            )}
+            {userRoles.includes("Admin") && <CreateSurveyButton />}
           </div>
           <div className="block md:hidden">
             <FilterButton text="Add filter" />
@@ -446,15 +431,7 @@ const CreatedSurveysPage = () => {
               </div>
             </div>
             <div className="hidden md:block mt-2 md:mt-0">
-              {userRoles.includes("Admin") && (
-                <Button
-                  label="Create new survey +"
-                  onClick={() => {
-                    router.push("/surveys/create-survey");
-                  }}
-                  className="h-10 !bg-gradient-to-r !from-[#5B03B2] !to-[#9D50BB]"
-                />
-              )}
+              {userRoles.includes("Admin") && <CreateSurveyButton />}
             </div>
             <div className="block md:hidden">
               <FilterButton text="Add filter" />

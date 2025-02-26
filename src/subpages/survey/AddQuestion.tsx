@@ -38,7 +38,7 @@ const customStyles = {
 const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
   const [question] = useState<string>("");
   const [questionType] = useState<string>("multiple_choice");
-  const [options] = useState<string[] | any>([""]);
+  const [options, setOptions] = useState<string[] | any>([""]);
   const [is_required] = useState<boolean>(true);
   const [can_accept_media, setCanAcceptMedia] = useState<boolean>(true);
   const [min] = useState<number | undefined>(undefined);
@@ -63,9 +63,13 @@ const AddQuestion: React.FC<AddQuestionProps> = ({ onSave, onCancel }) => {
         columns
       ) => {
         if (onSave) {
+          // Set default options to Yes/No if question type is boolean
+          const finalOptions =
+            editedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions;
+
           onSave(
             updatedQuestion,
-            updatedOptions,
+            finalOptions,
             editedQuestionType,
             is_required,
             minValue,

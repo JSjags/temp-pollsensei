@@ -6,10 +6,10 @@ interface Question {
   options?: string[];
   min?: number;
   max?: number;
-  can_accept_media?: boolean;
+  step?: number;
   rows?: string[];
   columns?: string[];
-  step?: number;
+  can_accept_media?: boolean;
 }
 
 export type { Question };
