@@ -649,7 +649,7 @@ const EditSurvey = () => {
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-4 sm:px-0 lg:pl-10">
           {isNewSection ? (
-            <>
+            <div>
               <SurveyHeader
                 logoUrl={surveyData.logo_url}
                 headerUrl={surveyData.header_url}
@@ -657,7 +657,6 @@ const EditSurvey = () => {
                 headerText={survey.header_text}
                 bodyText={survey.body_text}
               />
-              {console.log(questions[currentSection])}
               {questions[currentSection]?.questions.map(
                 (item: any, index: number) => (
                   <div key={index} className="mb-4">
@@ -849,7 +848,7 @@ const EditSurvey = () => {
               </div>
               <WatermarkBanner className="mb-10" />
               {/* <CreateNewSection /> */}
-            </>
+            </div>
           ) : (
             <CreateNewSection />
           )}
