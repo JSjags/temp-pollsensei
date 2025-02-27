@@ -210,6 +210,7 @@ export default function DragAndDropPage() {
         toast.error("An error occurred. Please try again.");
       }
     },
+    retry: true,
   });
 
   console.log(runTestMutation);

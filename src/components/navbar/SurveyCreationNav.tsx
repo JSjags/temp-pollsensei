@@ -306,21 +306,29 @@ const SurveyCreationNav = () => {
                     </DialogContent>
                   </Dialog>
                 )}
-                {/* <Image
+                <Image
                   src={hyphen}
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
                 />
                 <Link
-                  href={""}
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon color="#B0A5BB" />
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
                   <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
                     Report
                   </span>
-                </Link> */}
-                {/* <Image src={hyphen} alt="hyphen" className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto" /> */}
+                </Link>
               </nav>
             </div>
           )}
@@ -571,9 +579,23 @@ const SurveyCreationNav = () => {
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
                 />
-                <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon color="#B0A5BB" />
-                  <span className="ml-3 text-sm">Report</span>
+                <Link
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
+                  className="flex md:flex-col lg:flex-row items-center"
+                >
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
+                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
+                    Report
+                  </span>
                 </Link>
               </>
             )}
@@ -800,10 +822,19 @@ const SurveyCreationNav = () => {
                 )}
 
                 <Link
-                  href={""}
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
                   className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
                 >
-                  <BreadcrumbsIcon color="#B0A5BB" />
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
                   <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
                     Report
                   </span>
@@ -1058,9 +1089,23 @@ const SurveyCreationNav = () => {
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
                 />
-                <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon color="#B0A5BB" />
-                  <span className="ml-3 text-sm">Report</span>
+                <Link
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
+                  className="flex md:flex-col lg:flex-row items-center"
+                >
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
+                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
+                    Report
+                  </span>
                 </Link>
               </>
             )}
