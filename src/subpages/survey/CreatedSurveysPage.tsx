@@ -39,7 +39,7 @@ const CreatedSurveysPage = () => {
   const currentPage = parseInt(searchParams.get("page") || "1");
   const [searchTerm, setSearchTerm] = useState(search);
   const [debouncedTerm, setDebouncedTerm] = useState(search);
-  const [showDrafts, setShowDrafts] = useState(false);
+  const showDrafts = searchParams.get("view") === "drafts";
 
   // Update URL with search params
   const updateSearchParams = useCallback(
@@ -123,6 +123,16 @@ const CreatedSurveysPage = () => {
         : Math.max(currentPage - 1, 1);
 
     updateSearchParams({ page: newPage.toString() });
+  };
+
+  const toggleDrafts = (show: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (show) {
+      params.set("view", "drafts");
+    } else {
+      params.delete("view");
+    }
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const SurveyCardSkeleton = () => (
@@ -219,7 +229,7 @@ const CreatedSurveysPage = () => {
   );
 
   if (showDrafts) {
-    return <DraftsList onBack={() => setShowDrafts(false)} />;
+    return <DraftsList onBack={() => toggleDrafts(false)} />;
   }
 
   if (isLoading || isFetching) {
@@ -273,7 +283,7 @@ const CreatedSurveysPage = () => {
                 <>
                   <CreateSurveyButton />
                   <ShadButton
-                    onClick={() => setShowDrafts(true)}
+                    onClick={() => toggleDrafts(true)}
                     variant="outline"
                     className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
                   >
@@ -325,7 +335,7 @@ const CreatedSurveysPage = () => {
                   <>
                     <CreateSurveyButton />
                     <ShadButton
-                      onClick={() => setShowDrafts(true)}
+                      onClick={() => toggleDrafts(true)}
                       variant="outline"
                       className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
                     >
@@ -378,7 +388,7 @@ const CreatedSurveysPage = () => {
                 <>
                   <CreateSurveyButton />
                   <ShadButton
-                    onClick={() => setShowDrafts(true)}
+                    onClick={() => toggleDrafts(true)}
                     variant="outline"
                     className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
                   >
@@ -427,7 +437,7 @@ const CreatedSurveysPage = () => {
                     <>
                       <CreateSurveyButton />
                       <ShadButton
-                        onClick={() => setShowDrafts(true)}
+                        onClick={() => toggleDrafts(true)}
                         variant="outline"
                         className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
                       >
@@ -480,7 +490,7 @@ const CreatedSurveysPage = () => {
                   <>
                     <CreateSurveyButton />
                     <ShadButton
-                      onClick={() => setShowDrafts(true)}
+                      onClick={() => toggleDrafts(true)}
                       variant="outline"
                       className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
                     >

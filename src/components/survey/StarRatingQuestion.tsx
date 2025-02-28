@@ -168,11 +168,14 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
-            pathname.includes("/edit-submitted-survey")) && (
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
-          {pathname.includes("edit-survey") && (
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">Required</span>
               <Switch

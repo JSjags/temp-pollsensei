@@ -40,12 +40,14 @@ const SurveyCreationNav = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const params = useParams();
-  const { data } = useFetchASurveyQuery(params.id);
   const [shareSurvey, setShareSurvey] = useState(false);
   const queryClient = useQueryClient();
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
   );
+  const { data } = useFetchASurveyQuery(params.id, {
+    skip: !params.id || path.includes("edit-draft-survey"),
+  });
 
   // Extract surveyId regardless of path
   const surveyId = extractMongoId(path);

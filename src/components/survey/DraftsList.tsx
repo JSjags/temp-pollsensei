@@ -101,9 +101,7 @@ const DraftsList = ({ onBack }: DraftsListProps) => {
 
       <div className="mt-6">
         <Button
-          onClick={() =>
-            router.push(`/surveys/edit-submitted-survey/${draft._id}`)
-          }
+          onClick={() => router.push(`/surveys/edit-draft-survey/${draft._id}`)}
           className="w-full bg-purple-600 hover:bg-purple-700 text-white transition-all duration-200 group rounded-lg"
         >
           <span className="flex items-center justify-center gap-2">
