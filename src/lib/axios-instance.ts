@@ -68,7 +68,7 @@ axiosInstance.interceptors.response.use(
         error?.message) &&
       !error?.response?.data?.message?.includes("Survey milestone not found")
     ) {
-      toast.error(formatErrorMessage(error), { toastId: "error" });
+      // toast.error(formatErrorMessage(error), { toastId: "error" });
     }
 
     return Promise.reject(error);

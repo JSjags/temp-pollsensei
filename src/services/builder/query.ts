@@ -54,6 +54,9 @@ const customBaseQuery: BaseQueryFn<
     // Only show toast if we have an error message
     if (toastMessage) {
       // Dismiss existing toasts and show new one with consistent toastId
+
+      console.log(toastMessage);
+
       toast.dismiss();
       toast.error(toastMessage, { toastId: "api-error" });
     }

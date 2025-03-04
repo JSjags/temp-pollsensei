@@ -67,9 +67,8 @@ export default function Milestones({
     queryKey: [`get-survey-responses-${surveyId}`],
     queryFn: () => getSurveyResponses({ surveyId: surveyId! }),
     enabled: surveyId !== undefined,
+    retry: 1,
   });
-
-  console.log(surveyResponses.data.data.length);
 
   const initialNodes: Node[] = [
     {

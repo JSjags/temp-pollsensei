@@ -28,6 +28,7 @@ const VerifyEmail = () => {
     message: string;
     access_token: string;
     user: any;
+    data: { access_token: string; user: any };
   }>({
     queryKey: ["verifyEmail", token || otpString],
     queryFn: async () => {
@@ -64,12 +65,23 @@ const VerifyEmail = () => {
           "Email verification failed."
       );
     } else if (data) {
+      console.log(data);
+
       toast.success("Email verification successful!");
       if (data?.access_token && data?.user) {
         dispatch(
           updateUser({
             token: data.access_token,
             user: data.user,
+          })
+        );
+        router.push("/dashboard");
+      }
+      if (data?.data?.access_token && data?.data?.user) {
+        dispatch(
+          updateUser({
+            token: data?.data?.access_token,
+            user: data?.data?.user,
           })
         );
         router.push("/dashboard");
