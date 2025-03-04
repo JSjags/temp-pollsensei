@@ -306,9 +306,6 @@ const AddQuestionPage = () => {
     setIsEdit(false);
   };
 
-  console.log(surveyData);
-  console.log(surveyData);
-
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
@@ -347,22 +344,24 @@ const AddQuestionPage = () => {
       // Get base survey state
       const updatedSurvey = survey;
 
-      // Add current section if it doesn't exist
-      const sectionExists = updatedSurvey.sections.some(
-        (section) =>
-          section.section_topic === sectionTitle &&
-          section.section_description === sDescription &&
-          JSON.stringify(section.questions) === JSON.stringify(questions)
-      );
+      // If sections is empty, initialize with current questions
+      if (updatedSurvey.sections.length === 0) {
+        dispatch(
+          addSection({
+            questions: questions,
+          })
+        );
+      } else {
+        // Check if current section already exists
+        const sectionExists = updatedSurvey.sections.some(
+          (section) =>
+            section.section_topic === sectionTitle &&
+            section.section_description === sDescription &&
+            JSON.stringify(section.questions) === JSON.stringify(questions)
+        );
 
-      if (!sectionExists) {
-        if (updatedSurvey.sections.length === 0) {
-          dispatch(
-            addSection({
-              questions: questions,
-            })
-          );
-        } else {
+        // Add current section if it doesn't exist
+        if (!sectionExists) {
           dispatch(
             addSection({
               section_topic: sectionTitle,
@@ -497,8 +496,6 @@ const AddQuestionPage = () => {
           }),
         })),
       };
-
-      console.log(processedSurvey);
 
       await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);

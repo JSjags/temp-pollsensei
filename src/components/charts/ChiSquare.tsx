@@ -37,14 +37,6 @@ const ChiSquare: React.FC<ChiSquareProps> = ({ data }) => {
 
   const currentResult = data.test_results.results[selectedResult];
 
-  if (!currentResult || !currentResult.table_data) {
-    return (
-      <div className="p-4">
-        <p>No data available for this selection.</p>
-      </div>
-    );
-  }
-
   const handleImageDownload = async (url: string, name: string) => {
     try {
       const response = await fetch(url);
@@ -85,62 +77,73 @@ const ChiSquare: React.FC<ChiSquareProps> = ({ data }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Statistical Values Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">Statistic</th>
-                  <th className="text-right py-2">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentResult.table_data.statistics?.map((stat, index) => (
-                  <tr key={stat} className="border-b">
-                    <td className="py-2">{stat}</td>
-                    <td className="text-right py-2">
-                      {currentResult.table_data.value[index]?.toFixed(3) ??
-                        "N/A"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Plot Images */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {currentResult.plot_urls?.map((url, index) => (
-              <div key={url} className="relative">
-                <div className="flex justify-between items-center mb-2 relative z-10 bg-white">
-                  <div className="text-center font-medium">
-                    {currentResult.plot_names[index]
-                      .replace(/_/g, " ")
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      handleImageDownload(url, currentResult.plot_names[index])
-                    }
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Download</span>
-                  </Button>
-                </div>
-                <div className="relative aspect-video mt-2">
-                  <Image
-                    src={url}
-                    alt={currentResult.plot_names[index]}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
+          {!currentResult || !currentResult.table_data ? (
+            <div className="p-4">
+              <p>No data available for this selection.</p>
+            </div>
+          ) : (
+            <>
+              {/* Statistical Values Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Statistic</th>
+                      <th className="text-right py-2">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentResult.table_data.statistics?.map((stat, index) => (
+                      <tr key={stat} className="border-b">
+                        <td className="py-2">{stat}</td>
+                        <td className="text-right py-2">
+                          {currentResult.table_data.value[index]?.toFixed(3) ??
+                            "N/A"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
+
+              {/* Plot Images */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentResult.plot_urls?.map((url, index) => (
+                  <div key={url} className="relative">
+                    <div className="flex justify-between items-center mb-2 relative z-10 bg-white">
+                      <div className="text-center font-medium">
+                        {currentResult.plot_names[index]
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleImageDownload(
+                            url,
+                            currentResult.plot_names[index]
+                          )
+                        }
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span>Download</span>
+                      </Button>
+                    </div>
+                    <div className="relative aspect-video mt-2">
+                      <Image
+                        src={url}
+                        alt={currentResult.plot_names[index]}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

@@ -34,12 +34,22 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
     });
 
     // List of colors for dynamic assignment (expand this as needed)
-    const colorPalette = ['#4CAF50', '#F44336', '#FFC107', '#2196F3', '#9C27B0'];
+    const colorPalette = [
+      "#4CAF50",
+      "#F44336",
+      "#FFC107",
+      "#2196F3",
+      "#9C27B0",
+    ];
 
     // Prepare labels, data, and background color for the pie chart
     const labels = Object.keys(optionCounts);
-    const data = Object.values(optionCounts).map((count) => (count / questionData.total_responses) * 100);
-    const backgroundColor = labels.map((_, index) => colorPalette[index % colorPalette.length]);
+    const data = Object.values(optionCounts).map(
+      (count) => (count / questionData.total_responses) * 100
+    );
+    const backgroundColor = labels.map(
+      (_, index) => colorPalette[index % colorPalette.length]
+    );
 
     return {
       labels,
@@ -52,7 +62,7 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
     };
   };
 
-  console.log(result)
+  console.log(result);
 
   return (
     <div>
@@ -72,12 +82,14 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
                 title={`Question ${index + 1}`}
                 question={item.question}
                 data={chartData}
+                allowDownload
               />
             ) : (
               <BarChart
-              title={`Question ${index + 1}`}
-              question={item.question}
-              data={chartData}
+                title={`Question ${index + 1}`}
+                question={item.question}
+                data={chartData}
+                allowDownload
               />
               // <HorizontalBarChart
               //   title={`Question ${index + 1}`}

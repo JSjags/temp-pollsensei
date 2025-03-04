@@ -4,8 +4,8 @@ import {
   ArrowLeft,
   Trash2,
   MoreVertical,
-  PencilIcon,
   ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { Card } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
@@ -20,23 +20,43 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 interface DraftsListProps {
   onBack: () => void;
 }
 
+interface DraftResponse {
+  data: Draft[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+interface Draft {
+  _id: string;
+  topic: string;
+  description: string;
+  createdAt: string;
+  status: string;
+}
+
 const DraftsList = ({ onBack }: DraftsListProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 12;
 
   const {
-    data: drafts,
+    data: draftsResponse,
     isLoading,
     isFetching,
-  } = useQuery({
-    queryKey: ["get-drafts"],
+  } = useQuery<DraftResponse>({
+    queryKey: ["get-drafts", currentPage],
     queryFn: async () => {
-      const response = await axiosInstance.get("/progress");
+      const response = await axiosInstance.get(
+        `/progress?page=${currentPage}&page_size=${pageSize}`
+      );
       return response.data;
     },
   });
@@ -60,7 +80,11 @@ const DraftsList = ({ onBack }: DraftsListProps) => {
     deleteDraft(id);
   };
 
-  const DraftCard = ({ draft }: { draft: any }) => (
+  const totalPages = draftsResponse
+    ? Math.ceil(draftsResponse.total / pageSize)
+    : 0;
+
+  const DraftCard = ({ draft }: { draft: Draft }) => (
     <div className="bg-white relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[413px] h-auto transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-purple-400">
       <div>
         <div className="flex justify-between items-center mb-1 gap-2">
@@ -89,7 +113,7 @@ const DraftsList = ({ onBack }: DraftsListProps) => {
 
       <div className="mt-3 sm:mt-4">
         <div className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 transition-all duration-200 hover:bg-gray-200 hover:scale-105">
-          Draft
+          {draft.status}
         </div>
       </div>
 
@@ -149,9 +173,9 @@ const DraftsList = ({ onBack }: DraftsListProps) => {
 
       {isLoading || isFetching ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array(12)
+          {Array(6)
             .fill(0)
-            .map((i) => (
+            .map((_, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -162,7 +186,7 @@ const DraftsList = ({ onBack }: DraftsListProps) => {
               </motion.div>
             ))}
         </div>
-      ) : drafts?.length === 0 ? (
+      ) : draftsResponse?.data.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -176,21 +200,49 @@ const DraftsList = ({ onBack }: DraftsListProps) => {
           </p>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <AnimatePresence>
-            {drafts?.map((draft: any, index: number) => (
-              <motion.div
-                key={draft._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <DraftCard draft={draft} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence>
+              {draftsResponse?.data.map((draft, index) => (
+                <motion.div
+                  key={draft._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <DraftCard draft={draft} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2"
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </>
       )}
     </motion.div>
   );

@@ -6,191 +6,154 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import Image from "next/image";
 
-interface SentimentData {
-  category: string[];
-  count: number[];
-}
-
-interface SentimentGraph {
-  type: string;
-  x: string[];
-  y: number[][];
+interface TestData {
+  table_data: {
+    statistics: string[];
+    value: number[];
+  };
+  plot_names: string[];
+  plot_urls: string[];
 }
 
 interface TestProps {
   test_name: string;
   test_results: {
-    results: Record<string, SentimentData>;
-    graph: SentimentGraph;
+    results: Record<string, TestData>;
     description: string;
   };
 }
 
-const SentimentAnalysisComponent: React.FC<{ data: TestProps }> = ({
-  data,
-}) => {
-  const [selectedVariable, setSelectedVariable] = useState<string>(
-    Object.keys(data.test_results.results)[0]
+const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
+  const [selectedResult, setSelectedResult] = useState<string>(
+    Object.keys(props.test_results.results)[0]
   );
 
-  const selectedResult = data.test_results.results[selectedVariable];
-  const chartData = selectedResult.category.map((cat, idx) => ({
-    name: cat,
-    value: selectedResult.count[idx],
-  }));
+  const currentResult = props.test_results.results[selectedResult];
 
-  const stackedChartData = data.test_results.graph.x.map((category, idx) => ({
-    name: category
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" "),
-    Neutral: data.test_results.graph.y[idx][0],
-    Positive: data.test_results.graph.y[idx][1],
-    Negative: data.test_results.graph.y[idx][2],
-  }));
-
-  // Add download function for Recharts
-  const downloadChart = (chartId: string, filename: string) => {
-    const chartSvg = document
-      .querySelector(`#${chartId}`)
-      ?.querySelector("svg");
-    if (chartSvg) {
-      const svgData = new XMLSerializer().serializeToString(chartSvg);
-      const svgBlob = new Blob([svgData], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const downloadUrl = URL.createObjectURL(svgBlob);
-
+  const handleImageDownload = async (url: string, name: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `${filename}.svg`;
+      link.download = `${name.toLowerCase().replace(/\s+/g, "-")}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Error downloading image:", error);
     }
   };
 
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-900">{data.test_name}</h2>
-
-      <Select
-        onValueChange={setSelectedVariable}
-        defaultValue={selectedVariable}
-      >
-        <SelectTrigger className="w-full md:w-72">
-          <SelectValue placeholder="Select Category" />
-        </SelectTrigger>
-        <SelectContent>
-          {Object.keys(data.test_results.results).map((variable) => (
-            <SelectItem key={variable} value={variable}>
-              {variable
-                .split("_")
-                .map(
-                  (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                )
-                .join(" ")}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Category Sentiment Distribution
-            </h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                downloadChart("sentiment-chart", "sentiment-distribution")
-              }
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download</span>
-            </Button>
-          </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>{props.test_name}</span>
+            <Select value={selectedResult} onValueChange={setSelectedResult}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select variable" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(props.test_results.results).map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {key
+                      .replace(/_/g, " ")
+                      .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="h-[400px]" id="sentiment-chart">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+        <CardContent className="space-y-6">
+          {!currentResult || !currentResult.table_data ? (
+            <div className="p-4">
+              <p>No data available for this selection.</p>
+            </div>
+          ) : (
+            <>
+              {/* Statistical Values Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Statistic</th>
+                      <th className="text-right py-2">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentResult.table_data.statistics?.map(
+                      (stat: string, index: number) => (
+                        <tr key={stat} className="border-b">
+                          <td className="py-2">{stat}</td>
+                          <td className="text-right py-2">
+                            {currentResult.table_data.value[index]?.toFixed(
+                              3
+                            ) ?? "N/A"}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-gray-50 border-b">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Overall Sentiment Distribution
-            </h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                downloadChart("stacked-chart", "overall-sentiment")
-              }
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download</span>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="h-[400px]" id="stacked-chart">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stackedChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="Neutral" fill="#64748b" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Positive" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Negative" fill="#ef4444" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+              {/* Plot Images */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentResult.plot_urls?.map((url: string, index: number) => (
+                  <div key={url} className="relative">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="text-center font-medium">
+                        {currentResult.plot_names[index]
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleImageDownload(
+                            url,
+                            currentResult.plot_names[index]
+                          )
+                        }
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span>Download</span>
+                      </Button>
+                    </div>
+                    <div className="relative aspect-video mt-2">
+                      <Image
+                        src={url}
+                        alt={currentResult.plot_names[index]}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader className="bg-gray-50 border-b">
-          <h3 className="text-lg font-semibold text-gray-900">Description</h3>
+        <CardHeader>
+          <CardTitle>Analysis Description</CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {data.test_results.description}
-          </p>
+        <CardContent>
+          <p className="text-gray-700">{props.test_results.description}</p>
         </CardContent>
       </Card>
     </div>

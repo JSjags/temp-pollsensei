@@ -148,7 +148,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
         body,
       }),
     }),
-
   }),
 });
 
@@ -164,8 +163,7 @@ export const {
   useUpdateUserPasswordMutation,
   useUpdateProfileImageMutation,
   useGooleRegisterMutation,
-  useFacebookRegisterMutation, 
+  useFacebookRegisterMutation,
   useGoogleLoginMutation,
   useLazyChangePswdCodeQuery,
-
 } = userApiSlice;

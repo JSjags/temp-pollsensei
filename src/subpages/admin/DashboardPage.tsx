@@ -261,7 +261,7 @@ const DashboardPage = () => {
                         id={index + 1}
                         title={row?.topic.slice(0, 20)}
                         value={row?.number_of_responses}
-                        link={`/surveys/question/${row?._id}`}
+                        link={`/surveys/${row?._id}`}
                       />
                     ))}
                   {!isSurveyLeaderboardLoading &&
