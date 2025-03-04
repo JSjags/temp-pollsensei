@@ -24,6 +24,7 @@ const Page = (props: Props) => {
   const latestMilestone = useQuery({
     queryKey: ["latest-milestone"],
     queryFn: () => getLatestSurveyMilestone(),
+    retry: 1,
   });
 
   const [showModal, setShowModal] = useState(true);
