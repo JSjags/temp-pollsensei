@@ -78,8 +78,8 @@ const VerifyEmail = () => {
       if (data?.data?.access_token && data?.data?.user) {
         dispatch(
           updateUser({
-            token: data?.data.access_token,
-            user: data?.data.user,
+            token: data?.data?.access_token,
+            user: data?.data?.user,
           })
         );
         router.push("/dashboard");
