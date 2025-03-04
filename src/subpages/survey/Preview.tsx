@@ -174,7 +174,7 @@ const Preview = () => {
               )
             )}
 
-          {questions?.length > 1 && (
+          {/* {questions?.length > 1 && (
             <div className="flex justify-end items-center pb-10">
               <PaginationBtn
                 currentSection={currentSection}
@@ -182,7 +182,7 @@ const Preview = () => {
                 onNavigate={navigatePage}
               />
             </div>
-          )}
+          )} */}
 
           <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">

@@ -123,7 +123,7 @@ const RegisterPage = () => {
       toast.success(
         "User registered successfully, check your email to continue"
       );
-      router.push(`/login?${ed && `ed=${ed}`}`);
+      router.push(`/verify-email${ed ? `?ed=${ed}` : ""}`);
     } catch (err: any) {
       toast.error(
         "Failed to register user " + (err?.data?.message || err.message)
@@ -146,7 +146,7 @@ const RegisterPage = () => {
           referral_code: refCode,
         }).unwrap();
         toast.success("Register success");
-        router.push("/login");
+        router.push("/verify-email");
       } catch (err: any) {
         console.log(err);
 
@@ -440,7 +440,7 @@ const RegisterPage = () => {
 
                         <div className="pt-3">
                           <label className="auth-label font-sans pb-2">
-                            Referral Code
+                            Referral Code (Optional)
                           </label>
                           <input
                             value={refCode}
@@ -486,7 +486,7 @@ const RegisterPage = () => {
                           disabled={submitting || isLoading}
                         >
                           {submitting || isLoading ? (
-                            <ClipLoader size={20} />
+                            <ClipLoader size={20} color="white" />
                           ) : (
                             "Sign Up"
                           )}

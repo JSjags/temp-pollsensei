@@ -6,272 +6,156 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import ReactWordcloud from "react-wordcloud";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import html2canvas from "html2canvas";
+import Image from "next/image";
 
-interface WordData {
-  words: string[];
-  frequency: number[];
-  percentage: number[];
-}
-
-interface WordGraph {
-  type: string;
-  x: number[];
-  y: string[];
+interface TestData {
+  table_data: {
+    statistics: string[];
+    value: number[];
+  };
+  plot_names: string[];
+  plot_urls: string[];
 }
 
 interface TestProps {
   test_name: string;
   test_results: {
-    results: Record<string, WordData>;
-    graph: WordGraph;
+    results: Record<string, TestData>;
     description: string;
   };
 }
 
-const WordFrequencyAnalysisComponent: React.FC<{ data: TestProps }> = ({
-  data,
-}) => {
-  const [selectedVariable, setSelectedVariable] = useState<string>(
-    Object.keys(data.test_results.results)[0]
+const WordFrequencyAnalysisComponent: React.FC<TestProps> = (props) => {
+  const [selectedResult, setSelectedResult] = useState<string>(
+    Object.keys(props.test_results.results)[0]
   );
 
-  const selectedResult = data.test_results.results[selectedVariable];
+  const currentResult = props.test_results.results[selectedResult];
 
-  // Prepare data for word cloud
-  const wordCloudData = selectedResult.words.map((word, idx) => ({
-    text: word,
-    value: selectedResult.frequency[idx],
-  }));
-
-  // Prepare data for horizontal bar chart
-  const barChartData = selectedResult.words
-    .map((word, idx) => ({
-      word,
-      frequency: selectedResult.frequency[idx],
-      percentage: selectedResult.percentage[idx] || 0,
-    }))
-    .sort((a, b) => b.frequency - a.frequency);
-
-  // Add download function for Recharts
-  const downloadChart = (chartId: string, filename: string) => {
-    const chartSvg = document
-      .querySelector(`#${chartId}`)
-      ?.querySelector("svg");
-    if (chartSvg) {
-      const svgData = new XMLSerializer().serializeToString(chartSvg);
-      const svgBlob = new Blob([svgData], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const downloadUrl = URL.createObjectURL(svgBlob);
-
+  const handleImageDownload = async (url: string, name: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `${filename}.svg`;
+      link.download = `${name.toLowerCase().replace(/\s+/g, "-")}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(downloadUrl);
-    }
-  };
-
-  // Fix word cloud options type
-  const wordCloudOptions = {
-    colors: [
-      "#8b5cf6",
-      "#6366f1",
-      "#3b82f6",
-      "#0ea5e9",
-      "#06b6d4",
-      "#0891b2",
-      "#4f46e5",
-    ] as string[],
-    enableTooltip: true,
-    deterministic: false,
-    fontFamily: "Inter",
-    fontSizes: [24, 80] as [number, number],
-    fontStyle: "normal",
-    fontWeight: "bold",
-    padding: 2,
-    rotations: 3,
-    rotationAngles: [0, 90] as [number, number],
-    scale: "sqrt" as const,
-    spiral: "archimedean" as const,
-    transitionDuration: 1000,
-  };
-
-  // Replace downloadWordCloud function
-  const downloadWordCloud = async () => {
-    const element = document.querySelector("#word-cloud-content");
-    if (!element) {
-      console.error("Element not found");
-      return;
-    }
-
-    try {
-      const canvas = await html2canvas(element as HTMLElement, {
-        backgroundColor: "#FFFFFF",
-        scale: 2, // Higher quality
-      });
-
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.download = "word-cloud.png";
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error("Error downloading word cloud:", error);
+      console.error("Error downloading image:", error);
     }
   };
+
+  console.log(props);
 
   return (
-    <div className="space-y-4 p-4 bg-white rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-900 mb-6">
-        {data.test_name}
-      </h2>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>{props.test_name}</span>
+            <Select value={selectedResult} onValueChange={setSelectedResult}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select variable" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(props.test_results.results).map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {key
+                      .replace(/_/g, " ")
+                      .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {!currentResult || !currentResult.table_data ? (
+            <div className="p-4">
+              <p>No data available for this selection.</p>
+            </div>
+          ) : (
+            <>
+              {/* Statistical Values Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Statistic</th>
+                      <th className="text-right py-2">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentResult.table_data.statistics?.map(
+                      (stat: string, index: number) => (
+                        <tr key={stat} className="border-b">
+                          <td className="py-2">{stat}</td>
+                          <td className="text-right py-2">
+                            {currentResult.table_data.value[index]?.toFixed(
+                              3
+                            ) ?? "N/A"}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-      <Select
-        onValueChange={setSelectedVariable}
-        defaultValue={selectedVariable}
-      >
-        <SelectTrigger className="w-full md:w-80">
-          <SelectValue placeholder="Select Category" />
-        </SelectTrigger>
-        <SelectContent>
-          {Object.keys(data.test_results.results).map((variable) => (
-            <SelectItem key={variable} value={variable}>
-              {variable
-                .split("_")
-                .map(
-                  (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-                )
-                .join(" ")}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="overflow-hidden lg:col-span-2">
-          <CardHeader className="bg-gray-50 border-b">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900">
-                Word Cloud
-              </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={downloadWordCloud}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download</span>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div id="word-cloud-content" className="h-[500px] w-full bg-white">
-              <ReactWordcloud
-                words={wordCloudData}
-                options={wordCloudOptions}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden lg:col-span-2">
-          <CardHeader className="bg-gray-50 border-b">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900">
-                Word Frequency Distribution
-              </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  downloadChart("frequency-chart", "word-frequency")
-                }
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Download</span>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="h-[600px]" id="frequency-chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={barChartData}
-                  layout="vertical"
-                  margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis type="number" stroke="#64748b" />
-                  <YAxis
-                    type="category"
-                    dataKey="word"
-                    width={60}
-                    style={{ fontSize: "12px", fill: "#64748b" }}
-                    tick={{ textAnchor: "end" }}
-                  />
-                  <Tooltip
-                    formatter={(value: number, name: string) => [
-                      value,
-                      name === "percentage" ? "Percentage %" : "Frequency",
-                    ]}
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "6px",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    }}
-                  />
-                  <Legend />
-                  <Bar
-                    dataKey="frequency"
-                    fill="#8b5cf6"
-                    radius={[0, 4, 4, 0]}
-                    name="Frequency"
-                  />
-                  <Bar
-                    dataKey="percentage"
-                    fill="#6366f1"
-                    radius={[0, 4, 4, 0]}
-                    name="Percentage %"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              {/* Plot Images */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {currentResult.plot_urls?.map((url: string, index: number) => (
+                  <div key={url} className="relative">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="text-center font-medium">
+                        {currentResult.plot_names[index]
+                          .replace(/_/g, " ")
+                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleImageDownload(
+                            url,
+                            currentResult.plot_names[index]
+                          )
+                        }
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        <span>Download</span>
+                      </Button>
+                    </div>
+                    <div className="relative aspect-video mt-2">
+                      <Image
+                        src={url}
+                        alt={currentResult.plot_names[index]}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
-        <CardHeader className="bg-gray-50 border-b py-4">
-          <h3 className="text-xl font-semibold text-gray-900">Description</h3>
+        <CardHeader>
+          <CardTitle>Analysis Description</CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
-            {data.test_results.description}
-          </p>
+        <CardContent>
+          <p className="text-gray-700">{props.test_results.description}</p>
         </CardContent>
       </Card>
     </div>

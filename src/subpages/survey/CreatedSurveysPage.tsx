@@ -21,6 +21,7 @@ import debounce from "lodash/debounce";
 import { SearchIcon, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/shadcn-input";
 import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
+import DraftsList from "@/components/survey/DraftsList";
 
 const CreatedSurveysPage = () => {
   const [itemsPerPage] = useState(6);
@@ -38,6 +39,7 @@ const CreatedSurveysPage = () => {
   const currentPage = parseInt(searchParams.get("page") || "1");
   const [searchTerm, setSearchTerm] = useState(search);
   const [debouncedTerm, setDebouncedTerm] = useState(search);
+  const showDrafts = searchParams.get("view") === "drafts";
 
   // Update URL with search params
   const updateSearchParams = useCallback(
@@ -121,6 +123,16 @@ const CreatedSurveysPage = () => {
         : Math.max(currentPage - 1, 1);
 
     updateSearchParams({ page: newPage.toString() });
+  };
+
+  const toggleDrafts = (show: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (show) {
+      params.set("view", "drafts");
+    } else {
+      params.delete("view");
+    }
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const SurveyCardSkeleton = () => (
@@ -216,6 +228,10 @@ const CreatedSurveysPage = () => {
     </Card>
   );
 
+  if (showDrafts) {
+    return <DraftsList onBack={() => toggleDrafts(false)} />;
+  }
+
   if (isLoading || isFetching) {
     return (
       <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
@@ -262,7 +278,20 @@ const CreatedSurveysPage = () => {
             </div>
           </div>
           <div className="hidden md:block mt-2 md:mt-0">
-            {userRoles.includes("Admin") && <CreateSurveyButton />}
+            <div className="hidden md:flex gap-3">
+              {userRoles.includes("Admin") && (
+                <>
+                  <CreateSurveyButton />
+                  <ShadButton
+                    onClick={() => toggleDrafts(true)}
+                    variant="outline"
+                    className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
+                  >
+                    View Drafts
+                  </ShadButton>
+                </>
+              )}
+            </div>
           </div>
           <div className="block md:hidden">
             <FilterButton text="Add filter" />
@@ -301,14 +330,20 @@ const CreatedSurveysPage = () => {
           <div className="flex gap-5 items-center">
             <h2 className="text-[#333333] font-[700] text-xl">Your Surveys</h2>
             <div className="block md:hidden mt-2 md:mt-0">
-              {userRoles.includes("Admin") && (
-                <Button
-                  label="Create new survey +"
-                  onClick={() => {
-                    router.push("/surveys/create-survey");
-                  }}
-                />
-              )}
+              <div className="hidden md:flex gap-3">
+                {userRoles.includes("Admin") && (
+                  <>
+                    <CreateSurveyButton />
+                    <ShadButton
+                      onClick={() => toggleDrafts(true)}
+                      variant="outline"
+                      className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
+                    >
+                      View Drafts
+                    </ShadButton>
+                  </>
+                )}
+              </div>
             </div>
             <div className="hidden lg:flex items-center gap-2 rounded-[8px] bg-white border-[1px] border-[#d9d9d9] w-[292px] h-[40px]">
               <input
@@ -348,7 +383,20 @@ const CreatedSurveysPage = () => {
             </div>
           </div>
           <div className="hidden md:block mt-2 md:mt-0">
-            {userRoles.includes("Admin") && <CreateSurveyButton />}
+            <div className="hidden md:flex gap-3">
+              {userRoles.includes("Admin") && (
+                <>
+                  <CreateSurveyButton />
+                  <ShadButton
+                    onClick={() => toggleDrafts(true)}
+                    variant="outline"
+                    className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
+                  >
+                    View Drafts
+                  </ShadButton>
+                </>
+              )}
+            </div>
           </div>
           <div className="block md:hidden">
             <FilterButton text="Add filter" />
@@ -384,14 +432,20 @@ const CreatedSurveysPage = () => {
                 Your Surveys
               </h2>
               <div className="block md:hidden mt-2 md:mt-0">
-                {userRoles.includes("Admin") && (
-                  <Button
-                    label="Create new survey +"
-                    onClick={() => {
-                      router.push("/surveys/create-survey");
-                    }}
-                  />
-                )}
+                <div className="hidden md:flex gap-3">
+                  {userRoles.includes("Admin") && (
+                    <>
+                      <CreateSurveyButton />
+                      <ShadButton
+                        onClick={() => toggleDrafts(true)}
+                        variant="outline"
+                        className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
+                      >
+                        View Drafts
+                      </ShadButton>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="hidden lg:flex items-center gap-2 rounded-[8px] border-[1px] bg-white border-[#d9d9d9] w-[292px] h-[40px]">
                 <input
@@ -431,7 +485,20 @@ const CreatedSurveysPage = () => {
               </div>
             </div>
             <div className="hidden md:block mt-2 md:mt-0">
-              {userRoles.includes("Admin") && <CreateSurveyButton />}
+              <div className="hidden md:flex gap-3">
+                {userRoles.includes("Admin") && (
+                  <>
+                    <CreateSurveyButton />
+                    <ShadButton
+                      onClick={() => toggleDrafts(true)}
+                      variant="outline"
+                      className="border-purple-600 text-purple-600 hover:bg-purple-50 rounded-lg"
+                    >
+                      View Drafts
+                    </ShadButton>
+                  </>
+                )}
+              </div>
             </div>
             <div className="block md:hidden">
               <FilterButton text="Add filter" />

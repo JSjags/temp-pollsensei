@@ -16,6 +16,7 @@ import TextArea from "../../components/ui/TextArea";
 import InputEdit from "../../components/ui/InputEdit";
 import { useDispatch } from "react-redux";
 import apiSlice from "@/services/config/apiSlice";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface UserData {
   name: string;
@@ -24,11 +25,41 @@ interface UserData {
   username: string;
   bio: string;
   file: string;
+  referral_code: string;
 }
+
+const ProfileSkeleton = () => {
+  return (
+    <div className="px-4 md:px-[4.4rem] flex flex-col py-6 md:py-[3.88rem]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <div className="flex flex-col md:flex-row flex-1 gap-3 items-start md:items-center">
+          <Skeleton className="w-24 h-24 md:w-28 md:h-28 rounded-full" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        </div>
+        <Skeleton className="h-10 w-24" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-6 w-20 mt-7" />
+        <div className="py-7">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="pb-4">
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-6 w-48" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ProfilePage: React.FC = () => {
   const dispatch = useDispatch();
-  const { data, refetch } = useUserProfileQuery({});
+  const { data, refetch, isLoading } = useUserProfileQuery({});
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -37,12 +68,16 @@ const ProfilePage: React.FC = () => {
     username: "",
     bio: "",
     file: "",
+    referral_code: "",
   });
   const [profileImage, setProfileImage] = useState<File | string | null>(null);
 
   useEffect(() => {
     if (data?.data) {
-      const { name, email, username, bios, file, photo_url } = data.data;
+      console.log(data.data);
+
+      const { name, email, username, bios, file, photo_url, referral_code } =
+        data.data;
       setUserData({
         name: name || "",
         lastName: "",
@@ -50,12 +85,14 @@ const ProfilePage: React.FC = () => {
         username: username || "",
         bio: bios[0]?.bio || "",
         file: file || photo_url || "",
+        referral_code: referral_code || "",
       });
       setProfileImage(photo_url || userPlaceholder);
     }
   }, [data]);
 
-  const [updateUserProfile, { isLoading }] = useUpdateUserProfileMutation();
+  const [updateUserProfile, { isLoading: isUpdating }] =
+    useUpdateUserProfileMutation();
   const [updateProfileImage, { isLoading: Updating }] =
     useUpdateProfileImageMutation();
 
@@ -115,6 +152,10 @@ const ProfilePage: React.FC = () => {
       }
     }
   };
+
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
 
   return (
     <div className="px-4 md:px-[4.4rem] flex flex-col py-6 md:py-[3.88rem]">
@@ -184,6 +225,12 @@ const ProfilePage: React.FC = () => {
                 <p className="text-[#070707] text-[1rem]">
                   {userData.bio || "Not set"}
                 </p>
+              </div>
+              <div className="pb-4">
+                <p className="text-[#7D8398] text-sm">Referral Code</p>
+                <h3 className="text-[#070707] text-[1rem]">
+                  {userData.referral_code || "Not set"}
+                </h3>
               </div>
             </div>
           </div>
@@ -290,9 +337,9 @@ const ProfilePage: React.FC = () => {
                     <button
                       className="auth-btn w-full justify-center items-center py-2"
                       type="submit"
-                      disabled={submitting || isLoading}
+                      disabled={submitting || isUpdating}
                     >
-                      {submitting || isLoading ? (
+                      {submitting || isUpdating ? (
                         <ClipLoader size={20} color="white" />
                       ) : (
                         "Save"

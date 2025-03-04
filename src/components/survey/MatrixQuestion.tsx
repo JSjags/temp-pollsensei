@@ -143,6 +143,9 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
     backgroundColor: colorTheme ? `${colorTheme}15` : "#F5F0FF",
   };
 
+  console.log(rows);
+  console.log(columns);
+
   return (
     <div
       className={cn(
@@ -262,7 +265,8 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
-            pathname.includes("/edit-submitted-survey")) && (
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
@@ -277,7 +281,9 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
             </div>
           )}
 
-          {pathname.includes("edit-survey") && (
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">Required</span>
               <Switch

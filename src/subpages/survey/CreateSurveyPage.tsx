@@ -78,7 +78,9 @@ const CreateSurveyPage: React.FC = () => {
       survey.sections.length > 0 &&
       survey.sections[0].questions.length > 0
     ) {
-      router.push("/surveys/edit-survey");
+      router.push(
+        `/surveys/create-survey?whatDoYouWant=false&oneMoreThing=false&surveyType=&promptForm=false&surveyPrompt=&isTopicModal=false&generated=true`
+      );
       return;
     }
   }, [survey, router]);

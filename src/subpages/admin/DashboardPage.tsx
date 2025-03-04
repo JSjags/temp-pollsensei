@@ -26,6 +26,7 @@ import { ArrowRight, Calendar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
 
 // Add keyframes for the twinkle animation
 const styles = `
@@ -145,59 +146,7 @@ const DashboardPage = () => {
             <p className="text-lg md:text-2xl text-gray-400">
               Great to have you here!
             </p>
-            <Button
-              onClick={() => router.push("/surveys/create-survey")}
-              className="group relative !mt-6 overflow-hidden rounded-full bg-gradient-to-r from-purple-700 to-pink-600 px-8 shadow-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(139,92,246,0.7)] hover:scale-[1.02]"
-            >
-              <div className="absolute inset-0">
-                {[...Array(12)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute size-0.1 rounded-full bg-white/50"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animation: `twinkle ${
-                        1.5 + Math.random() * 1
-                      }s ease-in-out infinite ${Math.random() * 2}s`,
-                      opacity: 0.6,
-                    }}
-                  />
-                ))}
-                {[...Array(8)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute size-0.5 rounded-full bg-white/50"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animation: `twinkle ${
-                        1 + Math.random() * 1.5
-                      }s ease-in-out infinite ${Math.random() * 2}s`,
-                      opacity: 0.8,
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="relative flex items-center gap-3 text-white">
-                <span className="text-base font-medium">Create New Survey</span>
-                <svg
-                  className="w-5 h-5 transform transition-transform duration-300 group-hover:rotate-90"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 4V20M20 12H4"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-300/0 via-violet-300/40 to-violet-300/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            </Button>
+            <CreateSurveyButton type="dashboard" />
           </div>
 
           <div className="flex flex-wrap items-center gap-3 md:gap-4">
@@ -312,7 +261,7 @@ const DashboardPage = () => {
                         id={index + 1}
                         title={row?.topic.slice(0, 20)}
                         value={row?.number_of_responses}
-                        link={`/surveys/question/${row?._id}`}
+                        link={`/surveys/${row?._id}`}
                       />
                     ))}
                   {!isSurveyLeaderboardLoading &&
