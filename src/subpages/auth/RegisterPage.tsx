@@ -447,6 +447,7 @@ const RegisterPage = () => {
                             onChange={(e) => setRefCode(e?.target?.value)}
                             type="text"
                             className="auth-input w-full  focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground placeholder:text-foreground/40"
+                            readOnly={!!refValue}
                           />
                         </div>
                         <motion.div
