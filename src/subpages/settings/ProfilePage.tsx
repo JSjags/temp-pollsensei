@@ -17,6 +17,7 @@ import InputEdit from "../../components/ui/InputEdit";
 import { useDispatch } from "react-redux";
 import apiSlice from "@/services/config/apiSlice";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ClipboardCopy } from "lucide-react";
 
 interface UserData {
   name: string;
@@ -26,6 +27,7 @@ interface UserData {
   bio: string;
   file: string;
   referral_code: string;
+  referral_link: string;
 }
 
 const ProfileSkeleton = () => {
@@ -69,15 +71,23 @@ const ProfilePage: React.FC = () => {
     bio: "",
     file: "",
     referral_code: "",
+    referral_link: "",
   });
   const [profileImage, setProfileImage] = useState<File | string | null>(null);
 
   useEffect(() => {
     if (data?.data) {
-      console.log(data.data);
-
       const { name, email, username, bios, file, photo_url, referral_code } =
         data.data;
+
+      const baseUrl =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "https://pollsensei.ai";
+      const referral_link = referral_code
+        ? `${baseUrl}/register?ref=${referral_code}`
+        : "";
+
       setUserData({
         name: name || "",
         lastName: "",
@@ -86,6 +96,7 @@ const ProfilePage: React.FC = () => {
         bio: bios[0]?.bio || "",
         file: file || photo_url || "",
         referral_code: referral_code || "",
+        referral_link: referral_link,
       });
       setProfileImage(photo_url || userPlaceholder);
     }
@@ -99,6 +110,15 @@ const ProfilePage: React.FC = () => {
   const toggleEdit = useCallback(() => {
     setEditProfile((prev) => !prev);
   }, []);
+
+  const handleCopy = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${type} copied to clipboard!`);
+    } catch (err) {
+      toast.error("Failed to copy to clipboard");
+    }
+  };
 
   const onSubmit = async (values: UserData) => {
     const formData = new FormData();
@@ -127,6 +147,10 @@ const ProfilePage: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
       setProfileImage(file);
     }
   };
@@ -134,6 +158,10 @@ const ProfilePage: React.FC = () => {
   const handleImageUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
       setProfileImage(file);
     }
     if (profileImage instanceof File) {
@@ -178,7 +206,10 @@ const ProfilePage: React.FC = () => {
               <div className="flex flex-col gap-2">
                 <p className="text-[#333333] font-semibold">Profile picture</p>
                 <small className="text-[#BDBDBD]">PNG, JPG up to 5MB</small>
-                <label htmlFor="userImage" className="text-[#5B03B2] font-bold">
+                <label
+                  htmlFor="userImage"
+                  className="text-[#5B03B2] font-bold cursor-pointer hover:text-[#4A029A]"
+                >
                   {Updating ? "Updating..." : "Update"}
                 </label>
                 <input
@@ -191,7 +222,7 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             <button
-              className="shadow-md flex text-sm rounded items-center px-4 py-2 w-full md:w-auto justify-center md:justify-start"
+              className="shadow-md flex text-sm rounded items-center px-4 py-2 w-full md:w-auto justify-center md:justify-start hover:bg-gray-50"
               onClick={toggleEdit}
             >
               <FaRegEdit className="mr-2" /> Edit
@@ -228,9 +259,39 @@ const ProfilePage: React.FC = () => {
               </div>
               <div className="pb-4">
                 <p className="text-[#7D8398] text-sm">Referral Code</p>
-                <h3 className="text-[#070707] text-[1rem]">
-                  {userData.referral_code || "Not set"}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-[#070707] text-[1rem]">
+                    {userData.referral_code || "Not set"}
+                  </h3>
+                  {userData.referral_code && (
+                    <button
+                      onClick={() =>
+                        handleCopy(userData.referral_code, "Referral code")
+                      }
+                      className="text-[#5B03B2] hover:text-[#4A029A] transition-all duration-200 hover:scale-110"
+                    >
+                      <ClipboardCopy size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="pb-4">
+                <p className="text-[#7D8398] text-sm">Referral Link</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-[#070707] text-[1rem]">
+                    {userData.referral_link || "Not set"}
+                  </h3>
+                  {userData.referral_link && (
+                    <button
+                      onClick={() =>
+                        handleCopy(userData.referral_link, "Referral link")
+                      }
+                      className="text-[#5B03B2] hover:text-[#4A029A] transition-all duration-200 hover:scale-110"
+                    >
+                      <ClipboardCopy size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -257,7 +318,7 @@ const ProfilePage: React.FC = () => {
               <small className="text-[#BDBDBD]">PNG, JPG up to 5MB</small>
               <label
                 htmlFor="editUserImage"
-                className="text-[#5B03B2] font-bold"
+                className="text-[#5B03B2] font-bold cursor-pointer hover:text-[#4A029A]"
               >
                 Update
               </label>
