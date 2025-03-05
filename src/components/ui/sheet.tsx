@@ -62,7 +62,7 @@ const SheetContent = React.forwardRef<
     ref
   ) => (
     <SheetPortal>
-      <SheetOverlay className="backdrop-blur" />
+      <SheetOverlay className="backdrop-blur z-[100000]" />
       <SheetPrimitive.Content
         ref={ref}
         className={cn(

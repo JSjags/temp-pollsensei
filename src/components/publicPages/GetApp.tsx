@@ -7,7 +7,7 @@ import { FaAppStore } from "react-icons/fa";
 
 const GetAppSection: React.FC = () => {
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between p-12 md:p-24 py-0 md:py-0 bg-gradient-to-br from-white to-purple-50 shadow-[inset_0_4px_20px_rgba(0,0,0,0.2)] rounded-2xl">
+    <div className="flex flex-col md:flex-row items-center justify-between p-12 md:p-24 py-0 md:py-0 bg-gradient-to-br from-white to-purple-50 shadow-[inset_0_4px_20px_rgba(0,0,0,0.2)] md:rounded-2xl">
       {/* Left Section - App Promotion Text */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -21,7 +21,7 @@ const GetAppSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight"
+          className="text-4xl md:text-6xl pt-6 font-bold text-gray-900 leading-tight"
         >
           Get the <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
@@ -46,12 +46,12 @@ const GetAppSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
           viewport={{ once: true }}
-          className="flex gap-6 pt-4"
+          className="flex flex-col md:flex-row gap-6 pt-4"
         >
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
+            className="flex items-center justify-center h-10 gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
           >
             <FaAppStore />
             <span className="text-sm font-medium">Get on iPhone</span>
@@ -60,7 +60,7 @@ const GetAppSection: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
+            className="flex items-center justify-center h-10 gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
           >
             <BiLogoPlayStore />
             <span className="text-sm font-medium">Get on Android</span>

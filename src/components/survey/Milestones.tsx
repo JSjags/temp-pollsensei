@@ -23,6 +23,9 @@ import { FaCheckCircle } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import CustomEdge from "../milestone/customEdge";
 import { useRouter } from "next/navigation";
+import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
+import { getSurveyResponses } from "@/services/analysis";
+import { useQuery } from "@tanstack/react-query";
 
 // icons paths
 const start = "/assets/milestones/Start.svg";
@@ -47,15 +50,25 @@ export default function Milestones({
   surveyId = "",
   generated_by,
   survey_type,
+  survey,
 }: {
   stage: string;
   onClick?: () => void;
   surveyId?: string;
   generated_by?: "manually" | "ai";
   survey_type?: "both" | "qualitative" | "quantitative";
+  survey?: SurveyData;
 }) {
   const router = useRouter();
   const [currentStage] = useState(parseInt(stage) + 1);
+
+  // Initialize useQuery hook unconditionally
+  const surveyResponses = useQuery({
+    queryKey: [`get-survey-responses-${surveyId}`],
+    queryFn: () => getSurveyResponses({ surveyId: surveyId! }),
+    enabled: surveyId !== undefined,
+    retry: 1,
+  });
 
   const initialNodes: Node[] = [
     {
@@ -85,7 +98,7 @@ export default function Milestones({
     {
       id: "3",
       type: "customNode",
-      data: { label: "Assign Roles", icon: FaUserCheck, progress: 35 },
+      data: { label: "Edit Survey", icon: FaUserCheck, progress: 35 },
       position: { x: 850, y: 82 },
       sourcePosition: Position.Right,
       targetPosition: Position.Left,
@@ -242,9 +255,9 @@ export default function Milestones({
           "-translate-y-8 bg-white shadow-lg shadow-[#EB06AB12] p-2 px-8 rounded-full whitespace-nowrap absolute z-[100]"
         );
       }
-      if (label === "Assign Roles") {
+      if (label === "Edit Survey") {
         return cn(
-          "-translate-x-[210px] translate-y-3 h-[60px] flex items-center bg-white shadow-lg shadow-[#EB06AB12] p-2 px-8 rounded-full whitespace-nowrap absolute"
+          "-translate-x-[200px] translate-y-3 h-[60px] flex items-center bg-white shadow-lg shadow-[#EB06AB12] p-2 px-8 rounded-full whitespace-nowrap absolute"
         );
       }
       if (label === "Collect Data") {
@@ -442,8 +455,8 @@ export default function Milestones({
         }
       }
       if (id === "3") {
-        if (label === "Assign Roles") {
-          router.push("/team-members");
+        if (label === "Edit Survey") {
+          router.push(`/surveys/edit-submitted-survey/${surveyId}`);
           // alert(label);
         }
       }

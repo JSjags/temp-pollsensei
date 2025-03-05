@@ -35,28 +35,30 @@ function generateEventDuration(): number {
 }
 
 export function generateMockEvents(): CalendarEvent[] {
-  const events: CalendarEvent[] = [];
-  const startDate = startOfMonth(new Date());
+  // const events: CalendarEvent[] = [];
+  // const startDate = startOfMonth(new Date());
 
-  // Generate 120 events over 3 months
-  for (let i = 0; i < 120; i++) {
-    // Random date between start and end
-    const daysToAdd = Math.floor(Math.random() * 90); // 90 days = ~3 months
-    const eventDate = addDays(startDate, daysToAdd);
+  // // Generate 120 events over 3 months
+  // for (let i = 0; i < 120; i++) {
+  //   // Random date between start and end
+  //   const daysToAdd = Math.floor(Math.random() * 90); // 90 days = ~3 months
+  //   const eventDate = addDays(startDate, daysToAdd);
 
-    const startTime = getRandomTime(eventDate);
-    const durationMinutes = generateEventDuration();
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
+  //   const startTime = getRandomTime(eventDate);
+  //   const durationMinutes = generateEventDuration();
+  //   const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
 
-    events.push({
-      id: `event-${i + 1}`,
-      title: EVENT_TITLES[Math.floor(Math.random() * EVENT_TITLES.length)],
-      color: EVENT_COLORS[Math.floor(Math.random() * EVENT_COLORS.length)],
-      start: startTime,
-      end: endTime,
-    });
-  }
+  //   events.push({
+  //     id: `event-${i + 1}`,
+  //     title: EVENT_TITLES[Math.floor(Math.random() * EVENT_TITLES.length)],
+  //     color: EVENT_COLORS[Math.floor(Math.random() * EVENT_COLORS.length)],
+  //     start: startTime,
+  //     end: endTime,
+  //   });
+  // }
 
-  // Sort events by start date
-  return events.sort((a, b) => a.start.getTime() - b.start.getTime());
+  // // Sort events by start date
+  // return events.sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  return [];
 }

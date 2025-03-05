@@ -65,9 +65,25 @@ const CreateSurveyPage: React.FC = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
+  const survey = useSelector((state: RootState) => state.survey);
   const generated_by = useSelector(
     (state: RootState) => state.survey.generated_by
   );
+
+  useEffect(() => {
+    // Redirect to editor if survey has topic, description and questions
+    if (
+      survey.topic &&
+      survey.description &&
+      survey.sections.length > 0 &&
+      survey.sections[0].questions.length > 0
+    ) {
+      router.push(
+        `/surveys/create-survey?whatDoYouWant=false&oneMoreThing=false&surveyType=&promptForm=false&surveyPrompt=&isTopicModal=false&generated=true`
+      );
+      return;
+    }
+  }, [survey, router]);
 
   // Get all URL params
   const params = new URLSearchParams(searchParams.toString());
@@ -271,7 +287,7 @@ const CreateSurveyPage: React.FC = () => {
     dispatch(resetSurvey());
   }, []);
 
-  const survey = store.getState().survey;
+  console.log(survey);
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center bg-white">

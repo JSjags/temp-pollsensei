@@ -1,10 +1,15 @@
-import { stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
-import { Check, GripVertical, MessageSquare } from "lucide-react";
+import {
+  Check,
+  GripVertical,
+  MessageSquare,
+  AlignLeft,
+  TextCursor,
+} from "lucide-react";
 import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { Textarea } from "../ui/shadcn-textarea";
@@ -12,6 +17,7 @@ import { Input } from "../ui/shadcn-input";
 import ActionButtons from "./ActionButtons";
 import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
 import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 interface ComponentQuestionProps {
   question: string;
@@ -64,14 +70,30 @@ const LongTextQuestion: React.FC<ComponentQuestionProps> = ({
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1.5 mr-3">
-            <Check strokeWidth={1.5} className="text-white w-4 h-4" />
+          <div className="bg-green-500 rounded-full p-1 transition-all duration-200 hover:bg-green-600">
+            <Check
+              strokeWidth={1.5}
+              className="w-4 h-4 text-white"
+              aria-label="Passed validation"
+            />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full p-1.5 mr-3">
-            <BsExclamation className="text-white w-4 h-4" />
+          <div className="bg-red-500 rounded-full p-1 transition-all duration-200 hover:bg-red-600">
+            <BsExclamation
+              className="w-4 h-4 text-white"
+              aria-label="Failed validation"
+            />
+          </div>
+        );
+      case "pending":
+        return (
+          <div className="bg-yellow-500 rounded-full p-1 transition-all duration-200 hover:bg-yellow-600">
+            <span
+              className="block w-4 h-4 animate-pulse"
+              aria-label="Validation pending"
+            />
           </div>
         );
       default:
@@ -113,21 +135,23 @@ const LongTextQuestion: React.FC<ComponentQuestionProps> = ({
                     <span className="text-2xl text-red-500">*</span>
                   )}
 
-                  {!pathname.includes("survey-public-response") && isEdit && (
-                    <PollsenseiTriggerButton
-                      key={index}
-                      imageUrl={stars}
-                      tooltipText="Rephrase question"
-                      className="hidden group-hover:inline-block transition transform hover:scale-110"
-                      triggerType="rephrase"
-                      question={question}
-                      optionType={questionType}
-                      options={options}
-                      setEditId={setEditId}
-                      onSave={onSave!}
-                      index={index}
-                    />
-                  )}
+                  {!pathname.includes("survey-public-response") &&
+                    !pathname.includes("response-upload") &&
+                    isEdit && (
+                      <PollsenseiTriggerButton
+                        key={index}
+                        tooltipText="Rephrase question"
+                        className="hidden group-hover:inline-block transition transform hover:scale-110"
+                        triggerType="rephrase"
+                        question={question}
+                        optionType={questionType}
+                        options={options}
+                        setEditId={setEditId}
+                        onSave={onSave!}
+                        index={index}
+                        imageUrl="/assets/images/pollsensei.png"
+                      />
+                    )}
                 </div>
               </h3>
 
@@ -138,11 +162,12 @@ const LongTextQuestion: React.FC<ComponentQuestionProps> = ({
                     onChange={onChange}
                     value={response}
                     required={is_required}
+                    className="bg-white"
                   />
                 ) : (
                   <Textarea
                     placeholder="Type your response here..."
-                    className="resize-none"
+                    className="resize-none bg-white min-h-[120px]"
                     onChange={onChange}
                     value={response}
                     required={is_required}
@@ -153,7 +178,8 @@ const LongTextQuestion: React.FC<ComponentQuestionProps> = ({
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
-            pathname.includes("/edit-submitted-survey")) && (
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
@@ -168,7 +194,9 @@ const LongTextQuestion: React.FC<ComponentQuestionProps> = ({
             </div>
           )}
 
-          {pathname.includes("edit-survey") && (
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">Required</span>
               <Switch
@@ -180,28 +208,24 @@ const LongTextQuestion: React.FC<ComponentQuestionProps> = ({
               />
             </div>
           )}
-
-          <div className="flex justify-end">
-            {!pathname.includes("edit-survey") &&
-              !pathname.includes("surveys/question") && (
-                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
-                  {(questionType === "long_text" ||
-                    questionType === "short_text") && (
-                    <span className="flex items-center gap-1 text-xs">
-                      <MessageSquare className="text-[#9D50BB] w-3 h-3" />
-                      {questionType === "long_text"
-                        ? "Long Text"
-                        : "Short Text"}
-                    </span>
-                  )}
-                </p>
-              )}
-          </div>
         </div>
 
         {pathname.includes("survey-response-upload") && status && (
           <div>{getStatus(status)}</div>
         )}
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1 text-xs">
+            {questionType === "short_text" ? (
+              <TextCursor className="text-[#9D50BB] w-3 h-3" />
+            ) : (
+              <AlignLeft className="text-[#9D50BB] w-3 h-3" />
+            )}
+            {questionType === "short_text" ? "Short Text" : "Long Text"}
+          </span>
+        </p>
       </div>
     </div>
   );

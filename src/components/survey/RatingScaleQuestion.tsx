@@ -64,6 +64,7 @@ interface RatingScaleQuestionProps {
   setIsRequired?: (value: boolean) => void;
   isEdit?: boolean;
   surveyData?: SurveyData;
+  item?: any;
 }
 
 const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
@@ -82,6 +83,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
   setIsRequired,
   isEdit = false,
   surveyData,
+  item,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -91,8 +93,12 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  const [selectedRating, setSelectedRating] = useState<string>("");
+  const [selectedRating, setSelectedRating] = useState<string>(
+    item?.scale_value?.toString() || ""
+  );
   const [dynamicOptions, setDynamicOptions] = useState<string[]>([]);
+
+  console.log(item);
 
   // Extract range from question text
   const extractRange = (question: string) => {
@@ -174,6 +180,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
   }, [question, options, onSave, questionType, index]);
 
   const handleRatingChange = (value: string) => {
+    if (item?.scale_value) return; // Prevent changes if this is a response
     setSelectedRating(value);
     if (onChange) {
       onChange(value);
@@ -256,6 +263,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
                   value={selectedRating}
                   onValueChange={handleRatingChange}
                   className="flex items-center justify-between gap-2 w-full"
+                  disabled={!!item?.scale_value}
                 >
                   {dynamicOptions.map((option, optionIndex) => (
                     <div
@@ -281,7 +289,8 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
-            pathname.includes("/edit-submitted-survey")) && (
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
@@ -296,7 +305,9 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
             </div>
           )}
 
-          {pathname.includes("edit-survey") && (
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">Required</span>
               <Switch

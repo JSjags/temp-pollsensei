@@ -57,31 +57,47 @@ const ViolinPlot: React.FC<{
 
   // Generate violin plot data
   const violinData = React.useMemo(() => {
-    return resultsToUse.map((result) => {
-      const [name, stats] = Object.entries(result)[0];
-      const hStat = stats.h_statistic[0];
-      const pValue = stats.p_value[0];
+    return resultsToUse
+      .map((result) => {
+        try {
+          const entries = Object.entries(result);
+          if (!entries.length) return null;
 
-      const sampleSize = 200;
-      const center = 5 + hStat * 0.5;
-      const spread = Math.max(0.5, pValue * 2);
+          const [name, stats] = entries[0];
+          if (!stats?.h_statistic?.[0] || !stats?.p_value?.[0]) return null;
 
-      const samples = Array.from({ length: sampleSize }, () => {
-        const u1 = Math.random();
-        const u2 = Math.random();
-        const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-        return Math.max(0, Math.min(10, center + z * spread));
-      });
+          const hStat = stats.h_statistic[0];
+          const pValue = stats.p_value[0];
 
-      return {
-        name: name.replace(/-/g, " vs "),
-        stats,
-        kde: generateKDE(samples),
-        median: median(samples) || 0,
-        q1: median(samples.filter((d) => d < (median(samples) || 0))) || 0,
-        q3: median(samples.filter((d) => d > (median(samples) || 0))) || 0,
-      };
-    });
+          const sampleSize = 200;
+          const center = 5 + hStat * 0.5;
+          const spread = Math.max(0.5, pValue * 2);
+
+          const samples = Array.from({ length: sampleSize }, () => {
+            const u1 = Math.random();
+            const u2 = Math.random();
+            const z =
+              Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            return Math.max(0, Math.min(10, center + z * spread));
+          });
+
+          const medianValue = median(samples);
+          if (medianValue === undefined) return null;
+
+          return {
+            name: name.replace(/-/g, " vs "),
+            stats,
+            kde: generateKDE(samples),
+            median: medianValue,
+            q1: median(samples.filter((d) => d < medianValue)) || 0,
+            q3: median(samples.filter((d) => d > medianValue)) || 0,
+          };
+        } catch (error) {
+          console.error("Error processing violin data:", error);
+          return null;
+        }
+      })
+      .filter((data): data is NonNullable<typeof data> => data !== null);
   }, [resultsToUse]);
 
   useEffect(() => {
@@ -101,7 +117,7 @@ const ViolinPlot: React.FC<{
   }, []);
 
   useEffect(() => {
-    if (!svgRef.current || dimensions.width === 0) return;
+    if (!svgRef.current || dimensions.width === 0 || !violinData.length) return;
 
     const svg = select(svgRef.current);
     svg.selectAll("*").remove();
@@ -132,7 +148,10 @@ const ViolinPlot: React.FC<{
     const violinWidth = Math.min(100, x.bandwidth());
 
     violinData.forEach((datum) => {
-      const xCenter = x(datum.name)! + x.bandwidth() / 2;
+      const xPos = x(datum.name);
+      if (xPos === undefined) return;
+
+      const xCenter = xPos + x.bandwidth() / 2;
 
       // Create violin shape
       const violinArea = area<{ x: number; y: number }>()
@@ -154,8 +173,8 @@ const ViolinPlot: React.FC<{
             show: true,
             content: `
               Group: ${datum.name}
-              H-statistic: ${datum.stats.h_statistic[0].toFixed(3)}
-              p-value: ${datum.stats.p_value[0].toFixed(3)}
+              H-statistic: ${datum.stats.h_statistic[0]?.toFixed(3) ?? "N/A"}
+              p-value: ${datum.stats.p_value[0]?.toFixed(3) ?? "N/A"}
               Distribution shows the density of values
             `,
             x: mouseX,
@@ -269,16 +288,16 @@ const ViolinPlot: React.FC<{
           </Alert>
         )}
         <div className="relative" ref={containerRef}>
-          {violinData.map((datum, index) => (
+          {violinData.map((datum) => (
             <div key={datum.name} className="mb-2 text-sm">
               <span className="font-medium capitalize">
                 {datum.name.replace(/_/g, " ")}:
               </span>{" "}
               <span>
-                H = {datum.stats.h_statistic[0].toFixed(3)}, p{" "}
+                H = {datum.stats.h_statistic[0]?.toFixed(3) ?? "N/A"}, p{" "}
                 {datum.stats.p_value[0] < 0.001
                   ? "< 0.001"
-                  : `= ${datum.stats.p_value[0].toFixed(3)}`}
+                  : `= ${datum.stats.p_value[0]?.toFixed(3) ?? "N/A"}`}
               </span>
             </div>
           ))}

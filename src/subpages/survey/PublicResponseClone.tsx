@@ -388,6 +388,8 @@ const PublicResponse = () => {
     return otherOptions.includes(option);
   };
 
+  console.log(question);
+
   // Question rendering with enhanced UI and animations
   const renderQuestion = (quest: any, index: number, theme: string) => {
     return (
@@ -424,9 +426,9 @@ const PublicResponse = () => {
                 </span>
               )}
             </p>
-            {quest.description && (
+            {/* {quest.description && (
               <p className="text-gray-600 text-sm mt-1">{quest.description}</p>
-            )}
+            )} */}
           </div>
         </motion.div>
 
@@ -1134,11 +1136,11 @@ const PublicResponse = () => {
         <div>
           {question?.data && (
             <div
-              className={`${question?.data?.theme} flex justify-center items-center px-5  lg:px-16 mx-auto gap-10 w-full`}
+              className={`${question?.data?.theme} flex justify-center items-center px-5 bg-fixed lg:px-16 mx-auto gap-10 w-full`}
             >
               <form
                 onSubmit={handleSubmitResponse}
-                className={` flex flex-col overflow-y-auto max-h-screen custom-scrollbar w-full max-w-screen-lg`}
+                className={` flex flex-col overflow-y-auto custom-scrollbar w-full max-w-screen-lg`}
               >
                 {question?.data?.logo_url && (
                   <div className="bg-gray-100 w-16 rounded my-5 text-white flex items-center flex-col ">
@@ -1234,7 +1236,7 @@ const PublicResponse = () => {
 
                 <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
                   <div className="flex gap-2 items-center"></div>
-                  {question?.data?.sections?.length > 1 && (
+                  {/* {question?.data?.sections?.length > 1 && (
                     <div className="flex w-full md:w-auto md:justify-end items-center">
                       <PaginationBtn
                         currentSection={currentSection}
@@ -1242,7 +1244,7 @@ const PublicResponse = () => {
                         onNavigate={navigatePage}
                       />
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
@@ -1261,7 +1263,7 @@ const PublicResponse = () => {
                     )}
                   </Button>
                 </div>
-                <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+                {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
                   <div className="flex flex-col">
                     <p>Form created by</p>
                     <Image src={pollsensei_new_logo} alt="Logo" />
@@ -1269,7 +1271,7 @@ const PublicResponse = () => {
                   <span className="absolute bottom-2 right-4 text-[#828282]">
                     Remove watermark
                   </span>
-                </div>
+                </div> */}
               </form>
             </div>
           )}

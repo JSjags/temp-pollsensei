@@ -32,6 +32,7 @@ export default function SingleSurvey() {
           stage={generateMilestoneStage(
             surveyMilestone.data?.current_stage ?? "0"
           )}
+          survey={surveyMilestone.data}
           surveyId={String(params.id)}
           generated_by={surveyMilestone.data?.generated_by}
           survey_type={surveyMilestone.data?.survey_type}

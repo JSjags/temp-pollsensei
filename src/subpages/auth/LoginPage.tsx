@@ -22,11 +22,11 @@ import axios from "axios";
 
 // Import images
 import steps from "../../assets/auth/steps2.svg";
-import logo from "../../assets/auth/logo.svg";
 import google from "../../assets/auth/goggle.svg";
 import chat from "../../assets/auth/chat.svg";
-import { dark_theme_logo } from "@/assets/images";
+import { dark_theme_logo, pollsensei_new_logo } from "@/assets/images";
 import axiosInstance from "@/lib/axios-instance";
+import { useGoogleLoginMutation } from "@/services/user.service";
 
 const constraints = {
   email: {
@@ -57,6 +57,8 @@ const LoginPage = () => {
   const [loginState, setLoginState] = useState(true);
   const [state, setState] = useState(false);
   const [eyeState, setEyeState] = useState(false);
+  const [googleLogin, { data: register, error: registerError }] =
+    useGoogleLoginMutation();
 
   const loginMutation = useMutation({
     mutationFn: (values: { email: string; password: string }) => {
@@ -73,8 +75,6 @@ const LoginPage = () => {
         } else if (ed === "3") {
           router.push("/surveys/manual-survey-create");
         }
-      } else {
-        router.push("/dashboard");
       }
     },
     onError: (error: any) => {
@@ -119,8 +119,6 @@ const LoginPage = () => {
         } else if (ed === "3") {
           router.push("/surveys/manual-survey-create");
         }
-      } else {
-        router.push("/dashboard");
       }
     }
   }, [user, router, ed]);
@@ -135,15 +133,23 @@ const LoginPage = () => {
   };
 
   const googleSignUp = useGoogleLogin({
-    onSuccess: (response) => {
-      const accessToken = response.access_token;
-      setState(true);
-      setLoginState(false);
-      googleLoginMutation.mutate(accessToken);
+    onSuccess: async (response) => {
+      const accessToken = response.access_token; // Directly get the access token
+
+      try {
+        const userData = await googleLogin({ code: accessToken }).unwrap();
+        toast.success("Sign in  success");
+        dispatch(updateUser(userData.data));
+        setState(true);
+        setLoginState(false);
+      } catch (err: any) {
+        toast.error(
+          "Failed to register user " + (err?.data?.message || err.message)
+        );
+        console.error("Failed to sign up user", err);
+      }
     },
-    onError: () => {
-      toast.error("Google Sign-In Failed");
-    },
+    onError: () => console.log("Google Sign-In Failed"),
     flow: "implicit",
   });
 
@@ -156,20 +162,21 @@ const LoginPage = () => {
         className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br"
       >
         <AnimatePresence mode="wait">
-          <div className="auth-bg md:hidden flex items-center justify-center p-4 bg-gradient-to-r from-blue-600 to-blue-400">
+          <div className="md:hidden flex items-center justify-center p-4 bg-white shadow">
             <motion.div
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.5 }}
               className="flex items-center justify-center gap-3"
             >
-              <Image
-                src={logo}
-                alt="Logo"
-                width={32}
-                height={32}
-                className="animate-pulse"
-              />
+              <Link href="/">
+                <Image
+                  src={pollsensei_new_logo}
+                  alt="Logo"
+                  width={100}
+                  height={100}
+                />
+              </Link>
               <h1 className="auth-head text-white font-bold">PollSensei</h1>
             </motion.div>
           </div>
@@ -265,21 +272,21 @@ const LoginPage = () => {
       className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br"
     >
       <AnimatePresence mode="wait">
-        <div className="auth-bg md:hidden flex items-center justify-center p-4 bg-gradient-to-r from-blue-600 to-blue-400">
+        <div className="md:hidden flex items-center justify-center p-4 bg-white shadow">
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
             className="flex items-center justify-center gap-3"
           >
-            <Image
-              src={logo}
-              alt="Logo"
-              width={32}
-              height={32}
-              className="animate-pulse"
-            />
-            <h1 className="auth-head text-white font-bold">PollSensei</h1>
+            <Link href="/">
+              <Image
+                src={pollsensei_new_logo}
+                alt="Logo"
+                width={100}
+                height={100}
+              />
+            </Link>
           </motion.div>
         </div>
 
@@ -356,7 +363,7 @@ const LoginPage = () => {
                   animate="animate"
                   className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10"
                 >
-                  <h2 className="auth-header font-sans text-center md:text-left text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                  <h2 className="auth-header font-sans text-center md:text-left !text-2xl md:!text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                     Welcome back to PollSensei
                   </h2>
                   <p className="auth-title font-sans pt-3 text-center md:text-left text-gray-600">
@@ -465,9 +472,9 @@ const LoginPage = () => {
                     onClick={() => {
                       try {
                         googleSignUp();
-                        mixpanel.track("Google Sign-In Clicked", {
-                          timestamp: new Date().toISOString(),
-                        });
+                        // mixpanel.track("Google Sign-In Clicked", {
+                        //   timestamp: new Date().toISOString(),
+                        // });
                       } catch (err) {
                         console.error("Error during Google sign up:", err);
                         toast.error("Failed to sign in with Google");

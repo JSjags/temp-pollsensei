@@ -26,8 +26,28 @@ import { ArrowRight, Calendar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
+
+// Add keyframes for the twinkle animation
+const styles = `
+  @keyframes twinkle {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+`;
 
 const DashboardPage = () => {
+  // Add the styles to the document head
+  useEffect(() => {
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = styles;
+    document.head.appendChild(styleSheet);
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
+
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
   const { data: item, isLoading: isItemLoading } =
@@ -126,6 +146,7 @@ const DashboardPage = () => {
             <p className="text-lg md:text-2xl text-gray-400">
               Great to have you here!
             </p>
+            <CreateSurveyButton type="dashboard" />
           </div>
 
           <div className="flex flex-wrap items-center gap-3 md:gap-4">
@@ -240,7 +261,7 @@ const DashboardPage = () => {
                         id={index + 1}
                         title={row?.topic.slice(0, 20)}
                         value={row?.number_of_responses}
-                        link={`/surveys/question/${row?._id}`}
+                        link={`/surveys/${row?._id}`}
                       />
                     ))}
                   {!isSurveyLeaderboardLoading &&

@@ -5,8 +5,8 @@ import { toast } from "react-toastify";
 import environment from "@/services/config/base";
 
 const axiosInstanceWithoutToken = axios.create({
-  baseURL: "https://pollsensei-api-a0e832048911.herokuapp.com/api/v1",
-  //   baseURL: environment.API_BASE_URL,
+  // baseURL: "https://pollsensei-api-a0e832048911.herokuapp.com/api/v1",
+  baseURL: environment.API_BASE_URL,
 });
 
 axiosInstanceWithoutToken.interceptors.response.use(

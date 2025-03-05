@@ -15,7 +15,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { useFetchASurveyQuery } from "@/services/survey.service";
 import { useDispatch } from "react-redux";
 import { openUpload } from "@/redux/slices/upload.slice";
-import { FiShare2 } from "react-icons/fi";
+import { FiShare2, FiUpload } from "react-icons/fi";
 import ShareSurvey from "../survey/ShareSurvey";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -40,12 +40,14 @@ const SurveyCreationNav = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const params = useParams();
-  const { data } = useFetchASurveyQuery(params.id);
   const [shareSurvey, setShareSurvey] = useState(false);
   const queryClient = useQueryClient();
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
   );
+  const { data } = useFetchASurveyQuery(params.id, {
+    skip: !params.id || path.includes("edit-draft-survey"),
+  });
 
   // Extract surveyId regardless of path
   const surveyId = extractMongoId(path);
@@ -61,6 +63,20 @@ const SurveyCreationNav = () => {
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["get-survey-responses"] });
   }, [queryClient]);
+
+  // Move state updates to useEffect
+  useEffect(() => {
+    if (
+      path === "/surveys/create-survey" ||
+      path === "/surveys/add-question-m" ||
+      path === "/surveys/survey-list" ||
+      path.includes("validate-response") ||
+      path.includes("validate-res") ||
+      path.includes("/surveys/question")
+    ) {
+      // Handle path-based logic here
+    }
+  }, [path]);
 
   const activeLink = path.includes("survey-response-upload")
     ? "Reponses"
@@ -257,7 +273,10 @@ const SurveyCreationNav = () => {
                           )}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent
+                      className="sm:max-w-[425px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription>
@@ -295,15 +314,23 @@ const SurveyCreationNav = () => {
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
                 />
                 <Link
-                  href={""}
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon color="#B0A5BB" />
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
                   <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
                     Report
                   </span>
                 </Link>
-                {/* <Image src={hyphen} alt="hyphen" className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto" /> */}
               </nav>
             </div>
           )}
@@ -514,7 +541,10 @@ const SurveyCreationNav = () => {
                           )}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent
+                      className="sm:max-w-[425px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription>
@@ -551,23 +581,38 @@ const SurveyCreationNav = () => {
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
                 />
-                <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon color="#B0A5BB" />
-                  <span className="ml-3 text-sm">Report</span>
+                <Link
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
+                  className="flex md:flex-col lg:flex-row items-center"
+                >
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
+                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
+                    Report
+                  </span>
                 </Link>
               </>
             )}
           </nav>
 
           {path.includes("survey-response-upload") ? (
-            <button
+            <Button
               className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-5 py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
               onClick={() => {
                 dispatch(openUpload());
               }}
             >
+              <FiUpload className="w-5 h-5" />
               Upload Results
-            </button>
+            </Button>
           ) : (
             <div className="flex justify-between items-center gap-3">
               {path === "/surveys/create-survey" ||
@@ -582,9 +627,7 @@ const SurveyCreationNav = () => {
                   {userRoles.includes("Admin") && (
                     <button
                       className="border-2 px-4 py-1 rounded-lg text-[#5B03B2] border-[#5B03B2] flex items-center transition-all duration-300 hover:bg-[#5B03B2] hover:text-white hover:scale-105"
-                      onClick={() => {
-                        setShareSurvey(!shareSurvey);
-                      }}
+                      onClick={() => setShareSurvey((prev) => !prev)}
                     >
                       <FiShare2 className="mr-2" />
                       <span className="hidden xl:flex"> Share </span>
@@ -744,7 +787,10 @@ const SurveyCreationNav = () => {
                         </span>
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="w-[90%] rounded-lg sm:max-w-[280px]">
+                    <DialogContent
+                      className="w-[90%] rounded-lg sm:max-w-[280px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription className="text-sm mt-2">
@@ -778,10 +824,19 @@ const SurveyCreationNav = () => {
                 )}
 
                 <Link
-                  href={""}
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
                   className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
                 >
-                  <BreadcrumbsIcon color="#B0A5BB" />
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
                   <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
                     Report
                   </span>
@@ -996,7 +1051,10 @@ const SurveyCreationNav = () => {
                           )}
                       </button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent
+                      className="sm:max-w-[425px] z-[100000]"
+                      overlayClassName="z-[100000]"
+                    >
                       <DialogHeader>
                         <DialogTitle>Insufficient Responses</DialogTitle>
                         <DialogDescription>
@@ -1033,23 +1091,38 @@ const SurveyCreationNav = () => {
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
                 />
-                <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon color="#B0A5BB" />
-                  <span className="ml-3 text-sm">Report</span>
+                <Link
+                  href={
+                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
+                  }
+                  className="flex md:flex-col lg:flex-row items-center"
+                >
+                  <BreadcrumbsIcon
+                    icon={
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      )
+                    }
+                    color={!data?.data?._id ? "#B0A5BB" : ""}
+                  />
+                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
+                    Report
+                  </span>
                 </Link>
               </>
             )}
           </nav>
 
           {path.includes("survey-response-upload") ? (
-            <button
+            <Button
               className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-5 py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
               onClick={() => {
                 dispatch(openUpload());
               }}
             >
+              <FiUpload className="w-5 h-5" />
               Upload Results
-            </button>
+            </Button>
           ) : (
             <div className="flex justify-between items-center gap-3">
               {path === "/surveys/create-survey" ||
@@ -1065,9 +1138,7 @@ const SurveyCreationNav = () => {
                   {userRoles.includes("Admin") && (
                     <button
                       className="border-2 px-4 py-1 rounded-lg text-[#5B03B2] border-[#5B03B2] flex items-center transition-all duration-300 hover:bg-[#5B03B2] hover:text-white hover:scale-105"
-                      onClick={() => {
-                        setShareSurvey(!shareSurvey);
-                      }}
+                      onClick={() => setShareSurvey((prev) => !prev)}
                     >
                       <FiShare2 className="mr-2" />
                       <span className="hidden xl:flex"> Share </span>

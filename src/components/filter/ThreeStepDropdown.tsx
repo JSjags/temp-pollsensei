@@ -7,12 +7,29 @@ import {
 import { resetName } from "@/redux/slices/name.slice";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X, Filter, ChevronLeft } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DropdownData {
   questions: any;
+  isLoading: boolean;
 }
 
-const ThreeStepDropdown: React.FC<DropdownData> = ({ questions }) => {
+const ThreeStepDropdown: React.FC<DropdownData> = ({
+  questions,
+  isLoading,
+}) => {
   const dispatch = useDispatch();
   const [isAddingFilter, setIsAddingFilter] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
@@ -27,126 +44,162 @@ const ThreeStepDropdown: React.FC<DropdownData> = ({ questions }) => {
     setIsAddingFilter(false);
     dispatch(resetFilters());
     dispatch(resetName());
-
   };
 
-  useEffect(() => {
-    if (selectedAnswer) {
-      console.log("Answer updated:", selectedAnswer);
-    }
-  }, [selectedAnswer]);
+  const handleBackToQuestion = () => {
+    setSelectedAnswer(null);
+    dispatch(setAnswersss(""));
+  };
+
+  const dropdownAnimation = {
+    initial: { opacity: 0, y: -10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+    transition: { duration: 0.2 },
+  };
 
   return (
-    <div className="p- space-y- flex justify-between items-start gap-4">
-      <button
-        onClick={() => {
-          setIsAddingFilter(true);
-          dispatch(resetFilters());
-          dispatch(resetName());
+    <div className="flex items-start gap-4 flex-1 w-full">
+      {!isAddingFilter ? (
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIsAddingFilter(true);
+            dispatch(resetFilters());
+            dispatch(resetName());
+          }}
+          className="flex items-center gap-2 w-full"
+          disabled={isLoading}
+        >
+          <Filter className="h-4 w-4" />
+          Add Filter
+        </Button>
+      ) : (
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="space-y-4 w-full"
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={dropdownAnimation}
+          >
+            <Card className="p-4 space-y-4 min-w-full">
+              {isLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-8 w-24" />
+                </div>
+              ) : (
+                <div className="w-full">
+                  {!selectedQuestion && (
+                    <Select
+                      onValueChange={(value) => {
+                        dispatch(setQuestion(value));
+                        setSelectedQuestion(value);
+                        const questionType = questions.find(
+                          (q: any) => q.question === value
+                        )?.question_type;
+                        dispatch(setQuestionType(questionType));
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a question" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[100000]">
+                        {questions?.map((question: any, index: number) => (
+                          <SelectItem key={index} value={question.question}>
+                            {question.question}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
 
-        }}
-        className="border border-gray-300 text-gray-700 rounded-md px-4 py-2 hover:bg-gray-50"
-      >
-        Add filter
-      </button>
+                  {selectedQuestion && !selectedAnswer && (
+                    <motion.div {...dropdownAnimation} className="space-y-4">
+                      <Select
+                        onValueChange={(value) => {
+                          dispatch(setAnswersss(value));
+                          setSelectedAnswer(value);
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select an answer" />
+                        </SelectTrigger>
+                        <SelectContent className="z-[100000]">
+                          {questions
+                            ?.filter(
+                              (q: any) => q.question === selectedQuestion
+                            )
+                            ?.flatMap((q: any) => q.options || [])
+                            ?.map((option: any, index: number) => (
+                              <SelectItem
+                                key={index}
+                                value={option}
+                                className="line-clamp-1"
+                              >
+                                {option}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedQuestion(null);
+                          dispatch(setQuestion(""));
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Back to questions
+                      </Button>
+                    </motion.div>
+                  )}
 
-      {isAddingFilter && (
-        <div className="space-y-4">
-          {/* Step 1: Select Question */}
-          {!selectedQuestion && (
-            <div className="w-[350px]">
-              <select
-                className="block w-[400px] text-wrap p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  dispatch(setQuestion(value));
-                  setSelectedQuestion(value);
-                  console.log(value);
-                }}
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  -- Choose a Question --
-                </option>
-                {questions?.map((question: any, index: any) => {
-                  console.log(question)
-                  console.log(question?.question_type)
-                  dispatch(setQuestionType(question?.question_type))
-                  return (
-                    <option key={index} value={question?.question}>
-                      {question?.question}
-                    </option>
-                  )
-                })}
-              </select>
-            </div>
-          )}
+                  {selectedAnswer && (
+                    <motion.div {...dropdownAnimation} className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="secondary"
+                          className="px-3 py-1 line-clamp-1"
+                        >
+                          {selectedQuestion}: {selectedAnswer}
+                          <button
+                            onClick={handleReset}
+                            className="ml-2 hover:text-red-500 transition-colors"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleBackToQuestion}
+                        className="flex items-center gap-2"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Change answer
+                      </Button>
+                    </motion.div>
+                  )}
 
-          {/* Step 2: Select Question Type */}
-          {/* {selectedQuestion && !selectedQuestionType && (
-            <div className="">
-              <select
-                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e) =>{ 
-                  const value = e.target.value;
-                  dispatch(setQuestionType(value))
-                  setSelectedQuestionType(value)
-                }}
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  -- Choose a Question Type --
-                </option>
-                {questions?.map((type:any, index:any) => (
-                  <option key={index} value={type?.question_type
-                  }>
-                    {type?.question_type
-                    }
-                  </option>
-                ))}
-              </select>
-            </div>
-          )} */}
-
-          {/* Step 3: Select Answer */}
-          {selectedQuestion && !selectedAnswer && (
-            <div className="">
-              <select
-                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  dispatch(setAnswersss(value));
-                  setSelectedAnswer(value);
-                }}
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  -- Choose an Answer --
-                </option>
-                {questions
-                  ?.filter((q: any) => q.question === selectedQuestion) // Filter for the selected question
-                  ?.flatMap((q: any) => q.options || []) // Get all options for the selected question
-                  ?.map((option: any, index: any) => (
-                    <option key={index} value={option}>
-                      {option}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          )}
-
-          {/* Final Step: Show Selected Filters */}
-          {selectedAnswer && (
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-            >
-              Reset
-            </button>
-
-            // </div>
-          )}
-        </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsAddingFilter(false)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </Card>
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );

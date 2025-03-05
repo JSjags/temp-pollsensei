@@ -28,7 +28,6 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     padding: 20,
-    fontFamily: "Helvetica",
     margin: 0, // Ensure no margin at top
   },
   header: {
@@ -113,7 +112,6 @@ const SurveyPDFDocument = ({ surveyData }: SurveyPDFDocumentProps) => {
 
   interface Style {
     fontSize?: number;
-    fontFamily?: string;
     color?: string;
     marginBottom?: number;
   }
@@ -124,7 +122,6 @@ const SurveyPDFDocument = ({ surveyData }: SurveyPDFDocumentProps) => {
       typeof question_text?.size === "string"
         ? parseInt(question_text.size)
         : question_text?.size || 24,
-    fontFamily: header_text?.name || "Helvetica",
     color: "#5B03B2",
     marginBottom: 10,
   };
@@ -134,7 +131,6 @@ const SurveyPDFDocument = ({ surveyData }: SurveyPDFDocumentProps) => {
       typeof question_text?.size === "string"
         ? parseInt(question_text.size)
         : question_text?.size || 14,
-    fontFamily: body_text?.name || "Helvetica",
     color: "#666",
     marginBottom: 20,
   };
@@ -144,7 +140,6 @@ const SurveyPDFDocument = ({ surveyData }: SurveyPDFDocumentProps) => {
       typeof question_text?.size === "string"
         ? parseInt(question_text.size)
         : question_text?.size || 16,
-    fontFamily: question_text?.name || "Helvetica",
     color: "#333",
     marginBottom: 10,
   };

@@ -42,17 +42,22 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   handleDeleteQuestion,
   handleRequiredToggle,
 }) => {
+  const questionType =
+    !item.question_type && item.rows?.length && item.columns?.length
+      ? "matrix_multiple_choice"
+      : item.question_type;
+
   if (isEdit && editIndex === index) {
     if (
-      item.question_type === "matrix_multiple_choice" ||
-      item.question_type === "matrix_checkbox"
+      questionType === "matrix_multiple_choice" ||
+      questionType === "matrix_checkbox"
     ) {
       return (
         <MatrixQuestionEdit
           question={item.question}
           options={item.options}
           is_required={item.is_required}
-          questionType={item.question_type}
+          questionType={questionType}
           onSave={handleSave}
           onCancel={handleCancel}
         />
@@ -63,7 +68,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         index={index + 1}
         question={item.question}
         options={item.options}
-        questionType={item.question_type}
+        questionType={questionType}
         is_required={item.is_required}
         onSave={handleSave}
         onCancel={handleCancel}
@@ -74,7 +79,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   const commonProps = {
     index: index + 1,
     question: item.question,
-    questionType: item.question_type,
+    questionType: questionType,
     EditQuestion: () => EditQuestion(index),
     DeleteQuestion: () => handleDeleteQuestion(index),
     is_required: item.is_required,
@@ -102,13 +107,19 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     slider: SliderQuestion,
   };
 
-  const QuestionComponent = questionComponents[item.question_type];
+  const QuestionComponent = questionComponents[questionType];
   if (!QuestionComponent) return null;
 
   const extraProps = {
     ...(item.options && !item.options.Rows && { options: item.options }),
-    ...(item.options?.Rows && { rows: item.options.Rows }),
-    ...(item.options?.Columns && { columns: item.options.Columns }),
+    ...(item.options?.Rows && { rows: item?.options?.Rows }),
+    ...(item.options?.Columns && {
+      columns: item?.options?.Columns,
+    }),
+    ...(item?.rows && { rows: item.rows }),
+    ...(item?.columns && {
+      columns: item.columns,
+    }),
     isEdit: true,
   };
 

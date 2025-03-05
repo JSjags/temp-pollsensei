@@ -1,157 +1,6 @@
-// "use client";
-
-// import React, {
-//   createContext,
-//   useContext,
-//   useState,
-//   useEffect,
-//   ReactNode,
-//   useRef,
-// } from "react";
-// import { io, Socket } from "socket.io-client";
-
-// interface SenseiContextProps {
-//   emitUserTrigger: (payload: UserTriggerPayload) => void;
-//   aiResponse: string;
-//   loading: boolean;
-//   isConnected: boolean;
-//   messages: string[];
-//   clearMessages: () => void;
-//   error: string | null;
-// }
-
-// const SenseiContext = createContext<SenseiContextProps | undefined>(undefined);
-
-// const SOCKET_URL = "https://ai-api-staging.pollsensei.ai"; // Replace with your actual WebSocket URL
-
-// interface ServerToClientEvents {
-//   ai_trigger: (data: { message: string }) => void;
-// }
-
-// interface ClientToServerEvents {
-//   user_trigger: (data: UserTriggerPayload) => void;
-// }
-
-// interface Question {
-//   Question: string;
-//   "Option type": string;
-//   Options: string[];
-// }
-
-// interface UserTriggerPayload {
-//   conversation_id: string;
-//   data: {
-//     question: Question;
-//   };
-//   trigger_type: string;
-// }
-
-// export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
-//   children,
-// }) => {
-//   const [socket, setSocket] = useState<Socket<
-//     ServerToClientEvents,
-//     ClientToServerEvents
-//   > | null>(null);
-//   const [aiResponse, setAiResponse] = useState<string>("");
-//   const [loading, setLoading] = useState<boolean>(false);
-//   const [isConnected, setIsConnected] = useState<boolean>(false);
-//   const [messages, setMessages] = useState<string[]>([]);
-//   const [error, setError] = useState<string | null>(null);
-
-//   const socketRef = useRef<Socket | null>(null);
-
-//   useEffect(() => {
-//     const socketIo = io(SOCKET_URL, {
-//       transports: ["websocket"], // Force WebSocket transport
-//     });
-
-//     setSocket(socketIo);
-//     socketRef.current = socketIo;
-
-//     // Connection established
-//     socketIo.on("connect", () => {
-//       setIsConnected(true);
-//       addMessage("Connected to server.");
-//     });
-
-//     // Listen for AI responses
-//     socketIo.on("ai_trigger", (data) => {
-//       setAiResponse(data.message);
-//       setLoading(false); // Stop loading once the response is received
-//       addMessage(`Received ai_trigger event: ${data.message}`);
-//     });
-
-//     // Handle disconnects
-//     socketIo.on("disconnect", (reason) => {
-//       setIsConnected(false);
-//       addMessage("Disconnected from server.");
-//       if (reason !== "io client disconnect") {
-//         setError(`Unexpected disconnect: ${reason}`);
-//       }
-//     });
-
-//     // Handle any events
-//     socketIo.onAny((event, ...args) => {
-//       addMessage(`Received event: ${event}`);
-//       addMessage(`Data: ${JSON.stringify(args)}`);
-//     });
-
-//     // Cleanup
-//     return () => {
-//       socketIo.disconnect();
-//     };
-//   }, []);
-
-//   const addMessage = (message: string) => {
-//     setMessages((prev) => [...prev, message]);
-//   };
-
-//   const clearMessages = () => {
-//     setMessages([]);
-//   };
-
-//   const emitUserTrigger = (payload: UserTriggerPayload) => {
-//     if (socketRef.current && isConnected) {
-//       setLoading(true); // Start loading when the user_trigger event is emitted
-//       socketRef.current.emit("user_trigger", payload);
-//       addMessage(
-//         `Emitted user_trigger event with payload: ${JSON.stringify(payload)}`
-//       );
-//     } else {
-//       setError("Socket is not connected.");
-//       setLoading(false); // Stop loading if there's a connection issue
-//     }
-//   };
-
-//   return (
-//     <SenseiContext.Provider
-//       value={{
-//         emitUserTrigger,
-//         aiResponse,
-//         loading,
-//         isConnected,
-//         messages,
-//         clearMessages,
-//         error,
-//       }}
-//     >
-//       {children}
-//     </SenseiContext.Provider>
-//   );
-// };
-
-// // Hook to use SenseiContext in components
-// export const useSensei = () => {
-//   const context = useContext(SenseiContext);
-//   if (!context) {
-//     throw new Error("useSensei must be used within a SenseiProvider");
-//   }
-//   return context;
-// };
-
 "use client";
 
+import { RootState } from "@/redux/store";
 import React, {
   createContext,
   useContext,
@@ -160,6 +9,7 @@ import React, {
   ReactNode,
   useRef,
 } from "react";
+import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
 
 interface SenseiContextProps {
@@ -213,21 +63,58 @@ export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const user_id = useSelector((state: RootState) => state.user.user?._id);
+
+  console.log(user_id);
 
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
+    if (!user_id) {
+      console.warn("No user ID available for socket connection");
+      return;
+    }
+
     const socketIo = io(SOCKET_URL, {
-      transports: ["websocket"], // Force WebSocket transport
+      transports: ["websocket"],
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      auth: {
+        user_id: user_id,
+      },
+      query: {
+        user_id: user_id,
+      },
+      extraHeaders: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true",
+      },
     });
 
     setSocket(socketIo);
     socketRef.current = socketIo;
 
-    // Connection established
     socketIo.on("connect", () => {
+      console.log("Socket connected with user ID:", user_id);
+      // alert(`Socket connected with user ID:, ${user_id}`);
       setIsConnected(true);
-      addMessage("Connected to server.");
+      addMessage(`Connected to server with user ID: ${user_id}`);
+    });
+
+    socketIo.on("reconnect_attempt", (attempt) => {
+      console.log(`Reconnection attempt ${attempt}`);
+    });
+
+    socketIo.on("reconnect_failed", () => {
+      setError("Failed to reconnect to server after multiple attempts");
+    });
+
+    socketIo.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      setError(`Connection error: ${error.message}`);
+      setIsConnected(false);
     });
 
     // Handle any event
@@ -246,9 +133,12 @@ export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
 
     // Cleanup
     return () => {
-      socketIo.disconnect();
+      if (socketIo) {
+        socketIo.disconnect();
+        console.log("Socket disconnected");
+      }
     };
-  }, []);
+  }, [user_id]);
 
   const addMessage = (message: string) => {
     setMessages((prev) => [...prev, message]);

@@ -1,20 +1,21 @@
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { FaStar } from "react-icons/fa";
 import { draggable, stars } from "@/assets/images";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
-import { Check } from "lucide-react";
+import { Check, GripVertical, Star } from "lucide-react";
 import { BsExclamation } from "react-icons/bs";
 import { Switch } from "../ui/switch";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { cn } from "@/lib/utils";
 
 interface StarRatingQuestionProps {
   question: string;
   questionType: string;
   options?: string[];
-  scale_value?: number; // Add scale_value prop
+  scale_value?: number | string;
   onRate?: (value: number) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
@@ -34,9 +35,9 @@ interface StarRatingQuestionProps {
 
 const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
   question,
-  options = ["1 star", "2 star", "3 star", "4 star", "5 star"],
+  options = ["1_star", "2_stars", "3_stars", "4_stars", "5_stars"],
   questionType,
-  scale_value = 0, // Default to 0 if no value is provided
+  scale_value = 0,
   onRate,
   EditQuestion,
   DeleteQuestion,
@@ -56,142 +57,131 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  const [hoveredRating, setHoveredRating] = useState<number | null>(null);
-  const [selectedRating, setSelectedRating] = useState<number>(scale_value);
-
-  // Update selectedRating when scale_value changes
-  useEffect(() => {
-    setSelectedRating(scale_value);
-  }, [scale_value]);
-
-  // Handle rating selection
-  const handleRate = (rating: number) => {
-    setSelectedRating(rating);
-    if (onRate) {
-      onRate(rating); // Call onRate callback with the new value
+  // Convert string scale_value (e.g. "4_stars") to number
+  const getNumericRating = (value: number | string) => {
+    if (typeof value === "string") {
+      return parseInt(value[0]);
     }
+    return value;
   };
 
-  const getStatus = (status: string) => {
+  const rating = getNumericRating(scale_value);
+
+  console.log(rating);
+
+  const getStatus = useMemo(() => {
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1 transition-all duration-200 hover:bg-green-600">
+            <Check
+              strokeWidth={1.5}
+              className="w-4 h-4 text-white"
+              aria-label="Passed validation"
+            />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1 transition-all duration-200 hover:bg-red-600">
+            <BsExclamation
+              className="w-4 h-4 text-white"
+              aria-label="Failed validation"
+            />
           </div>
         );
-
+      case "pending":
+        return (
+          <div className="bg-yellow-500 rounded-full p-1 transition-all duration-200 hover:bg-yellow-600">
+            <span
+              className="block w-4 h-4 animate-pulse"
+              aria-label="Validation pending"
+            />
+          </div>
+        );
       default:
         return null;
     }
-  };
+  }, [status]);
 
   return (
     <div
-      className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: `${questionText?.name}`,
         fontSize: `${questionText?.size}px`,
       }}
     >
-      <Image
-        src={draggable}
-        alt="draggable icon"
-        className={
-          pathname === "/surveys/create-survey" ? "visible" : "invisible"
-        }
-      />
-      <div className="w-full">
-        <div className="flex justify-between w-full items-center">
-          <h3 className="group text-lg font-semibold text-start">
-            <p>
-              <span>{index}. </span> {question}
-              {is_required && (
-                <span className="text-2xl ml-2 text-red-500">*</span>
-              )}
-            </p>
-            {!pathname.includes("survey-public-response") && (
-              <PollsenseiTriggerButton
-                key={index}
-                imageUrl={stars}
-                tooltipText="Rephrase question"
-                className={"group-hover:inline-block hidden"}
-                triggerType="rephrase"
-                question={question}
-                optionType={questionType}
-                options={options}
-                setEditId={setEditId}
-                onSave={onSave!}
-                index={index!}
-              />
-            )}
-          </h3>
-        </div>
-        <div className="flex items-center my-2">
-          {options.map((_, idx) => (
-            <FaStar
-              key={idx}
-              size={24}
-              className={`mr-1 cursor-pointer ${
-                (hoveredRating !== null ? hoveredRating : selectedRating) > idx
-                  ? "text-[#5B03B2]"
-                  : "text-gray-300"
-              }`}
-              onMouseEnter={() => setHoveredRating(idx + 1)}
-              onMouseLeave={() => setHoveredRating(null)}
-              onClick={() => handleRate(idx + 1)} // Trigger rating selection
-            />
-          ))}
-        </div>
-        {pathname === "/surveys/edit-survey" ||
-          (pathname.includes("/edit-submitted-survey") && (
-            <div className="flex justify-end gap-4">
-              <button
-                className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-                onClick={EditQuestion}
-              >
-                Edit
-              </button>
-              <button
-                className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-                onClick={DeleteQuestion}
-              >
-                Delete
-              </button>
+      <div className="flex gap-4">
+        <GripVertical
+          className={`w-5 h-5 text-gray-400 mt-1 ${
+            pathname === "/surveys/create-survey" ? "visible" : "hidden"
+          }`}
+        />
+        <div className="flex-1 space-y-4">
+          <div className="flex items-start">
+            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <div className="flex-1">
+              <h3 className="group font-semibold">
+                <div className="flex items-start gap-2">
+                  <span className="text-left">{question}</span>
+                  {is_required && (
+                    <span className="text-2xl text-red-500">*</span>
+                  )}
+                </div>
+              </h3>
             </div>
-          ))}
-        {pathname.includes("edit-survey") && (
-          <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB] "
-            />
           </div>
-        )}
-        <div className="flex justify-end">
-          {pathname === "/surveys/edit-survey" ||
-          pathname.includes("surveys/question") ? (
-            ""
-          ) : (
-            <p>{questionType === "star_rating" ? "Star Rating" : ""}</p>
+
+          <div className="flex items-center my-2">
+            {options.map((_, idx) => (
+              <FaStar
+                key={idx}
+                size={24}
+                className={`mr-1 cursor-not-allowed ${
+                  idx < rating ? "text-[#5B03B250]" : "text-gray-300"
+                }`}
+                aria-label={`${idx + 1} stars`}
+              />
+            ))}
+          </div>
+
+          {pathname === "/surveys/edit-survey" && (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Required</span>
+                <Switch
+                  checked={is_required}
+                  onCheckedChange={
+                    setIsRequired && ((checked) => setIsRequired(checked))
+                  }
+                  className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] scale-90"
+                />
+              </div>
+            </div>
           )}
         </div>
+        {pathname.includes("survey-response-upload") && status && (
+          <div>{getStatus}</div>
+        )}
       </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
-      )}
+      <div className="flex justify-end">
+        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1 text-xs">
+            <Star className="text-[#9D50BB] w-3 h-3" />
+            Star Rating
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

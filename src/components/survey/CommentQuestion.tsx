@@ -1,7 +1,7 @@
 import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
 import {
@@ -9,6 +9,8 @@ import {
   GripVertical,
   MessageCircle,
   MessageSquare,
+  AlignLeft,
+  TextQuote,
 } from "lucide-react";
 import { Switch } from "../ui/switch";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
@@ -70,22 +72,51 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  const getStatus = (status: string) => {
+  const getStatus = useMemo(() => {
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1.5 mr-3">
-            <Check strokeWidth={1.5} className="text-white w-4 h-4" />
+          <div className="bg-green-500 rounded-full p-1 transition-all duration-200 hover:bg-green-600">
+            <Check
+              strokeWidth={1.5}
+              className="w-4 h-4 text-white"
+              aria-label="Passed validation"
+            />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full p-1.5 mr-3">
-            <BsExclamation className="text-white w-4 h-4" />
+          <div className="bg-red-500 rounded-full p-1 transition-all duration-200 hover:bg-red-600">
+            <BsExclamation
+              className="w-4 h-4 text-white"
+              aria-label="Failed validation"
+            />
+          </div>
+        );
+      case "pending":
+        return (
+          <div className="bg-yellow-500 rounded-full p-1 transition-all duration-200 hover:bg-yellow-600">
+            <span
+              className="block w-4 h-4 animate-pulse"
+              aria-label="Validation pending"
+            />
           </div>
         );
       default:
         return null;
+    }
+  }, [status]);
+
+  const getQuestionTypeIcon = () => {
+    switch (questionType) {
+      case "comment":
+        return <MessageCircle className="text-[#9D50BB] w-3 h-3" />;
+      case "short_text":
+        return <AlignLeft className="text-[#9D50BB] w-3 h-3" />;
+      case "long_text":
+        return <TextQuote className="text-[#9D50BB] w-3 h-3" />;
+      default:
+        return <MessageSquare className="text-[#9D50BB] w-3 h-3" />;
     }
   };
 
@@ -154,7 +185,8 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
           </div>
 
           {(pathname === "/surveys/edit-survey" ||
-            pathname.includes("/edit-submitted-survey")) && (
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <ActionButtons onDelete={DeleteQuestion} onEdit={EditQuestion} />
           )}
 
@@ -169,7 +201,9 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
             </div>
           )}
 
-          {pathname.includes("edit-survey") && (
+          {(pathname === "/surveys/edit-survey" ||
+            pathname.includes("/edit-submitted-survey") ||
+            pathname.includes("/edit-draft-survey")) && (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">Required</span>
@@ -195,23 +229,19 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
               </div>
             </div>
           )}
-
-          <div className="flex justify-end">
-            {!pathname.includes("edit-survey") &&
-              !pathname.includes("surveys/question") && (
-                <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
-                  <span className="flex items-center gap-1 text-xs">
-                    <MessageCircle className="text-[#9D50BB] w-3 h-3" />
-                    Comment
-                  </span>
-                </p>
-              )}
-          </div>
         </div>
 
         {pathname.includes("survey-response-upload") && status && (
-          <div>{getStatus(status)}</div>
+          <div>{getStatus}</div>
         )}
+      </div>
+      <div className="flex justify-end mt-4 ">
+        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1 text-xs capitalize">
+            {getQuestionTypeIcon()}
+            {questionType.replace(/_/g, " ")}
+          </span>
+        </p>
       </div>
     </div>
   );

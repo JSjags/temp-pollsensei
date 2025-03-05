@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface FilterState {
   question: string;
@@ -7,13 +7,13 @@ interface FilterState {
 }
 
 const initialState: FilterState = {
-  question: '',
-  questionType: '',
-  answer: '',
+  question: "",
+  questionType: "",
+  answer: "",
 };
 
 const filterSlice = createSlice({
-  name: 'filter',
+  name: "filter",
   initialState,
   reducers: {
     setQuestion(state, action: PayloadAction<string>) {
@@ -26,12 +26,13 @@ const filterSlice = createSlice({
       state.answer = action.payload;
     },
     resetFilters(state) {
-      state.question = '';
-      state.questionType = '';
-      state.answer = '';
+      state.question = "";
+      state.questionType = "";
+      state.answer = "";
     },
   },
 });
 
-export const { setQuestion, setQuestionType, setAnswersss, resetFilters } = filterSlice.actions;
+export const { setQuestion, setQuestionType, setAnswersss, resetFilters } =
+  filterSlice.actions;
 export default filterSlice.reducer;

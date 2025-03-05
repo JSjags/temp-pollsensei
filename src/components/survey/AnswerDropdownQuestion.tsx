@@ -1,19 +1,27 @@
-import { draggable, stars } from "@/assets/images";
+import { draggable } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import { BsExclamation } from "react-icons/bs";
-import { Check } from "lucide-react";
+import { Check, ChevronDown, CircleCheck, ListFilter } from "lucide-react";
 import { Switch } from "../ui/switch";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface DropdownQuestionProps {
   question: string;
   questionType: string;
   options?: string[];
-  drop_down_value?: string; // Added prop for preselected value
+  drop_down_value?: string;
   onChange?: (value: string) => void;
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
@@ -33,8 +41,8 @@ interface DropdownQuestionProps {
 
 const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
   question,
-  options = [], // Default to empty array
-  drop_down_value = null, // Default to null
+  options = [],
+  drop_down_value = null,
   questionType,
   EditQuestion,
   DeleteQuestion,
@@ -51,51 +59,70 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
-  const colorTheme = useSelector(
-    (state: RootState) => state?.survey?.color_theme
+
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    drop_down_value
   );
 
-  // State to store the selected dropdown value
-  const [selectedOption, setSelectedOption] = useState<string | null>(drop_down_value);
-
-  // Sync the drop_down_value prop with the state
   useEffect(() => {
     setSelectedOption(drop_down_value);
   }, [drop_down_value]);
 
-  // Handle option selection
-  const handleOptionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedValue = e.target.value;
-    setSelectedOption(selectedValue);
+  const handleOptionChange = (value: string) => {
+    setSelectedOption(value);
     if (onChange) {
-      onChange(selectedValue); // Trigger onChange callback if provided
+      onChange(value);
     }
   };
 
-  const getStatus = (status: string) => {
+  const getStatus = useMemo(() => {
     switch (status) {
       case "passed":
         return (
-          <div className="bg-green-500 rounded-full p-1 mr-3">
-            <Check strokeWidth={1} className="text-xs text-white" />
+          <div className="bg-green-500 rounded-full p-1 transition-all duration-200 hover:bg-green-600">
+            <Check
+              strokeWidth={1.5}
+              className="w-4 h-4 text-white"
+              aria-label="Passed validation"
+            />
           </div>
         );
       case "failed":
         return (
-          <div className="bg-red-500 rounded-full text-white p-2 mr-3">
-            <BsExclamation />
+          <div className="bg-red-500 rounded-full p-1 transition-all duration-200 hover:bg-red-600">
+            <BsExclamation
+              className="w-4 h-4 text-white"
+              aria-label="Failed validation"
+            />
+          </div>
+        );
+      case "pending":
+        return (
+          <div className="bg-yellow-500 rounded-full p-1 transition-all duration-200 hover:bg-yellow-600">
+            <span
+              className="block w-4 h-4 animate-pulse"
+              aria-label="Validation pending"
+            />
           </div>
         );
       default:
         return null;
     }
-  };
+  }, [status]);
 
   return (
     <div
-      className="mb-4 bg-[#FAFAFA] flex items-center w-full p-3 gap-3 rounded"
+      className={cn(
+        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        {
+          [`font-${questionText?.name
+            ?.split(" ")
+            .join("-")
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`]: questionText?.name,
+        }
+      )}
       style={{
-        fontFamily: `${questionText?.name}`,
         fontSize: `${questionText?.size}px`,
       }}
     >
@@ -107,89 +134,71 @@ const DropdownQuestion: React.FC<DropdownQuestionProps> = ({
         }
       />
       <div className="w-full">
-        <div className="flex justify-between w-full items-center">
+        <div className="flex justify-between w-full items-start gap-2">
           <h3 className="text-lg font-semibold text-start">
-            <div className="group flex justify-between gap-2 items-start">
-              <p>
-                <span>{index}. </span> {question}
-                {is_required && (
-                  <span className="text-2xl ml-2 text-red-500">*</span>
-                )}
-              </p>
-              {!pathname.includes("survey-public-respons") && (
-                <PollsenseiTriggerButton
-                  key={index}
-                  imageUrl={stars}
-                  tooltipText="Rephrase question"
-                  className={"group-hover:inline-block hidden"}
-                  triggerType="rephrase"
-                  question={question}
-                  optionType={questionType}
-                  options={options}
-                  setEditId={setEditId}
-                  onSave={onSave!}
-                  index={index}
-                />
-              )}
-            </div>
+            <span>{index}. </span> {question}
+            {is_required && <span className="text-red-500 ml-1">*</span>}
           </h3>
+          {pathname.includes("survey-response-upload") && status && (
+            <div>{getStatus}</div>
+          )}
         </div>
 
-        {/* Dropdown for Single Choice Options */}
-        <div className="my-2">
-          <select
+        <div className="mt-4">
+          <Select
             value={selectedOption || ""}
-            onChange={handleOptionChange}
-            className="w-full p-2 border rounded-md"
-            required={is_required}
-            style={{ borderColor: colorTheme }}
+            onValueChange={handleOptionChange}
+            disabled={pathname.includes("survey-response-upload")}
           >
-            <option value="" disabled>
-              Select an option
-            </option>
-            {options.map((option, optionIndex) => (
-              <option key={optionIndex} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option, idx) => (
+                <SelectItem key={idx} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        {pathname === "/surveys/edit-survey" || pathname.includes("/edit-submitted-survey") && (
-          <div className="flex justify-end gap-4">
-            <button
-              className="bg-transparent border text-[#828282] border-[#828282] px-5 py-1 rounded-full"
-              onClick={EditQuestion}
-            >
-              Edit
-            </button>
-            <button
-              className="text-red-500 bg-white px-5 border border-red-500 py-1 rounded-full"
-              onClick={DeleteQuestion}
-            >
-              Delete
-            </button>
-          </div>
-        )}
-
-        {pathname.includes("edit-survey") && (
-          <div className="flex items-center gap-4">
-            <span>Required</span>
-            <Switch
-              checked={is_required}
-              onCheckedChange={
-                setIsRequired
-                  ? (checked: boolean) => setIsRequired(checked)
-                  : undefined
-              }
-              className="bg-[#9D50BB]"
-            />
+        {pathname === "/surveys/edit-survey" && (
+          <div className="flex justify-between items-center mt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Required</span>
+              <Switch
+                checked={is_required}
+                onCheckedChange={setIsRequired}
+                className="data-[state=checked]:bg-[#5B03B2]"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="bg-transparent border text-gray-500 border-gray-300 px-4 py-1.5 rounded-full text-sm hover:bg-gray-50 transition-colors"
+                onClick={EditQuestion}
+              >
+                Edit
+              </button>
+              <button
+                className="text-red-500 bg-white px-4 py-1.5 border border-red-500 rounded-full text-sm hover:bg-red-50 transition-colors"
+                onClick={DeleteQuestion}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         )}
       </div>
-      {pathname.includes("survey-response-upload") && status && (
-        <div>{getStatus(status)}</div>
-      )}
+
+      <div className="flex justify-end mt-4">
+        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1 text-xs capitalize">
+            <ListFilter className="text-[#9D50BB] w-3 h-3" />
+            {questionType.split("_").join(" ")}
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

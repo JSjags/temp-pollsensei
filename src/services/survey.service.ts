@@ -1,6 +1,5 @@
 import { RootState } from "@/redux/store";
 import apiSlice from "./config/apiSlice";
-
 export const surveyApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     fetchSurveys: builder.query({

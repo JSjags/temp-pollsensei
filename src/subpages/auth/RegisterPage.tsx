@@ -1,5 +1,5 @@
 "use client";
-import { dark_theme_logo } from "@/assets/images";
+import { dark_theme_logo, pollsensei_new_logo } from "@/assets/images";
 import Input from "@/components/ui/Input";
 import { useGoogleLogin } from "@react-oauth/google";
 import Image from "next/image";
@@ -123,7 +123,7 @@ const RegisterPage = () => {
       toast.success(
         "User registered successfully, check your email to continue"
       );
-      router.push(`/login?${ed && `ed=${ed}`}`);
+      router.push(`/verify-email${ed ? `?ed=${ed}` : ""}`);
     } catch (err: any) {
       toast.error(
         "Failed to register user " + (err?.data?.message || err.message)
@@ -146,15 +146,19 @@ const RegisterPage = () => {
           referral_code: refCode,
         }).unwrap();
         toast.success("Register success");
-        router.push("/login");
+        router.push("/verify-email");
       } catch (err: any) {
+        console.log(err);
+
         toast.error(
           "Failed to register user " + (err?.data?.message || err.message)
         );
         console.error("Failed to sign up user", err);
       }
     },
-    onError: () => console.log("Google Sign-In Failed"),
+    onError: (err) => {
+      console.log(error);
+    },
     flow: "implicit",
   });
 
@@ -241,11 +245,17 @@ const RegisterPage = () => {
             <motion.div
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="auth-bg md:hidden flex items-center justify-center p-4"
+              className="md:hidden flex items-center justify-center p-4 shadow"
             >
               <div className="flex items-center justify-center gap-3">
-                <Image src={logo} alt="Logo" width={32} height={32} />
-                <h1 className="auth-head">PollSensei</h1>
+                <Link href="/">
+                  <Image
+                    src={pollsensei_new_logo}
+                    alt="Logo"
+                    width={100}
+                    height={100}
+                  />
+                </Link>
               </div>
             </motion.div>
             <motion.div
@@ -315,7 +325,7 @@ const RegisterPage = () => {
                   transition={{ delay: 0.3 }}
                   className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10"
                 >
-                  <h2 className="auth-header font-sans text-center md:text-left">
+                  <h2 className="auth-header !text-2xl md:!text-4xl font-sans text-center md:text-left">
                     Welcome to PollSensei
                   </h2>
                   <p className="auth-title font-sans pt-3 text-center md:text-left">
@@ -430,7 +440,7 @@ const RegisterPage = () => {
 
                         <div className="pt-3">
                           <label className="auth-label font-sans pb-2">
-                            Referral Code
+                            Referral Code (Optional)
                           </label>
                           <input
                             value={refCode}
@@ -476,7 +486,7 @@ const RegisterPage = () => {
                           disabled={submitting || isLoading}
                         >
                           {submitting || isLoading ? (
-                            <ClipLoader size={20} />
+                            <ClipLoader size={20} color="white" />
                           ) : (
                             "Sign Up"
                           )}
@@ -560,9 +570,9 @@ const RegisterPage = () => {
                     onClick={() => {
                       try {
                         googleSignUp();
-                        mixpanel.track("Google Sign-In Clicked", {
-                          timestamp: new Date().toISOString(),
-                        });
+                        // mixpanel.track("Google Sign-In Clicked", {
+                        //   timestamp: new Date().toISOString(),
+                        // });
                       } catch (err) {
                         console.error("Error during Google sign up:", err);
                         toast.error("Failed to sign in with Google");

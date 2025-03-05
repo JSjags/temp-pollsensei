@@ -1,5 +1,5 @@
 import { RootState } from "@/redux/store";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import StyleEditor from "./StyleEditor";
@@ -14,7 +14,7 @@ import {
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import CreateNewSection from "./CreateNewSection";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   deleteQuestionFromSection,
   resetSurvey,
@@ -42,12 +42,25 @@ import {
   handleRequiredToggle,
   processNewSurveyQuestions,
 } from "@/utils/surveyUtils";
-import { ArrowRight, Loader2, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+  PencilIcon,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/shadcn-input";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
 import type { Question } from "@/types/survey";
 import { SurveyData } from "./EditSubmittedSurvey";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -93,6 +106,7 @@ const EditSurvey = () => {
   const [isEdit, setIsEdit] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
   const [aiChatbot, setAiChatbot] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -103,6 +117,7 @@ const EditSurvey = () => {
   const [
     saveprogress,
     {
+      isLoading: isSavingProgress,
       isSuccess: progressSuccess,
       isError: progressIsError,
       error: progressError,
@@ -126,6 +141,10 @@ const EditSurvey = () => {
   const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<
+    (() => void) | null
+  >(null);
 
   const [surveyData, setSurveyData] = useState<SurveyData>({
     topic: "",
@@ -143,9 +162,13 @@ const EditSurvey = () => {
   const handleClearSurvey = () => {
     dispatch(resetSurvey());
     setShowClearDialog(false);
+    setShowExitDialog(false);
     toast.success("Survey cleared successfully", {
       position: "bottom-right",
     });
+    if (pendingNavigation) {
+      pendingNavigation();
+    }
     router.push("/surveys/survey-list");
   };
 
@@ -385,6 +408,19 @@ const EditSurvey = () => {
         sections: updatedSurvey.sections.map((section) => ({
           ...section,
           questions: section.questions.map((question: Question) => {
+            // Check if empty question type but has matrix structure
+            if (
+              !question.question_type &&
+              question.rows?.length &&
+              question.columns?.length
+            ) {
+              return {
+                ...question,
+                question_type: "matrix_multiple_choice", // Set default matrix type
+                description: question.description || "Matrix Question",
+              } as Question;
+            }
+
             const baseQuestion = {
               question: question.question,
               description: question?.description || question.question,
@@ -481,6 +517,7 @@ const EditSurvey = () => {
       };
 
       await createSurvey(processedSurvey).unwrap();
+      handleClearSurvey();
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
     } catch (e) {
@@ -522,12 +559,97 @@ const EditSurvey = () => {
     }
   }, [progressError, progressIsError]);
 
+  // Update the handleNavigation function
+  const handleNavigation = useCallback(
+    (targetPath: string, e?: any) => {
+      if (survey.sections.length > 0) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        setShowExitDialog(true);
+        setPendingNavigation(() => () => router.push(targetPath));
+        return false;
+      }
+      return true;
+    },
+    [survey.sections.length]
+  );
+
+  // Update the click handler
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest("a");
+      if (link) {
+        const targetPath = link.getAttribute("href");
+        if (targetPath && targetPath !== pathname) {
+          handleNavigation(targetPath, e);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick, true); // Add capture phase
+    return () => document.removeEventListener("click", handleClick, true);
+  }, [handleNavigation, pathname]);
+
+  // Update the popstate handler
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (survey.sections.length > 0) {
+        e.preventDefault();
+        window.history.pushState(null, "", pathname); // Push current path back
+        setShowExitDialog(true);
+        // setPendingNavigation(() => () => window.history.back());
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [survey.sections.length, pathname]);
+
+  // Keep the beforeunload handler for tab/window closing
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (survey.sections.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [survey]);
+
+  const handleSaveDraft = async () => {
+    try {
+      await saveprogress(survey);
+      toast.success("Survey saved as draft");
+      if (pendingNavigation) {
+        pendingNavigation();
+      }
+      setShowExitDialog(false);
+    } catch (error) {
+      toast.error("Failed to save draft");
+    }
+  };
+
+  // Add this middleware pattern
+  const handleRouterPush = (url: string) => {
+    if (survey.sections.length > 0) {
+      setShowExitDialog(true);
+      setPendingNavigation(() => () => router.push(url));
+      return;
+    }
+    router.push(url);
+  };
+
   return (
     <div className={`${theme} flex flex-col gap-5 w-full relative`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-4 sm:px-0 lg:pl-10">
           {isNewSection ? (
-            <>
+            <div>
               <SurveyHeader
                 logoUrl={surveyData.logo_url}
                 headerUrl={surveyData.header_url}
@@ -535,7 +657,6 @@ const EditSurvey = () => {
                 headerText={survey.header_text}
                 bodyText={survey.body_text}
               />
-
               {questions[currentSection]?.questions.map(
                 (item: any, index: number) => (
                   <div key={index} className="mb-4">
@@ -567,20 +688,80 @@ const EditSurvey = () => {
                 <div className="flex gap-2 items-center">
                   <Button
                     variant="outline"
-                    className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                    onClick={() => setAddMoreQuestion((prev) => !prev)}
+                    className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                    // onClick={() => setAddMoreQuestion((prev) => !prev)}
                     disabled={generatingSingleSurvey}
                   >
                     {generatingSingleSurvey ? (
                       <ClipLoader size={24} />
                     ) : (
-                      <>
-                        <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
-                        <span className="group-hover:tracking-wide transition-all duration-200">
-                          Add Question
-                        </span>
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
-                      </>
+                      <div className="flex gap-2 items-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                            >
+                              <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                              <span className="group-hover:tracking-wide transition-all duration-200">
+                                Add Question
+                              </span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            collisionPadding={{ bottom: 40 }}
+                            className="w-56"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const newQuestion = {
+                                  question: "New Question",
+                                  description: "Question description",
+                                  question_type: "short_text",
+                                  is_required: false,
+                                  options: [],
+                                };
+
+                                const updatedSections = [...questions];
+                                const currentSectionData =
+                                  updatedSections[currentSection];
+
+                                const updatedSection = {
+                                  ...currentSectionData,
+                                  questions: [
+                                    ...currentSectionData.questions,
+                                    newQuestion,
+                                  ],
+                                };
+
+                                dispatch(
+                                  updateSection({
+                                    index: currentSection,
+                                    newSection: updatedSection,
+                                  })
+                                );
+                                setEditIndex(
+                                  currentSectionData.questions.length
+                                );
+                                setIsEdit(true);
+                              }}
+                              className="gap-2"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                              <span>Add Manually</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setAddMoreQuestion(true)}
+                              className="gap-2"
+                            >
+                              <Sparkles className="h-4 w-4" />
+                              <span>Generate with AI</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     )}
                   </Button>
 
@@ -596,7 +777,7 @@ const EditSurvey = () => {
                     <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
                   </Button>
                 </div>
-                {questions?.length > 1 && (
+                {/* {questions?.length > 1 && (
                   <div className="flex w-full md:w-auto md:justify-end items-center">
                     <PaginationBtn
                       currentSection={currentSection}
@@ -604,7 +785,7 @@ const EditSurvey = () => {
                       onNavigate={navigatePage}
                     />
                   </div>
-                )}
+                )} */}
               </div>
               <WaitingMessagesModal
                 otherPossibleCondition={generatingSingleSurvey}
@@ -667,7 +848,7 @@ const EditSurvey = () => {
               </div>
               <WatermarkBanner className="mb-10" />
               {/* <CreateNewSection /> */}
-            </>
+            </div>
           ) : (
             <CreateNewSection />
           )}
@@ -802,7 +983,7 @@ const EditSurvey = () => {
           className="bg-blue-500 z-[1000000] fixed top-0 left-0"
         >
           <SenseiMaster
-            type="generation"
+            type="analysis"
             onSave={handleSave}
             setEditId={setEditIndex}
             aiSave={handleAISave}
@@ -869,6 +1050,17 @@ const EditSurvey = () => {
           </p>
         </DialogContent>
       </Dialog>
+
+      <ExitSurveyDialog
+        isLoading={isSavingProgress}
+        isOpen={showExitDialog}
+        onClose={() => {
+          setShowExitDialog(false);
+          setPendingNavigation(null);
+        }}
+        onSave={handleSaveDraft}
+        onClear={handleClearSurvey}
+      />
     </div>
   );
 };
