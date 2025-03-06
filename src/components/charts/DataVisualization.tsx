@@ -34,6 +34,8 @@ import { toast } from "react-toastify";
 import axiosInstance from "@/lib/axios-instance";
 import { useRouter } from "next/navigation";
 import AnovaAnalysisComponent from "./AnovaAnalysis";
+import SpearmanCorrelation from "./SpearmanCorrelation";
+import TTest from "./TTest";
 
 type TestResult = {
   status: string;
@@ -239,6 +241,23 @@ const TestChartRenderer = ({ testData }: { testData: any }) => {
             test_name={test_name}
             test_results={test_results}
           />
+        </div>
+      );
+
+    case "Spearman’s Rank Correlation":
+      return (
+        <div {...chartProps}>
+          <SpearmanCorrelation
+            test_name={test_name}
+            test_results={test_results}
+          />
+        </div>
+      );
+
+    case "T-tests":
+      return (
+        <div {...chartProps}>
+          <TTest test_name={test_name} test_results={test_results} />
         </div>
       );
 

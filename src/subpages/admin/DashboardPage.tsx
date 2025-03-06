@@ -28,8 +28,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
 
-// Add keyframes for the twinkle animation
-const styles = `
+// Move the styles definition outside the component
+const twinkleStyles = `
   @keyframes twinkle {
     0% { opacity: 0; }
     50% { opacity: 1; }
@@ -38,16 +38,6 @@ const styles = `
 `;
 
 const DashboardPage = () => {
-  // Add the styles to the document head
-  useEffect(() => {
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = styles;
-    document.head.appendChild(styleSheet);
-    return () => {
-      document.head.removeChild(styleSheet);
-    };
-  }, []);
-
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
   const { data: item, isLoading: isItemLoading } =
