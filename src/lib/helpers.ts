@@ -1,9 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser, User } from "../redux/slices/user.slice";
-import { RootState } from "../redux/store"; // Assuming you have a RootState type defined
+import store, { RootState } from "../redux/store"; // Assuming you have a RootState type defined
+import { Dispatch, UnknownAction } from "redux";
 
 interface UseIsLoggedInProps {
   message: string;
+  dispatch: Dispatch<UnknownAction>;
 }
 
 interface UserState {
@@ -12,9 +14,8 @@ interface UserState {
   expiresIn?: number;
 }
 
-export const useIsLoggedIn = ({ message }: UseIsLoggedInProps) => {
-  const user = useSelector((state: RootState) => state.user as UserState);
-  const dispatch = useDispatch();
+export const useIsLoggedIn = ({ message, dispatch }: UseIsLoggedInProps) => {
+  const user = store.getState().user as UserState;
 
   console.log(user);
 
@@ -27,7 +28,8 @@ export const useIsLoggedIn = ({ message }: UseIsLoggedInProps) => {
 
   const isLogin = expiresIn ? Date.now() < expiresIn * 1000 : false;
 
-  if (!isLogin || token === null) {
+  // Only dispatch logout if not already logged out
+  if ((!isLogin || token === null) && user?.access_token) {
     dispatch(logoutUser());
     return { isLoggedIn: false, message };
   }

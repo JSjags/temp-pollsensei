@@ -87,6 +87,7 @@ const userSlice = createSlice({
       return {
         ...state,
         user: null,
+        access_token: null,
         token: null,
       };
     },

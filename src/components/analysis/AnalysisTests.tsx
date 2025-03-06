@@ -290,13 +290,13 @@ export default function DragAndDropPage() {
       const formatTests = () => {
         const formattedData: Test[] = [];
         const allowedTests = [
-          // "T-tests",
+          "T-tests",
           // "Correlation Analysis",
           "Wilcoxon Signed-Rank Test",
           "Kruskal-Wallis Test",
           "Chi-Square Test",
           "ANOVA (Analysis of Variance)",
-          // "Spearman's Rank Correlation",
+          "Spearman’s Rank Correlation",
           "Mann-Whitney U Test",
           "Sentiment Analysis",
           // "Thematic Analysis",
@@ -331,13 +331,13 @@ export default function DragAndDropPage() {
     if (createTestsQuery.isSuccess) {
       console.log(createTestsQuery.data);
       const allowedTests = [
-        // "T-tests",
+        "T-tests",
         // "Correlation Analysis",
         "Wilcoxon Signed-Rank Test",
         "Kruskal-Wallis Test",
         "Chi-Square Test",
         "ANOVA (Analysis of Variance)",
-        // "Spearman's Rank Correlation",
+        "Spearman’s Rank Correlation",
         "Mann-Whitney U Test",
         "Sentiment Analysis",
         // "Thematic Analysis",

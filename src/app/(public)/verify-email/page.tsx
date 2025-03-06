@@ -69,19 +69,12 @@ const VerifyEmail = () => {
 
       toast.success("Email verification successful!");
       if (data?.access_token && data?.user) {
+        console.log(data);
+
         dispatch(
           updateUser({
             access_token: data.access_token,
             user: data.user,
-          })
-        );
-        router.push("/dashboard");
-      }
-      if (data?.data?.access_token && data?.data?.user) {
-        dispatch(
-          updateUser({
-            access_token: data?.data?.access_token,
-            user: data?.data?.user,
           })
         );
         router.push("/dashboard");

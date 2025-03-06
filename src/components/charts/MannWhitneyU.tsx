@@ -11,13 +11,16 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import Image from "next/image";
 
+interface TableData {
+  [key: string]: number | string[] | undefined;
+}
+
 interface TestData {
-  table_data: {
-    statistics: string[];
-    value: number[];
-  };
+  table_data?: TableData;
   plot_names: string[];
   plot_urls: string[];
+  status?: string;
+  reason?: string;
 }
 
 interface TestProps {
@@ -34,6 +37,13 @@ const MannWhitneyUComponent: React.FC<TestProps> = (props) => {
   );
 
   const currentResult = props.test_results.results[selectedResult];
+
+  const formatKey = (key: string) => {
+    return key
+      .split(/[-_]/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -65,9 +75,7 @@ const MannWhitneyUComponent: React.FC<TestProps> = (props) => {
               <SelectContent>
                 {Object.keys(props.test_results.results).map((key) => (
                   <SelectItem key={key} value={key}>
-                    {key
-                      .replace(/_/g, " ")
-                      .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    {formatKey(key)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -75,7 +83,11 @@ const MannWhitneyUComponent: React.FC<TestProps> = (props) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!currentResult || !currentResult.table_data ? (
+          {currentResult?.status === "error" ? (
+            <div className="p-4">
+              <p>Error: {currentResult.reason}</p>
+            </div>
+          ) : !currentResult || !currentResult.table_data ? (
             <div className="p-4">
               <p>No data available for this selection.</p>
             </div>
@@ -91,14 +103,14 @@ const MannWhitneyUComponent: React.FC<TestProps> = (props) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentResult.table_data.statistics?.map(
-                      (stat: string, index: number) => (
-                        <tr key={stat} className="border-b">
-                          <td className="py-2">{stat}</td>
+                    {Object.entries(currentResult.table_data).map(
+                      ([key, value]) => (
+                        <tr key={key} className="border-b">
+                          <td className="py-2">{formatKey(key)}</td>
                           <td className="text-right py-2">
-                            {currentResult.table_data.value[index]?.toFixed(
-                              3
-                            ) ?? "N/A"}
+                            {typeof value === "number"
+                              ? value.toFixed(4)
+                              : "N/A"}
                           </td>
                         </tr>
                       )
@@ -108,14 +120,21 @@ const MannWhitneyUComponent: React.FC<TestProps> = (props) => {
               </div>
 
               {/* Plot Images */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                className={`grid ${
+                  currentResult.plot_urls.length === 1
+                    ? "grid-cols-1"
+                    : "grid-cols-1 md:grid-cols-2"
+                } gap-4`}
+              >
                 {currentResult.plot_urls?.map((url: string, index: number) => (
                   <div key={url} className="relative">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-center font-medium">
                         {currentResult.plot_names[index]
-                          .replace(/_/g, " ")
-                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                          .split("_")
+                          .map(formatKey)
+                          .join(" ")}
                       </div>
                       <Button
                         variant="outline"
