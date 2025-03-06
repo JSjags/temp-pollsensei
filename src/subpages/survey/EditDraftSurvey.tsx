@@ -55,8 +55,8 @@ import { ClipLoader } from "react-spinners";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { HiOutlinePlus } from "react-icons/hi";
 import { useDispatch } from "react-redux";
-import { updateSection } from "@/redux/slices/survey.slice";
 import { useQueryClient } from "@tanstack/react-query";
+import { resetSurvey } from "@/redux/slices/survey.slice";
 
 interface Question {
   question: string;
@@ -66,6 +66,10 @@ interface Question {
   rows?: string[];
   columns?: string[];
   is_required?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  can_accept_media?: boolean;
 }
 
 interface Section {
@@ -264,8 +268,6 @@ const EditDraftSurvey = () => {
   ) => {
     if (editIndex === null) return;
 
-    console.log(minValue, maxValue);
-
     setSurveyData((prevData) => {
       const updatedSections = [...prevData.sections];
       const currentSectionData = updatedSections[currentSection];
@@ -274,25 +276,16 @@ const EditDraftSurvey = () => {
         const updatedQuestions = currentSectionData.questions.map(
           (question, idx) => {
             if (idx === editIndex) {
-              // Create base question object
+              // Base question object with common properties
               const baseQuestion = {
                 question: updatedQuestionText,
+                description: updatedQuestionText, // Using question as description for now
                 question_type: updatedQuestionType,
                 is_required: isRequired,
               };
 
-              // Add type-specific properties
+              // Add type-specific properties based on question type
               switch (updatedQuestionType) {
-                case "slider":
-                  return {
-                    ...baseQuestion,
-                    // options: updatedOptions,
-                    description: baseQuestion.question,
-                    min: minValue,
-                    max: maxValue,
-                    step: 1,
-                  };
-
                 case "matrix_multiple_choice":
                 case "matrix_checkbox":
                   return {
@@ -301,18 +294,42 @@ const EditDraftSurvey = () => {
                     columns: matrixColumns || [],
                   };
 
-                case "likert_scale":
+                case "slider":
+                  return {
+                    ...baseQuestion,
+                    min: minValue || 0,
+                    max: maxValue || 100,
+                    step: 1,
+                  };
+
+                case "number":
+                  return {
+                    ...baseQuestion,
+                    min: minValue || 0,
+                    max: maxValue || Number.MAX_SAFE_INTEGER,
+                  };
+
                 case "multiple_choice":
                 case "single_choice":
                 case "checkbox":
                 case "drop_down":
+                case "likert_scale":
                 case "rating_scale":
+                case "star_rating":
                 case "boolean":
                   return {
                     ...baseQuestion,
                     options: updatedOptions,
                   };
 
+                case "long_text":
+                  return {
+                    ...baseQuestion,
+                    can_accept_media: true,
+                  };
+
+                case "short_text":
+                case "comment":
                 default:
                   return baseQuestion;
               }
@@ -321,10 +338,8 @@ const EditDraftSurvey = () => {
           }
         );
 
-        updatedSections[currentSection] = {
-          ...currentSectionData,
-          questions: updatedQuestions,
-        };
+        currentSectionData.questions = updatedQuestions;
+        updatedSections[currentSection] = currentSectionData;
       }
 
       return {
@@ -348,6 +363,7 @@ const EditDraftSurvey = () => {
         toast.success("Survey published successfully");
         queryClient.invalidateQueries({ queryKey: ["get-drafts"] });
         router.push("/surveys/survey-list");
+        dispatch(resetSurvey());
       } catch (error) {
         router.push("/surveys/survey-list");
       }
@@ -369,15 +385,65 @@ const EditDraftSurvey = () => {
       sections: surveyData.sections.map((section) => ({
         section_topic: section.section_topic,
         section_description: section.section_description,
-        questions: section.questions.map((question) => ({
-          question: question.question,
-          description: question.description,
-          question_type: question.question_type,
-          is_required: question.is_required || false,
-          options: question.options || [],
-          rows: question.rows || [],
-          columns: question.columns || [],
-        })),
+        questions: section.questions.map((question) => {
+          // Base question structure
+          const baseQuestion = {
+            question: question.question,
+            description: question.description || question.question,
+            question_type: question.question_type,
+            is_required: question.is_required || false,
+          };
+
+          // Add type-specific properties
+          switch (question.question_type) {
+            case "matrix_multiple_choice":
+            case "matrix_checkbox":
+              return {
+                ...baseQuestion,
+                rows: question.rows || [],
+                columns: question.columns || [],
+              };
+
+            case "slider":
+              return {
+                ...baseQuestion,
+                min: question.min || 0,
+                max: question.max || 100,
+                step: 1,
+              };
+
+            case "number":
+              return {
+                ...baseQuestion,
+                min: question.min || 0,
+                max: question.max || Number.MAX_SAFE_INTEGER,
+              };
+
+            case "multiple_choice":
+            case "single_choice":
+            case "checkbox":
+            case "drop_down":
+            case "likert_scale":
+            case "rating_scale":
+            case "star_rating":
+            case "boolean":
+              return {
+                ...baseQuestion,
+                options: question.options || [],
+              };
+
+            case "long_text":
+              return {
+                ...baseQuestion,
+                can_accept_media: true,
+              };
+
+            case "short_text":
+            case "comment":
+            default:
+              return baseQuestion;
+          }
+        }),
       })),
       theme: surveyData.theme || "Default",
       header_text: {

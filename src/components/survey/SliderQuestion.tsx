@@ -63,6 +63,8 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
     (state: RootState) => state?.survey?.question_text
   );
 
+  console.log(value);
+
   const [sliderValue, setSliderValue] = useState<number>(value ?? min ?? 0);
 
   useEffect(() => {

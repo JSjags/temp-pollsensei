@@ -12,7 +12,7 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { SlCloudUpload } from "react-icons/sl";
 import { useSelector, useDispatch } from "react-redux";
-import { BeatLoader } from "react-spinners";
+import { BeatLoader, GridLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
@@ -305,14 +305,40 @@ const SurveyResponses = () => {
       </Dialog>
 
       <Dialog open={OCRloading}>
-        <DialogContent>
-          <div className="flex flex-col items-center gap-6 py-8">
-            <BeatLoader color="#6b46c1" />
-            <Progress value={uploadProgress} className="w-[60%]" />
-            <p className="text-center text-gray-600">
-              Processing your files... Please wait
-            </p>
-          </div>
+        <DialogContent
+          className="sm:max-w-[425px] z-[100000]"
+          overlayClassName="z-[100000]"
+        >
+          <DialogHeader>
+            <div className="flex flex-col items-center gap-8 py-6">
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 5, -5, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                }}
+              >
+                <GridLoader
+                  color="#5903b0"
+                  loading
+                  margin={4}
+                  size={16}
+                  speedMultiplier={0.5}
+                />
+              </motion.div>
+
+              <p className="text-base font-medium text-gray-700">
+                Analyzing and Processing Documents
+              </p>
+              <p className="text-sm text-gray-500 text-center">
+                This may take a few moments. Please don't close this window.
+              </p>
+            </div>
+          </DialogHeader>
         </DialogContent>
       </Dialog>
     </motion.div>

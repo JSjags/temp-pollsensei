@@ -17,8 +17,6 @@ interface UserState {
 export const useIsLoggedIn = ({ message, dispatch }: UseIsLoggedInProps) => {
   const user = store.getState().user as UserState;
 
-  console.log(user);
-
   const token = user?.access_token;
   const expiresIn = user?.expiresIn;
 
