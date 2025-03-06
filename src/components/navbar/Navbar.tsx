@@ -118,13 +118,13 @@ const Navbar = () => {
                   onClick={toogleMainSidebar}
                 />
               )}
-              <div className="h-10 bg-white relative rounded-lg w-52">
+              {/* <div className="h-10 bg-white relative rounded-lg w-52">
                 <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
                 <Input
                   className="border-none h-10 pl-8 rounded-lg"
                   placeholder="Search anything"
                 />
-              </div>
+              </div> */}
             </div>
           </div>
           {/* mobile */}

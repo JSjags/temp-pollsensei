@@ -23,6 +23,7 @@ import { useEditTranscriptionMutation } from "@/services/survey.service";
 import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import CommentWithMediaQuestion from "./CommentWithMediaQuestion";
+import SliderQuestion from "./SliderQuestion";
 
 interface Answer {
   question?: string;
@@ -270,27 +271,18 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   questionType={item.question_type}
                   status={item?.validation_result?.status}
                 />
-              ) : //  : item.question_type === "single_choice" ? (
-              //   <SingleChoiceQuestion
-              //     index={index + 1}
-              //     key={index}
-              //     question={item.question}
-              //     options={item.options}
-              //     questionType={item.question_type}
-              //     // selectedOptions={item.selected_options}
-              //   />
-              // )
-
-              // : item.question_type === "number" ? (
-              //   <NumberQuestion
-              //     key={index}
-              //     index={index + 1}
-              //     question={item.question}
-              //     questionType={item.question_type}
-              //     // EditQuestion={() => EditQuestion(index)}
-              //   />
-              // )
-              item.question_type === "checkbox" ? (
+              ) : item.question_type === "slider" ? (
+                <SliderQuestion
+                  key={index}
+                  index={index + 1}
+                  question={item.question}
+                  questionType={item.question_type}
+                  value={item.scale_value}
+                  min={item.min}
+                  max={item.max}
+                  status={item?.validation_result?.status}
+                />
+              ) : item.question_type === "checkbox" ? (
                 <CheckboxQuestion
                   key={index}
                   index={index + 1}

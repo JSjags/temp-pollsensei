@@ -220,9 +220,6 @@ const AddQuestionPage = () => {
     }
   };
 
-  console.log(survey);
-  console.log(questions);
-
   // Default survey data state
   const [surveyData, setSurveyData] = useState<SurveyData>({
     topic: sectionTopic || "Untitled Survey",
@@ -332,8 +329,6 @@ const AddQuestionPage = () => {
     setIsSidebarOpen(false);
   };
 
-  console.log(questions);
-
   const handleSurveyCreation = async () => {
     if (!userToken || !user) {
       setShowAuthModal(true);
@@ -341,38 +336,103 @@ const AddQuestionPage = () => {
     }
 
     try {
-      // Get base survey state
-      const updatedSurvey = survey;
+      // Get current survey state
+      const updatedSurvey = { ...survey }; // Create a copy to avoid direct mutation
 
-      // If sections is empty, initialize with current questions
-      if (updatedSurvey.sections.length === 0) {
-        dispatch(
-          addSection({
-            questions: questions,
-          })
-        );
-      } else {
-        // Check if current section already exists
-        const sectionExists = updatedSurvey.sections.some(
-          (section) =>
-            section.section_topic === sectionTitle &&
-            section.section_description === sDescription &&
-            JSON.stringify(section.questions) === JSON.stringify(questions)
-        );
+      // Create a section with current questions if no sections exist
+      // or if the current questions aren't already in a section
+      const currentSection = {
+        section_topic: sectionTitle,
+        section_description: sDescription,
+        questions: questions.map((question: Question) => {
+          // Base question structure with required fields
+          const baseQuestion = {
+            question: question.question,
+            description: question.description || question.question,
+            question_type: question.question_type,
+            is_required: question.is_required || false,
+          };
 
-        // Add current section if it doesn't exist
-        if (!sectionExists) {
-          dispatch(
-            addSection({
-              section_topic: sectionTitle,
-              section_description: sDescription,
-              questions: questions,
-            })
-          );
-        }
+          // Process question based on type with exact structure
+          switch (question.question_type) {
+            case "checkbox":
+            case "multiple_choice":
+            case "single_choice":
+            case "drop_down":
+            case "likert_scale":
+            case "rating_scale":
+            case "star_rating":
+              return {
+                ...baseQuestion,
+                options: Array.isArray(question.options)
+                  ? question.options
+                  : [],
+              };
+
+            case "boolean":
+              return {
+                ...baseQuestion,
+                options: ["Yes", "No"],
+              };
+
+            case "matrix_multiple_choice":
+            case "matrix_checkbox":
+              return {
+                ...baseQuestion,
+                rows: Array.isArray(question.rows) ? question.rows : [],
+                columns: Array.isArray(question.columns)
+                  ? question.columns
+                  : [],
+              };
+
+            case "slider":
+              return {
+                ...baseQuestion,
+                min: typeof question.min === "number" ? question.min : 1,
+                max: typeof question.max === "number" ? question.max : 10,
+                step: 1,
+              };
+
+            case "number":
+              return {
+                ...baseQuestion,
+                min: typeof question.min === "number" ? question.min : 0,
+                max:
+                  typeof question.max === "number"
+                    ? question.max
+                    : Number.MAX_SAFE_INTEGER,
+              };
+
+            case "long_text":
+              return {
+                ...baseQuestion,
+                can_accept_media: Boolean(question.can_accept_media),
+              };
+
+            case "media":
+            case "short_text":
+              return baseQuestion;
+
+            default:
+              return baseQuestion;
+          }
+        }),
+      };
+
+      // If no sections exist or if current section is different from last section
+      if (
+        !updatedSurvey.sections.length ||
+        JSON.stringify(
+          updatedSurvey.sections[updatedSurvey.sections.length - 1]
+        ) !== JSON.stringify(currentSection)
+      ) {
+        // Create new array instead of pushing
+        updatedSurvey.sections = [currentSection];
       }
 
-      // Process survey to ensure questions match their type structure
+      console.log(updatedSurvey.sections.length);
+
+      // Process the final survey data
       const processedSurvey = {
         ...updatedSurvey,
         header_text: {
@@ -393,115 +453,13 @@ const AddQuestionPage = () => {
             : headerUrl,
         logo_url:
           typeof logoUrl === "string" && logoUrl.startsWith("#") ? "" : logoUrl,
-        sections: updatedSurvey.sections.map((section) => ({
-          ...section,
-          questions: section.questions.map((question) => {
-            const baseQuestion = {
-              question: question.question,
-              description: question?.description || question.question,
-              question_type: question.question_type,
-              is_required: question.is_required,
-            };
-
-            switch (question.question_type) {
-              case "slider":
-                const extractRange = (questionText: string) => {
-                  const numberWords: { [key: string]: number } = {
-                    one: 1,
-                    two: 2,
-                    three: 3,
-                    four: 4,
-                    five: 5,
-                    six: 6,
-                    seven: 7,
-                    eight: 8,
-                    nine: 9,
-                    ten: 10,
-                  };
-
-                  let processedText = questionText.toLowerCase();
-                  Object.entries(numberWords).forEach(([word, num]) => {
-                    processedText = processedText.replace(
-                      new RegExp(word, "g"),
-                      num.toString()
-                    );
-                  });
-
-                  const match = processedText.match(
-                    /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
-                  );
-                  return match
-                    ? {
-                        min: parseInt(match[1]),
-                        max: parseInt(match[2]),
-                      }
-                    : { min: 0, max: 10 };
-                };
-
-                const range = extractRange(question.question);
-                return {
-                  ...baseQuestion,
-                  min: range.min,
-                  max: range.max,
-                  step: 1,
-                };
-
-              case "boolean":
-                return {
-                  ...baseQuestion,
-                  options: question.options?.length
-                    ? question.options
-                    : ["Yes", "No"],
-                };
-
-              case "checkbox":
-              case "multiple_choice":
-              case "single_choice":
-              case "drop_down":
-              case "likert_scale":
-              case "rating_scale":
-              case "star_rating":
-                return {
-                  ...baseQuestion,
-                  options: question.options,
-                };
-
-              case "matrix_multiple_choice":
-              case "matrix_checkbox":
-                return {
-                  ...baseQuestion,
-                  description: question.description || "Matrix Question",
-                  rows: question.rows || [],
-                  columns: question.columns || [],
-                };
-
-              case "number":
-                return {
-                  ...baseQuestion,
-                  min: question.min,
-                  max: question.max,
-                };
-
-              case "long_text":
-                return {
-                  ...baseQuestion,
-                  can_accept_media: question.can_accept_media || false,
-                };
-
-              case "short_text":
-              case "media":
-              default:
-                return baseQuestion;
-            }
-          }),
-        })),
       };
 
       await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
     } catch (e) {
-      console.log(e);
+      console.error("Survey creation error:", e);
     }
   };
 
@@ -583,10 +541,6 @@ const AddQuestionPage = () => {
       </motion.div>
     );
   };
-
-  console.log(questions);
-  console.log(surveyData);
-  console.log(survey);
 
   const handleSaveDraft = async () => {
     try {
