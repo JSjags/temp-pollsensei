@@ -153,7 +153,7 @@ const LoginPage = () => {
     flow: "implicit",
   });
 
-  if (user) {
+  if (user || state) {
     return (
       <motion.section
         initial={{ opacity: 0 }}
