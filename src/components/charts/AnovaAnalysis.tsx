@@ -11,29 +11,48 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import Image from "next/image";
 
+interface TableData {
+  [key: string]: number | string[];
+}
+
+interface PlotData {
+  [key: string]: number | string;
+}
+
 interface TestData {
-  table_data: {
-    statistics: string[];
-    value: number[];
-  };
+  table_data: TableData;
+  plot_data: PlotData;
   plot_names: string[];
   plot_urls: string[];
+}
+
+interface TestResult {
+  [key: string]: TestData;
 }
 
 interface TestProps {
   test_name: string;
   test_results: {
-    results: Record<string, TestData>;
+    results: TestResult[];
     description: string;
   };
 }
 
 const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
   const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(props.test_results.results)[0]
+    Object.keys(props.test_results.results[0])[0]
   );
 
-  const currentResult = props.test_results.results[selectedResult];
+  const currentResult = props.test_results.results.find(
+    (result) => Object.keys(result)[0] === selectedResult
+  )?.[selectedResult];
+
+  const formatKey = (key: string) => {
+    return key
+      .split(/[-_]/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -52,6 +71,22 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
     }
   };
 
+  const renderTableData = (tableData: TableData) => {
+    return Object.entries(tableData)
+      .map(([key, value]) => {
+        if (Array.isArray(value)) return null; // Skip arrays like interpretation
+        return (
+          <tr key={key} className="border-b">
+            <td className="py-2">{formatKey(key)}</td>
+            <td className="text-right py-2">
+              {typeof value === "number" ? value.toFixed(4) : value}
+            </td>
+          </tr>
+        );
+      })
+      .filter(Boolean); // Remove null entries
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -60,22 +95,23 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
             <span>{props.test_name}</span>
             <Select value={selectedResult} onValueChange={setSelectedResult}>
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select variable" />
+                <SelectValue placeholder="Select variables" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(props.test_results.results).map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {key
-                      .replace(/_/g, " ")
-                      .replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                  </SelectItem>
-                ))}
+                {props.test_results.results.map((result) => {
+                  const key = Object.keys(result)[0];
+                  return (
+                    <SelectItem key={key} value={key}>
+                      {formatKey(key)}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!currentResult || !currentResult.table_data ? (
+          {!currentResult ? (
             <div className="p-4">
               <p>No data available for this selection.</p>
             </div>
@@ -90,32 +126,17 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
                       <th className="text-right py-2">Value</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {currentResult.table_data.statistics?.map(
-                      (stat: string, index: number) => (
-                        <tr key={stat} className="border-b">
-                          <td className="py-2">{stat}</td>
-                          <td className="text-right py-2">
-                            {currentResult.table_data.value[index]?.toFixed(
-                              3
-                            ) ?? "N/A"}
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
+                  <tbody>{renderTableData(currentResult.table_data)}</tbody>
                 </table>
               </div>
 
               {/* Plot Images */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="w-full">
                 {currentResult.plot_urls?.map((url: string, index: number) => (
-                  <div key={url} className="relative">
+                  <div key={url} className="relative w-full">
                     <div className="flex justify-between items-center mb-2">
                       <div className="text-center font-medium">
-                        {currentResult.plot_names[index]
-                          .replace(/_/g, " ")
-                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        {formatKey(currentResult.plot_names[index])}
                       </div>
                       <Button
                         variant="outline"

@@ -5,13 +5,14 @@ import { RootState } from "@/redux/store";
 import LoginPage from "@/subpages/auth/LoginPage";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 type Props = {};
 
 const Login = (props: Props) => {
   const router = useRouter();
-  const { isLoggedIn } = useIsLoggedIn({ message: "" });
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []

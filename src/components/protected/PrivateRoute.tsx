@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import LoadRedirect from "../ui/LoadRedirect";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useIsLoggedIn } from "@/lib/helpers";
 
@@ -13,7 +13,8 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, message }) => {
-  const { isLoggedIn } = useIsLoggedIn({ message: "" });
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
 
   console.log(state?.user?.roles);

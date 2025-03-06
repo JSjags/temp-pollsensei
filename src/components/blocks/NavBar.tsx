@@ -8,7 +8,7 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import { useIsLoggedIn } from "@/lib/helpers";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { pollsensei_new_logo } from "@/assets/images";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,7 +21,8 @@ const NavBar = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { isLoggedIn } = useIsLoggedIn({ message: "" });
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
   const pathname = usePathname();
   const router = useRouter();
