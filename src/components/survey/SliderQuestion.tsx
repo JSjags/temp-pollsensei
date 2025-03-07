@@ -37,6 +37,7 @@ interface SliderQuestionProps {
   setIsRequired?: (value: boolean) => void;
   isEdit?: boolean;
   surveyData?: SurveyData;
+  isResponse?: boolean;
 }
 
 const SliderQuestion: React.FC<SliderQuestionProps> = ({
@@ -57,6 +58,7 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
   setIsRequired,
   isEdit = false,
   surveyData,
+  isResponse = false,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -72,6 +74,7 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
   }, [min, value]);
 
   const handleSliderChange = (newValue: number[]) => {
+    if (isResponse) return;
     setSliderValue(newValue[0]);
     if (onChange) {
       onChange(newValue[0]);
@@ -200,7 +203,10 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
                   min={min ?? 0}
                   step={1}
                   onValueChange={handleSliderChange}
-                  className="w-full"
+                  className={cn("w-full", {
+                    "pointer-events-none": isResponse,
+                  })}
+                  disabled={isResponse}
                 />
                 <div className="w-full mt-4 flex justify-between text-sm text-gray-600">
                   {sliderLabels.map((label, i) => (

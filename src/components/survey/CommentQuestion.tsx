@@ -179,6 +179,7 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
                   onChange={onChange}
                   value={response}
                   required={is_required}
+                  readOnly
                 />
               </div>
             </div>

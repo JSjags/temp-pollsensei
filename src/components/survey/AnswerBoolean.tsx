@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { BsExclamation } from "react-icons/bs";
-import { Check, GripVertical, ToggleLeft } from "lucide-react";
+import { BookLock, Check, GripVertical, ToggleLeft } from "lucide-react";
 import { Switch } from "../ui/switch";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { cn } from "@/lib/utils";
@@ -54,7 +54,8 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
   }, [boolean_value]);
 
   const handleOptionChange = (value: string) => {
-    const boolValue = value.toLowerCase() === "yes";
+    const boolValue =
+      value.toLowerCase() === "yes" || value.toLowerCase() === "true";
     setSelectedValue(boolValue);
     if (onChange) {
       onChange(boolValue);
@@ -96,6 +97,14 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
     }
   }, [status]);
 
+  const getRadioValue = () => {
+    if (boolean_value === null) return undefined;
+    if (options[0] === "Yes") {
+      return boolean_value ? "Yes" : "No";
+    }
+    return boolean_value ? "True" : "False";
+  };
+
   return (
     <div
       className={cn(
@@ -132,17 +141,7 @@ const BooleanQuestion: React.FC<BooleanQuestionProps> = ({
               </h3>
             </div>
           </div>
-          <RadioGroup
-            className="flex gap-6"
-            value={
-              boolean_value === null
-                ? undefined
-                : boolean_value
-                ? "True"
-                : "False"
-            }
-            disabled
-          >
+          <RadioGroup className="flex gap-6" value={getRadioValue()} disabled>
             {options.map((option) => (
               <div key={option} className="flex items-center space-x-2">
                 <RadioGroupItem

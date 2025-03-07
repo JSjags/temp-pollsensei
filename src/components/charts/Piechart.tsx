@@ -1,7 +1,8 @@
 import React, { useRef } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-
+import { Button } from "../ui/button";
+import { Download } from "lucide-react";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface PieChartProps {
@@ -105,12 +106,9 @@ const Piechart: React.FC<PieChartProps> = ({
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-gray-700 text-lg font-semibold">{title}</h3>
         {allowDownload && (
-          <button
-            onClick={downloadChart}
-            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-          >
-            Download Chart
-          </button>
+          <Button onClick={downloadChart} variant="outline" size="icon">
+            <Download className="h-4 w-4" />
+          </Button>
         )}
       </div>
       <p className="text-gray-600 mb-4">{question}</p>
