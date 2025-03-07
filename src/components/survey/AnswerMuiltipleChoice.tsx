@@ -142,7 +142,7 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
                 checked={localSelectedOptions?.includes(option)}
                 onCheckedChange={() => handleOptionChange(option)}
                 disabled={true}
-                className="mr-2 data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-[#5B03B2]"
+                className="mr-2 disabled data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-[#5B03B2]"
               />
               <span className="ml-2">{option}</span>
             </label>

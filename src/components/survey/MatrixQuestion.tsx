@@ -42,7 +42,7 @@ Key Features:
 import { draggable, stars } from "@/assets/images";
 import { RootState } from "@/redux/store";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { BsExclamation } from "react-icons/bs";
@@ -53,6 +53,12 @@ import PollsenseiTriggerButton from "../ui/pollsensei-trigger-button";
 import ActionButtons from "./ActionButtons";
 import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
 import { cn } from "@/lib/utils";
+
+interface MatrixAnswer {
+  row: string;
+  column: string;
+  _id: string;
+}
 
 interface MatrixQuestionProps {
   question: string;
@@ -76,6 +82,7 @@ interface MatrixQuestionProps {
   isEdit?: boolean;
   surveyData?: SurveyData;
   response?: { [key: string]: string };
+  matrix_answers?: MatrixAnswer[];
 }
 
 const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
@@ -95,6 +102,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
   isEdit = false,
   surveyData,
   response,
+  matrix_answers,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
@@ -108,8 +116,21 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
     [key: string]: string;
   }>(response || {});
 
+  useEffect(() => {
+    if (matrix_answers) {
+      const prefilled: { [key: string]: string } = {};
+      matrix_answers.forEach((answer) => {
+        const rowIndex = rows?.findIndex((r) => r === answer.row);
+        if (rowIndex !== undefined && rowIndex !== -1) {
+          prefilled[rowIndex] = answer.column;
+        }
+      });
+      setSelectedItems(prefilled);
+    }
+  }, [matrix_answers, rows]);
+
   const handleMatrixItemSelect = (rowIndex: number, value: string) => {
-    if (response) return; // Prevent changes if response exists
+    if (response || matrix_answers) return; // Prevent changes if response or matrix_answers exists
 
     const newSelectedItems = { ...selectedItems };
     newSelectedItems[rowIndex] = value;
@@ -142,9 +163,6 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
   const headerBgStyle = {
     backgroundColor: colorTheme ? `${colorTheme}15` : "#F5F0FF",
   };
-
-  console.log(rows);
-  console.log(columns);
 
   return (
     <div
@@ -236,7 +254,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                               handleMatrixItemSelect(rowIndex, value)
                             }
                             className="flex justify-around"
-                            disabled={!!response}
+                            disabled={!!response || !!matrix_answers}
                           >
                             {columns?.map((col) => (
                               <div
@@ -247,7 +265,7 @@ const MatrixQuestion: React.FC<MatrixQuestionProps> = ({
                                   value={col}
                                   id={`${rowIndex}-${col}`}
                                   className={
-                                    response
+                                    response || matrix_answers
                                       ? "cursor-not-allowed opacity-50"
                                       : ""
                                   }

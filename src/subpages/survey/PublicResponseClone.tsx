@@ -567,6 +567,8 @@ const PublicResponse = () => {
                 );
 
               case "likert_scale":
+                console.log(quest);
+
                 return (
                   <RadioGroup
                     className="mb-4 bg-[#FAFAFA] w-full p-3 rounded"
