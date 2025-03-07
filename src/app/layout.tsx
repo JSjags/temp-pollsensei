@@ -73,7 +73,7 @@ const merriweather = Merriweather({
 
 export const metadata: Metadata = {
   icons: "/favicon.ico?v=1",
-  title: "PollSensei - Your end-to-end AI survey assistant",
+  title: "PollSensei - Easy surveys for everyone",
   description:
     "Create surveys effortlessly with manual input or AI assistance. Streamline your survey creation process with our intuitive web app.",
 };
