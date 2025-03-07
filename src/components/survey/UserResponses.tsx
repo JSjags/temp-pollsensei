@@ -243,7 +243,8 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   status={item?.validation_result?.status}
                   onRate={(value) => console.log("Rated:", value)}
                 />
-              ) : item.question_type === "matrix_checkbox" ? (
+              ) : item.question_type === "matrix_checkbox" ||
+                item.question_type === "matrix_multiple_choice" ? (
                 <MatrixQuestion
                   key={index}
                   index={index + 1}
@@ -252,6 +253,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   columns={item.columns}
                   questionType={item.question_type}
                   question={item.question}
+                  matrix_answers={item.matrix_answers}
                 />
               ) : item.question_type === "short_text" ? (
                 <ShortTextQuestion
@@ -281,6 +283,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   min={item.min}
                   max={item.max}
                   status={item?.validation_result?.status}
+                  isResponse={true}
                 />
               ) : item.question_type === "checkbox" ? (
                 <CheckboxQuestion

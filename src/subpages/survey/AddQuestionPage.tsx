@@ -361,12 +361,17 @@ const AddQuestionPage = () => {
             case "drop_down":
             case "likert_scale":
             case "rating_scale":
+              return {
+                ...baseQuestion,
+                options: question.options,
+              };
+
+            case "likert_scale":
+            case "rating_scale":
             case "star_rating":
               return {
                 ...baseQuestion,
-                options: Array.isArray(question.options)
-                  ? question.options
-                  : [],
+                options: ["1 Star", "2 Star", "3 Star", "4 Star", "5 Star"],
               };
 
             case "boolean":
@@ -475,7 +480,106 @@ const AddQuestionPage = () => {
     if (isError || error) {
       const SaveProgress = async () => {
         try {
-          await saveprogress(survey);
+          await saveprogress({
+            ...survey,
+            sections: [
+              {
+                section_topic: sectionTitle,
+                section_description: sDescription,
+                questions: questions.map((question: Question) => {
+                  const baseQuestion = {
+                    question: question.question,
+                    description: question.description || question.question,
+                    question_type: question.question_type,
+                    is_required: question.is_required || false,
+                  };
+
+                  switch (question.question_type) {
+                    case "checkbox":
+                    case "multiple_choice":
+                    case "single_choice":
+                    case "drop_down":
+                    case "likert_scale":
+                    case "rating_scale":
+                    case "star_rating":
+                      return {
+                        ...baseQuestion,
+                        options: [
+                          "1 Star",
+                          "2 Star",
+                          "3 Star",
+                          "4 Star",
+                          "5 Star",
+                        ],
+                      };
+                    case "boolean":
+                      return {
+                        ...baseQuestion,
+                        options: ["Yes", "No"],
+                      };
+                    case "matrix_multiple_choice":
+                    case "matrix_checkbox":
+                      return {
+                        ...baseQuestion,
+                        rows: Array.isArray(question.rows) ? question.rows : [],
+                        columns: Array.isArray(question.columns)
+                          ? question.columns
+                          : [],
+                      };
+                    case "slider":
+                      return {
+                        ...baseQuestion,
+                        min:
+                          typeof question.min === "number" ? question.min : 1,
+                        max:
+                          typeof question.max === "number" ? question.max : 10,
+                        step: 1,
+                      };
+                    case "number":
+                      return {
+                        ...baseQuestion,
+                        min:
+                          typeof question.min === "number" ? question.min : 0,
+                        max:
+                          typeof question.max === "number"
+                            ? question.max
+                            : Number.MAX_SAFE_INTEGER,
+                      };
+                    case "long_text":
+                      return {
+                        ...baseQuestion,
+                        can_accept_media: Boolean(question.can_accept_media),
+                      };
+                    case "media":
+                    case "short_text":
+                      return baseQuestion;
+                    default:
+                      return baseQuestion;
+                  }
+                }),
+              },
+            ],
+            header_text: {
+              ...survey.header_text,
+              size: survey.header_text?.size || 24,
+            },
+            body_text: {
+              ...survey.body_text,
+              size: survey.body_text?.size || 16,
+            },
+            question_text: {
+              ...survey.question_text,
+              size: survey.question_text?.size || 16,
+            },
+            header_url:
+              typeof headerUrl === "string" && headerUrl.startsWith("#")
+                ? ""
+                : headerUrl,
+            logo_url:
+              typeof logoUrl === "string" && logoUrl.startsWith("#")
+                ? ""
+                : logoUrl,
+          });
         } catch (e) {
           console.error(e);
         }
@@ -1016,7 +1120,9 @@ const AddQuestionPage = () => {
                                     }
                                     surveyData={surveyData}
                                   />
-                                ) : item.question_type === "matrix_checkbox" ? (
+                                ) : item.question_type === "matrix_checkbox" ||
+                                  item.question_type ===
+                                    "matrix_multiple_choice" ? (
                                   <MatrixQuestion
                                     key={index}
                                     index={index + 1}
@@ -1091,7 +1197,10 @@ const AddQuestionPage = () => {
                       console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
-                    } else if (questionType === "matrix_checkbox") {
+                    } else if (
+                      questionType === "matrix_checkbox" ||
+                      questionType === "matrix_multiple_choice"
+                    ) {
                       const newQuestion = {
                         question: question,
                         question_type: questionType,

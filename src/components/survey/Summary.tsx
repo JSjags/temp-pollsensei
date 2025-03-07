@@ -7,45 +7,100 @@ interface SummaryProps {
   result: any[]; // assuming 'result' is an array of survey results
 }
 
-const chartData2 = {
-  labels: ["Yes", "No"], // x-axis labels
-  datasets: [
-    {
-      label: "Survey Responses",
-      data: [65, 35], // Corresponding data for each label
-      backgroundColor: ["#36A2EB", "#FF6384"], // Colors for each bar
-    },
-  ],
-};
+const colorPalette = [
+  "#4CAF50",
+  "#F44336",
+  "#FFC107",
+  "#2196F3",
+  "#9C27B0",
+  "#FF9800",
+  "#795548",
+  "#607D8B",
+  "#E91E63",
+  "#9E9E9E",
+];
 
 const Summary: React.FC<SummaryProps> = ({ result }) => {
-  // Function to process each question's selected_options data for pie chart
   const transformDataForChart = (questionData: any) => {
-    const optionCounts: Record<string, number> = {};
+    const { question_type } = questionData;
+    let optionCounts: Record<string, number> = {};
+    let totalCount = 0;
 
-    // Count occurrences of each selected option
-    questionData.selected_options?.forEach((option: string[]) => {
-      const selectedOption = option[0]; // Assume the first item in the array is the selected option
-      if (!optionCounts[selectedOption]) {
-        optionCounts[selectedOption] = 1;
-      } else {
-        optionCounts[selectedOption]++;
-      }
-    });
+    switch (question_type) {
+      case "single_choice":
+      case "multiple_choice":
+        questionData.selected_options?.forEach((option: string[]) => {
+          option.forEach((choice) => {
+            optionCounts[choice] = (optionCounts[choice] || 0) + 1;
+            totalCount++;
+          });
+        });
+        break;
 
-    // List of colors for dynamic assignment (expand this as needed)
-    const colorPalette = [
-      "#4CAF50",
-      "#F44336",
-      "#FFC107",
-      "#2196F3",
-      "#9C27B0",
-    ];
+      case "checkbox":
+        questionData.selected_options?.forEach((options: string[]) => {
+          options.forEach((option) => {
+            const normalizedOption = option.toLowerCase().trim();
+            optionCounts[normalizedOption] =
+              (optionCounts[normalizedOption] || 0) + 1;
+            totalCount++;
+          });
+        });
+        break;
 
-    // Prepare labels, data, and background color for the pie chart
+      case "boolean":
+        const booleanResponses = questionData.boolean_responses || [];
+        const yesCount = booleanResponses.filter((x: boolean) => x).length;
+        const noCount = booleanResponses.filter((x: boolean) => !x).length;
+        optionCounts = {
+          Yes: yesCount,
+          No: noCount,
+        };
+        totalCount = yesCount + noCount;
+        break;
+
+      case "rating_scale":
+      case "likert_scale":
+        questionData.scale_responses?.forEach((response: string) => {
+          optionCounts[response] = (optionCounts[response] || 0) + 1;
+          totalCount++;
+        });
+        break;
+
+      case "drop_down":
+        questionData.drop_down_responses?.forEach((response: string) => {
+          optionCounts[response] = (optionCounts[response] || 0) + 1;
+          totalCount++;
+        });
+        break;
+
+      case "number":
+        const numbers = questionData.number_responses || [];
+        if (numbers.length) {
+          const min = Math.min(...numbers);
+          const max = Math.max(...numbers);
+          const range = max - min;
+          const bucketSize = range / 5;
+
+          numbers.forEach((num: number) => {
+            const bucketIndex = Math.floor((num - min) / bucketSize);
+            const bucketStart = min + bucketIndex * bucketSize;
+            const bucketEnd = bucketStart + bucketSize;
+            const label = `${Math.round(bucketStart)}-${Math.round(bucketEnd)}`;
+            optionCounts[label] = (optionCounts[label] || 0) + 1;
+            totalCount++;
+          });
+        }
+        break;
+
+      default:
+        return null;
+    }
+
+    // Calculate percentages using the total count of actual responses
     const labels = Object.keys(optionCounts);
     const data = Object.values(optionCounts).map(
-      (count) => (count / questionData.total_responses) * 100
+      (count) => (count / totalCount) * 100
     );
     const backgroundColor = labels.map(
       (_, index) => colorPalette[index % colorPalette.length]
@@ -62,22 +117,21 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
     };
   };
 
-  console.log(result);
-
   return (
     <div>
       {result?.map((item, index) => {
-        // Skip items that don't have selected options
-        // if (!item.selected_options || item.selected_options.length === 0) {
-        //   return null;
-        // }
-
         const chartData = transformDataForChart(item);
+
+        if (!chartData) return null;
+
+        const shouldUsePieChart =
+          item.question_type === "single_choice" ||
+          item.question_type === "multiple_choice" ||
+          (chartData.labels.length > 2 && item.question_type !== "number");
 
         return (
           <div key={index}>
-            {/* If the question has more than 2 options, show a Piechart, otherwise HorizontalBarChart */}
-            {chartData.labels.length > 2 ? (
+            {shouldUsePieChart ? (
               <Piechart
                 title={`Question ${index + 1}`}
                 question={item.question}
@@ -91,15 +145,6 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
                 data={chartData}
                 allowDownload
               />
-              // <HorizontalBarChart
-              //   title={`Question ${index + 1}`}
-              //   question={item.question}
-              //   data={chartData.datasets[0].data.map((value, idx) => ({
-              //     label: chartData.labels[idx],
-              //     percentage: value,
-              //     color: chartData.datasets[0].backgroundColor[idx],
-              //   }))}
-              // />
             )}
           </div>
         );
