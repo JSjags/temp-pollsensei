@@ -1138,7 +1138,7 @@ const PublicResponse = () => {
         <div>
           {question?.data && (
             <div
-              className={`${question?.data?.theme} flex justify-center items-center px-5 bg-fixed lg:px-16 mx-auto gap-10 w-full`}
+              className={`${question?.data?.theme} min-h-screen flex justify-center px-5 bg-fixed lg:px-16 mx-auto gap-10 w-full`}
             >
               <form
                 onSubmit={handleSubmitResponse}

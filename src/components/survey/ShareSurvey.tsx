@@ -27,7 +27,7 @@ import axiosInstance from "@/lib/axios-instance";
 import dynamic from "next/dynamic";
 
 const DownloadPdfButton = dynamic(
-  () => import("../reusable/DownloadPdfButton"),
+  () => import("@/components/reusable/DownloadPdfButton"),
   { ssr: false }
 );
 
