@@ -42,6 +42,7 @@ const PublicResponseFile = ({
   const [isLooping, setIsLooping] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isUploaded, setIsUploaded] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -61,42 +62,50 @@ const PublicResponseFile = ({
   const initWaveform = () => {
     if (waveformContainerRef.current) {
       if (waveformRef.current) {
-        waveformRef.current.destroy();
-      }
-
-      waveformRef.current = WaveSurfer.create({
-        container: waveformContainerRef.current,
-        waveColor: "#9D50BB",
-        progressColor: "#6E48AA",
-        cursorColor: "#6E48AA",
-        dragToSeek: true,
-        barWidth: 2,
-        barRadius: 3,
-        height: 60,
-        normalize: true,
-        fillParent: true,
-        minPxPerSec: 50,
-        plugins: [],
-      });
-
-      if (audioURL) {
-        waveformRef.current.load(audioURL);
-      }
-
-      waveformRef.current.on("finish", () => {
-        setIsPlaying(false);
-        if (isLooping) {
-          waveformRef.current?.play();
+        try {
+          waveformRef.current.destroy();
+        } catch (error) {
+          console.log("Error destroying waveform:", error);
         }
-      });
+      }
 
-      waveformRef.current.on("audioprocess", () => {
-        setCurrentTime(waveformRef.current?.getCurrentTime() || 0);
-      });
+      try {
+        waveformRef.current = WaveSurfer.create({
+          container: waveformContainerRef.current,
+          waveColor: "#9D50BB",
+          progressColor: "#6E48AA",
+          cursorColor: "#6E48AA",
+          dragToSeek: true,
+          barWidth: 2,
+          barRadius: 3,
+          height: 60,
+          normalize: true,
+          fillParent: true,
+          minPxPerSec: 50,
+          plugins: [],
+        });
 
-      waveformRef.current.on("ready", () => {
-        setDuration(waveformRef.current?.getDuration() || 0);
-      });
+        if (audioURL) {
+          waveformRef.current.load(audioURL);
+        }
+
+        waveformRef.current.on("finish", () => {
+          setIsPlaying(false);
+          if (isLooping) {
+            waveformRef.current?.play();
+          }
+        });
+
+        waveformRef.current.on("audioprocess", () => {
+          setCurrentTime(waveformRef.current?.getCurrentTime() || 0);
+        });
+
+        waveformRef.current.on("ready", () => {
+          setDuration(waveformRef.current?.getDuration() || 0);
+        });
+      } catch (error) {
+        console.log("Error creating waveform:", error);
+      }
     }
   };
 
@@ -184,14 +193,22 @@ const PublicResponseFile = ({
 
   const handleDeleteRecording = (e: React.MouseEvent) => {
     e.preventDefault();
+
     setAudioURL(null);
     setAudioFile(null);
     setCurrentTime(0);
     setDuration(0);
+    setIsPlaying(false);
     handleAnswerChange(question, { media_url: "" });
-    if (waveformRef.current) {
-      waveformRef.current.destroy();
+
+    try {
+      if (waveformRef.current) {
+        waveformRef.current.destroy();
+        waveformRef.current = null;
+      }
       initWaveform();
+    } catch (error) {
+      console.log("Error handling delete:", error);
     }
   };
 
@@ -210,6 +227,7 @@ const PublicResponseFile = ({
       const mediaUrl = response?.data?.media_url;
       if (mediaUrl) {
         handleAnswerChange(question, { media_url: mediaUrl });
+        setIsUploaded(true);
         toast.success("Audio uploaded successfully!");
       } else {
         toast.error("Failed to get media URL from the server.");
@@ -218,6 +236,71 @@ const PublicResponseFile = ({
       toast.error("Failed to upload the audio.");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleNewRecording = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // Clear all states
+    setIsUploaded(false);
+    setAudioURL(null);
+    setAudioFile(null);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+    handleAnswerChange(question, { media_url: "" });
+
+    // Clean up waveform
+    try {
+      if (waveformRef.current) {
+        waveformRef.current.destroy();
+        waveformRef.current = null;
+      }
+      initWaveform();
+    } catch (error) {
+      console.log("Error handling waveform cleanup:", error);
+    }
+
+    // Automatically start new recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+          const tempBlob = new Blob(audioChunksRef.current, {
+            type: "audio/wav",
+          });
+          const tempUrl = URL.createObjectURL(tempBlob);
+          if (waveformRef.current) {
+            waveformRef.current.load(tempUrl);
+          }
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const fileName = `audio_${Date.now()}.wav`;
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/wav",
+        });
+
+        const newAudioFile = new File([audioBlob], fileName, {
+          type: "audio/wav",
+        });
+
+        setAudioFile(newAudioFile);
+        setAudioURL(URL.createObjectURL(audioBlob));
+      };
+
+      mediaRecorder.start(100);
+      setIsRecording(true);
+    } catch (error) {
+      toast.error("Microphone access denied or not available.");
     }
   };
 
@@ -248,56 +331,79 @@ const PublicResponseFile = ({
 
   return (
     <div className="bg-white rounded-lg" onClick={(e) => e.stopPropagation()}>
-      <div className="flex items-center gap-3 mb-4">
-        {!isRecording ? (
-          <Button
-            type="button"
-            onClick={handleStartRecording}
-            className={`flex items-center px-4 py-2 rounded-lg text-sm font-semibold ${
-              isDisabled
-                ? "bg-gray-600 cursor-not-allowed"
-                : "bg-purple-600 hover:bg-purple-700"
-            } text-white transition-colors`}
-            disabled={isDisabled}
-            onFocus={onFocus}
-            onBlur={onBlur}
-          >
-            <AiOutlineAudio className="mr-2" size={20} />
-            Record
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            onClick={handleStopRecording}
-            className="flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors"
-          >
-            Stop Recording
-          </Button>
-        )}
-
-        {(audioURL || audioFile) && (
-          <>
+      {isUploaded ? (
+        <div className="mb-4">
+          <div className="p-2 bg-green-50 border border-green-200 rounded-lg mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-green-700">
+                <AiOutlineSound size={20} />
+                <span className="font-medium text-sm">
+                  Audio response uploaded successfully
+                </span>
+              </div>
+              <Button
+                type="button"
+                onClick={handleNewRecording}
+                className="flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+              >
+                <AiOutlineAudio className="mr-2" size={20} />
+                Record New Response
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 mb-4">
+          {!isRecording ? (
             <Button
               type="button"
-              onClick={handleUploadRecording}
-              className="flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-green-600 hover:bg-green-700 text-white transition-colors"
-              disabled={uploading}
+              onClick={handleStartRecording}
+              className={`flex items-center px-4 py-2 rounded-lg text-sm font-semibold ${
+                isDisabled
+                  ? "bg-gray-600 cursor-not-allowed"
+                  : "bg-purple-600 hover:bg-purple-700"
+              } text-white transition-colors`}
+              disabled={isDisabled}
+              onFocus={onFocus}
+              onBlur={onBlur}
             >
-              <AiOutlineUpload className="mr-2" size={20} />
-              {uploading ? "Uploading..." : "Upload"}
+              <AiOutlineAudio className="mr-2" size={20} />
+              Record
             </Button>
-
+          ) : (
             <Button
               type="button"
-              onClick={handleDeleteRecording}
+              onClick={handleStopRecording}
               className="flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors"
             >
-              <AiOutlineDelete className="mr-2" size={20} />
-              Delete
+              Stop Recording
             </Button>
-          </>
-        )}
-      </div>
+          )}
+
+          {(audioURL || audioFile) && (
+            <>
+              <Button
+                type="button"
+                onClick={handleUploadRecording}
+                className="flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-green-600 hover:bg-green-700 text-white transition-colors"
+                disabled={uploading}
+              >
+                <AiOutlineUpload className="mr-2" size={20} />
+                {uploading ? "Uploading..." : "Upload"}
+              </Button>
+
+              <Button
+                type="button"
+                onClick={handleDeleteRecording}
+                className="flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors"
+              >
+                <AiOutlineDelete className="mr-2" size={20} />
+                Delete
+              </Button>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
         <div ref={waveformContainerRef} className="mb-3" />
