@@ -278,6 +278,24 @@ const LeaderboardPage = () => {
                   Total number of surveys created by referred users
                 </p>
               </div>
+              <div className="flex items-start sm:items-center gap-2">
+                <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                <p className="text-sm">
+                  <span className="font-semibold text-[#5B03B2]">
+                    Top 3 Qualification:
+                  </span>{" "}
+                  Minimum of 150 referrals required to win Top 3 positions
+                </p>
+              </div>
+              <div className="flex items-start sm:items-center gap-2">
+                <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                <p className="text-sm">
+                  <span className="font-semibold text-[#5B03B2]">
+                    Points Calculation:
+                  </span>{" "}
+                  Points = Total Referrals + (2 × Total Surveys)
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
