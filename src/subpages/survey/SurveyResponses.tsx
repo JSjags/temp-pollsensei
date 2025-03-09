@@ -48,6 +48,19 @@ const SurveyResponses = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const processingSteps = [
+    "Initializing document scanner...",
+    "Analyzing document structure...",
+    "Detecting text regions & patterns...",
+    "Enhancing image quality...",
+    "Processing handwritten text...",
+    "Extracting form data...",
+    "Cross-referencing survey format...",
+    "Validating extracted responses...",
+    "Organizing survey data...",
+    "Finalizing results...",
+  ];
 
   const handleParentClick = (inputRef: React.RefObject<HTMLInputElement>) => {
     if (inputRef.current) {
@@ -159,6 +172,28 @@ const SurveyResponses = () => {
     router,
     OCRerror,
   ]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (OCRloading) {
+      const startDelay = setTimeout(() => {
+        interval = setInterval(() => {
+          setLoadingStep((prev) => {
+            if (prev === processingSteps.length - 1) {
+              clearInterval(interval);
+              return prev;
+            }
+            return prev + 1;
+          });
+        }, 3500);
+      }, 1000);
+
+      return () => {
+        clearTimeout(startDelay);
+        clearInterval(interval);
+      };
+    }
+  }, [OCRloading]);
 
   return (
     <motion.div
@@ -295,6 +330,7 @@ const SurveyResponses = () => {
                 <Button
                   onClick={handleResponeOCR}
                   disabled={!selectedFiles.length || OCRloading}
+                  className="bg-purple-700"
                 >
                   {OCRloading ? "Uploading..." : "Upload"}
                 </Button>
@@ -331,12 +367,22 @@ const SurveyResponses = () => {
                 />
               </motion.div>
 
-              <p className="text-base font-medium text-gray-700">
-                Analyzing and Processing Documents
-              </p>
-              <p className="text-sm text-gray-500 text-center">
-                This may take a few moments. Please don't close this window.
-              </p>
+              <div className="flex flex-col items-center gap-2">
+                <motion.p
+                  key={loadingStep}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-base font-medium text-gray-700 text-center"
+                >
+                  {processingSteps[loadingStep]}
+                </motion.p>
+                <p className="text-sm text-gray-500 text-center mt-4">
+                  Please don't close this window while we process your
+                  documents.
+                </p>
+              </div>
             </div>
           </DialogHeader>
         </DialogContent>

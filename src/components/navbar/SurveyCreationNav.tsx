@@ -605,7 +605,7 @@ const SurveyCreationNav = () => {
 
           {path.includes("survey-response-upload") ? (
             <Button
-              className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-5 py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
+              className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
               onClick={() => {
                 dispatch(openUpload());
               }}
@@ -1115,7 +1115,7 @@ const SurveyCreationNav = () => {
 
           {path.includes("survey-response-upload") ? (
             <Button
-              className="flex items-center justify-center gap-4 text-white text-[1rem] rounded-md px-5 py-3  bg-gradient-to-r from-[#5B03B2] via-violet-600 to-[#9D50BB]"
+              className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
               onClick={() => {
                 dispatch(openUpload());
               }}
