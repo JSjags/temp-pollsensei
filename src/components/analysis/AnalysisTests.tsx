@@ -447,7 +447,7 @@ export default function DragAndDropPage() {
       {!showReport ? (
         <Fragment>
           {(variablesQuery.isLoading || testsLibraryQuery.isLoading) && (
-            <AnalysisLoadingScreen />
+            <AnalysisLoadingScreen isExtractingVariables />
           )}
           {variablesQuery.isError && <AnalysisErrorComponent />}
           {variablesQuery.isSuccess && (
@@ -458,6 +458,7 @@ export default function DragAndDropPage() {
                 <LoadingOverlay
                   title="Analyzing Survey"
                   subtitle="Hold on! Let PollSensei cook."
+                  isAnalysing
                 />
               )}
               <DndProvider backend={HTML5Backend}>
@@ -718,6 +719,7 @@ export default function DragAndDropPage() {
             <LoadingOverlay
               title="Regenerating analysis"
               subtitle="Hold on! Let PollSensei cook."
+              isAnalysing
             />
           )}
           {runTestMutation.isSuccess && (
