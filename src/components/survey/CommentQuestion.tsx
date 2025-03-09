@@ -145,11 +145,13 @@ const CommentQuestion: React.FC<ComponentQuestionProps> = ({
 
         <div className="flex-1 space-y-4">
           <div className="flex items-start">
-            <span className="font-semibold min-w-[24px]">{index}.</span>
             <div className="flex-1">
               <h3 className="group font-semibold">
                 <div className="flex items-start gap-2">
-                  <span className="text-left">{question}</span>
+                  <div className="flex items-center">
+                    <span className="font-semibold min-w-[24px]">{index}.</span>
+                    <span className="text-left">{question}</span>
+                  </div>
                   {is_required && (
                     <span className="text-2xl text-red-500">*</span>
                   )}
