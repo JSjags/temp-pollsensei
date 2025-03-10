@@ -36,6 +36,15 @@ import { useRouter } from "next/navigation";
 import AnovaAnalysisComponent from "./AnovaAnalysis";
 import SpearmanCorrelation from "./SpearmanCorrelation";
 import TTest from "./TTest";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { X } from "lucide-react";
 
 type TestResult = {
   status: string;
@@ -115,6 +124,10 @@ interface DataVisualizationProps {
   };
   rerunTests: () => void;
   onBack?: () => void;
+  selectedTestsData: Array<{
+    test_name: string;
+    test_variables: string[];
+  }>;
 }
 
 interface DensityPoint {
@@ -244,7 +257,7 @@ const TestChartRenderer = ({ testData }: { testData: any }) => {
         </div>
       );
 
-    case "Spearman’s Rank Correlation":
+    case "Spearman's Rank Correlation":
       return (
         <div {...chartProps}>
           <SpearmanCorrelation
@@ -278,6 +291,7 @@ const VerticalDataVisualization: React.FC<DataVisualizationProps> = ({
   survey,
   rerunTests,
   onBack,
+  selectedTestsData,
 }) => {
   return (
     <div className="space-y-8 p-0 ">
@@ -302,32 +316,90 @@ interface ReportResponse {
   };
 }
 
+interface ReportPayload {
+  survey_id: string;
+  conversation_id: string;
+  variable_id: string;
+  data: Array<{
+    test_name: string;
+    test_variables: string[];
+  }>;
+}
+
 const DataVisualizationComponent = ({
   data,
   survey,
   rerunTests,
   onBack,
+  selectedTestsData,
 }: DataVisualizationProps) => {
   const router = useRouter();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [selectedTests, setSelectedTests] = useState<
+    Array<{
+      test_name: string;
+      test_variables: string[];
+    }>
+  >(selectedTestsData);
+
+  useEffect(() => {
+    setSelectedTests(selectedTestsData);
+  }, [selectedTestsData]);
+
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      setSelectedTests(selectedTestsData);
+    }
+    setShowReportDialog(open);
+  };
+
   const getReportMutation = useMutation({
     mutationFn: async () => {
+      const payload: ReportPayload = {
+        survey_id: survey._id,
+        conversation_id: survey.conversation_id,
+        variable_id: data.variable_id,
+        data: selectedTests,
+      };
+
       const response = await axiosInstance.post<ReportResponse>(
         `/survey/analysis/survey-report`,
-        {
-          survey_id: survey._id,
-        }
+        payload
       );
       return response.data;
     },
     onSuccess: async (data) => {
       router.push((data as any).report_url);
+      setShowReportDialog(false);
+      toast.success("Report downloaded successfully!");
     },
     onError: (error) => {
       console.error("Error downloading report:", error);
       toast.error("Failed to download report");
     },
+    retry: 5,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  const handleRemoveTest = (testName: string) => {
+    setSelectedTests((prev) =>
+      prev.filter((test) => test.test_name !== testName)
+    );
+  };
+
+  const handleRemoveVariable = (testName: string, variable: string) => {
+    setSelectedTests((prev) =>
+      prev.map((test) =>
+        test.test_name === testName
+          ? {
+              ...test,
+              test_variables: test.test_variables.filter((v) => v !== variable),
+            }
+          : test
+      )
+    );
+  };
 
   console.log(survey);
   console.log(data);
@@ -364,9 +436,9 @@ const DataVisualizationComponent = ({
               <span className="font-medium">Regenerate</span>
             </Button>
             <Button
-              onClick={() => getReportMutation.mutate()}
+              onClick={() => setShowReportDialog(true)}
               disabled={getReportMutation.isPending}
-              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-none hover:from-purple-700 hover:to-indigo-700 active:scale-95 group w-full sm:w-auto"
+              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white border-none hover:from-[#5B03B2] hover:to-[#9D50BB] active:scale-95 group w-full sm:w-auto"
             >
               {getReportMutation.isPending ? (
                 <>
@@ -400,10 +472,85 @@ const DataVisualizationComponent = ({
               survey={survey}
               rerunTests={rerunTests}
               onBack={onBack}
+              selectedTestsData={selectedTestsData}
             />
           </div>
         </div>
       </div>
+
+      <Dialog open={showReportDialog} onOpenChange={handleDialogChange}>
+        <DialogContent
+          className="max-w-2xl max-h-[90vh] flex flex-col z-[1000000]"
+          overlayClassName="z-[1000000]"
+        >
+          <DialogHeader>
+            <DialogTitle>Download Analysis Report</DialogTitle>
+            <DialogDescription>
+              Review and modify the tests and variables to include in your
+              report
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 min-h-0 overflow-y-auto py-4 bg-gray-100 rounded-lg px-4 shadow-[inset_0_-8px_16px_-8px_rgba(0,0,0,0.3)]">
+            <div className="space-y-4">
+              {selectedTests.map((test) => (
+                <div
+                  key={test.test_name}
+                  className="border rounded-lg p-4 space-y-2 bg-white"
+                >
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">{test.test_name}</h3>
+                    <button
+                      onClick={() => handleRemoveTest(test.test_name)}
+                      className="text-gray-500 hover:text-red-500"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {test.test_variables.map((variable) => (
+                      <div
+                        key={variable}
+                        className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
+                      >
+                        <span>{variable}</span>
+                        <button
+                          onClick={() =>
+                            handleRemoveVariable(test.test_name, variable)
+                          }
+                          className="hover:text-red-500"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4 border-t pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowReportDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => getReportMutation.mutate()}
+              disabled={getReportMutation.isPending}
+              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white border-none hover:from-[#5B03B2] hover:to-[#9D50BB] active:scale-95 group w-full sm:w-auto"
+            >
+              {getReportMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Download Report"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

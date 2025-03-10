@@ -70,6 +70,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Rewind, FastForward } from "lucide-react";
+import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
 
 interface ComponentQuestionProps {
   question: string;
@@ -326,6 +327,23 @@ const ContentRenderer = ({ content }: { content: string }) => {
   );
 };
 
+const PLAYBACK_RATES = [
+  { value: "0.5", label: "0.5x" },
+  { value: "0.75", label: "0.75x" },
+  { value: "1", label: "1x" },
+  { value: "1.25", label: "1.25x" },
+  { value: "1.5", label: "1.5x" },
+  { value: "2", label: "2x" },
+];
+
+const AUDIO_PLAYER_STYLES = {
+  container:
+    "mt-4 p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border-2 border-purple-600 shadow-sm",
+  waveformContainer: "bg-white rounded-lg p-3 mb-3 border border-purple-100",
+  controlsGroup:
+    "flex items-center bg-white rounded-lg shadow-sm p-1 border border-purple-100",
+};
+
 const TranscriptionDialog = ({
   isOpen,
   onOpenChange,
@@ -347,61 +365,66 @@ const TranscriptionDialog = ({
   const [duration, setDuration] = useState(0);
   const waveformRef = useRef<WaveSurfer | null>(null);
   const waveformContainerRef = useRef<HTMLDivElement>(null);
+  const [isLooping, setIsLooping] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState("1");
 
-  const initWaveform = useCallback(() => {
-    if (waveformContainerRef.current) {
-      if (waveformRef.current) {
-        waveformRef.current.destroy();
+  const initWaveform = useCallback(
+    (initialPlaybackRate: string) => {
+      if (waveformContainerRef.current) {
+        if (waveformRef.current) {
+          waveformRef.current.destroy();
+        }
+
+        const wavesurfer = WaveSurfer.create({
+          container: waveformContainerRef.current,
+          waveColor: "#9D50BB",
+          progressColor: "#6E48AA",
+          cursorColor: "#6E48AA",
+          dragToSeek: true,
+          barWidth: 2,
+          barRadius: 3,
+          height: 60,
+          normalize: true,
+          fillParent: true,
+          minPxPerSec: 50,
+        });
+
+        Object.assign(waveformRef, { current: wavesurfer });
+
+        if (mediaUrl) {
+          waveformRef.current?.load(mediaUrl);
+        }
+
+        waveformRef.current?.on("ready", () => {
+          setDuration(waveformRef.current?.getDuration() || 0);
+          waveformRef.current?.setVolume(volume);
+          waveformRef.current?.setPlaybackRate(parseFloat(initialPlaybackRate));
+        });
+
+        waveformRef.current?.on("finish", () => {
+          setIsPlaying(false);
+        });
+
+        waveformRef.current?.on("audioprocess", () => {
+          setCurrentTime(waveformRef.current?.getCurrentTime() || 0);
+        });
+
+        waveformRef.current?.on("play", () => {
+          setIsPlaying(true);
+        });
+
+        waveformRef.current?.on("pause", () => {
+          setIsPlaying(false);
+        });
       }
-
-      const wavesurfer = WaveSurfer.create({
-        container: waveformContainerRef.current,
-        waveColor: "#9D50BB",
-        progressColor: "#6E48AA",
-        cursorColor: "#6E48AA",
-        dragToSeek: true,
-        barWidth: 2,
-        barRadius: 3,
-        height: 60,
-        normalize: true,
-        fillParent: true,
-        minPxPerSec: 50,
-      });
-
-      Object.assign(waveformRef, { current: wavesurfer });
-
-      if (mediaUrl) {
-        waveformRef.current?.load(mediaUrl);
-      }
-
-      waveformRef.current?.on("ready", () => {
-        setDuration(waveformRef.current?.getDuration() || 0);
-        waveformRef.current?.setVolume(volume);
-      });
-
-      waveformRef.current?.on("finish", () => {
-        setIsPlaying(false);
-      });
-
-      waveformRef.current?.on("audioprocess", () => {
-        setCurrentTime(waveformRef.current?.getCurrentTime() || 0);
-      });
-
-      waveformRef.current?.on("play", () => {
-        setIsPlaying(true);
-      });
-
-      waveformRef.current?.on("pause", () => {
-        setIsPlaying(false);
-      });
-    }
-  }, [mediaUrl]);
+    },
+    [mediaUrl]
+  );
 
   useEffect(() => {
     if (isOpen) {
-      // Small delay to ensure container is mounted
       const timer = setTimeout(() => {
-        initWaveform();
+        initWaveform(playbackRate);
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -441,26 +464,25 @@ const TranscriptionDialog = ({
           <DialogTitle>Edit Transcription</DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto space-y-6">
-          <div className="mt-4 p-4 px-2 bg-gray-50 rounded-lg">
-            <div ref={waveformContainerRef} className="mb-3" />
+          <div className={AUDIO_PLAYER_STYLES.container}>
+            <div className={AUDIO_PLAYER_STYLES.waveformContainer}>
+              <div ref={waveformContainerRef} />
+            </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={togglePlayPause}
-                  className="flex items-center px-2 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
+                  onClick={() => {
+                    if (waveformRef.current) {
+                      const newTime = waveformRef.current.getCurrentTime() - 2;
+                      waveformRef.current.setTime(Math.max(0, newTime));
+                    }
+                  }}
+                  className="p-2 text-gray-600 hover:text-purple-700"
+                  title="Rewind 2 seconds"
                 >
-                  {isPlaying ? (
-                    <>
-                      <AiOutlinePause className="mr-2" size={20} />
-                      Pause
-                    </>
-                  ) : (
-                    <>
-                      <AiOutlinePlayCircle className="mr-2" size={20} />
-                      Play
-                    </>
-                  )}
+                  <Rewind size={16} />
+                  <span className="text-xs">2s</span>
                 </button>
 
                 <button
@@ -471,8 +493,31 @@ const TranscriptionDialog = ({
                     }
                   }}
                   className="p-2 text-gray-600 hover:text-purple-700"
+                  title="Rewind 5 seconds"
                 >
                   <Rewind size={18} />
+                  <span className="text-xs">5s</span>
+                </button>
+
+                <button
+                  onClick={togglePlayPause}
+                  className="flex items-start px-2 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
+                >
+                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (waveformRef.current) {
+                      const newTime = waveformRef.current.getCurrentTime() + 2;
+                      waveformRef.current.setTime(Math.min(duration, newTime));
+                    }
+                  }}
+                  className="p-2 text-gray-600 hover:text-purple-700"
+                  title="Forward 2 seconds"
+                >
+                  <FastForward size={16} />
+                  <span className="text-xs">2s</span>
                 </button>
 
                 <button
@@ -483,22 +528,37 @@ const TranscriptionDialog = ({
                     }
                   }}
                   className="p-2 text-gray-600 hover:text-purple-700"
+                  title="Forward 5 seconds"
                 >
                   <FastForward size={18} />
+                  <span className="text-xs">5s</span>
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsLooping(!isLooping);
+                  }}
+                  className={`flex items-center px-4 py-2 text-sm font-medium ${
+                    isLooping ? "text-purple-600" : "text-gray-500"
+                  } hover:text-purple-700`}
+                >
+                  <RotateCcw size={20} />
                 </button>
 
                 <Select
-                  defaultValue="1"
+                  value={playbackRate}
                   onValueChange={(value) => {
                     if (waveformRef.current) {
                       waveformRef.current.setPlaybackRate(parseFloat(value));
+                      setPlaybackRate(value);
                     }
                   }}
                 >
-                  <SelectTrigger className="w-[110px]">
-                    <SelectValue placeholder="Speed" />
+                  <SelectTrigger className="w-[80px] shadow-sm border border-purple-100">
+                    <SelectValue>{playbackRate}x</SelectValue>
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[1000000]">
                     <SelectItem value="0.5">0.5x</SelectItem>
                     <SelectItem value="0.75">0.75x</SelectItem>
                     <SelectItem value="1">1x</SelectItem>
@@ -509,7 +569,7 @@ const TranscriptionDialog = ({
                 </Select>
 
                 <div className="flex items-center gap-2">
-                  <Volume2Icon size={20} className="text-gray-500" />
+                  <Volume2 size={20} className="text-gray-500" />
                   <Slider
                     min={0}
                     max={1}
@@ -791,28 +851,25 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
     volume: number,
     setVolume: (volume: number) => void
   ) => (
-    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-      <div ref={containerRef} className="mb-3" />
+    <div className={AUDIO_PLAYER_STYLES.container}>
+      <div className={AUDIO_PLAYER_STYLES.waveformContainer}>
+        <div ref={containerRef} />
+      </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-4">
+        <div className={AUDIO_PLAYER_STYLES.controlsGroup}>
           <button
-            onClick={(e) =>
-              togglePlayPause(e, wavesurferRef, isPlaying, setIsPlaying)
-            }
-            className="flex items-center px-2 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
+            onClick={() => {
+              if (wavesurferRef.current) {
+                const newTime = wavesurferRef.current.getCurrentTime() - 2;
+                wavesurferRef.current.setTime(Math.max(0, newTime));
+              }
+            }}
+            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            title="Rewind 2 seconds"
           >
-            {isPlaying ? (
-              <>
-                <AiOutlinePause className="mr-2" size={20} />
-                Pause
-              </>
-            ) : (
-              <>
-                <AiOutlinePlayCircle className="mr-2" size={20} />
-                Play
-              </>
-            )}
+            <Rewind size={16} />
+            <span className="text-xs">2s</span>
           </button>
 
           <button
@@ -822,9 +879,44 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 wavesurferRef.current.setTime(Math.max(0, newTime));
               }
             }}
-            className="p-2 text-gray-600 hover:text-purple-700"
+            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            title="Rewind 5 seconds"
           >
             <Rewind size={18} />
+            <span className="text-xs">5s</span>
+          </button>
+
+          <button
+            onClick={(e) =>
+              togglePlayPause(e, wavesurferRef, isPlaying, setIsPlaying)
+            }
+            className="flex items-center px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 gap-2"
+          >
+            {isPlaying ? (
+              <>
+                <Pause size={20} />
+                <span>Pause</span>
+              </>
+            ) : (
+              <>
+                <Play size={20} />
+                <span>Play</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              if (wavesurferRef.current) {
+                const newTime = wavesurferRef.current.getCurrentTime() + 2;
+                wavesurferRef.current.setTime(Math.min(duration, newTime));
+              }
+            }}
+            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            title="Forward 2 seconds"
+          >
+            <FastForward size={16} />
+            <span className="text-xs">2s</span>
           </button>
 
           <button
@@ -834,9 +926,11 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 wavesurferRef.current.setTime(Math.min(duration, newTime));
               }
             }}
-            className="p-2 text-gray-600 hover:text-purple-700"
+            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            title="Forward 5 seconds"
           >
             <FastForward size={18} />
+            <span className="text-xs">5s</span>
           </button>
 
           <button
@@ -844,12 +938,12 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               e.preventDefault();
               setIsLooping(!isLooping);
             }}
-            className={`flex items-center px-4 py-2 text-sm font-medium ${
+            className={`flex items-center px-3 py-2 text-sm font-medium gap-2 ${
               isLooping ? "text-purple-600" : "text-gray-500"
             } hover:text-purple-700`}
           >
-            <AiOutlineReload className="mr-2" size={20} />
-            Repeat
+            <RotateCcw size={20} />
+            <span>{isLooping ? "Stop Loop" : "Loop"}</span>
           </button>
 
           <Select
@@ -860,21 +954,20 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               }
             }}
           >
-            <SelectTrigger className="w-[110px]">
-              <SelectValue placeholder="Speed" />
+            <SelectTrigger className="w-[110px] bg-white shadow-sm">
+              <SelectValue placeholder="1x" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="0.5">0.5x</SelectItem>
-              <SelectItem value="0.75">0.75x</SelectItem>
-              <SelectItem value="1">1x</SelectItem>
-              <SelectItem value="1.25">1.25x</SelectItem>
-              <SelectItem value="1.5">1.5x</SelectItem>
-              <SelectItem value="2">2x</SelectItem>
+              {PLAYBACK_RATES.map((rate) => (
+                <SelectItem key={rate.value} value={rate.value}>
+                  {rate.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-2">
-            <Volume2Icon size={20} className="text-gray-500" />
+          <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm p-2">
+            <Volume2 size={20} className="text-gray-500" />
             <Slider
               min={0}
               max={1}
@@ -888,7 +981,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm font-medium text-purple-700 bg-white px-3 py-1.5 rounded-lg shadow-sm">
           <span>{formatTime(currentTime)}</span>
           <span>/</span>
           <span>{formatTime(duration)}</span>
