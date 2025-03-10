@@ -1,51 +1,16 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import NavBar from "@/components/blocks/NavBar";
 import Footer from "@/components/blocks/Footer";
-import {
-  ai_powered,
-  aiReportingIcon,
-  analysis,
-  bar_chart,
-  built_for_u_1,
-  dataAnalysisIcon,
-  hero_icon_2,
-  integration_1,
-  integration_2,
-  integration_3,
-  landing_img,
-  offlinePrintingIcon,
-  pie_chart,
-  poll_video,
-  pollsensei,
-  surveyCreationIcon,
-  voiceToTextIcon,
-} from "@/assets/images";
-import MarqueSlider from "../common/MarqueSlider";
 import { faqs } from "@/data/faqs";
-import Accordion from "../common/Accordion";
-import Pricing from "./Pricing";
-import ContactUsCard from "./ContactusCard";
-import { Play } from "lucide-react";
-import FeatureCard2 from "./FeatureCard2";
 import SeePricing from "./SeePricing";
 import GetAppSection from "./GetApp";
 import Subscribe from "../modals/Subsribe";
 import { useRouter } from "next/navigation";
-import EmbedVideo from "./EmbedVideo";
-import { cn } from "@/lib/utils";
-import { useRive } from "@rive-app/react-canvas";
-import {
-  setAnimationState,
-  setCount,
-} from "@/redux/slices/sensei-master.slice";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useDispatch } from "react-redux";
 import HeroSection from "../landing-page/HeroSection";
 import BenefitsSection from "../landing-page/BenefitsSection";
 import FeaturesSection from "../landing-page/FeaturesSection";
@@ -79,11 +44,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 );
 
 const LandingPage: React.FC = () => {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const testimonialsRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const featureCardY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const [subscribe, setSubscribe] = useState(false);
 
   const featuresRef = useRef<HTMLDivElement>(null);
