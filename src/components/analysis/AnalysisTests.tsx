@@ -296,7 +296,7 @@ export default function DragAndDropPage() {
           "Kruskal-Wallis Test",
           "Chi-Square Test",
           "ANOVA (Analysis of Variance)",
-          "Spearman’s Rank Correlation",
+          "Spearman's Rank Correlation",
           "Mann-Whitney U Test",
           "Sentiment Analysis",
           // "Thematic Analysis",
@@ -337,7 +337,7 @@ export default function DragAndDropPage() {
         "Kruskal-Wallis Test",
         "Chi-Square Test",
         "ANOVA (Analysis of Variance)",
-        "Spearman’s Rank Correlation",
+        "Spearman's Rank Correlation",
         "Mann-Whitney U Test",
         "Sentiment Analysis",
         // "Thematic Analysis",
@@ -386,7 +386,7 @@ export default function DragAndDropPage() {
     setShowReport(false);
   };
 
-  // Check if survey has less than 3 responses
+  // Check if survey has less than 10 responses
   if (getSurvey.isSuccess && getSurvey.data?.response_count < 10) {
     return (
       <Dialog
@@ -728,6 +728,10 @@ export default function DragAndDropPage() {
               survey={getSurvey.data}
               rerunTests={() => runTestMutation.mutate()}
               onBack={handleBackToTests}
+              selectedTestsData={testsLibrary.map((test) => ({
+                test_name: test.name,
+                test_variables: test.variables.map((v) => v.id),
+              }))}
             />
           )}
         </div>

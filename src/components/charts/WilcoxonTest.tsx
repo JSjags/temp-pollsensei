@@ -10,6 +10,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import Image from "next/image";
+import { extractDescription } from "@/utils/analysis";
 
 interface TableData {
   [key: string]: number | string[] | undefined;
@@ -19,6 +20,7 @@ interface TestData {
   table_data?: TableData;
   plot_names: string[];
   plot_urls: string[];
+  description: string;
   status?: string;
   reason?: string;
 }
@@ -172,7 +174,11 @@ const WilcoxonTestComponent: React.FC<TestProps> = (props) => {
           <CardTitle>Analysis Description</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-700">{props.test_results.description}</p>
+          <p className="text-gray-700">
+            {currentResult?.description
+              ? extractDescription(currentResult?.description)
+              : props.test_results.description}
+          </p>
         </CardContent>
       </Card>
     </div>
