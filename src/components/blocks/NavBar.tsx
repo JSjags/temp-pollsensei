@@ -32,7 +32,14 @@ const NavBar = ({
     setIsScrolled(latest > 50);
   });
 
-  const navItems = ["Benefits", "Features", "Pricing", "Resource Hub", "FAQs"];
+  const navItems = [
+    "Benefits",
+    "Features",
+    "Pricing",
+    "Resource Hub",
+    "Leaderboard",
+    "FAQs",
+  ];
 
   const handleLinkClick = (item: string) => {
     const isLandingPage = pathname === "/";
@@ -43,6 +50,8 @@ const NavBar = ({
       } else {
         router.push(`/?section=${sectionId}`);
       }
+    } else if (item === "Leaderboard") {
+      router.push("/leaderboard");
     } else {
       router.push(`/${item.toLowerCase().replace(" ", "-")}`);
     }
