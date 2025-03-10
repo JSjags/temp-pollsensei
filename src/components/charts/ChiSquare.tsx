@@ -10,6 +10,7 @@ import {
 import Image from "next/image";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { extractDescription } from "@/utils/analysis";
 
 interface ChiSquareProps {
   data: {
@@ -23,6 +24,7 @@ interface ChiSquareProps {
           };
           plot_names: string[];
           plot_urls: string[];
+          description?: string;
         };
       };
       description: string;
@@ -153,7 +155,11 @@ const ChiSquare: React.FC<ChiSquareProps> = ({ data }) => {
           <CardTitle>Analysis Description</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-700">{data.test_results.description}</p>
+          <p className="text-gray-700">
+            {currentResult?.description
+              ? extractDescription(currentResult?.description)
+              : data?.test_results?.description}
+          </p>
         </CardContent>
       </Card>
     </div>
