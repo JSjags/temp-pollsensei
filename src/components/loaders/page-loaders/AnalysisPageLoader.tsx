@@ -82,28 +82,60 @@ const VARIABLE_EXTRACTION_STATES = [
   },
 ];
 
+const REPORT_DOWNLOAD_STATES = [
+  {
+    title: "Preparing Report Data",
+    duration: 3000, // 3 seconds
+  },
+  {
+    title: "Compiling Analysis Results",
+    duration: 4000, // 4 seconds
+  },
+  {
+    title: "Generating Visualizations",
+    duration: 4500, // 4.5 seconds
+  },
+  {
+    title: "Formatting Document",
+    duration: 3500, // 3.5 seconds
+  },
+  {
+    title: "Finalizing Report",
+    duration: 3000, // 3 seconds
+  },
+];
+
 export const LoadingOverlay = ({
   title,
   subtitle,
   isAnalysing = false,
   isExtractingVariables = false,
+  isDownloadingReport = false,
 }: {
   title?: string;
   subtitle?: string;
   isAnalysing?: boolean;
   isExtractingVariables?: boolean;
+  isDownloadingReport?: boolean;
 }) => {
   const [stateIndex, setStateIndex] = React.useState(0);
 
   React.useEffect(() => {
     // Reset state index when switching between modes
     setStateIndex(0);
-  }, [isAnalysing, isExtractingVariables]);
+  }, [isAnalysing, isExtractingVariables, isDownloadingReport]);
 
   React.useEffect(() => {
-    const states = isAnalysing ? ANALYSIS_STATES : VARIABLE_EXTRACTION_STATES;
+    const states = isAnalysing
+      ? ANALYSIS_STATES
+      : isExtractingVariables
+      ? VARIABLE_EXTRACTION_STATES
+      : isDownloadingReport
+      ? REPORT_DOWNLOAD_STATES
+      : [];
+
     if (
-      (!isAnalysing && !isExtractingVariables) ||
+      (!isAnalysing && !isExtractingVariables && !isDownloadingReport) ||
       stateIndex === states.length - 1
     )
       return;
@@ -113,7 +145,7 @@ export const LoadingOverlay = ({
     }, states[stateIndex].duration);
 
     return () => clearTimeout(timeout);
-  }, [isAnalysing, isExtractingVariables, stateIndex]);
+  }, [isAnalysing, isExtractingVariables, isDownloadingReport, stateIndex]);
 
   const getState = () => {
     if (isAnalysing) {
@@ -128,6 +160,12 @@ export const LoadingOverlay = ({
         subtitle: "Please wait while we extract your variables...",
       };
     }
+    if (isDownloadingReport) {
+      return {
+        title: REPORT_DOWNLOAD_STATES[stateIndex].title,
+        subtitle: "Please wait while we prepare your report for download...",
+      };
+    }
     return {
       title: title ?? "Processing",
       subtitle: subtitle ?? "Hold on while we do the hard work for you.",
@@ -140,7 +178,7 @@ export const LoadingOverlay = ({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 bg-[#00000070] z-[1000000] bg-opacity-75 flex items-center backdrop-blur-sm justify-center"
+      className="fixed inset-0 bg-[#00000070] z-[10000000] bg-opacity-75 flex items-center backdrop-blur-sm justify-center"
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
@@ -176,10 +214,13 @@ export const LoadingOverlay = ({
 };
 
 export default function AnalysisLoadingScreen({
+  isAnalysing = false,
   isExtractingVariables = false,
+  isDownloadingReport = false,
 }: {
   isAnalysing?: boolean;
   isExtractingVariables?: boolean;
+  isDownloadingReport?: boolean;
 }) {
   return (
     <div className="min-h-screen bg-gray-100 p-8 relative z-[100000]">
@@ -195,7 +236,11 @@ export default function AnalysisLoadingScreen({
           <ContentBlock className="h-48" />
         </div>
       </div>
-      <LoadingOverlay isExtractingVariables={isExtractingVariables} />
+      <LoadingOverlay
+        isAnalysing={isAnalysing}
+        isExtractingVariables={isExtractingVariables}
+        isDownloadingReport={isDownloadingReport}
+      />
     </div>
   );
 }
