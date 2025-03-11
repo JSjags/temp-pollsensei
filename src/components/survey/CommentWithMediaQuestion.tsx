@@ -341,7 +341,15 @@ const AUDIO_PLAYER_STYLES = {
     "mt-4 p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border-2 border-purple-600 shadow-sm",
   waveformContainer: "bg-white rounded-lg p-3 mb-3 border border-purple-100",
   controlsGroup:
-    "flex items-center bg-white rounded-lg shadow-sm p-1 border border-purple-100",
+    "flex flex-wrap items-center bg-white rounded-lg shadow-sm p-1 border border-purple-100 gap-1 sm:gap-0",
+  controlsWrapper: "flex flex-wrap items-center justify-between gap-2 sm:gap-4",
+  timeDisplay:
+    "flex items-center gap-2 text-sm font-medium text-purple-700 bg-white px-3 py-1.5 rounded-lg shadow-sm mt-2 sm:mt-0",
+  buttonBase: "flex items-center gap-1 p-2 text-gray-600 hover:text-purple-700",
+  playButton:
+    "flex items-center px-2 sm:px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 gap-1 sm:gap-2",
+  volumeControl:
+    "hidden sm:flex items-center gap-2 bg-white rounded-lg shadow-sm p-2",
 };
 
 const TranscriptionDialog = ({
@@ -457,7 +465,7 @@ const TranscriptionDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-2xl z-[100000] px-4"
+        className="max-w-4xl z-[100000] px-2 sm:px-4"
         overlayClassName="z-[100000]"
       >
         <DialogHeader>
@@ -469,8 +477,8 @@ const TranscriptionDialog = ({
               <div ref={waveformContainerRef} />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className={AUDIO_PLAYER_STYLES.controlsWrapper}>
+              <div className={AUDIO_PLAYER_STYLES.controlsGroup}>
                 <button
                   onClick={() => {
                     if (waveformRef.current) {
@@ -478,7 +486,7 @@ const TranscriptionDialog = ({
                       waveformRef.current.setTime(Math.max(0, newTime));
                     }
                   }}
-                  className="p-2 text-gray-600 hover:text-purple-700"
+                  className={AUDIO_PLAYER_STYLES.buttonBase}
                   title="Rewind 2 seconds"
                 >
                   <Rewind size={16} />
@@ -492,7 +500,7 @@ const TranscriptionDialog = ({
                       waveformRef.current.setTime(Math.max(0, newTime));
                     }
                   }}
-                  className="p-2 text-gray-600 hover:text-purple-700"
+                  className={AUDIO_PLAYER_STYLES.buttonBase}
                   title="Rewind 5 seconds"
                 >
                   <Rewind size={18} />
@@ -501,9 +509,19 @@ const TranscriptionDialog = ({
 
                 <button
                   onClick={togglePlayPause}
-                  className="flex items-start px-2 py-2 text-sm font-medium text-purple-600 hover:text-purple-700"
+                  className={AUDIO_PLAYER_STYLES.playButton}
                 >
-                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                  {isPlaying ? (
+                    <>
+                      <Pause size={20} />
+                      <span className="hidden sm:inline">Pause</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play size={20} />
+                      <span className="hidden sm:inline">Play</span>
+                    </>
+                  )}
                 </button>
 
                 <button
@@ -513,7 +531,7 @@ const TranscriptionDialog = ({
                       waveformRef.current.setTime(Math.min(duration, newTime));
                     }
                   }}
-                  className="p-2 text-gray-600 hover:text-purple-700"
+                  className={AUDIO_PLAYER_STYLES.buttonBase}
                   title="Forward 2 seconds"
                 >
                   <FastForward size={16} />
@@ -527,7 +545,7 @@ const TranscriptionDialog = ({
                       waveformRef.current.setTime(Math.min(duration, newTime));
                     }
                   }}
-                  className="p-2 text-gray-600 hover:text-purple-700"
+                  className={AUDIO_PLAYER_STYLES.buttonBase}
                   title="Forward 5 seconds"
                 >
                   <FastForward size={18} />
@@ -539,36 +557,35 @@ const TranscriptionDialog = ({
                     e.preventDefault();
                     setIsLooping(!isLooping);
                   }}
-                  className={`flex items-center px-4 py-2 text-sm font-medium ${
+                  className={`${AUDIO_PLAYER_STYLES.buttonBase} ${
                     isLooping ? "text-purple-600" : "text-gray-500"
-                  } hover:text-purple-700`}
+                  }`}
                 >
                   <RotateCcw size={20} />
+                  <span>{isLooping ? "Stop Loop" : "Loop"}</span>
                 </button>
 
                 <Select
-                  value={playbackRate}
+                  defaultValue="1"
                   onValueChange={(value) => {
                     if (waveformRef.current) {
                       waveformRef.current.setPlaybackRate(parseFloat(value));
-                      setPlaybackRate(value);
                     }
                   }}
                 >
-                  <SelectTrigger className="w-[80px] shadow-sm border border-purple-100">
-                    <SelectValue>{playbackRate}x</SelectValue>
+                  <SelectTrigger className="w-[80px] sm:w-[110px] bg-white shadow-sm">
+                    <SelectValue placeholder="1x" />
                   </SelectTrigger>
-                  <SelectContent className="z-[1000000]">
-                    <SelectItem value="0.5">0.5x</SelectItem>
-                    <SelectItem value="0.75">0.75x</SelectItem>
-                    <SelectItem value="1">1x</SelectItem>
-                    <SelectItem value="1.25">1.25x</SelectItem>
-                    <SelectItem value="1.5">1.5x</SelectItem>
-                    <SelectItem value="2">2x</SelectItem>
+                  <SelectContent>
+                    {PLAYBACK_RATES.map((rate) => (
+                      <SelectItem key={rate.value} value={rate.value}>
+                        {rate.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
-                <div className="flex items-center gap-2">
+                <div className={AUDIO_PLAYER_STYLES.volumeControl}>
                   <Volume2 size={20} className="text-gray-500" />
                   <Slider
                     min={0}
@@ -576,12 +593,12 @@ const TranscriptionDialog = ({
                     step={0.1}
                     value={[volume]}
                     onValueChange={([value]) => handleVolumeChange(value)}
-                    className="w-20 !h-2"
+                    className="w-16 sm:w-20 !h-2"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className={AUDIO_PLAYER_STYLES.timeDisplay}>
                 <span>{formatTime(currentTime)}</span>
                 <span>/</span>
                 <span>{formatTime(duration)}</span>
@@ -589,7 +606,7 @@ const TranscriptionDialog = ({
             </div>
           </div>
 
-          <div className="space-y-4 px-2">
+          <div className="space-y-4">
             <TranscriptionEditor
               content={editableResponse}
               onChange={setEditableResponse}
@@ -856,7 +873,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
         <div ref={containerRef} />
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className={AUDIO_PLAYER_STYLES.controlsWrapper}>
         <div className={AUDIO_PLAYER_STYLES.controlsGroup}>
           <button
             onClick={() => {
@@ -865,7 +882,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 wavesurferRef.current.setTime(Math.max(0, newTime));
               }
             }}
-            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            className={AUDIO_PLAYER_STYLES.buttonBase}
             title="Rewind 2 seconds"
           >
             <Rewind size={16} />
@@ -879,7 +896,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 wavesurferRef.current.setTime(Math.max(0, newTime));
               }
             }}
-            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            className={AUDIO_PLAYER_STYLES.buttonBase}
             title="Rewind 5 seconds"
           >
             <Rewind size={18} />
@@ -890,17 +907,17 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
             onClick={(e) =>
               togglePlayPause(e, wavesurferRef, isPlaying, setIsPlaying)
             }
-            className="flex items-center px-3 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 gap-2"
+            className={AUDIO_PLAYER_STYLES.playButton}
           >
             {isPlaying ? (
               <>
                 <Pause size={20} />
-                <span>Pause</span>
+                <span className="hidden sm:inline">Pause</span>
               </>
             ) : (
               <>
                 <Play size={20} />
-                <span>Play</span>
+                <span className="hidden sm:inline">Play</span>
               </>
             )}
           </button>
@@ -912,7 +929,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 wavesurferRef.current.setTime(Math.min(duration, newTime));
               }
             }}
-            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            className={AUDIO_PLAYER_STYLES.buttonBase}
             title="Forward 2 seconds"
           >
             <FastForward size={16} />
@@ -926,7 +943,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 wavesurferRef.current.setTime(Math.min(duration, newTime));
               }
             }}
-            className="p-2 text-gray-600 hover:text-purple-700 flex items-center gap-1"
+            className={AUDIO_PLAYER_STYLES.buttonBase}
             title="Forward 5 seconds"
           >
             <FastForward size={18} />
@@ -938,9 +955,9 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               e.preventDefault();
               setIsLooping(!isLooping);
             }}
-            className={`flex items-center px-3 py-2 text-sm font-medium gap-2 ${
+            className={`${AUDIO_PLAYER_STYLES.buttonBase} ${
               isLooping ? "text-purple-600" : "text-gray-500"
-            } hover:text-purple-700`}
+            }`}
           >
             <RotateCcw size={20} />
             <span>{isLooping ? "Stop Loop" : "Loop"}</span>
@@ -954,7 +971,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               }
             }}
           >
-            <SelectTrigger className="w-[110px] bg-white shadow-sm">
+            <SelectTrigger className="w-[80px] sm:w-[110px] bg-white shadow-sm">
               <SelectValue placeholder="1x" />
             </SelectTrigger>
             <SelectContent>
@@ -966,7 +983,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm p-2">
+          <div className={AUDIO_PLAYER_STYLES.volumeControl}>
             <Volume2 size={20} className="text-gray-500" />
             <Slider
               min={0}
@@ -976,12 +993,12 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               onValueChange={([value]) =>
                 handleVolumeChange(value, wavesurferRef, setVolume)
               }
-              className="w-20 !h-2"
+              className="w-16 sm:w-20 !h-2"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-medium text-purple-700 bg-white px-3 py-1.5 rounded-lg shadow-sm">
+        <div className={AUDIO_PLAYER_STYLES.timeDisplay}>
           <span>{formatTime(currentTime)}</span>
           <span>/</span>
           <span>{formatTime(duration)}</span>

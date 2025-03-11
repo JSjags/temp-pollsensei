@@ -33,6 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "../ui/skeleton";
 
 const customStyles = {
   control: (provided: any) => ({
@@ -99,24 +100,35 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
       {/* Top Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         {/* Navigation Controls */}
-        <div className="flex items-center text-gray-500 min-w-[200px]">
-          <button
-            className="p-2 text-gray-500 hover:text-gray-700"
-            onClick={handlePrev}
-          >
-            &lt;
-          </button>
-          <span className="font-semibold mx-2">Response</span>
-          <span>{curerentSurvey}</span>
-          <span className="mx-1">/</span>
-          <span>{totalSurveys}</span>
-          <button
-            className="p-2 text-gray-500 hover:text-gray-700"
-            onClick={handleNext}
-          >
-            &gt;
-          </button>
-        </div>
+        {isLoading ? (
+          <div className="flex items-center text-gray-500 min-w-[200px]">
+            <Skeleton className="h-8 w-8" />
+            <Skeleton className="h-6 w-20 mx-2" />
+            <Skeleton className="h-6 w-8" />
+            <Skeleton className="h-6 w-4 mx-1" />
+            <Skeleton className="h-6 w-8" />
+            <Skeleton className="h-8 w-8" />
+          </div>
+        ) : (
+          <div className="flex items-center text-gray-500 min-w-[200px]">
+            <button
+              className="p-2 text-gray-500 hover:text-gray-700"
+              onClick={handlePrev}
+            >
+              &lt;
+            </button>
+            <span className="font-semibold mx-2">Response</span>
+            <span>{curerentSurvey}</span>
+            <span className="mx-1">/</span>
+            <span>{totalSurveys}</span>
+            <button
+              className="p-2 text-gray-500 hover:text-gray-700"
+              onClick={handleNext}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex flex-col gap-4">

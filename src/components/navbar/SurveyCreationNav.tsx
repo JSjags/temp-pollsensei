@@ -34,6 +34,7 @@ import {
 import { Button } from "../ui/button";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { Skeleton } from "../ui/skeleton";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -45,7 +46,11 @@ const SurveyCreationNav = () => {
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
   );
-  const { data } = useFetchASurveyQuery(params.id, {
+  const {
+    data,
+    isLoading: surveyLoading,
+    isFetching: surveyFetching,
+  } = useFetchASurveyQuery(params.id, {
     skip: !params.id || path.includes("edit-draft-survey"),
   });
 
@@ -91,6 +96,45 @@ const SurveyCreationNav = () => {
   const isExactSurveyPath = path === "/surveys";
   const isSurveySubpath = path.startsWith("/surveys") && isExactSurveyPath;
 
+  // Add this helper function to check loading states
+  const isLoading = (queryLoading?: boolean, queryFetching?: boolean) => {
+    return (
+      queryLoading ||
+      queryFetching ||
+      surveyResponses.isLoading ||
+      surveyResponses.isFetching
+    );
+  };
+
+  // Update the NavItemSkeleton component to be more visually appealing
+  const NavItemSkeleton = () => (
+    <div className="flex items-center gap-3">
+      <Skeleton className="h-5 w-5 rounded-full" />
+      <Skeleton className="h-4 w-16" />
+    </div>
+  );
+
+  // Update renderNavItem to use the new isLoading helper
+  const renderNavItem = (
+    icon: React.ReactNode,
+    label: string,
+    queryLoading?: boolean,
+    queryFetching?: boolean
+  ) => {
+    if (isLoading(queryLoading, queryFetching)) {
+      return <NavItemSkeleton />;
+    }
+
+    return (
+      <>
+        <BreadcrumbsIcon icon={icon} />
+        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
+          {label}
+        </span>
+      </>
+    );
+  };
+
   // Conditional return after hooks
   if (isSurveySubpath) {
     return null;
@@ -119,14 +163,12 @@ const SurveyCreationNav = () => {
                   href={""}
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                    Design
-                  </span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -141,17 +183,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={data?.data.sections === undefined ? "#B0A5BB" : ""}
-                  />
-                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                    Responses
-                  </span>
+                  {renderNavItem(
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Responses",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -168,23 +207,15 @@ const SurveyCreationNav = () => {
                   }
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      surveyResponses.isSuccess &&
+                  {renderNavItem(
+                    surveyResponses.isSuccess &&
                       surveyResponses.data?.data?.length > 0 && (
                         <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={
-                      surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length > 0
-                        ? ""
-                        : "#B0A5BB"
-                    }
-                  />
-                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                    Validation
-                  </span>
+                      ),
+                    "Validation",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -200,28 +231,20 @@ const SurveyCreationNav = () => {
                       }
                     }}
                   >
-                    <BreadcrumbsIcon
-                      icon={
-                        surveyResponses.isSuccess ? (
-                          surveyResponses.data?.data?.length >= 10 ? (
-                            <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                          ) : (
-                            <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                              <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                            </div>
-                          )
-                        ) : null
-                      }
-                      color={
-                        surveyResponses.isSuccess &&
-                        surveyResponses.data?.data?.length >= 10
-                          ? ""
-                          : "#B0A5BB"
-                      }
-                    />
-                    <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                      Analysis
-                    </span>
+                    {renderNavItem(
+                      surveyResponses.isSuccess ? (
+                        surveyResponses.data?.data?.length >= 10 ? (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                        ) : (
+                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                          </div>
+                        )
+                      ) : null,
+                      "Analysis",
+                      surveyLoading,
+                      surveyFetching
+                    )}
                     {surveyResponses.isSuccess &&
                       surveyResponses.data?.data?.length < 10 && (
                         <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
@@ -241,36 +264,20 @@ const SurveyCreationNav = () => {
                           }
                         }}
                       >
-                        <BreadcrumbsIcon
-                          icon={
-                            surveyResponses.isSuccess ? (
-                              surveyResponses.data?.data?.length >= 10 ? (
-                                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                              ) : (
-                                <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                                  <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                                </div>
-                              )
-                            ) : null
-                          }
-                          color={
-                            surveyResponses.isSuccess &&
-                            surveyResponses.data?.data?.length >= 10
-                              ? ""
-                              : "#B0A5BB"
-                          }
-                        />
-
-                        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                          Analysis
-                        </span>
-                        {surveyResponses.isSuccess &&
-                          surveyResponses.data?.data?.length < 10 && (
-                            <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
-                              {10 - (surveyResponses.data?.data?.length || 0)}{" "}
-                              more responses needed to unlock analysis
-                            </div>
-                          )}
+                        {renderNavItem(
+                          surveyResponses.isSuccess ? (
+                            surveyResponses.data?.data?.length >= 10 ? (
+                              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                            ) : (
+                              <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                                <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                              </div>
+                            )
+                          ) : null,
+                          "Analysis",
+                          surveyLoading,
+                          surveyFetching
+                        )}
                       </button>
                     </DialogTrigger>
                     <DialogContent
@@ -319,17 +326,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data?.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={!data?.data?._id ? "#B0A5BB" : ""}
-                  />
-                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                    Report
-                  </span>
+                  {renderNavItem(
+                    data?.data?.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Report",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </nav>
             </div>
@@ -339,12 +343,12 @@ const SurveyCreationNav = () => {
             {userRoles.includes("Data Collector") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -359,27 +363,26 @@ const SurveyCreationNav = () => {
                   }
                   className="flex items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={data?.data.sections === undefined ? "#B0A5BB" : ""}
-                  />
-                  <span className="ml-3 text-sm">Responses</span>
+                  {renderNavItem(
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Responses",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}
             {userRoles.includes("Data Validator") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -394,15 +397,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={data?.data.sections === undefined ? "#B0A5BB" : ""}
-                  />
-                  <span className="ml-3 text-sm">Responses</span>
+                  {renderNavItem(
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Responses",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -419,45 +421,39 @@ const SurveyCreationNav = () => {
                   }
                   className="flex items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      surveyResponses.isSuccess &&
+                  {renderNavItem(
+                    surveyResponses.isSuccess &&
                       surveyResponses.data?.data?.length > 0 && (
                         <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={
-                      surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length > 0
-                        ? ""
-                        : "#B0A5BB"
-                    }
-                  />
-                  <span className="ml-3 text-sm">Validation</span>
+                      ),
+                    "Validation",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}
             {userRoles.includes("Data Editor") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}
             {userRoles.includes("Data Analyst") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -473,33 +469,20 @@ const SurveyCreationNav = () => {
                       }
                     }}
                   >
-                    <BreadcrumbsIcon
-                      icon={
-                        surveyResponses.isSuccess ? (
-                          surveyResponses.data?.data?.length >= 10 ? (
-                            <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                          ) : (
-                            <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                              <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                            </div>
-                          )
-                        ) : null
-                      }
-                      color={
-                        surveyResponses.isSuccess &&
-                        surveyResponses.data?.data?.length >= 10
-                          ? ""
-                          : "#B0A5BB"
-                      }
-                    />
-                    <span className="ml-3 text-sm">Analysis</span>
-                    {surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length < 10 && (
-                        <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
-                          {10 - (surveyResponses.data?.data?.length || 0)} more
-                          responses needed to unlock analysis
-                        </div>
-                      )}
+                    {renderNavItem(
+                      surveyResponses.isSuccess ? (
+                        surveyResponses.data?.data?.length >= 10 ? (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                        ) : (
+                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                          </div>
+                        )
+                      ) : null,
+                      "Analysis",
+                      surveyLoading,
+                      surveyFetching
+                    )}
                   </button>
                 ) : (
                   <Dialog>
@@ -512,33 +495,20 @@ const SurveyCreationNav = () => {
                           }
                         }}
                       >
-                        <BreadcrumbsIcon
-                          icon={
-                            surveyResponses.isSuccess ? (
-                              surveyResponses.data?.data?.length >= 10 ? (
-                                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                              ) : (
-                                <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                                  <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                                </div>
-                              )
-                            ) : null
-                          }
-                          color={
-                            surveyResponses.isSuccess &&
-                            surveyResponses.data?.data?.length >= 10
-                              ? ""
-                              : "#B0A5BB"
-                          }
-                        />
-                        <span className="ml-3 text-sm">Analysis</span>
-                        {surveyResponses.isSuccess &&
-                          surveyResponses.data?.data?.length < 10 && (
-                            <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
-                              {10 - (surveyResponses.data?.data?.length || 0)}{" "}
-                              more responses needed to unlock analysis
-                            </div>
-                          )}
+                        {renderNavItem(
+                          surveyResponses.isSuccess ? (
+                            surveyResponses.data?.data?.length >= 10 ? (
+                              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                            ) : (
+                              <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                                <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                              </div>
+                            )
+                          ) : null,
+                          "Analysis",
+                          surveyLoading,
+                          surveyFetching
+                        )}
                       </button>
                     </DialogTrigger>
                     <DialogContent
@@ -587,17 +557,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data?.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={!data?.data?._id ? "#B0A5BB" : ""}
-                  />
-                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                    Report
-                  </span>
+                  {renderNavItem(
+                    data?.data?.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Report",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}
@@ -667,14 +634,12 @@ const SurveyCreationNav = () => {
                   href={""}
                   className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
-                    }
-                  />
-                  <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
-                    Design
-                  </span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
 
                 <Link
@@ -685,17 +650,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
-                      )
-                    }
-                    color={data?.data.sections === undefined ? "#B0A5BB" : ""}
-                  />
-                  <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
-                    Responses
-                  </span>
+                  {renderNavItem(
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
+                    ),
+                    "Responses",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
 
                 <Link
@@ -708,23 +670,15 @@ const SurveyCreationNav = () => {
                   }
                   className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      surveyResponses.isSuccess &&
+                  {renderNavItem(
+                    surveyResponses.isSuccess &&
                       surveyResponses.data?.data?.length > 0 && (
                         <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
-                      )
-                    }
-                    color={
-                      surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length > 0
-                        ? ""
-                        : "#B0A5BB"
-                    }
-                  />
-                  <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
-                    Validation
-                  </span>
+                      ),
+                    "Validation",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
 
                 {surveyResponses.data?.data?.length >= 10 ? (
@@ -736,55 +690,39 @@ const SurveyCreationNav = () => {
                       }
                     }}
                   >
-                    <BreadcrumbsIcon
-                      icon={
-                        surveyResponses.isSuccess ? (
-                          surveyResponses.data?.data?.length >= 10 ? (
-                            <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
-                          ) : (
-                            <div className="bg-amber-100 rounded-full flex justify-center items-center size-3 group-hover:scale-110 transition-transform duration-200">
-                              <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                            </div>
-                          )
-                        ) : null
-                      }
-                      color={
-                        surveyResponses.isSuccess &&
-                        surveyResponses.data?.data?.length >= 10
-                          ? ""
-                          : "#B0A5BB"
-                      }
-                    />
-                    <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
-                      Analysis
-                    </span>
+                    {renderNavItem(
+                      surveyResponses.isSuccess ? (
+                        surveyResponses.data?.data?.length >= 10 ? (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
+                        ) : (
+                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3 group-hover:scale-110 transition-transform duration-200">
+                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                          </div>
+                        )
+                      ) : null,
+                      "Analysis",
+                      surveyLoading,
+                      surveyFetching
+                    )}
                   </button>
                 ) : (
                   <Dialog>
                     <DialogTrigger asChild>
                       <button className="flex flex-col items-center group hover:scale-110 transition-transform duration-200">
-                        <BreadcrumbsIcon
-                          icon={
-                            surveyResponses.isSuccess ? (
-                              surveyResponses.data?.data?.length >= 10 ? (
-                                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
-                              ) : (
-                                <div className="bg-amber-100 rounded-full flex justify-center items-center size-3 group-hover:scale-110 transition-transform duration-200">
-                                  <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                                </div>
-                              )
-                            ) : null
-                          }
-                          color={
-                            surveyResponses.isSuccess &&
-                            surveyResponses.data?.data?.length >= 10
-                              ? ""
-                              : "#B0A5BB"
-                          }
-                        />
-                        <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
-                          Analysis
-                        </span>
+                        {renderNavItem(
+                          surveyResponses.isSuccess ? (
+                            surveyResponses.data?.data?.length >= 10 ? (
+                              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
+                            ) : (
+                              <div className="bg-amber-100 rounded-full flex justify-center items-center size-3 group-hover:scale-110 transition-transform duration-200">
+                                <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                              </div>
+                            )
+                          ) : null,
+                          "Analysis",
+                          surveyLoading,
+                          surveyFetching
+                        )}
                       </button>
                     </DialogTrigger>
                     <DialogContent
@@ -829,17 +767,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data?.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={!data?.data?._id ? "#B0A5BB" : ""}
-                  />
-                  <span className="text-[10px] mt-1 group-hover:text-[#5B03B2] transition-colors duration-200">
-                    Report
-                  </span>
+                  {renderNavItem(
+                    data?.data?.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Report",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </nav>
             </div>
@@ -849,12 +784,12 @@ const SurveyCreationNav = () => {
             {userRoles.includes("Data Collector") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -869,27 +804,26 @@ const SurveyCreationNav = () => {
                   }
                   className="flex items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={data?.data.sections === undefined ? "#B0A5BB" : ""}
-                  />
-                  <span className="ml-3 text-sm">Responses</span>
+                  {renderNavItem(
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Responses",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}
             {userRoles.includes("Data Validator") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -904,15 +838,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={data?.data.sections === undefined ? "#B0A5BB" : ""}
-                  />
-                  <span className="ml-3 text-sm">Responses</span>
+                  {renderNavItem(
+                    data?.data.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Responses",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -929,45 +862,39 @@ const SurveyCreationNav = () => {
                   }
                   className="flex items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      surveyResponses.isSuccess &&
+                  {renderNavItem(
+                    surveyResponses.isSuccess &&
                       surveyResponses.data?.data?.length > 0 && (
                         <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={
-                      surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length > 0
-                        ? ""
-                        : "#B0A5BB"
-                    }
-                  />
-                  <span className="ml-3 text-sm">Validation</span>
+                      ),
+                    "Validation",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}
             {userRoles.includes("Data Editor") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}
             {userRoles.includes("Data Analyst") && (
               <>
                 <Link href={""} className="flex items-center">
-                  <BreadcrumbsIcon
-                    icon={
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    }
-                  />
-                  <span className="ml-3 text-sm">Design</span>
+                  {renderNavItem(
+                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                    "Design",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
                 <Image
                   src={hyphen}
@@ -983,33 +910,20 @@ const SurveyCreationNav = () => {
                       }
                     }}
                   >
-                    <BreadcrumbsIcon
-                      icon={
-                        surveyResponses.isSuccess ? (
-                          surveyResponses.data?.data?.length >= 10 ? (
-                            <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                          ) : (
-                            <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                              <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                            </div>
-                          )
-                        ) : null
-                      }
-                      color={
-                        surveyResponses.isSuccess &&
-                        surveyResponses.data?.data?.length >= 10
-                          ? ""
-                          : "#B0A5BB"
-                      }
-                    />
-                    <span className="ml-3 text-sm">Analysis</span>
-                    {surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length < 10 && (
-                        <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
-                          {10 - (surveyResponses.data?.data?.length || 0)} more
-                          responses needed to unlock analysis
-                        </div>
-                      )}
+                    {renderNavItem(
+                      surveyResponses.isSuccess ? (
+                        surveyResponses.data?.data?.length >= 10 ? (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                        ) : (
+                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                          </div>
+                        )
+                      ) : null,
+                      "Analysis",
+                      surveyLoading,
+                      surveyFetching
+                    )}
                   </button>
                 ) : (
                   <Dialog>
@@ -1022,33 +936,20 @@ const SurveyCreationNav = () => {
                           }
                         }}
                       >
-                        <BreadcrumbsIcon
-                          icon={
-                            surveyResponses.isSuccess ? (
-                              surveyResponses.data?.data?.length >= 10 ? (
-                                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                              ) : (
-                                <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                                  <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                                </div>
-                              )
-                            ) : null
-                          }
-                          color={
-                            surveyResponses.isSuccess &&
-                            surveyResponses.data?.data?.length >= 10
-                              ? ""
-                              : "#B0A5BB"
-                          }
-                        />
-                        <span className="ml-3 text-sm">Analysis</span>
-                        {surveyResponses.isSuccess &&
-                          surveyResponses.data?.data?.length < 10 && (
-                            <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
-                              {10 - (surveyResponses.data?.data?.length || 0)}{" "}
-                              more responses needed to unlock analysis
-                            </div>
-                          )}
+                        {renderNavItem(
+                          surveyResponses.isSuccess ? (
+                            surveyResponses.data?.data?.length >= 10 ? (
+                              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                            ) : (
+                              <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                                <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                              </div>
+                            )
+                          ) : null,
+                          "Analysis",
+                          surveyLoading,
+                          surveyFetching
+                        )}
                       </button>
                     </DialogTrigger>
                     <DialogContent
@@ -1097,17 +998,14 @@ const SurveyCreationNav = () => {
                   }
                   className="flex md:flex-col lg:flex-row items-center"
                 >
-                  <BreadcrumbsIcon
-                    icon={
-                      data?.data?.sections.length > 0 && (
-                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                      )
-                    }
-                    color={!data?.data?._id ? "#B0A5BB" : ""}
-                  />
-                  <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
-                    Report
-                  </span>
+                  {renderNavItem(
+                    data?.data?.sections.length > 0 && (
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                    ),
+                    "Report",
+                    surveyLoading,
+                    surveyFetching
+                  )}
                 </Link>
               </>
             )}

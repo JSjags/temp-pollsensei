@@ -213,13 +213,13 @@ const SenseiMasterChat: React.FC<Props> = ({
   const simulateTyping = (text: string, messageId: number) => {
     senseiStateSetter("start talking");
     let displayedText = "";
-    const totalTime = text.length * 20;
+    const totalTime = text.length * 2;
 
     text.split("").forEach((char, index) => {
       setTimeout(() => {
         displayedText += char;
         updateMessage(messageId, displayedText);
-      }, index * 20);
+      }, index * 22);
     });
     senseiStateSetter("start talking");
 
