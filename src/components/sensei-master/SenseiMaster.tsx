@@ -414,133 +414,101 @@ const SenseiMaster = ({
     },
   });
 
-  // Calculate best position based on available space
+  // Add new function to ensure position stays within bounds
+  const getConstrainedPosition = useCallback((x: number, y: number) => {
+    const maxX = window.innerWidth - SENSEI_SIZE;
+    const maxY = window.innerHeight - SENSEI_SIZE;
+
+    return {
+      x: Math.max(PADDING, Math.min(x, maxX - PADDING)),
+      y: Math.max(PADDING, Math.min(y, maxY - PADDING)),
+    };
+  }, []);
+
+  // Update calculateLayout to be more robust
   const calculateLayout = useCallback((x: number, y: number) => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
+    // Calculate center points
+    const senseiCenterX = x + SENSEI_SIZE / 2;
+    const senseiCenterY = y + SENSEI_SIZE / 2;
+
+    // Determine which quadrant of the screen we're in
+    const isRightHalf = senseiCenterX > windowWidth / 2;
+    const isBottomHalf = senseiCenterY > windowHeight / 2;
+
     // Calculate available space in each direction
-    const hasSpaceLeft = x >= CHAT_WIDTH + PADDING;
-    const hasSpaceRight =
-      windowWidth - (x + SENSEI_SIZE) >= CHAT_WIDTH + PADDING;
-    const hasSpaceTop = y >= CHAT_HEIGHT + PADDING;
-    const hasSpaceBottom =
-      windowHeight - (y + SENSEI_SIZE) >= CHAT_HEIGHT + PADDING;
+    const spaceLeft = x;
+    const spaceRight = windowWidth - (x + SENSEI_SIZE);
+    const spaceTop = y;
+    const spaceBottom = windowHeight - (y + SENSEI_SIZE);
 
     let direction: Direction;
 
-    // If sensei is on the right side or there's not enough space on the right,
-    // force the chat to open on the left
-    if (x > windowWidth / 2 || !hasSpaceRight) {
-      direction = hasSpaceTop ? "top-left" : "bottom-left";
+    // Prefer opening away from screen edges
+    if (isRightHalf) {
+      // On right half of screen, prefer opening to the left
+      direction = isBottomHalf ? "top-left" : "bottom-left";
     } else {
-      // Otherwise use the normal logic for other positions
-      if (hasSpaceLeft && hasSpaceTop) {
-        direction = "top-left";
-      } else if (hasSpaceLeft && hasSpaceBottom) {
-        direction = "bottom-left";
-      } else if (hasSpaceRight && hasSpaceTop) {
-        direction = "top-right";
-      } else {
-        direction = "bottom-right";
-      }
+      // On left half of screen, prefer opening to the right
+      direction = isBottomHalf ? "top-right" : "bottom-right";
+    }
+
+    // Override if there's not enough space in preferred direction
+    if (direction.includes("left") && spaceLeft < CHAT_WIDTH + PADDING) {
+      direction = direction.includes("top") ? "top-right" : "bottom-right";
+    }
+    if (direction.includes("right") && spaceRight < CHAT_WIDTH + PADDING) {
+      direction = direction.includes("top") ? "top-left" : "bottom-left";
+    }
+    if (direction.includes("top") && spaceTop < CHAT_HEIGHT + PADDING) {
+      direction = direction.includes("left") ? "bottom-left" : "bottom-right";
+    }
+    if (direction.includes("bottom") && spaceBottom < CHAT_HEIGHT + PADDING) {
+      direction = direction.includes("left") ? "top-left" : "top-right";
     }
 
     setOpenDirection(direction);
-    return {
-      x,
-      y,
-      direction,
-    };
+    return { x, y, direction };
   }, []);
 
-  // Get chat position styles based on direction
-  const getChatPositionStyles = useCallback((direction: Direction) => {
-    switch (direction) {
-      case "top-left":
-        return {
-          right: "100%",
-          bottom: "100%",
-          marginRight: 10,
-          marginBottom: 10,
-        };
-      case "top-right":
-        return {
-          left: "100%",
-          bottom: "100%",
-          marginLeft: 10,
-          marginBottom: 10,
-        };
-      case "bottom-left":
-        return {
-          right: "100%",
-          top: 0,
-          marginRight: 10,
-        };
-      case "bottom-right":
-      default:
-        return {
-          left: "100%",
-          top: 0,
-          marginLeft: 10,
-        };
-    }
-  }, []);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setMouseDownTime(Date.now());
-    setMouseDownPosition({ x: e.clientX, y: e.clientY });
-  };
-
-  const handleMouseUp = (e: React.MouseEvent) => {
-    const mouseUpTime = Date.now();
-    const timeDiff = mouseUpTime - mouseDownTime;
-    const distanceMoved = Math.sqrt(
-      Math.pow(e.clientX - mouseDownPosition.x, 2) +
-        Math.pow(e.clientY - mouseDownPosition.y, 2)
-    );
-
-    if (timeDiff < 200 && distanceMoved < 5) {
-      if (!isCollapsed) {
-        dispatch(toggleCollapse());
-        return;
-      }
-
-      setIsRepositioning(true);
-      const { direction } = calculateLayout(position.x, position.y);
-
-      setTimeout(() => {
-        setIsRepositioning(false);
-        dispatch(toggleCollapse());
-      }, TRANSITION_DURATION * 1000);
-    }
-  };
-
-  // Pin to bottom right
-  const pinToSide = useCallback(() => {
-    const x = window.innerWidth - (SENSEI_SIZE + PADDING);
-    const y = window.innerHeight - (SENSEI_SIZE + PADDING);
-    setPosition({ x, y });
-    // Recalculate direction when pinning
-    calculateLayout(x, y);
-  }, [calculateLayout]);
-
-  // Handle window resize
+  // Improve window resize handler
   useEffect(() => {
     const handleResize = () => {
-      dispatch(setWindowWidth(window.innerWidth));
-      dispatch(setWindowHeight(window.innerHeight));
+      const newWindowWidth = window.innerWidth;
+      const newWindowHeight = window.innerHeight;
 
-      if (isPinned) {
-        pinToSide();
-      } else if (!isCollapsed) {
-        calculateLayout(position.x, position.y);
+      dispatch(setWindowWidth(newWindowWidth));
+      dispatch(setWindowHeight(newWindowHeight));
+
+      // Ensure Sensei stays in bounds after resize
+      const constrainedPosition = getConstrainedPosition(
+        position.x,
+        position.y
+      );
+
+      if (
+        constrainedPosition.x !== position.x ||
+        constrainedPosition.y !== position.y
+      ) {
+        setPosition(constrainedPosition);
+      }
+
+      if (!isCollapsed) {
+        calculateLayout(constrainedPosition.x, constrainedPosition.y);
       }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [dispatch, isPinned, isCollapsed, position, calculateLayout, pinToSide]);
+  }, [
+    dispatch,
+    position,
+    isCollapsed,
+    calculateLayout,
+    getConstrainedPosition,
+  ]);
 
   // Set initial position
   useEffect(() => {
@@ -584,6 +552,77 @@ const SenseiMaster = ({
     }
   }, [isCollapsed, position.x, position.y, calculateLayout]);
 
+  // Add back the getChatPositionStyles function that was accidentally removed
+  const getChatPositionStyles = useCallback((direction: Direction) => {
+    switch (direction) {
+      case "top-left":
+        return {
+          right: "100%",
+          bottom: "100%",
+          marginRight: 10,
+          marginBottom: 10,
+        };
+      case "top-right":
+        return {
+          left: "100%",
+          bottom: "100%",
+          marginLeft: 10,
+          marginBottom: 10,
+        };
+      case "bottom-left":
+        return {
+          right: "100%",
+          top: 0,
+          marginRight: 10,
+        };
+      case "bottom-right":
+      default:
+        return {
+          left: "100%",
+          top: 0,
+          marginLeft: 10,
+        };
+    }
+  }, []);
+
+  // Add back the mouse event handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setMouseDownTime(Date.now());
+    setMouseDownPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    const mouseUpTime = Date.now();
+    const timeDiff = mouseUpTime - mouseDownTime;
+    const distanceMoved = Math.sqrt(
+      Math.pow(e.clientX - mouseDownPosition.x, 2) +
+        Math.pow(e.clientY - mouseDownPosition.y, 2)
+    );
+
+    if (timeDiff < 200 && distanceMoved < 5) {
+      if (!isCollapsed) {
+        dispatch(toggleCollapse());
+        return;
+      }
+
+      setIsRepositioning(true);
+      calculateLayout(position.x, position.y);
+
+      setTimeout(() => {
+        setIsRepositioning(false);
+        dispatch(toggleCollapse());
+      }, TRANSITION_DURATION * 1000);
+    }
+  };
+
+  // Add back the pinToSide function
+  const pinToSide = useCallback(() => {
+    const x = window.innerWidth - (SENSEI_SIZE + PADDING);
+    const y = window.innerHeight - (SENSEI_SIZE + PADDING);
+    setPosition({ x, y });
+    calculateLayout(x, y);
+  }, [calculateLayout]);
+
   return (
     <Rnd
       position={position}
@@ -595,8 +634,14 @@ const SenseiMaster = ({
       enableResizing={false}
       disableDragging={isPinned}
       onDrag={(_e, d) => {
-        setPosition({ x: d.x, y: d.y });
-        handleDrag(d.x, d.y);
+        const constrainedPos = getConstrainedPosition(d.x, d.y);
+        setPosition(constrainedPos);
+        handleDrag(constrainedPos.x, constrainedPos.y);
+      }}
+      onDragStop={(_e, d) => {
+        const constrainedPos = getConstrainedPosition(d.x, d.y);
+        setPosition(constrainedPos);
+        calculateLayout(constrainedPos.x, constrainedPos.y);
       }}
       dragHandleClassName="drag-handle"
       style={{ zIndex: 9999999 }}

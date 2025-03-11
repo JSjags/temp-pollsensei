@@ -193,7 +193,6 @@ export default function DragAndDropPage() {
         ),
       }),
     onSuccess: (data) => {
-      console.log(data);
       toast.success("Analysis conducted successfully");
       setShowReport(true);
     },
@@ -210,10 +209,9 @@ export default function DragAndDropPage() {
         toast.error("An error occurred. Please try again.");
       }
     },
-    retry: true,
+    retry: 5,
+    retryDelay: 60000,
   });
-
-  console.log(runTestMutation);
 
   // Drag and Drop Handlers
   const handleDrop = (variable: Variable, testId: string) => {
@@ -324,12 +322,12 @@ export default function DragAndDropPage() {
 
       // Call the function on component mount
       formatTests();
+      dispatch(toggleCollapse());
     }
   }, [testsLibraryQuery.isSuccess]);
 
   useEffect(() => {
     if (createTestsQuery.isSuccess) {
-      console.log(createTestsQuery.data);
       const allowedTests = [
         "T-tests",
         // "Correlation Analysis",

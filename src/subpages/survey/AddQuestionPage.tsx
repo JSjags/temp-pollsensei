@@ -648,7 +648,16 @@ const AddQuestionPage = () => {
 
   const handleSaveDraft = async () => {
     try {
-      await saveprogress(survey);
+      await saveprogress({
+        ...survey,
+        sections: [
+          {
+            section_topic: sectionTitle,
+            section_description: sDescription,
+            questions: questions,
+          },
+        ],
+      });
       toast.success("Survey saved as draft");
       if (pendingNavigation) {
         pendingNavigation();
@@ -661,19 +670,19 @@ const AddQuestionPage = () => {
 
   const handleRouterPush = useCallback(
     (url: string) => {
-      if (questions.length > 0) {
+      if (questions?.length > 0) {
         setShowExitDialog(true);
         setPendingNavigation(() => () => router.push(url));
         return;
       }
       router.push(url);
     },
-    [survey.sections.length, router]
+    [questions, router]
   );
 
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
-      if (questions.length > 0) {
+      if (questions?.length > 0) {
         e.preventDefault();
         window.history.pushState(null, "", pathname);
         setShowExitDialog(true);
@@ -683,7 +692,7 @@ const AddQuestionPage = () => {
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [survey.sections.length, pathname]);
+  }, [questions, pathname]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -697,21 +706,25 @@ const AddQuestionPage = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [questions]);
 
-  // Add this effect to intercept clicks on links
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a");
-      if (link) {
-        const targetPath = link.getAttribute("href");
-        if (targetPath && targetPath !== pathname) {
+      if (link && !link.hasAttribute("download")) {
+        const href = link.getAttribute("href");
+        if (
+          href &&
+          !href.startsWith("#") &&
+          !href.startsWith("http") &&
+          href !== pathname
+        ) {
           e.preventDefault();
-          handleRouterPush(targetPath);
+          handleRouterPush(href);
         }
       }
     };
 
-    document.addEventListener("click", handleClick, true); // Use capture phase
+    document.addEventListener("click", handleClick, true);
     return () => document.removeEventListener("click", handleClick, true);
   }, [handleRouterPush, pathname]);
 
