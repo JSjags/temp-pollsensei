@@ -30,11 +30,11 @@ const items = [
   //   url: "/earn",
   //   icon: "/assets/sidebar/earn.svg",
   // },
-  // {
-  //   title: "Shop",
-  //   url: "/shop",
-  //   icon: "/assets/sidebar/shop.svg",
-  // },
+  {
+    title: "Shop",
+    url: "/shop",
+    icon: "/assets/sidebar/shop.svg",
+  },
   {
     title: "Survey Board",
     url: "/surveys",
