@@ -210,7 +210,7 @@ export default function DragAndDropPage() {
       }
     },
     retry: 5,
-    retryDelay: 60000,
+    retryDelay: 30000,
   });
 
   // Drag and Drop Handlers
