@@ -256,42 +256,53 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     const totalPages = Math.ceil(totalResponses / pageSize);
 
     return (
-      <Card className="p-4 mt-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={handlePrevPage}
-              disabled={currentPage === 1 || isLoading}
-              className="flex items-center gap-2"
-            >
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Previous Page
-            </Button>
-            <span>
+      <Card className="p-2 sm:p-4 mt-6 w-full">
+        <div className="flex flex-col gap-4 max-w-full">
+          <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-col xs:flex-row items-center gap-2 w-full">
+              <Button
+                variant="outline"
+                onClick={handlePrevPage}
+                disabled={currentPage === 1 || isLoading}
+                className="flex items-center gap-2 w-full xs:w-auto text-xs sm:text-sm min-w-0"
+              >
+                {isLoading && (
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
+                )}
+                <span className="whitespace-nowrap">Previous Page</span>
+              </Button>
+              <span className="hidden xs:inline text-xs sm:text-sm truncate">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages || isLoading}
+                className="flex items-center gap-2 w-full xs:w-auto text-xs sm:text-sm min-w-0"
+              >
+                {isLoading && (
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
+                )}
+                <span className="whitespace-nowrap">Next Page</span>
+              </Button>
+            </div>
+            <span className="xs:hidden text-center text-xs truncate">
               Page {currentPage} of {totalPages}
             </span>
-            <Button
-              variant="outline"
-              onClick={handleNextPage}
-              disabled={currentPage >= totalPages || isLoading}
-              className="flex items-center gap-2"
-            >
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Next Page
-            </Button>
           </div>
-          <div className="flex items-center gap-2">
-            <span>Responses per page:</span>
+          <div className="flex flex-wrap items-center gap-2 w-full justify-center text-xs sm:text-sm">
+            <span className="whitespace-nowrap">Responses per page:</span>
             <Input
               type="number"
               min="1"
               value={tempPageSize}
               onChange={handlePageSizeChange}
-              className="w-20"
+              className="w-16 sm:w-20 text-xs sm:text-sm"
               disabled={isLoading}
             />
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isLoading && (
+              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
+            )}
           </div>
         </div>
       </Card>
@@ -302,7 +313,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="lg:px-10 space-y-6"
+      className="lg:px-10 space-y-6 max-w-full overflow-x-hidden"
     >
       <Card>
         <ResponseHeader
@@ -377,7 +388,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
             </Card>
 
             {activeTab === "Individual Responses" && !isLoading && (
-              <Card className="p-6 mt-6">
+              <Card className="p-2 sm:p-6 mt-6">
                 <UserResponses
                   data={validateSource}
                   index={currentUserResponse}
