@@ -344,19 +344,20 @@ const PLAYBACK_RATES = [
 
 const AUDIO_PLAYER_STYLES = {
   container:
-    "mt-4 p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border-2 border-purple-600 shadow-sm overflow-hidden",
+    "mt-4 p-2 sm:p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border-2 border-purple-600 shadow-sm overflow-hidden",
   waveformContainer:
-    "flex items-center gap-4 bg-white rounded-lg p-3 mb-3 border border-purple-100 overflow-hidden",
+    "flex items-center gap-2 sm:gap-4 bg-white rounded-lg p-2 sm:p-3 mb-2 sm:mb-3 border border-purple-100 overflow-hidden",
   waveformWrapper:
     "flex-1 overflow-hidden [&_*]:!scrollbar-none [&_*]:!-webkit-scrollbar-none [&_*]:!-ms-overflow-style-none",
   playButton:
-    "flex-shrink-0 p-3 text-purple-600 hover:text-purple-700 bg-purple-50 rounded-full transition-all duration-200 hover:bg-purple-100",
+    "flex-shrink-0 p-2 sm:p-3 text-purple-600 hover:text-purple-700 bg-purple-50 rounded-full transition-all duration-200 hover:bg-purple-100",
   controlsGroup:
-    "flex items-center justify-center bg-white rounded-lg shadow-sm p-1 border border-purple-100 gap-1 sm:gap-6 md:gap-10",
-  controlsWrapper: "flex flex-col items-center gap-2 sm:gap-4",
+    "flex flex-wrap items-center justify-between sm:justify-center bg-white rounded-lg shadow-sm p-1 border border-purple-100 gap-1 sm:gap-6 md:gap-10",
+  controlsWrapper: "flex flex-col items-center gap-1 sm:gap-4",
   timeDisplay:
-    "flex items-end justify-end gap-2 text-sm font-medium text-purple-700 px-3 py-1.5 rounded-lg",
-  buttonBase: "flex items-center gap-1 p-2 text-gray-600 hover:text-purple-700",
+    "flex items-end justify-end gap-2 text-xs sm:text-sm font-medium text-purple-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg",
+  buttonBase:
+    "flex items-center gap-1 p-1 sm:p-2 text-gray-600 hover:text-purple-700",
   volumeControl:
     "hidden sm:flex items-center gap-2 bg-white rounded-lg shadow-sm p-2",
 };
@@ -474,13 +475,13 @@ const TranscriptionDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-4xl z-[100000] px-2 sm:px-4"
+        className="max-w-4xl z-[100000] px-2 sm:px-4 min-h-[80vh] sm:min-h-[95vh]"
         overlayClassName="z-[100000]"
       >
         <DialogHeader>
           <DialogTitle>Edit Transcription</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[60vh] overflow-y-auto space-y-6 px-2">
+        <div className="max-h-full overflow-y-auto space-y-6 px-2">
           <div className="z-10 bg-white pb-4 space-y-4">
             <div
               className={`${AUDIO_PLAYER_STYLES.container} sticky top-0 z-[1000000]`}
@@ -628,7 +629,7 @@ const TranscriptionDialog = ({
               </div>
             </div>
 
-            <div className="border-b border-gray-200 bg-gray-50 rounded-t-lg pb-10">
+            <div className="rounded-t-lg pb-10">
               <TranscriptionEditor
                 content={editableResponse}
                 onChange={setEditableResponse}
@@ -636,7 +637,7 @@ const TranscriptionDialog = ({
             </div>
           </div>
 
-          <DialogFooter className="sticky bottom-0 z-[1000000] backdrop-blur-[1000000px] border-t border-border pt-4">
+          <DialogFooter className="sticky bottom-0 z-[1000000] backdrop-blur-[1000000px] border border-border p-2 rounded-lg">
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
@@ -895,31 +896,38 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
     setVolume: (volume: number) => void
   ) => (
     <div className={AUDIO_PLAYER_STYLES.container}>
-      <div className={AUDIO_PLAYER_STYLES.timeDisplay}>
-        <div className="flex justify-end items-center gap-2 w-fit bg-white p-1 rounded-lg">
-          <span>{formatTime(currentTime)}</span>
-          <span>/</span>
-          <span>{formatTime(duration)}</span>
-        </div>
-      </div>
-      <div className={AUDIO_PLAYER_STYLES.waveformContainer}>
-        <button
-          onClick={(e) =>
-            togglePlayPause(e, wavesurferRef, isPlaying, setIsPlaying)
-          }
-          className={AUDIO_PLAYER_STYLES.playButton}
-        >
-          {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+        <div className={AUDIO_PLAYER_STYLES.waveformContainer}>
+          <button
+            onClick={(e) =>
+              togglePlayPause(e, wavesurferRef, isPlaying, setIsPlaying)
+            }
+            className={AUDIO_PLAYER_STYLES.playButton}
+          >
+            {isPlaying ? (
+              <Pause size={20} className="sm:size-24" />
+            ) : (
+              <Play size={20} className="sm:size-24" />
+            )}
+          </button>
 
-        <div className={AUDIO_PLAYER_STYLES.waveformWrapper}>
-          <div ref={containerRef} className="w-full" />
+          <div className={AUDIO_PLAYER_STYLES.waveformWrapper}>
+            <div ref={containerRef} className="w-full" />
+          </div>
+        </div>
+
+        <div className={AUDIO_PLAYER_STYLES.timeDisplay}>
+          <div className="flex justify-end items-center gap-1 sm:gap-2 w-fit bg-white p-1 rounded-lg text-xs sm:text-sm">
+            <span>{formatTime(currentTime)}</span>
+            <span>/</span>
+            <span>{formatTime(duration)}</span>
+          </div>
         </div>
       </div>
 
       <div className={AUDIO_PLAYER_STYLES.controlsWrapper}>
-        <div className={`${AUDIO_PLAYER_STYLES.controlsGroup} gap-6`}>
-          <div className="flex items-center">
+        <div className={AUDIO_PLAYER_STYLES.controlsGroup}>
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => {
                 if (wavesurferRef.current) {
@@ -930,52 +938,25 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               className={AUDIO_PLAYER_STYLES.buttonBase}
               title="Rewind 5 seconds"
             >
-              <Rewind size={18} />
-              <span className="text-xs">5s</span>
+              <Rewind size={16} className="sm:size-18" />
+              <span className="text-[10px] sm:text-xs">5s</span>
             </button>
-            <button
-              onClick={() => {
-                if (wavesurferRef.current) {
-                  const newTime = wavesurferRef.current.getCurrentTime() - 2;
-                  wavesurferRef.current.setTime(Math.max(0, newTime));
-                }
-              }}
-              className={AUDIO_PLAYER_STYLES.buttonBase}
-              title="Rewind 2 seconds"
-            >
-              <Rewind size={18} />
-              <span className="text-xs">2s</span>
-            </button>
-
-            <div className="w-px h-6 bg-gray-200 mx-2" />
 
             <button
               onClick={(e) => {
                 e.preventDefault();
                 setIsLooping(!isLooping);
               }}
-              className={`${AUDIO_PLAYER_STYLES.buttonBase} text-sm ${
+              className={`${
+                AUDIO_PLAYER_STYLES.buttonBase
+              } text-xs sm:text-sm ${
                 isLooping ? "text-purple-600" : "text-gray-500"
               }`}
             >
-              <RotateCcw size={16} />
-              <span>{isLooping ? "Stop Loop" : "Loop"}</span>
-            </button>
-
-            <div className="w-px h-6 bg-gray-200 mx-2" />
-
-            <button
-              onClick={() => {
-                if (wavesurferRef.current) {
-                  const newTime = wavesurferRef.current.getCurrentTime() + 2;
-                  wavesurferRef.current.setTime(Math.min(duration, newTime));
-                }
-              }}
-              className={AUDIO_PLAYER_STYLES.buttonBase}
-              title="Forward 2 seconds"
-            >
-              <FastForward size={18} />
-              <span className="text-xs">2s</span>
+              <RotateCcw size={14} className="sm:size-16" />
+              <span className="hidden sm:inline">
+                {isLooping ? "Stop Loop" : "Loop"}
+              </span>
             </button>
 
             <button
@@ -988,8 +969,8 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               className={AUDIO_PLAYER_STYLES.buttonBase}
               title="Forward 5 seconds"
             >
-              <FastForward size={18} />
-              <span className="text-xs">5s</span>
+              <FastForward size={16} className="sm:size-18" />
+              <span className="text-[10px] sm:text-xs">5s</span>
             </button>
           </div>
 
@@ -1002,7 +983,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 }
               }}
             >
-              <SelectTrigger className="w-[80px] sm:w-[110px] bg-white shadow-sm">
+              <SelectTrigger className="w-[60px] sm:w-[110px] bg-white shadow-sm text-xs sm:text-sm h-8 sm:h-10">
                 <SelectValue placeholder="1x" />
               </SelectTrigger>
               <SelectContent>
@@ -1036,7 +1017,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
   const renderTranscriptionSection = () => {
     if (pathname.includes("survey-response-upload") && mediaUrl) {
       return (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[calc(100vw-40px)] sm:max-w-full">
           <div className="relative w-full">
             {renderAudioControls(
               waveformContainerRef,
@@ -1050,17 +1031,17 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
             )}
           </div>
 
-          <div className="flex flex-col gap-3 w-full">
-            <div className="w-full p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[300px] overflow-y-auto">
+          <div className="flex flex-col gap-2 sm:gap-3 w-full">
+            <div className="w-full p-2 sm:p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
               <ContentRenderer content={editableResponse} />
             </div>
             <div className="flex justify-end w-full">
               <Button
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 flex items-center gap-2"
+                className="w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-2 sm:px-6 py-2 sm:py-3 text-xs sm:text-base rounded-lg font-semibold shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2"
                 onClick={() => setIsDialogOpen(true)}
               >
-                <Edit3 size={18} />
-                Edit Transcription
+                <Edit3 size={14} className="sm:size-18" />
+                <span>Edit Transcription</span>
               </Button>
             </div>
           </div>
@@ -1078,8 +1059,8 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
     }
     if (pathname.includes("survey-response-upload") && !mediaUrl) {
       return (
-        <div className="flex flex-col gap-4 w-full">
-          <div className="w-full p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[300px] overflow-y-auto">
+        <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[calc(100vw-40px)] sm:max-w-full">
+          <div className="w-full p-2 sm:p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
             <ContentRenderer content={editableResponse} />
           </div>
         </div>
