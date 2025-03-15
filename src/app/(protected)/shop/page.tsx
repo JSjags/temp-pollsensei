@@ -1,3 +1,4 @@
+'use client'
 import { ComingSoon } from "@/components/reusable/coming-soon";
 import Shop from "@/components/shop";
 
@@ -9,7 +10,7 @@ export default function Page() {
     //   eta="Q2 2025"
     //   backUrl="/dashboard"
     // />
-    <div className="px-10">
+    <div className="md:px-10">
       <Shop />
     </div>
   );

@@ -1,7 +1,8 @@
 import React from "react";
 import * as CheckboxPrimiteve from "@radix-ui/react-checkbox";
-import Check from "@/assets/images/shop/check.svg";
 import { cn } from "@/lib/utils";
+import { Check } from "@/assets/images";
+import Image from "next/image";
 
 type CheckboxElement = React.ElementRef<typeof CheckboxPrimiteve.Root>;
 type CheckboxProps = React.ComponentPropsWithoutRef<
@@ -13,7 +14,7 @@ export const Checkbox = React.forwardRef<CheckboxElement, CheckboxProps>(
     return (
       <CheckboxPrimiteve.Root
         className={cn(
-          "flex size-6 items-center justify-center rounded-full border border-[#5B03B2]",
+          "flex size-6 items-center justify-center rounded-full border-2 border-[#5B03B2]",
           "data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-transparent",
           className
         )}
@@ -22,7 +23,7 @@ export const Checkbox = React.forwardRef<CheckboxElement, CheckboxProps>(
         {...checkboxProps}
       >
         <CheckboxPrimiteve.Indicator>
-          <Check className="size-2.5" />
+          <Image src={Check} alt="checkmark" />
         </CheckboxPrimiteve.Indicator>
       </CheckboxPrimiteve.Root>
     );

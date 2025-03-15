@@ -1,18 +1,44 @@
-import Link from "next/link";
 import React from "react";
+import { TransactionHistoryTable } from "./table";
+import { TransactionHistory } from "../types";
 
-export function TransactionHistory() {
+export function TransactionHistoryTab() {
   return (
-    <div className="mt-[29px]">
-      <div className="flex items-center justify-between">
-        <p className="text-xl font-bold">Transaction History</p>
-
-        <div>
-          <Link href="#" className="font-bold text-[#5B03B2]">
-            <span className="underline">See All</span>
-          </Link>
-        </div>
-      </div>
+    <div className="mt-[29px] pb-16 max-md:px-5">
+      <TransactionHistoryTable
+        historyData={mockTransactionHistory}
+        isHistoryLoading={false}
+      />
     </div>
   );
 }
+
+function generateMockTransaction(id: number): TransactionHistory {
+  const now = new Date();
+  const randomOffset = Math.floor(Math.random() * 100000000); 
+  const date = new Date(now.getTime() - randomOffset);
+
+  return {
+    transactionId: id,
+    date,
+    timestamp: date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }),
+    type: Math.random() > 0.5 ? "Credit" : "Debit",
+    status: ["Completed", "Pending", "Failed"][
+      Math.floor(Math.random() * 3)
+    ] as "Completed" | "Pending" | "Failed",
+    activity: ["Referral Bonus", "Withdrawal", "NFT Purchase", "Reward"][
+      Math.floor(Math.random() * 4)
+    ],
+    amount: Number((Math.random() * 1000).toFixed(2)),
+  };
+}
+
+const mockTransactionHistory: TransactionHistory[] = Array.from(
+  { length: 20 },
+  (_, i) => generateMockTransaction(i + 1)
+);

@@ -13,7 +13,7 @@ export default function ProtectedLayout({
     <PrivateRoute>
       <div className="w-full pb-16 md:pb-0 bg-[#F7F8FB]">
         <SidebarProvider>
-          <div className="flex flex-1 gap-0 pr-2">
+          <div className="flex flex-1 gap-0 md:pr-2">
             <AppSidebar />
             <main className="flex-1 mt-2 rounded-md">
               <div className="flex justify-between sticky top-0 z-[100]">
