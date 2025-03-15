@@ -128,7 +128,7 @@ const SurveyCreationNav = () => {
     return (
       <>
         <BreadcrumbsIcon icon={icon} />
-        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
+        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-xs md:text-xs min-[1150px]:text-sm">
           {label}
         </span>
       </>
