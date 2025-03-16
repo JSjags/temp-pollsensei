@@ -18,10 +18,8 @@ export function makeTransactionHistoryColumns() {
       </div>
     ),
     cell: ({ getValue }) => {
-      // const { transctionId, collectionImage } = row.original;
       return (
         <div className="flex items-center gap-3 w-full">
-          {/* <div className="text-center min-w-[30px]">{row.index + 1}</div> */}
           <div className="flex items-center">
             <div className="flex flex-col gap-1.5">
               <div className="text-sm">
@@ -37,7 +35,7 @@ export function makeTransactionHistoryColumns() {
   /* -------------------------------------------------------------------------------------------------
    * Date column
    * -----------------------------------------------------------------------------------------------*/
-  // const FLOORPRICE_HEADER_NAME = "Floor Price";
+  const DATE_HEADER_NAME = "Date";
   const dateColumn = columns.accessor("date", {
     header: ({ column }) => (
       <div className="min-w-[120px]">
@@ -54,13 +52,13 @@ export function makeTransactionHistoryColumns() {
         </div>
       );
     },
-    // meta: { headerName: FLOORPRICE_HEADER_NAME },
+    meta: { headerName: DATE_HEADER_NAME },
   });
 
   /* -------------------------------------------------------------------------------------------------
    * Type column
    * -----------------------------------------------------------------------------------------------*/
-  const VOLUME_HEADER_NAME = "Volume";
+  const TYPE_HEADER_NAME = "Type";
   const typeColumn = columns.accessor("type", {
     header: ({ column }) => (
       <div className="flex min-w-[120px]">
@@ -72,21 +70,24 @@ export function makeTransactionHistoryColumns() {
 
       return (
         <div
-          className={cn("bg-[#FFDFE080] text-[#BF0508] min-w-[100px] py-1 flex items-center justify-center rounded-full", {
-            "bg-[#D3FAEC] text-[#069662]": type === "Credit",
-          })}
+          className={cn(
+            "bg-[#FFDFE080] text-[#BF0508] min-w-[100px] py-1 flex items-center justify-center rounded-full",
+            {
+              "bg-[#D3FAEC]/60 text-[#069662]": type === "Credit",
+            }
+          )}
         >
           <p className={cn("text-sm")}>{type}</p>
         </div>
       );
     },
-    meta: { headerName: VOLUME_HEADER_NAME },
+    meta: { headerName: TYPE_HEADER_NAME },
   });
 
   /* -------------------------------------------------------------------------------------------------
    * Status column
    * -----------------------------------------------------------------------------------------------*/
-  // const HOLDERCOUNT_HEADER_NAME = "Holder Count";
+  const STATUS_HEADER_NAME = "Status";
   const statusColumn = columns.accessor("status", {
     header: ({ column }) => (
       <div className="flex min-w-[120px]">
@@ -98,21 +99,25 @@ export function makeTransactionHistoryColumns() {
 
       return (
         <div
-          className={cn("bg-[#D195FC1A] text-[#6704AE] min-w-[100px] py-1 flex items-center justify-center rounded-full", {
-            "bg-[#FFDFE080] text-[#BF0508]": status === "Failed",
-            "bg-[#FCCC951A] text-[#AE5F04]": status === "Pending",
-          })}
+          className={cn(
+            "bg-[#D195FC1A] text-[#6704AE] min-w-[100px] py-1 flex items-center justify-center rounded-full",
+            {
+              "bg-[#FFDFE080] text-[#BF0508]": status === "Failed",
+              "bg-[#FCCC951A] text-[#AE5F04]": status === "Pending",
+            }
+          )}
         >
           <p className={cn("text-sm")}>{status}</p>
         </div>
       );
     },
-    // meta: { headerName: HOLDERCOUNT_HEADER_NAME },
+    meta: { headerName: STATUS_HEADER_NAME },
   });
 
   /* -------------------------------------------------------------------------------------------------
    * Activity column
    * -----------------------------------------------------------------------------------------------*/
+  const ACTIVITY_HEADER_NAME = "Activity";
   const activityColumn = columns.accessor("activity", {
     header: ({ column }) => (
       <div className="flex min-w-[120px]">
@@ -126,12 +131,13 @@ export function makeTransactionHistoryColumns() {
         </div>
       );
     },
-    // meta: { headerName: HOLDERCOUNT_HEADER_NAME },
+    meta: { headerName: ACTIVITY_HEADER_NAME },
   });
 
   /* -------------------------------------------------------------------------------------------------
    * Amount column
    * -----------------------------------------------------------------------------------------------*/
+  const AMOUNT_HEADER_NAME = "Amount";
   const amountColumn = columns.accessor("amount", {
     header: ({ column }) => (
       <div className="flex min-w-[120px]">
@@ -145,12 +151,12 @@ export function makeTransactionHistoryColumns() {
         </div>
       );
     },
-    // meta: { headerName: HOLDERCOUNT_HEADER_NAME },
+    meta: { headerName: AMOUNT_HEADER_NAME },
   });
   /* -------------------------------------------------------------------------------------------------
    * Timestamp column
    * -----------------------------------------------------------------------------------------------*/
-
+  const TIMESTAMP_HEADER_NAME = "Timestamp";
   const timestampColumn = columns.accessor("timestamp", {
     header: ({ column }) => (
       <div className="min-w-[120px]">
@@ -160,6 +166,7 @@ export function makeTransactionHistoryColumns() {
     cell: ({ getValue }) => (
       <div className="text-sm text-muted-foreground">{getValue()}</div>
     ),
+    meta: { headerName: TIMESTAMP_HEADER_NAME },
   });
 
   return [

@@ -39,36 +39,23 @@ export function TransactionHistoryTable({
 
   return (
     <HydrationBoundary state={dehydrate}>
-      <div suppressHydrationWarning>
-        <TableLayout table={table} title="Collections">
-          <Table
-            // onRowClick={(_row) => {
-            //   const collectionAddress = _row.collectionAddress;
-            //   router.push(`/collections/${collectionAddress}`);
-            // }}
-            isLoading={isHistoryLoading}
-            hasHover
-            table={table}
-          >
-            <div>
-              <p className="mb-6 text-lg">
-                Oops! No recorded transactions yet. Buy Pollcoins to use the AI
-                features of PollSensei
-              </p>
+      <TableLayout table={table}>
+        <Table isLoading={isHistoryLoading} hasHover table={table}>
+          <>
+            <p className="mb-6 text-lg">
+              Oops! No recorded transactions yet. Buy Pollcoins to use the AI
+              features of PollSensei
+            </p>
 
-              <BuyPollcoinsFlow>
-                <Button
-                  variant={"gradient"}
-                  className="font-bold gap-1 text-sm"
-                >
-                  Buy Pollcoins{" "}
-                  <Image src={Arrow} alt="icons" className="size-3.5" />
-                </Button>
-              </BuyPollcoinsFlow>
-            </div>
-          </Table>
-        </TableLayout>
-      </div>
+            <BuyPollcoinsFlow>
+              <Button variant={"gradient"} className="font-bold gap-1 text-sm">
+                Buy Pollcoins{" "}
+                <Image src={Arrow} alt="icons" className="size-3.5" />
+              </Button>
+            </BuyPollcoinsFlow>
+          </>
+        </Table>
+      </TableLayout>
     </HydrationBoundary>
   );
 }

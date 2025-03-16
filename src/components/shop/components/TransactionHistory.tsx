@@ -1,21 +1,8 @@
-import React from "react";
-import { TransactionHistoryTable } from "./table";
 import { TransactionHistory } from "../types";
-
-export function TransactionHistoryTab() {
-  return (
-    <div className="mt-[29px] pb-16 max-md:px-5">
-      <TransactionHistoryTable
-        historyData={mockTransactionHistory}
-        isHistoryLoading={false}
-      />
-    </div>
-  );
-}
 
 function generateMockTransaction(id: number): TransactionHistory {
   const now = new Date();
-  const randomOffset = Math.floor(Math.random() * 100000000); 
+  const randomOffset = Math.floor(Math.random() * 100000000);
   const date = new Date(now.getTime() - randomOffset);
 
   return {
@@ -38,7 +25,7 @@ function generateMockTransaction(id: number): TransactionHistory {
   };
 }
 
-const mockTransactionHistory: TransactionHistory[] = Array.from(
+export const mockTransactionHistory: TransactionHistory[] = Array.from(
   { length: 20 },
   (_, i) => generateMockTransaction(i + 1)
 );

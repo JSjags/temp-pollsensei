@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table } from "@tanstack/react-table";
 import { Checkbox } from "@/components/shop/components/Checkbox";
 import Link from "next/link";
+import { Columns } from "./columns";
 
 type TableLayoutProps<T> = {
   title?: string;
@@ -28,36 +29,39 @@ export function TableLayout<T>({
     }
   }, [selectedOption, table]);
   return (
-    <div className="flex flex-col w-full">
-      <div className="mt-[29px] mb-[51px]">
-        <div className="flex items-center justify-between">
+    <div className="flex flex-col w-full mt-10">
+      <div className="flex items-center justify-between mt-[29px] mb-[51px]">
+        <div className="flex items-center max-md:justify-between">
           <p className="text-xl font-bold">Transaction History</p>
-
-          <div className="flex items-center justify-between w-[55%]">
-            <div className="flex items-center gap-[22.5px]">
-              {["All", "Credit", "Debit", "Completed", "Pending"].map(
-                (option) => (
-                  <div
-                    onClick={() => setSelectedOption(option)}
-                    key={option}
-                    className="flex items-center gap-2"
-                  >
-                    <Checkbox
-                      checked={selectedOption === option}
-                      onCheckedChange={() => setSelectedOption(option)}
-                    />
-                    <label>{option}</label>
-                  </div>
-                )
-              )}
-            </div>
-            <Link href="#" className="font-bold text-[#5B03B2]">
-              <span className="underline">See All</span>
-            </Link>
+          <div className="md:hidden">
+            <Columns table={table} />
           </div>
         </div>
+
+        <div className="md:flex items-center justify-between w-[55%] hidden">
+          <div className="flex items-center gap-[22.5px]">
+            {["All", "Credit", "Debit", "Completed", "Pending"].map(
+              (option) => (
+                <div
+                  onClick={() => setSelectedOption(option)}
+                  key={option}
+                  className="flex items-center gap-2"
+                >
+                  <Checkbox
+                    checked={selectedOption === option}
+                    onCheckedChange={() => setSelectedOption(option)}
+                  />
+                  <label>{option}</label>
+                </div>
+              )
+            )}
+          </div>
+          <Link href="#" className="font-bold text-[#5B03B2]">
+            <span className="underline">See All</span>
+          </Link>
+        </div>
       </div>
-      <div className="w-full">{children}</div>
+      <div className="w-full table-auto">{children}</div>
     </div>
   );
 }

@@ -44,13 +44,13 @@ export function BuyFirstStep() {
 
   return (
     <Dialog.Body>
-      <div className="mt-5 flex flex-col items-center justify-center">
-        <p className="text-2xl font-bold">Buy Pollcoins</p>
+      <div className="mt-5 flex flex-col items-center justify-center z-50">
+        <p className="text-2xl font-bold text-new-tertiary">Buy Pollcoins</p>
 
         <div className="w-full">
           {/* Quantity of Pollcoins */}
           <div className="mt-12">
-            <label htmlFor="pollcoins" className="text-sm">
+            <label htmlFor="pollcoins" className="text-sm text-new-tertiary">
               Amount of Pollcoins
             </label>
             <Input
@@ -67,7 +67,7 @@ export function BuyFirstStep() {
             {pollErrors.quantity && (
               <p className="mt-1 text-xs text-red-600">{pollErrors.quantity}</p>
             )}
-            <p className="mt-1 text-xs">Today’s coin rate: $5 / 20 pollcoins</p>
+            <p className="mt-1 text-xs text-new-tertiary">Today’s coin rate: $5 / 20 pollcoins</p>
           </div>
 
           {/* Cost*/}

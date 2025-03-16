@@ -13,6 +13,8 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import BuyDialog from "./dialogs/BuyPollcoins";
+import { Dialog } from "@/components/ui/new-dialog";
+import Redeemable from "./dialogs/Redeemable";
 
 const analyticData = [
   {
@@ -43,27 +45,29 @@ const analyticData = [
 export function Analytics() {
   return (
     <div className="w-full">
-      <h3 className="text-2xl font-bold mb-[26px] max-md:hidden">Sensei Shop</h3>
+      <h3 className="text-2xl font-bold mb-[26px] max-md:hidden">
+        Sensei Shop
+      </h3>
       <div className="flex gap-[22px] w-full max-md:flex-col">
         <div className="bg-gradient-to-br from-[#9D50BB] via-[#5B03B2] md:min-w-[231px] max-md:w-full text-white to-[#260D3E] px-4 pt-5 md:rounded-[6.8px] pb-2 max-md:pb-0 relative">
           <p>Welcome to the</p>
           <h3 className="text-3xl max-md:text-2xl font-bold">Sensei Shop</h3>
           <div className="flex items-center justify-center w-full">
-          <div className="rounded-tr-[27px] rounded-tl-[27px] mt-[14px] pb-[11px] flex items-center flex-col justify-center gap-[11px] bg-white/10 md:px-[18px] px-10 pt-[14px] max-md:pt-6 max-md:max-w-[317px] max-md:pb-8">
-            <p className="text-[0.8125rem] md:w-[176px] w-[217px] text-center">
-              Purchase Pollcoins with cash to be able to participate in various
-              activities such as buying respondents for your survey.{" "}
-            </p>
-            <BuyDialog>
-              <Button
-                variant={"gradient"}
-                className="min-w-[131px] h-[29px] max-md:h-11 max-md:w-full font-bold gap-1 py-[7px] max-md:mt-6"
-              >
-                Buy Pollcoins
-                <Image src={Arrow} alt="icons" className="size-5" />
-              </Button>
-            </BuyDialog>
-          </div>
+            <div className="rounded-tr-[27px] rounded-tl-[27px] mt-[14px] pb-[11px] flex items-center flex-col justify-center gap-[11px] bg-white/10 md:px-[18px] px-10 pt-[14px] max-md:pt-6 max-md:max-w-[317px] max-md:pb-8">
+              <p className="text-[0.8125rem] md:w-[176px] w-[217px] text-center">
+                Purchase Pollcoins with cash to be able to participate in
+                various activities such as buying respondents for your survey.{" "}
+              </p>
+              <BuyDialog>
+                <Button
+                  variant={"gradient"}
+                  className="min-w-[131px] h-[29px] max-md:h-11 max-md:w-full font-bold gap-1 py-[7px] max-md:mt-6"
+                >
+                  Buy Pollcoins
+                  <Image src={Arrow} alt="icons" className="size-5" />
+                </Button>
+              </BuyDialog>
+            </div>
           </div>
 
           <div className="absolute top-0 right-0">
@@ -109,7 +113,14 @@ export function Analytics() {
                       </div>
                     )}
                     {label === "Redeemable Pollcoins" && (
-                      <Button variant="gradient">Redeem coins</Button>
+                      <Dialog.Root>
+                        <Dialog.Trigger>
+                          <Button variant="gradient">Redeem coins</Button>
+                        </Dialog.Trigger>
+                        <Dialog.Content className="z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%]">
+                          <Redeemable />
+                        </Dialog.Content>
+                      </Dialog.Root>
                     )}
                   </div>
                 </div>

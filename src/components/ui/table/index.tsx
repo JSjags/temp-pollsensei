@@ -2,10 +2,11 @@
 import { flexRender, Table as ReactTable } from "@tanstack/react-table";
 
 import { TableEmptyState } from "./empty";
-import { ScrollArea } from "../scroll-area";
+
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+import { ScrollArea } from "../scrollarea";
 
 type TableProps<T> = {
   table: ReactTable<T>;
@@ -18,6 +19,117 @@ type TableProps<T> = {
   onRowPointerLeave?: (event?: PointerEvent) => void;
 };
 
+// export function Table<T>({
+//   table,
+//   hasHover,
+//   onRowClick,
+//   isLoading,
+//   children,
+// }: TableProps<T>) {
+//   return (
+//     <div className="p-4 max-sm:p-2 pt-2 overflow-auto" suppressHydrationWarning>
+//       <div className="overflow-x-auto w-full">
+//         <ScrollArea>
+//           <table className="w-full rounded-2xl">
+//             {isLoading ? (
+//               <Skeleton />
+//             ) : (
+//               <>
+//                 <thead>
+//                   {table.getHeaderGroups().map((headerGroup) => (
+//                     <tr key={headerGroup.id}>
+//                       {headerGroup.headers.map((header, index) => (
+//                         <th
+//                           key={header.id}
+//                           className={cn(
+//                             "h-9 px-3 text-sm text-new-muted-foreground bg-special-bg font-normal text-left align-middle font-sans whitespace-nowrap",
+//                             "first:sticky first:left-0 first:bg-special-bg first:pl-6 first:z-10 first:rounded-l-md last:rounded-r-md",
+//                             "md:last:sticky md:last:right-0 md:last:bg-special-bg md:last:z-10"
+//                           )}
+//                         >
+//                           {header.isPlaceholder
+//                             ? null
+//                             : flexRender(
+//                                 header.column.columnDef.header,
+//                                 header.getContext()
+//                               )}
+//                         </th>
+//                       ))}
+//                     </tr>
+//                   ))}
+//                 </thead>
+//                 {table.getRowModel().rows.length > 0 && (
+//                   <tbody className="p-4 mx-4 max-sm:mx-0 max-sm:p-0">
+//                     <tr className="h-8 max-sm:px-0 px-6" />
+//                     {table.getRowModel().rows.map((row, index) => (
+//                       <motion.tr
+//                         key={row.id}
+//                         onClick={() => onRowClick?.(row.original)}
+//                         initial={{ opacity: 0, y: -34 }}
+//                         animate={{ opacity: 1, y: 0 }}
+//                         transition={{
+//                           type: "spring",
+//                           stiffness: 340,
+//                           damping: 48,
+//                           delay: index * 0.08,
+//                         }}
+//                         className={cn(
+//                           "bg-[#FEF5FED6] hover:bg-table-hover hover:z-20 cursor-pointer z-20",
+//                           {
+//                             "bg-[#F7EEFED9]": index % 2 === 0,
+//                           }
+//                         )}
+//                       >
+//                         {/* First Column Sticky with Padding to the Right */}
+//                         {row.getVisibleCells().map((cell, index) => {
+//                           return (
+//                             <motion.td
+//                               key={cell.id}
+//                               initial={{
+//                                 opacity: 0,
+//                                 y: -24,
+//                               }}
+//                               animate={{
+//                                 opacity: 1,
+//                                 y: 0,
+//                               }}
+//                               transition={{
+//                                 type: "spring",
+//                                 stiffness: 340,
+//                                 damping: 48,
+//                                 delay: index * 0.05,
+//                               }}
+//                               className={cn(
+//                                 "group/row h-16 hover:bg-table-hover",
+//                                 "first:sticky first:left-0 first:pl-3 first:z-10 group-first/row:hover:bg-table-hover",
+//                                 "md:last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl"
+//                               )}
+//                             >
+//                               <div className="h-full flex items-center group-last/row:justify-start first:pl-3 last:pr-3 group-last/row:rounded-r-xl group-data-[highlighted]:ring-2 ring-new-terciary group-first/row:rounded-l-xl first:group-data-[highlighted]:bg-tertiary">
+//                                 {" "}
+//                                 {flexRender(
+//                                   cell.column.columnDef.cell,
+//                                   cell.getContext()
+//                                 )}
+//                               </div>
+//                             </motion.td>
+//                           );
+//                         })}
+//                       </motion.tr>
+//                     ))}
+//                   </tbody>
+//                 )}
+//               </>
+//             )}
+//           </table>
+//         </ScrollArea>
+//       </div>
+//       {table.getRowModel().rows.length === 0 && (
+//         <TableEmptyState>{children}</TableEmptyState>
+//       )}
+//     </div>
+//   );
+// }
 export function Table<T>({
   table,
   hasHover,
@@ -25,11 +137,24 @@ export function Table<T>({
   isLoading,
   children,
 }: TableProps<T>) {
+  const rows = table.getRowModel().rows;
+
+  if (!isLoading && rows.length === 0) {
+    return (
+      <div
+        className="w-full your-table-container"
+        suppressHydrationWarning
+      >
+        <TableEmptyState>{children}</TableEmptyState>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 max-sm:p-2 pt-2 overflow-auto" suppressHydrationWarning>
-      <div className="overflow-x-auto w-full">
-        <ScrollArea>
-          <table className="w-full rounded-2xl">
+    <div className="overflow-x-auto" suppressHydrationWarning>
+      <div className="w-full overflow-hidden">
+        <ScrollArea.Root>
+          <table className="w-full">
             {isLoading ? (
               <Skeleton />
             ) : (
@@ -37,7 +162,7 @@ export function Table<T>({
                 <thead>
                   {table.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id}>
-                      {headerGroup.headers.map((header, index) => (
+                      {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
                           className={cn(
@@ -57,75 +182,61 @@ export function Table<T>({
                     </tr>
                   ))}
                 </thead>
-                {table.getRowModel().rows.length > 0 && (
-                  <tbody className="p-4 mx-4 max-sm:mx-0 max-sm:p-0">
-                    <tr className="h-8 max-sm:px-0 px-6" />
-                    {table.getRowModel().rows.map((row, index) => (
-                      <motion.tr
-                        key={row.id}
-                        onClick={() => onRowClick?.(row.original)}
-                        initial={{ opacity: 0, y: -34 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 340,
-                          damping: 48,
-                          delay: index * 0.08,
-                        }}
-                        className={cn(
-                          "bg-[#FEF5FED6] hover:bg-table-hover hover:z-20 cursor-pointer z-20",
-                          {
-                            "bg-[#F7EEFED9]": index % 2 === 0,
-                          }
-                        )}
-                      >
-                        {/* First Column Sticky with Padding to the Right */}
-                        {row.getVisibleCells().map((cell, index) => {
-                          return (
-                            <motion.td
-                              key={cell.id}
-                              initial={{
-                                opacity: 0,
-                                y: -24,
-                              }}
-                              animate={{
-                                opacity: 1,
-                                y: 0,
-                              }}
-                              transition={{
-                                type: "spring",
-                                stiffness: 340,
-                                damping: 48,
-                                delay: index * 0.05,
-                              }}
-                              className={cn(
-                                "group/row h-16 hover:bg-table-hover",
-                                "first:sticky first:left-0 max-md:first:bg-card first:pl-3 first:z-10 group-first/row:hover:bg-table-hover",
-                                "md:last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl"
-                              )}
-                            >
-                              <div className="h-full flex items-center group-last/row:justify-start first:pl-3 last:pr-3 group-last/row:rounded-r-xl group-data-[highlighted]:ring-2 ring-new-terciary group-first/row:rounded-l-xl first:group-data-[highlighted]:bg-tertiary">
-                                {" "}
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext()
-                                )}
-                              </div>
-                            </motion.td>
-                          );
-                        })}
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                )}
+
+                <tbody className="p-4 mx-4 max-sm:mx-0 max-sm:p-0">
+                  <tr className="h-8 max-sm:px-0 px-6" />
+                  {rows.map((row, index) => (
+                    <motion.tr
+                      key={row.id}
+                      onClick={() => onRowClick?.(row.original)}
+                      initial={{ opacity: 0, y: -34 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 340,
+                        damping: 48,
+                        delay: index * 0.08,
+                      }}
+                      className={cn(
+                        "bg-[#FEF5FED6] hover:bg-table-hover hover:z-20 cursor-pointer z-20",
+                        {
+                          "bg-[#F7EEFED9]": index % 2 === 0,
+                        }
+                      )}
+                    >
+                      {row.getVisibleCells().map((cell, index) => (
+                        <motion.td
+                          key={cell.id}
+                          initial={{ opacity: 0, y: -24 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 340,
+                            damping: 48,
+                            delay: index * 0.05,
+                          }}
+                          className={cn(
+                            "group/row h-16 hover:bg-table-hover",
+                            "first:sticky first:left-0 first:pl-3 first:z-10 group-first/row:hover:bg-table-hover",
+                            "md:last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl"
+                          )}
+                        >
+                          <div className="h-full flex items-center group-last/row:justify-start first:pl-3 last:pr-3 group-last/row:rounded-r-xl group-data-[highlighted]:ring-2 ring-new-terciary group-first/row:rounded-l-xl first:group-data-[highlighted]:bg-tertiary">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </div>
+                        </motion.td>
+                      ))}
+                    </motion.tr>
+                  ))}
+                </tbody>
               </>
             )}
           </table>
-        </ScrollArea>
+        </ScrollArea.Root>
       </div>
-      {table.getRowModel().rows.length === 0 && (
-        <TableEmptyState>{children}</TableEmptyState>
-      )}
     </div>
   );
 }
