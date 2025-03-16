@@ -71,25 +71,18 @@ const LeaderboardPage = () => {
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
             <div className="w-[150px]">
-              <Image
-                src={pollsensei_new_logo}
-                alt="PollSensei"
-                width={150}
-                height={150}
-                className="w-full h-auto"
-              />
+              <Link href="/">
+                <Image
+                  src={pollsensei_new_logo}
+                  alt="PollSensei"
+                  width={150}
+                  height={150}
+                  className="w-full h-auto"
+                />
+              </Link>
             </div>
 
             <div className="flex flex-wrap justify-center sm:justify-end gap-2 sm:gap-4">
-              <Link href="/">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hover:bg-[#5B03B2]/10 hover:text-[#5B03B2]"
-                >
-                  Home
-                </Button>
-              </Link>
               <Link href="/login">
                 <Button
                   variant="outline"
@@ -283,25 +276,18 @@ const LeaderboardPage = () => {
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="w-[150px]">
-            <Image
-              src={pollsensei_new_logo}
-              alt="PollSensei"
-              width={150}
-              height={150}
-              className="w-full h-auto"
-            />
+            <Link href="/">
+              <Image
+                src={pollsensei_new_logo}
+                alt="PollSensei"
+                width={150}
+                height={150}
+                className="w-full h-auto"
+              />
+            </Link>
           </div>
 
           <div className="flex flex-wrap justify-center sm:justify-end gap-2 sm:gap-4">
-            <Link href="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hover:bg-[#5B03B2]/10 hover:text-[#5B03B2]"
-              >
-                Home
-              </Button>
-            </Link>
             <Link href="/login">
               <Button
                 variant="outline"

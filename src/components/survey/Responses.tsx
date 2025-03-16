@@ -26,6 +26,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/shadcn-input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Loader2 } from "lucide-react";
 
 interface PathParamsProps {
   name?: string;
@@ -88,6 +92,10 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
   });
   const [currentUserResponse, setCurrentUserResponse] = useState(0);
   const [pagesNumber, setPagesNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [tempPageSize, setTempPageSize] = useState(20);
+  const debouncedPageSize = useDebounce(tempPageSize, 500);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: response_ } = useGetUserSurveyResponseQuery(params.id);
   const { data: summary_ } = useGetSurveySummaryQuery(params.id, {
@@ -105,7 +113,8 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
 
   const queryArgs = {
     id: params.id,
-    pagesNumber: pagesNumber,
+    pagesNumber: currentPage,
+    pageSize: pageSize,
     ...(Object.keys(path_params).length >= 3 ? path_params : {}),
   };
 
@@ -123,7 +132,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
       axiosInstance.get(
         `/response/validate/individual/${
           params.id
-        }?page=${pagesNumber}&page_size=20${
+        }?page=${currentPage}&page_size=${pageSize}${
           Object.keys(path_params).length
             ? `&${new URLSearchParams(path_params as Record<string, string>)}`
             : ""
@@ -184,6 +193,14 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     }
   }, [answer, question, questionType, refetch]);
 
+  useEffect(() => {
+    if (debouncedPageSize !== pageSize) {
+      setPageSize(debouncedPageSize);
+      setCurrentPage(1);
+      setCurrentUserResponse(0);
+    }
+  }, [debouncedPageSize]);
+
   const handleNext = () => {
     if (currentUserResponse < totalResponses - 1) {
       setCurrentUserResponse((prev) => prev + 1);
@@ -194,6 +211,28 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     if (currentUserResponse > 0) {
       setCurrentUserResponse((prev) => prev - 1);
     }
+  };
+
+  const handleNextPage = () => {
+    const totalPages = Math.ceil(
+      (validate_individual_response?.data?.total || 0) / pageSize
+    );
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+      setCurrentUserResponse(0);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+      setCurrentUserResponse(0);
+    }
+  };
+
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSize = parseInt(e.target.value) || 20;
+    setTempPageSize(newSize);
   };
 
   useEffect(() => {
@@ -210,6 +249,53 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     if (validateSource?._id) {
       deleteResponseMutation.mutate(validateSource._id);
     }
+  };
+
+  const renderPagination = () => {
+    const totalResponses = validate_individual_response?.data?.total || 0;
+    const totalPages = Math.ceil(totalResponses / pageSize);
+
+    return (
+      <Card className="p-4 mt-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={handlePrevPage}
+              disabled={currentPage === 1 || isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Previous Page
+            </Button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages || isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Next Page
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>Responses per page:</span>
+            <Input
+              type="number"
+              min="1"
+              value={tempPageSize}
+              onChange={handlePageSizeChange}
+              className="w-20"
+              disabled={isLoading}
+            />
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+          </div>
+        </div>
+      </Card>
+    );
   };
 
   return (
@@ -315,6 +401,11 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
                 <FeatureComing height="min-h-[20vh]" />
               </Card>
             )}
+
+            {!isLoading &&
+              !isError &&
+              activeTab === "Individual Responses" &&
+              renderPagination()}
           </motion.div>
         )}
       </AnimatePresence>

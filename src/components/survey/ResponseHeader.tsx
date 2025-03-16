@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "../ui/skeleton";
 
 interface ResponseHeaderProps {
   data: any;
@@ -101,24 +102,70 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center w-full">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex -space-x-3">
-              {respondent_data?.slice(0, 3).map((respondent, index) => {
-                const names = respondent.name.split(" ");
-                const initials = names.map((name: string) => name[0]).join("");
-                const colors = ["bg-purple-500", "bg-red-500", "bg-blue-500"];
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-10 w-10 rounded-full animate-pulse" />
+                  <Skeleton className="h-10 w-10 rounded-full animate-pulse" />
+                  <Skeleton className="h-10 w-10 rounded-full animate-pulse" />
+                </>
+              ) : (
+                respondent_data?.slice(0, 3).map((respondent, index) => {
+                  const names = respondent.name.split(" ");
+                  const initials = names
+                    .map((name: string) => name[0])
+                    .join("");
+                  const gradients = [
+                    "from-violet-500 to-fuchsia-500",
+                    "from-cyan-500 to-blue-500",
+                    "from-emerald-500 to-teal-500",
+                    "from-rose-500 to-pink-500",
+                    "from-amber-500 to-orange-500",
+                  ];
 
-                return (
-                  <Avatar
-                    key={index}
-                    className={`${colors[index]} border-2 border-white`}
-                  >
-                    <AvatarFallback>{initials}</AvatarFallback>
-                  </Avatar>
-                );
-              })}
+                  return (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.15, zIndex: 10 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Avatar
+                        className={`bg-gradient-to-br ${
+                          gradients[index % gradients.length]
+                        } border-2 border-white relative group`}
+                        title={respondent.name}
+                      >
+                        <motion.div
+                          className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 whitespace-nowrap"
+                          initial={{ y: 10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                        >
+                          {respondent.name}
+                        </motion.div>
+                        <AvatarFallback className="group-hover:animate-pulse bg-gradient-to-br">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                    </motion.div>
+                  );
+                })
+              )}
             </div>
-            <Badge variant="secondary" className="text-sm font-medium">
-              {data} Response{(respondent_data?.length ?? 0) > 1 && "s"}
-            </Badge>
+            {isLoading ? (
+              <Skeleton className="h-6 w-24" />
+            ) : (
+              <Badge
+                variant="secondary"
+                className="text-sm font-medium hover:scale-105 transition-transform"
+              >
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {data} Response{(respondent_data?.length ?? 0) > 1 && "s"}
+                </motion.span>
+              </Badge>
+            )}
           </div>
 
           <div className="flex justify-end">

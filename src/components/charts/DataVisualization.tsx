@@ -36,7 +36,16 @@ import { useRouter } from "next/navigation";
 import AnovaAnalysisComponent from "./AnovaAnalysis";
 import SpearmanCorrelation from "./SpearmanCorrelation";
 import TTest from "./TTest";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { X } from "lucide-react";
+import { LoadingOverlay } from "../loaders/page-loaders/AnalysisPageLoader";
 type TestResult = {
   status: string;
   reason: string;
@@ -115,6 +124,10 @@ interface DataVisualizationProps {
   };
   rerunTests: () => void;
   onBack?: () => void;
+  selectedTestsData: Array<{
+    test_name: string;
+    test_variables: string[];
+  }>;
 }
 
 interface DensityPoint {
@@ -244,7 +257,7 @@ const TestChartRenderer = ({ testData }: { testData: any }) => {
         </div>
       );
 
-    case "Spearman’s Rank Correlation":
+    case "Spearman's Rank Correlation":
       return (
         <div {...chartProps}>
           <SpearmanCorrelation
@@ -278,6 +291,7 @@ const VerticalDataVisualization: React.FC<DataVisualizationProps> = ({
   survey,
   rerunTests,
   onBack,
+  selectedTestsData,
 }) => {
   return (
     <div className="space-y-8 p-0 ">
@@ -302,32 +316,90 @@ interface ReportResponse {
   };
 }
 
+interface ReportPayload {
+  survey_id: string;
+  conversation_id: string;
+  variable_id: string;
+  data: Array<{
+    test_name: string;
+    test_variables: string[];
+  }>;
+}
+
 const DataVisualizationComponent = ({
   data,
   survey,
   rerunTests,
   onBack,
+  selectedTestsData,
 }: DataVisualizationProps) => {
   const router = useRouter();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [selectedTests, setSelectedTests] = useState<
+    Array<{
+      test_name: string;
+      test_variables: string[];
+    }>
+  >(selectedTestsData);
+
+  useEffect(() => {
+    setSelectedTests(selectedTestsData);
+  }, [selectedTestsData]);
+
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      setSelectedTests(selectedTestsData);
+    }
+    setShowReportDialog(open);
+  };
+
   const getReportMutation = useMutation({
     mutationFn: async () => {
+      const payload: ReportPayload = {
+        survey_id: survey._id,
+        conversation_id: survey.conversation_id,
+        variable_id: data.variable_id,
+        data: selectedTests,
+      };
+
       const response = await axiosInstance.post<ReportResponse>(
         `/survey/analysis/survey-report`,
-        {
-          survey_id: survey._id,
-        }
+        payload
       );
       return response.data;
     },
     onSuccess: async (data) => {
       router.push((data as any).report_url);
+      setShowReportDialog(false);
+      toast.success("Report downloaded successfully!");
     },
     onError: (error) => {
       console.error("Error downloading report:", error);
       toast.error("Failed to download report");
     },
+    retry: 5,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  const handleRemoveTest = (testName: string) => {
+    setSelectedTests((prev) =>
+      prev.filter((test) => test.test_name !== testName)
+    );
+  };
+
+  const handleRemoveVariable = (testName: string, variable: string) => {
+    setSelectedTests((prev) =>
+      prev.map((test) =>
+        test.test_name === testName
+          ? {
+              ...test,
+              test_variables: test.test_variables.filter((v) => v !== variable),
+            }
+          : test
+      )
+    );
+  };
 
   console.log(survey);
   console.log(data);
@@ -364,9 +436,9 @@ const DataVisualizationComponent = ({
               <span className="font-medium">Regenerate</span>
             </Button>
             <Button
-              onClick={() => getReportMutation.mutate()}
+              onClick={() => setShowReportDialog(true)}
               disabled={getReportMutation.isPending}
-              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-none hover:from-purple-700 hover:to-indigo-700 active:scale-95 group w-full sm:w-auto"
+              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white border-none hover:from-[#5B03B2] hover:to-[#9D50BB] active:scale-95 group w-full sm:w-auto"
             >
               {getReportMutation.isPending ? (
                 <>
@@ -400,293 +472,94 @@ const DataVisualizationComponent = ({
               survey={survey}
               rerunTests={rerunTests}
               onBack={onBack}
+              selectedTestsData={selectedTestsData}
             />
           </div>
         </div>
       </div>
+
+      {getReportMutation.isPending && (
+        <LoadingOverlay
+          title="Downloading Report"
+          subtitle="Hold on! Let PollSensei cook."
+          isAnalysing
+        />
+      )}
+
+      <Dialog open={showReportDialog} onOpenChange={handleDialogChange}>
+        <DialogContent
+          className="max-w-2xl max-h-[90vh] flex flex-col z-[1000000]"
+          overlayClassName="z-[1000000]"
+        >
+          <DialogHeader>
+            <DialogTitle>Download Analysis Report</DialogTitle>
+            <DialogDescription>
+              Review and modify the tests and variables to include in your
+              report
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 min-h-0 overflow-y-auto py-4 bg-gray-100 rounded-lg px-4 shadow-[inset_0_-8px_16px_-8px_rgba(0,0,0,0.3)]">
+            <div className="space-y-4">
+              {selectedTests.map((test) => (
+                <div
+                  key={test.test_name}
+                  className="border rounded-lg p-4 space-y-2 bg-white"
+                >
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">{test.test_name}</h3>
+                    <button
+                      onClick={() => handleRemoveTest(test.test_name)}
+                      className="text-gray-500 hover:text-red-500"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {test.test_variables.map((variable) => (
+                      <div
+                        key={variable}
+                        className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
+                      >
+                        <span>{variable}</span>
+                        <button
+                          onClick={() =>
+                            handleRemoveVariable(test.test_name, variable)
+                          }
+                          className="hover:text-red-500"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4 border-t pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowReportDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => getReportMutation.mutate()}
+              disabled={getReportMutation.isPending}
+              className="flex gap-2 items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white border-none hover:from-[#5B03B2] hover:to-[#9D50BB] active:scale-95 group w-full sm:w-auto"
+            >
+              {getReportMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Download Report"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
-};
-
-interface MannTestResult {
-  [key: string]: {
-    u_statistic: number;
-    p_value: number;
-  };
-}
-
-interface MannWhitneyProps {
-  test_name: string;
-  test_results: MannTestResult[];
-}
-
-const DEFAULT_TEST_RESULT: MannTestResult[] = [
-  {
-    "example-comparison": {
-      u_statistic: 300,
-      p_value: 0.04,
-    },
-  },
-];
-
-const MannWhitney: React.FC<MannWhitneyProps> = ({
-  test_name,
-  test_results = DEFAULT_TEST_RESULT,
-}) => {
-  const resultsToUse =
-    test_results.length === 0 ? DEFAULT_TEST_RESULT : test_results;
-
-  const firstResult = resultsToUse[0];
-  const [variableName, testResult] = Object.entries(firstResult)[0];
-
-  const formatPValue = (p: number): string => {
-    if (p < 0.001) return "p < 0.001";
-    return `p = ${p.toFixed(3)}`;
-  };
-
-  const isSignificant = testResult.p_value < 0.05;
-
-  const getEffectSize = (u: number): string => {
-    if (u < 200) return "Large";
-    if (u < 400) return "Medium";
-    return "Small";
-  };
-
-  const effectSize = getEffectSize(testResult.u_statistic);
-
-  const getSignificanceColor = (significant: boolean): string => {
-    return significant ? "bg-green-100" : "bg-yellow-100";
-  };
-
-  const isUsingDefault = test_results.length === 0;
-
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {test_name}
-          <Info className="h-4 w-4 text-gray-500" />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isUsingDefault && (
-          <Alert className="bg-blue-50">
-            <AlertDescription>
-              Showing example data. No test results were provided.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="text-lg font-medium capitalize">
-          Variable: {variableName.replace(/[-_]/g, " ")}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-blue-50 p-4">
-            <div className="text-sm text-gray-600">U Statistic</div>
-            <div className="text-2xl font-bold">{testResult.u_statistic}</div>
-            <div className="text-sm text-gray-600">
-              Effect Size: {effectSize}
-            </div>
-          </div>
-
-          <div
-            className={`rounded-lg p-4 ${getSignificanceColor(isSignificant)}`}
-          >
-            <div className="text-sm text-gray-600">P-Value</div>
-            <div className="text-2xl font-bold">
-              {formatPValue(testResult.p_value)}
-            </div>
-            <div className="text-sm text-gray-600">
-              {isSignificant ? "Statistically Significant" : "Not Significant"}
-            </div>
-          </div>
-        </div>
-
-        <Alert className="mt-4">
-          <AlertDescription>
-            {isSignificant
-              ? `There is strong statistical evidence to suggest a significant difference between the groups (${formatPValue(
-                  testResult.p_value
-                )}). The test shows a ${effectSize.toLowerCase()} effect size based on the U statistic of ${
-                  testResult.u_statistic
-                }.`
-              : `There is not enough statistical evidence to suggest a significant difference between the groups (${formatPValue(
-                  testResult.p_value
-                )}). The test shows a ${effectSize.toLowerCase()} effect size based on the U statistic of ${
-                  testResult.u_statistic
-                }.`}
-          </AlertDescription>
-        </Alert>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface WilcoxinTestResult {
-  [key: string]:
-    | {
-        w_statistic: number;
-        p_value: number;
-      }
-    | string
-    | null;
-}
-
-const generateDeterministicData = (wStatistic: number, pValue: number) => {
-  const data = [];
-  const effectSize = (wStatistic / 1000) * 2;
-  const variance = Math.max(0.1, pValue) * 1.5;
-
-  for (let i = 0; i < 50; i++) {
-    const baseValue = (i / 50) * 12;
-    const seed = Math.sin(i * 13.37);
-    const variation = seed * variance;
-    const before = baseValue + variation;
-    const after = before + effectSize + seed * variance * 0.5;
-
-    data.push({
-      before: Math.max(0, Math.min(12, before)),
-      after: Math.max(0, Math.min(12, after)),
-    });
-  }
-
-  return data.sort((a, b) => a.before - b.before);
-};
-
-const Wilcoxon: React.FC<{ test_data: WilcoxinTestResult[] }> = ({
-  test_data = [],
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-
-  useEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
-      }
-    };
-
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, []);
-
-  const resultsToUse =
-    test_data.length === 0
-      ? [
-          {
-            "product_experience-customer_service_quality": {
-              w_statistic: 245,
-              p_value: 0.03,
-            },
-          },
-        ]
-      : test_data;
-
-  const validResults = resultsToUse.filter((result) => {
-    const [_, value] = Object.entries(result)[0];
-    return value !== null && typeof value !== "string";
-  });
-
-  const firstValidResult = validResults[0];
-  const [comparisonName, stats] = firstValidResult
-    ? Object.entries(firstValidResult)[0]
-    : [null, null];
-
-  const scatterData = useMemo(() => {
-    if (stats && typeof stats !== "string") {
-      return generateDeterministicData(
-        (stats as any).w_statistic,
-        (stats as any).p_value
-      );
-    }
-    return generateDeterministicData(245, 0.03);
-  }, [stats]);
-
-  const isUsingDefault = test_data.length === 0;
-
-  const aspectRatio = Math.min(1.2, Math.max(0.8, containerWidth / 800));
-  const height = containerWidth * aspectRatio;
-
-  const margins = {
-    top: Math.max(20, containerWidth * 0.05),
-    right: Math.max(15, containerWidth * 0.03),
-    bottom: Math.max(20, containerWidth * 0.05),
-    left: Math.max(40, containerWidth * 0.06),
-  };
-
-  return (
-    <Card className="w-full">
-      <CardHeader className="space-y-0 pb-2">
-        <CardTitle className="text-center text-xl font-normal capitalize">
-          {comparisonName?.split(/[-_]/).join(" vs ")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isUsingDefault && (
-          <Alert className="mb-4 bg-blue-50">
-            <AlertDescription>
-              Showing example data. No valid test results were provided.
-            </AlertDescription>
-          </Alert>
-        )}
-        <div className="relative" ref={containerRef}>
-          <div className="absolute left-8 top-4 z-10 rounded-md bg-purple-50 px-2 py-1 text-sm text-purple-900">
-            {stats &&
-            typeof stats !== "string" &&
-            (stats as any).p_value !== undefined
-              ? `W = ${(stats as any).w_statistic}, p ${
-                  (stats as any).p_value < 0.001
-                    ? "< 0.001"
-                    : `= ${(stats as any).p_value.toFixed(3)}`
-                }`
-              : "Statistics not available"}
-          </div>
-          <div style={{ height: `${height}px`, width: "100%" }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={margins}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                <XAxis
-                  type="number"
-                  dataKey="before"
-                  name="Before"
-                  domain={[0, 12]}
-                  tickCount={7}
-                  stroke="#666"
-                  label={{ value: "Before", position: "bottom", offset: 0 }}
-                />
-                <YAxis
-                  type="number"
-                  dataKey="after"
-                  name="After"
-                  domain={[0, 12]}
-                  tickCount={7}
-                  stroke="#666"
-                  label={{
-                    value: "After",
-                    angle: -90,
-                    position: "left",
-                    offset: 20,
-                  }}
-                />
-                <ZAxis range={[20, 60]} />
-                <ReferenceLine
-                  segment={[
-                    { x: 0, y: 0 },
-                    { x: 12, y: 12 },
-                  ]}
-                  stroke="red"
-                  strokeDasharray="5 5"
-                  ifOverflow="extendDomain"
-                />
-                <Scatter data={scatterData} fill="#80008070" opacity={0.7} />
-              </ScatterChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 
