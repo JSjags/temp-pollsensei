@@ -29,17 +29,19 @@ export function TableLayout<T>({
     }
   }, [selectedOption, table]);
   return (
-    <div className="flex flex-col w-full mt-10">
-      <div className="flex items-center justify-between mt-[29px] mb-[51px]">
-        <div className="flex items-center max-md:justify-between">
+    <div className="flex flex-col w-full mt-10 max-md:px-5">
+      <div className="flex items-center justify-between mt-[29px] mb-[51px] max-md:flex-col max-md:gap-4">
+        <div className="flex items-center max-md:justify-between w-full">
           <p className="text-xl font-bold">Transaction History</p>
-          <div className="md:hidden">
-            <Columns table={table} />
-          </div>
+          {table.getRowModel().rows.length > 0 && (
+            <div className="md:hidden">
+              <Columns table={table} />
+            </div>
+          )}
         </div>
 
-        <div className="md:flex items-center justify-between w-[55%] hidden">
-          <div className="flex items-center gap-[22.5px]">
+        <div className="md:flex items-center justify-between md:w-[55%] w-full">
+          <div className="flex items-center md:gap-[22.5px] gap-3">
             {["All", "Credit", "Debit", "Completed", "Pending"].map(
               (option) => (
                 <div
@@ -51,12 +53,12 @@ export function TableLayout<T>({
                     checked={selectedOption === option}
                     onCheckedChange={() => setSelectedOption(option)}
                   />
-                  <label>{option}</label>
+                  <label className="max-md:text-xs">{option}</label>
                 </div>
               )
             )}
           </div>
-          <Link href="#" className="font-bold text-[#5B03B2]">
+          <Link href="#" className="font-bold text-[#5B03B2] max-md:hidden">
             <span className="underline">See All</span>
           </Link>
         </div>
