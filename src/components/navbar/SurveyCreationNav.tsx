@@ -197,7 +197,8 @@ const SurveyCreationNav = () => {
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
                 />
-                <Link
+                {/* Validation link commented out */}
+                {/* <Link
                   href={
                     path.includes(
                       "survey-response-upload?tab=Individual+Responses"
@@ -216,12 +217,12 @@ const SurveyCreationNav = () => {
                     surveyLoading,
                     surveyFetching
                   )}
-                </Link>
-                <Image
+                </Link> */}
+                {/* <Image
                   src={hyphen}
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
+                /> */}
                 {surveyResponses.data?.data?.length >= 10 ? (
                   <button
                     className="flex md:flex-col lg:flex-row items-center group relative"
@@ -406,12 +407,13 @@ const SurveyCreationNav = () => {
                     surveyFetching
                   )}
                 </Link>
-                <Image
+                {/* <Image
                   src={hyphen}
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                <Link
+                /> */}
+                {/* Validation link commented out */}
+                {/* <Link
                   href={
                     path.includes(
                       "survey-response-upload?tab=Individual+Responses"
@@ -430,7 +432,7 @@ const SurveyCreationNav = () => {
                     surveyLoading,
                     surveyFetching
                   )}
-                </Link>
+                </Link> */}
               </>
             )}
             {userRoles.includes("Data Editor") && (
@@ -572,7 +574,7 @@ const SurveyCreationNav = () => {
 
           {path.includes("survey-response-upload") ? (
             <Button
-              className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+              className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
               onClick={() => {
                 dispatch(openUpload());
               }}
@@ -586,6 +588,7 @@ const SurveyCreationNav = () => {
               path === "/surveys/add-question-m" ||
               path === "/surveys/survey-list" ||
               path.includes("validate-response") ||
+              path.includes("validate-res") ||
               path.includes("/surveys/question")
                 ? " "
                 : " "}
@@ -660,7 +663,8 @@ const SurveyCreationNav = () => {
                   )}
                 </Link>
 
-                <Link
+                {/* Validation link commented out */}
+                {/* <Link
                   href={
                     path.includes(
                       "survey-response-upload?tab=Individual+Responses"
@@ -679,7 +683,7 @@ const SurveyCreationNav = () => {
                     surveyLoading,
                     surveyFetching
                   )}
-                </Link>
+                </Link> */}
 
                 {surveyResponses.data?.data?.length >= 10 ? (
                   <button

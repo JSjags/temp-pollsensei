@@ -409,7 +409,8 @@ const LeaderboardPage = () => {
         <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
           <AlertCircle className="h-4 w-4" />
           <p className="text-sm italic">
-            Fake accounts are being purged from our database on an ongoing basis
+            Fake and duplicate accounts are being purged from our database on an
+            ongoing basis
           </p>
         </div>
 
