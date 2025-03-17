@@ -256,53 +256,52 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     const totalPages = Math.ceil(totalResponses / pageSize);
 
     return (
-      <Card className="p-2 sm:p-4 mt-6 w-full">
-        <div className="flex flex-col gap-4 max-w-full">
-          <div className="flex flex-col gap-4 w-full">
-            <div className="flex flex-col xs:flex-row items-center gap-2 w-full">
+      <Card className="p-3 sm:p-6 mt-6 w-full">
+        <div className="flex flex-col gap-6 max-w-full">
+          {/* Pagination Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <Button
                 variant="outline"
                 onClick={handlePrevPage}
                 disabled={currentPage === 1 || isLoading}
-                className="flex items-center gap-2 w-full xs:w-auto text-xs sm:text-sm min-w-0"
+                className="flex items-center gap-2 text-sm min-w-[120px] sm:min-w-[140px]"
               >
-                {isLoading && (
-                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
-                )}
-                <span className="whitespace-nowrap">Previous Page</span>
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Previous Page
               </Button>
-              <span className="hidden xs:inline text-xs sm:text-sm truncate">
-                Page {currentPage} of {totalPages}
-              </span>
               <Button
                 variant="outline"
                 onClick={handleNextPage}
                 disabled={currentPage >= totalPages || isLoading}
-                className="flex items-center gap-2 w-full xs:w-auto text-xs sm:text-sm min-w-0"
+                className="flex items-center gap-2 text-sm min-w-[120px] sm:min-w-[140px]"
               >
-                {isLoading && (
-                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
-                )}
-                <span className="whitespace-nowrap">Next Page</span>
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Next Page
               </Button>
             </div>
-            <span className="xs:hidden text-center text-xs truncate">
-              Page {currentPage} of {totalPages}
-            </span>
+
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <span className="font-medium">
+                Page {currentPage} of {totalPages}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 w-full justify-center text-xs sm:text-sm">
-            <span className="whitespace-nowrap">Responses per page:</span>
-            <Input
-              type="number"
-              min="1"
-              value={tempPageSize}
-              onChange={handlePageSizeChange}
-              className="w-16 sm:w-20 text-xs sm:text-sm"
-              disabled={isLoading}
-            />
-            {isLoading && (
-              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin flex-shrink-0" />
-            )}
+
+          {/* Page Size Controls */}
+          <div className="flex items-center justify-center sm:justify-end gap-3 w-full">
+            <span className="text-sm font-medium">Responses per page:</span>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="1"
+                value={tempPageSize}
+                onChange={handlePageSizeChange}
+                className="w-20 text-sm"
+                disabled={isLoading}
+              />
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            </div>
           </div>
         </div>
       </Card>
