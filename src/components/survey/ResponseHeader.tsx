@@ -40,6 +40,9 @@ interface ResponseHeaderProps {
   response_id?: string;
   isLoading: boolean;
   isDeletingResponse: boolean;
+  currentPage: number;
+  totalCount: number;
+  pageSize: number;
 }
 
 const ResponseHeader: React.FC<ResponseHeaderProps> = ({
@@ -58,6 +61,9 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   surveyData,
   isLoading,
   isDeletingResponse,
+  currentPage,
+  totalCount,
+  pageSize,
 }) => {
   const dispatch = useDispatch();
   const params = useParams();
@@ -163,7 +169,7 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {data} Response{(respondent_data?.length ?? 0) > 1 && "s"}
+                    {totalCount} Response{(totalCount ?? 0) > 1 && "s"}
                   </motion.span>
                 </Badge>
               )}
@@ -287,6 +293,9 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                 surveyData={surveyData}
                 isLoading={isLoading}
                 isDeletingResponse={isDeletingResponse}
+                currentPage={currentPage}
+                totalCount={totalCount}
+                pageSize={pageSize}
               />
             </motion.div>
           )}
