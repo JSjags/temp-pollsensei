@@ -113,7 +113,7 @@ const MenuButton = ({
 }) => (
   <button
     onClick={onClick}
-    className={`p-2 rounded-lg hover:bg-purple-50 transition-colors ${
+    className={`p-1 sm:p-2 rounded-lg hover:bg-purple-50 transition-colors ${
       isActive ? "text-purple-600 bg-purple-50" : "text-gray-600"
     }`}
   >
@@ -169,65 +169,63 @@ const TranscriptionEditor = ({
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white focus-within:ring-2 focus-within:ring-[#5B03B2] focus-within:border-transparent">
-      <div className="flex flex-wrap  sticky top-[224px] z-[1000000] items-center gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-        <div className="flex items-center gap-1">
-          <MenuButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 1 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 1 })}
-          >
-            <Heading1 size={18} />
-          </MenuButton>
-          <MenuButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 2 })}
-          >
-            <Heading2 size={18} />
-          </MenuButton>
-          <MenuButton
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 3 }).run()
-            }
-            isActive={editor.isActive("heading", { level: 3 })}
-          >
-            <Heading3 size={18} />
-          </MenuButton>
-          <div className="w-px h-6 bg-gray-200 mx-1" />
-        </div>
+      <div className="flex flex-wrap items-center gap-1 p-1 sm:p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg sticky top-[244px] sm:top-[224px] z-50">
+        <MenuButton
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run()
+          }
+          isActive={editor.isActive("heading", { level: 1 })}
+        >
+          <Heading1 size={16} />
+        </MenuButton>
+        <MenuButton
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
+          isActive={editor.isActive("heading", { level: 2 })}
+        >
+          <Heading2 size={16} />
+        </MenuButton>
+        <MenuButton
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
+          isActive={editor.isActive("heading", { level: 3 })}
+        >
+          <Heading3 size={16} />
+        </MenuButton>
+        <div className="w-px h-6 bg-gray-200 mx-1" />
 
         <div className="flex items-center gap-1">
           <MenuButton
             onClick={() => editor.chain().focus().toggleBold().run()}
             isActive={editor.isActive("bold")}
           >
-            <Bold size={18} />
+            <Bold size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
             isActive={editor.isActive("italic")}
           >
-            <Italic size={18} />
+            <Italic size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().toggleUnderline().run()}
             isActive={editor.isActive("underline")}
           >
-            <UnderlineIcon size={18} />
+            <UnderlineIcon size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().toggleStrike().run()}
             isActive={editor.isActive("strike")}
           >
-            <Strikethrough size={18} />
+            <Strikethrough size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().toggleHighlight().run()}
             isActive={editor.isActive("highlight")}
           >
-            <Highlighter size={18} />
+            <Highlighter size={16} />
           </MenuButton>
           <div className="w-px h-6 bg-gray-200 mx-1" />
         </div>
@@ -237,19 +235,19 @@ const TranscriptionEditor = ({
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             isActive={editor.isActive("bulletList")}
           >
-            <List size={18} />
+            <List size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             isActive={editor.isActive("orderedList")}
           >
-            <ListOrdered size={18} />
+            <ListOrdered size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             isActive={editor.isActive("blockquote")}
           >
-            <TextQuote size={18} />
+            <TextQuote size={16} />
           </MenuButton>
           <div className="w-px h-6 bg-gray-200 mx-1" />
         </div>
@@ -259,19 +257,19 @@ const TranscriptionEditor = ({
             onClick={() => editor.chain().focus().setTextAlign("left").run()}
             isActive={editor.isActive({ textAlign: "left" })}
           >
-            <AlignLeft size={18} />
+            <AlignLeft size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().setTextAlign("center").run()}
             isActive={editor.isActive({ textAlign: "center" })}
           >
-            <AlignCenter size={18} />
+            <AlignCenter size={16} />
           </MenuButton>
           <MenuButton
             onClick={() => editor.chain().focus().setTextAlign("right").run()}
             isActive={editor.isActive({ textAlign: "right" })}
           >
-            <AlignRight size={18} />
+            <AlignRight size={16} />
           </MenuButton>
         </div>
 
@@ -279,15 +277,18 @@ const TranscriptionEditor = ({
 
         <div className="flex items-center gap-1">
           <MenuButton onClick={() => editor.chain().focus().undo().run()}>
-            <Undo size={18} />
+            <Undo size={16} />
           </MenuButton>
           <MenuButton onClick={() => editor.chain().focus().redo().run()}>
-            <Redo size={18} />
+            <Redo size={16} />
           </MenuButton>
         </div>
       </div>
 
-      <EditorContent editor={editor} />
+      <EditorContent
+        editor={editor}
+        className="prose prose-sm sm:prose max-w-none focus:outline-none min-h-[150px] sm:min-h-[200px] px-2 sm:px-4 py-2 sm:py-3"
+      />
 
       <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
         <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white shadow-lg border border-gray-200">
@@ -346,18 +347,18 @@ const AUDIO_PLAYER_STYLES = {
   container:
     "mt-4 p-2 sm:p-4 bg-gradient-to-r from-gray-50 to-purple-50 rounded-lg border-2 border-purple-600 shadow-sm overflow-hidden",
   waveformContainer:
-    "flex items-center gap-2 sm:gap-4 bg-white rounded-lg p-2 sm:p-3 mb-2 sm:mb-3 border border-purple-100 overflow-hidden",
+    "flex items-center gap-2 sm:gap-4 bg-white rounded-lg p-2 sm:p-3 mb-3 border border-purple-100 overflow-hidden",
   waveformWrapper:
     "flex-1 overflow-hidden [&_*]:!scrollbar-none [&_*]:!-webkit-scrollbar-none [&_*]:!-ms-overflow-style-none",
   playButton:
     "flex-shrink-0 p-2 sm:p-3 text-purple-600 hover:text-purple-700 bg-purple-50 rounded-full transition-all duration-200 hover:bg-purple-100",
   controlsGroup:
-    "flex flex-wrap items-center justify-between sm:justify-center bg-white rounded-lg shadow-sm p-1 border border-purple-100 gap-1 sm:gap-6 md:gap-10",
-  controlsWrapper: "flex flex-col items-center gap-1 sm:gap-4",
+    "flex flex-wrap items-center justify-center bg-white rounded-lg shadow-sm p-1 border border-purple-100 gap-1 sm:gap-6 md:gap-10",
+  controlsWrapper: "flex flex-col items-center gap-2 sm:gap-4",
   timeDisplay:
     "flex items-end justify-end gap-2 text-xs sm:text-sm font-medium text-purple-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg",
   buttonBase:
-    "flex items-center gap-1 p-1 sm:p-2 text-gray-600 hover:text-purple-700",
+    "flex items-center gap-1 p-1 sm:p-2 text-gray-600 hover:text-purple-700 text-xs sm:text-sm",
   volumeControl:
     "hidden sm:flex items-center gap-2 bg-white rounded-lg shadow-sm p-2",
 };
@@ -475,16 +476,18 @@ const TranscriptionDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-4xl z-[100000] px-2 sm:px-4 min-h-[80vh] sm:min-h-[95vh]"
+        className="max-w-4xl z-[100000] h-[95vh] sm:h-[90vh] px-2 sm:px-4 w-[95vw] sm:w-auto"
         overlayClassName="z-[100000]"
       >
         <DialogHeader>
-          <DialogTitle>Edit Transcription</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">
+            Edit Transcription
+          </DialogTitle>
         </DialogHeader>
-        <div className="max-h-full overflow-y-auto space-y-6 px-2">
+        <div className="overflow-y-auto space-y-4 sm:space-y-6 px-1 sm:px-2">
           <div className="z-10 bg-white pb-4 space-y-4">
             <div
-              className={`${AUDIO_PLAYER_STYLES.container} sticky top-0 z-[1000000]`}
+              className={cn(AUDIO_PLAYER_STYLES.container, "sticky top-0 z-50")}
             >
               <div className={AUDIO_PLAYER_STYLES.timeDisplay}>
                 <div className="flex justify-end items-center gap-2 w-fit bg-white p-1 rounded-lg">
@@ -590,7 +593,7 @@ const TranscriptionDialog = ({
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                     <Select
                       defaultValue="1"
                       onValueChange={(value) => {
@@ -601,7 +604,7 @@ const TranscriptionDialog = ({
                         }
                       }}
                     >
-                      <SelectTrigger className="w-[80px] sm:w-[110px] bg-white shadow-sm">
+                      <SelectTrigger className="w-[70px] sm:w-[110px] text-xs sm:text-sm bg-white shadow-sm">
                         <SelectValue placeholder="1x" />
                       </SelectTrigger>
                       <SelectContent>
@@ -614,14 +617,14 @@ const TranscriptionDialog = ({
                     </Select>
 
                     <div className={AUDIO_PLAYER_STYLES.volumeControl}>
-                      <Volume2 size={20} className="text-gray-500" />
+                      <Volume2 size={16} className="text-gray-500" />
                       <Slider
                         min={0}
                         max={1}
                         step={0.1}
                         value={[volume]}
                         onValueChange={([value]) => handleVolumeChange(value)}
-                        className="w-16 sm:w-20 !h-2"
+                        className="w-12 sm:w-20 !h-2"
                       />
                     </div>
                   </div>
@@ -637,13 +640,17 @@ const TranscriptionDialog = ({
             </div>
           </div>
 
-          <DialogFooter className="sticky bottom-0 z-[1000000] backdrop-blur-[1000000px] border border-border p-2 rounded-lg">
+          <DialogFooter className="sticky bottom-0 z-[1000000] backdrop-blur-[1000000px] border-t border-border pt-2 sm:pt-4">
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="text-xs sm:text-sm py-1.5 px-2 sm:px-4"
+              >
                 Cancel
               </Button>
               <Button
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 text-xs sm:text-sm py-1.5 px-2 sm:px-4"
                 onClick={onSave}
               >
                 Save Changes
@@ -896,38 +903,31 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
     setVolume: (volume: number) => void
   ) => (
     <div className={AUDIO_PLAYER_STYLES.container}>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-        <div className={AUDIO_PLAYER_STYLES.waveformContainer}>
-          <button
-            onClick={(e) =>
-              togglePlayPause(e, wavesurferRef, isPlaying, setIsPlaying)
-            }
-            className={AUDIO_PLAYER_STYLES.playButton}
-          >
-            {isPlaying ? (
-              <Pause size={20} className="sm:size-24" />
-            ) : (
-              <Play size={20} className="sm:size-24" />
-            )}
-          </button>
-
-          <div className={AUDIO_PLAYER_STYLES.waveformWrapper}>
-            <div ref={containerRef} className="w-full" />
-          </div>
+      <div className={AUDIO_PLAYER_STYLES.timeDisplay}>
+        <div className="flex justify-end items-center gap-2 w-fit bg-white p-1 rounded-lg">
+          <span>{formatTime(currentTime)}</span>
+          <span>/</span>
+          <span>{formatTime(duration)}</span>
         </div>
+      </div>
+      <div className={AUDIO_PLAYER_STYLES.waveformContainer}>
+        <button
+          onClick={(e) =>
+            togglePlayPause(e, wavesurferRef, isPlaying, setIsPlaying)
+          }
+          className={AUDIO_PLAYER_STYLES.playButton}
+        >
+          {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+        </button>
 
-        <div className={AUDIO_PLAYER_STYLES.timeDisplay}>
-          <div className="flex justify-end items-center gap-1 sm:gap-2 w-fit bg-white p-1 rounded-lg text-xs sm:text-sm">
-            <span>{formatTime(currentTime)}</span>
-            <span>/</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+        <div className={AUDIO_PLAYER_STYLES.waveformWrapper}>
+          <div ref={containerRef} className="w-full" />
         </div>
       </div>
 
       <div className={AUDIO_PLAYER_STYLES.controlsWrapper}>
-        <div className={AUDIO_PLAYER_STYLES.controlsGroup}>
-          <div className="flex items-center gap-1 sm:gap-2">
+        <div className={`${AUDIO_PLAYER_STYLES.controlsGroup} gap-6`}>
+          <div className="flex items-center">
             <button
               onClick={() => {
                 if (wavesurferRef.current) {
@@ -938,25 +938,52 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               className={AUDIO_PLAYER_STYLES.buttonBase}
               title="Rewind 5 seconds"
             >
-              <Rewind size={16} className="sm:size-18" />
-              <span className="text-[10px] sm:text-xs">5s</span>
+              <Rewind size={18} />
+              <span className="text-xs">5s</span>
             </button>
+            <button
+              onClick={() => {
+                if (wavesurferRef.current) {
+                  const newTime = wavesurferRef.current.getCurrentTime() - 2;
+                  wavesurferRef.current.setTime(Math.max(0, newTime));
+                }
+              }}
+              className={AUDIO_PLAYER_STYLES.buttonBase}
+              title="Rewind 2 seconds"
+            >
+              <Rewind size={18} />
+              <span className="text-xs">2s</span>
+            </button>
+
+            <div className="w-px h-6 bg-gray-200 mx-2" />
 
             <button
               onClick={(e) => {
                 e.preventDefault();
                 setIsLooping(!isLooping);
               }}
-              className={`${
-                AUDIO_PLAYER_STYLES.buttonBase
-              } text-xs sm:text-sm ${
+              className={`${AUDIO_PLAYER_STYLES.buttonBase} text-sm ${
                 isLooping ? "text-purple-600" : "text-gray-500"
               }`}
             >
-              <RotateCcw size={14} className="sm:size-16" />
-              <span className="hidden sm:inline">
-                {isLooping ? "Stop Loop" : "Loop"}
-              </span>
+              <RotateCcw size={16} />
+              <span>{isLooping ? "Stop Loop" : "Loop"}</span>
+            </button>
+
+            <div className="w-px h-6 bg-gray-200 mx-2" />
+
+            <button
+              onClick={() => {
+                if (wavesurferRef.current) {
+                  const newTime = wavesurferRef.current.getCurrentTime() + 2;
+                  wavesurferRef.current.setTime(Math.min(duration, newTime));
+                }
+              }}
+              className={AUDIO_PLAYER_STYLES.buttonBase}
+              title="Forward 2 seconds"
+            >
+              <FastForward size={18} />
+              <span className="text-xs">2s</span>
             </button>
 
             <button
@@ -969,8 +996,8 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
               className={AUDIO_PLAYER_STYLES.buttonBase}
               title="Forward 5 seconds"
             >
-              <FastForward size={16} className="sm:size-18" />
-              <span className="text-[10px] sm:text-xs">5s</span>
+              <FastForward size={18} />
+              <span className="text-xs">5s</span>
             </button>
           </div>
 
@@ -983,7 +1010,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
                 }
               }}
             >
-              <SelectTrigger className="w-[60px] sm:w-[110px] bg-white shadow-sm text-xs sm:text-sm h-8 sm:h-10">
+              <SelectTrigger className="w-[80px] sm:w-[110px] bg-white shadow-sm">
                 <SelectValue placeholder="1x" />
               </SelectTrigger>
               <SelectContent>
@@ -1017,7 +1044,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
   const renderTranscriptionSection = () => {
     if (pathname.includes("survey-response-upload") && mediaUrl) {
       return (
-        <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[calc(100vw-40px)] sm:max-w-full">
+        <div className="flex flex-col gap-4 w-full">
           <div className="relative w-full">
             {renderAudioControls(
               waveformContainerRef,
@@ -1031,17 +1058,17 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
             )}
           </div>
 
-          <div className="flex flex-col gap-2 sm:gap-3 w-full">
-            <div className="w-full p-2 sm:p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+          <div className="flex flex-col gap-3 w-full">
+            <div className="w-full p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[300px] overflow-y-auto">
               <ContentRenderer content={editableResponse} />
             </div>
             <div className="flex justify-end w-full">
               <Button
-                className="w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-2 sm:px-6 py-2 sm:py-3 text-xs sm:text-base rounded-lg font-semibold shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 flex items-center gap-2"
                 onClick={() => setIsDialogOpen(true)}
               >
-                <Edit3 size={14} className="sm:size-18" />
-                <span>Edit Transcription</span>
+                <Edit3 size={18} />
+                Edit Transcription
               </Button>
             </div>
           </div>
@@ -1059,8 +1086,8 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
     }
     if (pathname.includes("survey-response-upload") && !mediaUrl) {
       return (
-        <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[calc(100vw-40px)] sm:max-w-full">
-          <div className="w-full p-2 sm:p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+        <div className="flex flex-col gap-4 w-full">
+          <div className="w-full p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 max-h-[300px] overflow-y-auto">
             <ContentRenderer content={editableResponse} />
           </div>
         </div>
@@ -1073,12 +1100,12 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
     const handleResize = () => {
       if (waveformRef.current && waveformContainerRef.current) {
         (waveformRef.current as any).setWidth(
-          waveformContainerRef.current.clientWidth - 16
+          waveformContainerRef.current.clientWidth - 32
         );
       }
       if (dialogWaveformRef.current && dialogWaveformContainerRef.current) {
         (dialogWaveformRef.current as any).setWidth(
-          dialogWaveformContainerRef.current.clientWidth - 16
+          dialogWaveformContainerRef.current.clientWidth - 32
         );
       }
     };
@@ -1090,7 +1117,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
   return (
     <div
       className={cn(
-        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        "mb-4 sm:mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-3 sm:p-6 transition-all duration-300",
         {
           [`font-${questionText?.name
             ?.split(" ")
@@ -1099,19 +1126,18 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
             .replace(/\s+/g, "-")}`]: questionText?.name,
         }
       )}
-      style={{
-        fontSize: `${questionText?.size}px`,
-      }}
     >
-      <div className="flex gap-4">
+      <div className="flex gap-2 sm:gap-4">
         <GripVertical
-          className={`w-5 h-5 text-gray-400 mt-1 ${
+          className={`w-4 sm:w-5 h-4 sm:h-5 text-gray-400 mt-1 ${
             pathname === "/surveys/create-survey" ? "visible" : "hidden"
           }`}
         />
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-2 sm:space-y-4">
           <div className="flex items-start">
-            <span className="font-semibold min-w-[24px]">{index}.</span>
+            <span className="font-semibold min-w-[20px] sm:min-w-[24px] text-sm sm:text-base">
+              {index}.
+            </span>
             <div className="flex-1">
               <h3 className="group font-semibold">
                 <div className="flex items-start gap-2">
@@ -1160,10 +1186,10 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
           <div>{getStatus(status)}</div>
         )}
       </div>
-      <div className="flex justify-end mt-4">
-        <p className="text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-4 py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
-          <span className="flex items-center gap-1 text-xs">
-            <MessageSquare className="text-[#9D50BB] w-3 h-3" />
+      <div className="flex justify-end mt-2 sm:mt-4">
+        <p className="text-xs sm:text-sm font-medium bg-gradient-to-r from-[#F5F0FF] to-[#F8F4FF] text-[#5B03B2] px-2 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-sm border border-[#E5D5FF]">
+          <span className="flex items-center gap-1">
+            <MessageSquare className="w-3 h-3" />
             Comment with Media
           </span>
         </p>
