@@ -120,6 +120,23 @@ const DialogDescription = React.forwardRef<
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
+type DialogBodyElement = React.ElementRef<"div">;
+type DialogBodyProps = Omit<React.ComponentPropsWithoutRef<"div">, "dir">;
+
+const DialogBody = React.forwardRef<DialogBodyElement, DialogBodyProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn("flex-1 overflow-auto p-4", className)}
+        {...props}
+      />
+    );
+  }
+);
+
+DialogBody.displayName = "DialogBody";
+
 export {
   Dialog,
   DialogPortal,
@@ -131,4 +148,5 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+  DialogBody,
 };

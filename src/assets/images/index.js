@@ -73,9 +73,45 @@ import cratf from "./craft.svg";
 import tut1 from "./tut1.svg";
 import tut2 from "./tut2.svg";
 import tut4 from "./tut4.svg";
+import Coins from "./shop/coins.svg";
+import Arrow from "./shop/arrow.svg";
+import AvailableIcon from "./shop/available.svg";
+import WalletIcon from "./shop/wallet.svg";
+import MoneyIcon from "./shop/money.svg";
+import RespondentIcon from "./shop/respondents.svg";
+import InfoIcon from "./shop/info.svg";
+import Purchases1 from "./shop/resp.svg";
+import Purchases2 from "./shop/credit.svg";
+import Check from "./shop/check.svg";
+import LockIcon from "./shop/lock.svg";
+import PaystackLogo from "./shop/paystack.svg";
+import StripeLogo from "./shop/stripe.svg";
+import VisaLogo from "./shop/visa.svg";
+import Coin from "./shop/coin.svg";
+import CoinCard from "./shop/coin+card.svg";
+import Caret from "./shop/caret.svg";
+import RedeemableEmpty from "./shop/redeemable.svg";
 
 export {
   teamIcon,
+  Coins,
+  Coin,
+  CoinCard,
+  Caret,
+  Arrow,
+  AvailableIcon,
+  RedeemableEmpty,
+  StripeLogo,
+  PaystackLogo,
+  VisaLogo,
+  LockIcon,
+  Check,
+  WalletIcon,
+  MoneyIcon,
+  Purchases1,
+  Purchases2,
+  RespondentIcon,
+  InfoIcon,
   userPlaceholder,
   pollsensei_new_logo,
   pollsensei_icon,

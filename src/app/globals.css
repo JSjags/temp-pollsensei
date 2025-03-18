@@ -48,6 +48,10 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --tertiary: 270 97% 35%;
+    --new-sec-bg: 220 33% 98%;
+    --sec-text: 0 0% 54%;
+    --new-tertiary: 0 0% 20%;
     --font-lexend: "Lexend", sans-serif;
     --font-roboto: "Roboto", sans-serif;
     --font-playfair: "Playfair Display", serif;
@@ -73,6 +77,7 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
+    --sec-text: 0 0% 54%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
@@ -90,6 +95,8 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --tertiary: 270 97% 35%;
+    --new-tertiary: 0 0% 20%;
     --font-lexend: "Lexend", sans-serif;
     --font-roboto: "Roboto", sans-serif;
     --font-playfair: "Playfair Display", serif;
@@ -622,4 +629,9 @@ input[type="radio"].radio:checked:before {
 
 .app-popover-container {
   @apply flex w-full flex-col gap-y-3 rounded-lg bg-white px-1 py-2 shadow-popoverShadow;
+}
+
+.your-table-container [style*="min-width: 100%"] {
+  min-width: 0 !important;
+  width: 100% !important;
 }

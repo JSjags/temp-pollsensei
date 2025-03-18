@@ -28,6 +28,10 @@ const config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        tertiary: "hsl(var(--tertiary))",
+        "sec-bg": "hsl(var(--new-sec-bg))",
+        "sec-text": "hsl(var(--sec-text))",
+        "new-tertiary": "hsl(var(--new-tertiary))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
