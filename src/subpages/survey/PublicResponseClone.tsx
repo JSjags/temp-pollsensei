@@ -353,14 +353,16 @@ const PublicResponse = () => {
       answers: formattedAnswers,
     };
 
-    try {
-      await submitPublicResponse(responsePayload).unwrap();
-      toast.success("Your response was saved successfully");
-      setSubmitSurveySuccess(true);
-    } catch (error) {
-      console.error(error);
-      toast.error("An error occurred while submitting your response");
-    }
+    console.log(responsePayload);
+
+    // try {
+    //   await submitPublicResponse(responsePayload).unwrap();
+    //   toast.success("Your response was saved successfully");
+    //   setSubmitSurveySuccess(true);
+    // } catch (error) {
+    //   console.error(error);
+    //   toast.error("An error occurred while submitting your response");
+    // }
   };
 
   console.log(question);
@@ -1083,7 +1085,7 @@ const PublicResponse = () => {
                 className="flex gap-4"
               >
                 <Link
-                  href="/dashboard"
+                  href="/"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white h-10 px-4 py-2 hover:opacity-90 group relative"
                 >
                   <span className="absolute inset-0 rounded-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

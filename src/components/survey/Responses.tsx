@@ -23,7 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
 import { Button } from "@/components/ui/button";
@@ -91,12 +91,13 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     return urlTab ? urlTab : "Individual Responses";
   });
   const [currentUserResponse, setCurrentUserResponse] = useState(0);
+  const [deletedUserResponse, setDeletedUserResponse] = useState(0);
   const [pagesNumber, setPagesNumber] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [tempPageSize, setTempPageSize] = useState(20);
   const debouncedPageSize = useDebounce(tempPageSize, 500);
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [deletedPage, setDeletedPage] = useState(1);
   const { data: response_ } = useGetUserSurveyResponseQuery(params.id);
   const { data: summary_ } = useGetSurveySummaryQuery(params.id, {
     skip: activeTab !== "Summary",
@@ -119,6 +120,28 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
   };
 
   const respondentName = useSelector((state: RootState) => state.name.name);
+
+  const {
+    data: deleted_response,
+    isLoading: deleted_response_loading,
+    isSuccess: deleted_response_success,
+    isError: deleted_response_error,
+    refetch: deleted_response_refetch,
+  } = useQuery({
+    queryKey: ["deletedIndividualResponse", queryArgs, name],
+    queryFn: () =>
+      axiosInstance.get(
+        `/response/deleted-responses/${
+          params.id
+        }?page=${deletedPage}&page_size=${pageSize}${
+          Object.keys(path_params).length
+            ? `&${new URLSearchParams(path_params as Record<string, string>)}`
+            : ""
+        }`
+      ),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
 
   const {
     data: validate_individual_response,
@@ -148,6 +171,11 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
       ? validate_individual_response?.data?.data[currentUserResponse]
       : validate_individual_response?.data;
 
+  const deletedSource =
+    deleted_response?.data?.data && deleted_response?.data?.data?.length > 0
+      ? deleted_response?.data?.data[deletedUserResponse]
+      : deleted_response?.data;
+
   const { validCount, invalidCount } =
     calculateValidationCounts2(validateSource);
   const totalResponses = validate_individual_response?.data?.total || 0;
@@ -167,6 +195,12 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
       if (currentUserResponse > 0) {
         setCurrentUserResponse((prev) => prev - 1);
       }
+      queryClient.invalidateQueries({
+        queryKey: ["validateIndividualResponse"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["deletedIndividualResponse"],
+      });
     },
     onError: (error) => {
       toast.error("Failed to delete response");
@@ -256,42 +290,115 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     const totalPages = Math.ceil(totalResponses / pageSize);
 
     return (
-      <Card className="p-4 mt-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={handlePrevPage}
-              disabled={currentPage === 1 || isLoading}
-              className="flex items-center gap-2"
-            >
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Previous Page
-            </Button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              onClick={handleNextPage}
-              disabled={currentPage >= totalPages || isLoading}
-              className="flex items-center gap-2"
-            >
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Next Page
-            </Button>
+      <Card className="p-3 sm:p-6 mt-6 w-full">
+        <div className="flex flex-col gap-6 max-w-full">
+          {/* Pagination Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={handlePrevPage}
+                disabled={currentPage === 1 || isLoading}
+                className="flex items-center gap-2 text-sm min-w-[120px] sm:min-w-[140px]"
+              >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Previous Page
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleNextPage}
+                disabled={currentPage >= totalPages || isLoading}
+                className="flex items-center gap-2 text-sm min-w-[120px] sm:min-w-[140px]"
+              >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Next Page
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <span className="font-medium">
+                Page {currentPage} of {totalPages}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span>Responses per page:</span>
-            <Input
-              type="number"
-              min="1"
-              value={tempPageSize}
-              onChange={handlePageSizeChange}
-              className="w-20"
-              disabled={isLoading}
-            />
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+
+          {/* Page Size Controls */}
+          <div className="flex items-center justify-center sm:justify-end gap-3 w-full">
+            <span className="text-sm font-medium">Responses per page:</span>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="1"
+                value={tempPageSize}
+                onChange={handlePageSizeChange}
+                className="w-20 text-sm"
+                disabled={isLoading}
+              />
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
+  const renderDeletedPagination = () => {
+    const totalResponses = deleted_response?.data?.total || 0;
+    const totalPages = Math.ceil(totalResponses / pageSize);
+
+    return (
+      <Card className="p-3 sm:p-6 mt-6 w-full">
+        <div className="flex flex-col gap-6 max-w-full">
+          {/* Pagination Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={handlePrevPage}
+                disabled={deletedPage === 1 || deleted_response_loading}
+                className="flex items-center gap-2 text-sm min-w-[120px] sm:min-w-[140px]"
+              >
+                {deleted_response_loading && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                Previous Page
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleNextPage}
+                disabled={deletedPage >= totalPages || deleted_response_loading}
+                className="flex items-center gap-2 text-sm min-w-[120px] sm:min-w-[140px]"
+              >
+                {deleted_response_loading && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                Next Page
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <span className="font-medium">
+                Page {deletedPage} of {totalPages}
+              </span>
+            </div>
+          </div>
+
+          {/* Page Size Controls */}
+          <div className="flex items-center justify-center sm:justify-end gap-3 w-full">
+            <span className="text-sm font-medium">Responses per page:</span>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="1"
+                value={tempPageSize}
+                onChange={handlePageSizeChange}
+                className="w-20 text-sm"
+                disabled={deleted_response_loading}
+              />
+              {deleted_response_loading && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+            </div>
           </div>
         </div>
       </Card>
@@ -302,7 +409,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="lg:px-10 space-y-6"
+      className="lg:px-10 space-y-6 max-w-full overflow-x-hidden"
     >
       <Card>
         <ResponseHeader
@@ -321,6 +428,9 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
           surveyData={validateSource}
           isLoading={isLoading}
           isDeletingResponse={deleteResponseMutation.isPending}
+          currentPage={currentPage}
+          totalCount={validate_individual_response?.data?.total}
+          pageSize={pageSize}
         />
       </Card>
 
@@ -368,16 +478,23 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <Card className="p-6">
-              <RespondentDetails
-                data={validateSource}
-                validCount={validCount}
-                isLoading={isLoading}
-              />
-            </Card>
+            {(activeTab === "Individual Responses" ||
+              activeTab === "Deleted") && (
+              <Card className="p-6">
+                <RespondentDetails
+                  data={
+                    activeTab === "Individual Responses"
+                      ? validateSource
+                      : deletedSource
+                  }
+                  validCount={validCount}
+                  isLoading={isLoading}
+                />
+              </Card>
+            )}
 
             {activeTab === "Individual Responses" && !isLoading && (
-              <Card className="p-6 mt-6">
+              <Card className="p-2 sm:p-6 mt-6">
                 <UserResponses
                   data={validateSource}
                   index={currentUserResponse}
@@ -389,7 +506,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
             )}
 
             {userRoles.includes("Admin") && activeTab === "Summary" && (
-              <Card className="p-6 mt-6 min-h-[50vh]">
+              <Card className="p-6 mt-6 min-h-fit">
                 <Suspense fallback={<Skeleton className="w-full h-[400px]" />}>
                   <Summary result={summary_?.data} />
                 </Suspense>
@@ -398,7 +515,52 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
 
             {activeTab === "Deleted" && (
               <Card className="p-6 mt-6 min-h-[50vh]">
-                <FeatureComing height="min-h-[20vh]" />
+                {/* <FeatureComing height="min-h-[20vh]" /> */}
+                <div className="flex items-center justify-between mb-6">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setDeletedUserResponse((prev) => Math.max(0, prev - 1))
+                    }
+                    disabled={deletedUserResponse === 0}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous Response
+                  </Button>
+
+                  <span className="text-sm text-muted-foreground">
+                    Response {deletedUserResponse + 1} of{" "}
+                    {deleted_response?.data?.data?.length || 0}
+                  </span>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setDeletedUserResponse((prev) =>
+                        Math.min(
+                          (deleted_response?.data?.data?.length || 1) - 1,
+                          prev + 1
+                        )
+                      )
+                    }
+                    disabled={
+                      deletedUserResponse >=
+                      (deleted_response?.data?.data?.length || 1) - 1
+                    }
+                  >
+                    Next Response
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+                <UserResponses
+                  data={deletedSource}
+                  index={deletedUserResponse}
+                  isLoading={deleted_response_loading}
+                  isSuccess={deleted_response_success}
+                  error={deleted_response_error}
+                />
               </Card>
             )}
 
@@ -406,6 +568,11 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
               !isError &&
               activeTab === "Individual Responses" &&
               renderPagination()}
+
+            {activeTab === "Deleted" &&
+              !deleted_response_loading &&
+              !deleted_response_error &&
+              renderDeletedPagination()}
           </motion.div>
         )}
       </AnimatePresence>

@@ -16,7 +16,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Trophy, Users, LineChart, ClipboardList } from "lucide-react";
+import {
+  Trophy,
+  Users,
+  LineChart,
+  ClipboardList,
+  AlertCircle,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -215,7 +221,7 @@ const LeaderboardPage = () => {
             <Card className="border-[#5B03B2]/20">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-xl sm:text-2xl text-[#5B03B2]">
-                  Prize Pool
+                  Prize Pool*
                 </CardTitle>
                 <CardDescription className="text-sm">
                   Exciting rewards for our top performers
@@ -250,6 +256,9 @@ const LeaderboardPage = () => {
                       ₦50,000
                     </p>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-4 italic">
+                    *Terms and Conditions apply
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -360,40 +369,50 @@ const LeaderboardPage = () => {
             </Table>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 py-4 px-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((old) => Math.max(old - 1, 1))}
-              disabled={page === 1}
-              className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground whitespace-nowrap">
-              Page {leaderboardResponse?.page || 1} of{" "}
-              {Math.ceil((leaderboardResponse?.total || 0) / limit)}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setPage((old) =>
-                  Math.min(
-                    old + 1,
-                    Math.ceil((leaderboardResponse?.total || 0) / limit)
+          <div className="border-t border-[#5B03B2]/10">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 py-4 px-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((old) => Math.max(old - 1, 1))}
+                disabled={page === 1}
+                className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
+                Page {leaderboardResponse?.page || 1} of{" "}
+                {Math.ceil((leaderboardResponse?.total || 0) / limit)}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPage((old) =>
+                    Math.min(
+                      old + 1,
+                      Math.ceil((leaderboardResponse?.total || 0) / limit)
+                    )
                   )
-                )
-              }
-              disabled={
-                page === Math.ceil((leaderboardResponse?.total || 0) / limit)
-              }
-              className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
-            >
-              Next
-            </Button>
+                }
+                disabled={
+                  page === Math.ceil((leaderboardResponse?.total || 0) / limit)
+                }
+                className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </Card>
+
+        <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
+          <AlertCircle className="h-4 w-4" />
+          <p className="text-sm italic">
+            Fake and duplicate accounts are being purged from our database on an
+            ongoing basis
+          </p>
+        </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
           <Card className="border-[#5B03B2]/20">
@@ -450,7 +469,7 @@ const LeaderboardPage = () => {
           <Card className="border-[#5B03B2]/20">
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl sm:text-2xl text-[#5B03B2]">
-                Prize Pool
+                Prize Pool*
               </CardTitle>
               <CardDescription className="text-sm">
                 Exciting rewards for our top performers
@@ -485,6 +504,9 @@ const LeaderboardPage = () => {
                     ₦50,000
                   </p>
                 </div>
+                <p className="text-xs text-muted-foreground mt-4 italic">
+                  *Terms and Conditions apply
+                </p>
               </div>
             </CardContent>
           </Card>
