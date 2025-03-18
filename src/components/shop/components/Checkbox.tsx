@@ -10,17 +10,19 @@ type CheckboxProps = React.ComponentPropsWithoutRef<
 >;
 export const Checkbox = React.forwardRef<CheckboxElement, CheckboxProps>(
   (props, ref) => {
-    const { className, ...checkboxProps } = props;
+    const { className, disabled, ...checkboxProps } = props;
     return (
       <CheckboxPrimiteve.Root
         className={cn(
           "flex size-6 items-center justify-center rounded-full border-2 border-[#5B03B2]",
           "data-[state=checked]:bg-[#5B03B2] data-[state=checked]:border-transparent",
+          "disabled:opacity-25",
           className
         )}
         defaultChecked
         ref={ref}
         {...checkboxProps}
+        disabled={disabled}
       >
         <CheckboxPrimiteve.Indicator>
           <Image src={Check} alt="checkmark" />

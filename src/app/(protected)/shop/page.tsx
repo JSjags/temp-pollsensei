@@ -10,7 +10,7 @@ export default function Page() {
     //   eta="Q2 2025"
     //   backUrl="/dashboard"
     // />
-    <div className="md:px-10">
+    <div className="md:px-10 pb-16">
       <Shop />
     </div>
   );

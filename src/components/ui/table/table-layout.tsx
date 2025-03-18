@@ -3,6 +3,7 @@ import { Table } from "@tanstack/react-table";
 import { Checkbox } from "@/components/shop/components/Checkbox";
 import Link from "next/link";
 import { Columns } from "./columns";
+import { cn } from "@/lib/utils";
 
 type TableLayoutProps<T> = {
   title?: string;
@@ -15,6 +16,7 @@ export function TableLayout<T>({
   table,
 }: TableLayoutProps<T>) {
   const [selectedOption, setSelectedOption] = useState("All");
+  const disabled = table.getRowModel().rows.length === 0;
 
   useEffect(() => {
     if (selectedOption === "All") {
@@ -31,7 +33,7 @@ export function TableLayout<T>({
   return (
     <div className="flex flex-col w-full mt-10 max-md:px-5">
       <div className="flex items-center justify-between mt-[29px] mb-[51px] max-md:flex-col max-md:gap-4">
-        <div className="flex items-center max-md:justify-between w-full">
+        <div className="flex items-center max-md:justify-between max-md:w-full">
           <p className="text-xl font-bold">Transaction History</p>
           {table.getRowModel().rows.length > 0 && (
             <div className="md:hidden">
@@ -50,10 +52,15 @@ export function TableLayout<T>({
                   className="flex items-center gap-2"
                 >
                   <Checkbox
+                    disabled={disabled}
                     checked={selectedOption === option}
                     onCheckedChange={() => setSelectedOption(option)}
                   />
-                  <label className="max-md:text-xs">{option}</label>
+                  <label
+                    className={cn("max-md:text-xs", { "opacity-30": disabled })}
+                  >
+                    {option}
+                  </label>
                 </div>
               )
             )}
