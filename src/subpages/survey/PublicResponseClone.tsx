@@ -353,16 +353,14 @@ const PublicResponse = () => {
       answers: formattedAnswers,
     };
 
-    console.log(responsePayload);
-
-    // try {
-    //   await submitPublicResponse(responsePayload).unwrap();
-    //   toast.success("Your response was saved successfully");
-    //   setSubmitSurveySuccess(true);
-    // } catch (error) {
-    //   console.error(error);
-    //   toast.error("An error occurred while submitting your response");
-    // }
+    try {
+      await submitPublicResponse(responsePayload).unwrap();
+      toast.success("Your response was saved successfully");
+      setSubmitSurveySuccess(true);
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while submitting your response");
+    }
   };
 
   console.log(question);
