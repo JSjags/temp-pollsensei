@@ -38,75 +38,12 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import {
-  HelpCircle,
-  LogOut,
-  Search,
-  Settings,
-  User,
-  Check,
-  Mail,
-  MailCheckIcon,
-} from "lucide-react";
+import { HelpCircle, LogOut, Search, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { persistStore } from "redux-persist";
 import { useSidebar } from "../ui/sidebar";
-import { Input } from "../ui/shadcn-input";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios-instance";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-
-interface Notification {
-  _id: string;
-  user_id: {
-    _id: string;
-    name: string;
-    email: string;
-    username: string;
-  };
-  organization_id: string;
-  content: string;
-  type: "Survey Response" | string;
-  read_status: "Read" | "Unread";
-  is_deleted: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface NotificationResponse {
-  data: Notification[];
-  total: number;
-  page: number;
-  page_size: number;
-}
-
-const fetchNotifications = async () => {
-  const response = await axiosInstance.get<NotificationResponse>(
-    "/notification",
-    {
-      params: {
-        page: 1,
-        page_size: 10,
-      },
-    }
-  );
-  return response.data;
-};
-
-const markNotificationAsRead = async (notificationId: string) => {
-  const response = await axiosInstance.patch(
-    `/notification/${notificationId}`,
-    {
-      read_status: "Read",
-    }
-  );
-  return response.data;
-};
+import { PiBellSimple } from "react-icons/pi";
+import { FaBars } from "react-icons/fa6";
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -117,52 +54,8 @@ const Navbar = () => {
   const path = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
 
   const persistor = persistStore(store);
-
-  const queryClient = useQueryClient();
-
-  const { data: notifications, isLoading: isLoadingNotifications } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: fetchNotifications,
-  });
-
-  const { mutate: markAsRead } = useMutation({
-    mutationFn: markNotificationAsRead,
-    onMutate: async (notificationId) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["notifications"] });
-
-      // Snapshot the previous value
-      const previousData = queryClient.getQueryData<NotificationResponse>([
-        "notifications",
-      ]);
-
-      // Optimistically update the notifications
-      queryClient.setQueryData<NotificationResponse>(
-        ["notifications"],
-        (old) => ({
-          ...old!,
-          data: old!.data.map((notification) =>
-            notification._id === notificationId
-              ? { ...notification, read_status: "Read" }
-              : notification
-          ),
-        })
-      );
-
-      return { previousData };
-    },
-    onError: (_, __, context) => {
-      // Rollback on error
-      queryClient.setQueryData(["notifications"], context?.previousData);
-    },
-    onSettled: () => {
-      // Refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    },
-  });
 
   const handleSetActiveTab = (tab: string) => {
     setActiveTab(tab);
@@ -174,8 +67,8 @@ const Navbar = () => {
     persistor.purge(); // Clear persisted storage
   };
 
-  console.log(user);
-  console.log(user2);
+  // console.log(user);
+  // console.log(user2);
 
   useEffect(() => {
     if (path && path.includes("/surveys")) {
@@ -197,8 +90,6 @@ const Navbar = () => {
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
 
-  console.log(notifications?.data);
-
   return (
     <div
       className={cn(
@@ -210,210 +101,35 @@ const Navbar = () => {
       <div className="sticky top-0 z-50 bg-[#F7F8FB]">
         <header className="container flex items-center justify-between py-2 pt-2 px-2 sm:px-5 sticky top-0 bg-[#F7F8FB99] backdrop-blur-md">
           <div className="hidden lg:flex items-center gap-2 cursor-pointer">
-            <div className="flex gap-4 items-center h-10">
-              {isOpen ? (
-                <Image
-                  src={"/assets/sidebar/open.svg"}
-                  alt="Close sidebar"
-                  width={24}
-                  height={24}
-                  onClick={toogleMainSidebar}
-                />
-              ) : (
-                <Image
-                  src={"/assets/sidebar/close.svg"}
-                  alt="Open sidebar"
-                  width={24}
-                  height={24}
-                  onClick={toogleMainSidebar}
-                />
-              )}
-              {/* <div className="h-10 bg-white relative rounded-lg w-52">
-                <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
-                <Input
-                  className="border-none h-10 pl-8 rounded-lg"
-                  placeholder="Search anything"
-                />
-              </div> */}
+            <div className="h-10 bg-white relative rounded-lg w-52 shadow-md shadow-black/5">
+              <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
+              <input
+                type="text"
+                className="border-none h-10 pl-8 rounded-lg active:outline-none focus:outline-none w-[350px]"
+                placeholder="Search anything"
+              />
             </div>
           </div>
           {/* mobile */}
-          <div className="lg:hidden flex items-center gap-2 cursor-pointer">
-            <div className="flex gap-4 items-center h-10">
-              {isOpen ? (
-                <Image
-                  src={"/assets/sidebar/open.svg"}
-                  alt="Close sidebar"
-                  width={24}
-                  height={24}
-                  onClick={toogleMainSidebar}
-                />
-              ) : (
-                <Image
-                  src={"/assets/sidebar/close.svg"}
-                  alt="Open sidebar"
-                  width={24}
-                  height={24}
-                  onClick={toogleMainSidebar}
-                />
-              )}
-              {/* <div className="h-10 bg-white relative rounded-lg w-52">
-                <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
-                <Input
-                  className="border-none h-10 pl-8 rounded-lg"
-                  placeholder="Search anything"
-                />
-              </div> */}
-            </div>
-          </div>
-          <div className="lg:hidden flex items-center gap-2 cursor-pointer">
-            <Link href="/dashboard" className="w-full">
-              <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
-            </Link>
+          <div className="flex gap-4 items-center h-10 lg:hidden">
+            {isOpen && (
+              <FaBars className="text-2xl" onClick={toogleMainSidebar} />
+            )}
           </div>
 
           <div className="flex gap-4 items-center">
-            <DropdownMenu
-              open={notificationOpen}
-              onOpenChange={setNotificationOpen}
+            <Button
+              variant="default"
+              // onClick={() => {
+              //   alert("Clicked");
+              // }}
+              className="size-12 rounded-full bg-transparent hover:bg-muted flex items-center justify-center cursor-pointer p-[12px] relative"
             >
-              <DropdownMenuTrigger asChild className="z-[1000000] relative">
-                <div className="size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px] relative">
-                  <Image
-                    className="object-contain size-8"
-                    width={24}
-                    height={24}
-                    src={notification}
-                    alt="Notification"
-                  />
-                  {notifications?.data.some(
-                    (n) => n.read_status === "Unread"
-                  ) && (
-                    <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full" />
-                  )}
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-96 z-[1000000] relative"
-                align="end"
-                forceMount
-              >
-                <DropdownMenuLabel className="flex justify-between items-center">
-                  <span>Notifications</span>
-                  {notifications?.data.some(
-                    (n) => n.read_status === "Unread"
-                  ) && (
-                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
-                      New
-                    </span>
-                  )}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup className="max-h-[400px] overflow-auto">
-                  {isLoadingNotifications ? (
-                    <DropdownMenuItem>
-                      Loading notifications...
-                    </DropdownMenuItem>
-                  ) : notifications?.data.length === 0 ? (
-                    <div className="p-4 text-center">
-                      <div className="mb-3">
-                        <Image
-                          src="/assets/empty-notifications.svg"
-                          alt="No notifications"
-                          width={64}
-                          height={64}
-                          className="mx-auto"
-                        />
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        You're all caught up! No new notifications.
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => router.push("/notifications")}
-                        className="w-full"
-                      >
-                        View notification history
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      {notifications?.data
-                        .filter(
-                          (notification) =>
-                            notification.read_status === "Unread"
-                        )
-                        .slice(0, 5)
-                        .map((notification) => (
-                          <DropdownMenuItem
-                            key={notification._id}
-                            className="cursor-pointer"
-                            onSelect={(e) => e.preventDefault()}
-                          >
-                            <div className="flex flex-col gap-1 py-2 w-full">
-                              <div className="flex items-start justify-between gap-2">
-                                <p className="text-sm flex-1 line-clamp-2">
-                                  {notification.content}
-                                </p>
-                                {notification.read_status === "Unread" && (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <button
-                                          className="size-6 flex items-center justify-center text-red-500 hover:text-green-900 hover:bg-green-50 rounded-full group"
-                                          onClick={() =>
-                                            markAsRead(notification._id)
-                                          }
-                                        >
-                                          <Mail className="size-4 group-hover:hidden" />
-                                          <MailCheckIcon className="size-4 hidden group-hover:block" />
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Mark as read</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                )}
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-muted-foreground">
-                                  {notification.type === "Survery Response"
-                                    ? "Survey Response"
-                                    : notification.type}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(
-                                    notification.createdAt
-                                  ).toLocaleDateString()}{" "}
-                                  {new Date(
-                                    notification.createdAt
-                                  ).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </span>
-                              </div>
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
-
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="cursor-pointer flex justify-center items-center text-primary hover:text-primary"
-                          onSelect={(e) => {
-                            router.push("/notifications");
-                          }}
-                        >
-                          View all notifications
-                        </DropdownMenuItem>
-                      </>
-                    </>
-                  )}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <PiBellSimple className="text-xl font-black text-[#4E4E4E]" />
+              <span className="w-3 h-3 p-1 rounded-full bg-[#5B03B2] absolute top-[30%] right-1 text-[7.5px] text-white hidden md:flex items-center justify-center font-bold">
+                5
+              </span>
+            </Button>
 
             <DropdownMenu open={open} onOpenChange={setOpen}>
               <DropdownMenuTrigger asChild>
