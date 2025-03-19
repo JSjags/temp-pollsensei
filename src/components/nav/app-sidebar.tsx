@@ -30,11 +30,11 @@ const items = [
   //   url: "/earn",
   //   icon: "/assets/sidebar/earn.svg",
   // },
-  {
-    title: "Shop",
-    url: "/shop",
-    icon: "/assets/sidebar/shop.svg",
-  },
+  // {
+  //   title: "Shop",
+  //   url: "/shop",
+  //   icon: "/assets/sidebar/shop.svg",
+  // },
   {
     title: "Survey Board",
     url: "/surveys",
@@ -73,7 +73,12 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const { open, isMobile, setOpenMobile } = useSidebar();
+  const {
+    open,
+    isMobile,
+    setOpenMobile,
+    toggleSidebar: toogleMainSidebar,
+  } = useSidebar();
   const pathname = usePathname();
 
   const isActive = (itemUrl: string) => {
@@ -105,17 +110,47 @@ export function AppSidebar() {
           )}
         >
           {!open ? (
-            <Link
-              href="/dashboard"
-              className="w-fit -translate-x-0"
-              onClick={handleNavClick}
-            >
-              <Image src={pollsensei_icon} alt="Logo" />
-            </Link>
+            <div className="w-full flex flex-col gap-5 items-center justify-center">
+              <Link
+                href="/dashboard"
+                className="w-fit -translate-x-0"
+                onClick={handleNavClick}
+              >
+                <Image src={pollsensei_icon} alt="Logo" />
+              </Link>
+
+              <Image
+                src={"/assets/sidebar/close.svg"}
+                alt="Open sidebar"
+                width={24}
+                height={24}
+                onClick={toogleMainSidebar}
+                className="cursor-pointer hidden lg:flex"
+              />
+            </div>
           ) : (
-            <Link href="/dashboard" className="w-full" onClick={handleNavClick}>
-              <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
-            </Link>
+            <div className="w-full flex gap-3 items-center justify-between">
+              <Link
+                href="/dashboard"
+                className="w-full"
+                onClick={handleNavClick}
+              >
+                <Image
+                  src={pollsensei_new_logo}
+                  alt="Logo"
+                  className="w-[60%]"
+                />
+              </Link>
+
+              <Image
+                src={"/assets/sidebar/open.svg"}
+                alt="Close sidebar"
+                width={24}
+                height={24}
+                onClick={toogleMainSidebar}
+                className="cursor-pointer"
+              />
+            </div>
           )}
         </SidebarHeader>
         <SidebarGroup className="pt-6 px-0">
