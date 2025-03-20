@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/shadcn-input";
-import React from "react";
+import React, { useEffect } from "react";
 import { useShopStore } from "../../../store/useShopStore";
 import { Dialog } from "@/components/ui/new-dialog";
 
@@ -15,6 +15,17 @@ export function BuyFirstStep() {
     clearPollError,
     setPollStep,
   } = useShopStore();
+
+  const RATE = 5;
+
+  useEffect(() => {
+    if (pollcoins) {
+      const calculatedAmount = (parseFloat(pollcoins) / RATE).toFixed(2);
+      setPollAmount(calculatedAmount);
+    } else {
+      setPollAmount("");
+    }
+  }, [pollcoins, setPollAmount]);
 
   const validate = () => {
     const newErrors: { amount?: string; quantity?: string } = {};
@@ -67,7 +78,9 @@ export function BuyFirstStep() {
             {pollErrors.quantity && (
               <p className="mt-1 text-xs text-red-600">{pollErrors.quantity}</p>
             )}
-            <p className="mt-1 text-xs text-new-tertiary">Today’s coin rate: $5 / 20 pollcoins</p>
+            <p className="mt-1 text-xs text-new-tertiary">
+              Today’s coin rate: {RATE} / 20 pollcoins
+            </p>
           </div>
 
           {/* Cost*/}
@@ -81,10 +94,11 @@ export function BuyFirstStep() {
               placeholder="0.00"
               className="h-[54px] border flex-1 pl-2.5 outline-none"
               value={pollAmount}
-              onChange={(e) => {
-                setPollAmount(e.target.value);
-                if (pollErrors.amount) clearPollError("amount");
-              }}
+              readOnly
+              // onChange={(e) => {
+              //   setPollAmount(e.target.value);
+              //   if (pollErrors.amount) clearPollError("amount");
+              // }}
             />
           </div>
           {pollErrors.amount && (

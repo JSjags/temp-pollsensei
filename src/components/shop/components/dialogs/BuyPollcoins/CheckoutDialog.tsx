@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/shadcn-input";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/new-dialog";
+import { useMutation } from "@tanstack/react-query";
+import { purchasePollcoins } from "@/lib/purchase";
 
 const PaymentOptionsData = [
   {
@@ -33,6 +35,35 @@ export function CheckoutDialog() {
   );
 
   const { pollAmount, pollcoins, loading, setLoading, setPollStep } = useShopStore();
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const amount = parseFloat(pollAmount);
+  
+      if (isNaN(amount) || amount <= 0) {
+        throw new Error("Invalid amount");
+      }
+  
+      setLoading(true);
+      return await purchasePollcoins({ amount });
+    },
+    onSuccess: (response) => {
+      const url = response?.data?.payment?.authorization_url;
+      if (url) {
+        window.location.href = url; // Redirect to Paystack
+      } else {
+        throw new Error("No authorization URL returned");
+      }
+    },
+    onError: (error) => {
+      console.error("Payment failed:", error);
+      alert(error.message); // Optional: show toast/UI error
+    },
+    onSettled: () => {
+      setLoading(false);
+    },
+  });
+  
 
   const txnOverview = [
     {
@@ -67,13 +98,14 @@ export function CheckoutDialog() {
   };
 
   const handleCheckout = () => {
-    setLoading(true);
+    // setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      setPollStep("success");
-      resetLocalState();
-    }, 5000);
+    // setTimeout(() => {
+    //   setLoading(false);
+    //   setPollStep("success");
+    //   resetLocalState();
+    // }, 5000);
+    mutation.mutate();
   };
 
   return (
