@@ -40,11 +40,11 @@ const items = [
     url: "/surveys",
     icon: "/assets/sidebar/survey-board.svg",
   },
-  // {
-  //   title: "Payouts",
-  //   url: "/payouts",
-  //   icon: "/assets/sidebar/payouts.svg",
-  // },
+  {
+    title: "Payouts",
+    url: "/payouts",
+    icon: "/assets/sidebar/payouts.svg",
+  },
   // {
   //   title: "Referrals",
   //   url: "/referrals",
