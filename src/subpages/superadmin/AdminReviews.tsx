@@ -1,4 +1,3 @@
-
 "use client";
 
 import PageControl from "@/components/common/PageControl";
@@ -7,7 +6,17 @@ import React, { useState } from "react";
 import { FadeLoader } from "react-spinners";
 import { generateInitials } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { X } from "lucide-react";
+import { Eye } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Answer {
   question: string;
@@ -33,18 +42,19 @@ interface ReviewData {
 
 const AdminReviews: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [reviewsPerPage] = useState(10);
-  const { data, isLoading, error, refetch, isFetching } = useGetReviewQuery(currentPage);
+  const [reviewsPerPage] = useState(20);
+  const { data, isLoading, error, refetch, isFetching } =
+    useGetReviewQuery(currentPage);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<ReviewData | null>(null);
 
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / reviewsPerPage);
 
-  const openModal = (reviews:ReviewData) => {
+  const openModal = (reviews: ReviewData) => {
     setSelectedReview(reviews);
     setIsModalOpen(true);
-    console.log(reviews)
+    console.log(reviews);
   };
 
   const closeModal = () => {
@@ -67,135 +77,258 @@ const AdminReviews: React.FC = () => {
     refetch();
   };
 
-  const statusColorMap = ["#FFC107", "#3498DB", "#27AE60", "#2980B9", "#2ECC71", "#E74C3C", "#FF5733", "#FF5733", "#FF5733",
+  const statusColorMap = [
+    "#FFC107",
+    "#3498DB",
+    "#27AE60",
+    "#2980B9",
+    "#2ECC71",
+    "#E74C3C",
+    "#FF5733",
+    "#FF5733",
+    "#FF5733",
   ];
   const getRandomColor = () => {
     return statusColorMap[Math.floor(Math.random() * statusColorMap.length)];
   };
 
+  const TableLoadingSkeleton = () => (
+    <>
+      {Array(10)
+        .fill(0)
+        .map((i) => (
+          <tr key={i}>
+            <td className="px-4 py-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-4 w-[150px]" />
+              </div>
+            </td>
+            <td className="px-4 py-3">
+              <Skeleton className="h-4 w-[200px]" />
+            </td>
+            <td className="px-4 py-3">
+              <Skeleton className="h-4 w-[100px]" />
+            </td>
+            <td className="px-4 py-3">
+              <Skeleton className="h-4 w-[100px]" />
+            </td>
+            <td className="px-4 py-3">
+              <Skeleton className="h-8 w-[80px]" />
+            </td>
+          </tr>
+        ))}
+    </>
+  );
 
-  console.log(reviews)
+  console.log(reviews);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Customer Reviews</h1>
+    <div className="p-4 max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          Customer Reviews
+        </h1>
+        <Badge variant="secondary" className="hidden md:flex">
+          Total Reviews: {totalItems}
+        </Badge>
+      </div>
 
-      <div className="overflow-x-auto w-full">
-        <table className="w-full border-collapse border-gray-200 overflow-x-auto">
-          <thead className="bg-gray-100">
-          <tr>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Respondent Name
+      {/* Mobile view - Cards */}
+      <div className="md:hidden space-y-4">
+        {isLoading || isFetching ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-[150px]" />
+                      <Skeleton className="h-3 w-[200px]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-[120px]" />
+                    <Skeleton className="h-4 w-[150px]" />
+                  </div>
+                  <Skeleton className="h-9 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-8">
+            Something went wrong
+          </div>
+        ) : (
+          reviews?.map((review: ReviewData) => (
+            <Card key={review._id} className="overflow-hidden">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={review?.user_id?.photo_url} />
+                    <AvatarFallback
+                      style={{ backgroundColor: getRandomColor() }}
+                      className="text-white"
+                    >
+                      {generateInitials(review?.user_id?.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold">{review?.user_id?.name}</h3>
+                    <p className="text-sm text-gray-500">
+                      {review?.user_id?.email}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-sm space-y-1">
+                  <p>Country: {review?.user_id?.country || "Not Provided"}</p>
+                  <p>Date: {new Date(review.createdAt).toLocaleDateString()}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => openModal(review)}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Responses
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop view - Table */}
+      <div className="hidden md:block overflow-x-auto rounded-lg border">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                Respondent
               </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Respondent Email
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                Email
               </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
                 Country
               </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Answers
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                Date
               </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                Created At
-              </th>
-              <th className="border border-gray-300 px-4 py-2 text-left">
-                View
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                Actions
               </th>
             </tr>
           </thead>
-          <tbody>
-            {
-              isLoading || isFetching ? (
-                <tr>
-                  <td colSpan={6} className="text-center ">
-                    <span className="flex justify-center items-center" >
-                    <FadeLoader height={10} radius={1} className="mt-3" />
-                    </span>
+          <tbody className="divide-y">
+            {isLoading || isFetching ? (
+              <TableLoadingSkeleton />
+            ) : error ? (
+              <tr>
+                <td colSpan={5} className="text-center py-8 text-red-500">
+                  Something went wrong
+                </td>
+              </tr>
+            ) : (
+              reviews?.map((review: ReviewData) => (
+                <tr key={review._id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={review?.user_id?.photo_url} />
+                        <AvatarFallback
+                          style={{ backgroundColor: getRandomColor() }}
+                          className="text-white"
+                        >
+                          {generateInitials(review?.user_id?.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">
+                        {review?.user_id?.name}
+                      </span>
+                    </div>
                   </td>
-                </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={6} className="text-center ">
-                    <span className="flex justify-center items-center text-xs text-red-500" >
-                    Something went wrong
-                    </span>
+                  <td className="px-4 py-3 text-sm">
+                    {review?.user_id?.email}
                   </td>
-                </tr>
-              ) :
-              reviews?.map((review: any, index: number) => (
-              <tr
-                key={index}
-                className={`${
-                  index % 2 === 0 ? "bg-[#F7EEFED9]" : "bg-[#FEF5FED6]"
-                } text-sm rounded-md`}
-              >
-                <td className="py-3 px-4 flex items-center gap-2">
-                <Avatar className="size-8">
-                  <AvatarImage
-                    src={(review as any)?.photo_url ?? ""}
-                    alt="@johndoe"
-                  />
-                  <AvatarFallback className={`font-semibold  `} style={{backgroundColor: getRandomColor()}}>
-                    {generateInitials(review?.user_id?.name ?? "")}
-                  </AvatarFallback>
-                </Avatar>
-                   {review?.user_id?.name}</td>
-               
-                <td className="py-3 px-4">{review?.user_id?.email}</td>
-                <td className="border border-gray-300 px-4 py-2">
+                  <td className="px-4 py-3 text-sm">
                     {review?.user_id?.country || "Not Provided"}
                   </td>
-                <td className="py-3 px-4">
-                  {review?.collaborators ? review.collaborators : "Not Available"}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                    {new Date(review.createdAt).toLocaleString()}
+                  <td className="px-4 py-3 text-sm">
+                    {new Date(review.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="border border-gray-300 cursor-pointer px-4 py-2"  onClick={() => openModal(review)}>
-                    View
+                  <td className="px-4 py-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openModal(review)}
+                      className="hover:bg-gray-100"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
+                    </Button>
                   </td>
-              </tr>
-            ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {isModalOpen && selectedReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white w-11/12 max-w-lg rounded-lg shadow-lg p-6 relative">
-            <button
-              className="absolute top-3 right-3 text-gray-600 hover:text-gray-800"
-              onClick={closeModal}
-            >
-              <X className="w-5 h-5 font-extrabold" strokeWidth={3} />
-            </button>
-            <h3 className="text-lg font-semibold text-blue-600">
-              {selectedReview?.user_id?.name}&apos;s review
-            </h3>
+      {/* Review Dialog */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent
+          className="max-w-lg max-h-[80vh] overflow-y-auto z-[100000]"
+          overlayClassName="z-[100000]"
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={selectedReview?.user_id?.photo_url} />
+                <AvatarFallback
+                  style={{ backgroundColor: getRandomColor() }}
+                  className="text-white"
+                >
+                  {generateInitials(selectedReview?.user_id?.name ?? "")}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-xl font-semibold">
+                  {selectedReview?.user_id?.name}&apos;s Review
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {new Date(
+                    selectedReview?.createdAt ?? ""
+                  ).toLocaleDateString()}
+                </p>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
 
+          <div className="space-y-4 mt-4">
             {selectedReview?.reviews.map((item) => {
-        // Determine the answer key dynamically based on question_type
-        const answer =
-          item.question_type === "short_text"
-            ? item?.text || "No response provided"
-            : item?.selected_options?.[0] || "No response provided";
+              const answer =
+                item.question_type === "short_text"
+                  ? item?.text
+                  : item?.selected_options?.[0];
 
-        return (
-          <div key={item._id} className="flex flex-col py-2">
-            <p className="text-black font-semibold">Q: {item.question}</p>
-            <p className="text-[#5B03B2] font-normal">A: {answer}</p>
+              return (
+                <div key={item._id} className="space-y-2">
+                  <p className="font-medium text-gray-900">{item.question}</p>
+                  <p className="text-gray-600 bg-gray-50 p-3 rounded-md">
+                    {answer || "No response provided"}
+                  </p>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+        </DialogContent>
+      </Dialog>
 
-           
-          </div>
-        </div>
-      )}
-
-      <div className="mt-6 sm:mt-8 flex justify-between items-center">
-        <p className="text-xs font-medium">
+      <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p className="text-sm text-gray-600">
           {totalItems > 0
             ? `Showing ${(currentPage - 1) * reviewsPerPage + 1}-${Math.min(
                 currentPage * reviewsPerPage,

@@ -47,7 +47,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         return {
           url: `/superadmin/overview?${params.toString()}`, // filter_by
           method: "GET",
-        }
+        };
       },
     }),
     surveyCreationDistribution: builder.query({
@@ -78,7 +78,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         if (month) params.append("month", month);
         if (year) params.append("year", year);
         return {
-          url: `superadmin/user-subscription-distribution?${params.toString()}`, // superadmin/user-subscription-distribution?month=October&year=2024
+          url: `superadmin/user-subscription-distribution?${params.toString()}`,
           method: "GET",
         };
       },
@@ -228,8 +228,8 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     subscriptionTrend: builder.query({
-      query: () => ({
-        url: `superadmin/subscription-trend?period=6 months`, // superadmin/subscription-trend?period=1 year
+      query: (period) => ({
+        url: `superadmin/subscription-trend?period=${period}`,
         method: "GET",
       }),
     }),
