@@ -1,5 +1,4 @@
 "use client";
-
 import "./style.css";
 import Navbar from "../../components/navbar/Navbar";
 import trophy from "../../assets/images/trophy.svg";
@@ -28,6 +27,7 @@ import { ArrowRight, Calendar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
 
 // Move the styles definition outside the component
 const twinkleStyles = `
@@ -51,19 +51,6 @@ const DashboardPage = () => {
     useSurveyLeaderboardQuery("year");
   const { data: surveys, isLoading: isSurveysLoading } = useSurveyQuery("year");
 
-  const leaderboardData = [
-    { name: "GodspowerOgbonna100", coins: 6200 },
-    { name: "Broadcastar", coins: 2400 },
-    { name: "Popeyes", coins: 3150 },
-    { name: "Labsonar", coins: 1000 },
-    { name: "VanillaSky", coins: 590 },
-    { name: "You", coins: 100 },
-    { name: "John Doe", coins: 50 },
-    { name: "Ribbon James", coins: 10 },
-    { name: "John Doe", coins: 5 },
-    { name: "Ribbon James", coins: 1 },
-  ];
-
   function DashboardSkeleton() {
     return (
       <div className="p-4 md:p-6 w-full mx-auto">
@@ -75,7 +62,7 @@ const DashboardPage = () => {
             <Skeleton className="h-4 md:h-6 w-28 md:w-36" />
           </div>
 
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center flex-wrap gap-3 md:gap-4">
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="flex items-center p-2 md:p-4 gap-2 md:gap-4">
                 <Skeleton className="size-16 md:size-20 rounded-full" />
@@ -160,7 +147,7 @@ const DashboardPage = () => {
             <p className="text-lg md:text-4xl text-gray-400">
               Great to have you here!
             </p>
-            {/* <CreateSurveyButton type="dashboard" /> */}
+            <CreateSurveyButton type="dashboard" />
           </div>
 
           <div className="flex items-center gap-3 md:gap-4">
@@ -240,7 +227,7 @@ const DashboardPage = () => {
                   <div className="flex items-center w-full px-4 gap-7 lg:gap-3">
                     <div className="flex flex-col gap-1">
                       <p className="top-response-title text-sm md:text-xs font-bold">
-                        RESPONDENTS RANKING
+                        TOP RESPONSE RATE
                       </p>
                       <p className="top-response-text text-xs md:text-[10px]">
                         PollSensei Leaderboard
@@ -256,76 +243,43 @@ const DashboardPage = () => {
                   </div>
                 </div>
 
-                <div className="px-4 py-2 h-[15rem] flex flex-col items-center gap-2">
-                  <div className="h-[12rem] w-full overflow-auto scrollbar-hide relative before:absolute before:top-0 before:left-0 before:w-full before:h-full before:bg-transparent before:z-10">
-                    {leaderboardData.map((user, index) => (
-                      <div
-                        key={index}
-                        className={`flex items-center gap-1 w-full mb-4 px-1 ${
-                          user.name === "You" &&
-                          "bg-[#F9D8F9] rounded-lg px-2 py-1 sticky bottom-0"
-                        }`}
-                        style={{
-                          top: user.name === "You" ? "0" : "auto",
-                          bottom: user.name === "You" ? "0" : "auto",
-                        }}
-                      >
-                        <p
-                          className={`font-bold w-[20%] ${
-                            index === 0 || index === 1 || index === 2
-                              ? "text-[18.28px] md:text-lg"
-                              : "text-[12.28px] md:text-sm"
-                          }`}
+                <div className="p-3 md:p-4 w-full flex flex-col gap-3 md:gap-4 ">
+                  {isSurveyLeaderboardLoading && (
+                    <>
+                      {[1, 2, 3, 4, 5].map((index) => (
+                        <div
+                          key={index}
+                          className="flex w-full items-center justify-between animate-pulse"
                         >
-                          {index + 1}
-                          <span
-                            className={`font-bold align-super ${
-                              index === 0 || index === 1 || index === 2
-                                ? "text-[18.28px] md:text-lg"
-                                : "text-[12.28px] md:text-sm"
-                            }`}
-                          >
-                            {index === 0
-                              ? "st"
-                              : index === 1
-                              ? "nd"
-                              : index === 2
-                              ? "rd"
-                              : "th"}
-                          </span>
-                        </p>
-
-                        <div className="flex items-center gap-2 flex-1">
-                          <Image
-                            src={user_placeholder}
-                            alt="Avatar"
-                            width={24}
-                            height={24}
-                            className="size-10 rounded-full"
-                          />
-                          <div>
-                            <p className="text-xs md:text-sm">
-                              {user?.name.length > 18
-                                ? user.name.slice(0, 15) + "..."
-                                : user.name}
-                            </p>
-                            <p className="text-[10px] md:text-xs text-gray-500">
-                              {user?.coins <= 1
-                                ? `${user?.coins} coin`
-                                : `${user?.coins} coins`}{" "}
-                            </p>
+                          <div className="flex items-center gap-2 md:gap-3">
+                            <div className="size-5 md:size-6 bg-gray-200 rounded-full flex justify-center items-center"></div>
+                            <div className="flex flex-col gap-1">
+                              <div className="h-3 md:h-4 bg-gray-200 rounded w-24 md:w-32"></div>
+                              <div className="h-2 md:h-3 bg-gray-200 rounded w-20 md:w-24"></div>
+                            </div>
                           </div>
+                          <div className="size-5 md:size-6 bg-gray-200 rounded"></div>
                         </div>
-                      </div>
+                      ))}
+                    </>
+                  )}
+                  {!isSurveyLeaderboardLoading &&
+                    surveyLeaderboard?.data?.length > 0 &&
+                    surveyLeaderboard?.data?.map((row: any, index: number) => (
+                      <TopResponse
+                        key={index}
+                        id={index + 1}
+                        title={row?.topic.slice(0, 20)}
+                        value={row?.number_of_responses}
+                        link={`/surveys/${row?._id}`}
+                      />
                     ))}
-                  </div>
-
-                  <Link
-                    href=""
-                    className="text-[9.6px] text-[#5B03B2] no-underline border-b border-[#5B03B2]"
-                  >
-                    View all Leaderboards
-                  </Link>
+                  {!isSurveyLeaderboardLoading &&
+                    !Boolean(surveyLeaderboard?.data?.length) && (
+                      <div className="flex justify-center text-center items-center text-xs md:text-sm h-[15rem] text-[#7A8699]">
+                        No survey has been created yet. Check back soon.
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
