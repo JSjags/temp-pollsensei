@@ -42,8 +42,8 @@ export function TableLayout<T>({
           )}
         </div>
 
-        <div className="md:flex items-center justify-between md:w-[55%] w-full">
-          <div className="flex items-center md:gap-[22.5px] gap-3">
+        <div className="md:flex items-center justify-between gap-6 max-md:w-full">
+          <div className="flex items-center md:gap-[22.5px] gap-3 flex-wrap">
             {["All", "Credit", "Debit", "Completed", "Pending"].map(
               (option) => (
                 <div

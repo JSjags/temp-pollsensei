@@ -91,9 +91,41 @@ import Coin from "./shop/coin.svg";
 import CoinCard from "./shop/coin+card.svg";
 import Caret from "./shop/caret.svg";
 import RedeemableEmpty from "./shop/redeemable.svg";
+import RedeemableCoins from './referrals/coins.svg'
+import RedeemedCoins from './referrals/redeemed.svg'
+import RedeemCoins from './referrals/redeem-points.svg'
+import RedeemableHowIcon from './referrals/how-icon.svg'
+import ReferralIcon from './referrals/referral.svg'
+import CopyIcon from './referrals/Copy.svg'
+import CheckIcon from './referrals/check.svg'
+import HowIcon from './referrals/how-icon.svg'
+import StackedCoin from './referrals/stacked-coin.svg'
+import Share from './referrals/share-2.svg'
+import Facebook from './referrals/Facebook.svg'
+import X from './referrals/X.svg'
+import Tiktok from './referrals/Tiktok.svg'
+import LinkedIn from './referrals/LinkedIn.svg'
+import Youtube from './referrals/Youtube.svg'
+import Instagram from './referrals/Instagram.svg'
 
 export {
   teamIcon,
+  Facebook,
+  X,
+  Tiktok,
+  Instagram,
+  Youtube,
+  LinkedIn,
+  RedeemCoins,
+  RedeemableCoins,
+  RedeemableHowIcon,
+  RedeemedCoins,
+  ReferralIcon,
+  Share,
+  StackedCoin,
+  HowIcon,
+  CopyIcon,
+  CheckIcon,
   Coins,
   Coin,
   CoinCard,
