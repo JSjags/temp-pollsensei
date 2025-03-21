@@ -47,6 +47,7 @@ import {
   Check,
   Mail,
   MailCheckIcon,
+  BellOffIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { persistStore } from "redux-persist";
@@ -317,13 +318,7 @@ const Navbar = () => {
                   ) : notifications?.data.length === 0 ? (
                     <div className="p-4 text-center">
                       <div className="mb-3">
-                        <Image
-                          src="/assets/empty-notifications.svg"
-                          alt="No notifications"
-                          width={64}
-                          height={64}
-                          className="mx-auto"
-                        />
+                        <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">
                         You're all caught up! No new notifications.

@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
-import { Modal } from "./Modal";
-import DeleteSurvey from "../survey/DeleteSurvey";
-import DeleteFaq from "./DeleteFaq";
 import { toast } from "react-toastify";
 import {
   useSingleFAQsQuery,
@@ -13,19 +10,33 @@ import {
   useEditFAQsMutation,
   usePublishFAQsMutation,
   useUnpublishFAQsMutation,
+  surveyApiSlice,
+  useAllFAQsQuery,
 } from "@/services/superadmin.service";
-import UnpublishFaq from "./UnpublishFaq";
-import PublishFaq from "./Publish";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetTrigger,
-} from "../ui/sheet";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { Input } from "../ui/shadcn-input";
+import { Textarea } from "../ui/shadcn-textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { useParams } from "next/navigation";
-import { FadeLoader } from "react-spinners";
+import { Skeleton } from "../ui/skeleton";
+import { Pencil, Trash2, EyeOff, Eye } from "lucide-react";
+import { Badge } from "../ui/badge";
 
 interface AccordionItemProps {
   question: string;
@@ -33,6 +44,7 @@ interface AccordionItemProps {
   _id: string;
   is_deleted?: boolean;
   is_published: boolean;
+  currentPage: number;
 }
 
 const AccordionItem: React.FC<AccordionItemProps> = ({
@@ -41,8 +53,9 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   _id,
   is_deleted,
   is_published,
+  currentPage,
 }) => {
-  const params = useParams()
+  const params = useParams();
   const [isOpen, setIsOpen] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -54,8 +67,9 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
     useUnpublishFAQsMutation();
   const [publishFAQs, { isLoading: isPublishLoading }] =
     usePublishFAQsMutation();
-  const { data:singleFAQs, isLoading:isLoadingAll, } = useSingleFAQsQuery(_id);
+  const { data: singleFAQs, isLoading: isLoadingAll } = useSingleFAQsQuery(_id);
   const [editFAQs, { isLoading: isEditLoading }] = useEditFAQsMutation();
+  const { refetch } = useAllFAQsQuery({ pagesNumber: currentPage });
 
   const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
 
@@ -91,7 +105,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
       await deleteFAQs(id).unwrap();
       toast.success("FAQ deleted successfully");
       handleCloseAll();
-      // refetch();
+      refetch();
     } catch (e) {
       console.log(e);
       toast.error("Error deleting FAQ");
@@ -99,10 +113,10 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   };
   const handleUnpublishFaq = async (id: any) => {
     try {
-      await unpublishFAQs(id).unwrap();
+      await unpublishFAQs({ id }).unwrap();
       toast.success("FAQ unpublish successfully");
       handleCloseAll();
-      // refetch();
+      refetch();
     } catch (e) {
       console.log(e);
       toast.error("Error deleting FAQ");
@@ -110,13 +124,13 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   };
   const handlePublishFaq = async (id: any) => {
     try {
-      await publishFAQs(id).unwrap();
-      toast.success("FAQ deleted successfully");
+      await publishFAQs({ id }).unwrap();
+      toast.success("FAQ published successfully");
       handleCloseAll();
-      // refetch();
+      refetch();
     } catch (e) {
       console.log(e);
-      toast.error("Error deleting FAQ");
+      toast.error("Error publishing FAQ");
     }
   };
 
@@ -130,183 +144,279 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
       setEdittingFaq({
         question: singleFAQs.data?.question || "",
         answer: singleFAQs.data?.answer || "",
-     
       });
     }
   }, [singleFAQs]);
 
-  const handleSubmit = async () => {
-   
+  const handleSubmit = async (id: string) => {
     const editData = {
       question: editingFaq.question,
       answer: editingFaq.answer,
-  }
-  console.log(editData);
+    };
+    console.log(editData);
     try {
-      await editFAQs(editData).unwrap();
+      await editFAQs({ id, body: editData }).unwrap();
       toast.success("FAQ updated successfully");
+      refetch();
     } catch (err: any) {
       toast.error("Failed: " + err.message);
+    } finally {
+      setEdit(false);
     }
   };
 
-  console.log(_id)
-  console.log(singleFAQs)
+  console.log(_id);
+  console.log(singleFAQs);
 
   return (
-    <div className="relative border border-gray-300 rounded-lg mb-4 shadow-sm w-full">
+    <div className="relative border border-gray-200 rounded-xl mb-4 shadow-sm w-full hover:shadow-md transition-all duration-200 ease-in-out overflow-hidden bg-white">
       <div
-        className="flex justify-between items-center p-4 cursor-pointer"
+        className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50/50 transition-colors duration-200"
         onClick={toggleAccordion}
       >
         <div className="flex items-center gap-4">
-          <button
-            className="p-2 text-gray-600 rounded-full hover:bg-gray-100"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu((prev) => !prev);
-            }}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-gray-100 transition-colors duration-200"
+              >
+                <HiDotsVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="animate-in slide-in-from-top-1 duration-200"
+            >
+              <DropdownMenuItem
+                onClick={() => handleSelectOption("Edit")}
+                className="transition-colors duration-200 gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  handleSelectOption(is_published ? "Unpublish" : "Publish")
+                }
+                className="transition-colors duration-200 gap-2"
+              >
+                {is_published ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+                {is_published ? "Unpublish" : "Publish"}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-600 transition-colors duration-200 gap-2"
+                onClick={() => handleSelectOption("Delete")}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex-1 flex items-center gap-3">
+          <div className="text-gray-800 font-medium">{question}</div>
+          <Badge
+            variant="outline"
+            className={`
+              ${
+                is_published
+                  ? "border-green-500 text-green-700 bg-green-50"
+                  : "border-orange-500 text-orange-700 bg-orange-50"
+              } text-xs font-medium`}
           >
-            <HiDotsVertical size={18} />
-          </button>
-          {showMenu && (
-            <div className="absolute left-4 sm:right-8 top-12 sm:top-16 z-50 w-[180px] sm:w-[210px] rounded-[8px] py-[20px] sm:py-[24px] px-[30px] sm:px-[40px] border border-border/50 bg-white shadow-lg">
-              <div className="flex flex-col justify-between h-full">
-                {options.map((op, id) => (
-                  <p
-                    key={id}
-                    onClick={() => handleSelectOption(op)}
-                    className={`${
-                      op.toLowerCase() === "delete"
-                        ? "text-[#FF3E3E]"
-                        : "text-[#333333]"
-                    } text-[14px] sm:text-[16px] cursor-pointer mb-2 sm:mb-3`}
-                  >
-                    {op}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
+            {is_published ? "Published" : "Draft"}
+          </Badge>
         </div>
-        <div className="flex-1 text-gray-800 font-semibold text-sm">
-          {question}
-        </div>
-        <button className="p-2 text-gray-600 rounded-full hover:bg-gray-100">
-          {isOpen ? <FiChevronDown size={18} /> : <FiChevronRight size={18} />}
-        </button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-2 transition-transform duration-200"
+        >
+          <div
+            className={`transform transition-transform duration-200 ${
+              isOpen ? "rotate-90" : "rotate-0"
+            }`}
+          >
+            <FiChevronRight className="h-4 w-4" />
+          </div>
+        </Button>
       </div>
-      {isOpen && (
-        <div className="p-4 bg-gray-50 text-gray-600 text-sm">{answer}</div>
-      )}
-      {showDelete && (
-        <DeleteFaq
-          openModal={showDelete}
-          onClose={handleCloseAll}
-          onDelete={() => handleDeleteFaq(_id)}
-          isLoading={isDeleteing}
-        />
-      )}
-      {unpublish && (
-        <UnpublishFaq
-          openModal={unpublish}
-          onClose={handleCloseAll}
-          onDelete={() => handleUnpublishFaq(_id)}
-          isLoading={isUnpublishLoading}
-        />
-      )}
-      {publish && (
-        <PublishFaq
-          openModal={publish}
-          onClose={handleCloseAll}
-          onDelete={() => handlePublishFaq(_id)}
-          isLoading={isPublishLoading}
-        />
-      )}
-      {edit && (
-        <Sheet open={edit} onOpenChange={setEdit}>
-          <SheetContent
-            side="right"
-            className="w-full md:w-1/3 bg-white flex flex-col gap-5"
-          >
-            <SheetHeader>
-              <SheetTitle>Edit FAQ</SheetTitle>
-            </SheetHeader>
-            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Question
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter Title"
-                  className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  value={editingFaq.question}
-                  onChange={(e)=>{
-                    setEdittingFaq({...editingFaq, question: e.target.value });
-                  }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Answer
-                </label>
-                <textarea
-                  placeholder="Type brief description"
-                  rows={4}
-                  className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  value={editingFaq.answer}
-                  onChange={(e)=>{
-                    setEdittingFaq({...editingFaq, answer: e.target.value });
-                  }}
-                />
-              </div>
-              <div className="flex items-center justify-end space-x-4 w-full">
-                <button className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100">
-                  Cancel
-                </button>
-                <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg">
-                  {isEditLoading ? "Waiting..." : "Save and Continue"}
-                </button>
-              </div>
-            </form>
-          </SheetContent>
-        </Sheet>
-      )}
+      <div
+        className={`transform transition-all duration-200 ease-in-out ${
+          isOpen ? "opacity-100 max-h-[500px]" : "opacity-0 max-h-0"
+        }`}
+      >
+        <div className="p-4 bg-gray-50 text-gray-600 border-t">{answer}</div>
+      </div>
+
+      <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
+        <AlertDialogContent className="animate-in zoom-in-90 duration-200">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              FAQ.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => handleDeleteFaq(_id)}
+            >
+              {isDeleteing ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unpublish Dialog */}
+      <AlertDialog open={unpublish} onOpenChange={setUnpublish}>
+        <AlertDialogContent className="animate-in zoom-in-90 duration-200">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unpublish FAQ</AlertDialogTitle>
+            <AlertDialogDescription>
+              This FAQ will no longer be visible to users. You can publish it
+              again later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCloseAll}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-orange-600 hover:bg-orange-700"
+              onClick={() => handleUnpublishFaq(_id)}
+            >
+              {isUnpublishLoading ? "Unpublishing..." : "Unpublish"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Publish Dialog */}
+      <AlertDialog open={publish} onOpenChange={setPublish}>
+        <AlertDialogContent className="animate-in zoom-in-90 duration-200">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Publish FAQ</AlertDialogTitle>
+            <AlertDialogDescription>
+              This FAQ will be visible to all users. Are you sure you want to
+              publish it?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCloseAll}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => handlePublishFaq(_id)}
+            >
+              {isPublishLoading ? "Publishing..." : "Publish"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Sheet open={edit} onOpenChange={setEdit}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg animate-in slide-in-from-right duration-300"
+        >
+          <SheetHeader>
+            <SheetTitle>Edit FAQ</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Question</label>
+              <Input
+                placeholder="Enter question"
+                value={editingFaq.question}
+                onChange={(e) =>
+                  setEdittingFaq({ ...editingFaq, question: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Answer</label>
+              <Textarea
+                placeholder="Enter answer"
+                rows={4}
+                value={editingFaq.answer}
+                onChange={(e) =>
+                  setEdittingFaq({ ...editingFaq, answer: e.target.value })
+                }
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEdit(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handleSubmit(_id)}
+                disabled={isEditLoading}
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+              >
+                {isEditLoading ? "Saving..." : "Save changes"}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
 
 interface AccordionProps {
   items: AccordionItemProps[];
-  isLoading:boolean,
-  isError:boolean,
+  isLoading: boolean;
+  isError: boolean;
+  currentPage: number;
 }
 
-const FaqAccordion: React.FC<AccordionProps> = ({ items, isLoading, isError }) => {
+const FaqAccordion: React.FC<AccordionProps> = ({
+  items,
+  isLoading,
+  isError,
+  currentPage,
+}) => {
   return (
-    <div className="w-full">
-      {
-         isLoading ? (
-         
-            <div className="text-center w-full">
-              <span className="flex justify-center items-center" >
-              <FadeLoader height={10} radius={1} className="mt-3" />
-              </span>
+    <div className="w-full space-y-2">
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="border border-gray-200 rounded-xl p-4 space-y-3 bg-white"
+            >
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-4 flex-1" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+              <Skeleton className="h-20 w-full" />
             </div>
-         
-        ) : isError ? (
-         
-            <div className="text-center w-full">
-              <span className="flex justify-center items-center text-xs text-red-500" >
-              Something went wrong
-              </span>
-            </div>
-         
-        ) :
-      items?.map((item, index) => (
-        <AccordionItem key={index} {...item} />
-      ))}
+          ))}
+        </div>
+      ) : isError ? (
+        <div className="text-center w-full p-8 rounded-xl bg-red-50 border border-red-100">
+          <span className="flex justify-center items-center text-xs text-red-500">
+            Something went wrong
+          </span>
+        </div>
+      ) : (
+        <div className="animate-in fade-in duration-500">
+          {items?.map((item, index) => (
+            <AccordionItem key={index} {...item} currentPage={currentPage} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

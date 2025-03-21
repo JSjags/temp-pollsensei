@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Label, Pie, PieChart, Sector } from "recharts";
+import { Label, Pie, PieChart, Sector, ResponsiveContainer } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
 import {
@@ -28,9 +28,9 @@ import {
 import { FadeLoader } from "react-spinners";
 
 interface CircleData {
-  value: number; // Percentage
-  color: string; // Background color
-  size: number; // Diameter in pixels
+  value: number;
+  color: string;
+  size: number;
 }
 
 interface OverlappingCirclesProps {
@@ -40,6 +40,12 @@ interface OverlappingCirclesProps {
   bottomLegend: string[];
   title: string;
   isLoading: boolean;
+  year: string[];
+  months: string[];
+  selectedYear: string;
+  onYearChange: (year: string) => void;
+  selectedMonth: string;
+  onMonthChange: (month: string) => void;
 }
 
 const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
@@ -49,103 +55,160 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
   bottomLegend,
   title,
   isLoading,
+  year,
+  months,
+  selectedYear,
+  onYearChange,
+  selectedMonth,
+  onMonthChange,
 }) => {
   const id = "pie-interactive";
-  const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>();
 
-  const activeIndex = React.useMemo(
-    () => desktopData.findIndex((item) => item.month === activeMonth),
-    [activeMonth]
-  );
   const plans = React.useMemo(
     () => desktopData.map((item) => item.month),
     [desktopData]
   );
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  console.log(desktopData);
+
+  const renderActiveShape = (props: PieSectorDataItem) => {
+    const {
+      cx = 0,
+      cy = 0,
+      innerRadius = 0,
+      outerRadius = 0,
+      startAngle = 0,
+      endAngle = 0,
+      fill = "#000",
+    } = props;
+
+    return (
+      <g>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 10}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          cornerRadius={4}
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 15}
+          outerRadius={outerRadius + 15}
+          fill={fill}
+        />
+      </g>
+    );
+  };
+
+  const pieData = circles.map((circle) => ({
+    value: circle.value,
+    fill: circle.color,
+  }));
+
   return (
-    <Card data-chart={id} className="flex flex-col w-full">
+    <Card
+      data-chart={id}
+      className="flex flex-col w-full p-0 border-none shadow-none rounded-xl"
+    >
       <ChartStyle id={id} config={chartConfig} />
-      <CardHeader className="flex-row items-start space-y-0 pb-0">
+      <CardHeader className="flex-col gap-2 items-start space-y-0 pb-0">
         <div className="grid gap-1">
-          <CardTitle className="text-sm font-medium text-gray-800">
+          <CardTitle className="text-base font-semibold text-gray-800">
             {title}
           </CardTitle>
         </div>
-        <Select value={activeMonth} onValueChange={setActiveMonth}>
-          <SelectTrigger
-            className="ml-auto h-7 w-auto rounded-lg pl-2.5"
-            aria-label="Select a value"
-          >
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent align="end" className="rounded-xl">
-            {plans.map((key) => {
-              const config = chartConfig[key as keyof typeof chartConfig];
-
-              if (!config) {
-                return null;
-              }
-
-              return (
+        <div className="ml-auto flex gap-2">
+          <Select value={selectedMonth} onValueChange={onMonthChange}>
+            <SelectTrigger
+              className="h-7 w-auto rounded-lg pl-2.5"
+              aria-label="Select month"
+            >
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+            <SelectContent align="end" className="rounded-xl">
+              {months?.map((month) => (
                 <SelectItem
-                  key={key}
-                  value={key}
+                  key={month}
+                  value={month}
                   className="rounded-lg [&_span]:flex"
                 >
-                  <div className="flex items-center gap-2 text-xs">
-                    <span
-                      className="flex h-3 w-3 shrink-0 rounded-sm"
-                      style={{
-                        backgroundColor: `var(--color-${key})`,
-                      }}
-                    />
-                    {config?.label}
-                  </div>
+                  {month}
                 </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedYear} onValueChange={onYearChange}>
+            <SelectTrigger
+              className="h-7 w-auto rounded-lg pl-2.5"
+              aria-label="Select year"
+            >
+              <SelectValue placeholder="Select year" />
+            </SelectTrigger>
+            <SelectContent align="end" className="rounded-xl">
+              {year?.map((yr) => (
+                <SelectItem
+                  key={yr}
+                  value={yr}
+                  className="rounded-lg [&_span]:flex"
+                >
+                  {yr}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
-      <CardContent className="flex flex-1 justify-center pb-0">
+      <CardContent className="flex flex-1 justify-center min-h-[300px]">
         {isLoading ? (
-          <>
-            <div className="text-center ">
-              <span className="flex justify-center items-center">
-                <FadeLoader height={10} radius={1} className="mt-3" />
-              </span>
-            </div>
-          </>
-        ) : (
-          <div className="relative flex justify-center items-center">
-            {circles.map((circle, index) => (
-              <div
-                key={index}
-                className="absolute flex justify-center items-center rounded-full text-white font-bold"
-                style={{
-                  backgroundColor: circle.color,
-                  width: `${circle.size}px`,
-                  height: `${circle.size}px`,
-                  zIndex: index,
-                  transform: `translate(${index * 70}px, ${index * 0}px)`,
-                }}
-              >
-                <span>{circle.value}%</span>
-              </div>
-            ))}
+          <div className="flex items-center justify-center h-full min-h-[300px]">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
           </div>
+        ) : (
+          <ChartContainer config={chartConfig} className="w-full">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={1}
+                  cornerRadius={4}
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  onMouseEnter={onPieEnter}
+                  onMouseLeave={() => setActiveIndex(undefined)}
+                  label={({ value }) => `${value}%`}
+                  labelLine={false}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         )}
       </CardContent>
       <div className="mt-4 flex justify-center space-x-6">
         {bottomLegend?.map((label, idx) => (
           <div key={idx} className="flex items-center space-x-2">
             <div
-              className={`w-2 h-2  ${
-                idx === 0
-                  ? "bg-purple-800"
-                  : idx === 1
-                  ? "bg-purple-400"
-                  : "bg-purple-200"
-              }`}
+              className="size-4 rounded-full"
+              style={{
+                backgroundColor: desktopData[idx]?.fill || "#E9D7FB",
+              }}
             ></div>
             <span className="text-sm text-gray-600">{label}</span>
           </div>
