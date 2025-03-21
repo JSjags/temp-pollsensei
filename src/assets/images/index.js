@@ -91,9 +91,25 @@ import Coin from "./shop/coin.svg";
 import CoinCard from "./shop/coin+card.svg";
 import Caret from "./shop/caret.svg";
 import RedeemableEmpty from "./shop/redeemable.svg";
+import CheckIcon from './payouts/check.svg'
+import CopyIcon from './payouts/copy.svg'
+import PayoutCash from './payouts/money.svg'
+import OverallEarnings from './payouts/overall-earnings.svg'
+import CoinsObtained from './payouts/coins-obtained.svg'
+import CoinRedeemed from './payouts/coins-redeemed.svg'
+import RedeemableCoin from './payouts/redeemable-coin.svg'
+import PayoutInfoIcon from './payouts/Info.svg'
 
 export {
   teamIcon,
+  CheckIcon,
+  CopyIcon,
+  PayoutCash,
+  OverallEarnings,
+  PayoutInfoIcon,
+  CoinRedeemed,
+  CoinsObtained,
+  RedeemableCoin,
   Coins,
   Coin,
   CoinCard,

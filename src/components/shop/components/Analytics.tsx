@@ -128,7 +128,7 @@ export function Analytics() {
             );
           })}
         </div>
-        <div className="px-2 relative min-w-[327px] max-md:hidden">
+        {/* <div className="px-2 relative min-w-[327px] max-md:hidden">
           <div className="absolute inset-0 z-0">
             <Image
               src={"/assets/shop/webp/banner.webp"}
@@ -144,7 +144,7 @@ export function Analytics() {
               <br /> ON ALL ORDERS FROM TEMU TODAY
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
