@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import PageControl from "@/components/common/PageControl";
 import FaqAccordion from "@/components/superadmin-faqs/FaqAccordion";
@@ -9,8 +9,8 @@ const SuperAdminDraftFaqs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, isError, refetch } = useAllFAQsQuery({
     pagesNumber: currentPage,
-    filter_by:"draft"
-  })
+    filter_by: "draft",
+  });
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
@@ -24,13 +24,16 @@ const SuperAdminDraftFaqs = () => {
     });
     refetch();
   };
-  console.log(data);
-  console.log(currentPage);
-
 
   return (
     <div className="p-6">
-      <FaqAccordion items={data?.data?.data} isLoading={isLoading} isError={isError} />
+      <FaqAccordion
+        items={data?.data?.data}
+        isLoading={isLoading}
+        isError={isError}
+        currentPage={currentPage}
+        refetch={refetch}
+      />
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">
           {totalItems > 0

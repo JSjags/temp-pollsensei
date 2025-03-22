@@ -1,16 +1,19 @@
-"use client"
+"use client";
 
 import PageControl from "@/components/common/PageControl";
 import FaqAccordion from "@/components/superadmin-faqs/FaqAccordion";
+import { RootState } from "@/redux/store";
 import { useAllFAQsQuery } from "@/services/superadmin.service";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 const SuperAdminLiveFaqs = () => {
+  const store = useSelector((state: RootState) => state);
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, isError, refetch } = useAllFAQsQuery({
     pagesNumber: currentPage,
-    filter_by:"live"
-  })
+    filter_by: "live",
+  });
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
@@ -24,14 +27,14 @@ const SuperAdminLiveFaqs = () => {
     });
     refetch();
   };
-  console.log(data);
+  console.log(store);
   console.log(currentPage);
-
 
   const faqItems = [
     {
       question: "How do I create a survey?",
-      answer: "You can create a survey by clicking on the 'Create Survey' button...",
+      answer:
+        "You can create a survey by clicking on the 'Create Survey' button...",
     },
     {
       question: "Can I customize the survey design and layout?",
@@ -39,13 +42,20 @@ const SuperAdminLiveFaqs = () => {
     },
     {
       question: "Is my survey data kept confidential and secure?",
-      answer: "Your survey data is kept confidential using our security measures...",
+      answer:
+        "Your survey data is kept confidential using our security measures...",
     },
   ];
 
   return (
     <div className="p-6">
-      <FaqAccordion items={data?.data?.data} isLoading={isLoading} isError={isError} />
+      <FaqAccordion
+        items={data?.data?.data}
+        isLoading={isLoading}
+        isError={isError}
+        currentPage={currentPage}
+        refetch={refetch}
+      />
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">
           {totalItems > 0
