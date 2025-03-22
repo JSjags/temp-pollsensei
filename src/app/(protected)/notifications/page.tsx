@@ -82,7 +82,7 @@ const NotificationsPage = () => {
   const isEmpty = notifications.length === 0;
 
   return (
-    <div className="container py-8 bg-white">
+    <div className="container py-8 min-h-screen bg-white">
       <h1 className="text-2xl font-semibold mb-6">Notifications</h1>
       <div className="space-y-4">
         {notifications.map((notification) => (
