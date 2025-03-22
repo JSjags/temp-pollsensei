@@ -180,14 +180,14 @@ const SurveyPDFDocument = ({ surveyData }: SurveyPDFDocumentProps) => {
 
         {/* Survey Topic */}
         <View style={styles.section}>
-          <Text style={headerStyle}>{topic}</Text>
-          <Text style={descriptionStyle}>{description}</Text>
+          <Text style={headerStyle as any}>{topic}</Text>
+          <Text style={descriptionStyle as any}>{description}</Text>
         </View>
 
         {/* Questions */}
         {sections[0]?.questions?.map((item, index) => (
           <View key={index} style={styles.section}>
-            <Text style={questionStyle}>
+            <Text style={questionStyle as any}>
               {index + 1}. {item.question}
             </Text>
             {item.question_type === "checkbox" ? (

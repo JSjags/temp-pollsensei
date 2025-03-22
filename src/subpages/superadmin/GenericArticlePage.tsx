@@ -28,10 +28,6 @@ import Image from "next/image";
 import { ClipLoader, FadeLoader } from "react-spinners";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { toast } from "react-toastify";
-import DeleteFaq from "@/components/superadmin-faqs/DeleteFaq";
-import UnpublishFaq from "@/components/superadmin-faqs/UnpublishFaq";
-import PublishFaq from "@/components/superadmin-faqs/Publish";
-import { Modal } from "@/components/superadmin-faqs/Modal";
 import { FaFileUpload } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import {
@@ -45,12 +41,74 @@ import AppReactQuill from "@/components/common/forms/AppReactQuill";
 import AppCollapse from "@/components/custom/AppCollapse";
 import { GetTutorials } from "@/types/api/tutorials.types";
 import { ChatBotIcon } from "@/components/icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Eye, Pencil, Ban, Trash2, MoreVertical } from "lucide-react";
+import { PlayCircle, FileText } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/shadcn-input";
+import { Textarea } from "@/components/ui/shadcn-textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   pageValue: UseQueryResult<GetTutorials | null, Error>;
   currentPage: number;
   setCurrentPage: Dispatch<SetStateAction<number>>;
 }
+
+const CardSkeleton = () => (
+  <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+    <Skeleton className="w-full h-[200px]" />
+    <div className="p-4">
+      <Skeleton className="h-4 w-3/4 mb-2" />
+      <Skeleton className="h-3 w-1/4" />
+    </div>
+  </div>
+);
+
+const EditSheetSkeleton = () => (
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-20" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-32 w-full" />
+    </div>
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-16" />
+      <Skeleton className="h-32 w-full" />
+    </div>
+    <div className="space-y-2">
+      <Skeleton className="h-4 w-16" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+    <Skeleton className="h-64 w-full" />
+  </div>
+);
 
 const GenericArticlePage = (props: Props) => {
   const {
@@ -63,9 +121,6 @@ const GenericArticlePage = (props: Props) => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [preview, setPreview] = useState(false);
   const [edit, setEdit] = useState(false);
-  const [publish, setPublish] = useState(false);
-  const [unpublish, setUnpublish] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
   const [_id, set_Id] = useState("");
   const [deleteTutorial, { isLoading: isDeleteing }] =
     useDeleteTutorialMutation();
@@ -79,6 +134,19 @@ const GenericArticlePage = (props: Props) => {
     useEditTutorialMutation();
   const queryClient = useQueryClient();
   const [quilValue, setQuilValue] = useState("");
+  const [selectedCardId, setSelectedCardId] = useState<string>("");
+  const [selectedTutorial, setSelectedTutorial] = useState<any>(null);
+  const [confirmationDialog, setConfirmationDialog] = useState<{
+    isOpen: boolean;
+    type: "publish" | "unpublish" | "delete";
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    type: "delete",
+    title: "",
+    message: "",
+  });
 
   // const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
 
@@ -141,7 +209,9 @@ const GenericArticlePage = (props: Props) => {
     setFileName(file?.name || null);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const editFormData = new FormData();
     editFormData.append("type", formData.type);
     editFormData.append("title", formData.title);
@@ -158,54 +228,70 @@ const GenericArticlePage = (props: Props) => {
       await editTutorial({ id: _id, body: editFormData }).unwrap();
       toast.success("Tutorial edited successfully");
       setEdit(false);
-      queryClient?.invalidateQueries({ queryKey: [queryKeys.TUTORIALS] });
+      await queryClient.invalidateQueries({ queryKey: [queryKeys.TUTORIALS] });
     } catch (err: any) {
       toast.error(
-        "Failed to create tutorial " + (err?.data?.message || err.message)
+        "Failed to edit tutorial " + (err?.data?.message || err.message)
       );
-      console.error("Failed to create tutorial", err);
     }
   };
 
-  const handleCloseAll = () => {
-    setEdit(false);
-    setPublish(false);
-    setUnpublish(false);
-    setShowDelete(false);
+  const handleDelete = async (id: string) => {
+    setSelectedTutorial(id);
+    setConfirmationDialog({
+      isOpen: true,
+      type: "delete",
+      title: "Delete Tutorial",
+      message:
+        "Are you sure you want to delete this tutorial? This action cannot be undone.",
+    });
   };
 
-  const handleDeleteTutorial = async (id: any) => {
-    try {
-      await deleteTutorial(id).unwrap();
-      toast.success("FAQ deleted successfully");
-      handleCloseAll();
-      // refetch();
-    } catch (e) {
-      console.log(e);
-      toast.error("Error deleting FAQ");
-    }
+  const handlePublish = async (id: string) => {
+    setSelectedTutorial(id);
+    setConfirmationDialog({
+      isOpen: true,
+      type: "publish",
+      title: "Publish Tutorial",
+      message:
+        "Are you sure you want to publish this tutorial? It will be visible to all users.",
+    });
   };
 
-  const handleUnpublishTutorial = async (id: any) => {
-    try {
-      await unpublishTutorial(id).unwrap();
-      toast.success("FAQ unpublish successfully");
-      handleCloseAll();
-      // refetch();
-    } catch (e) {
-      console.log(e);
-      toast.error("Error deleting FAQ");
-    }
+  const handleUnpublish = async (id: string) => {
+    setSelectedTutorial(id);
+    setConfirmationDialog({
+      isOpen: true,
+      type: "unpublish",
+      title: "Unpublish Tutorial",
+      message:
+        "Are you sure you want to unpublish this tutorial? It will no longer be visible to users.",
+    });
   };
-  const handlePublishTutorial = async (id: any) => {
+
+  const handleConfirmAction = async () => {
     try {
-      await publishTutorial(id).unwrap();
-      toast.success("FAQ deleted successfully");
-      handleCloseAll();
-      // refetch();
-    } catch (e) {
-      console.log(e);
-      toast.error("Error deleting FAQ");
+      switch (confirmationDialog.type) {
+        case "delete":
+          await deleteTutorial({ id: selectedTutorial }).unwrap();
+          toast.success("Tutorial deleted successfully");
+          break;
+        case "publish":
+          await publishTutorial({ id: selectedTutorial }).unwrap();
+          toast.success("Tutorial published successfully");
+          break;
+        case "unpublish":
+          await unpublishTutorial({ id: selectedTutorial }).unwrap();
+          toast.success("Tutorial unpublished successfully");
+          break;
+      }
+      setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
+
+      // Add these two lines to ensure data is refreshed
+      await queryClient.invalidateQueries({ queryKey: [queryKeys.TUTORIALS] });
+      await value.refetch(); // Refetch the current page data
+    } catch (error) {
+      toast.error("An error occurred");
     }
   };
 
@@ -262,17 +348,17 @@ const GenericArticlePage = (props: Props) => {
   }, [previewTutorial]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {isLoading || isRefetching ? (
-          <div className="text-center flex justify-center items-center w-full">
-            <span className="flex justify-center items-center">
-              <FadeLoader height={10} radius={1} className="mt-3" />
-            </span>
-          </div>
+          <>
+            {[...Array(6)].map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </>
         ) : isError ? (
-          <div className="text-center w-full">
-            <span className="flex justify-center items-center text-xs text-red-500">
+          <div className="col-span-full text-center">
+            <span className="flex justify-center items-center text-sm text-red-500">
               Something went wrong
             </span>
           </div>
@@ -280,459 +366,115 @@ const GenericArticlePage = (props: Props) => {
           data?.data.map((card: any, index: number) => (
             <div
               key={index}
-              className="relative flex flex-col bg-white shadow rounded-lg overflow-hidden"
+              className="relative flex flex-col bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg overflow-hidden"
             >
               {/* Card Background */}
-              <div
-                className={`relative w-full aspect-video flex justify-center items-center`}
-              >
+              <div className="relative w-full aspect-video flex justify-center items-center bg-gray-100">
                 {card?.media[0]?.type.includes("image") ? (
                   <Image
-                    className="dark:invert w-full h-40 object-cover "
+                    className="w-full h-full object-cover"
                     src={card?.media[0]?.url}
-                    alt="Next.js logo"
-                    width={180}
-                    height={38}
+                    alt={card?.title}
+                    width={400}
+                    height={225}
                     priority
                   />
                 ) : card?.media?.[0]?.type.includes("video") ? (
-                  <video loop muted autoPlay className="w-full">
+                  <video
+                    loop
+                    muted
+                    autoPlay
+                    className="w-full h-full object-cover"
+                  >
                     <source src={card?.media[0]?.url} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 ) : (
-                  <div className="w-full text-3xl md:text-4xl lg:text-5xl aspect-video flex items-center justify-center">
-                    <ChatBotIcon />
+                  <div className="w-full h-full flex items-center justify-center bg-purple-50">
+                    <ChatBotIcon className="w-16 h-16 text-purple-600" />
                   </div>
                 )}
               </div>
 
               {/* Card Content */}
-              <div className="p-4  flex flex-col">
-                <h3 className="text-sm font-medium text-gray-800">
-                  {card?.title}
-                </h3>
-                <div className="w-full flex justify-between items-center">
+              <div className="p-4 flex flex-col flex-grow">
+                <div className="flex justify-between items-center mb-2">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "px-2 py-1 text-xs font-medium",
+                      card.is_published
+                        ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                        : "bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100"
+                    )}
+                  >
+                    {card.is_published ? "Published" : "Draft"}
+                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="p-1 hover:bg-gray-100 rounded-full">
+                      <MoreVertical className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setPreview(true);
+                          set_Id(card?._id);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        <span>Preview</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setEdit(true);
+                          set_Id(card?._id);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Pencil className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleUnpublish(card._id)}
+                        className="cursor-pointer"
+                      >
+                        <Ban className="mr-2 h-4 w-4" />
+                        <span>Unpublish</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(card._id)}
+                        className="cursor-pointer text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
+                <div className="mt-auto pt-2 flex items-center text-xs text-gray-500">
                   {card?.media?.[0]?.type === "video/mp4" ? (
-                    <small>Watch Video</small>
+                    <span className="flex items-center">
+                      <PlayCircle className="w-4 h-4 mr-1" />
+                      Watch Video
+                    </span>
                   ) : (
-                    <small>Read article</small>
+                    <span className="flex items-center">
+                      <FileText className="w-4 h-4 mr-1" />
+                      Read article
+                    </span>
                   )}
-                  <button
-                    onClick={() =>
-                      setDropdownIndex((prevIndex) =>
-                        prevIndex === index ? null : index
-                      )
-                    }
-                    className="relative"
-                  >
-                    <BsThreeDotsVertical />
-                  </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1"></p>
               </div>
-
-              {/* Action Menu */}
-              {dropdownIndex === index && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute top-12 right-4 bg-white shadow-md rounded-md w-40 py-2 z-10"
-                >
-                  <ul>
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        setPreview(true);
-                        set_Id(card?._id);
-                      }}
-                    >
-                      Preview
-                    </li>
-
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        setEdit(true);
-                        set_Id(card?._id);
-                      }}
-                    >
-                      Edit
-                    </li>
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => setUnpublish(true)}
-                    >
-                      Unpublish
-                    </li>
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                      onClick={() => setShowDelete(true)}
-                    >
-                      Delete
-                    </li>
-                  </ul>
-                </div>
-              )}
-
-              {preview && (
-                <Modal
-                  size="w-[60%]"
-                  onClose={() => {
-                    setPreview(false);
-                    set_Id("");
-                  }}
-                >
-                  {isLoadingAll && "Loading..."}
-
-                  {previewTutorial?.data && (
-                    <div className="max-h-[60vh] overflow-y-auto custom-scrollbar ">
-                      <div className="flex flex-col gap-4">
-                        <h2 className="text-center text-2xl font-bold">
-                          {previewTutorial?.data?.title}
-                        </h2>
-                        <div
-                          className={`relative flex justify-center items-center`}
-                        >
-                          {previewTutorial?.data?.media[0].type.includes(
-                            "image"
-                          ) ? (
-                            <Image
-                              className="dark:invert"
-                              src={previewTutorial?.data?.media[0]?.url}
-                              alt={previewTutorial?.data?.title}
-                              width={700}
-                              height={300}
-                            />
-                          ) : (
-                            <video loop muted autoPlay className="w-full">
-                              <source
-                                src={previewTutorial?.data?.media[0]?.url}
-                                type="video/mp4"
-                              />
-                              Your browser does not support the video tag.
-                            </video>
-                          )}
-                        </div>
-                      </div>
-                      <div className="px-10 py-4">
-                        <p className="">{previewTutorial?.description}</p>
-                      </div>
-                    </div>
-                  )}
-                </Modal>
-              )}
-
-              {showDelete && (
-                <DeleteFaq
-                  openModal={showDelete}
-                  onClose={handleCloseAll}
-                  onDelete={() => handleDeleteTutorial(card?._id)}
-                  isLoading={isDeleteing}
-                />
-              )}
-              {unpublish && (
-                <UnpublishFaq
-                  openModal={unpublish}
-                  onClose={handleCloseAll}
-                  onDelete={() => handleUnpublishTutorial(card?._id)}
-                  isLoading={isUnpublishLoading}
-                />
-              )}
-              {publish && (
-                <PublishFaq
-                  openModal={publish}
-                  onClose={handleCloseAll}
-                  onDelete={() => handlePublishTutorial(card?._id)}
-                  isLoading={isPublishLoading}
-                />
-              )}
-
-              {/* {edit && (
-                <Sheet open={edit} onOpenChange={setEdit}>
-                  <SheetContent
-                    side="right"
-                    className="w-full md:w-1/3 bg-white flex flex-col gap-5"
-                  >
-                    <SheetHeader>
-                      <SheetTitle>Edit Tutorial</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-6 space-y-4">
-                      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-                        {isLoadingAll && "Loading..."}
-                        {previewTutorial && (
-                          <>
-                            <div>
-                              <select
-                                className={cn(
-                                  "auth-input focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground w-full placeholder:text-foreground/40"
-                                )}
-                                name="type"
-                                id="type"
-                              >
-                                <option value="">{formData.type}</option>
-                                {apiConstantOptions?.TUTORIAL_TYPES?.map(
-                                  (option: any) => (
-                                    <option
-                                      key={option.value}
-                                      value={option.value}
-                                    >
-                                      {option.label}
-                                    </option>
-                                  )
-                                )}
-                              </select>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Title
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Enter Title"
-                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                                value={formData.title}
-                                onChange={handleChange}
-                                name="title"
-                                id="title"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Description
-                              </label>
-                              <textarea
-                                placeholder="Type brief description"
-                                rows={4}
-                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                                value={formData.description}
-                                onChange={handleChange}
-                                name="description"
-                                id="description"
-                              />
-                            </div>
-
-                            <div
-                              onDrop={handleDrop}
-                              onDragOver={preventDefaults}
-                              onDragEnter={preventDefaults}
-                              className="flex flex-col items-center justify-center w-full h-32 cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-lg"
-                            >
-                              <div className="flex flex-col items-center">
-                                <FaFileUpload size={24} />
-                                <p className="text-gray-500 mt-2">
-                                  {fileName ||
-                                    "Select a file or drag and drop here"}
-                                </p>
-                                <p className="text-sm text-gray-400">
-                                  MP4, MOV, MKV, file size no more than 50MB
-                                </p>
-                              </div>
-                              <input
-                                type="file"
-                                id="fileUpload"
-                                name="fileUpload"
-                                accept=".mp4, .mov, .mkv, .jpg, .jpeg, .png"
-                                className="hidden"
-                                onChange={handleFileChange}
-                              />
-                              <label
-                                htmlFor="fileUpload"
-                                className="border border-purple-800 py-1 px-4 rounded-full mt-3"
-                              >
-                                Select file
-                              </label>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Links
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Enter Title"
-                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                                value={formData.links}
-                                onChange={handleChange}
-                                name="links"
-                                id="links"
-                              />
-                            </div>
-                            <div className="flex items-center justify-end space-x-4 w-full">
-                              <button
-                                className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100"
-                                type="button"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg"
-                                type="submit"
-                              >
-                                {isEditLoading
-                                  ? "Waiting..."
-                                  : "Save and Continue"}
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </form>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              )} */}
-
-              {edit && (
-                <Sheet open={edit} onOpenChange={setEdit}>
-                  <SheetContent
-                    side="right"
-                    className=" sm:max-w-[80vw] md:max-w-[60vw] lg:max-w-[50vw] xl:max-w-[35vw] overflow-y-auto bg-white flex flex-col gap-5"
-                  >
-                    <SheetHeader>
-                      <SheetTitle>Edit Tutorial</SheetTitle>
-                    </SheetHeader>
-                    <div className="mt-6 space-y-4">
-                      <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-                        {isLoadingAll && "Loading..."}
-                        {previewTutorial && (
-                          <>
-                            <div>
-                              <select
-                                onChange={handleChange}
-                                className={cn(
-                                  "auth-input focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground w-full placeholder:text-foreground/40"
-                                )}
-                                name="type"
-                                id="type"
-                              >
-                                {/* <option value={formData.type} className="">
-                                  {formData.type}
-                                </option> */}
-                                {apiConstantOptions?.TUTORIAL_TYPES.map(
-                                  (option: any) => (
-                                    <option
-                                      key={option.value}
-                                      value={option.value}
-                                    >
-                                      {option.label}
-                                    </option>
-                                  )
-                                )}
-                              </select>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Title
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Enter Title"
-                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                                value={formData.title}
-                                onChange={handleChange}
-                                name="title"
-                                id="title"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Description
-                              </label>
-                              <textarea
-                                placeholder="Type brief description"
-                                rows={4}
-                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                                value={formData.description}
-                                onChange={handleChange}
-                                name="description"
-                                id="description"
-                              />
-                            </div>
-
-                            <AppCollapse
-                              isVisible={formData.type != TUTORIAL_ENUM.text}
-                            >
-                              <div
-                                onDrop={handleDrop}
-                                onDragOver={preventDefaults}
-                                onDragEnter={preventDefaults}
-                                className="flex flex-col items-center justify-center w-full h-32 cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-lg"
-                              >
-                                <div className="flex flex-col items-center">
-                                  <FaFileUpload size={24} />
-                                  <p className="text-gray-500 mt-2">
-                                    {fileName ||
-                                      "Select a file or drag and drop here"}
-                                  </p>
-                                  <p className="text-sm text-gray-400">
-                                    MP4, MOV, MKV, file size no more than 50MB
-                                  </p>
-                                </div>
-                                <input
-                                  type="file"
-                                  id="fileUpload"
-                                  name="fileUpload"
-                                  accept=".mp4, .mov, .mkv, .jpg, .jpeg, .png"
-                                  className="hidden"
-                                  onChange={handleFileChange}
-                                />
-                                <label
-                                  htmlFor="fileUpload"
-                                  className="border border-purple-800 py-1 px-4 rounded-full mt-3"
-                                >
-                                  Select file
-                                </label>
-                              </div>
-                            </AppCollapse>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Links
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Enter Title"
-                                className="w-full px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                                value={formData.links}
-                                onChange={handleChange}
-                                name="links"
-                                id="links"
-                              />
-                            </div>
-
-                            <div className="py-8">
-                              <AppReactQuill
-                                quilValue={quilValue}
-                                setQuilValue={setQuilValue}
-                              />
-                            </div>
-
-                            <div className="flex items-center justify-end space-x-4 w-full">
-                              <button
-                                className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100"
-                                type="button"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg"
-                                type="submit"
-                              >
-                                {isEditLoading
-                                  ? "Waiting..."
-                                  : "Save and Continue"}
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </form>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              )}
             </div>
           ))
         )}
       </div>
-      <div className="mt-6 sm:mt-8 flex justify-between items-center">
-        <p className="text-xs font-medium">
+
+      {/* Pagination */}
+      <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p className="text-xs font-medium order-2 sm:order-1">
           {totalItems > 0
             ? `Showing ${(currentPage - 1) * 20 + 1}-${Math.min(
                 currentPage * 20,
@@ -740,12 +482,357 @@ const GenericArticlePage = (props: Props) => {
               )} of ${totalItems}`
             : "No items to display"}
         </p>
-        <PageControl
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onNavigate={navigatePage}
-        />
+        <div className="order-1 sm:order-2">
+          <PageControl
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onNavigate={navigatePage}
+          />
+        </div>
       </div>
+
+      {preview && (
+        <Sheet open={preview} onOpenChange={setPreview}>
+          <SheetContent
+            side="right"
+            className=" sm:max-w-[80vw] md:max-w-[60vw] lg:max-w-[50vw] overflow-y-auto bg-white flex flex-col gap-5"
+          >
+            <SheetHeader>
+              <SheetTitle>Preview</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6 space-y-4">
+              {isLoadingAll && (
+                <div className="space-y-4">
+                  <Skeleton className="h-8 w-3/4" />
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-[300px] w-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/6" />
+                  </div>
+                </div>
+              )}
+
+              {previewTutorial?.data && (
+                <div className="max-h-[60vh] overflow-y-auto custom-scrollbar ">
+                  <div className="flex flex-col gap-4">
+                    <div className="overflow-y-auto max-h-[80vh]">
+                      <h2 className="text-2xl font-bold mb-4">
+                        {previewTutorial?.data?.title}
+                      </h2>
+
+                      <p className="text-gray-600 mb-4">
+                        {previewTutorial?.data?.description}
+                      </p>
+
+                      <div
+                        className={`relative flex justify-center items-center mb-4`}
+                      >
+                        {previewTutorial?.data?.media?.length > 0 ? (
+                          previewTutorial.data.media[0].type.includes(
+                            "image"
+                          ) ? (
+                            <Image
+                              className="dark:invert"
+                              src={previewTutorial.data.media[0].url}
+                              alt="Preview"
+                              width={300}
+                              height={300}
+                            />
+                          ) : previewTutorial.data.media[0].type.includes(
+                              "video"
+                            ) ? (
+                            <video loop muted autoPlay className="w-full">
+                              <source
+                                src={previewTutorial.data.media[0].url}
+                                type={previewTutorial.data.media[0].type}
+                              />
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : null
+                        ) : (
+                          <div className="text-gray-500 italic">
+                            No media available
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className="prose max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: previewTutorial?.data?.content || "",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {edit && (
+        <Sheet open={edit} onOpenChange={setEdit}>
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-[80vw] md:max-w-[60vw] lg:max-w-[50vw]  overflow-y-auto"
+          >
+            <SheetHeader>
+              <SheetTitle>Edit Tutorial</SheetTitle>
+              <SheetDescription>
+                Make changes to your tutorial here.
+              </SheetDescription>
+            </SheetHeader>
+
+            {isLoadingAll ? (
+              <EditSheetSkeleton />
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6 py-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Type</Label>
+                    <Select
+                      value={formData.type}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, type: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="image">Image</SelectItem>
+                        <SelectItem value="video">Video</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter title"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      placeholder="Type brief description"
+                      rows={4}
+                    />
+                  </div>
+
+                  {formData.type !== TUTORIAL_ENUM.text && (
+                    <div
+                      onDrop={handleDrop}
+                      onDragOver={preventDefaults}
+                      onDragEnter={preventDefaults}
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-purple-500 transition-colors"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <FaFileUpload className="h-8 w-8 text-gray-400" />
+                        <p className="text-sm text-gray-600">
+                          {fileName || "Select a file or drag and drop here"}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          MP4, MOV, MKV, file size no more than 50MB
+                        </p>
+                        <Input
+                          type="file"
+                          id="fileUpload"
+                          name="fileUpload"
+                          accept=".mp4,.mov,.mkv,.jpg,.jpeg,.png"
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() =>
+                            document.getElementById("fileUpload")?.click()
+                          }
+                        >
+                          Select file
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="links">Links</Label>
+                    <Input
+                      id="links"
+                      name="links"
+                      value={formData.links}
+                      onChange={handleChange}
+                      placeholder="Enter links"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Content</Label>
+                    <AppReactQuill
+                      quilValue={quilValue}
+                      setQuilValue={setQuilValue}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEdit(false)}
+                    disabled={isEditLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isEditLoading}
+                    className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                  >
+                    {isEditLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving changes...
+                      </>
+                    ) : (
+                      "Save changes"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={confirmationDialog.isOpen && confirmationDialog.type === "delete"}
+        onOpenChange={(open) =>
+          setConfirmationDialog((prev) =>
+            prev.type === "delete" ? { ...prev, isOpen: open } : prev
+          )
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Tutorial</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this tutorial? This action cannot
+              be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmationDialog((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmAction}
+              disabled={isDeleteing}
+            >
+              {isDeleteing ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Publish Confirmation Dialog */}
+      <Dialog
+        open={
+          confirmationDialog.isOpen && confirmationDialog.type === "publish"
+        }
+        onOpenChange={(open) =>
+          setConfirmationDialog((prev) =>
+            prev.type === "publish" ? { ...prev, isOpen: open } : prev
+          )
+        }
+      >
+        <DialogContent className="z-[100000]" overlayClassName="z-[100000]">
+          <DialogHeader>
+            <DialogTitle>Publish Tutorial</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to publish this tutorial? It will be visible
+              to all users.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmationDialog((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmAction}
+              disabled={isPublishLoading}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {isPublishLoading ? "Publishing..." : "Publish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unpublish Confirmation Dialog */}
+      <Dialog
+        open={
+          confirmationDialog.isOpen && confirmationDialog.type === "unpublish"
+        }
+        onOpenChange={(open) =>
+          setConfirmationDialog((prev) =>
+            prev.type === "unpublish" ? { ...prev, isOpen: open } : prev
+          )
+        }
+      >
+        <DialogContent className="z-[100000]" overlayClassName="z-[100000]">
+          <DialogHeader>
+            <DialogTitle>Unpublish Tutorial</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to unpublish this tutorial? It will no
+              longer be visible to users.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setConfirmationDialog((prev) => ({ ...prev, isOpen: false }))
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmAction}
+              disabled={isUnpublishLoading}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {isUnpublishLoading ? "Unpublishing..." : "Unpublish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

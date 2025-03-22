@@ -384,8 +384,42 @@ const PublicResponse = () => {
       "Other",
       "other",
       "others",
+      "Other...",
+      "Others...",
+      "Other option",
+      "Other options",
+      "Other choice",
+      "Other choices",
+      "Something else",
+      "Something else...",
+      "Specify other",
+      "Please specify",
+      "Please specify other",
+      "Please specify others",
+      "Custom option",
+      "Custom choice",
+      "Please specify here",
+      "Please specify below",
+      "Please provide details",
+      "Please explain",
+      "Please describe",
+      "Please elaborate",
+      "Please write here",
+      "Please enter details",
+      "Please tell us more",
+      "Specify here",
+      "Enter other option",
+      "Write your answer",
+      "Other option (please specify)",
+      "Other options (please specify)",
+      "Other choice (please specify)",
+      "Other choices (please specify)",
+      "Specify other option",
+      "Specify other options",
     ];
-    return otherOptions.includes(option);
+    return otherOptions.some(
+      (otherOption) => otherOption.toLowerCase() === option.toLowerCase().trim()
+    );
   };
 
   console.log(question);

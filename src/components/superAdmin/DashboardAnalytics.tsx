@@ -13,50 +13,67 @@ import SubscriptionTrend from "./SubscriptionTrend";
 import UsersByLocation from "./UsersByLocation";
 import TrafficByDevice from "./TrafficByDevice";
 import { getMonthsFromCurrent, getCurrentAndLastYears } from "@/lib/utils";
+import { addDays, format } from "date-fns";
 
 const DashboardAnalytics: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState("January");
-  const [selectedYear, setSelectedYear] = useState("2025");
+  // Get current month and year
+  const currentMonth = format(new Date(), "MMMM");
+  const currentYear = format(new Date(), "yyyy");
 
-  const [selectedMonth2, setSelectedMonth2] = useState("January");
-  const [selectedYear2, setSelectedYear2] = useState("2025");
-  // const
+  // Update initial states to use current month/year
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+
+  const [selectedMonth2, setSelectedMonth2] = useState(currentMonth);
+  const [selectedYear2, setSelectedYear2] = useState(currentYear);
+  const [timeRange, setTimeRange] = useState<"6months" | "1year">("6months");
+
+  const [selectedCreationMonth, setSelectedCreationMonth] =
+    useState(currentMonth);
+  const [selectedCreationYear, setSelectedCreationYear] = useState(currentYear);
+
   const { data, isLoading, isSuccess, error, isFetching } =
     useSurveyCreationDistributionQuery({
-      month: selectedMonth,
-      year: selectedYear,
+      month: selectedCreationMonth,
+      year: selectedCreationYear,
     });
 
-  const { data:subScribe, isLoading:subIsLoading , isSuccess:subIsSuccess, isFetching:subIsFetching } =
-    useSubscriptionDistributionQuery({
-      month: selectedMonth,
-      year: selectedYear,
-    });
+  const {
+    data: subScribe,
+    isLoading: subIsLoading,
+    isSuccess: subIsSuccess,
+    isFetching: subIsFetching,
+  } = useSubscriptionDistributionQuery({
+    month: selectedMonth,
+    year: selectedYear,
+  });
 
   const {
     data: surveyTypeDistribution,
     isLoading: typeLoading,
     isSuccess: typeSuccess,
-    isFetching:typeFetching
+    isFetching: typeFetching,
   } = useSurveyTypeDistributionQuery({
     month: selectedMonth2,
     year: selectedYear2,
   });
-  // console.log(data);
+
   console.log(subScribe);
   console.log(surveyTypeDistribution);
- 
 
   const circles = [
     {
       value: Math.round(data?.data?.ai_generated_percentage),
-      color: "#8E24AA", 
-      size: 120,
+      color: "#8E24AA",
+      size: Math.max(60, Math.round(data?.data?.ai_generated_percentage * 1.5)),
     },
     {
       value: Math.round(data?.data?.manually_generated_percentage),
-      color: "#E1BEE7", 
-      size: 90,
+      color: "#E1BEE7",
+      size: Math.max(
+        60,
+        Math.round(data?.data?.manually_generated_percentage * 1.5)
+      ),
     },
   ];
 
@@ -85,14 +102,12 @@ const DashboardAnalytics: React.FC = () => {
     },
     {
       month: "Business",
-      value: subScribe?.data?.
-      business_sub_percentage ?? 0,
-      fill: "#9B51E0", // 
+      value: subScribe?.data?.business_sub_percentage ?? 0,
+      fill: "#9B51E0", //
     },
     {
       month: "Pro",
-      value: subScribe?.data?.
-      pro_sub_percentage ?? 0,
+      value: subScribe?.data?.pro_sub_percentage ?? 0,
       fill: "#E9D7FB",
     },
   ];
@@ -185,78 +200,130 @@ const DashboardAnalytics: React.FC = () => {
   const bottomLegend = ["Free", "Pro", "Premium"];
   const surveyType = ["Quantitative", "Qualitative", "Mixed"];
   const planType = ["Basic", "Business", "Pro"];
-  const createdBy = ["AI-Generated", "Manual",];
+  const createdBy = ["AI-Generated", "Manual"];
+
+  const handleTimeRangeChange = (range: "6months" | "1year") => {
+    setTimeRange(range);
+  };
+
   return (
-    <div className="p-6 bg-gray-50">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SuperAdminPieChart
-          desktopData={desktopData3}
-          chartConfig={chartConfigForSurveyType}
-          bottomLegend={planType}
-          title="User Subscription Distribution"
-          year={getCurrentAndLastYears()}
-          months={getMonthsFromCurrent()}
-          selectedYear={selectedYear}
-          onYearChange={setSelectedYear}
-          selectedMonth={selectedMonth}
-          onMonthChange={setSelectedMonth}
-          isLoading={subIsLoading || subIsFetching} 
-        />
+    <div className="p-4 space-y-6">
+      {/* Analytics Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {/* Subscription Distribution Card */}
+        <div className="bg-white p-0 pb-4 rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
+          <SuperAdminPieChart
+            desktopData={desktopData3}
+            chartConfig={chartConfigForSurveyType}
+            bottomLegend={planType}
+            title="User Subscription Distribution"
+            year={getCurrentAndLastYears()}
+            months={getMonthsFromCurrent()}
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
+            selectedMonth={selectedMonth}
+            onMonthChange={setSelectedMonth}
+            isLoading={subIsLoading || subIsFetching}
+          />
+        </div>
 
-        {/* <SurveyTypeChart /> */}
-        <OverlappingCircles
-          desktopData={desktopData2}
-          chartConfig={chartConfig}
-          bottomLegend={createdBy}
-          title="Creation Method Distribution"
-          circles={circles}
-          isLoading={ isLoading || isFetching}
-        />
+        {/* Creation Method Distribution Card */}
+        <div className="bg-white p-0 pb-4 rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
+          <OverlappingCircles
+            desktopData={desktopData2}
+            chartConfig={chartConfig}
+            bottomLegend={createdBy}
+            title="Creation Method Distribution"
+            circles={circles}
+            isLoading={isLoading || isFetching}
+            year={getCurrentAndLastYears()}
+            months={getMonthsFromCurrent()}
+            selectedYear={selectedCreationYear}
+            onYearChange={setSelectedCreationYear}
+            selectedMonth={selectedCreationMonth}
+            onMonthChange={setSelectedCreationMonth}
+          />
+        </div>
 
-        <SuperAdminPieChart
-          desktopData={desktopData}
-          chartConfig={chartConfigForSurveyType}
-          bottomLegend={surveyType}
-          title="Survey Type Distribution"
-          year={getCurrentAndLastYears()}
-          months={getMonthsFromCurrent()}
-          selectedYear={selectedYear2}
-          onYearChange={setSelectedYear2}
-          selectedMonth={selectedMonth2}
-          onMonthChange={setSelectedMonth2}
-          isLoading={typeLoading || typeFetching} 
-        />
+        {/* Survey Type Distribution Card */}
+        <div className="bg-white p-0 pb-4 rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
+          <SuperAdminPieChart
+            desktopData={desktopData}
+            chartConfig={chartConfigForSurveyType}
+            bottomLegend={surveyType}
+            title="Survey Type Distribution"
+            year={getCurrentAndLastYears()}
+            months={getMonthsFromCurrent()}
+            selectedYear={selectedYear2}
+            onYearChange={setSelectedYear2}
+            selectedMonth={selectedMonth2}
+            onMonthChange={setSelectedMonth2}
+            isLoading={typeLoading || typeFetching}
+          />
+        </div>
       </div>
 
-      {/* Line Chart */}
-      <div className="bg-white mt-8 p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-6">
-            {["Subscription Trend"].map(
-              // {["Subscription Trend", "New Users", "Operating Status"].map(
-              (tab, idx) => (
+      {/* Subscription Trend Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+        <div className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div className="flex items-center space-x-6">
+              {["Subscription Trend"].map((tab, idx) => (
                 <span
                   key={idx}
-                  className={`text-sm font-medium ${
+                  className={`text-base font-semibold ${
                     idx === 0
-                      ? "text-gray-800 border-b-2 border-purple-600"
+                      ? "text-gray-800 border-b-2 border-transparent"
                       : "text-gray-600"
-                  } cursor-pointer`}
+                  } cursor-pointer hover:text-gray-800 transition-colors`}
                 >
                   {tab}
                 </span>
-              )
-            )}
+              ))}
+            </div>
+
+            {/* Add time range selector */}
+            <div className="flex items-center space-x-3 text-sm">
+              <button
+                className={`px-3 py-1 rounded-full ${
+                  timeRange === "6months"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-gray-100 text-gray-600"
+                } hover:bg-purple-200`}
+                onClick={() => handleTimeRangeChange("6months")}
+              >
+                6 Months
+              </button>
+              <button
+                className={`px-3 py-1 rounded-full ${
+                  timeRange === "1year"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-gray-100 text-gray-600"
+                } hover:bg-gray-200`}
+                onClick={() => handleTimeRangeChange("1year")}
+              >
+                1 Year
+              </button>
+            </div>
           </div>
-        </div>
-        <div className=" bg-gray-100 rounded-lg flex w-full items-center justify-center">
-          <SubscriptionTrend />
+
+          <div className="rounded-lg p-4">
+            <SubscriptionTrend timeRange={timeRange} />
+          </div>
         </div>
       </div>
 
-      <div className="flex justify-between items-center gap-4 mt-5">
-        <UsersByLocation />
-        <TrafficByDevice />
+      {/* Bottom Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        {/* Users by Location Card */}
+        <div className="bg-white p-0 rounded-xl hover:shadow-md transition-shadow">
+          <UsersByLocation />
+        </div>
+
+        {/* Traffic by Device Card */}
+        <div className="bg-white p-0 rounded-xl hover:shadow-md transition-shadow">
+          <TrafficByDevice />
+        </div>
       </div>
     </div>
   );

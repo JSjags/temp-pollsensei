@@ -15,13 +15,50 @@ import {
 } from "@/services/api/referrals.api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { FadeLoader } from "react-spinners";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const TableSkeleton = () => {
+  return (
+    <>
+      {[...Array(20)].map((_, index) => (
+        <tr key={index} className="animate-pulse">
+          <td className="py-4 px-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-9 w-9 rounded-full" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </td>
+          <td className="py-4 px-4">
+            <Skeleton className="h-4 w-40" />
+          </td>
+          <td className="py-4 px-4">
+            <Skeleton className="h-4 w-24" />
+          </td>
+          <td className="py-4 px-4">
+            <Skeleton className="h-6 w-16 rounded-full" />
+          </td>
+          <td className="py-4 px-4">
+            <Skeleton className="h-4 w-8 mx-auto" />
+          </td>
+          <td className="py-4 px-4">
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </td>
+          <td className="py-4 px-4">
+            <Skeleton className="h-4 w-28" />
+          </td>
+        </tr>
+      ))}
+    </>
+  );
+};
 
 const ReferrerUsersPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
   const id = useParams()?.id?.toString() ?? "";
 
   const { data, isLoading, error, isFetching } = useQuery({
@@ -35,24 +72,6 @@ const ReferrerUsersPage: React.FC = () => {
         return null;
       }
     },
-  });
-
-  const { data: searchData } = useQuery({
-    queryKey: [queryKeys.REFERRERS, "search", id],
-    queryFn: async () => {
-      if (!id) {
-        return null;
-      }
-
-      const response = await getReferrerByIdOrCode(id);
-      if (isValidResponse(response)) {
-        return response?.data;
-      } else {
-        handleApiErrors(response);
-        return null;
-      }
-    },
-    enabled: !!id,
   });
 
   const totalItems = data?.data?.total || 0;
@@ -84,151 +103,147 @@ const ReferrerUsersPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen w-full">
-      <div className="flex  mb-6 items-center gap-10">
+    <div className="min-h-screen w-full">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-10 mb-6">
         <Link
           replace
           href={"/referrers"}
-          className="flex  shrink-0 items-center gap-2 p-2 rounded px-4 bg-gradient-to-r hover:scale-105 transition-all duration-300 active:scale-95 from-[#5B03B2] to-[#9D50BB] text-white"
+          className="flex w-fit items-center gap-2 p-2 rounded-lg px-4 bg-gradient-to-r hover:scale-105 transition-all duration-300 active:scale-95 from-[#5B03B2] to-[#9D50BB] text-white shadow-lg hover:shadow-purple-500/30"
         >
           <RiArrowGoBackFill />
           <span>Go back</span>
         </Link>
-        <h1 className="text-sm font-bold">
+        <h1 className="text-sm sm:text-base font-bold">
           List of users{" "}
-          {!!searchData?.email && `referred by ${searchData?.email}`}
+          {searchParams.get("name") && (
+            <span className="text-purple-600">
+              referred by {searchParams.get("name")}
+            </span>
+          )}
         </h1>
       </div>
 
-      <div className="overflow-x-auto w-full">
-        <table className="w-full border-collapse border-gray-200 overflow-x-auto">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="text-left py-3 px-4 font-medium text-sm">
-                User Name
-              </th>
-              {/* <th className="text-left py-3 px-4 font-medium text-sm">
-                Account Type
-              </th> */}
-              <th className="text-left py-3 px-4 font-medium text-sm">
-                Email Address
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-sm">
-                Country
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-sm">
-                Status
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-sm">
-                No. of Collab...
-              </th>
-              <th className="text-left py-3 px-4 font-medium text-sm">Plan</th>
-              <th className="text-left py-3 px-4 font-medium text-sm">
-                Created Date
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading || isFetching ? (
+      {/* Table Section with Card Style */}
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto w-full scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-purple-100">
+          <table className="w-full border-collapse min-w-[800px]">
+            <thead className="bg-gradient-to-r from-purple-50 to-purple-100">
               <tr>
-                <td colSpan={6} className="text-center ">
-                  <span className="flex justify-center items-center">
-                    <FadeLoader height={10} radius={1} className="mt-3" />
-                  </span>
-                </td>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  User Name
+                </th>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  Email Address
+                </th>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  Country
+                </th>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  Status
+                </th>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  Collaborators
+                </th>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  Plan
+                </th>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  Created Date
+                </th>
               </tr>
-            ) : error ? (
-              <tr>
-                <td colSpan={6} className="text-center ">
-                  <span className="flex justify-center items-center text-xs text-red-500">
-                    Something went wrong
-                  </span>
-                </td>
-              </tr>
-            ) : data?.data?.data?.length === 0 ||
-              data?.data?.data?.length === undefined ? (
-              <tr>
-                <td colSpan={6} className="text-center ">
-                  <span className="flex justify-center items-center py-4 text-xs text-green-500">
-                    No record found
-                  </span>
-                </td>
-              </tr>
-            ) : (
-              data?.data?.data?.map((user: any, index: number) => (
-                <tr
-                  key={index}
-                  className={`text-xs ${
-                    index % 2 === 0 ? "bg-[#F7EEFED9]" : "bg-[#FEF5FED6]"
-                  } text-sm rounded-md`}
-                >
-                  <td className="py-3 px-4 flex items-center gap-2">
-                    <Avatar className="size-8">
-                      <AvatarImage
-                        src={(user as any)?.photo_url ?? ""}
-                        alt="@johndoe"
-                      />
-                      <AvatarFallback
-                        className={`font-semibold  `}
-                        style={{ backgroundColor: getRandomColor() }}
-                      >
-                        {generateInitials(user?.name ?? "")}
-                      </AvatarFallback>
-                    </Avatar>
-                    {user?.name}
-                  </td>
-                  {/* <td className="py-3 px-4">
-                    {user?.account_type ? user?.account_type : "Not Available"}
-                  </td> */}
-                  <td className="py-3 px-4">{user?.email}</td>
-                  <td className="py-3 px-4">
-                    {user?.country ? user?.country : "Not Available"}
-                  </td>
-                  <td
-                    className={`py-3 px-4 font-medium ${
-                      user.disabled[0].status === true
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    <span
-                      className={`py-1 px-2 rounded-full ${
-                        user.disabled[0].status === true
-                          ? "bg-[#FFEBED]"
-                          : "bg-[#D3FAEC]"
-                      }`}
-                    >
-                      {user.disabled[0].status === true ? "Disabled" : "Active"}
+            </thead>
+            <tbody>
+              {isLoading || isFetching ? (
+                <TableSkeleton />
+              ) : error ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-8">
+                    <span className="flex justify-center items-center text-sm text-red-500">
+                      Something went wrong
                     </span>
                   </td>
-                  <td className="py-3 text-center px-4">
-                    {user?.collaborators ? user?.collaborators : "0"}
-                  </td>
-                  <td
-                    className={`py-3 px-4 font-medium ${
-                      user?.plan?.name === "Team Plan"
-                        ? "text-purple-600"
-                        : user?.plan?.name === "Pro Plan"
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {user?.plan ? user?.plan.name : "Free Plan"}
-                  </td>
-                  <td className="py-3 px-4">
-                    {user?.createdAt
-                      ? formatDateOption(user.createdAt)
-                      : "Not Available"}
+                </tr>
+              ) : data?.data?.data?.length === 0 || !data?.data?.data ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-8">
+                    <span className="flex justify-center items-center text-sm text-purple-500">
+                      No record found
+                    </span>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                data?.data?.data?.map((user: any, index: number) => (
+                  <tr
+                    key={index}
+                    className={`text-sm hover:bg-purple-50 transition-colors duration-150 ${
+                      index % 2 === 0 ? "bg-[#F7EEFED9]" : "bg-[#FEF5FED6]"
+                    }`}
+                  >
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-9 ring-2 ring-purple-100">
+                          <AvatarImage
+                            src={user?.photo_url ?? ""}
+                            alt={user?.name}
+                          />
+                          <AvatarFallback
+                            className="font-semibold text-white"
+                            style={{ backgroundColor: getRandomColor() }}
+                          >
+                            {generateInitials(user?.name ?? "")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{user?.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">{user?.email}</td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {user?.country || "Not Available"}
+                    </td>
+                    <td className="py-4 px-4">
+                      <span
+                        className={`py-1.5 px-3 rounded-full text-xs font-medium ${
+                          user?.disabled?.[0]?.status
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {user?.disabled?.[0]?.status ? "Disabled" : "Active"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-center font-medium">
+                      {user?.collaborators || "0"}
+                    </td>
+                    <td className="py-4 px-4">
+                      <span
+                        className={`py-1.5 px-3 rounded-full text-xs font-medium ${
+                          user?.plan?.name === "Team Plan"
+                            ? "bg-purple-100 text-purple-700"
+                            : user?.plan?.name === "Pro Plan"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {user?.plan ? user?.plan.name : "Free Plan"}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-gray-600">
+                      {user?.createdAt
+                        ? formatDateOption(user.createdAt)
+                        : "Not Available"}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="mt-6 sm:mt-8 flex justify-between items-center">
-        <p className="text-xs font-medium">
+      {/* Pagination Section */}
+      <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p className="text-xs font-medium text-gray-600">
           {totalItems > 0
             ? `Showing ${(currentPage - 1) * 20 + 1}-${Math.min(
                 currentPage * 20,

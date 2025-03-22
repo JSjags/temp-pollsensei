@@ -110,7 +110,7 @@ export const CheckboxQuestion = ({
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.checkbox, { borderColor: colorTheme }]} />
@@ -141,7 +141,7 @@ export const MultipleChoiceQuestion = ({
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.radio, { borderColor: colorTheme }]} />
@@ -172,7 +172,7 @@ export const SingleChoiceQuestion = ({
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.radio, { borderColor: colorTheme }]} />
@@ -203,7 +203,7 @@ export const DropdownQuestion = ({
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.checkbox, { borderColor: colorTheme }]} />
@@ -232,7 +232,7 @@ export const BooleanQuestion = ({
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.row, questionStyle as Style]}>
+    <View style={[styles.row, questionStyle as any]}>
       <View style={[styles.radio, { borderColor: colorTheme }]} />
       <Text>True</Text>
     </View>
@@ -261,7 +261,7 @@ export const ShortTextQuestion = ({
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       <View
         style={[
           {
@@ -307,7 +307,7 @@ export const LongTextQuestion = ({
           borderRadius: 4,
         },
         { borderColor: colorTheme },
-        questionStyle as Style,
+        questionStyle as any,
       ]}
     ></View>
   </View>
@@ -333,7 +333,7 @@ export const SliderQuestion = ({
     </Text> */}
     <View style={styles.sliderContainer}>
       <View style={[styles.sliderLine, { backgroundColor: colorTheme }]} />
-      <View style={[styles.sliderMarkers, questionStyle as Style]}>
+      <View style={[styles.sliderMarkers, questionStyle as any]}>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
           <Text key={num}>{num}</Text>
         ))}
@@ -366,7 +366,7 @@ export const LikertScaleQuestion = ({
       {options?.map((option, i) => (
         <View key={i} style={styles.likertOption}>
           <View style={[styles.radio, { borderColor: colorTheme }]} />
-          <Text style={[questionStyle as Style]}>{option}</Text>
+          <Text style={[questionStyle as any]}>{option}</Text>
         </View>
       ))}
     </View>
@@ -402,7 +402,7 @@ export const RatingScaleQuestion = ({
         {range.map((rating, i) => (
           <View key={i} style={styles.likertOption}>
             <View style={[styles.radio, { borderColor: colorTheme }]} />
-            <Text style={[questionStyle as Style]}>{rating}</Text>
+            <Text style={[questionStyle as any]}>{rating}</Text>
           </View>
         ))}
       </View>
@@ -432,7 +432,7 @@ export const StarRatingQuestion = ({
       {[1, 2, 3, 4, 5].map((_, i) => (
         <Text
           key={i}
-          style={[styles.star, { color: colorTheme }, questionStyle as Style]}
+          style={[styles.star, { color: colorTheme }, questionStyle as any]}
         >
           ★
         </Text>
@@ -468,14 +468,14 @@ export const MatrixMultipleChoiceQuestion = ({
         <View style={styles.matrixRowLabel} />
         {columns?.map((col, i) => (
           <View key={i} style={styles.matrixCell}>
-            <Text style={[questionStyle as Style]}>{col}</Text>
+            <Text style={[questionStyle as any]}>{col}</Text>
           </View>
         ))}
       </View>
       {rows?.map((row, i) => (
         <View key={i} style={styles.matrixRow}>
           <View style={styles.matrixRowLabel}>
-            <Text style={[questionStyle as Style]}>{row}</Text>
+            <Text style={[questionStyle as any]}>{row}</Text>
           </View>
           {columns?.map((_, j) => (
             <View key={j} style={styles.matrixCell}>
@@ -515,14 +515,14 @@ export const MatrixCheckboxQuestion = ({
         <View style={styles.matrixRowLabel} />
         {columns?.map((col, i) => (
           <View key={i} style={styles.matrixCell}>
-            <Text style={[questionStyle as Style]}>{col}</Text>
+            <Text style={[questionStyle as any]}>{col}</Text>
           </View>
         ))}
       </View>
       {rows?.map((row, i) => (
         <View key={i} style={styles.matrixRow}>
           <View style={styles.matrixRowLabel}>
-            <Text style={[questionStyle as Style]}>{row}</Text>
+            <Text style={[questionStyle as any]}>{row}</Text>
           </View>
           {columns?.map((_, j) => (
             <View key={j} style={styles.matrixCell}>
