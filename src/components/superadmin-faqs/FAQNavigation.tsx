@@ -47,10 +47,6 @@ const FAQNavigation: React.FC = () => {
   const [createFAQs, { isLoading }] = useCreateFAQsMutation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const { refetch } = useAllFAQsQuery({
-    pagesNumber: 1,
-  });
-
   const currentTab = useMemo(() => {
     const path = pathname.split("/").pop() || "faqs";
     return tabs.find((tab) => tab.value === path)?.value || "faqs";
@@ -67,7 +63,7 @@ const FAQNavigation: React.FC = () => {
     try {
       await createFAQs(values).unwrap();
       toast.success("FAQ created successfully");
-      refetch();
+      // refetch();
     } catch (err: any) {
       toast.error(`Failed to create FAQ: ${err?.data?.message || err.message}`);
     }

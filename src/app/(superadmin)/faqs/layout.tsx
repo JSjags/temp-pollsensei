@@ -1,4 +1,5 @@
 //
+"use client";
 
 import FAQNavigation from "@/components/superadmin-faqs/FAQNavigation";
 

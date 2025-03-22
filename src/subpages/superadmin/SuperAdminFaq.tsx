@@ -30,6 +30,7 @@ const SuperAdminFaq = () => {
         isLoading={isLoading || isFetching}
         isError={isError}
         currentPage={currentPage}
+        refetch={refetch}
       />
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">

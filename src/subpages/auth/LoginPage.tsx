@@ -84,6 +84,7 @@ const LoginPage = () => {
       // );
       setLoginState(true);
     },
+    retry: false,
   });
 
   const googleLoginMutation = useMutation({
