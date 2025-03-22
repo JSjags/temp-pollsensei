@@ -37,6 +37,9 @@ import { useParams } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
 import { Pencil, Trash2, EyeOff, Eye } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { useDispatch } from "react-redux";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios-instance";
 
 interface AccordionItemProps {
   question: string;
@@ -45,6 +48,7 @@ interface AccordionItemProps {
   is_deleted?: boolean;
   is_published: boolean;
   currentPage: number;
+  refetch: any;
 }
 
 const AccordionItem: React.FC<AccordionItemProps> = ({
@@ -54,6 +58,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   is_deleted,
   is_published,
   currentPage,
+  refetch,
 }) => {
   const params = useParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -69,23 +74,26 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
     usePublishFAQsMutation();
   const { data: singleFAQs, isLoading: isLoadingAll } = useSingleFAQsQuery(_id);
   const [editFAQs, { isLoading: isEditLoading }] = useEditFAQsMutation();
-  const { refetch } = useAllFAQsQuery({ pagesNumber: currentPage });
+  // const { refetch } = useAllFAQsQuery({ pagesNumber: currentPage });
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const options = ["Edit", is_published ? "Unpublish" : "Publish", "Delete"];
 
   const toggleAccordion = () => setIsOpen(!isOpen);
 
-  const handleSelectOption = (option: string) => {
+  const handleSelectOption = (option: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setShowMenu(false);
     const choice = option.toLowerCase();
 
     if (choice.includes("edit")) {
       setEdit(true);
     }
-    if (choice.includes("Publish")) {
+    if (choice === "publish") {
       setPublish(true);
     }
-    if (choice.includes("unpublish")) {
+    if (choice === "unpublish") {
       setUnpublish(true);
     }
     if (choice.includes("delete")) {
@@ -111,27 +119,41 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
       toast.error("Error deleting FAQ");
     }
   };
-  const handleUnpublishFaq = async (id: any) => {
-    try {
-      await unpublishFAQs({ id }).unwrap();
-      toast.success("FAQ unpublish successfully");
-      handleCloseAll();
+
+  const publishMutation = useMutation({
+    mutationFn: (id: string) =>
+      axiosInstance.patch(`/superadmin/faq-status/${id}?status=publish`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["faqs"] });
       refetch();
-    } catch (e) {
-      console.log(e);
-      toast.error("Error deleting FAQ");
-    }
-  };
-  const handlePublishFaq = async (id: any) => {
-    try {
-      await publishFAQs({ id }).unwrap();
       toast.success("FAQ published successfully");
       handleCloseAll();
-      refetch();
-    } catch (e) {
-      console.log(e);
+    },
+    onError: () => {
       toast.error("Error publishing FAQ");
-    }
+    },
+  });
+
+  const unpublishMutation = useMutation({
+    mutationFn: (id: string) =>
+      axiosInstance.patch(`/superadmin/faq-status/${id}?status=unpublish`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["faqs"] });
+      refetch();
+      toast.success("FAQ unpublished successfully");
+      handleCloseAll();
+    },
+    onError: () => {
+      toast.error("Error unpublishing FAQ");
+    },
+  });
+
+  const handleUnpublishFaq = async (id: string) => {
+    unpublishMutation.mutate(id);
+  };
+
+  const handlePublishFaq = async (id: string) => {
+    publishMutation.mutate(id);
   };
 
   const [editingFaq, setEdittingFaq] = useState({
@@ -190,15 +212,15 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
               className="animate-in slide-in-from-top-1 duration-200"
             >
               <DropdownMenuItem
-                onClick={() => handleSelectOption("Edit")}
+                onClick={(e) => handleSelectOption("Edit", e)}
                 className="transition-colors duration-200 gap-2"
               >
                 <Pencil className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() =>
-                  handleSelectOption(is_published ? "Unpublish" : "Publish")
+                onClick={(e) =>
+                  handleSelectOption(is_published ? "Unpublish" : "Publish", e)
                 }
                 className="transition-colors duration-200 gap-2"
               >
@@ -211,7 +233,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-600 transition-colors duration-200 gap-2"
-                onClick={() => handleSelectOption("Delete")}
+                onClick={(e) => handleSelectOption("Delete", e)}
               >
                 <Trash2 className="h-4 w-4" />
                 Delete
@@ -282,8 +304,8 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Unpublish FAQ</AlertDialogTitle>
             <AlertDialogDescription>
-              This FAQ will no longer be visible to users. You can publish it
-              again later.
+              Are you sure you want to unpublish this FAQ? It will no longer be
+              visible to users.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -294,7 +316,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
               className="bg-orange-600 hover:bg-orange-700"
               onClick={() => handleUnpublishFaq(_id)}
             >
-              {isUnpublishLoading ? "Unpublishing..." : "Unpublish"}
+              {unpublishMutation.isPending ? "Unpublishing..." : "Unpublish"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -306,8 +328,8 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Publish FAQ</AlertDialogTitle>
             <AlertDialogDescription>
-              This FAQ will be visible to all users. Are you sure you want to
-              publish it?
+              Are you sure you want to publish this FAQ? It will be visible to
+              all users.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -318,7 +340,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
               className="bg-green-600 hover:bg-green-700"
               onClick={() => handlePublishFaq(_id)}
             >
-              {isPublishLoading ? "Publishing..." : "Publish"}
+              {publishMutation.isPending ? "Publishing..." : "Publish"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -378,6 +400,7 @@ interface AccordionProps {
   isLoading: boolean;
   isError: boolean;
   currentPage: number;
+  refetch: any;
 }
 
 const FaqAccordion: React.FC<AccordionProps> = ({
@@ -385,6 +408,7 @@ const FaqAccordion: React.FC<AccordionProps> = ({
   isLoading,
   isError,
   currentPage,
+  refetch,
 }) => {
   return (
     <div className="w-full space-y-2">
@@ -410,10 +434,39 @@ const FaqAccordion: React.FC<AccordionProps> = ({
             Something went wrong
           </span>
         </div>
+      ) : items.length === 0 ? (
+        <div className="text-center w-full p-8 rounded-xl bg-gray-50 border border-gray-100">
+          <div className="flex flex-col items-center gap-2">
+            <div className="text-gray-400">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5h.01v.01H12V17Z" />
+              </svg>
+            </div>
+            <p className="text-sm text-gray-600">No FAQs found</p>
+            <p className="text-xs text-gray-400">
+              Create a new FAQ to get started
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="animate-in fade-in duration-500">
           {items?.map((item, index) => (
-            <AccordionItem key={index} {...item} currentPage={currentPage} />
+            <AccordionItem
+              key={index}
+              {...item}
+              currentPage={currentPage}
+              refetch={refetch}
+            />
           ))}
         </div>
       )}

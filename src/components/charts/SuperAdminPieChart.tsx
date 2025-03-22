@@ -93,6 +93,10 @@ export function SuperAdminPieChart({
     );
   };
 
+  const hasData = React.useMemo(() => {
+    return desktopData.length > 0 && desktopData.some((item) => item.value > 0);
+  }, [desktopData]);
+
   return (
     <Card
       data-chart={id}
@@ -153,6 +157,33 @@ export function SuperAdminPieChart({
           <div className="flex items-center justify-center h-full min-h-[300px]">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
           </div>
+        ) : !hasData ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-gray-500">
+            <svg
+              className="w-16 h-16 mb-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 2v4m0 16v-4m10-6h-4M2 12h4"
+              />
+            </svg>
+            <p className="text-base font-medium mb-1">No data available</p>
+            <p className="text-sm text-gray-400">
+              Try selecting a different time period
+            </p>
+          </div>
         ) : (
           <ChartContainer config={chartConfig} className="w-full">
             <ResponsiveContainer width="100%" height={300}>
@@ -191,22 +222,24 @@ export function SuperAdminPieChart({
         )}
       </CardContent>
 
-      <div className="mt-0 flex justify-center space-x-6">
-        {bottomLegend?.map((label, idx) => (
-          <div key={idx} className="flex items-center space-x-2">
-            <div
-              className={`w-4 h-4 rounded-full ${
-                idx === 0
-                  ? "bg-purple-800"
-                  : idx === 1
-                  ? "bg-purple-400"
-                  : "bg-purple-200"
-              }`}
-            ></div>
-            <span className="text-sm font-medium text-gray-700">{label}</span>
-          </div>
-        ))}
-      </div>
+      {hasData && (
+        <div className="mt-0 flex justify-center space-x-6">
+          {bottomLegend?.map((label, idx) => (
+            <div key={idx} className="flex items-center space-x-2">
+              <div
+                className={`w-4 h-4 rounded-full ${
+                  idx === 0
+                    ? "bg-purple-800"
+                    : idx === 1
+                    ? "bg-purple-400"
+                    : "bg-purple-200"
+                }`}
+              ></div>
+              <span className="text-sm font-medium text-gray-700">{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }

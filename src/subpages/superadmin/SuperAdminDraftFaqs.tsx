@@ -24,8 +24,6 @@ const SuperAdminDraftFaqs = () => {
     });
     refetch();
   };
-  console.log(data);
-  console.log(currentPage);
 
   return (
     <div className="p-6">
@@ -34,6 +32,7 @@ const SuperAdminDraftFaqs = () => {
         isLoading={isLoading}
         isError={isError}
         currentPage={currentPage}
+        refetch={refetch}
       />
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">

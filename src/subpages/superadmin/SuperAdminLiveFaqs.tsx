@@ -2,10 +2,13 @@
 
 import PageControl from "@/components/common/PageControl";
 import FaqAccordion from "@/components/superadmin-faqs/FaqAccordion";
+import { RootState } from "@/redux/store";
 import { useAllFAQsQuery } from "@/services/superadmin.service";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 const SuperAdminLiveFaqs = () => {
+  const store = useSelector((state: RootState) => state);
   const [currentPage, setCurrentPage] = useState(1);
   const { data, isLoading, isError, refetch } = useAllFAQsQuery({
     pagesNumber: currentPage,
@@ -24,7 +27,7 @@ const SuperAdminLiveFaqs = () => {
     });
     refetch();
   };
-  console.log(data);
+  console.log(store);
   console.log(currentPage);
 
   const faqItems = [
@@ -51,6 +54,7 @@ const SuperAdminLiveFaqs = () => {
         isLoading={isLoading}
         isError={isError}
         currentPage={currentPage}
+        refetch={refetch}
       />
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
         <p className="text-xs font-medium">

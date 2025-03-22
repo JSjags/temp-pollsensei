@@ -34,8 +34,8 @@ const DashboardAnalytics: React.FC = () => {
 
   const { data, isLoading, isSuccess, error, isFetching } =
     useSurveyCreationDistributionQuery({
-      month: selectedMonth,
-      year: selectedYear,
+      month: selectedCreationMonth,
+      year: selectedCreationYear,
     });
 
   const {

@@ -8,7 +8,7 @@ import { formatDateOption } from "@/lib/helpers";
 import PageControl from "@/components/common/PageControl";
 import TableSkeleton from "@/components/common/TableSkeleton";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Power } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -56,16 +56,16 @@ const SuperAdminSurveys = () => {
   };
 
   return (
-    <div className="p-0 min-h-screen w-full">
+    <div className="h-full w-full flex flex-col">
       <h1 className="text-xl font-bold mb-6">Created Survey Table</h1>
-      <div className="bg-white rounded-lg shadow overflow-hidden w-full">
-        <div className="overflow-x-auto w-full flex flex-col gap-4">
-          {(isLoading || isFetching) && <TableSkeleton />}
-          {!isLoading && !isFetching && (
-            <table className="w-full border-collapse border-gray-200 flex-1">
-              <thead className="bg-white">
+      <div className="flex-1 bg-white rounded-lg shadow">
+        {(isLoading || isFetching) && <TableSkeleton />}
+        {!isLoading && !isFetching && (
+          <div className="h-full relative overflow-x-auto border-b">
+            <table className="w-full table-fixed">
+              <thead className="bg-white sticky top-0 z-10">
                 <tr>
-                  <th className="text-left py-3 px-4 font-medium text-sm">
+                  <th className="w-48 text-left py-3 px-4 font-medium text-sm">
                     Created by
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-sm">
@@ -81,12 +81,15 @@ const SuperAdminSurveys = () => {
                     Type
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-sm whitespace-nowrap">
+                    Responses
+                  </th>
+                  <th className="text-left py-3 px-4 font-medium text-sm whitespace-nowrap">
                     Created Date
                   </th>
                   <th className="text-left py-3 px-4 font-medium text-sm">
                     Status
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-sm">
+                  <th className="w-20 text-left py-3 px-4 font-medium text-sm sticky right-0 bg-white">
                     Action
                   </th>
                 </tr>
@@ -141,7 +144,7 @@ const SuperAdminSurveys = () => {
                         <span className="line-clamp-2">{survey?.topic}</span>
                       </td>
                       <td className="py-3 px-4">
-                        <span className="line-clamp-1">
+                        <span className="line-clamp-1 capitalize">
                           {survey?.generated_by === "ai"
                             ? "AI"
                             : survey?.generated_by}
@@ -150,6 +153,11 @@ const SuperAdminSurveys = () => {
                       <td className="py-3 px-4 font-medium">
                         <span className="line-clamp-1">
                           {survey?.survey_type}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-medium">
+                        <span className="line-clamp-1">
+                          {survey?.response_count}
                         </span>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
@@ -168,23 +176,25 @@ const SuperAdminSurveys = () => {
                           {survey?.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedSurvey(survey)}
-                          className="hover:text-primary"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                      <td className="py-3 px-4 sticky right-0 bg-inherit">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedSurvey(survey)}
+                            className="hover:text-primary"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-6 sm:mt-8 flex justify-between items-center">
@@ -249,6 +259,14 @@ const SuperAdminSurveys = () => {
                       Survey Type
                     </h3>
                     <p className="mt-1 text-sm">{selectedSurvey.survey_type}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Response Count
+                    </h3>
+                    <p className="mt-1 text-sm">
+                      {selectedSurvey.response_count}
+                    </p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">

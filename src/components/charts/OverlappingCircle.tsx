@@ -74,8 +74,6 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
     setActiveIndex(index);
   };
 
-  console.log(desktopData);
-
   const renderActiveShape = (props: PieSectorDataItem) => {
     const {
       cx = 0,
@@ -116,6 +114,14 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
     value: circle.value,
     fill: circle.color,
   }));
+
+  const hasData = React.useMemo(() => {
+    // Check if we have any circles and desktop data
+    const hasArrays = circles.length > 0 && desktopData.length > 0;
+    // Check if any value in pieData is greater than 0
+    const hasNonZeroValues = pieData.some((item) => item.value > 0);
+    return hasArrays && hasNonZeroValues;
+  }, [circles, desktopData, pieData]);
 
   return (
     <Card
@@ -176,6 +182,33 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
           <div className="flex items-center justify-center h-full min-h-[300px]">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
           </div>
+        ) : !hasData ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-gray-500">
+            <svg
+              className="w-16 h-16 mb-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 2v4m0 16v-4m10-6h-4M2 12h4"
+              />
+            </svg>
+            <p className="text-base font-medium mb-1">No data available</p>
+            <p className="text-sm text-gray-400">
+              Try selecting a different time period
+            </p>
+          </div>
         ) : (
           <ChartContainer config={chartConfig} className="w-full">
             <ResponsiveContainer width="100%" height={300}>
@@ -201,19 +234,21 @@ const OverlappingCircles: React.FC<OverlappingCirclesProps> = ({
           </ChartContainer>
         )}
       </CardContent>
-      <div className="mt-4 flex justify-center space-x-6">
-        {bottomLegend?.map((label, idx) => (
-          <div key={idx} className="flex items-center space-x-2">
-            <div
-              className="size-4 rounded-full"
-              style={{
-                backgroundColor: desktopData[idx]?.fill || "#E9D7FB",
-              }}
-            ></div>
-            <span className="text-sm text-gray-600">{label}</span>
-          </div>
-        ))}
-      </div>
+      {hasData && (
+        <div className="mt-4 flex justify-center space-x-6">
+          {bottomLegend?.map((label, idx) => (
+            <div key={idx} className="flex items-center space-x-2">
+              <div
+                className="size-4 rounded-full"
+                style={{
+                  backgroundColor: desktopData[idx]?.fill || "#E9D7FB",
+                }}
+              ></div>
+              <span className="text-sm text-gray-600">{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 };
