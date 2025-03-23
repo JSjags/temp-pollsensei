@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 import { ScrollArea } from "../scrollarea";
+import { Skeleton } from "../skeleton";
 
 type TableProps<T> = {
   table: ReactTable<T>;
@@ -42,7 +43,7 @@ export function Table<T>({
         <ScrollArea.Root>
           <table className="w-full">
             {isLoading ? (
-              <Skeleton />
+              <SkeletonEl />
             ) : (
               <>
                 <thead>
@@ -127,22 +128,16 @@ export function Table<T>({
   );
 }
 
-function Skeleton() {
+function SkeletonEl() {
   return (
     <div>
       <div className="flex w-full justify-between gap-4 p-4 border-b border-b-border">
-        <div className={cn("skeleton-el", "mt-4 !rounded-lg !w-full !h-7")} />
+        <Skeleton className="h-7 w-full" />
       </div>
 
-      <div className="flex flex-col pt-2 p-4 w-full">
+      <div className="flex flex-col gap-1 pt-2 p-4 w-full">
         {Array.from({ length: 5 }, (_, index) => (
-          <div
-            key={index}
-            className={cn(
-              "skeleton-el",
-              "!rounded-[14px] mt-4 !h-[64px] !w-full"
-            )}
-          />
+          <Skeleton key={index} className="h-16 w-full" />
         ))}
       </div>
     </div>
