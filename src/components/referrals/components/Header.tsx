@@ -56,9 +56,14 @@ export function Header() {
         </p>
       </div>
       <div className="flex justify-end w-[65%] max-md:w-full">
-        <div className={cn("border border-[#5B03B24D] rounded-[10px] h-12 flex items-center w-fit gap-4 px-5 overflow-hidden", {
-          'w-[55%]': isLoading
-        })}>
+        <div
+          className={cn(
+            "border border-[#5B03B24D] rounded-[10px] h-12 flex items-center w-fit max-md:w-full gap-4 px-5 overflow-hidden",
+            {
+              "w-[55%]": isLoading,
+            }
+          )}
+        >
           {isLoading ? (
             <Skeleton className="h-6 w-full" />
           ) : (
@@ -69,12 +74,14 @@ export function Header() {
                   {referralLink}
                 </span>
               </p>
-              <div onClick={copy} className="cursor-pointer shrink-0">
-                {copied ? (
-                  <Image src={CheckIcon} alt="checkmark" className="size-6" />
-                ) : (
-                  <Image src={CopyIcon} alt="copy" className="size-6" />
-                )}
+              <div className="flex justify-end flex-1">
+                <div onClick={copy} className="cursor-pointer shrink-0">
+                  {copied ? (
+                    <Image src={CheckIcon} alt="checkmark" className="size-6" />
+                  ) : (
+                    <Image src={CopyIcon} alt="copy" className="size-6" />
+                  )}
+                </div>
               </div>
             </div>
           )}

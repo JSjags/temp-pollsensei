@@ -4,7 +4,7 @@ import React from "react";
 
 export function HowItWorks() {
   return (
-    <div className="mt-10 w-full flex flex-col">
+    <div className="mt-10 w-full flex flex-col max-md:mt-16">
       <p className="text-lg font-bold">How it Works</p>
 
       <div className="grid grid-cols-3 max-md:grid-cols-1 gap-[22px] mt-3">

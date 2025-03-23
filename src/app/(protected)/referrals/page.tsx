@@ -9,7 +9,7 @@ export default function Page() {
     //   eta="Q2 2025"
     //   backUrl="/dashboard"
     // />
-    <div className="md:px-10 pb-16 py-8 px-5">
+    <div className="md:px-10 pb-16 py-8 px-5 max-md:w-screen overflow-hidden">
       <Referrals />
     </div>
   );
