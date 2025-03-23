@@ -1,12 +1,13 @@
 import React from "react";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
+import { Card } from "../ui/card";
 
 const TrafficByDevice: React.FC = () => {
   const chartOptions: ApexOptions = {
     chart: {
       type: "bar",
-      height: 350,
+      height: "100%",
       toolbar: {
         show: false,
       },
@@ -16,8 +17,8 @@ const TrafficByDevice: React.FC = () => {
       bar: {
         horizontal: false,
         columnWidth: "40%",
-        borderRadius: 10, 
-        distributed: true, 
+        borderRadius: 10,
+        distributed: true,
       },
     },
     dataLabels: {
@@ -57,22 +58,28 @@ const TrafficByDevice: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 h-[300px] bg-white shadow-lg rounded-lg p-4 w-full">
+    <Card className="flex-1 flex flex-col h-full bg-white rounded-lg p-4 w-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Traffic by Device</h2>
-        <div className="flex space-x-4 text-sm">
-          <div className="flex items-center space-x-2">
-            <div className="w-2.5 h-2.5 bg-transparent border-2 border-purple-700 rounded-full"></div>
-            <span className="text-gray-600">Free users</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2.5 h-2.5 bg-purple-700 rounded-full"></div>
-            <span className="text-gray-600">Paid users</span>
-          </div>
-        </div>
+        <h2 className="text-base font-semibold text-gray-800">
+          Traffic by Device
+        </h2>
       </div>
-      <ReactApexChart options={chartOptions} series={chartSeries} type="bar" height={200} />
-    </div>
+      <div className="flex-1">
+        <ReactApexChart
+          options={{
+            ...chartOptions,
+            chart: {
+              ...chartOptions.chart,
+              fontFamily: "DM Sans",
+            },
+          }}
+          series={chartSeries}
+          type="bar"
+          height="100%"
+          width="100%"
+        />
+      </div>
+    </Card>
   );
 };
 
