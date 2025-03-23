@@ -74,7 +74,7 @@ export function Analytics() {
             <Image src={Coins} alt="icons" />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 w-full max-md:px-5">
+        <div className="grid grid-cols-2 gap-4 w-full">
           {analyticData.map((analytic) => {
             const { label, icon, value, iconColor } = analytic;
             return (
