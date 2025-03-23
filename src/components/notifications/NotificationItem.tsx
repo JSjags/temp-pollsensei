@@ -6,7 +6,6 @@ import { Trash2, Mail, MailCheck } from "lucide-react";
 import { Notification } from "@/app/(protected)/notifications/page";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
-import { NotificationResponse } from "../navbar/Navbar";
 
 interface NotificationItemProps {
   notification: Notification;
@@ -43,22 +42,17 @@ export function NotificationItem({ notification }: NotificationItemProps) {
       await queryClient.cancelQueries({ queryKey: ["notifications"] });
 
       // Snapshot the previous value
-      const previousData = queryClient.getQueryData<NotificationResponse>([
-        "notifications",
-      ]);
+      const previousData = queryClient.getQueryData<any>(["notifications"]);
 
       // Optimistically update the notifications
-      queryClient.setQueryData<NotificationResponse>(
-        ["notifications"],
-        (old) => ({
-          ...old!,
-          data: old!.data.map((notification) =>
-            notification._id === notificationId
-              ? { ...notification, read_status: "Read" }
-              : notification
-          ),
-        })
-      );
+      queryClient.setQueryData<any>(["notifications"], (old: any) => ({
+        ...old!,
+        data: old!.data.map((notification: any) =>
+          notification._id === notificationId
+            ? { ...notification, read_status: "Read" }
+            : notification
+        ),
+      }));
 
       return { previousData };
     },

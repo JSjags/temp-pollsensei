@@ -47,6 +47,7 @@ import {
   Check,
   Mail,
   MailCheckIcon,
+  BellOffIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { persistStore } from "redux-persist";
@@ -209,34 +210,7 @@ const Navbar = () => {
     >
       <div className="sticky top-0 z-50 bg-[#F7F8FB]">
         <header className="container flex items-center justify-between py-2 pt-2 px-2 sm:px-5 sticky top-0 bg-[#F7F8FB99] backdrop-blur-md">
-          <div className="hidden lg:flex items-center gap-2 cursor-pointer">
-            <div className="flex gap-4 items-center h-10">
-              {isOpen ? (
-                <Image
-                  src={"/assets/sidebar/open.svg"}
-                  alt="Close sidebar"
-                  width={24}
-                  height={24}
-                  onClick={toogleMainSidebar}
-                />
-              ) : (
-                <Image
-                  src={"/assets/sidebar/close.svg"}
-                  alt="Open sidebar"
-                  width={24}
-                  height={24}
-                  onClick={toogleMainSidebar}
-                />
-              )}
-              {/* <div className="h-10 bg-white relative rounded-lg w-52">
-                <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
-                <Input
-                  className="border-none h-10 pl-8 rounded-lg"
-                  placeholder="Search anything"
-                />
-              </div> */}
-            </div>
-          </div>
+          <div className="hidden lg:flex items-center gap-2 cursor-pointer"></div>
           {/* mobile */}
           <div className="lg:hidden flex items-center gap-2 cursor-pointer">
             <div className="flex gap-4 items-center h-10">
@@ -317,13 +291,7 @@ const Navbar = () => {
                   ) : notifications?.data.length === 0 ? (
                     <div className="p-4 text-center">
                       <div className="mb-3">
-                        <Image
-                          src="/assets/empty-notifications.svg"
-                          alt="No notifications"
-                          width={64}
-                          height={64}
-                          className="mx-auto"
-                        />
+                        <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">
                         You're all caught up! No new notifications.

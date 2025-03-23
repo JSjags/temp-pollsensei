@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import SuperAdminDraftFaqs from "@/subpages/superadmin/SuperAdminDraftFaqs";
 import React from "react";

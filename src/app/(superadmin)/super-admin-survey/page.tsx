@@ -1,10 +1,12 @@
-import SuperAdminSurveys from '@/subpages/superadmin/SuperAdminSurveys'
-import React from 'react'
+import SuperAdminSurveys from "@/subpages/superadmin/SuperAdminSurveys";
+import React from "react";
 
 const Page = () => {
   return (
-    <SuperAdminSurveys />
-  )
-}
+    <div className="w-full overflow-scroll">
+      <SuperAdminSurveys />
+    </div>
+  );
+};
 
-export default Page
+export default Page;

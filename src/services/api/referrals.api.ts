@@ -17,9 +17,7 @@ export const postReferrer = (data: PostReferrer) =>
 
 export const getReferrers = ({ pageNumber }: GenericPaginatedRequest) =>
   axiosInstance.get<GetReferrers>(
-    `/superadmin/referrer?page=${
-      pageNumber ?? 1
-    }&page_size=${DEFAULT_API_PAGE_SIZE}`
+    `/superadmin/referrer?page=${pageNumber ?? 1}&page_size=${20}`
   );
 
 export const getReferrerByIdOrCode = (value: string) =>
@@ -40,7 +38,5 @@ interface GetReferrerUsersProps extends GenericPaginatedRequest {
 
 export const getReferrerUsers = ({ pageNumber, id }: GetReferrerUsersProps) =>
   axiosInstance.get<GetReferrerUsers>(
-    `/superadmin/referrer/${id}/users?page=${
-      pageNumber ?? 1
-    }&page_size=${DEFAULT_API_PAGE_SIZE}`
+    `/superadmin/referrer/${id}/users?page=${pageNumber ?? 1}&page_size=${20}`
   );

@@ -138,7 +138,7 @@ export const isValidResponse = (response: any) => {
   return false;
 };
 
-export function getMonthsFromCurrent(): string[] {
+export const getMonthsFromCurrent = () => {
   const months = [
     "January",
     "February",
@@ -154,16 +154,8 @@ export function getMonthsFromCurrent(): string[] {
     "December",
   ];
 
-  const currentMonthIndex = new Date().getMonth();
-  const orderedMonths = [];
-
-  for (let i = 0; i < 12; i++) {
-    const monthIndex = (currentMonthIndex - i + 12) % 12; // Handle wrapping
-    orderedMonths.push(months[monthIndex]);
-  }
-
-  return orderedMonths;
-}
+  return months;
+};
 
 export function getCurrentAndLastYears(): string[] {
   const currentYear = new Date().getFullYear();
