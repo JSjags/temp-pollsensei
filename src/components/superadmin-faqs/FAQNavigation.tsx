@@ -6,170 +6,225 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
   SheetTrigger,
+  SheetFooter,
 } from "../ui/sheet";
-import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
-import { useCreateFAQsMutation } from "@/services/superadmin.service";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Button } from "../ui/button";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  useAllFAQsQuery,
+  useCreateFAQsMutation,
+} from "@/services/superadmin.service";
 import { ClipLoader } from "react-spinners";
 import { Form, Field } from "react-final-form";
 import validate from "validate.js";
-import Input from "../ui/Input";
+import { Input } from "../ui/shadcn-input";
 import { toast } from "react-toastify";
-import TextArea from "../ui/TextArea";
+import { Textarea } from "../ui/shadcn-textarea";
+import { Menu, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Tab {
   label: string;
   value: string;
 }
 
-const slugify = (tab: string) => {
-  return tab.toLowerCase().replace(/\s+/g, "-");
-};
+const tabs: Tab[] = [
+  { label: "All FAQs", value: "faqs" },
+  { label: "Live FAQs", value: "live-faqs" },
+  { label: "Draft FAQs", value: "drafts" },
+];
+
 const constraints = {
-  question: {
-    presence: true,
-  },
-  answer: {
-    presence: true,
-  },
+  question: { presence: true },
+  answer: { presence: true },
 };
 
 const FAQNavigation: React.FC = () => {
-  const tabs: Tab[] = useMemo(
-    () => [
-      { label: "All FAQs", value: "faqs" },
-      { label: "Live FAQs", value: "live-faqs" },
-      { label: "Draft FAQs", value: "drafts" },
-    ],
-    []
-  );
-  const [createFAQs, { isLoading, isSuccess, error }] = useCreateFAQsMutation();
+  const router = useRouter();
   const pathname = usePathname();
+  const [createFAQs, { isLoading }] = useCreateFAQsMutation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const getActiveTabFromPath = useCallback(
-    (path: string) => {
-      const matchedTab = tabs?.find((tab) => path.includes(slugify(tab.value)));
-      return matchedTab || "faqs";
-    },
-    [tabs]
-  );
+  const currentTab = useMemo(() => {
+    const path = pathname.split("/").pop() || "faqs";
+    return tabs.find((tab) => tab.value === path)?.value || "faqs";
+  }, [pathname]);
 
-  const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
-
-  useEffect(() => {
-    setActiveTab(getActiveTabFromPath(pathname));
-  }, [getActiveTabFromPath, pathname]);
-
-  const RoutePath = (tab: string) => {
-    if (pathname.includes("faqs")) {
-      return tab === "faqs" ? `/faqs` : `/faqs/${slugify(tab)}`;
-    }
-    return "/";
+  const handleTabChange = (value: string) => {
+    const basePath = "/faqs";
+    const newPath = value === "faqs" ? basePath : `${basePath}/${value}`;
+    router.push(newPath);
+    setIsMobileMenuOpen(false);
   };
-  const onSubmit = async (values: { email: string; password: string }) => {
+
+  const onSubmit = async (values: { question: string; answer: string }) => {
     try {
       await createFAQs(values).unwrap();
-      toast.success("Faq created successfully");
+      toast.success("FAQ created successfully");
+      // refetch();
     } catch (err: any) {
-      toast.error(
-        "Failed to create faq " + (err?.data?.message || err.message)
-      );
-      console.error("Failed to log in user", err);
+      toast.error(`Failed to create FAQ: ${err?.data?.message || err.message}`);
     }
   };
 
-  const validateForm = (values: any) => {
-    return validate(values, constraints) || {};
-  };
-  
-
-  return (
-    <div className="flex items-center justify-between w-full  p-4">
-      {/* Tabs */}
-      <div className="flex space-x-8">
-        {tabs.map((tab) => (
-          <Link
-            href={RoutePath(tab.value)}
-            key={tab.value}
-            className={`text-sm font-medium pb-2 ${
-              activeTab === tab.value
-                ? "text-purple-600 border-b-2 border-purple-600"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab(tab.value)}
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </div>
+  // Move CreateFAQButton inside FAQNavigation to access onSubmit
+  const CreateFAQButton = ({
+    variant = "default",
+  }: {
+    variant?: "default" | "small";
+  }) => {
+    return (
       <Sheet>
-        <SheetTrigger>
-          <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-400 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg focus:outline-none">
+        <SheetTrigger asChild>
+          <Button
+            className={cn(
+              "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white",
+              "hover:opacity-90 transition-all duration-300",
+              variant === "small" ? "px-3 py-1.5 text-sm" : "px-4 py-2"
+            )}
+          >
+            <Plus className="w-4 h-4 mr-2" />
             Create FAQ
-          </button>
+          </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-full md:w-1/3 bg-white flex flex-col gap-5">
+        <SheetContent side="right" className="w-full sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Create New FAQ</SheetTitle>
+            <SheetTitle className="text-2xl font-bold text-gray-800">
+              Create New FAQ
+            </SheetTitle>
           </SheetHeader>
-          <div className="mt-6 space-y-4">
+          <div className="mt-6">
             <Form
               onSubmit={onSubmit}
-              validate={validateForm}
-              render={({ handleSubmit, form, submitting }) => (
-                <form onSubmit={handleSubmit} className="w-full">
+              validate={(values) => validate(values, constraints) || {}}
+              render={({ handleSubmit, submitting }) => (
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <Field name="question">
-                    {({ input, meta }) => (
-                      <Input
-                        label="Question"
-                        type="text"
-                        placeholder="Enter Title"
-                        form={form as any}
-                        {...input}
-                      />
+                    {({ input }) => (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Question</label>
+                        <Input
+                          {...input}
+                          placeholder="Enter your question here"
+                          className="w-full"
+                        />
+                      </div>
                     )}
                   </Field>
 
                   <Field name="answer">
-                    {({ input, meta }) => (
-                      <TextArea
-                        placeholder="Type brief description"
-                        label="Answer"
-                        form={form as any}
-                        {...input}
-                        name="answer"
-                        type="text"
-                      />
+                    {({ input }) => (
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Answer</label>
+                        <Textarea
+                          {...input}
+                          placeholder="Type detailed answer here..."
+                          className="min-h-[150px] resize-none"
+                        />
+                      </div>
                     )}
                   </Field>
 
-                  <div className="flex items-center justify-end space-x-4 w-full">
-                    <SheetTrigger>
-                    <button className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100"
-                    type="reset"
-                    >
-                      Cancel
-                    </button>
+                  <SheetFooter>
+                    <SheetTrigger asChild>
+                      <Button variant="outline">Cancel</Button>
                     </SheetTrigger>
-                    <button
-                      className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg"
+                    <Button
                       type="submit"
+                      disabled={submitting}
+                      className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
                     >
-                      {submitting || isLoading ? (
-                        <ClipLoader size={20} />
+                      {submitting ? (
+                        <ClipLoader size={20} color="#ffffff" />
                       ) : (
-                        " Save and Continue"
+                        "Save FAQ"
                       )}
-                    </button>
-                  </div>
+                    </Button>
+                  </SheetFooter>
                 </form>
               )}
             />
           </div>
         </SheetContent>
       </Sheet>
+    );
+  };
+
+  return (
+    <div className="w-full bg-transparent">
+      {/* Desktop Navigation */}
+      <div className="hidden md:block w-full">
+        <div className="flex items-center justify-between px-0 py-4 border-b bg-transparent backdrop-blur-md">
+          <Tabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            className="w-full max-w-3xl"
+          >
+            <TabsList className="grid grid-cols-3 w-[400px] bg-muted/50">
+              {tabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className={cn(
+                    "data-[state=active]:bg-white relative overflow-hidden",
+                    "after:content-[''] after:absolute after:bottom-0 after:left-0",
+                    "after:h-0.5 after:w-full after:bg-purple-600",
+                    "after:transform after:scale-x-0 after:transition-transform",
+                    "data-[state=active]:after:scale-x-100"
+                  )}
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          <CreateFAQButton />
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden w-full bg-transparent backdrop-blur-md border-b">
+        <div className="flex items-center justify-between p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="hover:bg-purple-50"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          <CreateFAQButton variant="small" />
+        </div>
+
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-300 ease-in-out",
+            isMobileMenuOpen ? "max-h-[300px]" : "max-h-0"
+          )}
+        >
+          <Tabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            className="w-full p-4"
+          >
+            <TabsList className="flex flex-col w-full gap-2 bg-transparent">
+              {tabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="w-full data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 justify-start"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 };
