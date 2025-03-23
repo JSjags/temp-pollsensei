@@ -32,7 +32,10 @@ export function PayoutsHistoryTable({
   });
 
   // Filter options
-  const payoutFilters: FilterConfig<"status", "All" | "Completed" | "Active">[] = [
+  const payoutFilters: FilterConfig<
+    "status",
+    "All" | "Completed" | "Active"
+  >[] = [
     { label: "All", value: "All", column: null, isDefault: true },
     { label: "Completed", value: "Completed", column: "status" },
     { label: "Active", value: "Active", column: "status" },
@@ -44,9 +47,9 @@ export function PayoutsHistoryTable({
     table: TanStackTable<PayoutTransaction>
   ) => {
     const statusColumn = table.getColumn("status");
-  
+
     if (!statusColumn) return;
-  
+
     switch (selectedFilter.value) {
       case "Completed":
         statusColumn.setFilterValue("Paid");
@@ -58,8 +61,6 @@ export function PayoutsHistoryTable({
         statusColumn.setFilterValue(undefined);
     }
   };
-  
-  
 
   return (
     <HydrationBoundary state={dehydrate}>
@@ -74,9 +75,8 @@ export function PayoutsHistoryTable({
             <Image
               src={"/assets/payout/EmptyCart.svg"}
               alt="empty state"
-              width={885}
+              width={485}
               height={420}
-              className="max-w-[285px] w-full"
             />
             <div className="max-md:text-center">
               <p className="mb-6 text-lg">You have not made any payouts</p>

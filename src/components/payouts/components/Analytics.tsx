@@ -9,34 +9,42 @@ import {
 } from "@/assets/images";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { usePayoutStore } from "../store/usePayoutStore";
 
-const analyticData = [
-  {
-    label: "Overall Earnings",
-    value: 0,
-    icon: OverallEarnings,
-  },
-  {
-    label: "Coins Obtained",
-    value: 0,
-    icon: CoinsObtained,
-  },
-  {
-    label: "Redeemable Coins",
-    value: 0,
-    icon: RedeemableCoin,
-  },
-  {
-    label: "Redeemable Pollcoins",
-    value: 0,
-    icon: CoinRedeemed,
-  },
-];
 export function Analytics() {
+  const {
+    overallEarnings,
+    coinsObtained,
+    redeemableCoins,
+    coinsRedeemed,
+  } = usePayoutStore();
+
+  const analyticData = [
+    {
+      label: "Overall Earnings",
+      value: overallEarnings,
+      icon: OverallEarnings,
+    },
+    {
+      label: "Coins Obtained",
+      value: coinsObtained,
+      icon: CoinsObtained,
+    },
+    {
+      label: "Redeemable Coins",
+      value: redeemableCoins,
+      icon: RedeemableCoin,
+    },
+    {
+      label: "Coins Redeemed",
+      value: coinsRedeemed,
+      icon: CoinRedeemed,
+    },
+  ];
   return (
     <div className="flex flex-col gap-7">
       <Header />
-      <div className="grid grid-cols-4 gap-4 w-full max-md:px-5 max-md:hidden">
+      <div className="grid grid-cols-4 max-[1220px]:grid-cols-2 gap-4 w-full max-md:px-5 max-md:hidden">
         {analyticData.map((analytic) => {
           const { label, icon, value } = analytic;
           return (
@@ -64,7 +72,7 @@ export function Analytics() {
         })}
       </div>
 
-      <div className="bg-[#D7AEF91A] md:rounded-2xl border-l border-l-tertiary md:px-12 py-4 w-full flex max-md:flex-col max-md:gap-6 px-5">
+      <div className="bg-[#D7AEF91A] md:rounded-2xl md:border-l border-l-tertiary md:px-12 py-4 w-full flex max-md:flex-col max-md:gap-6 px-5">
         <div className="flex md:items-center md:justify-center items-start md:gap-7 gap-3 w-auto md:border-r border-r-tertiary md:pr-10">
           <Image src={PayoutInfoIcon} alt="info" className="min-w-9" />
           <div>

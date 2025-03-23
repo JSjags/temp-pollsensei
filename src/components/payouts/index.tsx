@@ -8,10 +8,12 @@ export function PayoutPage() {
   return (
     <>
       <Analytics />
-      <PayoutsHistoryTable
-        payoutData={mockPayoutHistory}
-        isHistoryLoading={false}
-      />
+      <div className="max-md:px-5 ">
+        <PayoutsHistoryTable
+          payoutData={[]}
+          isHistoryLoading={false}
+        />
+      </div>
     </>
   );
 }

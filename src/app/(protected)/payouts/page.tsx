@@ -104,7 +104,7 @@ import React from 'react'
 
 export default function Page() {
   return (
-    <div className="md:px-10 pb-16 py-8">
+    <div className="md:px-10 pb-16 py-8 max-md:w-screen overflow-hidden">
       <PayoutPage/>
     </div>
   )

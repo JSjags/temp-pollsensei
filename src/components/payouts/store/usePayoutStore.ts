@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 type DialogStep = "buy" | "checkout" | "success";
 
-type ShopState = {
+type PayoutState = {
   coinAmount: string;
   coinQuantity: string;
   errors: {
@@ -12,7 +12,22 @@ type ShopState = {
   loading: boolean;
   step: DialogStep;
   dialogOpen: boolean;
-
+  overallEarnings: number;
+  coinsObtained: number;
+  redeemableCoins: number;
+  coinsRedeemed: number;
+  threshold: number
+  setAnalytics: (
+    data: Partial<
+      Pick<
+        PayoutState,
+        | "overallEarnings"
+        | "coinsObtained"
+        | "redeemableCoins"
+        | "coinsRedeemed"
+      >
+    >
+  ) => void;
   setDialogOpen: (open: boolean) => void;
   setStep: (step: DialogStep) => void;
   setCoinAmount: (value: string) => void;
@@ -23,13 +38,19 @@ type ShopState = {
   reset: () => void;
 };
 
-export const usePayoutStore = create<ShopState>((set) => ({
+export const usePayoutStore = create<PayoutState>((set) => ({
   coinAmount: "",
   coinQuantity: "",
   errors: {},
   loading: false,
   step: "buy",
   dialogOpen: false,
+  overallEarnings: 0,
+  coinsObtained: 0,
+  redeemableCoins: 5000,
+  coinsRedeemed: 0,
+  threshold:1000,
+
 
   setDialogOpen: (open) => set({ dialogOpen: open }),
   setStep: (step) => set({ step }),
@@ -45,7 +66,7 @@ export const usePayoutStore = create<ShopState>((set) => ({
     })),
 
   setLoading: (loading) => set({ loading }),
-
+  setAnalytics: (data) => set(data),
   reset: () =>
     set({
       coinAmount: "",

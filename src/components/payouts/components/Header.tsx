@@ -1,5 +1,5 @@
 import React from "react";
-import { Arrow,  PayoutCash } from "@/assets/images";
+import { Arrow, PayoutCash } from "@/assets/images";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
@@ -7,13 +7,14 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PayoutDialog } from "./dialogs";
-
+import { usePayoutStore } from "../store/usePayoutStore";
 
 export function Header() {
   const user = useSelector((state: RootState) => state.user.user);
+  const { redeemableCoins, threshold } = usePayoutStore();
 
   return (
-    <div className="flex md:items-center justify-between max-md:flex-col gap-5 max-md:px-5">
+    <div className="flex md:items-center justify-between max-md:flex-col gap-5 max-md:px-5 ">
       <div className="space-y-2 flex-1">
         <div className="flex lg:items-center gap-2">
           <h1 className="text-xl md:text-[38px] font-bold">
@@ -38,11 +39,20 @@ export function Header() {
             <div>
               <p className="text-xs text-[#7A8699]">Redeemble Coins</p>
               <h4 className="font-bold text-[1.75rem]">
-                19000 <span className="font-normal">Pollcoins</span>
+                {redeemableCoins} <span className="font-normal">Pollcoins</span>
               </h4>
               <div className="flex items-center gap-2">
-                <div className="size-2 bg-[#05BF43] rounded-full animate-pulse" />
-                <p className="text-xs text-[#7A8699]"> Above Threshold</p>
+                <div
+                  className={cn(
+                    "size-2 bg-[#05BF43] rounded-full animate-pulse",
+                    { "bg-red-500": redeemableCoins < threshold }
+                  )}
+                />
+                <p className="text-xs text-[#7A8699]">
+                  {redeemableCoins < threshold
+                    ? "Below Threshold"
+                    : "Above Threshold"}
+                </p>
               </div>
             </div>
           </div>
