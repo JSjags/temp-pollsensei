@@ -3,18 +3,88 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import NavBar from "@/components/blocks/NavBar";
-import { FaRocket, FaChartLine, FaBriefcase } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Footer from "@/components/blocks/Footer";
-import Pricing from "@/components/publicPages/Pricing";
 import ToggleMonth from "@/components/common/ToggleMonth";
-import SeePricing from "@/components/publicPages/SeePricing";
 import PricingTable from "@/components/publicPages/PricingTable";
 import NeedAssistance from "@/components/publicPages/NeedAssistance";
+import axiosInstanceWithoutToken from "@/lib/axios-instance-without-token";
+
+interface Feature {
+  _id: string;
+  feature_name: string;
+}
+
+interface Plan {
+  _id: string;
+  name: string;
+  description: string;
+  monthly_price_naira: number;
+  monthly_price_dollar: number;
+  yearly_price_naira: number;
+  yearly_price_dollar: number;
+  total_yearly_price_naira: number;
+  total_yearly_price_dollar: number;
+  trial_period: number;
+  number_of_collaborators: number | string;
+  number_of_monthly_responses: number | string;
+  number_of_accounts: number | string;
+  features: Feature[];
+}
+
+const PricingPageSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white text-gray-800">
+      <NavBar />
+      <main className="container mx-auto px-4 py-8 md:py-16 pb-0 md:pb-0">
+        <section className="text-[#171725] overflow-hidden w-full">
+          <div className="flex flex-col gap-3 justify-center text-center py-2 items-center text-black mx-auto">
+            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-12 w-72 bg-gray-200 rounded animate-pulse mt-4"></div>
+            <div className="h-8 w-32 bg-gray-200 rounded animate-pulse mt-4"></div>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pb-20">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl p-6 md:p-8 shadow-lg h-[600px]"
+              >
+                <div className="h-8 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
+                <div className="h-20 bg-gray-200 rounded animate-pulse mb-6"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((j) => (
+                    <div
+                      key={j}
+                      className="h-4 bg-gray-200 rounded animate-pulse"
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+};
 
 const PricingPage: React.FC = () => {
+  const [isMonthly, setIsMonthly] = useState(true);
+
+  const { data: plansData, isLoading } = useQuery({
+    queryKey: ["plans"],
+    queryFn: async () => {
+      const response = await axiosInstanceWithoutToken.get("/plan");
+      return response.data as Plan[];
+    },
+  });
+
+  console.log(plansData);
+
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -22,211 +92,224 @@ const PricingPage: React.FC = () => {
     });
   }, []);
 
-  const plans = [
-    {
-      name: "Basic",
-      icon: <FaRocket className="text-4xl mb-4 text-[#5B03B2]" />,
-      price: "$9.99",
-      description:
-        "Perfect for individuals and small teams just getting started.",
-      features: [
-        "100 surveys/month",
-        "Basic analytics",
-        "Email support",
-        "Customizable survey templates",
-        "Data export (CSV, Excel)",
-      ],
-    },
-    {
-      name: "Pro",
-      icon: <FaChartLine className="text-4xl mb-4 text-[#5B03B2]" />,
-      price: "$29.99",
-      description:
-        "Ideal for growing businesses that need more power and flexibility.",
-      features: [
-        "Unlimited surveys",
-        "Advanced analytics",
-        "Priority support",
-        "Custom branding",
-        "Team collaboration tools",
-        "Advanced question types",
-        "Survey logic and branching",
-      ],
-    },
-    {
-      name: "Enterprise",
-      icon: <FaBriefcase className="text-4xl mb-4 text-[#5B03B2]" />,
-      price: "Custom",
-      description:
-        "Tailored solutions for large organizations with complex needs.",
-      features: [
-        "All Pro features",
-        "Dedicated account manager",
-        "API access",
-        "On-premise deployment",
-        "Single Sign-On (SSO)",
-        "Advanced security features",
-        "Custom integrations",
-      ],
-    },
-  ];
-
-  // const handleToggle = (isMonthly: boolean) => {
-  //   console.log(isMonthly ? "Monthly Plan" : "Yearly Plan");
-  // };
-
-  const [currency, setCurrency] = useState(true); 
-
-  const handleToggle = (isMonthly: boolean) => {
-    setCurrency(isMonthly);
+  const handleToggle = (monthly: boolean) => {
+    setIsMonthly(monthly);
   };
 
-  const featuresRef = useRef<HTMLDivElement>(null);
-  const faqsRef = useRef<HTMLDivElement>(null);
-
-
-  const scrollToSection = (id: string) => {
-    if (id === "features" && featuresRef.current) {
-      featuresRef.current.scrollIntoView({ behavior: "smooth" });
-    } else if (id === "faqs" && faqsRef.current) {
-      faqsRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  if (isLoading) {
+    return <PricingPageSkeleton />;
+  }
 
   return (
-    <div className="min-h-screen bg-[gradient-to-b from-gray-100 to-white] text-gray-800 overflow-hidden">
-      <NavBar scrollToSection={scrollToSection} />
-      <main className="container mx-auto px-4 py-16">
-        {/* <motion.h1
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-4xl md:text-5xl font-bold text-center mb-6 text-[#5B03B2]"
-        >
-          Choose the Right Plan for You
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-xl text-center mb-12 text-gray-600"
-        >
-          Unlock the full potential of your surveys with our flexible pricing
-          options.
-        </motion.p> */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              data-aos="fade-up"
-              data-aos-delay={index * 100}
-              className="bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col"
-            >
-              <div className="flex-grow">
-                <div className="flex justify-center">{plan.icon}</div>
-                <h2 className="text-2xl font-semibold mb-4 text-[#5B03B2] text-center">
-                  {plan.name}
-                </h2>
-                <p className="text-4xl font-bold mb-4 text-[#5B03B2] text-center">
-                  {plan.price}
-                  {plan.name !== "Enterprise" && (
-                    <span className="text-lg font-normal text-gray-600">
-                      /month
-                    </span>
-                  )}
-                </p>
-                <p className="text-gray-600 mb-6 text-center">
-                  {plan.description}
-                </p>
-                <ul className="mb-8 space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                {index > 0 && (
-                  <p className="text-sm text-gray-600 mb-4 text-center">
-                    Includes all features from {plans[index - 1].name} plan
-                  </p>
-                )}
-              </div>
-              <Link
-                href="/register"
-                className="block w-full bg-[#5B03B2] text-white text-center py-3 rounded-full hover:bg-opacity-80 transition-colors duration-300 mt-auto"
-              >
-                {plan.name === "Enterprise" ? "Contact Sales" : "Get Started"}
-              </Link>
-            </div>
-          ))}
-        </div> */}
-        <section className="p- sm:p- text-[#171725] overflow-hidden w-full">
-      
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white text-gray-800">
+      <NavBar />
+      <main className="container mx-auto px-4 py-8 md:py-16 pb-0 md:pb-0">
+        <section className="text-[#171725] overflow-hidden w-full">
           <div className="flex flex-col gap-3 justify-center text-center py-2 items-center text-black mx-auto">
-          <motion.p
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-xl text-center mb text-gray-600"
-        >
-       Simple Pricing, no hidden fees
-        </motion.p>
-            {/* <p>Simple Pricing, no hidden fees</p> */}
+            <motion.p
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-lg md:text-xl text-gray-600"
+            >
+              Simple Pricing, no hidden fees
+            </motion.p>
             <motion.h2
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-[calc(4rem-4px)] leading-[50px] font-semibold"
-          >
-        
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-3xl md:text-5xl font-semibold leading-tight"
+            >
               Start Small, Scale <br /> as you wish
-      
-
-          </motion.h2>
+            </motion.h2>
             <ToggleMonth onToggle={handleToggle} />
           </div>
-          <div className="text-[#171725]  mt-12 w-full">
-            <Pricing currency={currency} />
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 pb-20">
+            {plansData?.map((plan) => (
+              <div
+                key={plan._id}
+                className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col"
+                data-aos="fade-up"
+              >
+                <div>
+                  <h3 className="text-xl md:text-2xl font-semibold text-[#5B03B2] mb-4">
+                    {plan.name}
+                  </h3>
+                  <div className="text-3xl md:text-4xl font-bold text-[#5B03B2] mb-6">
+                    $
+                    {isMonthly
+                      ? plan.monthly_price_dollar
+                      : plan.total_yearly_price_dollar}
+                    <span className="text-lg font-normal text-gray-600">
+                      /{isMonthly ? "month" : "year"}
+                    </span>
+                    {!isMonthly && plan.monthly_price_dollar !== 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="text-sm font-normal mt-2"
+                      >
+                        <div className="text-gray-600 flex items-center gap-1">
+                          <span className="font-medium">Only</span> $
+                          {Math.round(plan.yearly_price_dollar)}
+                          <span className="font-medium">/month</span>
+                        </div>
+                        <div className="text-green-600 font-medium flex items-center gap-1.5 mt-0.5">
+                          <svg
+                            className="w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          Save $
+                          {plan.monthly_price_dollar - plan.yearly_price_dollar}
+                          /month
+                          <span className="text-xs opacity-75">
+                            (
+                            {Math.round(
+                              (plan.monthly_price_dollar -
+                                plan.yearly_price_dollar) *
+                                12
+                            )}
+                            /year)
+                          </span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-grow">
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature._id}
+                        className="flex items-start space-x-2"
+                      >
+                        <svg
+                          className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="text-gray-700">
+                          {feature.feature_name}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="space-y-4 text-sm">
+                    <h3 className="font-semibold text-gray-900 mb-4">
+                      Plan Includes:
+                    </h3>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className="w-5 h-5 text-[#5B03B2]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                          />
+                        </svg>
+                        <span className="font-medium">Team Members</span>
+                      </div>
+                      <span className="text-[#5B03B2] font-semibold">
+                        {plan.number_of_collaborators.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className="w-5 h-5 text-[#5B03B2]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        <span className="font-medium">Monthly Responses</span>
+                      </div>
+                      <span className="text-[#5B03B2] font-semibold">
+                        {plan.number_of_monthly_responses.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className="w-5 h-5 text-[#5B03B2]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                        <span className="font-medium">User Accounts</span>
+                      </div>
+                      <span className="text-[#5B03B2] font-semibold capitalize">
+                        {plan.number_of_accounts}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  href="/register"
+                  className="block w-full bg-[#5B03B2] text-white text-center py-3 rounded-full hover:bg-opacity-80 transition-colors duration-300 mt-8"
+                >
+                  Get Started
+                </Link>
+              </div>
+            ))}
           </div>
         </section>
-        {/* <div className="mt-16 text-center" data-aos="fade-up">
-          <h2 className="text-2xl font-semibold mb-4">
-            Not sure which plan is right for you?
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Our team is here to help. Schedule a free consultation to find the
-            perfect fit for your needs.
-          </p>
-          <Link
-            href="/contact"
-            className="inline-block bg-[#5B03B2] text-white px-6 py-3 rounded-full hover:bg-opacity-80 transition-colors duration-300"
-          >
-            Schedule a Consultation
-          </Link>
-        </div> */}
       </main>
-        <section className=" bg-white text-black overflow-hidden">
-          <PricingTable />
-           </section>
-        <section className=" bg-white text-black overflow-hidden" data-aos="fade-up">
-          {/* <ContactUsCard /> */}
-          <NeedAssistance />
-        </section>
-      {/* Footer */}
+
+      {/* <section className="bg-white text-black overflow-hidden">
+        <PricingTable />
+      </section> */}
+
+      <section
+        className="bg-white text-black overflow-hidden"
+        data-aos="fade-up"
+      >
+        <NeedAssistance />
+      </section>
+
       <Footer />
     </div>
   );
