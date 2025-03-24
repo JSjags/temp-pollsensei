@@ -70,7 +70,7 @@ export function Analytics() {
         ))}
       </div>
 
-      <div className="w-full justify-end flex mt-4 max-md:hidden">
+      <div className="w-full md:justify-end flex mt-4 max-md:mt-16">
         <Dialog.Root>
           <Dialog.Trigger>
             <Button variant="gradient">Redeem coins</Button>

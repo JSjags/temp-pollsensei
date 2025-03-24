@@ -36,12 +36,24 @@ export function TransactionHistoryTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
-
+  
   return (
     <HydrationBoundary state={dehydrate}>
-      <TableLayout table={table}>
+      <TableLayout
+        table={table}
+        title="Transaction History"
+        renderSeeAll
+      >
         <Table isLoading={isHistoryLoading} hasHover table={table}>
-          <>
+          <Image
+            src={"/assets/shop/table_empty.png"}
+            alt="empty state"
+            width={285}
+            height={220}
+            className="max-w-[285px] w-full"
+          />
+
+          <div className="md:max-w-[223px] max-md:text-center">
             <p className="mb-6 text-lg">
               Oops! No recorded transactions yet. Buy Pollcoins to use the AI
               features of PollSensei
@@ -53,7 +65,7 @@ export function TransactionHistoryTable({
                 <Image src={Arrow} alt="icons" className="size-3.5" />
               </Button>
             </BuyPollcoinsFlow>
-          </>
+          </div>
         </Table>
       </TableLayout>
     </HydrationBoundary>

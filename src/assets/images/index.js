@@ -91,22 +91,28 @@ import Coin from "./shop/coin.svg";
 import CoinCard from "./shop/coin+card.svg";
 import Caret from "./shop/caret.svg";
 import RedeemableEmpty from "./shop/redeemable.svg";
-import RedeemableCoins from './referrals/coins.svg'
-import RedeemedCoins from './referrals/redeemed.svg'
-import RedeemCoins from './referrals/redeem-points.svg'
-import RedeemableHowIcon from './referrals/how-icon.svg'
-import ReferralIcon from './referrals/referral.svg'
-import CopyIcon from './referrals/Copy.svg'
-import CheckIcon from './referrals/check.svg'
-import HowIcon from './referrals/how-icon.svg'
-import StackedCoin from './referrals/stacked-coin.svg'
-import Share from './referrals/share-2.svg'
-import Facebook from './referrals/Facebook.svg'
-import X from './referrals/X.svg'
-import Tiktok from './referrals/Tiktok.svg'
-import LinkedIn from './referrals/LinkedIn.svg'
-import Youtube from './referrals/Youtube.svg'
-import Instagram from './referrals/Instagram.svg'
+import RedeemableCoins from "./referrals/coins.svg";
+import RedeemedCoins from "./referrals/redeemed.svg";
+import RedeemCoins from "./referrals/redeem-points.svg";
+import RedeemableHowIcon from "./referrals/how-icon.svg";
+import ReferralIcon from "./referrals/referral.svg";
+import CopyIcon from "./referrals/Copy.svg";
+import CheckIcon from "./referrals/check.svg";
+import HowIcon from "./referrals/how-icon.svg";
+import StackedCoin from "./referrals/stacked-coin.svg";
+import Share from "./referrals/share-2.svg";
+import Facebook from "./referrals/Facebook.svg";
+import X from "./referrals/X.svg";
+import Tiktok from "./referrals/Tiktok.svg";
+import LinkedIn from "./referrals/LinkedIn.svg";
+import Youtube from "./referrals/Youtube.svg";
+import Instagram from "./referrals/Instagram.svg";
+import PayoutCash from "./payouts/money.svg";
+import OverallEarnings from "./payouts/overall-earnings.svg";
+import CoinsObtained from "./payouts/coins-obtained.svg";
+import CoinRedeemed from "./payouts/coins-redeemed.svg";
+import RedeemableCoin from "./payouts/redeemable-coin.svg";
+import PayoutInfoIcon from "./payouts/Info.svg";
 
 export {
   teamIcon,
@@ -126,6 +132,12 @@ export {
   HowIcon,
   CopyIcon,
   CheckIcon,
+  PayoutCash,
+  OverallEarnings,
+  PayoutInfoIcon,
+  CoinRedeemed,
+  CoinsObtained,
+  RedeemableCoin,
   Coins,
   Coin,
   CoinCard,

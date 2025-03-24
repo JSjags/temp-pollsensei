@@ -53,6 +53,7 @@
     --sec-text: 0 0% 54%;
     --new-tertiary: 0 0% 20%;
     --new-elements: 0 0% 75%;
+    --new-elements-border: 216 20% 95%;
     --font-lexend: "Lexend", sans-serif;
     --font-roboto: "Roboto", sans-serif;
     --font-playfair: "Playfair Display", serif;
@@ -99,6 +100,7 @@
     --tertiary: 270 97% 35%;
     --new-tertiary: 0 0% 20%;
     --new-elements: 0 0% 75%;
+    --new-elements-border: 216 20% 95%;
     --font-lexend: "Lexend", sans-serif;
     --font-roboto: "Roboto", sans-serif;
     --font-playfair: "Playfair Display", serif;

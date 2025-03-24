@@ -1,32 +1,31 @@
 import React, { useState } from "react";
-import { useShopStore } from "../../../store/useShopStore";
+
 import Image from "next/image";
-import { Coin, CoinCard, LockIcon, PaystackLogo } from "@/assets/images";
+import { VisaLogo, StripeLogo, LockIcon, PaystackLogo } from "@/assets/images";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/shadcn-input";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/new-dialog";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePayoutStore } from "@/components/payouts/store/usePayoutStore";
 
 const PaymentOptionsData = [
   {
-    label: "Coin only",
-    src: Coin,
+    label: "Card",
+    src: VisaLogo,
   },
-  // {
-  //   label: "Coin + Card",
-  //   src: CoinCard,
-  // },
-  // {
-  //   label: "Paystack",
-  //   src: PaystackLogo,
-  // },
+  {
+    label: "Stripe",
+    src: StripeLogo,
+  },
+  {
+    label: "Paystack",
+    src: PaystackLogo,
+  },
 ];
 
 export function CheckoutDialog() {
-  const [selectedOption, setSelectedOption] = useState<string | null>(
-    "Coin only"
-  );
+  const [selectedOption, setSelectedOption] = useState<string | null>("Card");
   const [cardHolder, setCardHolder] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -35,28 +34,22 @@ export function CheckoutDialog() {
     "overview"
   );
 
-  const { aiAmount, credits, loading, setLoading, setAIStep } = useShopStore();
+  const { coinAmount, coinQuantity, loading, setLoading, setStep } =
+    usePayoutStore();
 
   const txnOverview = [
     {
-      label: "Amount of AI-Credits",
-      value: credits,
+      label: "Amount of Pollcoins",
+      value: coinQuantity,
     },
     {
       label: "Unit Price/coin",
       value: 0.25,
     },
+
     {
-      label: "VAT",
-      value: 0.05,
-    },
-    {
-      label: "Transaction Fee",
-      value: 0.01,
-    },
-    {
-      label: "Coin Cost",
-      value: aiAmount,
+      label: "Amount in cash",
+      value: coinAmount,
     },
   ];
 
@@ -74,7 +67,7 @@ export function CheckoutDialog() {
 
     setTimeout(() => {
       setLoading(false);
-      setAIStep("success");
+      setStep("success");
       resetLocalState();
     }, 5000);
   };
@@ -98,7 +91,7 @@ export function CheckoutDialog() {
             </p>
             <Image src={LockIcon} alt="lock icon" />
           </div>
-          <div className="flex items-center justify-between gap-2 border-b pb-4 w-[10vw]">
+          <div className="flex items-center justify-between gap-2 border-b pb-4">
             {PaymentOptionsData.map((option) => (
               <PaymentOptions
                 {...option}
@@ -111,83 +104,81 @@ export function CheckoutDialog() {
 
           <div className="flex flex-col h-full">
             <AnimatePresence mode="wait">
-              {/* {selectedOption !== "Coin only" && (
-                <motion.form
-                  key="card-form"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="flex flex-col gap-4 h-full"
-                >
-                  <div>
-                    <label htmlFor="name" className="text-sm">
-                      Card Holder Name
-                    </label>
-                    <Input
-                      type="text"
-                      id="name"
-                      name="name"
-                      placeholder="Enter card holder name"
-                      className="mt-2 h-[54px]"
-                      value={cardHolder}
-                      onChange={(e) => {
-                        setCardHolder(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="number" className="text-sm">
-                      Card Number
+              <motion.form
+                key="card-form"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="flex flex-col gap-4 h-full"
+              >
+                <div>
+                  <label htmlFor="name" className="text-sm">
+                    Card Holder Name
+                  </label>
+                  <Input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter card holder name"
+                    className="mt-2 h-[54px]"
+                    value={cardHolder}
+                    onChange={(e) => {
+                      setCardHolder(e.target.value);
+                    }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="number" className="text-sm">
+                    Card Number
+                  </label>
+                  <Input
+                    type="number"
+                    id="number"
+                    name="number"
+                    placeholder="Enter card number"
+                    className="mt-2 h-[54px]"
+                    value={cardNumber}
+                    onChange={(e) => {
+                      setCardNumber(e.target.value);
+                    }}
+                  />
+                </div>
+                <div className="flex w-full items-center gap-2.5 min-[440px]:mt-auto">
+                  <div className="w-1/2">
+                    <label htmlFor="expiry" className="text-sm">
+                      Card Expiry Date
                     </label>
                     <Input
                       type="number"
-                      id="number"
-                      name="number"
-                      placeholder="Enter card number"
+                      id="expiry"
+                      name="expiry"
+                      placeholder="Enter CVV"
                       className="mt-2 h-[54px]"
-                      value={cardNumber}
+                      value={cardExpiry}
                       onChange={(e) => {
-                        setCardNumber(e.target.value);
+                        setCardExpiry(e.target.value);
                       }}
                     />
                   </div>
-                  <div className="flex w-full items-center gap-2.5 min-[440px]:mt-auto">
-                    <div className="w-1/2">
-                      <label htmlFor="expiry" className="text-sm">
-                        Card Expiry Date
-                      </label>
-                      <Input
-                        type="number"
-                        id="expiry"
-                        name="expiry"
-                        placeholder="Enter CVV"
-                        className="mt-2 h-[54px]"
-                        value={cardExpiry}
-                        onChange={(e) => {
-                          setCardExpiry(e.target.value);
-                        }}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label htmlFor="number" className="text-sm">
-                        CVV
-                      </label>
-                      <Input
-                        type="number"
-                        id="cvv"
-                        name="cvv"
-                        placeholder="Enter CVV"
-                        className="mt-2 h-[54px]"
-                        value={cardCVV}
-                        onChange={(e) => {
-                          setCardCVV(e.target.value);
-                        }}
-                      />
-                    </div>
+                  <div className="flex-1">
+                    <label htmlFor="number" className="text-sm">
+                      CVV
+                    </label>
+                    <Input
+                      type="number"
+                      id="cvv"
+                      name="cvv"
+                      placeholder="Enter CVV"
+                      className="mt-2 h-[54px]"
+                      value={cardCVV}
+                      onChange={(e) => {
+                        setCardCVV(e.target.value);
+                      }}
+                    />
                   </div>
-                </motion.form>
-              )} */}
+                </div>
+              </motion.form>
             </AnimatePresence>
             <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
               <Button
@@ -214,27 +205,27 @@ export function CheckoutDialog() {
             <div className="flex items-center justify-between max-[440px]:justify-center w-full mb-6">
               <p className="text-xl font-bold">Order Summary</p>
               <button
-                onClick={() => setAIStep("buy")}
+                onClick={() => setStep("buy")}
                 className="uppercase underline text-tertiary font-bold max-[440px]:hidden"
               >
                 Edit
               </button>
             </div>
             <div className="flex-col flex gap-2 w-full">
-              {/* {txnOverview.map((item) => (
+              {txnOverview.map((item) => (
                 <div
                   key={item.label}
                   className="w-full flex items-center justify-between border-b border-dashed pb-[14px]"
                 >
                   <p className="text-sm font-bold">{item.label}</p>
                   <p>
-                    {item.label === "Amount of AI-Credits"
+                    {item.label === "Amount of Pollcoins"
                       ? item.value
                       : `$${item.value}`}
                   </p>
                 </div>
-              ))} */}
-              {(selectedOption === "Coin only"
+              ))}
+              {/* {(selectedOption === "Coin only"
                 ? txnOverview.slice(0, 2)
                 : txnOverview
               ).map((item) => (
@@ -249,17 +240,16 @@ export function CheckoutDialog() {
                       : `$${item.value}`}
                   </p>
                 </div>
-              ))}
+              ))} */}
             </div>
             <div className="w-full flex items-center justify-between pt-4 mt-6">
               <p className="text-base font-bold">Total</p>
               <p className="text-base font-bold">
-                {/* {txnOverview
-                  .filter((item) => item.label !== "Amount of AI-Credits")
+                $
+                {txnOverview
+                  .filter((item) => item.label !== "Amount of Pollcoins")
                   .reduce((acc, item) => acc + Number(item.value), 0)
-                  .toFixed(2)}{" "} */}
-                {aiAmount}
-                coins
+                  .toFixed(2)}{" "}
               </p>
             </div>
           </div>
@@ -277,7 +267,7 @@ export function CheckoutDialog() {
 
           <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden gap-6">
             <Button
-              onClick={() => setAIStep("buy")}
+              onClick={() => setStep("buy")}
               variant="outline"
               size="lg"
               className="w-1/2 text-sec-text"
@@ -315,7 +305,7 @@ const PaymentOptions = ({
     <button
       onClick={onClick}
       className={cn(
-        "border flex-1 py-6 rounded-[5px] transition-all duration-300 ease-in-out w-",
+        "border flex-1 py-6 rounded-[5px] transition-all duration-300 ease-in-out",
         {
           "border-[#D195FCCC]": isActive,
           "hover:border-[#D195FCCC]": !isActive,
