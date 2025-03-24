@@ -1,44 +1,110 @@
-import React from 'react';
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstanceWithoutToken from "@/lib/axios-instance-without-token";
 
-const PricingTable: React.FC = () => {
+const PricingTableSkeleton = () => {
   return (
     <div className="container mx-auto px-4 py-8 overflow-x-auto">
-      <h2 className="text-2xl font-semibold text-center mb-8">Compare Our Plans</h2>
+      <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mx-auto mb-8"></div>
+      <div className="h-[600px] bg-gray-200 rounded animate-pulse"></div>
+    </div>
+  );
+};
+
+const PricingTable: React.FC = () => {
+  const { data: plansData, isLoading } = useQuery({
+    queryKey: ["plans"],
+    queryFn: async () => {
+      const response = await axiosInstanceWithoutToken.get("/plan");
+      return response.data.data;
+    },
+  });
+
+  if (isLoading) {
+    return <PricingTableSkeleton />;
+  }
+
+  const getFeatureValue = (plan: any, featureName: string) => {
+    const feature = plan.features.find(
+      (f: any) => f.feature_name === featureName
+    );
+    return feature ? "✔️" : "-";
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8 overflow-x-auto">
+      <h2 className="text-2xl font-semibold text-center mb-8">
+        Compare Our Plans
+      </h2>
       <table className="w-full border-collapse border-gray-200">
         <thead>
           <tr className="bg-gray-100">
             <th className="w-1/4 p-4 border border-gray-200 font-semibold text-left"></th>
-            <th className="w-1/4 p-4 border border-gray-200 font-semibold text-center">Basic</th>
-            <th className="w-1/4 p-4 border border-gray-200 font-semibold text-center">Pro</th>
-            <th className="w-1/4 p-4 border border-gray-200 font-semibold text-center">Team</th>
+            {plansData?.map((plan: any) => (
+              <th
+                key={plan._id}
+                className="w-1/4 p-4 border border-gray-200 font-semibold text-center"
+              >
+                {plan.name}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
+          <tr className="bg-white">
+            <td className="p-4 border border-gray-200 text-left font-medium">
+              Monthly Responses
+            </td>
+            {plansData?.map((plan: any) => (
+              <td
+                key={plan._id}
+                className="p-4 border border-gray-200 text-center"
+              >
+                {plan.number_of_monthly_responses}
+              </td>
+            ))}
+          </tr>
+          <tr className="bg-gray-50">
+            <td className="p-4 border border-gray-200 text-left font-medium">
+              Collaborators
+            </td>
+            {plansData?.map((plan: any) => (
+              <td
+                key={plan._id}
+                className="p-4 border border-gray-200 text-center"
+              >
+                {plan.number_of_collaborators}
+              </td>
+            ))}
+          </tr>
           {[
-            { feature: 'Unlimited Access', basic: '✔️', pro: '✔️', team: '✔️' },
-            { feature: 'Account', basic: '1 Account', pro: '1 Account', team: '2 or more' },
-            { feature: '200 Monthly Responses', basic: '200', pro: '10,000', team: 'Unlimited' },
-            { feature: 'AI Survey/Poll Generation', basic: '5 Prompt by month', pro: 'Monthly Access', team: 'Monthly Access' },
-            { feature: 'Data Export (PDF)', basic: 'PDF Only', pro: 'XLS, PDF, PPT', team: 'XLS, PDF, PPT, Power BI' },
-            { feature: 'Add Contributors', basic: '-', pro: 'Up to 4', team: 'Unlimited' },
-            { feature: 'Unlimited Polls and Surveys', basic: '-', pro: '✔️', team: '✔️' },
-            { feature: 'Account Customization', basic: '-', pro: '✔️', team: '✔️' },
-            { feature: 'Offline Data Collection and Analytics', basic: '-', pro: '✔️', team: '✔️' },
-            { feature: 'AI Survey Assistant', basic: '-', pro: '✔️', team: '✔️' },
-            { feature: 'Automatic AI Survey Reporting', basic: '-', pro: '✔️', team: '✔️' },
-            { feature: 'Speech-to-Text Feature', basic: '-', pro: '✔️', team: '✔️' },
-            { feature: 'A/B Testing & Randomization', basic: '-', pro: '-', team: '✔️' },
-            { feature: 'Skip Logic', basic: '-', pro: '-', team: '✔️' },
-            { feature: 'Multilingual Survey Support', basic: '-', pro: '-', team: '✔️' },
-            { feature: 'Early Beta Feature', basic: '-', pro: '-', team: '✔️' },
-            { feature: 'Priority Email Support', basic: '-', pro: '✔️', team: '✔️' },
-            { feature: 'Dedicated Customer Success Manager', basic: '-', pro: '-', team: '✔️' },
-          ].map((row, idx) => (
-            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-              <td className="p-4 border border-gray-200 text-left font-medium">{row.feature}</td>
-              <td className="p-4 border border-gray-200 text-center">{row.basic}</td>
-              <td className="p-4 border border-gray-200 text-center">{row.pro}</td>
-              <td className="p-4 border border-gray-200 text-center">{row.team}</td>
+            "Unlimited Access",
+            "AI Survey/Poll Generation",
+            "Data Export (pdf)",
+            "Unlimited Polls and Surveys",
+            "Account Customization",
+            "Offline Data Collection and Analytics",
+            "AI Survey Assistant",
+            "Automatic AI Survey Reporting",
+            "Speech to Text",
+            "Priority Email Support",
+            "A/B Testing and Radomization",
+            "Skip Logic",
+            "Multilingual Survey",
+            "Dedicated Customer Success Manager",
+          ].map((feature, idx) => (
+            <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+              <td className="p-4 border border-gray-200 text-left font-medium">
+                {feature}
+              </td>
+              {plansData?.map((plan: any) => (
+                <td
+                  key={plan._id}
+                  className="p-4 border border-gray-200 text-center"
+                >
+                  {getFeatureValue(plan, feature)}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
