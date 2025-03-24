@@ -1,9 +1,6 @@
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
-import AppReactQuill from "@/components/common/forms/AppReactQuill";
-import PaginationBtn from "@/components/common/PaginationBtn";
 import StarRating from "@/components/survey/StarRating";
 import ResponseFile from "@/components/ui/VoiceRecorder";
-import VoiceRecorder from "@/components/ui/VoiceRecorder";
 import { RootState } from "@/redux/store";
 import {
   useGetPublicSurveyByIdQuery,
@@ -15,7 +12,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
-import { FaStar } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
@@ -60,9 +56,6 @@ interface FormErrors {
 }
 
 const PublicResponse = () => {
-  const questionText = useSelector(
-    (state: RootState) => state?.survey?.question_text
-  );
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const params = useParams();
   const { data: psId, isLoading: psIdLoading } = useGetPublicSurveyByIdQuery(
@@ -269,10 +262,6 @@ const PublicResponse = () => {
     });
   };
 
-  console.log(textResponses);
-  console.log(selectedOptions);
-
-  console.log(psId);
   const question =
     typeof params?.id === "string" && params.id.startsWith("ps-")
       ? psId
@@ -363,8 +352,6 @@ const PublicResponse = () => {
     }
   };
 
-  console.log(question);
-
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
@@ -421,8 +408,6 @@ const PublicResponse = () => {
       (otherOption) => otherOption.toLowerCase() === option.toLowerCase().trim()
     );
   };
-
-  console.log(question);
 
   // Question rendering with enhanced UI and animations
   const renderQuestion = (quest: any, index: number, theme: string) => {
@@ -484,7 +469,7 @@ const PublicResponse = () => {
                         key={option}
                         variants={fadeInUp}
                         custom={idx}
-                        className="flex items-center font-normal p-3 gap-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="flex items-center font-normal p-3 gap-3 rounded-lg hover:bg-gray-50 transition-colors"
                         style={{
                           fontSize: `${question?.data?.question_text?.size}px`,
                         }}
@@ -513,13 +498,13 @@ const PublicResponse = () => {
                               quest
                             )
                           }
-                          className="w-5 h-5 data-[state=checked]:bg-[#9D50BB] data-[state=checked]:border-[#9D50BB]"
+                          className="size-4 sm:size-5"
                         />
                         <Label
                           htmlFor={`${quest.question}-${option}`}
                           className="flex-1 cursor-pointer font-normal"
                           style={{
-                            fontSize: `${question?.data?.question_text?.size}px`,
+                            fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                           }}
                         >
                           {option}
@@ -563,18 +548,18 @@ const PublicResponse = () => {
                         key={option}
                         variants={fadeInUp}
                         custom={idx}
-                        className="flex items-center p-3 gap-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="flex items-center p-3 gap-3 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <RadioGroupItem
                           value={option}
                           id={`${quest.question}-${option}`}
-                          className="w-5 h-5 data-[state=checked]:bg-[#9D50BB] data-[state=checked]:border-[#9D50BB]"
+                          className="size-4 sm:size-5"
                         />
                         <Label
                           htmlFor={`${quest.question}-${option}`}
                           className="flex-1 cursor-pointer font-normal"
                           style={{
-                            fontSize: `${question?.data?.question_text?.size}px`,
+                            fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                           }}
                         >
                           {option}
@@ -601,11 +586,9 @@ const PublicResponse = () => {
                 );
 
               case "likert_scale":
-                console.log(quest);
-
                 return (
                   <RadioGroup
-                    className="mb-4 bg-[#FAFAFA] w-full p-3 rounded"
+                    className="mb-4 bg-white w-full p-4 sm:p-6 px-0 sm:px-0 rounded-lg transition-all duration-300"
                     onValueChange={(value) =>
                       handleAnswerChange(quest.question, {
                         scale_value: value,
@@ -613,43 +596,53 @@ const PublicResponse = () => {
                     }
                     required={quest.is_required}
                   >
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col md:flex-row justify-between items-stretch gap-2">
                       {quest.options?.map((option: any, idx: number) => (
-                        <div
+                        <motion.div
                           key={idx}
-                          className="flex flex-col items-center gap-2"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.1 }}
+                          className="flex-1 min-w-[100px] flex items-center md:flex-col md:items-center gap-2 p-3 rounded-lg bg-gray-50 sm:bg-transparent hover:bg-gray-50 transition-colors duration-200"
                         >
                           <RadioGroupItem
                             value={option}
                             id={`${quest.question}-${idx}`}
-                            className="mb-1"
+                            className="size-4 sm:size-5 md:mb-1 transition-all duration-200"
                           />
                           <Label
                             htmlFor={`${quest.question}-${idx}`}
-                            className="text-sm text-center font-normal"
+                            className="text-sm md:text-center flex-1 font-normal cursor-pointer transition-colors duration-200 hover:text-[#9D50BB]"
                             style={{
-                              fontSize: `${question?.data?.question_text?.size}px`,
+                              fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                             }}
                           >
                             {option}
                           </Label>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                     {answers[quest.question]?.scale_value &&
                       isOtherOption(answers[quest.question]?.scale_value) && (
-                        <Input
-                          type="text"
-                          placeholder="Please specify"
-                          className="mt-2"
-                          value={answers[quest.question]?.other_value || ""}
-                          onChange={(e) =>
-                            handleAnswerChange(quest.question, {
-                              ...answers[quest.question],
-                              other_value: e.target.value,
-                            })
-                          }
-                        />
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Input
+                            type="text"
+                            placeholder="Please specify"
+                            className="mt-4 transition-all duration-200 focus:ring-[#9D50BB] focus:border-[#9D50BB]"
+                            value={answers[quest.question]?.other_value || ""}
+                            onChange={(e) =>
+                              handleAnswerChange(quest.question, {
+                                ...answers[quest.question],
+                                other_value: e.target.value,
+                              })
+                            }
+                          />
+                        </motion.div>
                       )}
                   </RadioGroup>
                 );
@@ -667,13 +660,13 @@ const PublicResponse = () => {
                       <SelectTrigger
                         className="mb-4 bg-[#FAFAFA] w-full"
                         style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                         }}
                       >
                         <SelectValue
                           placeholder="Select an option"
                           style={{
-                            fontSize: `${question?.data?.question_text?.size}px`,
+                            fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                           }}
                         />
                       </SelectTrigger>
@@ -683,7 +676,7 @@ const PublicResponse = () => {
                             key={option}
                             value={option}
                             style={{
-                              fontSize: `${question?.data?.question_text?.size}px`,
+                              fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                             }}
                           >
                             {option}
@@ -714,7 +707,7 @@ const PublicResponse = () => {
               case "boolean":
                 return (
                   <RadioGroup
-                    className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded"
+                    className="mb-4 flex flex-col w-full p-3 gap-4 sm:gap-5 rounded-lg transition-all duration-300"
                     onValueChange={(value) =>
                       handleAnswerChange(quest.question, {
                         boolean_value: value === "true",
@@ -722,31 +715,33 @@ const PublicResponse = () => {
                     }
                     required={quest.is_required}
                   >
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-3 sm:space-x-4 p-2 sm:p-3 rounded-md transition-colors duration-200 hover:bg-gray-50">
                       <RadioGroupItem
                         value="true"
                         id={`${quest.question}-yes`}
+                        className="size-4 sm:size-5"
                       />
                       <Label
                         htmlFor={`${quest.question}-yes`}
-                        className="font-normal"
+                        className="font-normal cursor-pointer select-none transition-colors duration-200 hover:text-[#5B03B2]"
                         style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                         }}
                       >
                         Yes
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-3 sm:space-x-4 p-2 sm:p-3 rounded-md transition-colors duration-200">
                       <RadioGroupItem
                         value="false"
                         id={`${quest.question}-no`}
+                        className="size-4 sm:size-5"
                       />
                       <Label
                         htmlFor={`${quest.question}-no`}
-                        className="font-normal"
+                        className="font-normal cursor-pointer select-none transition-colors duration-200 hover:text-[#5B03B2]"
                         style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                         }}
                       >
                         No
@@ -783,7 +778,7 @@ const PublicResponse = () => {
                           })
                         }
                         style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                         }}
                       />
                     ) : (
@@ -809,7 +804,7 @@ const PublicResponse = () => {
                         })
                       }
                       style={{
-                        fontSize: `${question?.data?.question_text?.size}px`,
+                        fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                       }}
                     />
                   </div>
@@ -817,13 +812,15 @@ const PublicResponse = () => {
 
               case "star_rating":
                 return (
-                  <StarRating
-                    question={quest.question}
-                    options={quest.options}
-                    handleAnswerChange={handleAnswerChange}
-                    selectedValue={answers[quest.question]?.scale_value || ""}
-                    required={quest.is_required}
-                  />
+                  <div className="px-4">
+                    <StarRating
+                      question={quest.question}
+                      options={quest.options}
+                      handleAnswerChange={handleAnswerChange}
+                      selectedValue={answers[quest.question]?.scale_value || ""}
+                      required={quest.is_required}
+                    />
+                  </div>
                 );
 
               case "rating_scale":
@@ -846,12 +843,13 @@ const PublicResponse = () => {
                           <RadioGroupItem
                             value={option}
                             id={`${quest.question}-${idx}`}
+                            className="size-4 sm:size-5 md:mb-1 transition-all duration-200"
                           />
                           <Label
                             htmlFor={`${quest.question}-${idx}`}
                             className="font-normal"
                             style={{
-                              fontSize: `${question?.data?.question_text?.size}px`,
+                              fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                             }}
                           >
                             {option}
@@ -889,6 +887,9 @@ const PublicResponse = () => {
                             <th
                               key={col}
                               className="p-3 text-center font-medium text-gray-600"
+                              style={{
+                                fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
+                              }}
                             >
                               {col}
                             </th>
@@ -898,7 +899,14 @@ const PublicResponse = () => {
                       <tbody>
                         {quest.rows?.map((row: any) => (
                           <tr key={row} className="border-b border-gray-100">
-                            <td className="p-3 text-gray-700">{row}</td>
+                            <td
+                              className="p-3 text-gray-700"
+                              style={{
+                                fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
+                              }}
+                            >
+                              {row}
+                            </td>
                             {quest.columns?.map((col: any) => (
                               <td key={col} className="p-3">
                                 <div className="flex justify-center">
@@ -918,7 +926,7 @@ const PublicResponse = () => {
                                           "checkbox"
                                         )
                                       }
-                                      className="h-5 w-5"
+                                      className="size-4 sm:size-5"
                                     />
                                   ) : (
                                     <Checkbox
@@ -936,7 +944,7 @@ const PublicResponse = () => {
                                           "radio"
                                         )
                                       }
-                                      className="h-5 w-5"
+                                      className="size-4 sm:size-5"
                                     />
                                   )}
                                 </div>
@@ -965,11 +973,33 @@ const PublicResponse = () => {
                       className="w-full"
                     />
                     <div className="flex justify-between mt-2 text-sm text-gray-600">
-                      <span>{quest.min}</span>
-                      <span>
-                        {Math.floor((quest.max - quest.min) / 2) + quest.min}
-                      </span>
-                      <span>{quest.max}</span>
+                      {/* Generate markers at meaningful intervals */}
+                      {[...Array(11)].map((_, i) => {
+                        const value =
+                          quest.min + ((quest.max - quest.min) / 10) * i;
+                        return (
+                          <div
+                            key={i}
+                            className="flex flex-col items-center"
+                            style={{
+                              width: "2px",
+                              position: "relative",
+                            }}
+                          >
+                            <div className="h-2 w-[2px] bg-gray-300"></div>
+                            {i % 2 === 0 && ( // Show numbers at every other marker
+                              <span
+                                style={{
+                                  fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
+                                  marginTop: "4px",
+                                }}
+                              >
+                                {Math.round(value)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -988,7 +1018,7 @@ const PublicResponse = () => {
                       })
                     }
                     style={{
-                      fontSize: `${question?.data?.question_text?.size}px`,
+                      fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
                     }}
                   />
                 );
@@ -1034,12 +1064,17 @@ const PublicResponse = () => {
     }
   };
 
-  console.log();
+  // Add type guard helper
+  const isFetchBaseQueryError = (
+    error: any
+  ): error is { data: { message: string } } => {
+    return "data" in error;
+  };
 
   return (
     <div className={`flex flex-col gap-5 w-full`}>
       {(psIdLoading || psShUrLoading) && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div className="relative w-32 h-32">
               <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl animate-pulse" />
@@ -1172,54 +1207,56 @@ const PublicResponse = () => {
         <div>
           {question?.data && (
             <div
-              className={`${question?.data?.theme} min-h-screen flex justify-center px-5 bg-fixed lg:px-16 mx-auto gap-10 w-full`}
+              className={`${question?.data?.theme} min-h-screen flex justify-center px-5 bg-fixed lg:px-16 mx-auto gap-10 w-full relative z-20 bg-gray-50`}
             >
               <form
                 onSubmit={handleSubmitResponse}
-                className={` flex flex-col overflow-y-auto custom-scrollbar w-full max-w-screen-lg`}
+                className={`flex flex-col overflow-y-auto custom-scrollbar w-full max-w-screen-lg`}
               >
                 {question?.data?.logo_url && (
-                  <div className="bg-gray-100 w-16 rounded my-5 text-white flex items-center flex-col ">
+                  <div className="bg-gray-100 w-16 sm:w-20 md:w-24 rounded my-3 sm:my-4 md:my-5 text-white flex items-center flex-col">
                     <Image
                       src={question?.data?.logo_url}
-                      alt=""
-                      className="w-full object-cover rounded bg-no-repeat h-16"
-                      width={"100"}
-                      height={"200"}
+                      alt="Survey Logo"
+                      className="w-full object-cover rounded bg-no-repeat h-16 sm:h-20 md:h-24"
+                      width={100}
+                      height={100}
+                      priority
                     />
                   </div>
                 )}
                 {question?.data?.header_url && (
-                  <div className="bg-gray-100 rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+                  <div className="bg-gray-100 rounded-lg w-full my-3 sm:my-4 text-white h-16 sm:h-20 md:h-24 flex items-center flex-col">
                     <Image
                       src={question?.data?.header_url}
-                      alt=""
-                      className="w-full object-cover bg-no-repeat h-24 rounded-lg"
-                      width={"100"}
-                      height={"200"}
+                      alt="Survey Header"
+                      className="w-full object-cover bg-no-repeat h-full rounded-lg"
+                      width={800}
+                      height={200}
+                      priority
                     />
                   </div>
                 )}
 
-                <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
+                <div className="bg-white rounded-lg w-full my-3 sm:my-4 flex gap-2 px-4 sm:px-8 md:px-11 py-3 sm:py-4 flex-col">
                   <h2
                     className={cn(
-                      "text-[1.5rem] font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+                      "font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
                       getFontClass(question?.data?.header_text?.name)
                     )}
                     style={{
-                      fontSize: `${question?.data?.header_text?.size}px`,
+                      fontSize: `clamp(1.25rem, ${question?.data?.header_text?.size}px, 2rem)`,
                     }}
                   >
                     {question?.data?.topic}
                   </h2>
                   <p
                     className={cn(
-                      "text-gray-600 leading-relaxed",
+                      "text-gray-600",
                       getFontClass(question?.data?.body_text?.name)
                     )}
                     style={{
-                      fontSize: `${question?.data?.body_text?.size}px`,
+                      fontSize: `clamp(0.875rem, ${question?.data?.body_text?.size}px, 1.125rem)`,
                     }}
                   >
                     {question?.data?.description}
@@ -1228,19 +1265,23 @@ const PublicResponse = () => {
 
                 <div
                   className={cn(
-                    "flex flex-col gap-2 w-full bg-white px-11 py-4 rounded-lg mb-4",
+                    "flex flex-col gap-2 w-full bg-white px-4 sm:px-8 md:px-11 py-3 sm:py-4 rounded-lg mb-4",
                     getFontClass(question?.data?.body_text?.name)
                   )}
                 >
                   {question?.data?.settings?.collect_email_addresses && (
                     <div className="flex flex-col w-full">
-                      <Label htmlFor="full name" className="">
+                      <Label
+                        htmlFor="full_name"
+                        className="text-sm sm:text-base mb-1"
+                      >
                         Full name{" "}
                         <span className="text-red-500 text-base">*</span>
                       </Label>
                       <Input
+                        id="full_name"
                         type="text"
-                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none"
+                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
                         required
                         onChange={(e) => setRespondent_name(e.target.value)}
                         value={respondent_name}
@@ -1248,13 +1289,17 @@ const PublicResponse = () => {
                     </div>
                   )}
                   {question?.data?.settings?.collect_name_of_respondents && (
-                    <div className="flex flex-col w-full">
-                      <Label htmlFor="full name" className="">
+                    <div className="flex flex-col w-full mt-3 sm:mt-4">
+                      <Label
+                        htmlFor="email"
+                        className="text-sm sm:text-base mb-1"
+                      >
                         Email <span className="text-red-500 text-base">*</span>
                       </Label>
                       <Input
+                        id="email"
                         type="email"
-                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none "
+                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
                         required
                         onChange={(e) => setRespondent_email(e.target.value)}
                         value={respondent_email}
@@ -1312,6 +1357,64 @@ const PublicResponse = () => {
             </div>
           )}
         </div>
+      )}
+      {(errorSubmitting || psId?.error || psShortUrl?.error) && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full mx-4 shadow-[0_0_50px_rgba(255,0,0,0.25)] border border-red-100"
+          >
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl" />
+                <svg
+                  className="w-12 h-12 text-red-500 relative z-10"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900">Error</h3>
+              <p className="text-gray-600">
+                {(isFetchBaseQueryError(errorSubmitting)
+                  ? errorSubmitting.data.message
+                  : null) ||
+                  (isFetchBaseQueryError(psId?.error)
+                    ? psId.error.data.message
+                    : null) ||
+                  (isFetchBaseQueryError(psShortUrl?.error)
+                    ? psShortUrl.error.data.message
+                    : null) ||
+                  "An unexpected error occurred. Please try again later."}
+              </p>
+              <Button
+                onClick={() => router.refresh()}
+                className="mt-4 bg-red-500 hover:bg-red-600 text-white"
+              >
+                Try Again
+              </Button>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );
