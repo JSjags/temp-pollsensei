@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/shadcn-input";
 import React, { useEffect } from "react";
 import { useShopStore } from "../../../store/useShopStore";
 import { Dialog } from "@/components/ui/new-dialog";
+import { useDailyRate } from "@/components/shop/queries/useDailyRate";
 
 export function BuyFirstStep() {
   const {
@@ -15,6 +16,10 @@ export function BuyFirstStep() {
     clearPollError,
     setPollStep,
   } = useShopStore();
+  const { data: dailyRate, isLoading, isError } = useDailyRate();
+
+  console.log(dailyRate, 'daily');
+  
 
   const RATE = 5;
 

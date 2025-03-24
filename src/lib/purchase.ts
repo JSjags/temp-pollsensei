@@ -1,32 +1,52 @@
-// // lib/api/purchase.ts
-// export async function purchasePollcoins({ amount }: { amount: number }) {
-//     const res = await fetch("/api/v1/purchases/pollcoins/purchase", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ amount }),
-//     });
 
+import { useMutation } from "@tanstack/react-query";
 import axiosInstance from "./axios-instance";
-import axiosInstanceWithoutToken from "./axios-instance-without-token";
+import rawAxiosInstance from "./rawAxiosInstance";
 
-  
-//     if (!res.ok) {
-//       const errorData = await res.json();
-//       throw new Error(errorData.message || "Failed to initiate purchase");
-//     }
-  
-//     return res.json();
-//   }
-  // lib/api/purchase.ts
+type PurchasePayload = {
+  paymentGateway: "paystack" | "stripe";
+  currency: "NGN" | "USD";
+  amount: number;
+  pollcoins: number; // Number of pollcoins to purchase
+  orderReferenceId: string;
+};
 
+type PurchaseResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    purchase: {
+      id: string;
+      amount: number;
+      pollcoins: number;
+      bonusCoins: number;
+      status: string;
+    };
+    payment: {
+      authorization_url: string;
+      access_code: string;
+      reference: string;
+    };
+  };
+};
 
-export async function purchasePollcoins({ amount }: { amount: number }) {
-  const response = await axiosInstanceWithoutToken.post("/purchases/pollcoins/purchase", {
-    amount,
+export const usePollcoinPurchase = () => {
+  return useMutation({
+    mutationFn: async (payload: PurchasePayload) => {
+      const res = await rawAxiosInstance.post<PurchaseResponse>(
+        "/purchases/pollcoins/purchase",
+        {
+
+          ...payload,
+          // Ensure amount is a number rather than a string
+          amount: Number(payload.amount),
+          // Make sure pollcoins is included
+          pollcoins: Number(payload.pollcoins)
+        }
+      );
+      console.log(res.data);
+      
+      return res.data;
+    },
   });
-
-  // axios interceptor already unwraps .data
-  return response;
-}
+};

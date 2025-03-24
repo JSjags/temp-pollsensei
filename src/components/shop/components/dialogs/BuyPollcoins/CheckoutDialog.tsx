@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useShopStore } from "../../../store/useShopStore";
 import Image from "next/image";
 import { LockIcon, PaystackLogo, StripeLogo, VisaLogo } from "@/assets/images";
@@ -7,7 +7,10 @@ import { Input } from "@/components/ui/shadcn-input";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/new-dialog";
 import { useMutation } from "@tanstack/react-query";
-import { purchasePollcoins } from "@/lib/purchase";
+import { usePollcoinPurchase } from "@/lib/purchase";
+import { toast } from "react-toastify";
+import { usePollcoinOrderSummary } from "@/components/shop/queries/usePollcoinsPurchase";
+
 
 const PaymentOptionsData = [
   {
@@ -33,37 +36,13 @@ export function CheckoutDialog() {
   const [mobileView, setMobileView] = useState<"details" | "overview">(
     "overview"
   );
+  const { mutate: purchasePollcoins } = usePollcoinPurchase();
+  const { mutateAsync: createOrderSummary } = usePollcoinOrderSummary();
 
-  const { pollAmount, pollcoins, loading, setLoading, setPollStep } = useShopStore();
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      const amount = parseFloat(pollAmount);
-  
-      if (isNaN(amount) || amount <= 0) {
-        throw new Error("Invalid amount");
-      }
-  
-      setLoading(true);
-      return await purchasePollcoins({ amount });
-    },
-    onSuccess: (response) => {
-      const url = response?.data?.payment?.authorization_url;
-      if (url) {
-        window.location.href = url; // Redirect to Paystack
-      } else {
-        throw new Error("No authorization URL returned");
-      }
-    },
-    onError: (error) => {
-      console.error("Payment failed:", error);
-      alert(error.message); // Optional: show toast/UI error
-    },
-    onSettled: () => {
-      setLoading(false);
-    },
-  });
-  
+
+  const { pollAmount, pollcoins, loading, setLoading, setPollStep } =
+    useShopStore();
 
   const txnOverview = [
     {
@@ -97,17 +76,104 @@ export function CheckoutDialog() {
     setSelectedOption("Card");
   };
 
-  const handleCheckout = () => {
-    // setLoading(true);
 
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   setPollStep("success");
-    //   resetLocalState();
-    // }, 5000);
-    mutation.mutate();
+  const handleCheckout = async () => {
+    setLoading(true);
+
+    const amount = parseFloat(pollAmount);
+    const pollcoinsInt = Number(pollcoins);
+
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Invalid amount");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const summary = await createOrderSummary({
+        currency: "NGN",
+        amount,
+        pollcoins: pollcoinsInt,
+      });
+
+      console.log("API Response:", summary); // Log the full response
+
+      // Validate the API response
+      if (
+        !summary ||
+        !summary.success ||
+        !summary.data ||
+        !summary.data.orderSummary
+      ) {
+        console.error("Invalid order summary response. Missing fields:", {
+          summary: !!summary,
+          success: summary?.success,
+          data: summary?.data,
+          orderSummary: summary?.data?.orderSummary,
+        });
+        throw new Error(
+          "Invalid order summary response: Missing required fields"
+        );
+      }
+
+      const orderSummary = summary.data.orderSummary;
+
+      // Validate required fields in orderSummary
+      if (!orderSummary.referenceId || !orderSummary.totalAmount) {
+        console.error("Missing fields in orderSummary:", {
+          referenceId: !!orderSummary.referenceId,
+          totalAmount: !!orderSummary.totalAmount,
+        });
+        throw new Error(
+          "Invalid order summary response: Missing referenceId or totalAmount"
+        );
+      }
+
+      const paymentGateway =
+        selectedOption?.toLowerCase() === "stripe" ? "stripe" : "paystack";
+
+      purchasePollcoins(
+        {
+          paymentGateway,
+          currency: "NGN",
+          amount: orderSummary.totalAmount,
+          pollcoins: pollcoinsInt,
+          orderReferenceId: orderSummary.referenceId,
+        },
+        {
+          onSuccess: (res) => {
+            const url = res?.data?.payment?.authorization_url;
+
+            if (res.success && url) {
+              window.location.href = url;
+              // setPollStep("success");
+              // resetLocalState();
+            } else {
+              toast.error(res.message || "Payment initialization failed");
+              setLoading(false);
+            }
+          },
+          onError: (err: any) => {
+            const errorMessage =
+              err.response?.data?.message ||
+              err.message ||
+              "Failed to initiate payment";
+            console.error("Payment error:", err);
+            toast.error(errorMessage);
+            setLoading(false);
+          },
+        }
+      );
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to create order summary";
+      console.error("Order summary error:", err);
+      toast.error(errorMessage);
+      setLoading(false);
+    }
   };
-
   return (
     <Dialog.Body className="h-full mt-2.5">
       <div className="flex gap-14 h-full max-[440px]:flex-row-reverse">
@@ -348,3 +414,96 @@ const LoadingSpinner = () => {
     </svg>
   );
 };
+
+// const handleCheckout = () => {
+//   // setLoading(true);
+
+//   // setTimeout(() => {
+//   //   setLoading(false);
+//   //   setPollStep("success");
+//   //   resetLocalState();
+//   // }, 5000);
+//   mutation.mutate();
+// };
+
+// const handleCheckout = () => {
+//   setLoading(true);
+//   const amount = parseFloat(pollAmount);
+
+//   // Validate amount
+//   if (isNaN(amount) || amount <= 0) {
+//     toast.error("Invalid amount");
+//     setLoading(false);
+//     return;
+//   }
+//   purchasePollcoins(
+//     {
+//       paymentGateway: selectedOption?.toLowerCase() === "stripe" ? "stripe" : "paystack",
+//       currency: "NGN", // or get this dynamically later
+//       amount: amount,  // Add the amount to the payload
+//     },
+//     {
+//       onSuccess: (res) => {
+//         const redirectUrl = res?.data?.payment.authorization_url;
+//         if (redirectUrl) {
+//           window.location.href = redirectUrl;
+//           setPollStep("success");
+//           resetLocalState();
+//         } else {
+//           toast.error("No payment URL returned.");
+//           setLoading(false);
+//         }
+//       },
+//       onError: (err) => {
+//         toast.error("Failed to initiate payment.");
+//         setLoading(false);
+//       },
+//     }
+//   );
+// };
+// const handleCheckout = () => {
+//   setLoading(true);
+
+//   // Parse amount to ensure it's a number
+//   const amount = parseFloat(pollAmount);
+
+//   // Validate amount
+//   if (isNaN(amount) || amount <= 0) {
+//     toast.error("Invalid amount");
+//     setLoading(false);
+//     return;
+//   }
+
+//   purchasePollcoins(
+//     {
+//       paymentGateway: selectedOption?.toLowerCase() === "stripe" ? "stripe" : "paystack",
+//       currency: "NGN", // or get this dynamically later
+//       amount: amount,  // Add the amount to the payload
+//       pollcoins: Number(pollcoins), // Add the number of pollcoins from the store
+//     },
+//     {
+//       onSuccess: (res) => {
+//         if (res.success && res.data?.payment?.authorization_url) {
+//           // Redirect to payment gateway
+//           window.location.href = res.data.payment.authorization_url;
+
+//           // These will only execute if the redirect is blocked
+//           setPollStep("success");
+//           resetLocalState();
+//         } else {
+//           toast.error(res.message || "Payment initialization failed");
+//           setLoading(false);
+//         }
+//       },
+//       onError: (err: any) => {
+//         // Improved error handling
+//         const errorMessage = err.response?.data?.message ||
+//                             err.message ||
+//                             "Failed to initiate payment";
+//         console.error("Payment error:", err);
+//         toast.error(errorMessage);
+//         setLoading(false);
+//       },
+//     }
+//   );
+// };
