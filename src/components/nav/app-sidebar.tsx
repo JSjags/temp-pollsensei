@@ -45,11 +45,11 @@ const items = [
   //   url: "/payouts",
   //   icon: "/assets/sidebar/payouts.svg",
   // },
-  // {
-  //   title: "Referrals",
-  //   url: "/referrals",
-  //   icon: "/assets/sidebar/referrals.svg",
-  // },
+  {
+    title: "Referrals",
+    url: "/referrals",
+    icon: "/assets/sidebar/referrals.svg",
+  },
   {
     title: "Learning Hub",
     url: "/learning-hub",

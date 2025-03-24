@@ -32,6 +32,7 @@ const config = {
         "sec-bg": "hsl(var(--new-sec-bg))",
         "sec-text": "hsl(var(--sec-text))",
         "new-tertiary": "hsl(var(--new-tertiary))",
+        "new-elements": "hsl(var(--new-elements))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

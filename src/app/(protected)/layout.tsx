@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/nav/app-sidebar";
 import { NavigationWrapper } from "@/components/navbar/NavigationWrapper";
 
+
 export default function ProtectedLayout({
   children,
 }: {

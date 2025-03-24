@@ -21,9 +21,9 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, message }) => {
 
   const logoutMessage = message || "You must be logged in to access this page.";
 
-  if (process.env.NODE_ENV === "development") {
-    return <>{children}</>;
-  }
+  // if (process.env.NODE_ENV === "development") {
+  //   return <>{children}</>;
+  // }
 
   console.log(isLoggedIn);
 

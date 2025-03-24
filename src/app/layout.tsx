@@ -11,6 +11,8 @@ import {
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import Script from "next/script";
 import type { NextFontWithVariable } from "next/dist/compiled/@next/font";
 import { cn } from "@/lib/utils";

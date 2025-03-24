@@ -31,7 +31,7 @@ export function TableLayout<T>({
     }
   }, [selectedOption, table]);
   return (
-    <div className="flex flex-col w-full mt-10 max-md:px-5">
+    <div className="flex flex-col w-full mt-10">
       <div className="flex items-center justify-between mt-[29px] mb-[51px] max-md:flex-col max-md:gap-4">
         <div className="flex items-center max-md:justify-between max-md:w-full">
           <p className="text-xl font-bold">Transaction History</p>
@@ -42,8 +42,8 @@ export function TableLayout<T>({
           )}
         </div>
 
-        <div className="md:flex items-center justify-between md:w-[55%] w-full">
-          <div className="flex items-center md:gap-[22.5px] gap-3">
+        <div className="md:flex items-center justify-between gap-6 max-md:w-full">
+          <div className="flex items-center md:gap-[22.5px] gap-3 flex-wrap">
             {["All", "Credit", "Debit", "Completed", "Pending"].map(
               (option) => (
                 <div
