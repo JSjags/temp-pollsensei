@@ -9,7 +9,7 @@ import BuyRespondent from "@/components/shop/components/dialogs/BuyRespondent/Bu
 
 export function InAppPurchases() {
   return (
-    <div className="mt-10 flex-col gap-5 flex max-md:px-5">
+    <div className="mt-10 flex-col gap-5 flex">
       <p className="text-xl font-bold">In-app Purchases</p>
       <div className="flex md:items-stretch gap-[14px] h-full">
         <BuyRespondent />
@@ -21,7 +21,7 @@ export function InAppPurchases() {
           <div className="flex flex-col items-center justify-center">
             <BuyAICredit>
               <Button variant="gradient" className="h-[25px] gap-1 text-xs">
-                AI-Credit <Image src={Arrow} alt="icons" className="size-4" />
+                Respondents <Image src={Arrow} alt="icons" className="size-4" />
               </Button>
             </BuyAICredit>
           </div>

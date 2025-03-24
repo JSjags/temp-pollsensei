@@ -56,7 +56,6 @@ export function TableLayout<T>({
     useState<FilterConfig<string, string | null>>(defaultFilter);
   const disabled = table.getRowModel().rows.length === 0;
 
-
   const filterColumns = useMemo(() => {
     const columns = new Set<string>();
     filters.forEach((filter) => {

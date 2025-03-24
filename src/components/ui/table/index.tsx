@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 import { ScrollArea } from "../scrollarea";
+import { Skeleton } from "../skeleton";
 
 type TableProps<T> = {
   table: ReactTable<T>;
@@ -42,7 +43,7 @@ export function Table<T>({
         <ScrollArea.Root>
           <table className="w-full">
             {isLoading ? (
-              <Skeleton />
+              <SkeletonEl />
             ) : (
               <>
                 <thead>
@@ -53,7 +54,7 @@ export function Table<T>({
                           key={header.id}
                           className={cn(
                             "h-9 px-3 text-sm text-new-muted-foreground bg-special-bg font-normal text-left align-middle font-sans whitespace-nowrap",
-                            "first:sticky first:left-0 first:bg-special-bg first:pl-6 first:z-10 first:rounded-l-md last:rounded-r-md",
+                            "first:sticky first:left-0 first:bg-[#F7F8FB] first:pl-6 first:z-10 first:rounded-l-md last:rounded-r-md",
                             "md:last:sticky md:last:right-0 md:last:bg-special-bg md:last:z-10"
                           )}
                         >
@@ -103,7 +104,7 @@ export function Table<T>({
                           }}
                           className={cn(
                             "group/row h-16 hover:bg-table-hover",
-                            "first:sticky first:left-0 first:pl-3 first:z-10 group-first/row:hover:bg-table-hover",
+                            "first:sticky first:left-0 max-md:first:bg-[#FEF5FED6] first:pl-3 first:z-10 group-first/row:hover:bg-table-hover",
                             "md:last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl"
                           )}
                         >
@@ -127,22 +128,16 @@ export function Table<T>({
   );
 }
 
-function Skeleton() {
+function SkeletonEl() {
   return (
     <div>
       <div className="flex w-full justify-between gap-4 p-4 border-b border-b-border">
-        <div className={cn("skeleton-el", "mt-4 !rounded-lg !w-full !h-7")} />
+        <Skeleton className="h-7 w-full" />
       </div>
 
-      <div className="flex flex-col pt-2 p-4 w-full">
+      <div className="flex flex-col gap-1 pt-2 p-4 w-full">
         {Array.from({ length: 5 }, (_, index) => (
-          <div
-            key={index}
-            className={cn(
-              "skeleton-el",
-              "!rounded-[14px] mt-4 !h-[64px] !w-full"
-            )}
-          />
+          <Skeleton key={index} className="h-16 w-full" />
         ))}
       </div>
     </div>

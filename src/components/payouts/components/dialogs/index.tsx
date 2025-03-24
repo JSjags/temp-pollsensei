@@ -1,14 +1,16 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog } from "@/components/ui/new-dialog";
 import { FirstStep } from "./FirstStep";
 import { usePayoutStore } from "../../store/usePayoutStore";
 import { CheckoutDialog } from "./CheckoutDialog";
 import { SuccessDialog } from "./SuccessDialog";
+import Redeemable from "@/components/shop/components/dialogs/Redeemable";
 
 type BuyDialogProps = {
   children: ReactNode;
 };
+
 export function PayoutDialog({ children }: BuyDialogProps) {
   const {
     dialogOpen,
@@ -18,23 +20,33 @@ export function PayoutDialog({ children }: BuyDialogProps) {
     coinAmount,
     coinQuantity,
     reset,
+    redeemableCoins,
+    threshold,
   } = usePayoutStore();
-  const description = `You have successfully converted and withdrawn ${coinQuantity} coins ~ $${coinAmount}`;
-  let DialogStepComponent = null;
 
-  switch (step) {
-    case "buy":
-      DialogStepComponent = <FirstStep />;
-      break;
-    case "checkout":
-      DialogStepComponent = <CheckoutDialog />;
-      break;
-    case "success":
-      DialogStepComponent = <SuccessDialog successMessage={description} />;
-      break;
-    default:
-      DialogStepComponent = <FirstStep />;
+  const description = `You have successfully converted and withdrawn ${coinQuantity} coins ~ $${coinAmount}`;
+
+  let DialogStepComponent: React.ReactNode;
+  const desc =
+    "Your redeemable coins has not reached the transfer minimum of 50 coins. Refer friends to Earn more redeemable coins";
+  if (redeemableCoins < threshold) {
+    DialogStepComponent = <Redeemable desc={desc} />;
+  } else {
+    switch (step) {
+      case "buy":
+        DialogStepComponent = <FirstStep />;
+        break;
+      case "checkout":
+        DialogStepComponent = <CheckoutDialog />;
+        break;
+      case "success":
+        DialogStepComponent = <SuccessDialog successMessage={description} />;
+        break;
+      default:
+        DialogStepComponent = <FirstStep />;
+    }
   }
+
   return (
     <Dialog.Root
       open={dialogOpen}
