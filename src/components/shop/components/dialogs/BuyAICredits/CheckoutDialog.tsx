@@ -13,14 +13,14 @@ const PaymentOptionsData = [
     label: "Coin only",
     src: Coin,
   },
-  {
-    label: "Coin + Card",
-    src: CoinCard,
-  },
-  {
-    label: "Paystack",
-    src: PaystackLogo,
-  },
+  // {
+  //   label: "Coin + Card",
+  //   src: CoinCard,
+  // },
+  // {
+  //   label: "Paystack",
+  //   src: PaystackLogo,
+  // },
 ];
 
 export function CheckoutDialog() {
@@ -98,7 +98,7 @@ export function CheckoutDialog() {
             </p>
             <Image src={LockIcon} alt="lock icon" />
           </div>
-          <div className="flex items-center justify-between gap-2 border-b pb-4">
+          <div className="flex items-center justify-between gap-2 border-b pb-4 w-[10vw]">
             {PaymentOptionsData.map((option) => (
               <PaymentOptions
                 {...option}
@@ -111,7 +111,7 @@ export function CheckoutDialog() {
 
           <div className="flex flex-col h-full">
             <AnimatePresence mode="wait">
-              {selectedOption !== "Coin only" && (
+              {/* {selectedOption !== "Coin only" && (
                 <motion.form
                   key="card-form"
                   initial={{ opacity: 0 }}
@@ -187,7 +187,7 @@ export function CheckoutDialog() {
                     </div>
                   </div>
                 </motion.form>
-              )}
+              )} */}
             </AnimatePresence>
             <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
               <Button
@@ -315,7 +315,7 @@ const PaymentOptions = ({
     <button
       onClick={onClick}
       className={cn(
-        "border flex-1 py-6 rounded-[5px] transition-all duration-300 ease-in-out",
+        "border flex-1 py-6 rounded-[5px] transition-all duration-300 ease-in-out w-",
         {
           "border-[#D195FCCC]": isActive,
           "hover:border-[#D195FCCC]": !isActive,

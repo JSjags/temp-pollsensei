@@ -1,40 +1,109 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Table } from "@tanstack/react-table";
 import { Checkbox } from "@/components/shop/components/Checkbox";
 import Link from "next/link";
 import { Columns } from "./columns";
 import { cn } from "@/lib/utils";
+import { HistoryStatus, HistoryType } from "@/components/shop/types";
+
+export type FilterConfig<
+  ColumnType extends string,
+  ValueType extends string | null
+> = {
+  label: string;
+  value: ValueType;
+  column: ColumnType | null;
+  isDefault?: boolean;
+};
+
+type TransactionFilterValue = HistoryType | HistoryStatus | "All";
 
 type TableLayoutProps<T> = {
   title?: string;
   children: React.ReactNode;
   table: Table<T>;
+  renderSeeAll?: boolean;
+  filters?: FilterConfig<string, string | null>[];
+  onFilterChange?: (
+    selectedFilter: FilterConfig<string, string | null>,
+    table: Table<T>
+  ) => void;
+  seeAllLink?: string;
 };
+
+const defaultTransactionFilters: FilterConfig<
+  "type" | "status",
+  TransactionFilterValue | null
+>[] = [
+  { label: "All", value: "All", column: null, isDefault: true },
+  { label: "Credit", value: "Credit", column: "type" },
+  { label: "Debit", value: "Debit", column: "type" },
+  { label: "Completed", value: "Completed", column: "status" },
+  { label: "Pending", value: "Pending", column: "status" },
+];
+
 export function TableLayout<T>({
   title,
   children,
   table,
+  filters = defaultTransactionFilters as FilterConfig<string, string | null>[],
+  onFilterChange,
+  renderSeeAll = false,
+  seeAllLink = "#",
 }: TableLayoutProps<T>) {
-  const [selectedOption, setSelectedOption] = useState("All");
+  const defaultFilter = filters.find((f) => f.isDefault) || filters[0];
+  const [selectedFilter, setSelectedFilter] =
+    useState<FilterConfig<string, string | null>>(defaultFilter);
   const disabled = table.getRowModel().rows.length === 0;
 
+  const filterColumns = useMemo(() => {
+    const columns = new Set<string>();
+    filters.forEach((filter) => {
+      if (filter.column !== null) {
+        columns.add(filter.column);
+      }
+    });
+    return Array.from(columns);
+  }, [filters]);
+  const lastFilterRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (selectedOption === "All") {
-      table.getColumn("type")?.setFilterValue(undefined);
-      table.getColumn("status")?.setFilterValue(undefined);
-    } else if (selectedOption === "Credit" || selectedOption === "Debit") {
-      table.getColumn("type")?.setFilterValue(selectedOption);
-      table.getColumn("status")?.setFilterValue(undefined);
-    } else {
-      table.getColumn("status")?.setFilterValue(selectedOption);
-      table.getColumn("type")?.setFilterValue(undefined);
+    const currentValue = selectedFilter.value;
+
+    if (onFilterChange) {
+      if (lastFilterRef.current !== currentValue) {
+        lastFilterRef.current = currentValue;
+        onFilterChange(selectedFilter, table);
+      }
+      return;
     }
-  }, [selectedOption, table]);
+
+    filterColumns.forEach((column) => {
+      const tableColumn = table.getColumn(column);
+      if (tableColumn) {
+        tableColumn.setFilterValue(undefined);
+      }
+    });
+
+    if (selectedFilter.column && selectedFilter.value !== "All") {
+      const column = table.getColumn(selectedFilter.column);
+      if (column) {
+        column.setFilterValue(selectedFilter.value);
+      }
+    }
+  }, [selectedFilter, table, filterColumns, onFilterChange]);
+
+  const handleFilterChange = (filter: FilterConfig<string, string | null>) => {
+    if (!disabled) {
+      setSelectedFilter(filter);
+    }
+  };
+
   return (
-    <div className="flex flex-col w-full mt-10 max-md:px-5">
-      <div className="flex items-center justify-between mt-[29px] mb-[51px] max-md:flex-col max-md:gap-4">
+    <div className="flex flex-col w-full mt-10">
+      <div className="flex md:items-center justify-between mt-[29px] mb-[51px] max-md:flex-col max-md:gap-4">
         <div className="flex items-center max-md:justify-between max-md:w-full">
-          <p className="text-xl font-bold">Transaction History</p>
+          <p className="text-xl font-bold">{title}</p>
           {table.getRowModel().rows.length > 0 && (
             <div className="md:hidden">
               <Columns table={table} />
@@ -42,32 +111,39 @@ export function TableLayout<T>({
           )}
         </div>
 
-        <div className="md:flex items-center justify-between md:w-[55%] w-full">
-          <div className="flex items-center md:gap-[22.5px] gap-3">
-            {["All", "Credit", "Debit", "Completed", "Pending"].map(
-              (option) => (
+        <div className="flex md:justify-end w-1/2 max-md:w-full">
+          <div className="md:flex items-center justify-between w-auto gap-7">
+            <div className="flex md:items-center md:gap-[22.5px] gap-3 flex-wrap">
+              {filters.map((filter) => (
                 <div
-                  onClick={() => setSelectedOption(option)}
-                  key={option}
+                  onClick={() => handleFilterChange(filter)}
+                  key={filter.value}
                   className="flex items-center gap-2"
                 >
                   <Checkbox
                     disabled={disabled}
-                    checked={selectedOption === option}
-                    onCheckedChange={() => setSelectedOption(option)}
+                    checked={selectedFilter.value === filter.value}
+                    onCheckedChange={() => handleFilterChange(filter)}
                   />
                   <label
-                    className={cn("max-md:text-xs", { "opacity-30": disabled })}
+                    className={cn("max-md:text-xs", {
+                      "opacity-30": disabled,
+                    })}
                   >
-                    {option}
+                    {filter.label}
                   </label>
                 </div>
-              )
+              ))}
+            </div>
+            {renderSeeAll && (
+              <Link
+                href={seeAllLink}
+                className="font-bold text-[#5B03B2] max-md:hidden"
+              >
+                <span className="underline">See All</span>
+              </Link>
             )}
           </div>
-          <Link href="#" className="font-bold text-[#5B03B2] max-md:hidden">
-            <span className="underline">See All</span>
-          </Link>
         </div>
       </div>
       <div className="w-full table-auto">{children}</div>

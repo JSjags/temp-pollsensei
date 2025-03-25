@@ -19,10 +19,9 @@ export const Checkbox = React.forwardRef<CheckboxElement, CheckboxProps>(
           "disabled:opacity-25",
           className
         )}
-        defaultChecked
-        ref={ref}
         {...checkboxProps}
         disabled={disabled}
+        ref={ref}
       >
         <CheckboxPrimiteve.Indicator>
           <Image src={Check} alt="checkmark" />

@@ -11,16 +11,8 @@ type TableEmptyStateProps = {
 
 export function TableEmptyState({ children }: TableEmptyStateProps) {
   return (
-    <div className="min-h-[168px] flex items-center justify-center w-full gap-[53px] max-md:flex-col py-12">
-      <Image
-        src={"/assets/shop/table_empty.png"}
-        alt="empty state"
-        width={285}
-        height={220}
-        className="max-w-[285px] w-full"
-      />
-
-      <div className="md:max-w-[223px] max-md:text-center">{children}</div>
+    <div className="min-h-[4vh] flex items-center justify-center w-full gap-[53px] max-md:flex-col py-12">
+      {children}
     </div>
   );
 }

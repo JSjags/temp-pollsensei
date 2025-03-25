@@ -49,7 +49,7 @@ export function Analytics() {
         Sensei Shop
       </h3>
       <div className="flex gap-[22px] w-full max-md:flex-col">
-        <div className="bg-gradient-to-br from-[#9D50BB] via-[#5B03B2] md:min-w-[231px] max-md:w-full text-white to-[#260D3E] px-4 pt-5 md:rounded-[6.8px] pb-2 max-md:pb-0 relative">
+        <div className="bg-gradient-to-br w-auto from-[#9D50BB] via-[#5B03B2] max-md:w-full text-white to-[#260D3E] px-4 pt-5 md:rounded-[6.8px] pb-2 max-md:pb-0 relative">
           <p>Welcome to the</p>
           <h3 className="text-3xl max-md:text-2xl font-bold">Sensei Shop</h3>
           <div className="flex items-center justify-center w-full">
@@ -74,7 +74,7 @@ export function Analytics() {
             <Image src={Coins} alt="icons" />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 w-full max-md:px-5">
+        <div className="grid grid-cols-2 gap-4 w-full">
           {analyticData.map((analytic) => {
             const { label, icon, value, iconColor } = analytic;
             return (
@@ -127,23 +127,6 @@ export function Analytics() {
               </div>
             );
           })}
-        </div>
-        <div className="px-2 relative min-w-[327px] max-md:hidden">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src={"/assets/shop/webp/banner.webp"}
-              alt="banner"
-              layout="fill"
-              objectFit="cover"
-              className="rounded-[10px]"
-            />
-          </div>
-          <div className="bg-[#FFC822CC] w-[282px] z-30 absolute bottom-3 flex items-center justify-center flex-col py-5 text-white">
-            <p className="text-xl font-bold w-[80%]">
-              <span className="font-bold italic text-[25px]">GET 50% OFF</span>{" "}
-              <br /> ON ALL ORDERS FROM TEMU TODAY
-            </p>
-          </div>
         </div>
       </div>
     </div>
