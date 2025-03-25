@@ -1,11 +1,11 @@
-// services/pollcoinService.ts
-
 import axiosInstance from "@/lib/axios-instance";
 
-
 export const fetchDailyRate = async () => {
-  const response = await axiosInstance.get("/purchases/pollcoins/daily-rate");
-  console.log(response.data);
-  
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/purchases/pollcoins/daily-rate");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching daily rate:", error);
+    throw error; // or handle it as appropriate for your use case
+  }
 };

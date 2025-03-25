@@ -21,7 +21,7 @@ export function InAppPurchases() {
           <div className="flex flex-col items-center justify-center">
             <BuyAICredit>
               <Button variant="gradient" className="h-[25px] gap-1 text-xs">
-                Respondents <Image src={Arrow} alt="icons" className="size-4" />
+                Buy AI-Credits <Image src={Arrow} alt="icons" className="size-4" />
               </Button>
             </BuyAICredit>
           </div>

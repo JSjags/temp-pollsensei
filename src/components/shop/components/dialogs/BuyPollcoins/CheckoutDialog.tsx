@@ -77,6 +77,7 @@ export function CheckoutDialog() {
   };
 
 
+  console.log(selectedOption, 'gateway');
   const handleCheckout = async () => {
     setLoading(true);
 
@@ -95,8 +96,7 @@ export function CheckoutDialog() {
         amount,
         pollcoins: pollcoinsInt,
       });
-
-      console.log("API Response:", summary); // Log the full response
+ // Log the full response
 
       // Validate the API response
       if (
@@ -132,6 +132,9 @@ export function CheckoutDialog() {
       const paymentGateway =
         selectedOption?.toLowerCase() === "stripe" ? "stripe" : "paystack";
 
+        console.log(paymentGateway, 'Payemnt Gateway');
+        
+
       purchasePollcoins(
         {
           paymentGateway,
@@ -143,6 +146,8 @@ export function CheckoutDialog() {
         {
           onSuccess: (res) => {
             const url = res?.data?.payment?.authorization_url;
+            console.log(url);
+            
 
             if (res.success && url) {
               window.location.href = url;

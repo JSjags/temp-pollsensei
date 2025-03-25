@@ -1,4 +1,3 @@
-
 import { useMutation } from "@tanstack/react-query";
 import axiosInstance from "./axios-instance";
 import rawAxiosInstance from "./rawAxiosInstance";
@@ -36,16 +35,12 @@ export const usePollcoinPurchase = () => {
       const res = await rawAxiosInstance.post<PurchaseResponse>(
         "/purchases/pollcoins/purchase",
         {
-
           ...payload,
-          // Ensure amount is a number rather than a string
           amount: Number(payload.amount),
-          // Make sure pollcoins is included
-          pollcoins: Number(payload.pollcoins)
+          pollcoins: Number(payload.pollcoins),
         }
       );
-      console.log(res.data);
-      
+
       return res.data;
     },
   });
