@@ -136,7 +136,7 @@ const DashboardPage = () => {
     // console.log({ user });
 
     return (
-      <div className="p-2 w-full mx-auto">
+      <div className="p-2 md:p-6 w-full mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -147,7 +147,10 @@ const DashboardPage = () => {
             <p className="text-lg md:text-4xl text-gray-400">
               Great to have you here!
             </p>
-            <CreateSurveyButton type="dashboard" />
+            <div className="hidden lg:flex">
+              {" "}
+              <CreateSurveyButton type="dashboard" />{" "}
+            </div>
           </div>
 
           <div className="flex items-center gap-3 md:gap-4">
@@ -171,6 +174,10 @@ const DashboardPage = () => {
               Become a Paid Respondent
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
+          </div>
+          <div className="flex lg:hidden">
+            {" "}
+            <CreateSurveyButton type="dashboard" />{" "}
           </div>
         </div>
 

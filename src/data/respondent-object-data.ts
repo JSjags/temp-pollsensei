@@ -2,13 +2,13 @@
   /*********** Personal Information data *********/
 }
 export const petOptions = [
-  "dog",
-  "cat",
-  "fish",
-  "rabbit",
-  "bird",
-  "snake",
-  "other",
+  { value: "dog", label: "Dog" },
+  { value: "cat", label: "Cat" },
+  { value: "fish", label: "Fish" },
+  { value: "rabbit", label: "Rabbit" },
+  { value: "bird", label: "Bird" },
+  { value: "snake", label: "Snake" },
+  { value: "other", label: "Other" },
 ];
 
 export const genderOptions = [
@@ -48,31 +48,31 @@ export const dependentsOptions = [
 }
 
 export const languagesOptions = [
-  "Mandarin",
-  "Spanish",
-  "English",
-  "Hindi",
-  "Arabic",
-  "Bengali",
-  "Portuguese",
-  "Russian",
-  "Japanese",
-  "Punjabi",
-  "German",
-  "Javanese",
-  "Wu Chinese (including Shanghainese)",
-  "French",
-  "Turkish",
-  "Vietnamese",
-  "Korean",
-  "Tamil",
-  "Italian",
-  "Urdu",
-  "Persian (Farsi)",
-  "Thai",
-  "Gujarati",
-  "Polish",
-  "Ukrainian",
+  { value: "mandarin", label: "Mandarin" },
+  { value: "spanish", label: "Spanish" },
+  { value: "english", label: "English" },
+  { value: "hindi", label: "Hindi" },
+  { value: "arabic", label: "Arabic" },
+  { value: "bengali", label: "Bengali" },
+  { value: "portuguese", label: "Portuguese" },
+  { value: "russian", label: "Russian" },
+  { value: "japanese", label: "Japanese" },
+  { value: "punjabi", label: "Punjabi" },
+  { value: "german", label: "German" },
+  { value: "javanese", label: "Javanese" },
+  { value: "wu_chinese", label: "Wu Chinese (including Shanghainese)" },
+  { value: "french", label: "French" },
+  { value: "turkish", label: "Turkish" },
+  { value: "vietnamese", label: "Vietnamese" },
+  { value: "korean", label: "Korean" },
+  { value: "tamil", label: "Tamil" },
+  { value: "italian", label: "Italian" },
+  { value: "urdu", label: "Urdu" },
+  { value: "persian", label: "Persian (Farsi)" },
+  { value: "thai", label: "Thai" },
+  { value: "gujarati", label: "Gujarati" },
+  { value: "polish", label: "Polish" },
+  { value: "ukrainian", label: "Ukrainian" },
 ];
 
 export const locationOptions = [
@@ -133,7 +133,7 @@ export const educationLevelOptions = [
   },
 ];
 
-export const employentStatusOptions = [
+export const employmentStatusOptions = [
   { value: "full_time", label: "Employed full-time" },
   { value: "part_time", label: "Employed part-time" },
   { value: "self_employed", label: "Self-employed" },
@@ -248,36 +248,36 @@ export const sleepOptions = [
 }
 
 export const contentOptions = [
-  "News & Current Events",
-  "Entertainment (Movies, TV, Music)",
-  "Educational Content",
-  "Sport & Fitness",
-  "Personal Development",
-  "other",
+  { value: "news", label: "News & Current Events" },
+  { value: "entertainment", label: "Entertainment (Movies, TV, Music)" },
+  { value: "education", label: "Educational Content" },
+  { value: "sport", label: "Sport & Fitness" },
+  { value: "development", label: "Personal Development" },
+  { value: "other", label: "Other (Please specify)" },
 ];
 
 export const platformOptions = [
-  "Facebook",
-  "TikTok",
-  "Instagram",
-  "X (Twitter)",
-  "Whatsapp",
-  "Telegram",
-  "Twitch",
-  "Reddit",
-  "Wechat",
-  "Weibo",
-  "other",
+  { value: "facebook", label: "Facebook" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "instagram", label: "Instagram" },
+  { value: "twitter", label: "X (Twitter)" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "telegram", label: "Telegram" },
+  { value: "twitch", label: "Twitch" },
+  { value: "reddit", label: "Reddit" },
+  { value: "wechat", label: "WeChat" },
+  { value: "weibo", label: "Weibo" },
+  { value: "other", label: "Other (Please specify)" },
 ];
 
 export const browserOptions = [
-  "Chrome",
-  "Microsoft Edge",
-  "Internet Explorer",
-  "Safari",
-  "Brave",
-  "Opera",
-  "other",
+  { value: "chrome", label: "Chrome" },
+  { value: "edge", label: "Microsoft Edge" },
+  { value: "ie", label: "Internet Explorer" },
+  { value: "safari", label: "Safari" },
+  { value: "brave", label: "Brave" },
+  { value: "opera", label: "Opera" },
+  { value: "other", label: "Other (Please specify)" },
 ];
 
 export const internetUsageOptions = [
@@ -361,4 +361,16 @@ export const travelOptions = [
 export const vehicleOwnershipOptions = [
   { value: "yes", label: "Yes" },
   { value: "no", label: "No" },
+];
+
+{
+  /*********** BUY RESPONDENTS *********/
+}
+
+export const surveyOptions = [
+  { value: "client_satifaction", label: "Client Satisfaction Questionnaire" },
+  { value: "product_review", label: "Product Review Survey" },
+  { value: "payment_processing", label: "Payment Processing Survey" },
+  { value: "service_quality", label: "Service Quality Review" },
+  { value: "user_experience", label: "User Experience Assessment" },
 ];

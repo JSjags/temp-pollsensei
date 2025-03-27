@@ -1,3 +1,4 @@
+import { hours } from "@/components/calendar/body/day/calendar-body-margin-day-margin";
 import Joi from "joi";
 import { z } from "zod";
 
@@ -29,17 +30,20 @@ export const joiSchemas = {
   phone: Joi.string().min(11).max(14).required(),
 };
 
+{
+  /***** BECOME A PAID RESPONDENTS *****/
+}
 export const personalInformationSchema = z.object({
   firstName: z.string().min(3, "First Name is required"),
   lastName: z.string().min(3, "Last Name is required"),
   otherName: z.string().optional(),
   email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number is required"),
+  phoneNumber: z.string().min(10, "Phone number is required"),
   gender: z.string().min(1, "Gender is required"),
   otherGender: z.string().optional(),
   maritalStatus: z.string().min(1, "Marital status is required"),
   ageGroup: z.string().min(1, "Age group is required"),
-  dependents: z.string().min(1, "Dependents field is required"),
+  children: z.string().min(1, "Children/Dependents field is required"),
   pets: z.array(z.string()).min(1, "At least one pet is required"),
   otherPet: z.string().optional(),
 });
@@ -113,4 +117,62 @@ export const mobilityAndTravelSchema = z.object({
   otherCommute: z.string().optional(),
   travel: z.string().optional(),
   vehicle: z.string().optional(),
+});
+
+{
+  /***** BUY A PAID RESPONDENTS *****/
+}
+
+export const filterPersonalInformationSchema = z.object({
+  gender: z.array(z.string()).optional(),
+  maritalStatus: z.array(z.string()).optional(),
+  ageGroup: z.array(z.string()).optional(),
+  dependents: z.array(z.string()).optional(),
+  pets: z.array(z.string()).optional(),
+});
+
+export const filterGeographyAndCultureSchema = z.object({
+  location: z.array(z.string()).optional(),
+  region: z.array(z.string()).optional(),
+  ethnicity: z.array(z.string()).optional(),
+});
+
+export const filterEducationAndEmploymentSchema = z.object({
+  education_level: z.array(z.string()).optional(),
+  employment_status: z.array(z.string()).optional(),
+  employment_industry: z.array(z.string()).optional(),
+  job_role: z.array(z.string()).optional(),
+  tech_savvy: z.array(z.string()).optional(),
+});
+
+export const filterHealthAndLifestyleSchema = z.object({
+  health: z.array(z.string()).optional(),
+  health_insurance: z.array(z.string()).optional(),
+  health_condition: z.array(z.string()).optional(),
+});
+
+export const filterTechAndMediaSchema = z.object({
+  internet: z.array(z.string()).optional(),
+  primary_access: z.array(z.string()).optional(),
+  social_media: z.array(z.string()).optional(),
+  content: z.array(z.string()).optional(),
+  platform: z.array(z.string()).optional(),
+  browser: z.array(z.string()).optional(),
+});
+
+export const filterHousingAndLivingSchema = z.object({
+  living_condition: z.array(z.string()).optional(),
+  living_arrangement: z.array(z.string()).optional(),
+  household: z.array(z.string()).optional(),
+});
+
+export const filterMobilityAndTravelSchema = z.object({
+  commute: z.array(z.string()).optional(),
+  travel: z.array(z.string()).optional(),
+  vehicle: z.array(z.string()).optional(),
+});
+
+export const surveySchema = z.object({
+  survey: z.string().min(1, "Select a survey type"),
+  respondentsNumber: z.number().min(1, "Specify the number of respondents"),
 });
