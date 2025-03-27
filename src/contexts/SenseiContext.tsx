@@ -65,7 +65,7 @@ export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
   const user_id = useSelector((state: RootState) => state.user.user?._id);
 
-  console.log(user_id);
+  // console.log(user_id);
 
   const socketRef = useRef<Socket | null>(null);
 
@@ -97,7 +97,7 @@ export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
     socketRef.current = socketIo;
 
     socketIo.on("connect", () => {
-      console.log("Socket connected with user ID:", user_id);
+      // console.log("Socket connected with user ID:", user_id);
       // alert(`Socket connected with user ID:, ${user_id}`);
       setIsConnected(true);
       addMessage(`Connected to server with user ID: ${user_id}`);
@@ -135,7 +135,7 @@ export const SenseiProvider: React.FC<{ children: ReactNode }> = ({
     return () => {
       if (socketIo) {
         socketIo.disconnect();
-        console.log("Socket disconnected");
+        // console.log("Socket disconnected");
       }
     };
   }, [user_id]);

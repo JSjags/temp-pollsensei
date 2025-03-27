@@ -70,7 +70,7 @@ export default function Component() {
 
   useEffect(() => {
     if (data?.data) {
-      console.log(data.data);
+      // console.log(data.data);
 
       setSettings({
         news_and_updates: (data?.data as any)?.notifications[0]
@@ -107,8 +107,8 @@ export default function Component() {
               <div className="space-y-0.5">
                 <Label className="text-base">Email Notification</Label>
                 <p className="text-xs md:text-sm text-muted-foreground">
-                  Get email notifications on what's happening right now. You can
-                  turn it off at any time
+                  Get email notifications on what&apos;s happening right now.
+                  You can turn it off at any time
                 </p>
               </div>
             </div>

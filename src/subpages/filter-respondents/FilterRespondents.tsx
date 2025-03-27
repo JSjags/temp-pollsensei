@@ -22,7 +22,7 @@ const FilterRespondents = () => {
   // Redirect if access is not allowed
   useEffect(() => {
     if (!allowFilterRespondentsAccess) {
-      console.log("Redirecting to /shop");
+      // console.log("Redirecting to /shop");
       redirect("/shop");
     }
   }, [allowFilterRespondentsAccess]);

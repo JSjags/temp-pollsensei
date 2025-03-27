@@ -401,8 +401,8 @@ const DataVisualizationComponent = ({
     );
   };
 
-  console.log(survey);
-  console.log(data);
+  // console.log(survey);
+  // console.log(data);
 
   return (
     <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-10 max-w-">

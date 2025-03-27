@@ -29,10 +29,10 @@ const StateLoader2: React.FC<StateLoader2Props> = ({
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
   );
-  console.log(userRoles);
+  // console.log(userRoles);
 
   const getDestinationRoute = () => {
-    console.log(directRoute);
+    // console.log(directRoute);
 
     if (directRoute) {
       return directRoute;

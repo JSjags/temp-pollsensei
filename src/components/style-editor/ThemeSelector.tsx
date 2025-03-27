@@ -20,7 +20,7 @@ const ThemeSelector = ({ initialTheme, setSurveyData }: ThemeSelectorProps) => {
     { id: "sparkly", image: sparkly, label: "Sparkly" },
   ];
 
-  console.log(initialTheme);
+  // console.log(initialTheme);
 
   const handleThemeChange = (themeId: string) => {
     dispatch(saveTheme(themeId));

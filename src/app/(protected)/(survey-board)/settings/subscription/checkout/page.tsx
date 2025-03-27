@@ -34,7 +34,7 @@ const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
     queryFn: () => getSubscriptionTier(planId!),
   });
 
-  console.log(tierData);
+  // console.log(tierData);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -83,7 +83,7 @@ const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
     );
   }
 
-  console.log(tierData);
+  // console.log(tierData);
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">

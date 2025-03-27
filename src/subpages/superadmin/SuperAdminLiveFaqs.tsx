@@ -27,8 +27,8 @@ const SuperAdminLiveFaqs = () => {
     });
     refetch();
   };
-  console.log(store);
-  console.log(currentPage);
+  // console.log(store);
+  // console.log(currentPage);
 
   const faqItems = [
     {

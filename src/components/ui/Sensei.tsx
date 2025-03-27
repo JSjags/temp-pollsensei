@@ -1,8 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "./button";
 import { Brain, X, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,10 +18,15 @@ type Message = {
 };
 
 const initialMessages: Message[] = [
-  { id: 1, text: "Hello there", sender: "ai", timestamp: new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  }) },
+  {
+    id: 1,
+    text: "Hello there",
+    sender: "ai",
+    timestamp: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  },
   {
     id: 2,
     text: "I'm an automated chatbot here to answer your questions.\n\nPlease pick the best option below to get started.",
@@ -47,10 +48,14 @@ type Props = {
   isOpen: boolean;
   setIsOpen: () => void;
   questionIndex: number | null;
-  currentSection: number
+  currentSection: number;
 };
 
-const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex, currentSection  }) => {
+const Sensei: React.FC<Props> = ({
+  setIsOpen,
+  questionIndex,
+  currentSection,
+}) => {
   const user = useSelector((state: RootState) => state.user.user);
   const questions = useSelector((state: RootState) => state?.survey?.sections);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -92,12 +97,11 @@ const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex, currentSection  }) 
 
       const updatedSections = [...questions];
       const currentSectionData = updatedSections[currentSection];
-      if (questionIndex !== null) {
-        console.log(currentSectionData.questions[questionIndex]);
-      } else {
-        console.log("No question selected");
-      }
-
+      // if (questionIndex !== null) {
+      //   console.log(currentSectionData.questions[questionIndex]);
+      // } else {
+      //   console.log("No question selected");
+      // }
     }
   };
 
@@ -195,7 +199,7 @@ const Sensei: React.FC<Props> = ({ setIsOpen, questionIndex, currentSection  }) 
           ))}
         </div>
         <div className="flex items-center space-x-2 border-t border-border px-2">
-        <AutosizeTextarea
+          <AutosizeTextarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Reply"

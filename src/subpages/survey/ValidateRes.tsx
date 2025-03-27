@@ -622,7 +622,7 @@ const ValidateResponse = () => {
             </div>
           </motion.div>
 
-          {console.log(ocrRes?.extracted_answers)}
+          {/* {console.log(ocrRes?.extracted_answers)} */}
 
           {/* Questions */}
           {ocrRes?.extracted_answers?.map((item: any, index: number) => (

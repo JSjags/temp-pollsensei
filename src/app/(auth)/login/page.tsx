@@ -21,8 +21,8 @@ const Login = (props: Props) => {
   const searchParams = useSearchParams();
   const ed = searchParams.get("ed");
 
-  console.log(userRoles);
-  console.log(state);
+  // console.log(userRoles);
+  // console.log(state);
   if (
     isLoggedIn &&
     state.user !== null &&

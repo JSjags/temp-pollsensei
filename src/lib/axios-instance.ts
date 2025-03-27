@@ -12,7 +12,7 @@ const getToken = () => {
   return store.getState().user.token || store.getState().user?.access_token;
 };
 
-console.log(environment.API_BASE_URL);
+// console.log(environment.API_BASE_URL);
 
 const axiosInstance = axios.create({
   baseURL: environment.API_BASE_URL,

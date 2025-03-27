@@ -330,7 +330,7 @@ const MembersTable: React.FC<MembersTableProps> = ({
       });
     },
     onError: (error: any) => {
-      console.log(error);
+      console.error(error);
 
       toast.error(
         error?.response?.data?.msg ??
@@ -359,7 +359,8 @@ const MembersTable: React.FC<MembersTableProps> = ({
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This action cannot be undone. This will permanently delete
-                  this member's account and remove their data from our servers.
+                  this member&apos;s account and remove their data from our
+                  servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -298,7 +298,7 @@ const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
       is_required: isRequired,
     };
 
-    console.log(updatedQuestionData);
+    // console.log(updatedQuestionData);
 
     // Update the question in the store
     dispatch(
@@ -332,7 +332,7 @@ const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
     );
     setEditIndex(questionIndex);
     setIsEdit(true);
-    console.log(questions[questionIndex]);
+    // console.log(questions[questionIndex]);
     setIsSidebarOpen(false);
   };
 
@@ -442,7 +442,7 @@ const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
         updatedSurvey.sections = [currentSection];
       }
 
-      console.log(updatedSurvey.sections.length);
+      // console.log(updatedSurvey.sections.length);
 
       // Process the final survey data
       const processedSurvey = {
@@ -1299,7 +1299,7 @@ const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
                         min: min,
                         max: max,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else if (
@@ -1314,7 +1314,7 @@ const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
                         rows: rows,
                         columns: columns,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else if (questionType === "long_text") {
@@ -1325,7 +1325,7 @@ const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
                         is_required: is_required,
                         can_accept_media: can_accept_media,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else {
@@ -1335,7 +1335,7 @@ const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
                         options: options,
                         is_required: is_required,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     }

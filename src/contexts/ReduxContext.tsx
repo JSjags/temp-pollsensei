@@ -21,9 +21,9 @@ const ReduxContext = ({ children }: Props) => {
     return null;
   }
 
-  console.log("beans1");
-  console.log(store);
-  console.log("beans2");
+  // console.log("beans1");
+  // console.log(store);
+  // console.log("beans2");
 
   return (
     <Provider store={store}>

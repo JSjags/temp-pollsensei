@@ -49,7 +49,7 @@ const Tech_Media: FC<Props> = ({ tab }) => {
   }, [tab, selectedCriteria, setValue]);
 
   const onSubmit = (data: FormData) => {
-    console.log("Form Data:", data);
+    // console.log("Form Data:", data);
   };
 
   return (

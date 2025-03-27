@@ -148,7 +148,7 @@ const RegisterPage = () => {
         toast.success("Register success");
         router.push("/verify-email");
       } catch (err: any) {
-        console.log(err);
+        // console.log(err);
 
         toast.error(
           "Failed to register user " + (err?.data?.message || err.message)
@@ -157,7 +157,7 @@ const RegisterPage = () => {
       }
     },
     onError: (err) => {
-      console.log(error);
+      console.error(error);
     },
     flow: "implicit",
   });

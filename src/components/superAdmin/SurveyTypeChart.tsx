@@ -38,7 +38,7 @@ export function SurveyTypeChart() {
     }));
   }, [data]);
 
-  console.log(data);
+  // console.log(data);
 
   React.useEffect(() => {
     fetchSurveyData({ month, year });
@@ -111,7 +111,6 @@ export function SurveyTypeChart() {
             outerRadius={80}
             activeIndex={activeIndex}
             onMouseEnter={handlePieEnter}
-
             activeShape={(props: any) => (
               <Sector {...props} outerRadius={props.outerRadius + 10} />
             )}

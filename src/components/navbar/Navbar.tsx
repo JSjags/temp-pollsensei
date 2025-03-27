@@ -175,8 +175,8 @@ const Navbar = () => {
     persistor.purge(); // Clear persisted storage
   };
 
-  console.log(user);
-  console.log(user2);
+  // console.log(user);
+  // console.log(user2);
 
   useEffect(() => {
     if (path && path.includes("/surveys")) {
@@ -198,7 +198,7 @@ const Navbar = () => {
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
 
-  console.log(notifications?.data);
+  // console.log(notifications?.data);
 
   return (
     <div
@@ -294,7 +294,7 @@ const Navbar = () => {
                         <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">
-                        You're all caught up! No new notifications.
+                        You&apos;re all caught up! No new notifications.
                       </p>
                       <Button
                         variant="outline"
