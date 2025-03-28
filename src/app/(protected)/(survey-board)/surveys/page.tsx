@@ -29,7 +29,7 @@ const Page = (props: Props) => {
 
   const [showModal, setShowModal] = useState(true);
 
-  console.log(survey);
+  // console.log(survey);
 
   return (
     <>

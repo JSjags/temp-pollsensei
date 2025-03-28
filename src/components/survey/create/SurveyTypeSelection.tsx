@@ -83,7 +83,7 @@ const SurveyTypeSelection: React.FC<SurveyTypeSelectionProps> = ({
     return surveyTypes.includes(type);
   };
 
-  console.log(store.getState().survey);
+  // console.log(store.getState().survey);
 
   return (
     <AnimatePresence mode="wait">

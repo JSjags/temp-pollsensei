@@ -23,14 +23,11 @@
 //     sections: [],
 //   });
 
-
 //   useEffect(() => {
 //     if (data) {
 //       setSurveyData(data.data);
 //     }
 //   }, [data]);
-
-
 
 //   const handleInputChange = (sectionIndex: number, questionIndex: number, field: string, value: any) => {
 //     setSurveyData((prevData: any) => {
@@ -51,8 +48,6 @@
 //       return { ...prevData, sections: updatedSections };
 //     });
 //   };
-
-
 
 //   const handleOptionChange = (sectionIndex: number, questionIndex: number, optionIndex: number, value: string) => {
 //     setSurveyData((prevData: any) => {
@@ -76,9 +71,6 @@
 //       return { ...prevData, sections: updatedSections };
 //     });
 //   };
-  
-
-
 
 //   const addOption = (sectionIndex: number, questionIndex: number) => {
 //     setSurveyData((prevData: any) => {
@@ -99,7 +91,6 @@
 //       return { ...prevData, sections: updatedSections };
 //     });
 //   };
-  
 
 //   const saveSurvey = async () => {
 //     try {
@@ -237,14 +228,6 @@
 // };
 
 // export default EditCreatedSurvey;
-
-
-
-
-
-
-
-
 
 // import { useParams } from "next/navigation";
 // import React, { useEffect, useState } from "react";
@@ -443,7 +426,10 @@
 
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useFetchASurveyQuery, useEditSurveyMutation } from "@/services/survey.service";
+import {
+  useFetchASurveyQuery,
+  useEditSurveyMutation,
+} from "@/services/survey.service";
 import { toast } from "react-toastify";
 
 interface Question {
@@ -462,75 +448,96 @@ const EditCreatedSurvey = () => {
   const { data, isLoading } = useFetchASurveyQuery(params.id);
   const [editSurvey] = useEditSurveyMutation();
 
-  const [surveyData, setSurveyData] = useState<any>({ topic: "", description: "", sections: [] });
-  const [editingQuestion, setEditingQuestion] = useState<{ sectionIndex: number; questionIndex: number } | null>(null);
+  const [surveyData, setSurveyData] = useState<any>({
+    topic: "",
+    description: "",
+    sections: [],
+  });
+  const [editingQuestion, setEditingQuestion] = useState<{
+    sectionIndex: number;
+    questionIndex: number;
+  } | null>(null);
 
   useEffect(() => {
     if (data) setSurveyData(data.data);
   }, [data]);
 
-    const handleInputChange = (sectionIndex: number, questionIndex: number, field: string, value: any) => {
+  const handleInputChange = (
+    sectionIndex: number,
+    questionIndex: number,
+    field: string,
+    value: any
+  ) => {
     setSurveyData((prevData: any) => {
-      const updatedSections = prevData.sections.map((section: any, sIndex: number) => {
-        if (sIndex === sectionIndex) {
-          return {
-            ...section,
-            questions: section.questions.map((q: any, qIndex: number) => {
-              if (qIndex === questionIndex) {
-                return { ...q, [field]: value }; // Spread existing question and update field
-              }
-              return q;
-            }),
-          };
+      const updatedSections = prevData.sections.map(
+        (section: any, sIndex: number) => {
+          if (sIndex === sectionIndex) {
+            return {
+              ...section,
+              questions: section.questions.map((q: any, qIndex: number) => {
+                if (qIndex === questionIndex) {
+                  return { ...q, [field]: value }; // Spread existing question and update field
+                }
+                return q;
+              }),
+            };
+          }
+          return section;
         }
-        return section;
-      });
+      );
       return { ...prevData, sections: updatedSections };
     });
   };
 
-
-
-  const handleOptionChange = (sectionIndex: number, questionIndex: number, optionIndex: number, value: string) => {
+  const handleOptionChange = (
+    sectionIndex: number,
+    questionIndex: number,
+    optionIndex: number,
+    value: string
+  ) => {
     setSurveyData((prevData: any) => {
-      const updatedSections = prevData.sections.map((section: any, sIndex: number) => {
-        if (sIndex === sectionIndex) {
-          return {
-            ...section,
-            questions: section.questions.map((q: any, qIndex: number) => {
-              if (qIndex === questionIndex) {
-                const updatedOptions = q.options.map((opt: string, oIndex: number) =>
-                  oIndex === optionIndex ? value : opt
-                );
-                return { ...q, options: updatedOptions };
-              }
-              return q;
-            }),
-          };
+      const updatedSections = prevData.sections.map(
+        (section: any, sIndex: number) => {
+          if (sIndex === sectionIndex) {
+            return {
+              ...section,
+              questions: section.questions.map((q: any, qIndex: number) => {
+                if (qIndex === questionIndex) {
+                  const updatedOptions = q.options.map(
+                    (opt: string, oIndex: number) =>
+                      oIndex === optionIndex ? value : opt
+                  );
+                  return { ...q, options: updatedOptions };
+                }
+                return q;
+              }),
+            };
+          }
+          return section;
         }
-        return section;
-      });
+      );
       return { ...prevData, sections: updatedSections };
     });
   };
 
-
-    const addOption = (sectionIndex: number, questionIndex: number) => {
+  const addOption = (sectionIndex: number, questionIndex: number) => {
     setSurveyData((prevData: any) => {
-      const updatedSections = prevData.sections.map((section: any, sIndex: number) => {
-        if (sIndex === sectionIndex) {
-          return {
-            ...section,
-            questions: section.questions.map((q: any, qIndex: number) => {
-              if (qIndex === questionIndex) {
-                return { ...q, options: [...q.options, ""] }; // Add a new empty option
-              }
-              return q;
-            }),
-          };
+      const updatedSections = prevData.sections.map(
+        (section: any, sIndex: number) => {
+          if (sIndex === sectionIndex) {
+            return {
+              ...section,
+              questions: section.questions.map((q: any, qIndex: number) => {
+                if (qIndex === questionIndex) {
+                  return { ...q, options: [...q.options, ""] }; // Add a new empty option
+                }
+                return q;
+              }),
+            };
+          }
+          return section;
         }
-        return section;
-      });
+      );
       return { ...prevData, sections: updatedSections };
     });
   };
@@ -542,7 +549,6 @@ const EditCreatedSurvey = () => {
   const saveEdit = () => {
     setEditingQuestion(null);
   };
-
 
   // const saveSurvey = async () => {
   //   console.log({ id: params.id, surveyData })
@@ -558,24 +564,28 @@ const EditCreatedSurvey = () => {
 
   const saveSurvey = async () => {
     setSurveyData((prevData: any) => {
-      console.log("Updated Payload:", prevData); // Log the updated survey data
+      // console.log("Updated Payload:", prevData); // Log the updated survey data
       return prevData;
     });
-  
+
     try {
       await new Promise((resolve) => setTimeout(resolve, 0));
-  
-      console.log("Sending Updated Data:", surveyData);
+
+      // console.log("Sending Updated Data:", surveyData);
       await editSurvey({ id: params.id, surveyData }).unwrap();
       toast.success("Survey updated successfully!");
-      router.push('/surveys/survey-list');
+      router.push("/surveys/survey-list");
     } catch (error) {
       console.error("Error updating survey:", error);
       toast.error("Failed to update survey.");
     }
   };
 
-  const renderEditableFields = (question: Question, sectionIndex: number, questionIndex: number) => {
+  const renderEditableFields = (
+    question: Question,
+    sectionIndex: number,
+    questionIndex: number
+  ) => {
     switch (question.question_type) {
       case "multiple_choice":
       case "checkbox":
@@ -588,12 +598,22 @@ const EditCreatedSurvey = () => {
               <input
                 key={idx}
                 value={opt}
-                onChange={(e) => handleOptionChange(sectionIndex, questionIndex, idx, e.target.value)}
+                onChange={(e) =>
+                  handleOptionChange(
+                    sectionIndex,
+                    questionIndex,
+                    idx,
+                    e.target.value
+                  )
+                }
                 className="w-full p-2 mb-2 border rounded"
                 placeholder={`Option ${idx + 1}`}
               />
             ))}
-            <button onClick={() => addOption(sectionIndex, questionIndex)} className="text-blue-500 underline">
+            <button
+              onClick={() => addOption(sectionIndex, questionIndex)}
+              className="text-blue-500 underline"
+            >
               + Add Option
             </button>
           </>
@@ -643,14 +663,28 @@ const EditCreatedSurvey = () => {
             <input
               type="number"
               value={question.min}
-              onChange={(e) => handleInputChange(sectionIndex, questionIndex, "min", +e.target.value)}
+              onChange={(e) =>
+                handleInputChange(
+                  sectionIndex,
+                  questionIndex,
+                  "min",
+                  +e.target.value
+                )
+              }
               className="w-full p-2 border rounded"
             />
             <label className="block font-semibold mt-2">Max:</label>
             <input
               type="number"
               value={question.max}
-              onChange={(e) => handleInputChange(sectionIndex, questionIndex, "max", +e.target.value)}
+              onChange={(e) =>
+                handleInputChange(
+                  sectionIndex,
+                  questionIndex,
+                  "max",
+                  +e.target.value
+                )
+              }
               className="w-full p-2 border rounded"
             />
           </>
@@ -667,75 +701,109 @@ const EditCreatedSurvey = () => {
       ) : (
         <div className="w-[80%] mx-auto">
           <h1 className="text-2xl font-semibold mb-4">Edit Survey</h1>
-                   {/* Survey Header */}
-           <div className="mb-6">
+          {/* Survey Header */}
+          <div className="mb-6">
             <label className="block font-semibold mb-2">Survey Topic</label>
-             <input
-               type="text"
-               value={surveyData.topic}
-               onChange={(e) => setSurveyData({ ...surveyData, topic: e.target.value })}
-               className="w-full p-2 border rounded"
-             />
-             <label className="block font-semibold mb-2 mt-4">Survey Description</label>
-             <textarea
-               rows={4}
-               value={surveyData.description}
-               onChange={(e) => setSurveyData({ ...surveyData, description: e.target.value })}
-               className="w-full p-2 border rounded"
-             />
-           </div>
+            <input
+              type="text"
+              value={surveyData.topic}
+              onChange={(e) =>
+                setSurveyData({ ...surveyData, topic: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+            />
+            <label className="block font-semibold mb-2 mt-4">
+              Survey Description
+            </label>
+            <textarea
+              rows={4}
+              value={surveyData.description}
+              onChange={(e) =>
+                setSurveyData({ ...surveyData, description: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+            />
+          </div>
 
           {surveyData.sections.map((section: any, sectionIndex: number) => (
             <div key={sectionIndex} className="mb-8">
-              <h2 className="text-lg font-semibold mb-4">Section {sectionIndex + 1}</h2>
-              {section.questions.map((question: Question, questionIndex: number) => (
-                <div key={questionIndex} className="p-4 mb-4 bg-gray-50 rounded">
-                  {editingQuestion?.sectionIndex === sectionIndex &&
-                  editingQuestion?.questionIndex === questionIndex ? (
-                    <>
-                      <label className="block font-semibold mb-2">Question:</label>
-                      <input
-                        type="text"
-                        value={question.question}
-                        onChange={(e) =>
-                          handleInputChange(sectionIndex, questionIndex, "question", e.target.value)
-                        }
-                        className="w-full p-2 border rounded mb-4"
-                      />
-                      {renderEditableFields(question, sectionIndex, questionIndex)}
-                      <button
-                        onClick={saveEdit}
-                        className="auth-btn text-white px-4 py-2 rounded hover:bg-green-600"
-                      >
-                        Save
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex justify-between">
-                        <p className="text-lg">{question.question}</p>
+              <h2 className="text-lg font-semibold mb-4">
+                Section {sectionIndex + 1}
+              </h2>
+              {section.questions.map(
+                (question: Question, questionIndex: number) => (
+                  <div
+                    key={questionIndex}
+                    className="p-4 mb-4 bg-gray-50 rounded"
+                  >
+                    {editingQuestion?.sectionIndex === sectionIndex &&
+                    editingQuestion?.questionIndex === questionIndex ? (
+                      <>
+                        <label className="block font-semibold mb-2">
+                          Question:
+                        </label>
+                        <input
+                          type="text"
+                          value={question.question}
+                          onChange={(e) =>
+                            handleInputChange(
+                              sectionIndex,
+                              questionIndex,
+                              "question",
+                              e.target.value
+                            )
+                          }
+                          className="w-full p-2 border rounded mb-4"
+                        />
+                        {renderEditableFields(
+                          question,
+                          sectionIndex,
+                          questionIndex
+                        )}
                         <button
-                          onClick={() => toggleEdit(sectionIndex, questionIndex)}
-                          className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full "
+                          onClick={saveEdit}
+                          className="auth-btn text-white px-4 py-2 rounded hover:bg-green-600"
                         >
-                          Edit
+                          Save
                         </button>
-                      </div>
-                      {["multiple_choice", "checkbox", "drop_down", "single_choice"].includes(
-                        question.question_type
-                      ) && (
-                        <ul className="list-disc ml-6 mt-2">
-                          {question.options?.map((opt, idx) => <li key={idx}>{opt}</li>)}
-                        </ul>
-                      )}
-                    </>
-                  )}
-                </div>
-              ))}
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex justify-between">
+                          <p className="text-lg">{question.question}</p>
+                          <button
+                            onClick={() =>
+                              toggleEdit(sectionIndex, questionIndex)
+                            }
+                            className="bg-transparent border text-[#828282] border-[#828282]  px-5 py-1 rounded-full "
+                          >
+                            Edit
+                          </button>
+                        </div>
+                        {[
+                          "multiple_choice",
+                          "checkbox",
+                          "drop_down",
+                          "single_choice",
+                        ].includes(question.question_type) && (
+                          <ul className="list-disc ml-6 mt-2">
+                            {question.options?.map((opt, idx) => (
+                              <li key={idx}>{opt}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )
+              )}
             </div>
           ))}
 
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={saveSurvey}>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={saveSurvey}
+          >
             Save Changes
           </button>
         </div>
@@ -745,4 +813,3 @@ const EditCreatedSurvey = () => {
 };
 
 export default EditCreatedSurvey;
-

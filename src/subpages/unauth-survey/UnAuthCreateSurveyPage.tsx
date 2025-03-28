@@ -130,7 +130,7 @@ const UnAuthCreateSurveyPage = () => {
   };
 
   const maxCharacters = 3000;
-  console.log(data);
+  // console.log(data);
 
   const handleSurveyType = (userType: string, prompt: string) => {
     setSelectedDiv(userType);
@@ -190,9 +190,9 @@ const UnAuthCreateSurveyPage = () => {
   };
 
   const survey = store.getState().survey;
-  console.log(survey);
-  console.log(data);
-  console.log(survey.sections);
+  // console.log(survey);
+  // console.log(data);
+  // console.log(survey.sections);
 
   useEffect(() => {
     dispatch(resetQuestion());

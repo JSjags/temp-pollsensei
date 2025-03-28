@@ -66,7 +66,7 @@ const DynamicCharts: React.FC<DynamicChartsProps> = ({ data }) => {
   //   console.log(surveyData.data.topic);
 
   const renderChart = (testName: string, testResults: any) => {
-    console.log(testResults);
+    // console.log(testResults);
 
     switch (testName) {
       case "Mann-Whitney U Test":

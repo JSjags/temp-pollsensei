@@ -85,7 +85,8 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ benefitsRef }) => {
           className="text-lg text-gray-600 max-w-2xl"
         >
           Create, validate, and analyze surveys effortlessly — all with
-          <br className="hidden lg:block" /> PollSensei's intelligent platform.
+          <br className="hidden lg:block" /> PollSensei&apos;s intelligent
+          platform.
         </motion.p>
       </motion.div>
 
@@ -186,7 +187,8 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({ benefitsRef }) => {
                 Insightful, Actionable Analysis
               </h3>
               <p className="text-gray-600 mb-6">
-                With PollSensei's powerful AI analysis, transform raw data into
+                With PollSensei&apos;s powerful AI analysis, transform raw data
+                into
                 <br className="hidden lg:block" /> clear, impactful insights—no
                 data expertise required
               </p>

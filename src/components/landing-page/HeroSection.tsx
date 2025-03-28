@@ -44,8 +44,8 @@ const EnhancedHero = () => {
     if (rive) {
       const statesLength = rive?.animationNames.length;
 
-      console.log(count);
-      console.log(statesLength);
+      // console.log(count);
+      // console.log(statesLength);
 
       const inputs = rive?.stateMachineInputs("sensei-states");
       const trigger1 = inputs?.find((i) => i.name === "sleep");
@@ -62,32 +62,32 @@ const EnhancedHero = () => {
 
         if (count === 0) {
           const trigger = inputs?.find((i) => i.name === "be idle");
-          console.log(trigger);
+          // console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
         if (count === 1) {
           const trigger = inputs?.find((i) => i.name === "be idle");
-          console.log(trigger);
+          // console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
         if (count === 2) {
           const trigger = inputs?.find((i) => i.name === "be idle");
-          console.log(trigger);
+          // console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
         if (count === 3) {
           const trigger = inputs?.find((i) => i.name === "be idle");
-          console.log(trigger);
+          // console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
         if (count === 4) {
           const trigger = inputs?.find((i) => i.name === "be idle");
-          console.log(trigger);
+          // console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
         if (count === 5) {
           const trigger = inputs?.find((i) => i.name === "be idle");
-          console.log(trigger);
+          // console.log(trigger);
           if (trigger?.fire) trigger.fire();
         }
       }

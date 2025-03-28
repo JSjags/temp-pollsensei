@@ -81,8 +81,8 @@ const EditSubmittedSurvey = () => {
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [currentSection, setCurrentSection] = useState(0);
 
-  console.log(data);
-  console.log(params.id);
+  // console.log(data);
+  // console.log(params.id);
   const [surveyData, setSurveyData] = useState<SurveyData>({
     topic: "",
     description: "",
@@ -96,15 +96,15 @@ const EditSubmittedSurvey = () => {
     header_url: "#ffffff",
   });
   const questions = surveyData?.sections;
-  console.log(questions);
-  console.log(surveyData);
+  // console.log(questions);
+  // console.log(surveyData);
 
   const EditQuestion = (index: any) => {
     setEditIndex(index);
     setIsEdit(true);
     // setIsSidebarOpen(false);
     // setAiChatbot(true);
-    console.log(index);
+    // console.log(index);
     // setSelectIndex(index);
   };
 
@@ -158,7 +158,7 @@ const EditSubmittedSurvey = () => {
         })),
       })) ?? [];
 
-    console.log(data?.data?.question_text);
+    // console.log(data?.data?.question_text);
 
     setSurveyData({
       header_text: data?.data?.header_text ?? defaultFontSettings.header,
@@ -174,10 +174,10 @@ const EditSubmittedSurvey = () => {
     });
   }, [data, isSurveySuccess]);
 
-  console.log(data);
-  console.log(surveyData.topic);
-  console.log(data?.data?.question_text);
-  console.log(surveyData.question_text);
+  // console.log(data);
+  // console.log(surveyData.topic);
+  // console.log(data?.data?.question_text);
+  // console.log(surveyData.question_text);
 
   // Add effect to refetch data on mount
   useEffect(() => {
@@ -208,7 +208,7 @@ const EditSubmittedSurvey = () => {
   ) => {
     if (editIndex === null) return;
 
-    console.log(minValue, maxValue);
+    // console.log(minValue, maxValue);
 
     setSurveyData((prevData) => {
       const updatedSections = [...prevData.sections];
@@ -282,7 +282,7 @@ const EditSubmittedSurvey = () => {
   };
 
   const saveSurvey = async () => {
-    console.log({ id: params.id, surveyData });
+    // console.log({ id: params.id, surveyData });
     try {
       await editSurvey({ id: params.id, body: surveyData }).unwrap();
       toast.success("Survey updated successfully!");

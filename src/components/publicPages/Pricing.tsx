@@ -2,13 +2,13 @@ import { useGetPlanQuery } from "@/services/subscribtion.service";
 import Link from "next/link";
 import React from "react";
 
-interface PricingProps{
-  currency?:boolean;
+interface PricingProps {
+  currency?: boolean;
 }
 
-const Pricing:React.FC<PricingProps> = ({currency}) => {
-  const { data, isLoading } =useGetPlanQuery(null);
-  console.log(data)
+const Pricing: React.FC<PricingProps> = ({ currency }) => {
+  const { data, isLoading } = useGetPlanQuery(null);
+  // console.log(data)
   const plans = [
     {
       name: "Basic",
@@ -31,7 +31,6 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
       description:
         "Ideal for growing businesses that need more power and flexibility.",
       features: [
-       
         "Add Contributors (Up to 4)",
         "Unlimited Polls and Surveys",
         "10,000 monthly responses",
@@ -64,16 +63,14 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
   ];
   return (
     <div className="lg:flex justify-between items-start gap-8 w-full">
-    {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 "> */}
+      {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 "> */}
       {plans.map((plan, index) => (
         <div
           key={index}
           data-aos="fade-up"
           data-aos-delay={index * 100}
           className={`
-            ${  plan.name === "Pro"
-              ? "border border-purple-500 "
-              : ""}
+            ${plan.name === "Pro" ? "border border-purple-500 " : ""}
              bg-[#FAFAFB] rounded-xl flex-1 p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col w-full border`}
         >
           <div className="flex-grow w-full">
@@ -82,12 +79,18 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
               {plan.name}
             </h2>
             <p className="text-4xl font-bold mb-4 text-[#171725] text-start">
-              {currency ? plan.price : plan.price2} 
-              {plan.name === "Team" ? (<small className="text-sm">/user Starting at 3</small>) : ""}
-              {
-                !currency  && 
-               <small className="text-sm font-normal text-gray-500"> Monthly</small>
-              }
+              {currency ? plan.price : plan.price2}
+              {plan.name === "Team" ? (
+                <small className="text-sm">/user Starting at 3</small>
+              ) : (
+                ""
+              )}
+              {!currency && (
+                <small className="text-sm font-normal text-gray-500">
+                  {" "}
+                  Monthly
+                </small>
+              )}
             </p>
             <hr />
 
@@ -96,10 +99,14 @@ const Pricing:React.FC<PricingProps> = ({currency}) => {
               className={` ${
                 plan.name === "Pro"
                   ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white"
-                  : plan.name === "Basic"? "text-purple-500 border border-purple-500" : "text-purple border border-purple-500 "
+                  : plan.name === "Basic"
+                  ? "text-purple-500 border border-purple-500"
+                  : "text-purple border border-purple-500 "
               } block w-full my-5  text-center py-3 rounded-md hover:bg-opacity-80 transition-colors duration-300 `}
             >
-              {plan.name === "Basic" ? "Get PollSensei for Free" : "Start Trial"}
+              {plan.name === "Basic"
+                ? "Get PollSensei for Free"
+                : "Start Trial"}
             </Link>
             <ul className="mb-8 space-y-3">
               {plan.features.map((feature, idx) => (

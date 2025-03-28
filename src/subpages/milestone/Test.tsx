@@ -144,7 +144,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     value: string
   ) => {
     const newOptions = { ...editedOptions };
-    console.log(newOptions[section]);
+    // console.log(newOptions[section]);
     newOptions[section] = [...newOptions[section]];
     newOptions[section][index] = value;
     setEditedOptions(newOptions);

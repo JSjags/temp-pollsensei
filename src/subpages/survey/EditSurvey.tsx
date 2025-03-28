@@ -177,7 +177,7 @@ const EditSurvey = () => {
     setIsEdit(true);
     setIsSidebarOpen(false);
     setAiChatbot(true);
-    console.log(index);
+    // console.log(index);
     setSelectIndex(index);
   };
 
@@ -202,7 +202,7 @@ const EditSurvey = () => {
     const currentSectionData = updatedSections[currentSection];
 
     if (editIndex !== null && currentSectionData) {
-      console.log(editIndex);
+      // console.log(editIndex);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[editIndex],
@@ -225,7 +225,7 @@ const EditSurvey = () => {
     }
 
     if (editIndex && currentSectionData) {
-      console.log(currentSectionData);
+      // console.log(currentSectionData);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[editIndex],
@@ -262,7 +262,7 @@ const EditSurvey = () => {
     const currentSectionData = updatedSections[currentSection];
 
     if (aiEditIndex !== null && currentSectionData) {
-      console.log(aiEditIndex);
+      // console.log(aiEditIndex);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[aiEditIndex!],
@@ -285,7 +285,7 @@ const EditSurvey = () => {
     }
 
     if (aiEditIndex && currentSectionData) {
-      console.log(currentSectionData);
+      // console.log(currentSectionData);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[aiEditIndex],
@@ -521,7 +521,7 @@ const EditSurvey = () => {
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -1015,7 +1015,7 @@ const EditSurvey = () => {
               </DialogTitle>
               <DialogDescription className="text-gray-600 text-lg leading-relaxed max-w-sm">
                 To continue creating your survey and access all features, please
-                log in to your account or sign up if you're new here.
+                log in to your account or sign up if you&apos;re new here.
               </DialogDescription>
             </div>
           </DialogHeader>

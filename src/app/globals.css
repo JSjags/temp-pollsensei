@@ -640,8 +640,6 @@ input[type="radio"].radio:checked:before {
   width: 100% !important;
 }
 
-
-
 .slick-list {
   margin: 0 -10px;
 }
@@ -649,4 +647,15 @@ input[type="radio"].radio:checked:before {
 .slick-prev::before,
 .slick-next::before {
   display: none;
+}
+
+.ProseMirror {
+  padding: 0;
+  outline: none;
+  font-size: 1.5rem;
+  color: #333333;
+}
+
+.ProseMirror:focus {
+  outline: none;
 }

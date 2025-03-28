@@ -67,7 +67,7 @@ const StarRatingQuestion: React.FC<StarRatingQuestionProps> = ({
 
   const rating = getNumericRating(scale_value);
 
-  console.log(rating);
+  // console.log(rating);
 
   const getStatus = useMemo(() => {
     switch (status) {

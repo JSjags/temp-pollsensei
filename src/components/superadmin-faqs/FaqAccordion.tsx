@@ -115,7 +115,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
       handleCloseAll();
       refetch();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Error deleting FAQ");
     }
   };
@@ -175,7 +175,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
       question: editingFaq.question,
       answer: editingFaq.answer,
     };
-    console.log(editData);
+    // console.log(editData);
     try {
       await editFAQs({ id, body: editData }).unwrap();
       toast.success("FAQ updated successfully");
@@ -187,8 +187,8 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
     }
   };
 
-  console.log(_id);
-  console.log(singleFAQs);
+  // console.log(_id);
+  // console.log(singleFAQs);
 
   return (
     <div className="relative border border-gray-200 rounded-xl mb-4 shadow-sm w-full hover:shadow-md transition-all duration-200 ease-in-out overflow-hidden bg-white">

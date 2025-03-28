@@ -263,8 +263,8 @@ const AddQuestionPage = () => {
     setIsEditing(false);
   };
 
-  console.log(sectionTopic);
-  console.log(sectionDescription);
+  // console.log(sectionTopic);
+  // console.log(sectionDescription);
 
   const handleSaveEdittedQuestion = (
     updatedQuestion: string,
@@ -296,7 +296,7 @@ const AddQuestionPage = () => {
     setIsEdit(false);
   };
 
-  console.log(survey);
+  // console.log(survey);
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -312,7 +312,7 @@ const AddQuestionPage = () => {
     );
     setEditIndex(questionIndex);
     setIsEdit(true);
-    console.log(questions[questionIndex]);
+    // console.log(questions[questionIndex]);
     setIsSidebarOpen(false);
   };
 
@@ -347,7 +347,7 @@ const AddQuestionPage = () => {
       }
     }
 
-    console.log(store.getState().survey);
+    // console.log(store.getState().survey);
 
     // try {
     //   const updatedSurvey = store.getState().survey;
@@ -897,7 +897,7 @@ const AddQuestionPage = () => {
                         min: min,
                         max: max,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else if (questionType === "matrix_checkbox") {
@@ -909,7 +909,7 @@ const AddQuestionPage = () => {
                         rows: rows,
                         columns: columns,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else {
@@ -919,7 +919,7 @@ const AddQuestionPage = () => {
                         options: options,
                         is_required: is_required,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     }
@@ -1124,7 +1124,7 @@ const AddQuestionPage = () => {
               </DialogTitle>
               <DialogDescription className="text-gray-600">
                 To continue creating your survey and access all features, please
-                log in to your account or sign up if you're new here.
+                log in to your account or sign up if you&apos;re new here.
               </DialogDescription>
             </div>
           </DialogHeader>

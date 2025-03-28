@@ -1,23 +1,5 @@
 "use client";
-import React, { FC } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
-import { IoChevronDownOutline } from "react-icons/io5";
-import { Button } from "@/components/ui/button";
-import { IoClose } from "react-icons/io5";
-import { Checkbox } from "@/components/ui/shadcn-checkbox";
+import React, { FC, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,12 +12,27 @@ import {
   ageGroupOptions,
   dependentsOptions,
 } from "@/data/respondent-object-data";
+import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { Button } from "@/components/ui/button";
+import { FormInput } from "@/components/respondent-form/FormInput";
+import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
+import { ControlledMultiSelect } from "@/components/respondent-form/ControlledMultiSelect";
 
 interface Props {
   onContinue: () => void;
 }
 
 const PersonalInformation: FC<Props> = ({ onContinue }) => {
+  const user = useSelector((state: RootState) => state.user.user);
+  const nameParts = user?.name?.split(" ") || [];
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+  const otherName =
+    nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : "";
+
   const {
     register,
     handleSubmit,
@@ -44,30 +41,38 @@ const PersonalInformation: FC<Props> = ({ onContinue }) => {
   } = useForm<FormData>({
     resolver: zodResolver(personalInformationSchema),
     defaultValues: {
+      firstName,
+      lastName,
+      otherName,
+      email: user?.email || "",
       pets: [],
     },
   });
 
   type FormData = z.infer<typeof personalInformationSchema>;
-  // function to handle pet selection
-  const handlePetChange = (field: any, pet: string, checked: boolean) => {
-    const updatedPets = checked
-      ? [...field.value, pet]
-      : field.value.filter((p: string) => p !== pet);
-    field.onChange(updatedPets);
-  };
 
-  // function to remove selected pet(s)
-  const removePet = (field: any, pet: string) => {
-    const updatedPets = field.value.filter((p: string) => p !== pet);
-    field.onChange(updatedPets);
-  };
+  const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
-  // function to handle the next tab/section
   const handleContinue = (data: FormData) => {
-    onContinue();
-    // console.log({ data });
+    submitForm(
+      { tab: "personalInfo", formData: data },
+      {
+        onSuccess: () => {
+          onContinue();
+        },
+        onError: (error) => {
+          console.error("Form submission error:", error);
+          toast.error(error.message);
+        },
+      }
+    );
   };
+
+  useEffect(() => {
+    if (isPending) {
+      toast.info("Saving Personal details...");
+    }
+  }, [isPending]);
 
   return (
     <div className="w-full h-full flex flex-col items-start mx-auto">
@@ -89,324 +94,124 @@ const PersonalInformation: FC<Props> = ({ onContinue }) => {
           className="flex flex-col gap-3"
           onSubmit={handleSubmit(handleContinue)}
         >
-          <div className="flex flex-col gap-2">
-            <label htmlFor="firstName" className="text-[#333333] text-sm">
-              First Name (Required)
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              placeholder="Enter name"
-              className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-base rounded-md py-2 px-3 active:outline-none"
-              {...register("firstName")}
-            />
-            {errors.firstName && (
-              <p className="text-red-500 text-sm">{errors.firstName.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="lastName" className="text-[#333333] text-sm">
-              Last Name/Surname (Required)
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              placeholder="Enter lastname"
-              className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-base rounded-md py-2 px-3 active:outline-none"
-              {...register("lastName")}
-            />
-            {errors.lastName && (
-              <p className="text-red-500 text-sm">{errors.lastName.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="otherName" className="text-[#333333] text-sm">
-              Other Name (Optional)
-            </label>
-            <input
-              type="text"
-              id="otherName"
-              placeholder="Enter lastname"
-              className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-base rounded-md py-2 px-3 active:outline-none"
-              {...register("otherName")}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="text-[#333333] text-sm">
-              Email Address (Required)
-            </label>
-            <input
-              type="email"
-              id="email"
-              placeholder="you@example.com"
-              className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-base rounded-md py-2 px-3 active:outline-none"
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="phone" className="text-[#333333] text-sm">
-              Phone number (Required)
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              placeholder="Enter name"
-              className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-base rounded-md py-2 px-3 active:outline-none"
-              {...register("phone")}
-            />
-            {errors.phone && (
-              <p className="text-red-500 text-sm">{errors.phone.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="gender" className="text-[#333333] text-sm">
-              What is your gender? (Required)
-            </label>
-            <Controller
-              name="gender"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      {genderOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <FormInput
+            id="firstName"
+            label="First Name"
+            placeholder="Enter name"
+            register={register}
+            error={errors.firstName}
+            required
+            disabled={isPending}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherGender")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-            {errors.gender && (
-              <p className="text-red-500 text-sm">{errors.gender.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="maritalStatus" className="text-[#333333] text-sm">
-              What is your marital status? (Required)
-            </label>
-            <Controller
-              name="maritalStatus"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select Marital Status" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {marriageStatusOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.maritalStatus && (
-              <p className="text-red-500 text-sm">
-                {errors.maritalStatus.message}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="ageGroup" className="text-[#333333] text-sm">
-              What is your age group? (Required)
-            </label>
-            <Controller
-              name="ageGroup"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select Age Group" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {ageGroupOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.ageGroup && (
-              <p className="text-red-500 text-sm">{errors.ageGroup.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="dependents" className="text-[#333333] text-sm">
-              Do you have children or dependents? (Required)
-            </label>
-            <Controller
-              name="dependents"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {dependentsOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.dependents && (
-              <p className="text-red-500 text-sm">
-                {errors.dependents.message}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="maritalStatus" className="text-[#333333] text-sm">
-              Pets Owned (You can select more than one pet)
-            </label>
-            <Controller
-              name="pets"
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      asChild
-                      className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none"
-                    >
-                      <Button
-                        variant="outline"
-                        size="default"
-                        className="w-full flex items-center justify-between"
-                      >
-                        <span>Select Option</span>
-                        <IoChevronDownOutline className="text-[#898989] text-lg" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[450px] flex flex-col">
-                      {petOptions.map((pet) => (
-                        <div
-                          key={pet}
-                          className="flex items-center gap-2 w-full hover:bg-[#CB85FD1A] px-5 rounded-sm"
-                        >
-                          <Checkbox
-                            id={pet}
-                            checked={field.value.includes(pet)}
-                            onCheckedChange={(checked) =>
-                              handlePetChange(field, pet, !!checked)
-                            }
-                          />
-                          <DropdownMenuLabel className="text-base capitalize font-normal">
-                            {pet}
-                          </DropdownMenuLabel>
-                        </div>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+          <FormInput
+            id="lastName"
+            label="Last Name/Surname"
+            placeholder="Enter lastname"
+            register={register}
+            error={errors.lastName}
+            required
+            disabled={isPending}
+          />
 
-                  <div className="flex flex-wrap gap-2">
-                    {field.value.map((pet: string) => (
-                      <div
-                        key={pet}
-                        className={`flex items-center gap-1 bg-[#E8DEF8] rounded-xl py-1 px-2 ${
-                          pet.includes("other") ? "hidden" : "inline-block"
-                        }`}
-                      >
-                        <span className="text-sm capitalize">{pet}</span>
-                        <IoClose
-                          className="text-lg cursor-pointer"
-                          onClick={() => removePet(field, pet)}
-                        />
-                      </div>
-                    ))}
-                  </div>
+          <FormInput
+            id="otherName"
+            label="Other Name (Optional)"
+            placeholder="Enter other name"
+            register={register}
+            error={errors.otherName}
+            disabled={isPending}
+          />
 
-                  {field.value.includes("other") && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherPet")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-            {errors.pets && (
-              <p className="text-red-500 text-sm">{errors.pets.message}</p>
-            )}
-          </div>
+          <FormInput
+            id="email"
+            label="Email Address"
+            type="email"
+            placeholder="you@example.com"
+            register={register}
+            error={errors.email}
+            required
+            disabled={isPending}
+          />
+
+          <FormInput
+            id="phoneNumber"
+            label="Phone number"
+            type="tel"
+            placeholder="Enter phone number"
+            register={register}
+            error={errors.phoneNumber}
+            required
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="gender"
+            control={control}
+            options={genderOptions}
+            placeholder="Select gender"
+            label="What is your gender?"
+            error={errors.gender}
+            required
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="maritalStatus"
+            control={control}
+            options={marriageStatusOptions}
+            placeholder="Select Marital Status"
+            label="What is your marital status?"
+            error={errors.maritalStatus}
+            required
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="ageGroup"
+            control={control}
+            options={ageGroupOptions}
+            placeholder="Select Age Group"
+            label="What is your age group?"
+            error={errors.ageGroup}
+            required
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="children"
+            control={control}
+            options={dependentsOptions}
+            placeholder="Select option"
+            label="Do you have children or dependents?"
+            error={errors.children}
+            required
+            disabled={isPending}
+          />
+
+          <ControlledMultiSelect
+            name="pets"
+            control={control}
+            options={petOptions}
+            label="Pets Owned (You can select more than one pet)"
+            error={errors.pets}
+            disabled={isPending}
+            otherFieldName="otherPet"
+            register={register}
+          />
+
           <Button
             size="default"
             type="submit"
             className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all lg:mb-10 mt-5"
+            disabled={isPending}
           >
-            Save and Continue
+            {isPending ? "Saving..." : "Save and Continue"}
           </Button>
         </form>
       </div>
     </div>
   );
 };
+
 export default PersonalInformation;

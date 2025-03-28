@@ -1,29 +1,24 @@
 "use client";
-import React, { FC } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import React, { FC, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { educationAndEmploymentSchema } from "@/utils/shema";
 import {
   educationLevelOptions,
-  employentStatusOptions,
+  employmentStatusOptions,
   industryOptions,
   jobRoleOptions,
   workingHoursOptions,
   incomeOptions,
   savvyOptions,
 } from "@/data/respondent-object-data";
+import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
+import { toast } from "react-toastify";
+import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
 
 interface Props {
   onContinue: () => void;
@@ -31,12 +26,29 @@ interface Props {
 }
 
 const Edu_Employment: FC<Props> = ({ onContinue, onPrevious }) => {
-  // function to handle the next tab/section
+  const { mutate: submitForm, isPending } = useSubmitRespondentForm();
+
   const handleContinue = (data: FormData) => {
-    onContinue();
+    submitForm(
+      { tab: "educationEmployment", formData: data },
+      {
+        onSuccess: () => {
+          onContinue();
+        },
+        onError: (error) => {
+          console.error("Form submission error:", error);
+          toast.error(error.message);
+        },
+      }
+    );
   };
 
-  // function to handle the previous tab/section
+  useEffect(() => {
+    if (isPending) {
+      toast.info("Saving Education & Employment details...");
+    }
+  }, [isPending]);
+
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     onPrevious();
@@ -70,249 +82,78 @@ const Edu_Employment: FC<Props> = ({ onContinue, onPrevious }) => {
           className="flex flex-col gap-3"
           onSubmit={handleSubmit(handleContinue)}
         >
-          <div className="flex flex-col gap-2">
-            <label htmlFor="education" className="text-[#333333] text-sm">
-              What is your highest level of education?
-            </label>
-            <Controller
-              name="education_level"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select highest level of education" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectGroup>
-                      {educationLevelOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="employment" className="text-[#333333] text-sm">
-              What is your current employment status?
-            </label>
-            <Controller
-              name="employment_status"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select employment status" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectGroup>
-                      {employentStatusOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="nationality" className="text-[#333333] text-sm">
-              Employment industry
-            </label>
-            <Controller
-              name="employment_industry"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select employment Industry" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectGroup>
-                      {industryOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="role" className="text-[#333333] text-sm">
-              What is your job role?
-            </label>
-            <Controller
-              name="job_role"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select job role" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      <SelectGroup>
-                        {jobRoleOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="education_level"
+            control={control}
+            options={educationLevelOptions}
+            placeholder="Select highest level of education"
+            label="What is your highest level of education?"
+            error={errors.education_level}
+            disabled={isPending}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherJob")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="workHours" className="text-[#333333] text-sm">
-              What is your average working hours per week?
-            </label>
-            <Controller
-              name="working_hours"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select average weekly working hours" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectGroup>
-                      {workingHoursOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="incomeRange" className="text-[#333333] text-sm">
-              What is your household income range?
-            </label>
-            <Controller
-              name="income_range"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select Household income range" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectGroup>
-                      {incomeOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="savvy" className="text-[#333333] text-sm">
-              Are you tech savyy?
-            </label>
-            <Controller
-              name="tech_savvy"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select languages" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectGroup>
-                      {savvyOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
+          <ControlledSelect
+            name="employment_status"
+            control={control}
+            options={employmentStatusOptions}
+            placeholder="Select employment status"
+            label="What is your current employment status?"
+            error={errors.employment_status}
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="employment_industry"
+            control={control}
+            options={industryOptions}
+            placeholder="Select employment Industry"
+            label="Employment industry"
+            error={errors.employment_industry}
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="job_role"
+            control={control}
+            options={jobRoleOptions}
+            placeholder="Select job role"
+            label="What is your job role?"
+            error={errors.job_role}
+            disabled={isPending}
+            otherFieldName="otherJob"
+            register={register}
+          />
+
+          <ControlledSelect
+            name="working_hours"
+            control={control}
+            options={workingHoursOptions}
+            placeholder="Select average weekly working hours"
+            label="What is your average working hours per week?"
+            error={errors.working_hours}
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="income_range"
+            control={control}
+            options={incomeOptions}
+            placeholder="Select Household income range"
+            label="What is your household income range?"
+            error={errors.income_range}
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="tech_savvy"
+            control={control}
+            options={savvyOptions}
+            placeholder="Select tech savvy level"
+            label="Are you tech savvy?"
+            error={errors.tech_savvy}
+            disabled={isPending}
+          />
+
           <div className="w-full flex items-center gap-5 lg:mb-10 mt-5">
             <Button
               size="default"
@@ -326,8 +167,9 @@ const Edu_Employment: FC<Props> = ({ onContinue, onPrevious }) => {
               size="default"
               className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
               type="submit"
+              disabled={isPending}
             >
-              Next
+              {isPending ? "Saving..." : "Next"}
             </Button>
           </div>
         </form>
@@ -335,4 +177,5 @@ const Edu_Employment: FC<Props> = ({ onContinue, onPrevious }) => {
     </div>
   );
 };
+
 export default Edu_Employment;

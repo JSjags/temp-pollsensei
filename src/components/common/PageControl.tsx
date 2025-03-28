@@ -14,7 +14,7 @@ const PageControl: React.FC<PaginationProps> = ({
   onNavigate,
   isLoading = false,
 }) => {
-  console.log(isLoading);
+  // console.log(isLoading);
 
   // The buttons were not properly disabled because the disabled prop was only being set based on
   // currentPage position, and isLoading was only used in the className and click handler.

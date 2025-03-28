@@ -215,8 +215,8 @@ export function PricingCards() {
     setDialogOpen(true);
   };
 
-  console.log("Helele");
-  console.log(userData.data?.data);
+  // console.log("Helele");
+  // console.log(userData.data?.data);
 
   const renderButton = (tier: TPricing, index: number) => {
     if (index === 0) {
@@ -314,7 +314,7 @@ export function PricingCards() {
       }
     },
     onError: (error) => {
-      console.log(error);
+      console.error(error);
     },
   });
 

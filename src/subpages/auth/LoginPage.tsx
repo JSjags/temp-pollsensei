@@ -150,7 +150,7 @@ const LoginPage = () => {
         console.error("Failed to sign up user", err);
       }
     },
-    onError: () => console.log("Google Sign-In Failed"),
+    onError: () => console.error("Google Sign-In Failed"),
     flow: "implicit",
   });
 

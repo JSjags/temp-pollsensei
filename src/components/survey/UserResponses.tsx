@@ -52,8 +52,8 @@ const UserResponses: React.FC<UserResponseProps> = ({
   error,
   isSuccess,
 }) => {
-  console.log(data);
-  console.log(isLoading);
+  // console.log(data);
+  // console.log(isLoading);
   const [currentSection, setCurrentSection] = useState(0);
   const [editTranscription, { isLoading: IsTranscribing }] =
     useEditTranscriptionMutation();
@@ -75,7 +75,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
   };
 
   const handleQuestionChange = (index: number, selectedOptions: string[]) => {
-    console.log(`Question ${index} selected options:`, selectedOptions);
+    // console.log(`Question ${index} selected options:`, selectedOptions);
   };
 
   if (isLoading) {
@@ -106,7 +106,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
   // };
 
   const handleTranscribe = async (transcription_id: string, text: string) => {
-    console.log("Updating transcription:", transcription_id, text);
+    // console.log("Updating transcription:", transcription_id, text);
 
     const payload = {
       id: response_id,
@@ -114,7 +114,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
       text: text,
     };
 
-    console.log(payload);
+    // console.log(payload);
 
     try {
       await editTranscription(payload).unwrap();

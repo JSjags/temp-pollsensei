@@ -1,17 +1,9 @@
 "use client";
-import React, { FC } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import React, { FC, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { healthAndLifestyleSchema } from "@/utils/shema";
@@ -25,6 +17,9 @@ import {
   drinkOptions,
   sleepOptions,
 } from "@/data/respondent-object-data";
+import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
+import { toast } from "react-toastify";
+import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
 
 interface Props {
   onContinue: () => void;
@@ -32,12 +27,29 @@ interface Props {
 }
 
 const Health_Lifestyle: FC<Props> = ({ onContinue, onPrevious }) => {
-  // function to handle the next tab/section
+  const { mutate: submitForm, isPending } = useSubmitRespondentForm();
+
   const handleContinue = (data: FormData) => {
-    onContinue();
+    submitForm(
+      { tab: "healthLifestyle", formData: data },
+      {
+        onSuccess: () => {
+          onContinue();
+        },
+        onError: (error) => {
+          console.error("Form submission error:", error);
+          toast.error(error.message);
+        },
+      }
+    );
   };
 
-  // function to handle the previous tab/section
+  useEffect(() => {
+    if (isPending) {
+      toast.info("Saving Health & Lifestyle details...");
+    }
+  }, [isPending]);
+
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     onPrevious();
@@ -71,306 +83,92 @@ const Health_Lifestyle: FC<Props> = ({ onContinue, onPrevious }) => {
           className="flex flex-col gap-3"
           onSubmit={handleSubmit(handleContinue)}
         >
-          <div className="flex flex-col gap-2">
-            <label htmlFor="health" className="text-[#333333] text-sm">
-              How would you describe your overall health?
-            </label>
-            <Controller
-              name="health"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {overallHealthOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="insurance" className="text-[#333333] text-sm">
-              Health Insurance Type
-            </label>
-            <Controller
-              name="health_insurance"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {helathInsuranceOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="health"
+            control={control}
+            options={overallHealthOptions}
+            placeholder="Select option"
+            label="How would you describe your overall health?"
+            error={errors.health}
+            disabled={isPending}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherHealthInsurance")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="condition" className="text-[#333333] text-sm">
-              Do you have any chronic health conditions?
-            </label>
-            <Controller
-              name="health_condition"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {healthConditionOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="health_insurance"
+            control={control}
+            options={helathInsuranceOptions}
+            placeholder="Select option"
+            label="Health Insurance Type"
+            error={errors.health_insurance}
+            disabled={isPending}
+            otherFieldName="otherHealthInsurance"
+            register={register}
+          />
 
-                  {field.value === "yes" && (
-                    <input
-                      type="text"
-                      placeholder="Please specify"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherHealthCondition")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="activity" className="text-[#333333] text-sm">
-              Do you engage in regular physical activity?
-            </label>
-            <Controller
-              name="physical_activity"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {physicalActivityOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="diet" className="text-[#333333] text-sm">
-              Do you have any dietary restrictions or preferences?
-            </label>
-            <Controller
-              name="dietry_restrictions"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {dietryOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="health_condition"
+            control={control}
+            options={healthConditionOptions}
+            placeholder="Select option"
+            label="Do you have any chronic health conditions?"
+            error={errors.health_condition}
+            disabled={isPending}
+            otherFieldName="otherHealthCondition"
+            register={register}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Please specify"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherDietryRestrictions")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="smoke" className="text-[#333333] text-sm">
-              Do you smoke or use tobacco products?
-            </label>
-            <Controller
-              name="smoke"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {smokeOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="alcohol" className="text-[#333333] text-sm">
-              Do you consume alcohol?
-            </label>
-            <Controller
-              name="drink_alcohol"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {drinkOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="sleep" className="text-[#333333] text-sm">
-              How many hours of sleep do you get on average per night?
-            </label>
-            <Controller
-              name="hours_sleep"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {sleepOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
+          <ControlledSelect
+            name="physical_activity"
+            control={control}
+            options={physicalActivityOptions}
+            placeholder="Select option"
+            label="Do you engage in regular physical activity?"
+            error={errors.physical_activity}
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="dietry_restrictions"
+            control={control}
+            options={dietryOptions}
+            placeholder="Select option"
+            label="Do you have any dietary restrictions or preferences?"
+            error={errors.dietry_restrictions}
+            disabled={isPending}
+            otherFieldName="otherDietryRestrictions"
+            register={register}
+          />
+
+          <ControlledSelect
+            name="smoke"
+            control={control}
+            options={smokeOptions}
+            placeholder="Select option"
+            label="Do you smoke or use tobacco products?"
+            error={errors.smoke}
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="drink_alcohol"
+            control={control}
+            options={drinkOptions}
+            placeholder="Select option"
+            label="Do you consume alcohol?"
+            error={errors.drink_alcohol}
+            disabled={isPending}
+          />
+
+          <ControlledSelect
+            name="hours_sleep"
+            control={control}
+            options={sleepOptions}
+            placeholder="Select option"
+            label="How many hours of sleep do you get on average per night?"
+            error={errors.hours_sleep}
+            disabled={isPending}
+          />
+
           <div className="w-full flex items-center gap-5 lg:mb-10 mt-5">
             <Button
               size="default"
@@ -384,8 +182,9 @@ const Health_Lifestyle: FC<Props> = ({ onContinue, onPrevious }) => {
               size="default"
               className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
               type="submit"
+              disabled={isPending}
             >
-              Next
+              {isPending ? "Saving..." : "Next"}
             </Button>
           </div>
         </form>
@@ -393,4 +192,5 @@ const Health_Lifestyle: FC<Props> = ({ onContinue, onPrevious }) => {
     </div>
   );
 };
+
 export default Health_Lifestyle;

@@ -58,8 +58,8 @@ const DashboardAnalytics: React.FC = () => {
     year: selectedYear2,
   });
 
-  console.log(subScribe);
-  console.log(surveyTypeDistribution);
+  // console.log(subScribe);
+  // console.log(surveyTypeDistribution);
 
   const circles = [
     {
