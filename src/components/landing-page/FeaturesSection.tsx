@@ -242,8 +242,13 @@ const IntegrationImage: React.FC<IntegrationImageProps> = ({
   );
 };
 
-const FeaturesSection: React.FC = () => {
-  const featuresRef = useRef<HTMLDivElement>(null);
+// Add an interface for the props
+interface FeaturesSectionProps {
+  featuresRef: React.RefObject<HTMLDivElement>;
+}
+
+// Update the component definition to use the props interface
+const FeaturesSection: React.FC<FeaturesSectionProps> = ({ featuresRef }) => {
   const isInView = useInView(featuresRef, { once: true });
 
   const getFeatureColor = (featureId: string): string => {

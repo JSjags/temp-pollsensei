@@ -272,7 +272,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
         </div>
         <hr />
         <div className="py-10 w-full flex gap-10 ">
-          <div className="pb-10 w-2/3 flex flex-col">
+          <div className="pb-10 lg:w-2/3 flex flex-col">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

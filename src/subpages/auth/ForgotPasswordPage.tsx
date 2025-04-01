@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect, memo } from "react";
 import Image from "next/image";
 import { Form, Field } from "react-final-form";
 import validate from "validate.js";
@@ -83,20 +83,20 @@ const ForgotPasswordPage: React.FC = () => {
   const [forgetPassword, { isLoading }] = useForgetPasswordMutation();
   const [verifyOTP, { isLoading: isLoadingOtp }] = useVerifyOTPMutation();
   const [resetPassword, { isLoading: isReset }] = useResetPasswordMutation();
+
   const [emailInput, setEmailInput] = useState(true);
   const [otpInput, setOtpInput] = useState(false);
   const [createNewPswd, setCreateNewPswd] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pwdFocus, setPwdFocus] = useState(false);
+  const [validPwd, setValidPwd] = useState(false);
+  const [matchFocus, setMatchFocus] = useState(false);
 
   const [eyeState, setEyeState] = useState({
     password: false,
     confirmPassword: false,
   });
-
-  const [pwdFocus, setPwdFocus] = useState(false);
-  const [validPwd] = useState(false);
-  const [matchFocus, setMatchFocus] = useState(false);
 
   const pattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
 
@@ -107,51 +107,66 @@ const ForgotPasswordPage: React.FC = () => {
     }));
   };
 
-  const onSubmit = async (values: { email: string }) => {
-    try {
-      setEmail(values.email);
-      await forgetPassword(values).unwrap();
-      toast.success("Check your email for your password reset code");
-      setEmailInput(false);
-      setOtpInput(true);
-    } catch (err: any) {
-      toast.error("Failed " + err?.data?.message || err.message);
-    }
-  };
+  const onSubmit = useCallback(
+    async (values: { email: string }) => {
+      try {
+        setEmail(values.email);
+        await forgetPassword(values).unwrap();
+        toast.success("Check your email for your password reset code");
+        setEmailInput(false);
+        setOtpInput(true);
+      } catch (err: any) {
+        toast.error("Failed " + err?.data?.message || err.message);
+      }
+    },
+    [forgetPassword]
+  );
+
+  const onSubmitOtp = useCallback(
+    async (values: { code: string }) => {
+      try {
+        const otpData = { ...values, code: parseInt(values.code, 10), email };
+        await verifyOTP(otpData).unwrap();
+        toast.success("OTP verified successfully");
+        setOtpInput(false);
+        setCreateNewPswd(true);
+      } catch (err: any) {
+        toast.error("Failed " + err?.data?.message || err.message);
+      }
+    },
+    [verifyOTP, email]
+  );
+
+  const createNewPswdHandler = useCallback(
+    async (values: { newPassword: string; confirmPassword: string }) => {
+      try {
+        const reset_data = { ...values, email };
+        await resetPassword(reset_data).unwrap();
+        toast.success("Password reset was successful");
+        setCreateNewPswd(false);
+        setLoading(true);
+      } catch (err: any) {
+        toast.error("Failed " + err?.data?.message || err.message);
+      }
+    },
+    [resetPassword, email]
+  );
+
+  useEffect(() => {
+    return () => {
+      setLoading(false);
+      setEmailInput(true);
+      setOtpInput(false);
+      setCreateNewPswd(false);
+    };
+  }, []);
 
   const validateForm = (values: any) => {
     return validate(values, constraints) || {};
   };
 
-  const onSubmitOtp = async (values: { code: string }) => {
-    try {
-      const otpData = { ...values, code: parseInt(values.code, 10), email };
-      await verifyOTP(otpData).unwrap();
-      toast.success("OTP verified successfully");
-      setOtpInput(false);
-      setCreateNewPswd(true);
-    } catch (err: any) {
-      toast.error("Failed " + err?.data?.message || err.message);
-    }
-  };
-
   const validateOTPForm = (values: any) => {
     return validate(values, otpConstraints) || {};
-  };
-
-  const createNewPswdHandler = async (values: {
-    newPassword: string;
-    confirmPassword: string;
-  }) => {
-    try {
-      const reset_data = { ...values, email };
-      await resetPassword(reset_data).unwrap();
-      toast.success("Password reset was successful");
-      setCreateNewPswd(false);
-      setLoading(true);
-    } catch (err: any) {
-      toast.error("Failed " + err?.data?.message || err.message);
-    }
   };
 
   const validateFormPswdForm = (values: any) => {
@@ -620,4 +635,4 @@ const ForgotPasswordPage: React.FC = () => {
   );
 };
 
-export default ForgotPasswordPage;
+export default memo(ForgotPasswordPage);

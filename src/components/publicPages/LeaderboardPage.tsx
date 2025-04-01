@@ -202,7 +202,7 @@ const LeaderboardPage = () => {
                       <span className="font-semibold text-[#5B03B2]">
                         Top 3 Qualification:
                       </span>{" "}
-                      Minimum of 150 referrals required to win Top 3 positions
+                      Minimum referrals required - 1st: 150, 2nd: 110, 3rd: 75
                     </p>
                   </div>
                   <div className="flex items-start sm:items-center gap-2">
@@ -450,7 +450,7 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       Top 3 Qualification:
                     </span>{" "}
-                    Minimum of 150 referrals required to win Top 3 positions
+                    Minimum referrals required - 1st: 150, 2nd: 110, 3rd: 75
                   </p>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">

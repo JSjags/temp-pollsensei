@@ -271,12 +271,14 @@ const RegisterPage = () => {
                 className="flex flex-col items-center max-w-md w-full"
               >
                 <div className="flex items-center justify-center gap-3 pb-10">
-                  <Image
-                    src={dark_theme_logo}
-                    alt="Logo"
-                    width={200}
-                    height={32}
-                  />
+                  <Link href={"/"}>
+                    <Image
+                      src={dark_theme_logo}
+                      alt="Logo"
+                      width={200}
+                      height={32}
+                    />
+                  </Link>
                 </div>
 
                 <motion.div

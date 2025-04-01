@@ -1,7 +1,7 @@
-//
 "use client";
 
 import FAQNavigation from "@/components/superadmin-faqs/FAQNavigation";
+import { useAllFAQsQuery } from "@/services/superadmin.service";
 
 export default function RootLayout({
   children,
