@@ -19,17 +19,6 @@ import apiSlice from "@/services/config/apiSlice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClipboardCopy } from "lucide-react";
 
-interface UserData {
-  name: string;
-  lastName: string;
-  email: string;
-  username: string;
-  bio: string;
-  file: string;
-  referral_code: string;
-  referral_link: string;
-}
-
 export const ProfileSkeleton = () => {
   return (
     <div className="px-4 md:px-[4.4rem] flex flex-col py-6 md:py-[3.88rem]">
@@ -59,18 +48,21 @@ export const ProfileSkeleton = () => {
   );
 };
 
+interface UserData {
+  name: string;
+  lastName: string;
+  email: string;
+  username: string;
+  bio: string;
+  file: string;
+  referral_code: string;
+  referral_link: string;
+}
+
 const ProfilePage: React.FC = () => {
   const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const dispatch = useDispatch();
-  const { data, refetch, isLoading } = useUserProfileQuery({
-    skip: !isClient,
-  });
   const [editProfile, setEditProfile] = useState<boolean>(false);
+  const [profileImage, setProfileImage] = useState<File | string | null>(null);
   const [userData, setUserData] = useState<UserData>({
     name: "",
     lastName: "",
@@ -81,7 +73,20 @@ const ProfilePage: React.FC = () => {
     referral_code: "",
     referral_link: "",
   });
-  const [profileImage, setProfileImage] = useState<File | string | null>(null);
+
+  const dispatch = useDispatch();
+
+  const { data, refetch, isLoading } = useUserProfileQuery({
+    skip: !isClient,
+  });
+  const [updateUserProfile, { isLoading: isUpdating }] =
+    useUpdateUserProfileMutation();
+  const [updateProfileImage, { isLoading: Updating }] =
+    useUpdateProfileImageMutation();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (data?.data) {
@@ -109,11 +114,6 @@ const ProfilePage: React.FC = () => {
       setProfileImage(photo_url || userPlaceholder);
     }
   }, [data]);
-
-  const [updateUserProfile, { isLoading: isUpdating }] =
-    useUpdateUserProfileMutation();
-  const [updateProfileImage, { isLoading: Updating }] =
-    useUpdateProfileImageMutation();
 
   const toggleEdit = useCallback(() => {
     setEditProfile((prev) => !prev);
