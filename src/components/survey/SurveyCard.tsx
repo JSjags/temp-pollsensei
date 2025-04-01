@@ -16,6 +16,7 @@ import {
   Trash2,
   MoreVertical,
   PlayCircle,
+  Cog,
 } from "lucide-react";
 
 import { Switch } from "../ui/switch";
@@ -112,6 +113,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         close: () => setModalStates((prev) => ({ ...prev, close: true })),
         open: () => setModalStates((prev) => ({ ...prev, open: true })),
         preview: () => router.push(`/surveys/question/${_id}`),
+        link: () => router.push(`/surveys/${_id}/settings`),
       };
 
       actions[choice]?.();
@@ -238,6 +240,11 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                           icon: PlayCircle,
                           action: "open",
                         },
+                    {
+                      label: "Settings",
+                      icon: Cog,
+                      action: "link",
+                    },
                     {
                       label: "Delete",
                       icon: Trash2,

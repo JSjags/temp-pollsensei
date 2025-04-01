@@ -45,7 +45,9 @@ const FAQNavigation: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [createFAQs, { isLoading }] = useCreateFAQsMutation();
+  const { refetch } = useAllFAQsQuery({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const currentTab = useMemo(() => {
     const path = pathname.split("/").pop() || "faqs";
@@ -62,21 +64,24 @@ const FAQNavigation: React.FC = () => {
   const onSubmit = async (values: { question: string; answer: string }) => {
     try {
       await createFAQs(values).unwrap();
+      if (refetch) {
+        await refetch();
+      }
+      setIsSheetOpen(false);
       toast.success("FAQ created successfully");
-      // refetch();
     } catch (err: any) {
       toast.error(`Failed to create FAQ: ${err?.data?.message || err.message}`);
     }
   };
 
-  // Move CreateFAQButton inside FAQNavigation to access onSubmit
+  // Move CreateFAQButton definition here, before it's used
   const CreateFAQButton = ({
     variant = "default",
   }: {
     variant?: "default" | "small";
   }) => {
     return (
-      <Sheet>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
           <Button
             className={cn(
@@ -99,8 +104,17 @@ const FAQNavigation: React.FC = () => {
             <Form
               onSubmit={onSubmit}
               validate={(values) => validate(values, constraints) || {}}
-              render={({ handleSubmit, submitting }) => (
-                <form onSubmit={handleSubmit} className="space-y-6">
+              render={({ handleSubmit, submitting, form }) => (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const result = await handleSubmit(e);
+                    if (result) {
+                      form.reset();
+                    }
+                  }}
+                  className="space-y-6"
+                >
                   <Field name="question">
                     {({ input }) => (
                       <div className="space-y-2">
@@ -128,15 +142,19 @@ const FAQNavigation: React.FC = () => {
                   </Field>
 
                   <SheetFooter>
-                    <SheetTrigger asChild>
-                      <Button variant="outline">Cancel</Button>
-                    </SheetTrigger>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsSheetOpen(false)}
+                    >
+                      Cancel
+                    </Button>
                     <Button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || isLoading}
                       className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
                     >
-                      {submitting ? (
+                      {submitting || isLoading ? (
                         <ClipLoader size={20} color="#ffffff" />
                       ) : (
                         "Save FAQ"

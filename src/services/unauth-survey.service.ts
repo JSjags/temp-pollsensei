@@ -1,5 +1,9 @@
 import apiSlice from "./config/apiSlice";
 
+const extraOptions = {
+  maxRetries: 5,
+};
+
 export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     fetchSurveys: builder.query({
@@ -14,6 +18,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      extraOptions,
     }),
     unAuthRecreateAiSurvey: builder.mutation({
       query: (body) => ({
@@ -21,6 +26,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      extraOptions,
     }),
     duplicateSurvey: builder.mutation({
       query: (body) => ({
@@ -40,6 +46,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         url: `survey/download/${id}`,
         method: "GET",
       }),
+      extraOptions,
     }),
     shareSurvey: builder.query({
       query: (id) => ({
@@ -72,6 +79,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      extraOptions,
     }),
     unAuthGenerateSingleSurvey: builder.mutation({
       query: (body) => ({
@@ -79,6 +87,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      extraOptions,
     }),
     unAuthRegenerateSingleSurvey: builder.mutation({
       query: (body) => ({
@@ -86,6 +95,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      extraOptions,
     }),
     saveProgress: builder.mutation({
       query: (body) => ({
@@ -93,6 +103,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      extraOptions,
     }),
     createSurvey: builder.mutation({
       query: (body) => ({
@@ -100,6 +111,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: body,
       }),
+      extraOptions,
     }),
     addSurveyHeader: builder.mutation({
       query: (body) => ({
@@ -185,12 +197,14 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         url: `/response/summary/${id}`,
         method: "GET",
       }),
+      extraOptions,
     }),
     validateSurveyResponse: builder.query({
       query: (id) => ({
         url: `response/validate/${id}`,
         method: "GET",
       }),
+      extraOptions,
     }),
     responseValidateIndividual: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
@@ -199,6 +213,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         }`,
         method: "GET",
       }),
+      extraOptions,
     }),
     validateIndividualResponse: builder.query({
       query: ({
@@ -231,6 +246,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
+      extraOptions,
     }),
 
     getPublicSurveyById: builder.query({
@@ -264,6 +280,7 @@ export const unAuthSurveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
+      extraOptions,
     }),
   }),
 });

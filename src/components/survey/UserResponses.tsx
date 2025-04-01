@@ -322,6 +322,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   questionType={item.question_type}
                 />
               ) : null}
+              {/* {console.log("User Response:", JSON.stringify(item, null, 2))} */}
             </div>
           ))
         ) : error ? (

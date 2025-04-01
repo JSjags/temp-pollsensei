@@ -30,7 +30,7 @@ interface UserData {
   referral_link: string;
 }
 
-const ProfileSkeleton = () => {
+export const ProfileSkeleton = () => {
   return (
     <div className="px-4 md:px-[4.4rem] flex flex-col py-6 md:py-[3.88rem]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
@@ -60,8 +60,16 @@ const ProfileSkeleton = () => {
 };
 
 const ProfilePage: React.FC = () => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const dispatch = useDispatch();
-  const { data, refetch, isLoading } = useUserProfileQuery({});
+  const { data, refetch, isLoading } = useUserProfileQuery({
+    skip: !isClient,
+  });
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -180,6 +188,10 @@ const ProfilePage: React.FC = () => {
       }
     }
   };
+
+  if (!isClient) {
+    return <ProfileSkeleton />;
+  }
 
   if (isLoading) {
     return <ProfileSkeleton />;

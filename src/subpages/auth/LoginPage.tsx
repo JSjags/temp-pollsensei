@@ -78,11 +78,10 @@ const LoginPage = () => {
       }
     },
     onError: (error: any) => {
-      // toast.error(
-      //   "Failed to login user " +
-      //     (error?.response?.data?.message || error.message)
-      // );
-      setLoginState(true);
+      toast.error(
+        "Failed to login user " +
+          (error?.response?.data?.message || error.message)
+      );
     },
     retry: false,
   });
@@ -105,7 +104,7 @@ const LoginPage = () => {
       }
     },
     onError: (error: any) => {
-      toast.error(
+      return toast.error(
         "Failed to register user " +
           (error?.response?.data?.message || error.message)
       );
@@ -125,7 +124,6 @@ const LoginPage = () => {
   }, [user, router, ed]);
 
   const onSubmit = (values: { email: string; password: string }) => {
-    setLoginState(true);
     loginMutation.mutate(values);
   };
 
@@ -302,13 +300,15 @@ const LoginPage = () => {
               whileHover={{ scale: 1.05 }}
               className="flex items-center justify-center gap-3 pb-10"
             >
-              <Image
-                src={dark_theme_logo}
-                alt="Logo"
-                width={200}
-                height={32}
-                className="drop-shadow-lg"
-              />
+              <Link href={"/"}>
+                <Image
+                  src={dark_theme_logo}
+                  alt="Logo"
+                  width={200}
+                  height={32}
+                  className="drop-shadow-lg"
+                />
+              </Link>
             </motion.div>
 
             <motion.div
