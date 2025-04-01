@@ -5,18 +5,13 @@ import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import { useUserProfileQuery } from "@/services/user.service";
 import { useDispatch } from "react-redux";
-import apiSlice from "@/services/config/apiSlice";
 import { useQueryClient } from "@tanstack/react-query";
 
-// Prevent page from being pre-rendered
-const SuccessPage = dynamic(() => Promise.resolve(PaymentSuccess), {
-  ssr: false,
-});
+export const dynamic = "force-dynamic";
 
-function PaymentSuccess({
+function SuccessPage({
   searchParams: { amount },
 }: {
   searchParams: { amount: string };
@@ -54,7 +49,7 @@ function PaymentSuccess({
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["profile"] });
-  }, []);
+  }, [queryClient]);
 
   return (
     <main className="w-full h-full mx-auto flex items-center justify-center">
@@ -129,5 +124,4 @@ function PaymentSuccess({
   );
 }
 
-// Export the dynamic component instead
 export default SuccessPage;
