@@ -9,7 +9,7 @@ import {
 import environment from "../config/base";
 import { logoutUser } from "../../redux/slices/user.slice";
 import { toast } from "react-toastify";
-import { RootState } from "../../redux/store";
+import store, { RootState } from "../../redux/store";
 
 const baseQuery = retry(
   fetchBaseQuery({
@@ -22,8 +22,43 @@ const baseQuery = retry(
       }
       return headers;
     },
+    responseHandler: async (response) => {
+      // Handle 401 Unauthorized responses
+      if (response.status === 401) {
+        // Return early to let the customBaseQuery handle the 401 error
+        // This will allow proper logout and error messaging
+        toast.error("Unauthorized access. Please login again.", {
+          toastId: "api-error",
+        });
+        return store.dispatch(logoutUser());
+      }
+
+      // Handle 204 No Content explicitly
+      if (response.status === 204) {
+        return null;
+      }
+
+      let responseData;
+      const responseText = await response.text();
+
+      try {
+        responseData = JSON.parse(responseText);
+      } catch {
+        responseData = { message: responseText };
+      }
+
+      // If response is not ok, throw error for RTK Query to handle
+      if (!response.ok) {
+        throw {
+          status: response.status,
+          data: responseData,
+        };
+      }
+
+      return responseData;
+    },
   }),
-  { maxRetries: 5 }
+  { maxRetries: 0 }
 );
 
 const customBaseQuery: BaseQueryFn<
@@ -39,24 +74,32 @@ const customBaseQuery: BaseQueryFn<
 
     // Create error message based on status
     let toastMessage = "";
-    if (status === 406) {
-      api.dispatch(logoutUser());
-      toastMessage = `Inactive for too long. Please login again to continue. ${errorMessage}`;
-    } else if (status === 401) {
-      api.dispatch(logoutUser());
-      toastMessage = `Error: ${errorMessage}`;
-    } else if (status === 400) {
-      toastMessage = `Something went wrong ${errorMessage}`;
-    } else if (status === 404) {
-      toastMessage = `Page not found ${errorMessage}`;
+    switch (status) {
+      case 406:
+        toastMessage = "Inactive for too long. Please login again to continue.";
+        api.dispatch(logoutUser());
+        break;
+      case 401:
+        toastMessage = "Unauthorized access. Please login again.";
+        api.dispatch(logoutUser());
+        break;
+      case 503:
+        toastMessage = "Unauthorized access. Please login again.";
+        api.dispatch(logoutUser());
+        break;
+      case 400:
+        toastMessage =
+          errorMessage || "Something went wrong with your request.";
+        break;
+      case 404:
+        toastMessage = errorMessage || "Page not found";
+        break;
+      default:
+        toastMessage = errorMessage || "An error occurred";
     }
 
-    // Only show toast if we have an error message
+    // Show toast message
     if (toastMessage) {
-      // Dismiss existing toasts and show new one with consistent toastId
-
-      console.log(toastMessage);
-
       toast.dismiss();
       toast.error(toastMessage, { toastId: "api-error" });
     }

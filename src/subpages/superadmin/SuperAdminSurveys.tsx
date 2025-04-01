@@ -21,7 +21,7 @@ const SuperAdminSurveys = () => {
   const [selectedSurvey, setSelectedSurvey] = useState<any>(null);
 
   const { data, isLoading, error, isFetching, refetch } =
-    useGetSuperAdminSurveyQuery("");
+    useGetSuperAdminSurveyQuery(currentPage);
   const totalItems = data?.data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 

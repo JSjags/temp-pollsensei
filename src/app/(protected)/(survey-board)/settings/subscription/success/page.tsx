@@ -5,12 +5,18 @@ import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useUserProfileQuery } from "@/services/user.service";
 import { useDispatch } from "react-redux";
 import apiSlice from "@/services/config/apiSlice";
 import { useQueryClient } from "@tanstack/react-query";
 
-export default function PaymentSuccess({
+// Prevent page from being pre-rendered
+const SuccessPage = dynamic(() => Promise.resolve(PaymentSuccess), {
+  ssr: false,
+});
+
+function PaymentSuccess({
   searchParams: { amount },
 }: {
   searchParams: { amount: string };
@@ -122,3 +128,6 @@ export default function PaymentSuccess({
     </main>
   );
 }
+
+// Export the dynamic component instead
+export default SuccessPage;

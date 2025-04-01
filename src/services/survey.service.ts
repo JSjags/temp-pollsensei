@@ -1,5 +1,10 @@
 import { RootState } from "@/redux/store";
 import apiSlice from "./config/apiSlice";
+
+const extraOptions = {
+  maxRetries: 5,
+};
+
 export const surveyApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     fetchSurveys: builder.query({
@@ -49,6 +54,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
         return result;
       },
+      extraOptions,
     }),
     duplicateSurvey: builder.mutation({
       query: (body) => ({
@@ -68,6 +74,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         url: `survey/download/${id}`,
         method: "GET",
       }),
+      extraOptions,
     }),
     shareSurvey: builder.query({
       query: (id) => ({
@@ -114,6 +121,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
         return result;
       },
+      extraOptions,
     }),
     generateSingleSurvey: builder.mutation({
       // query: (body) => ({
@@ -140,6 +148,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
 
         return result;
       },
+      extraOptions,
     }),
     saveProgress: builder.mutation({
       query: (body) => ({
@@ -185,6 +194,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
+      extraOptions,
     }),
     submitPublicResponse: builder.mutation({
       query: (body) => ({
@@ -269,6 +279,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         url: `response/validate/${id}`,
         method: "GET",
       }),
+      extraOptions,
     }),
     responseValidateIndividual: builder.query({
       query: ({ id, pagesNumber, path_params = "" }) => ({
@@ -277,8 +288,8 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         }`,
         method: "GET",
       }),
+      extraOptions,
     }),
-
     validateIndividualResponse: builder.query({
       query: ({
         countries,
@@ -310,8 +321,8 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
           method: "GET",
         };
       },
+      extraOptions,
     }),
-
     getPublicSurveyById: builder.query({
       query: (id) => ({
         url: `ps/survey/${id}`,

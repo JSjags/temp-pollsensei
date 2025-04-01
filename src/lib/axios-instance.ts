@@ -1,4 +1,5 @@
 // lib/axiosInstance.ts
+import { logoutUser } from "@/redux/slices/user.slice";
 import store from "@/redux/store";
 import environment from "@/services/config/base";
 import axios from "axios";
@@ -59,9 +60,12 @@ axiosInstance.interceptors.response.use(
     };
 
     if (error.request.status === 401 || error.response.status === 401) {
-      localStorage.removeItem("token");
-      toast.error(formatErrorMessage(error), { toastId: "error" });
-      // return window.location.assign("/login");
+      if (store.getState().user.user) {
+        localStorage.removeItem("token");
+        store.dispatch(logoutUser());
+        toast.error(formatErrorMessage(error), { toastId: "error" });
+        return window.location.assign("/login");
+      }
     } else if (
       (error?.response?.data?.msg ||
         error?.response?.data?.message ||
