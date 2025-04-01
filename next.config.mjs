@@ -8,12 +8,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false, // Fails on TypeScript errors
   },
-  output: "standalone",
-  experimental: {
-    // Disable static generation for problematic routes
-    excludeDefaultMomentLocales: false,
-    workerThreads: false,
-  },
 };
 
 export default nextConfig;
