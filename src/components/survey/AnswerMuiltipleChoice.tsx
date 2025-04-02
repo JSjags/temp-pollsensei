@@ -25,7 +25,7 @@ interface AnswerMultiChoiceQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
-  item: OtherValueProps;
+  item?: OtherValueProps;
   status?: string;
 }
 
