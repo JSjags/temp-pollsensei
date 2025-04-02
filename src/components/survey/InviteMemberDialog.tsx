@@ -9,38 +9,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/shadcn-input";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { InviteSuccessDialog } from "./InviteSuccessDialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { collaboratorsApi } from "@/services/collaborators";
 import { useParams } from "next/navigation";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import MultiSelectField from "@/components/ui/MultipleSelect";
 import { multiSelectCustomStyles } from "@/constants/multi-select";
 import { Form, Field } from "react-final-form";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 const roles = [
   { value: "Data Collector", label: "Data Collector" },
@@ -64,11 +48,15 @@ const customStyles = {
 interface InviteMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  refetch: (
+    options?: RefetchOptions | undefined
+  ) => Promise<QueryObserverResult<any, Error>>;
 }
 
 export function InviteMemberDialog({
   open,
   onOpenChange,
+  refetch,
 }: InviteMemberDialogProps) {
   const params = useParams();
   const surveyId = params.id as string;
@@ -87,12 +75,21 @@ export function InviteMemberDialog({
   const { mutate: inviteCollaborator, isPending } = useMutation({
     mutationFn: collaboratorsApi.invite,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["collaborators", surveyId] });
+      refetch();
       onOpenChange(false);
       setShowSuccess(true);
       // Reset form
       setFormData({ name: "", email: "" });
       setSelectedRoles([]);
+    },
+    onError: (error: any) => {
+      console.log(error);
+
+      toast.error(
+        error instanceof AxiosError
+          ? error?.response?.data?.message
+          : "Failed to invite collaborator"
+      );
     },
   });
 
@@ -139,7 +136,7 @@ export function InviteMemberDialog({
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
-                    placeholder="Mike Abayomi"
+                    placeholder="John Doe"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
@@ -152,7 +149,7 @@ export function InviteMemberDialog({
                   <Input
                     id="email"
                     type="email"
-                    placeholder="mikeabayomi@gmail.com"
+                    placeholder="johndoe@mail.com"
                     value={formData.email}
                     onChange={(e) =>
                       setFormData((prev) => ({

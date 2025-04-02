@@ -4,6 +4,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface InviteSuccessDialogProps {
   open: boolean;
@@ -66,7 +68,9 @@ export function InviteSuccessDialog({
           >
             <Button
               className="bg-purple-600 hover:bg-purple-700 text-white min-w-[200px]"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false);
+              }}
             >
               Continue
             </Button>

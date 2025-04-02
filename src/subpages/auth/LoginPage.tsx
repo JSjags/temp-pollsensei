@@ -15,7 +15,6 @@ import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import StateLoader2 from "@/components/common/StateLoader2";
 import { useRouter, useSearchParams } from "next/navigation";
-import mixpanel from "mixpanel-browser";
 import { RootState } from "@/redux/store";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -41,7 +40,7 @@ const constraints = {
   },
 };
 
-const fadeIn = {
+export const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 },

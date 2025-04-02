@@ -26,9 +26,10 @@ export const collaboratorsApi = {
   },
 
   remove: async (payload: RemoveCollaboratorPayload) => {
-    const response = await axiosInstance.delete("/survey/collaborators", {
-      data: payload,
-    });
+    const response = await axiosInstance.patch(
+      "/survey/collaborators",
+      payload
+    );
     return response.data;
   },
 };

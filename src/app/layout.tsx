@@ -137,7 +137,7 @@ export default function RootLayout({
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
           <TanstackProvider>
-            <ToastContainer limit={1} />
+            <ToastContainer className={"z-[1000000]"} limit={1} />
             <ReduxContext>
               <SenseiProvider>
                 <UpgradeModal />

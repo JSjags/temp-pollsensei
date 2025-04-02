@@ -14,6 +14,8 @@ const Login = (props: Props) => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
+  console.log(useSelector((state: RootState) => state.user));
+
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
   );
