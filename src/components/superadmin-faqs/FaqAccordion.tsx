@@ -40,6 +40,7 @@ import { Badge } from "../ui/badge";
 import { useDispatch } from "react-redux";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
+import { FAQContent } from "./FAQContent";
 
 interface AccordionItemProps {
   question: string;
@@ -274,7 +275,9 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
           isOpen ? "opacity-100 max-h-[500px]" : "opacity-0 max-h-0"
         }`}
       >
-        <div className="p-4 bg-gray-50 text-gray-600 border-t">{answer}</div>
+        <div className="px-[4.5rem] py-4 bg-gray-50 text-gray-600 border-t">
+          <FAQContent content={answer} className="max-w-none" />
+        </div>
       </div>
 
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
@@ -410,6 +413,8 @@ const FaqAccordion: React.FC<AccordionProps> = ({
   currentPage,
   refetch,
 }) => {
+  console.log(items);
+
   return (
     <div className="w-full space-y-2">
       {isLoading ? (
@@ -434,7 +439,7 @@ const FaqAccordion: React.FC<AccordionProps> = ({
             Something went wrong
           </span>
         </div>
-      ) : items.length === 0 ? (
+      ) : items?.length === 0 ? (
         <div className="text-center w-full p-8 rounded-xl bg-gray-50 border border-gray-100">
           <div className="flex flex-col items-center gap-2">
             <div className="text-gray-400">

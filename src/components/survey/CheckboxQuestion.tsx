@@ -17,6 +17,7 @@ import { Checkbox } from "../ui/shadcn-checkbox";
 import ActionButtons from "./ActionButtons";
 import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
 import { cn } from "@/lib/utils";
+import OtherValue, { OtherValueProps } from "../reusable/OtherValue";
 
 interface CheckboxQuestionProps {
   question: string;
@@ -39,6 +40,7 @@ interface CheckboxQuestionProps {
   setIsRequired?: (value: boolean) => void;
   isEdit?: boolean;
   surveyData?: SurveyData;
+  item?: OtherValueProps;
 }
 
 const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
@@ -55,6 +57,7 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
   is_required,
   setIsRequired,
   isEdit = false,
+  item,
   surveyData,
 }) => {
   const pathname = usePathname();
@@ -172,6 +175,7 @@ const CheckboxQuestion: React.FC<CheckboxQuestionProps> = ({
                     </label>
                   </div>
                 ))}
+                {item?.other_value && <OtherValue {...item} />}
               </div>
             </div>
           </div>
