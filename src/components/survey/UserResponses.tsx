@@ -24,6 +24,7 @@ import { useParams } from "next/navigation";
 import { toast } from "react-toastify";
 import CommentWithMediaQuestion from "./CommentWithMediaQuestion";
 import SliderQuestion from "./SliderQuestion";
+import { Input } from "../ui/shadcn-input";
 
 interface Answer {
   question?: string;
@@ -143,6 +144,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                 <AnswerMultiChoiceQuestion
                   key={index}
                   question={item.question}
+                  item={item}
                   options={item.options}
                   questionType={item.question_type}
                   selectedOptions={item.selected_options}
@@ -322,6 +324,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   questionType={item.question_type}
                 />
               ) : null}
+
               {/* {console.log("User Response:", JSON.stringify(item, null, 2))} */}
             </div>
           ))

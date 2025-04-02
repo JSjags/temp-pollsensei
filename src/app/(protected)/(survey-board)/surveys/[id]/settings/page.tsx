@@ -6,17 +6,24 @@ import { Input } from "@/components/ui/shadcn-input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Star, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Edit3, Star, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { InviteMemberDialog } from "@/components/survey/InviteMemberDialog";
 import { CollaboratorsList } from "@/components/survey/CollaboratorsList";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { collaboratorsApi } from "@/services/collaborators";
 import { useParams } from "next/navigation";
 import { CollaboratorSkeleton } from "@/components/survey/CollaboratorSkeleton";
 import Image from "next/image";
 import { teamIcon } from "@/assets/images";
+import { getSingleSurvey } from "@/services/analysis";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getSurveySettings, updateSurveySettings } from "@/services/survey";
+import { RegionSelectionDialog } from "@/components/survey/RegionSelectionDialog";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "react-toastify";
+import { Axios, AxiosError, AxiosInstance } from "axios";
 
 const fadeInUpVariant = {
   hidden: { opacity: 0, y: 20 },
@@ -35,17 +42,77 @@ const SettingsPage = () => {
   const params = useParams();
   const surveyId = params.id as string;
   const [settings, setSettings] = useState({
-    collectEmail: true,
+    collectEmail: false,
     collectNames: false,
-    allowEdit: true,
-    emailNotifications: true,
+    allowEdit: false,
+    emailNotifications: false,
   });
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [isRegionDialogOpen, setIsRegionDialogOpen] = useState(false);
+  const [isThresholdEditing, setIsThresholdEditing] = useState(false);
+  const [formState, setFormState] = useState({
+    language: "",
+    availabile_regions: [] as string[],
+    collect_email_addresses: false,
+    collect_name_of_respondents: false,
+    allow_survey_edit: false,
+    receive_email_notification: false,
+    response_threshold: 1000,
+  });
 
-  const { data: collaborators, isLoading } = useQuery({
+  const {
+    data: collaborators,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["collaborators", surveyId],
     queryFn: () => collaboratorsApi.fetchAll(surveyId),
   });
+
+  const {
+    data: surveySettings,
+    isLoading: isSurveySettingsLoading,
+    isSuccess: isSurveySettingsSuccess,
+    isError: isSurveySettingsError,
+  } = useQuery<{
+    regional_availability: {
+      status: boolean;
+      regions: string[];
+    };
+    survey_id: {
+      _id: string;
+      topic: string;
+    };
+    language: string;
+    collect_email_addresses: boolean;
+    collect_name_of_respondents: boolean;
+    allow_survey_edit: boolean;
+    receive_email_notification: boolean;
+    response_threshold: number;
+  }>({
+    queryKey: ["survey-settings", surveyId],
+    queryFn: () => getSurveySettings({ surveyId }),
+  });
+
+  useEffect(() => {
+    if (surveySettings) {
+      setSettings({
+        collectEmail: surveySettings.collect_email_addresses,
+        collectNames: surveySettings.collect_name_of_respondents,
+        allowEdit: surveySettings.allow_survey_edit,
+        emailNotifications: surveySettings.receive_email_notification,
+      });
+      setFormState({
+        language: surveySettings.language,
+        availabile_regions: surveySettings.regional_availability.regions,
+        collect_email_addresses: surveySettings.collect_email_addresses,
+        collect_name_of_respondents: surveySettings.collect_name_of_respondents,
+        allow_survey_edit: surveySettings.allow_survey_edit,
+        receive_email_notification: surveySettings.receive_email_notification,
+        response_threshold: surveySettings.response_threshold || 1000,
+      });
+    }
+  }, [surveySettings]);
 
   const handleSettingChange = (setting: keyof typeof settings) => {
     setSettings((prev) => ({
@@ -54,10 +121,45 @@ const SettingsPage = () => {
     }));
   };
 
+  const updateSettingsMutation = useMutation({
+    mutationFn: (data: typeof formState) =>
+      updateSurveySettings(surveyId, data),
+    onSuccess: (data) => {
+      toast.success("Survey settings updated successfully");
+      refetch();
+    },
+    onError: (error: AxiosError<{ message: string | string[] }>) => {
+      console.error("Failed to update survey settings:", error);
+      const errorMessage = error.response?.data?.message;
+      toast.error(
+        Array.isArray(errorMessage)
+          ? errorMessage[0]
+          : errorMessage || "Failed to update survey settings"
+      );
+    },
+  });
+
   const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log("Saving settings:", settings);
+    updateSettingsMutation.mutate(formState);
   };
+
+  const hasChanges = () => {
+    if (!surveySettings) return false;
+    return (
+      JSON.stringify(formState) !==
+      JSON.stringify({
+        language: surveySettings.language,
+        availabile_regions: surveySettings.regional_availability.regions,
+        collect_email_addresses: surveySettings.collect_email_addresses,
+        collect_name_of_respondents: surveySettings.collect_name_of_respondents,
+        allow_survey_edit: surveySettings.allow_survey_edit,
+        receive_email_notification: surveySettings.receive_email_notification,
+        response_threshold: surveySettings.response_threshold || 1000,
+      })
+    );
+  };
+
+  console.log(surveySettings);
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">
@@ -69,130 +171,294 @@ const SettingsPage = () => {
 
         <TabsContent value="general">
           <Card className="p-6">
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
+            {isSurveySettingsLoading && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-4 pt-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Skeleton className="h-4 w-40" />
+                        <Skeleton className="h-3 w-64" />
+                      </div>
+                      <Skeleton className="h-6 w-12 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-4 pt-6">
+                  <Skeleton className="h-10 w-20" />
+                  <Skeleton className="h-10 w-20" />
+                </div>
+              </div>
+            )}
+            {isSurveySettingsSuccess && (
               <motion.div
-                variants={fadeInUpVariant}
-                custom={0}
-                className="space-y-2"
-              >
-                <Label htmlFor="surveyTitle">Survey title</Label>
-                <Input
-                  id="surveyTitle"
-                  defaultValue="CareConnect: Your Voice Matters"
-                />
-              </motion.div>
-
-              <motion.div
-                variants={fadeInUpVariant}
-                custom={1}
-                className="space-y-2"
-              >
-                <Label htmlFor="language">Language</Label>
-                <Input id="language" defaultValue="English" />
-              </motion.div>
-
-              <motion.div
-                variants={fadeInUpVariant}
-                custom={2}
-                className="space-y-4 pt-4"
+                initial="hidden"
+                animate="visible"
+                className="space-y-6"
               >
                 <motion.div
                   variants={fadeInUpVariant}
-                  custom={3}
-                  className="flex items-center justify-between"
+                  custom={0}
+                  className="space-y-2"
                 >
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium">Regional Availability</h4>
-                      <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.4, duration: 0.2 }}
-                        className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-600 flex items-center gap-1"
-                      >
-                        <span>PREMIUM</span>
-                        <Star className="h-3 w-3 fill-purple-600" />
-                      </motion.div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Get localized insights. Limit survey responses to
-                      participants from designated geographic areas
-                    </p>
-                  </div>
-                  <Switch disabled />
+                  <Label htmlFor="surveyTitle">Survey title</Label>
+                  <Input
+                    id="surveyTitle"
+                    defaultValue={surveySettings.survey_id.topic}
+                    readOnly
+                  />
                 </motion.div>
 
-                {[
-                  {
-                    title: "Collect email addresses",
-                    description:
-                      "We will collect email addresses of respondents when they are about to fill your survey.",
-                    setting: "collectEmail",
-                    index: 4,
-                  },
-                  {
-                    title: "Collect names of respondents",
-                    description:
-                      "We will collect names of respondents when they are about to fill your survey.",
-                    setting: "collectNames",
-                    index: 5,
-                  },
-                  {
-                    title: "Allow survey edit",
-                    description:
-                      "Respondents can edit their responses after they have filled the survey. Note that users have a 30 minutes window to edit responses.",
-                    setting: "allowEdit",
-                    index: 6,
-                  },
-                  {
-                    title: "Receive email notifications",
-                    description:
-                      "Receive email notifications when your survey is filled.",
-                    setting: "emailNotifications",
-                    index: 7,
-                  },
-                ].map(({ title, description, setting, index }) => (
+                <motion.div
+                  variants={fadeInUpVariant}
+                  custom={1}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="language">Language</Label>
+                  <Input
+                    id="language"
+                    defaultValue={surveySettings.language}
+                    readOnly
+                  />
+                </motion.div>
+
+                <motion.div
+                  variants={fadeInUpVariant}
+                  custom={2}
+                  className="space-y-4 pt-4"
+                >
                   <motion.div
-                    key={setting}
                     variants={fadeInUpVariant}
-                    custom={index}
+                    custom={3}
                     className="flex items-center justify-between"
                   >
                     <div className="space-y-0.5">
-                      <h4 className="font-medium">{title}</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">Regional Availability</h4>
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: 0.4, duration: 0.2 }}
+                          className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-600 flex items-center gap-1"
+                        >
+                          <span>Pro plan</span>
+                          <Star className="h-3 w-3 fill-purple-600" />
+                        </motion.div>
+                      </div>
                       <p className="text-sm text-muted-foreground">
-                        {description}
+                        Get localized insights. Limit survey responses to
+                        participants from designated geographic areas
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2 pt-2">
+                        {formState.availabile_regions.map((region) => (
+                          <Badge
+                            key={region}
+                            variant="secondary"
+                            className="gap-1 bg-purple-100 hover:bg-purple-200"
+                          >
+                            {region}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <Switch
+                      checked={formState.availabile_regions.length > 0}
+                      onCheckedChange={() => setIsRegionDialogOpen(true)}
+                    />
+                  </motion.div>
+
+                  {[
+                    {
+                      title: "Collect email addresses",
+                      description:
+                        "We will collect email addresses of respondents when they are about to fill your survey.",
+                      setting: "collectEmail",
+                      index: 5,
+                    },
+                    {
+                      title: "Collect names of respondents",
+                      description:
+                        "We will collect names of respondents when they are about to fill your survey.",
+                      setting: "collectNames",
+                      index: 6,
+                    },
+                    {
+                      title: "Allow survey edit",
+                      description:
+                        "Respondents can edit their responses after they have filled the survey. Note that users have a 30 minutes window to edit responses.",
+                      setting: "allowEdit",
+                      index: 7,
+                    },
+                    {
+                      title: "Receive email notifications",
+                      description:
+                        "Receive email notifications when your survey is filled.",
+                      setting: "emailNotifications",
+                      index: 8,
+                    },
+                  ].map(({ title, description, setting, index }) => (
+                    <motion.div
+                      key={setting}
+                      variants={fadeInUpVariant}
+                      custom={index}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="space-y-0.5">
+                        <h4 className="font-medium">{title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {description}
+                        </p>
+                      </div>
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.1, duration: 0.2 }}
+                      >
+                        <Switch
+                          checked={settings[setting as keyof typeof settings]}
+                          onCheckedChange={() =>
+                            handleSettingChange(
+                              setting as keyof typeof settings
+                            )
+                          }
+                        />
+                      </motion.div>
+                    </motion.div>
+                  ))}
+
+                  <motion.div
+                    variants={fadeInUpVariant}
+                    custom={4}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="space-y-0.5">
+                      <h4 className="font-medium">Response Threshold</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Maximum number of responses allowed for this survey
                       </p>
                     </div>
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1, duration: 0.2 }}
-                    >
-                      <Switch
-                        checked={settings[setting as keyof typeof settings]}
-                        onCheckedChange={() =>
-                          handleSettingChange(setting as keyof typeof settings)
+                    <div className="flex items-center gap-2">
+                      {isThresholdEditing ? (
+                        <Input
+                          type="number"
+                          value={formState.response_threshold}
+                          onChange={(e) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              response_threshold: parseInt(e.target.value) || 0,
+                            }))
+                          }
+                          className="w-24"
+                        />
+                      ) : (
+                        <span>{formState.response_threshold}</span>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setIsThresholdEditing(!isThresholdEditing)
                         }
-                      />
-                    </motion.div>
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </motion.div>
-                ))}
-              </motion.div>
+                </motion.div>
 
+                <motion.div
+                  variants={fadeInUpVariant}
+                  custom={9}
+                  className="flex justify-end gap-4 pt-6"
+                >
+                  <Button
+                    variant="outline"
+                    disabled={updateSettingsMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={!hasChanges() || updateSettingsMutation.isPending}
+                    className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] hover:scale-105 transition-all"
+                  >
+                    {updateSettingsMutation.isPending ? (
+                      <>
+                        <svg
+                          className="mr-2 h-4 w-4 animate-spin"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Saving...
+                      </>
+                    ) : (
+                      "Save"
+                    )}
+                  </Button>
+                </motion.div>
+              </motion.div>
+            )}
+            {isSurveySettingsError && (
               <motion.div
                 variants={fadeInUpVariant}
-                custom={8}
-                className="flex justify-end gap-4 pt-6"
+                custom={0}
+                className="flex flex-col items-center justify-center py-8 space-y-4"
               >
-                <Button variant="outline">Cancel</Button>
-                <Button onClick={handleSave}>Save</Button>
+                <div className="rounded-full bg-red-50 p-6 mb-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-8 w-8 text-red-400"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium">Unable to load survey</h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  There was an error fetching the survey details. Please try
+                  again later or contact support if the problem persists.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                  className="mt-2"
+                >
+                  Retry
+                </Button>
               </motion.div>
-            </motion.div>
+            )}
           </Card>
         </TabsContent>
 
@@ -214,6 +480,7 @@ const SettingsPage = () => {
                       user_id: userId,
                     })
                   }
+                  refetch={refetch}
                 />
               ) : (
                 <motion.div
@@ -263,6 +530,15 @@ const SettingsPage = () => {
       <InviteMemberDialog
         open={inviteDialogOpen}
         onOpenChange={setInviteDialogOpen}
+        refetch={refetch}
+      />
+      <RegionSelectionDialog
+        open={isRegionDialogOpen}
+        onOpenChange={setIsRegionDialogOpen}
+        selectedRegions={formState.availabile_regions}
+        onRegionsChange={(regions) =>
+          setFormState((prev) => ({ ...prev, availabile_regions: regions }))
+        }
       />
     </div>
   );
