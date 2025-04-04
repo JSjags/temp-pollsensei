@@ -28,7 +28,6 @@ import { Separator } from "@/components/ui/separator";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
-import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 
 // Move the styles definition outside the component
 const twinkleStyles = `
@@ -54,8 +53,6 @@ const DashboardPage = () => {
   const isSurveyCompleted = useSelector(
     (state: RootState) => state.becomePaidRespondentSlice.isSurveyCompleted
   );
-
-  const { data: responseData } = useSubmitRespondentForm();
 
   function DashboardSkeleton() {
     return (

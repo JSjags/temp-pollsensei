@@ -5,7 +5,6 @@ import warning from "@/assets/images/warning.png";
 import { Button } from "@/components/ui/button";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import CompletedVideoDialog from "@/components/earn/CompletedVideoDialog";
-import ReactPlayer from "react-player";
 import { HiSpeakerWave, HiSpeakerXMark } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
 import {

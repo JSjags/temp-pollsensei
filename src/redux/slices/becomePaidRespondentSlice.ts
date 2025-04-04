@@ -9,7 +9,7 @@ const initialState: SurveyState = {
 };
 
 export const becomePaidRespondentSlice = createSlice({
-  name: "becomePaidRespondentSurvey",
+  name: "becomePaidRespondentSlice",
   initialState,
   reducers: {
     setSurveyCompleted: (state, action: PayloadAction<boolean>) => {
