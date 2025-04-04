@@ -15,6 +15,8 @@ import { IoArrowBack } from "react-icons/io5";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setSurveyCompleted } from "@/redux/slices/becomePaidRespondentSlice";
 
 interface Props {
   onPrevious: () => void;
@@ -30,6 +32,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [submitImage, setSubmitImage] = useState<boolean>(false);
+  const dispatch = useDispatch();
 
   // Request camera access when "proceed" is true
   useEffect(() => {
@@ -82,7 +85,11 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
     onPrevious();
   };
 
-  const { mutate: submitForm, isPending } = useSubmitRespondentForm();
+  const {
+    mutate: submitForm,
+    isPending,
+    data: responseData,
+  } = useSubmitRespondentForm();
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -133,6 +140,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
         {
           onSuccess: () => {
             setProceed(true);
+            dispatch(setSurveyCompleted(true));
           },
           onError: (error) => {
             console.error("Form submission error:", error);
@@ -447,6 +455,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
                     variant="outline"
                     className="w-full md:w-full bg-transparent border-[#A9A9B1] rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all text-black"
                     onClick={handlePrevious}
+                    disabled={responseData?.success === true}
                   >
                     Previous
                   </Button>

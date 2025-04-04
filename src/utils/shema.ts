@@ -43,7 +43,7 @@ export const personalInformationSchema = z.object({
   otherGender: z.string().optional(),
   maritalStatus: z.string().min(1, "Marital status is required"),
   ageGroup: z.string().min(1, "Age group is required"),
-  children: z.string().min(1, "Children/Dependents field is required"),
+  dependents: z.string().min(1, "Children/Dependents field is required"),
   pets: z.array(z.string()).min(1, "At least one pet is required"),
   otherPet: z.string().optional(),
 });

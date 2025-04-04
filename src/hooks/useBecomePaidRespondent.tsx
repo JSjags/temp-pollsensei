@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 interface DocumentType {
   base64: string;
@@ -93,8 +95,10 @@ interface RespondentFormData {
 }
 
 export function useSubmitRespondentForm() {
-  const pollsenseiAPIKey = `${process.env.NEXT_PUBLIC_APP_TOKEN}`;
   const pollsenseiAPIEndpoint = `${process.env.NEXT_PUBLIC_APP_BASE_URL}`;
+  const accessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
 
   return useMutation({
     mutationFn: async ({
@@ -105,6 +109,9 @@ export function useSubmitRespondentForm() {
       formData: Partial<RespondentFormData>;
     }) => {
       const url = `${pollsenseiAPIEndpoint}paid-respondent`;
+      if (!accessToken) {
+        throw new Error("No access token available");
+      }
 
       try {
         const response = await axios.post(url, formData, {
@@ -112,8 +119,8 @@ export function useSubmitRespondentForm() {
             section: tab,
           },
           headers: {
-            Authorization: `Bearer ${pollsenseiAPIKey}`,
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data",
           },
         });
         // console.log("API Response:", response.data);

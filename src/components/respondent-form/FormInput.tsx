@@ -9,7 +9,7 @@ interface FormInputProps {
   placeholder?: string;
   required?: boolean;
   register: UseFormRegister<any>;
-  error?: FieldError;
+  error?: FieldError | undefined;
   disabled?: boolean;
   className?: string;
 }
