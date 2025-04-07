@@ -13,9 +13,8 @@ import Image from "next/image";
 import { extractDescription } from "@/utils/analysis";
 
 interface TableData {
-  correlation_coefficient: number;
-  p_value: number;
-  interpretation: string[];
+  statistics: string[];
+  value: (number | string)[];
 }
 
 interface PlotData {
@@ -89,7 +88,7 @@ const SpearmanCorrelation: React.FC<TestProps> = (props) => {
           <CardTitle className="flex items-center justify-between">
             <span>{props.test_name}</span>
             <Select value={selectedResult} onValueChange={setSelectedResult}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
                 <SelectValue placeholder="Select variables" />
               </SelectTrigger>
               <SelectContent>
@@ -113,20 +112,21 @@ const SpearmanCorrelation: React.FC<TestProps> = (props) => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b">
-                  <td className="py-2">Correlation Coefficient (ρ)</td>
-                  <td className="text-right py-2">
-                    {currentResult.table_data.correlation_coefficient.toFixed(
-                      4
-                    )}
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2">P-Value</td>
-                  <td className="text-right py-2">
-                    {currentResult.table_data.p_value.toFixed(4)}
-                  </td>
-                </tr>
+                {currentResult.table_data.statistics &&
+                  currentResult.table_data.value &&
+                  currentResult.table_data.statistics.map((stat, index) => (
+                    <tr key={stat} className="border-b">
+                      <td className="py-2">{stat}</td>
+                      <td className="text-right py-2">
+                        {typeof currentResult.table_data.value[index] ===
+                        "number"
+                          ? Number(
+                              currentResult.table_data.value[index]
+                            ).toFixed(4)
+                          : currentResult.table_data.value[index]}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

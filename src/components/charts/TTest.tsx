@@ -13,11 +13,9 @@ import Image from "next/image";
 import { extractDescription } from "@/utils/analysis";
 
 interface TableData {
-  t_statistic: number;
-  p_value: number;
-  mean_diff: number;
-  interpretation: string[];
-  [key: string]: any; // For SEM values that vary by variable name
+  statistics: string[];
+  value: number[];
+  [key: string]: any;
 }
 
 interface PlotData {
@@ -42,17 +40,19 @@ interface TestResults {
 interface TestProps {
   test_name: string;
   test_results: {
-    results: TestResults[];
+    results: TestResults | TestResults[];
     description: string;
   };
 }
 
 const TTest: React.FC<TestProps> = (props) => {
-  // Flatten results array into a single object
-  const flattenedResults = props.test_results.results.reduce(
-    (acc, curr) => ({ ...acc, ...curr }),
-    {}
-  );
+  // Flatten results array into a single object if it's an array
+  const flattenedResults = Array.isArray(props.test_results.results)
+    ? props.test_results.results.reduce(
+        (acc, curr) => ({ ...acc, ...curr }),
+        {}
+      )
+    : props.test_results.results;
 
   const [selectedResult, setSelectedResult] = useState<string>(
     Object.keys(flattenedResults)[0]
@@ -84,13 +84,6 @@ const TTest: React.FC<TestProps> = (props) => {
       .join(" ");
   };
 
-  // Get SEM keys from table_data
-  const getSEMKeys = () => {
-    return Object.keys(currentResult.table_data).filter((key) =>
-      key.endsWith("_sem")
-    );
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -98,7 +91,7 @@ const TTest: React.FC<TestProps> = (props) => {
           <CardTitle className="flex items-center justify-between">
             <span>{props.test_name}</span>
             <Select value={selectedResult} onValueChange={setSelectedResult}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
                 <SelectValue placeholder="Select variables" />
               </SelectTrigger>
               <SelectContent>
@@ -122,35 +115,21 @@ const TTest: React.FC<TestProps> = (props) => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="border-b">
-                  <td className="py-2">T-Statistic</td>
-                  <td className="text-right py-2">
-                    {currentResult.table_data.t_statistic.toFixed(4)}
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2">P-Value</td>
-                  <td className="text-right py-2">
-                    {currentResult.table_data.p_value.toFixed(4)}
-                  </td>
-                </tr>
-                <tr className="border-b">
-                  <td className="py-2">Mean Difference</td>
-                  <td className="text-right py-2">
-                    {currentResult.table_data.mean_diff.toFixed(4)}
-                  </td>
-                </tr>
-                {/* Standard Error of Mean for each variable */}
-                {getSEMKeys().map((key) => (
-                  <tr key={key} className="border-b">
-                    <td className="py-2">
-                      {formatKey(key.replace("_sem", ""))} SEM
-                    </td>
-                    <td className="text-right py-2">
-                      {currentResult.table_data[key].toFixed(4)}
-                    </td>
-                  </tr>
-                ))}
+                {currentResult.table_data.statistics &&
+                  currentResult.table_data.value &&
+                  currentResult.table_data.statistics.map(
+                    (stat: string, index: number) => (
+                      <tr key={stat} className="border-b">
+                        <td className="py-2">{stat}</td>
+                        <td className="text-right py-2">
+                          {typeof currentResult.table_data.value[index] ===
+                          "number"
+                            ? currentResult.table_data.value[index].toFixed(4)
+                            : currentResult.table_data.value[index]}
+                        </td>
+                      </tr>
+                    )
+                  )}
               </tbody>
             </table>
           </div>
@@ -160,7 +139,11 @@ const TTest: React.FC<TestProps> = (props) => {
             {currentResult.plot_urls?.map((url: string, index: number) => (
               <div key={url} className="relative">
                 <div className="flex justify-between items-center mb-2">
-                  <div className="text-center font-medium">Box Plot</div>
+                  <div className="text-center font-medium">
+                    {currentResult.plot_data.type === "box"
+                      ? "Box Plot"
+                      : "Plot"}
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"

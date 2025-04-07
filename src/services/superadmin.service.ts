@@ -194,7 +194,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     deleteTutorial: builder.mutation({
-      query: (id) => ({
+      query: ({ id }: { id: string }) => ({
         url: `/superadmin/tutorial/${id}`, // superadmin/tutorial/674cf336922a72e499678670
         method: "DELETE",
       }),

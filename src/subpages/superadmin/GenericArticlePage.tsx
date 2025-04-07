@@ -48,7 +48,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Eye, Pencil, Ban, Trash2, MoreVertical } from "lucide-react";
-import { PlayCircle, FileText } from "lucide-react";
+import { PlayCircle, FileText, FileX } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -124,12 +124,16 @@ const GenericArticlePage = (props: Props) => {
   const [_id, set_Id] = useState("");
   const [deleteTutorial, { isLoading: isDeleteing }] =
     useDeleteTutorialMutation();
+
   const [unpublishTutorial, { isLoading: isUnpublishLoading }] =
     useUnpublishTutorialMutation();
   const [publishTutorial, { isLoading: isPublishLoading }] =
     usePublishTutorialMutation();
-  const { data: previewTutorial, isLoading: isLoadingAll } =
-    usePreviewTutorialQuery(_id, { skip: _id ? false : true });
+  const {
+    data: previewTutorial,
+    isLoading: isLoadingAll,
+    refetch,
+  } = usePreviewTutorialQuery(_id);
   const [editTutorial, { isLoading: isEditLoading }] =
     useEditTutorialMutation();
   const queryClient = useQueryClient();
@@ -332,20 +336,46 @@ const GenericArticlePage = (props: Props) => {
 
   useEffect(() => {
     if (previewTutorial?.data) {
-      console.log(previewTutorial);
+      // Update form data
       setFormData({
         type: previewTutorial.data.type || "image",
         title: previewTutorial.data.title || "",
         description: previewTutorial.data.description || "",
         links: previewTutorial.data.links || "",
-        file: null, // Files are not retrieved from the server
+        file: null,
       });
 
-      if (!quilValue && previewTutorial?.data?.content) {
-        setQuilValue(previewTutorial?.data?.content);
+      // Update quill content directly
+      setQuilValue(previewTutorial.data.content || "");
+
+      // If there's a media file, update the fileName
+      if (previewTutorial.data.media?.[0]?.url) {
+        const mediaUrl = previewTutorial.data.media[0].url;
+        const fileName = mediaUrl.split("/").pop();
+        setFileName(fileName || null);
       }
     }
-  }, [previewTutorial]);
+  }, [previewTutorial?.data]);
+
+  // Add a loading state for the edit form
+  const [isFormLoading, setIsFormLoading] = useState(false);
+
+  // Modify the edit click handler to ensure data is loaded
+  const handleEditClick = async (id: string) => {
+    setIsFormLoading(true);
+    try {
+      refetch();
+      setEdit(true);
+      set_Id(id);
+      // Force a refetch by removing the cache first
+      await queryClient.removeQueries({ queryKey: ["previewTutorial", id] });
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to load tutorial data");
+    } finally {
+      setIsFormLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
@@ -362,14 +392,25 @@ const GenericArticlePage = (props: Props) => {
               Something went wrong
             </span>
           </div>
+        ) : data?.data.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-12">
+            <FileX className="h-16 w-16 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              No tutorials found
+            </h3>
+            <p className="text-sm text-gray-500 text-center max-w-sm">
+              There are no tutorials available at the moment. Tutorials you
+              create will appear here.
+            </p>
+          </div>
         ) : (
           data?.data.map((card: any, index: number) => (
             <div
               key={index}
-              className="relative flex flex-col bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg overflow-hidden"
+              className="relative flex flex-col bg-white shadow-sm hover:shadow-md transition-shadow duration-200 rounded-lg overflow-hidden h-[400px]"
             >
-              {/* Card Background */}
-              <div className="relative w-full aspect-video flex justify-center items-center bg-gray-100">
+              {/* Card Background - Fixed height for media container */}
+              <div className="relative w-full h-[200px]">
                 {card?.media[0]?.type.includes("image") ? (
                   <Image
                     className="w-full h-full object-cover"
@@ -396,7 +437,7 @@ const GenericArticlePage = (props: Props) => {
                 )}
               </div>
 
-              {/* Card Content */}
+              {/* Card Content - Will take remaining height */}
               <div className="p-4 flex flex-col flex-grow">
                 <div className="flex justify-between items-center mb-2">
                   <Badge
@@ -426,10 +467,7 @@ const GenericArticlePage = (props: Props) => {
                         <span>Preview</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => {
-                          setEdit(true);
-                          set_Id(card?._id);
-                        }}
+                        onClick={() => handleEditClick(card._id)}
                         className="cursor-pointer"
                       >
                         <Pencil className="mr-2 h-4 w-4" />
@@ -452,8 +490,13 @@ const GenericArticlePage = (props: Props) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
-                <div className="mt-auto pt-2 flex items-center text-xs text-gray-500">
+                <h3 className="text-lg font-semibold mb-2 line-clamp-2">
+                  {card.title}
+                </h3>
+                <p className="text-gray-600 text-sm mb-auto line-clamp-3">
+                  {card.description}
+                </p>
+                <div className="mt-4 pt-2 flex items-center text-xs text-gray-500 border-t">
                   {card?.media?.[0]?.type === "video/mp4" ? (
                     <span className="flex items-center">
                       <PlayCircle className="w-4 h-4 mr-1" />
@@ -577,7 +620,7 @@ const GenericArticlePage = (props: Props) => {
         <Sheet open={edit} onOpenChange={setEdit}>
           <SheetContent
             side="right"
-            className="w-full sm:max-w-[80vw] md:max-w-[60vw] lg:max-w-[50vw]  overflow-y-auto"
+            className="w-full sm:max-w-[80vw] md:max-w-[60vw] lg:max-w-[50vw] overflow-y-auto"
           >
             <SheetHeader>
               <SheetTitle>Edit Tutorial</SheetTitle>
@@ -586,7 +629,7 @@ const GenericArticlePage = (props: Props) => {
               </SheetDescription>
             </SheetHeader>
 
-            {isLoadingAll ? (
+            {isLoadingAll || isFormLoading ? (
               <EditSheetSkeleton />
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6 py-6">
@@ -606,6 +649,7 @@ const GenericArticlePage = (props: Props) => {
                         <SelectItem value="text">Text</SelectItem>
                         <SelectItem value="image">Image</SelectItem>
                         <SelectItem value="video">Video</SelectItem>
+                        <SelectItem value="web">Web</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -685,6 +729,7 @@ const GenericArticlePage = (props: Props) => {
                     <AppReactQuill
                       quilValue={quilValue}
                       setQuilValue={setQuilValue}
+                      key={_id}
                     />
                   </div>
                 </div>
@@ -728,7 +773,7 @@ const GenericArticlePage = (props: Props) => {
           )
         }
       >
-        <DialogContent>
+        <DialogContent className="z-[100000]" overlayClassName="z-[100000]">
           <DialogHeader>
             <DialogTitle>Delete Tutorial</DialogTitle>
             <DialogDescription>
