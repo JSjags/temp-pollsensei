@@ -659,3 +659,41 @@ input[type="radio"].radio:checked:before {
 .ProseMirror:focus {
   outline: none;
 }
+
+/* Custom carousel styles */
+.daily-login-slider {
+  width: 100%;
+}
+
+.daily-login-slider .slick-slide {
+  padding: 0 4px;
+}
+
+.daily-login-slider .slick-list {
+  margin: 0 -4px;
+  padding: 10px 0;
+}
+
+.daily-login-slider .slick-prev:before,
+.daily-login-slider .slick-next:before {
+  color: #5b03b2;
+  font-size: 24px;
+}
+
+.daily-login-slider .slick-track {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Arrow styling */
+.daily-login-slider .slick-arrow {
+  width: 30px;
+  height: 30px;
+  background: rgba(91, 3, 178, 0.2);
+  border-radius: 50%;
+}
+
+.daily-login-slider .slick-arrow:hover {
+  background: rgba(91, 3, 178, 0.4);
+}

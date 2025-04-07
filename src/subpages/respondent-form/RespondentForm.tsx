@@ -18,9 +18,15 @@ import IdentityVerification from "@/subpages/respondent-form/IdentityVerificatio
 import Image from "next/image";
 import marker from "@/assets/images/marker.svg";
 import tech from "@/assets/images/tech.svg";
+import { z } from "zod";
+import { getInitialValuesFromSchema } from "@/utils/respondentUtils";
+import { combinedSchema, CombinedFormData } from "@/utils/combinedSchema";
 
 const RespondentForm = () => {
   const [activeTab, setActiveTab] = useState("personalInfo");
+  const initialFormData = getInitialValuesFromSchema(combinedSchema);
+
+  const [formData, setFormData] = useState<CombinedFormData>(initialFormData);
 
   const tabs = [
     {
@@ -37,6 +43,8 @@ const RespondentForm = () => {
       component: (
         <PersonalInformation
           onContinue={() => setActiveTab("geographicInfo")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
@@ -59,6 +67,8 @@ const RespondentForm = () => {
         <Geo_Culture
           onContinue={() => setActiveTab("educationEmployment")}
           onPrevious={() => setActiveTab("personalInfo")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
@@ -79,6 +89,8 @@ const RespondentForm = () => {
         <Edu_Employment
           onContinue={() => setActiveTab("healthLifestyle")}
           onPrevious={() => setActiveTab("geographicInfo")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
@@ -99,6 +111,8 @@ const RespondentForm = () => {
         <Health_LifeStyle
           onContinue={() => setActiveTab("technologyMedia")}
           onPrevious={() => setActiveTab("educationEmployment")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
@@ -123,6 +137,8 @@ const RespondentForm = () => {
         <Tech_Media
           onContinue={() => setActiveTab("housingLiving")}
           onPrevious={() => setActiveTab("healthLifestyle")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
@@ -141,6 +157,8 @@ const RespondentForm = () => {
         <Housing_Living
           onContinue={() => setActiveTab("mobilityTravel")}
           onPrevious={() => setActiveTab("technologyMedia")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
@@ -159,6 +177,8 @@ const RespondentForm = () => {
         <Mobility_Travel
           onContinue={() => setActiveTab("identityVerification")}
           onPrevious={() => setActiveTab("housingLiving")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
@@ -178,6 +198,8 @@ const RespondentForm = () => {
       component: (
         <IdentityVerification
           onPrevious={() => setActiveTab("mobilityTravel")}
+          // formData={formData}
+          // setFormData={setFormData}
         />
       ),
     },
@@ -214,4 +236,5 @@ const RespondentForm = () => {
     </Tabs>
   );
 };
+
 export default RespondentForm;

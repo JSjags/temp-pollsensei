@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { healthAndLifestyleSchema } from "@/utils/shema";
+import { CombinedFormData } from "@/utils/combinedSchema";
 import {
   overallHealthOptions,
   helathInsuranceOptions,
@@ -24,16 +25,37 @@ import { ControlledSelect } from "@/components/respondent-form/ControlledSelect"
 interface Props {
   onContinue: () => void;
   onPrevious: () => void;
+  formData: CombinedFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CombinedFormData>>;
 }
 
-const Health_Lifestyle: FC<Props> = ({ onContinue, onPrevious }) => {
+const Health_Lifestyle: FC<Props> = ({
+  onContinue,
+  onPrevious,
+  formData,
+  setFormData,
+}) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
-  const handleContinue = (data: FormData) => {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(healthAndLifestyleSchema),
+    defaultValues: formData,
+  });
+
+  const handleContinue = (data: z.infer<typeof healthAndLifestyleSchema>) => {
     submitForm(
       { tab: "healthLifestyle", formData: data },
       {
         onSuccess: () => {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            ...data,
+          }));
           onContinue();
         },
         onError: (error) => {
@@ -44,27 +66,10 @@ const Health_Lifestyle: FC<Props> = ({ onContinue, onPrevious }) => {
     );
   };
 
-  useEffect(() => {
-    if (isPending) {
-      toast.info("Saving Health & Lifestyle details...");
-    }
-  }, [isPending]);
-
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     onPrevious();
   };
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(healthAndLifestyleSchema),
-  });
-
-  type FormData = z.infer<typeof healthAndLifestyleSchema>;
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">

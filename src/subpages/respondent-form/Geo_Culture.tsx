@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { geographyAndCultureSchema } from "@/utils/shema";
+import { CombinedFormData } from "@/utils/combinedSchema";
 import { useQuery } from "@tanstack/react-query";
 import { getNationality } from "@/services/api/apiGetRequest";
 import Image from "next/image";
@@ -34,9 +35,16 @@ import { Controller } from "react-hook-form";
 interface Props {
   onContinue: () => void;
   onPrevious: () => void;
+  formData: CombinedFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CombinedFormData>>;
 }
 
-const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
+const Geo_Culture: FC<Props> = ({
+  onContinue,
+  onPrevious,
+  formData,
+  setFormData,
+}) => {
   const [searchNationality, setSearchNationality] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,22 +53,22 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm({
     resolver: zodResolver(geographyAndCultureSchema),
-    defaultValues: {
-      languages: [],
-    },
+    defaultValues: formData,
   });
-
-  type FormData = z.infer<typeof geographyAndCultureSchema>;
 
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
-  const handleContinue = (data: FormData) => {
+  const handleContinue = (data: z.infer<typeof geographyAndCultureSchema>) => {
     submitForm(
       { tab: "geographicInfo", formData: data },
       {
         onSuccess: () => {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            ...data,
+          }));
           onContinue();
         },
         onError: (error) => {
@@ -70,12 +78,6 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
       }
     );
   };
-
-  useEffect(() => {
-    if (isPending) {
-      toast.info("Saving Geography & Culture details...");
-    }
-  }, [isPending]);
 
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();

@@ -50,6 +50,9 @@ const DashboardPage = () => {
   const { data: surveyLeaderboard, isLoading: isSurveyLeaderboardLoading } =
     useSurveyLeaderboardQuery("year");
   const { data: surveys, isLoading: isSurveysLoading } = useSurveyQuery("year");
+  const isSurveyCompleted = useSelector(
+    (state: RootState) => state.becomePaidRespondentSlice.isSurveyCompleted
+  );
 
   function DashboardSkeleton() {
     return (
@@ -147,6 +150,7 @@ const DashboardPage = () => {
             <p className="text-lg md:text-4xl text-gray-400">
               Great to have you here!
             </p>
+            {}
             <div className="hidden lg:flex">
               {" "}
               <CreateSurveyButton type="dashboard" />{" "}
@@ -170,6 +174,7 @@ const DashboardPage = () => {
               size="default"
               className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-full text-xs md:text-sm p-2 lg:p-4 hover:scale-x-105 transition-all"
               onClick={() => router.push("/respondent-form")}
+              disabled={isSurveyCompleted}
             >
               Become a Paid Respondent
               <ArrowRight className="ml-2 w-5 h-5" />

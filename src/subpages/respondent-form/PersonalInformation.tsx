@@ -1,9 +1,9 @@
-"use client";
-import React, { FC, useEffect } from "react";
+import React, { FC } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { personalInformationSchema } from "@/utils/shema";
+import { CombinedFormData } from "@/utils/combinedSchema";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
 import {
   petOptions,
@@ -23,41 +23,54 @@ import { ControlledMultiSelect } from "@/components/respondent-form/ControlledMu
 
 interface Props {
   onContinue: () => void;
+  formData: CombinedFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CombinedFormData>>;
 }
 
-const PersonalInformation: FC<Props> = ({ onContinue }) => {
+const PersonalInformation: FC<Props> = ({
+  onContinue,
+  formData,
+  setFormData,
+}) => {
   const user = useSelector((state: RootState) => state.user.user);
   const nameParts = user?.name?.split(" ") || [];
   const firstName = nameParts[0] || "";
   const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
   const otherName =
     nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : "";
-
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm({
     resolver: zodResolver(personalInformationSchema),
     defaultValues: {
-      firstName,
-      lastName,
-      otherName,
+      firstName: firstName,
+      lastName: lastName,
+      otherName: otherName,
       email: user?.email || "",
-      pets: [],
+      phoneNumber: formData.phoneNumber || "",
+      gender: formData.gender || "",
+      maritalStatus: formData.maritalStatus || "",
+      ageGroup: formData.ageGroup || "",
+      dependents: formData.dependents || "",
+      pets: formData.pets || [],
+      otherPet: formData.otherPet || "",
     },
   });
 
-  type FormData = z.infer<typeof personalInformationSchema>;
-
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
-  const handleContinue = (data: FormData) => {
+  const handleContinue = (data: z.infer<typeof personalInformationSchema>) => {
     submitForm(
       { tab: "personalInfo", formData: data },
       {
         onSuccess: () => {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            ...data,
+          }));
           onContinue();
         },
         onError: (error) => {
@@ -67,12 +80,6 @@ const PersonalInformation: FC<Props> = ({ onContinue }) => {
       }
     );
   };
-
-  useEffect(() => {
-    if (isPending) {
-      toast.info("Saving Personal details...");
-    }
-  }, [isPending]);
 
   return (
     <div className="w-full h-full flex flex-col items-start mx-auto">
@@ -179,12 +186,12 @@ const PersonalInformation: FC<Props> = ({ onContinue }) => {
           />
 
           <ControlledSelect
-            name="children"
+            name="dependents"
             control={control}
             options={dependentsOptions}
             placeholder="Select option"
             label="Do you have children or dependents?"
-            error={errors.children}
+            error={errors.dependents}
             required
             disabled={isPending}
           />

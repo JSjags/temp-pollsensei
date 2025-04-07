@@ -143,9 +143,10 @@ import nameReducer from "./slices/name.slice";
 import filterReducer from "./slices/filter.slice";
 import surveySettingsReducer from "./slices/survey_settings.slice";
 import upgradeModalReducer from "./slices/modal.slice";
-import criteriaReducer from "./slices/criteriaSlice";
 import respondentDialogReducer from "./slices/buyRespondentDialogSlice";
-
+import criteriaReducer from "./slices/criteriaSlice";
+import earnDialogReducer from "./slices/earnDialogSlice";
+import becomePaidRespondentReducer from "./slices/becomePaidRespondentSlice";
 // At the top of the file, after imports
 export type RootState = {
   user: ReturnType<typeof userReducer>;
@@ -164,6 +165,8 @@ export type RootState = {
   [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
   criteria: ReturnType<typeof criteriaReducer>;
   respondentDialog: ReturnType<typeof respondentDialogReducer>;
+  earnDialogSlice: ReturnType<typeof earnDialogReducer>;
+  becomePaidRespondentSlice: ReturnType<typeof becomePaidRespondentReducer>;
 };
 
 const rootReducer = combineReducers({
@@ -182,6 +185,8 @@ const rootReducer = combineReducers({
   survey_settings: surveySettingsReducer,
   criteria: criteriaReducer,
   respondentDialog: respondentDialogReducer,
+  earnDialogSlice: earnDialogReducer,
+  becomePaidRespondentSlice: becomePaidRespondentReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 

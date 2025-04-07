@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { mobilityAndTravelSchema } from "@/utils/shema";
+import { CombinedFormData } from "@/utils/combinedSchema";
 import {
   commuteOptions,
   travelOptions,
@@ -19,16 +20,37 @@ import { ControlledSelect } from "@/components/respondent-form/ControlledSelect"
 interface Props {
   onContinue: () => void;
   onPrevious: () => void;
+  formData: CombinedFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CombinedFormData>>;
 }
 
-const Mobility_Travel: FC<Props> = ({ onContinue, onPrevious }) => {
+const Mobility_Travel: FC<Props> = ({
+  onContinue,
+  onPrevious,
+  formData,
+  setFormData,
+}) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
-  const handleContinue = (data: FormData) => {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(mobilityAndTravelSchema),
+    defaultValues: formData,
+  });
+
+  const handleContinue = (data: z.infer<typeof mobilityAndTravelSchema>) => {
     submitForm(
       { tab: "mobilityTravel", formData: data },
       {
         onSuccess: () => {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            ...data,
+          }));
           onContinue();
         },
         onError: (error) => {
@@ -39,27 +61,10 @@ const Mobility_Travel: FC<Props> = ({ onContinue, onPrevious }) => {
     );
   };
 
-  useEffect(() => {
-    if (isPending) {
-      toast.info("Saving Mobility & Travel details...");
-    }
-  }, [isPending]);
-
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     onPrevious();
   };
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(mobilityAndTravelSchema),
-  });
-
-  type FormData = z.infer<typeof mobilityAndTravelSchema>;
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
@@ -134,4 +139,5 @@ const Mobility_Travel: FC<Props> = ({ onContinue, onPrevious }) => {
     </div>
   );
 };
+
 export default Mobility_Travel;

@@ -14,7 +14,6 @@ interface CriteriaPayload {
   criteria: string;
 }
 
-// ✅ Initialize with all possible tabs to prevent undefined errors
 const initialState: CriteriaState = {
   selectedCriteria: {
     personalInfo: {},
@@ -52,7 +51,6 @@ const criteriaSlice = createSlice({
           section
         ].filter((item) => item !== criteria);
 
-        // Cleanup empty sections/tabs
         if (state.selectedCriteria[tab][section].length === 0) {
           delete state.selectedCriteria[tab][section];
         }
@@ -61,13 +59,13 @@ const criteriaSlice = createSlice({
         }
       }
     },
-    // 💡 New: Reset a specific tab (useful when switching parent tabs)
+    // New: Reset a specific tab (useful when switching parent tabs)
     // resetTabCriteria: (state, action: PayloadAction<{ tab: string }>) => {
     //   const { tab } = action.payload;
     //   delete state.selectedCriteria[tab];
     // },
     clearCriteria: (state) => {
-      state.selectedCriteria = { ...initialState.selectedCriteria }; // Keep structure
+      state.selectedCriteria = { ...initialState.selectedCriteria };
     },
   },
 });

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { techAndMediaSchema } from "@/utils/shema";
+import { CombinedFormData } from "@/utils/combinedSchema";
 import {
   contentOptions,
   platformOptions,
@@ -25,16 +26,37 @@ import { ControlledMultiSelect } from "@/components/respondent-form/ControlledMu
 interface Props {
   onContinue: () => void;
   onPrevious: () => void;
+  formData: CombinedFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CombinedFormData>>;
 }
 
-const Tech_Media: FC<Props> = ({ onContinue, onPrevious }) => {
+const Tech_Media: FC<Props> = ({
+  onContinue,
+  onPrevious,
+  formData,
+  setFormData,
+}) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
-  const handleContinue = (data: FormData) => {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(techAndMediaSchema),
+    defaultValues: formData,
+  });
+
+  const handleContinue = (data: z.infer<typeof techAndMediaSchema>) => {
     submitForm(
       { tab: "technologyMedia", formData: data },
       {
         onSuccess: () => {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            ...data,
+          }));
           onContinue();
         },
         onError: (error) => {
@@ -45,27 +67,16 @@ const Tech_Media: FC<Props> = ({ onContinue, onPrevious }) => {
     );
   };
 
-  useEffect(() => {
-    if (isPending) {
-      toast.info("Saving Technology & Media details...");
-    }
-  }, [isPending]);
+  // useEffect(() => {
+  //   if (isPending) {
+  //     toast.info("Saving Technology & Media details...");
+  //   }
+  // }, [isPending]);
 
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     onPrevious();
   };
-
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(techAndMediaSchema),
-  });
-
-  type FormData = z.infer<typeof techAndMediaSchema>;
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
