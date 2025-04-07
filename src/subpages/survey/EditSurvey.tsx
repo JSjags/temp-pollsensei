@@ -1,3 +1,5 @@
+"use client";
+
 import { RootState } from "@/redux/store";
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
