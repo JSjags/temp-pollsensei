@@ -262,7 +262,7 @@ const TestChartRenderer = ({ testData }: { testData: any }) => {
         </div>
       );
 
-    case "Spearman's Rank Correlation":
+    case "Spearman’s Rank Correlation":
       return (
         <div {...chartProps}>
           <SpearmanCorrelation
@@ -463,9 +463,6 @@ const DataVisualizationComponent = ({
       )
     );
   };
-
-  console.log(survey);
-  console.log(data);
 
   return (
     <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-10 max-w-">

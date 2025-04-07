@@ -38,6 +38,7 @@ interface LeaderboardEntry {
   referrerName: string;
   totalReferrals: number;
   totalSurveysByReferrals: number;
+  totalResponsesToReferralSurveys: number;
 }
 
 interface LeaderboardResponse {
@@ -130,6 +131,9 @@ const LeaderboardPage = () => {
                       Total Referrals
                     </TableHead>
                     <TableHead className="text-right">Total Surveys</TableHead>
+                    <TableHead className="text-right">
+                      Total Responses
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -140,6 +144,9 @@ const LeaderboardPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
@@ -202,16 +209,27 @@ const LeaderboardPage = () => {
                       <span className="font-semibold text-[#5B03B2]">
                         Top 3 Qualification:
                       </span>{" "}
-                      Minimum referrals required - 1st: 150, 2nd: 110, 3rd: 75
+                      Minimum referrals required - 1st: 500, 2nd: 300, 3rd: 200
                     </p>
                   </div>
                   <div className="flex items-start sm:items-center gap-2">
                     <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
                     <p className="text-sm">
                       <span className="font-semibold text-[#5B03B2]">
+                        Total Responses:
+                      </span>{" "}
+                      Total number of responses to surveys created by referred
+                      users
+                    </p>
+                  </div>
+                  <div className="flex items-start sm:items-center gap-2">
+                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                    <p className="text-sm">
+                      <span className="font-semibold text-[#5B03B2]">
                         Points Calculation:
                       </span>{" "}
-                      Points = Total Referrals + (2 × Total Surveys)
+                      Points = Total Referrals + (2 × Total Surveys) + (2 ×
+                      Total Responses)
                     </p>
                   </div>
                 </div>
@@ -336,6 +354,7 @@ const LeaderboardPage = () => {
                   <TableHead>Username</TableHead>
                   <TableHead className="text-right">Total Referrals</TableHead>
                   <TableHead className="text-right">Total Surveys</TableHead>
+                  <TableHead className="text-right">Total Responses</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -362,6 +381,9 @@ const LeaderboardPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       {row.totalSurveysByReferrals}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {row.totalResponsesToReferralSurveys}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -450,16 +472,27 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       Top 3 Qualification:
                     </span>{" "}
-                    Minimum referrals required - 1st: 150, 2nd: 110, 3rd: 75
+                    Minimum referrals required - 1st: 500, 2nd: 300, 3rd: 200
                   </p>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
                   <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
                   <p className="text-sm">
                     <span className="font-semibold text-[#5B03B2]">
+                      Total Responses:
+                    </span>{" "}
+                    Total number of responses to surveys created by referred
+                    users
+                  </p>
+                </div>
+                <div className="flex items-start sm:items-center gap-2">
+                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                  <p className="text-sm">
+                    <span className="font-semibold text-[#5B03B2]">
                       Points Calculation:
                     </span>{" "}
-                    Points = Total Referrals + (2 × Total Surveys)
+                    Points = Total Referrals + (2 × Total Surveys) + (2 × Total
+                    Responses)
                   </p>
                 </div>
               </div>

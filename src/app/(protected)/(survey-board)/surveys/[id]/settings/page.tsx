@@ -74,6 +74,7 @@ const SettingsPage = () => {
     isLoading: isSurveySettingsLoading,
     isSuccess: isSurveySettingsSuccess,
     isError: isSurveySettingsError,
+    refetch: refetchSettings,
   } = useQuery<{
     regional_availability: {
       status: boolean;
@@ -83,6 +84,7 @@ const SettingsPage = () => {
       _id: string;
       topic: string;
     };
+    _id: string;
     language: string;
     collect_email_addresses: boolean;
     collect_name_of_respondents: boolean;
@@ -115,18 +117,31 @@ const SettingsPage = () => {
   }, [surveySettings]);
 
   const handleSettingChange = (setting: keyof typeof settings) => {
+    const settingToFormStateMap = {
+      collectEmail: "collect_email_addresses",
+      collectNames: "collect_name_of_respondents",
+      allowEdit: "allow_survey_edit",
+      emailNotifications: "receive_email_notification",
+    } as const;
+
     setSettings((prev) => ({
       ...prev,
       [setting]: !prev[setting],
+    }));
+
+    const formStateKey = settingToFormStateMap[setting];
+    setFormState((prev) => ({
+      ...prev,
+      [formStateKey]: !prev[formStateKey],
     }));
   };
 
   const updateSettingsMutation = useMutation({
     mutationFn: (data: typeof formState) =>
-      updateSurveySettings(surveyId, data),
+      updateSurveySettings(surveySettings!._id, data),
     onSuccess: (data) => {
       toast.success("Survey settings updated successfully");
-      refetch();
+      refetchSettings();
     },
     onError: (error: AxiosError<{ message: string | string[] }>) => {
       console.error("Failed to update survey settings:", error);
@@ -281,6 +296,7 @@ const SettingsPage = () => {
                       description:
                         "We will collect email addresses of respondents when they are about to fill your survey.",
                       setting: "collectEmail",
+                      formKey: "collect_email_addresses",
                       index: 5,
                     },
                     {
@@ -288,6 +304,7 @@ const SettingsPage = () => {
                       description:
                         "We will collect names of respondents when they are about to fill your survey.",
                       setting: "collectNames",
+                      formKey: "collect_name_of_respondents",
                       index: 6,
                     },
                     {
@@ -295,6 +312,7 @@ const SettingsPage = () => {
                       description:
                         "Respondents can edit their responses after they have filled the survey. Note that users have a 30 minutes window to edit responses.",
                       setting: "allowEdit",
+                      formKey: "allow_survey_edit",
                       index: 7,
                     },
                     {
@@ -302,9 +320,10 @@ const SettingsPage = () => {
                       description:
                         "Receive email notifications when your survey is filled.",
                       setting: "emailNotifications",
+                      formKey: "receive_email_notification",
                       index: 8,
                     },
-                  ].map(({ title, description, setting, index }) => (
+                  ].map(({ title, description, setting, formKey, index }) => (
                     <motion.div
                       key={setting}
                       variants={fadeInUpVariant}
@@ -323,7 +342,9 @@ const SettingsPage = () => {
                         transition={{ delay: index * 0.1, duration: 0.2 }}
                       >
                         <Switch
-                          checked={settings[setting as keyof typeof settings]}
+                          checked={Boolean(
+                            formState[formKey as keyof typeof formState]
+                          )}
                           onCheckedChange={() =>
                             handleSettingChange(
                               setting as keyof typeof settings

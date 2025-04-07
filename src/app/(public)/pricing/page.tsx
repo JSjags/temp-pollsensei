@@ -133,9 +133,19 @@ const PricingPage: React.FC = () => {
                 data-aos="fade-up"
               >
                 <div>
-                  <h3 className="text-xl md:text-2xl font-semibold text-[#5B03B2] mb-4">
-                    {plan.name}
-                  </h3>
+                  <div className="flex items-center mb-4 gap-2">
+                    <h3 className="text-xl md:text-2xl font-semibold text-[#5B03B2]">
+                      {plan.name}
+                    </h3>
+                    <div className="font-bold text-[#171725] text-start">
+                      {plan.name === "Team Plan" ? (
+                        <small className="text-sm">/ Starting at 3</small>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                    <hr />
+                  </div>
                   <div className="text-3xl md:text-4xl font-bold text-[#5B03B2] mb-6">
                     $
                     {isMonthly
@@ -215,7 +225,7 @@ const PricingPage: React.FC = () => {
                     ))}
                   </ul>
 
-                  <div className="space-y-4 text-sm">
+                  {/* <div className="space-y-4 text-sm">
                     <h3 className="font-semibold text-gray-900 mb-4">
                       Plan Includes:
                     </h3>
@@ -284,7 +294,7 @@ const PricingPage: React.FC = () => {
                         {plan.number_of_accounts}
                       </span>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
 
                 <Link

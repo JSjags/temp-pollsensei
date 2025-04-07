@@ -6,7 +6,7 @@ export const getSurveySettings = async ({ surveyId }: { surveyId: string }) => {
 };
 
 export const updateSurveySettings = async (
-  surveyId: string,
+  settingsId: string,
   data: {
     language: string;
     availabile_regions: string[];
@@ -18,7 +18,7 @@ export const updateSurveySettings = async (
   }
 ) => {
   const response = await axiosInstance.patch(
-    `/survey/setting/${surveyId}`,
+    `/survey/setting/${settingsId}`,
     data
   );
   return response.data;
