@@ -7,50 +7,31 @@ import {
   ReferralIcon,
 } from "@/assets/images";
 import React, { useState } from "react";
-
-import { Dialog } from "@/components/ui/new-dialog";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import Redeemable from "@/components/shop/components/dialogs/Redeemable";
 import { Header } from "./Header";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
 import Slider, { Settings } from "react-slick";
+import { usePayoutStore } from "@/components/payouts/store/usePayoutStore";
+import { PayoutDialog } from "@/components/payouts/components/dialogs";
 
-const analyticData = [
-  {
-    label: "Referred",
-    value: 0,
-    icon: ReferralIcon,
-  },
-  {
-    label: "Coins Obtained",
-    value: 0,
-    icon: RedeemableCoins,
-  },
-  {
-    label: "Redeemable Coins",
-    value: 0,
-    icon: RedeemCoins,
-  },
-  {
-    label: "Coins Redeemed",
-    value: 0,
-    icon: RedeemedCoins,
-  },
-];
+
 
 export function Analytics() {
+  const { redeemableCoins } = usePayoutStore();
+  const updatedAnalyticData = getAnalyticData(redeemableCoins);
+
   return (
     <div className="w-full">
       <Header />
 
       <div className="w-full my-7 lg:hidden">
-        <MobileSlider />
+        <MobileSlider analyticData={updatedAnalyticData} />
       </div>
+
       <div className="grid grid-cols-4 gap-4 w-full max-md:px-5 mt-6 max-md:hidden">
-        {analyticData.map(({ label, icon, value }) => (
+        {updatedAnalyticData.map(({ label, icon, value }) => (
           <div
             key={label}
             className="bg-white rounded-[6.8px] p-5 shadow-[0px_1.36px_4.08px_0px_#34037914]"
@@ -71,20 +52,44 @@ export function Analytics() {
       </div>
 
       <div className="w-full md:justify-end flex mt-4 max-md:mt-16">
-        <Dialog.Root>
-          <Dialog.Trigger>
-            <Button variant="gradient">Redeem coins</Button>
-          </Dialog.Trigger>
-          <Dialog.Content className="z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%]">
-            <Redeemable />
-          </Dialog.Content>
-        </Dialog.Root>
+        <PayoutDialog>
+          <Button variant="gradient">Redeem coins</Button>
+        </PayoutDialog>
       </div>
     </div>
   );
 }
 
-function MobileSlider() {
+function getAnalyticData(redeemableCoins: number) {
+  return [
+    {
+      label: "Referred",
+      value: 0,
+      icon: ReferralIcon,
+    },
+    {
+      label: "Coins Obtained",
+      value: 0,
+      icon: RedeemableCoins,
+    },
+    {
+      label: "Redeemable Coins",
+      value: redeemableCoins, // Use dynamic value here
+      icon: RedeemCoins,
+    },
+    {
+      label: "Coins Redeemed",
+      value: 0,
+      icon: RedeemedCoins,
+    },
+  ];
+}
+
+function MobileSlider({
+  analyticData,
+}: {
+  analyticData: ReturnType<typeof getAnalyticData>;
+}) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const settings: Settings = {
@@ -103,33 +108,19 @@ function MobileSlider() {
       </div>
     ),
     customPaging: (i) => (
-      <div
-        className={cn(
-          "p-2 border-[3.43px] border-transparent transition-all duration-300 ease-in-out size-16 rounded-full flex items-center justify-center",
-          {
-            "scale-110": i === currentSlide,
-          }
-        )}
-      >
-        {/* <div
-          className={cn("flex w-2 h-1 relative rounded-full bg-[#E0C8EA]", {
-            "w-[30px] bg-[#9D50BB]": i === currentSlide,
-          })}
-        /> */}
-        <motion.div
-          layout
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
-          }}
-          className="h-1 rounded-full"
-          style={{
-            backgroundColor: i === currentSlide ? "#9D50BB" : "#E0C8EA",
-            width: i === currentSlide ? 30 : 8,
-          }}
-        />
-      </div>
+      <motion.div
+        layout
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+        }}
+        className="h-1 rounded-full"
+        style={{
+          backgroundColor: i === currentSlide ? "#9D50BB" : "#E0C8EA",
+          width: i === currentSlide ? 30 : 8,
+        }}
+      />
     ),
     beforeChange: (current, next) => {
       setCurrentSlide(next);
@@ -138,27 +129,24 @@ function MobileSlider() {
 
   return (
     <Slider {...settings}>
-      {analyticData.map((analytic) => {
-        const { label, icon, value } = analytic;
-        return (
-          <div
-            key={label}
-            className="bg-white rounded-[6.8px] p-5 shadow-[0px_1.36px_4.08px_0px_#34037914]"
-          >
-            <div className="h-full flex flex-col justify-between">
-              <div className="flex items-start justify-between">
-                <div className="flex flex-col gap-1.5">
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <h4 className="text-xl font-bold">{value}</h4>
-                </div>
-                <div className="size-12 flex items-center justify-center">
-                  <Image src={icon} alt="icons" />
-                </div>
+      {analyticData.map(({ label, icon, value }) => (
+        <div
+          key={label}
+          className="bg-white rounded-[6.8px] p-5 shadow-[0px_1.36px_4.08px_0px_#34037914]"
+        >
+          <div className="h-full flex flex-col justify-between">
+            <div className="flex items-start justify-between">
+              <div className="flex flex-col gap-1.5">
+                <p className="text-xs text-muted-foreground">{label}</p>
+                <h4 className="text-xl font-bold">{value}</h4>
+              </div>
+              <div className="size-12 flex items-center justify-center">
+                <Image src={icon} alt="icons" />
               </div>
             </div>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </Slider>
   );
 }

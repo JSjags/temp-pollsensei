@@ -650,3 +650,7 @@ input[type="radio"].radio:checked:before {
 .slick-next::before {
   display: none;
 }
+
+.Toastify__toast-container{
+  z-index: 100000000000 !important;
+}

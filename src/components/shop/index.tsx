@@ -9,7 +9,9 @@ export default function Shop() {
     <>
       <Analytics />
       <InAppPurchases />
-      <TransactionHistoryTable historyData={[]} isHistoryLoading={false} />
+      <div className="max-md:px-4">
+        <TransactionHistoryTable historyData={[]} isHistoryLoading={false} />
+      </div>
     </>
   );
 }

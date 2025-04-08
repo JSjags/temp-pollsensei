@@ -9,7 +9,7 @@ import BuyRespondent from "@/components/shop/components/dialogs/BuyRespondent/Bu
 
 export function InAppPurchases() {
   return (
-    <div className="mt-10 flex-col gap-5 flex">
+    <div className="mt-10 flex-col gap-5 flex max-md:px-4">
       <p className="text-xl font-bold">In-app Purchases</p>
       <div className="flex md:items-stretch gap-[14px] h-full">
         <BuyRespondent />
