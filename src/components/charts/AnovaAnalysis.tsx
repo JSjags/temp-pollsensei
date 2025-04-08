@@ -13,7 +13,8 @@ import Image from "next/image";
 import { extractDescription } from "@/utils/analysis";
 
 interface TableData {
-  [key: string]: number | string[];
+  statistics: string[];
+  value: (number | string)[];
 }
 
 interface PlotData {
@@ -74,19 +75,16 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
   };
 
   const renderTableData = (tableData: TableData) => {
-    return Object.entries(tableData)
-      .map(([key, value]) => {
-        if (Array.isArray(value)) return null; // Skip arrays like interpretation
-        return (
-          <tr key={key} className="border-b">
-            <td className="py-2">{formatKey(key)}</td>
-            <td className="text-right py-2">
-              {typeof value === "number" ? value.toFixed(4) : value}
-            </td>
-          </tr>
-        );
-      })
-      .filter(Boolean); // Remove null entries
+    return tableData.statistics.map((statistic, index) => (
+      <tr key={statistic} className="border-b">
+        <td className="py-2">{statistic}</td>
+        <td className="text-right py-2">
+          {typeof tableData.value[index] === "number"
+            ? Number(tableData.value[index]).toFixed(4)
+            : tableData.value[index]}
+        </td>
+      </tr>
+    ));
   };
 
   return (
