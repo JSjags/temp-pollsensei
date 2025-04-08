@@ -1,53 +1,70 @@
 "use client";
-import React, { FC } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import React, { FC, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { housingAndLivingSchema } from "@/utils/shema";
+import { CombinedFormData } from "@/utils/combinedSchema";
 import {
   livingConditionOptions,
   livingArrangementOptions,
   householdNumbersOptions,
 } from "@/data/respondent-object-data";
+import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
+import { toast } from "react-toastify";
+import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
 
 interface Props {
   onContinue: () => void;
   onPrevious: () => void;
+  formData: CombinedFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CombinedFormData>>;
 }
 
-const Housing_Living: FC<Props> = ({ onContinue, onPrevious }) => {
-  // function to handle the next tab/section
-  const handleContinue = (data: FormData) => {
-    onContinue();
-  };
-
-  // function to handle the previous tab/section
-  const handlePrevious = (e: React.MouseEvent) => {
-    e.preventDefault();
-    onPrevious();
-  };
+const Housing_Living: FC<Props> = ({
+  onContinue,
+  onPrevious,
+  formData,
+  setFormData,
+}) => {
+  const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm({
     resolver: zodResolver(housingAndLivingSchema),
+    defaultValues: formData,
   });
 
-  type FormData = z.infer<typeof housingAndLivingSchema>;
+  const handleContinue = (data: z.infer<typeof housingAndLivingSchema>) => {
+    submitForm(
+      { tab: "housingLiving", formData: data },
+      {
+        onSuccess: () => {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            ...data,
+          }));
+          onContinue();
+        },
+        onError: (error) => {
+          console.error("Form submission error:", error);
+          toast.error(error.message);
+        },
+      }
+    );
+  };
+
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onPrevious();
+  };
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
@@ -66,129 +83,42 @@ const Housing_Living: FC<Props> = ({ onContinue, onPrevious }) => {
           className="flex flex-col gap-3"
           onSubmit={handleSubmit(handleContinue)}
         >
-          <div className="flex flex-col gap-2">
-            <label htmlFor="current" className="text-[#333333] text-sm">
-              What is your current living arrangement?
-            </label>
-            <Controller
-              name="living_arrangement"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {livingConditionOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="living_arrangement"
+            control={control}
+            options={livingConditionOptions}
+            placeholder="Select option"
+            label="What is your current living arrangement?"
+            required
+            error={errors.living_arrangement}
+            disabled={isPending}
+            otherFieldName="otherLivingArrangement"
+            register={register}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Please specify"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherLivingArrangement")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="home" className="text-[#333333] text-sm">
-              Do you own or rent your home?
-            </label>
-            <Controller
-              name="home_status"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {livingArrangementOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="home_status"
+            control={control}
+            options={livingArrangementOptions}
+            placeholder="Select option"
+            label="Do you own or rent your home?"
+            required
+            error={errors.home_status}
+            disabled={isPending}
+            otherFieldName="otherHomeStatus"
+            register={register}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Please specify"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherHomeStatus")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="household" className="text-[#333333] text-sm">
-              How many people live in your household?
-            </label>
-            <Controller
-              name="household"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Select
-                  value={field.value}
-                  onValueChange={(value) => field.onChange(value)}
-                >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full h-auto">
-                    <SelectGroup>
-                      {householdNumbersOptions.map((option) => (
-                        <SelectItem
-                          value={option.value}
-                          className="text-base"
-                          key={option.value}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
+          <ControlledSelect
+            name="household"
+            control={control}
+            options={householdNumbersOptions}
+            placeholder="Select option"
+            label="How many people live in your household?"
+            required
+            error={errors.household}
+            disabled={isPending}
+          />
 
           <div className="w-full flex items-center gap-5 lg:mb-10 mt-5">
             <Button
@@ -203,8 +133,9 @@ const Housing_Living: FC<Props> = ({ onContinue, onPrevious }) => {
               size="default"
               className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
               type="submit"
+              disabled={isPending}
             >
-              Next
+              {isPending ? "Saving..." : "Next"}
             </Button>
           </div>
         </form>
@@ -212,4 +143,5 @@ const Housing_Living: FC<Props> = ({ onContinue, onPrevious }) => {
     </div>
   );
 };
+
 export default Housing_Living;

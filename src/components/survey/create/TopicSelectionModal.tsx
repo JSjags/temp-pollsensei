@@ -37,7 +37,7 @@ const TopicSelectionModal: React.FC<TopicSelectionModalProps> = ({
 
   useEffect(() => {
     if (manualTopic && isSelected !== null) {
-      console.log(manualTopic);
+      // console.log(manualTopic);
 
       setIsSelected(null);
       dispatch(updateTopic(""));

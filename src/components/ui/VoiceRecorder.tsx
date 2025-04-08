@@ -144,8 +144,8 @@ import { useUploadResponseFileMutation } from "@/services/survey.service";
 import React, { useState, useRef } from "react";
 import { AiOutlineAudio } from "react-icons/ai";
 import { toast } from "react-toastify";
-import AudioPlayer from 'react-h5-audio-player';
-import 'react-h5-audio-player/lib/styles.css';
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 
 const ResponseFile = ({
   question,
@@ -251,7 +251,7 @@ const ResponseFile = ({
       const formData = new FormData();
       formData.append("file", file);
       const response = await uploadResponseFile(formData).unwrap();
-      console.log(response);
+      // console.log(response);
       const mediaUrl = response?.data?.media_url;
       if (mediaUrl) {
         handleAnswerChange(question, { media_url: mediaUrl });
@@ -316,13 +316,13 @@ const ResponseFile = ({
           )} */}
 
           {audioURL && (
-             <AudioPlayer
-             autoPlay
-             src={audioURL}
-             onPlay={e => console.log("onPlay")}
+            <AudioPlayer
+              autoPlay
+              src={audioURL}
+              onPlay={(e) => console.log("onPlay")}
 
-             // other props here
-           />
+              // other props here
+            />
           )}
         </>
       ) : (

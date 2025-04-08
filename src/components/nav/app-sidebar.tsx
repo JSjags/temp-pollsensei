@@ -25,11 +25,11 @@ const items = [
     url: "/dashboard",
     icon: "/assets/sidebar/home.svg",
   },
-  // {
-  //   title: "Earn",
-  //   url: "/earn",
-  //   icon: "/assets/sidebar/earn.svg",
-  // },
+  {
+    title: "Earn",
+    url: "/earn",
+    icon: "/assets/sidebar/earn.svg",
+  },
   {
     title: "Shop",
     url: "/shop",

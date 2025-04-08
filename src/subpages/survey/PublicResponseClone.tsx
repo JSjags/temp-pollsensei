@@ -269,10 +269,10 @@ const PublicResponse = () => {
     });
   };
 
-  console.log(textResponses);
-  console.log(selectedOptions);
+  // console.log(textResponses);
+  // console.log(selectedOptions);
 
-  console.log(psId);
+  // console.log(psId);
   const question =
     typeof params?.id === "string" && params.id.startsWith("ps-")
       ? psId
@@ -363,7 +363,7 @@ const PublicResponse = () => {
     }
   };
 
-  console.log(question);
+  // console.log(question);
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
@@ -422,7 +422,7 @@ const PublicResponse = () => {
     );
   };
 
-  console.log(question);
+  // console.log(question);
 
   // Question rendering with enhanced UI and animations
   const renderQuestion = (quest: any, index: number, theme: string) => {
@@ -601,7 +601,7 @@ const PublicResponse = () => {
                 );
 
               case "likert_scale":
-                console.log(quest);
+                // console.log(quest);
 
                 return (
                   <RadioGroup
@@ -1034,7 +1034,7 @@ const PublicResponse = () => {
     }
   };
 
-  console.log();
+  // console.log();
 
   return (
     <div className={`flex flex-col gap-5 w-full`}>

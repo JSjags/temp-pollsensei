@@ -78,7 +78,7 @@ const ReportPage = () => {
     window.open(url, "_blank");
   };
 
-  console.log(reports);
+  // console.log(reports);
 
   return (
     <div className="container mx-auto py-8 bg-white min-h-screen">

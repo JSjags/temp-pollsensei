@@ -62,7 +62,7 @@ const ManualSurveyCreatePrompt = () => {
       >
         <motion.div variants={itemVariants} className="text-center">
           <h1 className="text-3xl md:text-4xl mt-10 md:mt-10 font-bold bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent">
-            What's your survey about?
+            What&apos;s your survey about?
           </h1>
           <p className="text-base md:text-lg text-gray-600 mt-4">
             Provide a suitable title and description for the survey you want to

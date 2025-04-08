@@ -1,3 +1,5 @@
+"use client";
+import React, { FC } from "react";
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
@@ -80,8 +82,13 @@ import {
 } from "@/components/ui/tooltip";
 import type { Question } from "@/types/survey";
 import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
+import TextEditor from "@/components/reusable/TextEditor";
 
-const AddQuestionPage = () => {
+interface Props {
+  previewSurvey?: boolean;
+}
+
+const AddQuestionPage: FC<Props> = ({ previewSurvey }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
@@ -291,7 +298,7 @@ const AddQuestionPage = () => {
       is_required: isRequired,
     };
 
-    console.log(updatedQuestionData);
+    // console.log(updatedQuestionData);
 
     // Update the question in the store
     dispatch(
@@ -325,7 +332,7 @@ const AddQuestionPage = () => {
     );
     setEditIndex(questionIndex);
     setIsEdit(true);
-    console.log(questions[questionIndex]);
+    // console.log(questions[questionIndex]);
     setIsSidebarOpen(false);
   };
 
@@ -435,7 +442,7 @@ const AddQuestionPage = () => {
         updatedSurvey.sections = [currentSection];
       }
 
-      console.log(updatedSurvey.sections.length);
+      // console.log(updatedSurvey.sections.length);
 
       // Process the final survey data
       const processedSurvey = {
@@ -731,7 +738,11 @@ const AddQuestionPage = () => {
   return (
     <div className={`${theme} flex flex-col gap-5 w-full`}>
       <div className={`flex flex-1 justify-between gap-10 w-full`}>
-        <motion.div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-5 pr-0 lg:pl-10">
+        <motion.div
+          className={`w-full ${
+            previewSurvey ? "lg:w-full" : "lg:w-1/3"
+          } lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-5 pr-0 lg:pl-10`}
+        >
           {/* ... existing content ... */}
           <motion.div className="h-fit">
             {surveyData?.logo_url &&
@@ -792,161 +803,242 @@ const AddQuestionPage = () => {
               )}
           </motion.div>
           <AnimatePresence mode="wait">
-            {isEditing && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="w-full my-4 border-none">
-                  <CardContent className="flex flex-col gap-2 px-11 py-4">
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: 20, opacity: 0 }}
-                      transition={{ delay: 0.1 }}
+            {pathname.includes("filter-respondents") ? (
+              !sectionTitle || isEditing ? (
+                <div className="mb-5 lg:mb-0">
+                  <TextEditor
+                    sectionTitle={sectionTitle}
+                    setSectionTitle={setSectionTitle}
+                    surveyData={surveyData}
+                    sDescription={sDescription}
+                    setsDescription={setsDescription}
+                    handleSave={handleSave}
+                    setIsEditing={setIsEditing}
+                  />
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-white rounded-lg w-full my-4 gap-2 px-4 md:px-6 py-6 flex flex-col shadow-md hover:shadow-lg transition-shadow duration-300"
+                >
+                  <motion.h2
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className={cn(
+                      "text-[1.5rem] font-normal font-lexend bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+                      `font-${surveyData?.header_text?.name
+                        .split(" ")
+                        .join("-")
+                        .toLowerCase()}`
+                    )}
+                    style={{
+                      fontSize: `${surveyData?.header_text?.size}px`,
+                      // fontFamily: `${surveyData?.header_text?.name}`,
+                    }}
+                  >
+                    {sectionTitle}
+                  </motion.h2>
+                  <motion.p
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className={cn(
+                      "text-gray-600 leading-relaxed",
+                      `font-${surveyData?.body_text?.name
+                        .split(" ")
+                        .join("-")
+                        .toLowerCase()}`
+                    )}
+                    style={{
+                      fontSize: `${surveyData?.body_text?.size}px`,
+                      // fontFamily: `${surveyData?.body_text?.name}`,
+                    }}
+                  >
+                    {sDescription}
+                  </motion.p>
+                  <motion.div
+                    className="flex justify-end"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
+                  >
+                    <Button
+                      variant="outline"
+                      className="rounded-full px-5 py-1 hover:scale-105 transition-all duration-300 hover:bg-gray-50 hover:shadow-md flex items-center gap-2"
+                      onClick={() => setIsEditing(true)}
                     >
-                      <Textarea
-                        value={sectionTitle}
-                        onChange={(e) => {
-                          setSectionTitle(e.target.value);
-                          dispatch(updateSectionTopic(e.target.value));
-                        }}
-                        placeholder="Untitled Section"
-                        className={cn(
-                          "resize-none",
-                          `font-${surveyData?.header_text?.name
-                            .split(" ")
-                            .join("-")
-                            .toLowerCase()}`
-                        )}
-                        style={{
-                          fontSize: `${surveyData?.header_text?.size}px`,
-                          // fontFamily: `${headerText?.name}`,
-                        }}
-                      />
-                    </motion.div>
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              )
+            ) : (
+              <>
+                {!sectionTitle || isEditing ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="w-full my-4 border-none">
+                      <CardContent className="flex flex-col gap-2 px-11 py-4">
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{ x: 20, opacity: 0 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          <Textarea
+                            value={sectionTitle}
+                            onChange={(e) => {
+                              setSectionTitle(e.target.value);
+                              dispatch(updateSectionTopic(e.target.value));
+                            }}
+                            placeholder="Untitled Section"
+                            className={cn(
+                              "resize-none",
+                              `font-${surveyData?.header_text?.name
+                                .split(" ")
+                                .join("-")
+                                .toLowerCase()}`
+                            )}
+                            style={{
+                              fontSize: `${surveyData?.header_text?.size}px`,
+                              // fontFamily: `${headerText?.name}`,
+                            }}
+                          />
+                        </motion.div>
 
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: 20, opacity: 0 }}
-                      transition={{ delay: 0.2 }}
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{ x: 20, opacity: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <Textarea
+                            value={sDescription}
+                            onChange={(e) => {
+                              setsDescription(e.target.value);
+                              dispatch(
+                                updateSectionDescription(e.target.value)
+                              );
+                            }}
+                            placeholder="Describe section (optional)"
+                            className={cn(
+                              "resize-none",
+                              `font-${surveyData?.body_text?.name
+                                .split(" ")
+                                .join("-")
+                                .toLowerCase()}`
+                            )}
+                            style={{
+                              fontSize: `${surveyData?.body_text?.size}px`,
+                              // fontFamily: `${bodyText?.name}`,
+                            }}
+                          />
+                        </motion.div>
+
+                        <motion.div
+                          className="flex justify-end gap-5 mt-4"
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -20, opacity: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <Button
+                            variant="outline"
+                            className="rounded-full flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-md hover:bg-gray-50"
+                            onClick={() => setIsEditing(false)}
+                          >
+                            <X className="h-4 w-4" />
+                            Cancel
+                          </Button>
+                          <Button
+                            className="rounded-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
+                            onClick={handleSave}
+                            disabled={!sectionTitle.trim()}
+                          >
+                            <Save className="h-4 w-4" />
+                            Save
+                          </Button>
+                        </motion.div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-white rounded-lg w-full my-4 gap-2 px-4 md:px-6 py-6 flex flex-col shadow-md hover:shadow-lg transition-shadow duration-300"
+                  >
+                    <motion.h2
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                      className={cn(
+                        "text-[1.5rem] font-normal font-lexend bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+                        `font-${surveyData?.header_text?.name
+                          .split(" ")
+                          .join("-")
+                          .toLowerCase()}`
+                      )}
+                      style={{
+                        fontSize: `${surveyData?.header_text?.size}px`,
+                        // fontFamily: `${surveyData?.header_text?.name}`,
+                      }}
                     >
-                      <Textarea
-                        value={sDescription}
-                        onChange={(e) => {
-                          setsDescription(e.target.value);
-                          dispatch(updateSectionDescription(e.target.value));
-                        }}
-                        placeholder="Describe section (optional)"
-                        className={cn(
-                          "resize-none",
-                          `font-${surveyData?.body_text?.name
-                            .split(" ")
-                            .join("-")
-                            .toLowerCase()}`
-                        )}
-                        style={{
-                          fontSize: `${surveyData?.body_text?.size}px`,
-                          // fontFamily: `${bodyText?.name}`,
-                        }}
-                      />
-                    </motion.div>
-
+                      {sectionTitle}
+                    </motion.h2>
+                    <motion.p
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className={cn(
+                        "text-gray-600 leading-relaxed",
+                        `font-${surveyData?.body_text?.name
+                          .split(" ")
+                          .join("-")
+                          .toLowerCase()}`
+                      )}
+                      style={{
+                        fontSize: `${surveyData?.body_text?.size}px`,
+                        // fontFamily: `${surveyData?.body_text?.name}`,
+                      }}
+                    >
+                      {sDescription}
+                    </motion.p>
                     <motion.div
-                      className="flex justify-end gap-5 mt-4"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      transition={{ delay: 0.3 }}
+                      className="flex justify-end"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.3, delay: 0.4 }}
                     >
                       <Button
                         variant="outline"
-                        className="rounded-full flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-md hover:bg-gray-50"
-                        onClick={() => setIsEditing(false)}
+                        className="rounded-full px-5 py-1 hover:scale-105 transition-all duration-300 hover:bg-gray-50 hover:shadow-md flex items-center gap-2"
+                        onClick={() => setIsEditing(true)}
                       >
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </Button>
-                      <Button
-                        className="rounded-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
-                        onClick={handleSave}
-                        disabled={!sectionTitle.trim()}
-                      >
-                        <Save className="h-4 w-4" />
-                        Save
+                        <Edit className="h-4 w-4" />
+                        Edit
                       </Button>
                     </motion.div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-
-            {!isEditing && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-lg w-full my-4 flex gap-2 px-4 md:px-6 py-6 flex-col shadow-md hover:shadow-lg transition-shadow duration-300"
-              >
-                <motion.h2
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className={cn(
-                    "text-[1.5rem] font-normal font-lexend bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
-                    `font-${surveyData?.header_text?.name
-                      .split(" ")
-                      .join("-")
-                      .toLowerCase()}`
-                  )}
-                  style={{
-                    fontSize: `${surveyData?.header_text?.size}px`,
-                    // fontFamily: `${surveyData?.header_text?.name}`,
-                  }}
-                >
-                  {sectionTitle}
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className={cn(
-                    "text-gray-600 leading-relaxed",
-                    `font-${surveyData?.body_text?.name
-                      .split(" ")
-                      .join("-")
-                      .toLowerCase()}`
-                  )}
-                  style={{
-                    fontSize: `${surveyData?.body_text?.size}px`,
-                    // fontFamily: `${surveyData?.body_text?.name}`,
-                  }}
-                >
-                  {sDescription}
-                </motion.p>
-                <motion.div
-                  className="flex justify-end"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                >
-                  <Button
-                    variant="outline"
-                    className="rounded-full px-5 py-1 hover:scale-105 transition-all duration-300 hover:bg-gray-50 hover:shadow-md flex items-center gap-2"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                </motion.div>
-              </motion.div>
+                  </motion.div>
+                )}
+              </>
             )}
           </AnimatePresence>
 
@@ -1207,7 +1299,7 @@ const AddQuestionPage = () => {
                         min: min,
                         max: max,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else if (
@@ -1222,7 +1314,7 @@ const AddQuestionPage = () => {
                         rows: rows,
                         columns: columns,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else if (questionType === "long_text") {
@@ -1233,7 +1325,7 @@ const AddQuestionPage = () => {
                         is_required: is_required,
                         can_accept_media: can_accept_media,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else {
@@ -1243,7 +1335,7 @@ const AddQuestionPage = () => {
                         options: options,
                         is_required: is_required,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     }
@@ -1264,6 +1356,18 @@ const AddQuestionPage = () => {
                 >
                   <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
                   Add Question
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full gap-2 items-center justify-center ${
+                    pathname.includes("filter-respondents") ? "flex" : "hidden"
+                  }`}
+                  onClick={handleAddSection}
+                >
+                  <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                  New Section
                 </Button>
 
                 {/* <Tooltip>
@@ -1297,11 +1401,12 @@ const AddQuestionPage = () => {
                     Delete Section
                   </Button>
                 )} */}
-
                 <Button
                   variant="outline"
                   size="sm"
-                  className="group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full"
+                  className={`group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full ${
+                    pathname.includes("filter-respondents") && "hidden"
+                  }`}
                   onClick={handleDiscard}
                 >
                   <GiCardDiscard className="mr-2 h-4 w-4 group-hover:rotate-12" />
@@ -1333,7 +1438,6 @@ const AddQuestionPage = () => {
                 ))}
               </div>
             </div>
-
             <Button
               disabled={
                 isLoading ||
@@ -1342,7 +1446,9 @@ const AddQuestionPage = () => {
                 !questions.length
               }
               size="lg"
-              className="w-full md:w-auto md:self-end bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl"
+              className={`w-full md:w-auto md:self-end bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl ${
+                pathname.includes("filter-respondents") && "hidden"
+              }`}
               onClick={handleSurveyCreation}
             >
               {isLoading ? (
@@ -1361,7 +1467,9 @@ const AddQuestionPage = () => {
           <WatermarkBanner />
         </motion.div>
         <div
-          className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
+          className={`hidden ${
+            previewSurvey ? "lg:hidden" : "lg:flex"
+          } lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
           {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
           <StyleEditor surveyData={surveyData} setSurveyData={setSurveyData} />

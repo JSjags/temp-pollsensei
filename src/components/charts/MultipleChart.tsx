@@ -26,7 +26,7 @@ const MultipleChart: React.FC<MultipleChartProps> = ({
   yKeys,
 }) => {
   // Extracting x-axis categories from the first series
-  console.log(seriesData);
+  // console.log(seriesData);
   const categories = seriesData[0]?.data?.map((item) => (item as any)[xKey]);
 
   const options: ApexOptions = {

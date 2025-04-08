@@ -93,7 +93,7 @@ const CreateNewSection = () => {
     );
     setEditIndex(questionIndex);
     setIsEdit(true);
-    console.log(questions[questionIndex]);
+    // console.log(questions[questionIndex]);
     setIsSidebarOpen(false);
   };
 
@@ -116,7 +116,7 @@ const CreateNewSection = () => {
             questions: questions,
           })
         );
-        console.log({ questions: questions });
+        // console.log({ questions: questions });
       } else {
         dispatch(
           addSection({
@@ -125,22 +125,22 @@ const CreateNewSection = () => {
             questions: questions,
           })
         );
-        console.log({
-          section_topic: newSectionTopic,
-          section_description: newSectionDesc,
-          questions: questions,
-        });
+        // console.log({
+        //   section_topic: newSectionTopic,
+        //   section_description: newSectionDesc,
+        //   questions: questions,
+        // });
       }
     }
 
     const updatedSurvey = store.getState().survey;
-    console.log(updatedSurvey.sections);
+    // console.log(updatedSurvey.sections);
 
     try {
       const updatedSurvey = store.getState().survey;
       await createSurvey(updatedSurvey);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -175,8 +175,8 @@ const CreateNewSection = () => {
     }
   }, [progressError, progressIsError]);
 
-  console.log(questions);
-  console.log(survey);
+  // console.log(questions);
+  // console.log(survey);
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
@@ -316,7 +316,7 @@ const CreateNewSection = () => {
                   options: options,
                   is_required: is_required,
                 };
-                console.log(newQuestion);
+                // console.log(newQuestion);
                 dispatch(addQuestion(newQuestion));
                 setAddQuestions((prev) => !prev);
               }}

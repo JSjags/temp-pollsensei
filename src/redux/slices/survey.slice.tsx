@@ -102,7 +102,7 @@ const surveySlice = createSlice({
         header_url?: string;
       }>
     ) => {
-      console.log(action.payload);
+      // console.log(action.payload);
 
       return {
         ...state,

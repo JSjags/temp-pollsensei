@@ -54,7 +54,7 @@ const WordFrequencyAnalysisComponent: React.FC<TestProps> = (props) => {
     }
   };
 
-  console.log(props);
+  // console.log(props);
 
   return (
     <div className="space-y-6">

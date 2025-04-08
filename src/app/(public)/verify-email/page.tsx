@@ -65,11 +65,11 @@ const VerifyEmail = () => {
           "Email verification failed."
       );
     } else if (data) {
-      console.log(data);
+      // console.log(data);
 
       toast.success("Email verification successful!");
       if (data?.access_token && data?.user) {
-        console.log(data);
+        // console.log(data);
 
         dispatch(
           updateUser({

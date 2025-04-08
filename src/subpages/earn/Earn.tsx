@@ -1,0 +1,234 @@
+"use client";
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { FaArrowRightLong } from "react-icons/fa6";
+import ActivityCard from "@/components/earn/ActivityCard";
+import stethoscope from "@/assets/images/stethoscope.jpg";
+import walk from "@/assets/images/walk.jpg";
+import Image from "next/image";
+import stakedCoins from "@/assets/images/stacked-coins.png";
+import tiltCup from "@/assets/images/tilt-cup.png";
+import { MdInfo } from "react-icons/md";
+import DailyLoginCard from "@/components/earn/DailyLoginCard";
+import SocialMediaCard from "@/components/earn/SocialMediaCard";
+import SurveyTabs from "@/subpages/earn/SurveyTabs";
+import AdsDialog from "@/subpages/earn/AdsDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import {
+  openSurveyTabs,
+  openAdsDialog,
+  closeAdsDialog,
+  openSurveyFormDialog,
+  closeSurveyFormDialog,
+} from "@/redux/slices/earnDialogSlice";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import Redeemable from "@/components/shop/components/dialogs/Redeemable";
+import { useRouter } from "next/navigation";
+import SurveyFormDialog from "@/subpages/earn/SurveyFormDialog";
+import BannerNote from "@/components/earn/BannerNote";
+
+const Earn = () => {
+  const router = useRouter();
+  const [streakDays, setStreakDays] = useState<number>(0);
+  const [currentDay, setCurrentDay] = useState<number>(0);
+  const [claimedDays, setClaimedDays] = useState<number[]>([]);
+
+  const activities = [
+    {
+      title: "Surveys",
+      desktopDescription:
+        "Get rewarded with Pollcoins that can be redeemed for cash by participating in tailored surveys",
+      mobileDescription: "Earn coins by filling surveys",
+      image: stethoscope,
+      buttonText: "Complete Survey",
+      coins: 1000,
+    },
+    {
+      title: "Ads",
+      desktopDescription:
+        "Earn Pollcoins that can be redeemed and changed to cash by watching a specified number of Ads daily.",
+      mobileDescription: "Earn coins by watching Ads",
+      image: walk,
+      buttonText: "Watch ads",
+      coins: 500,
+    },
+    {
+      title: "Referrals",
+      desktopDescription:
+        "Invite your friends and acquaintances to follow us on social media by sharing your referral link with them to earn Pollcoins",
+      mobileDescription: "Earn coins by referring ",
+      image: stethoscope,
+      buttonText: "Refer a Friend ",
+      coins: 20,
+    },
+    {
+      title: "Newsletter",
+      desktopDescription:
+        "Subscribe to our monthly Newsletter to earn coins which are redeemable for cash or can be used as voucher.",
+      mobileDescription: "Subscribe to earn coins",
+      image: walk,
+      buttonText: "Subscribe to Newsletter",
+      coins: 10,
+    },
+  ];
+
+  const dispatch = useDispatch();
+  const { isAdsDialogOpen, isSurveyFormDialogOpen } = useSelector(
+    (state: RootState) => state.earnDialogSlice
+  );
+
+  const handleActivityClick = (buttonText: string) => {
+    if (buttonText === "Complete Survey") {
+      dispatch(openSurveyTabs());
+    } else if (buttonText === "Watch ads") {
+      dispatch(openAdsDialog());
+    } else if (buttonText === "Refer a Friend") {
+      router.push("/referral");
+    }
+  };
+
+  return (
+    <>
+      <SurveyTabs />
+
+      <AdsDialog
+        open={isAdsDialogOpen}
+        onOpenChange={(open) =>
+          dispatch(open ? openAdsDialog() : closeAdsDialog())
+        }
+      />
+      <div className="w-full h-auto flex flex-col gap-5 lg:gap-10 mb-5 overflow-hidden">
+        <div className="w-full h-auto rounded-xl bg-gradient-to-r from-[#260D3E] via-[#260D3E] to-[#EB06AB] px-4 py-2 flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-1 items-center justify-start lg:justify-normal h-[120px] lg:h-auto">
+            <div className="flex gap-1 items-center">
+              <Image src={stakedCoins} width={30} height={30} alt="Coins" />
+              <h1 className="text-[32px] md:text-[42px] font-bold text-white">
+                5260
+              </h1>
+            </div>
+            <p className="text-xs lg:text-sm text-white/80">
+              Pollcoins generated
+            </p>
+          </div>
+          <span className="w-[1px] h-16 bg-white/50">&nbsp;</span>
+          <div className="flex flex-col lg:flex-row items-center gap-5 h-[120px] lg:h-auto">
+            <div className="flex flex-col items-center">
+              <h1 className="text-[32px] md:text-[42px] font-bold text-white">
+                10
+              </h1>
+              <p className="text-xs lg:text-sm text-white/80">
+                Activities completed
+              </p>
+            </div>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] flex items-center gap-2 text-white hover:scale-105 transition-all rounded-full text-sm lg:text-base"
+                  type="button"
+                >
+                  Redeem Coins
+                  <FaArrowRightLong className="text-base text-white" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="flex flex-col items-center gap-5 p-10 max-w-[442px]">
+                <Redeemable />
+              </DialogContent>
+            </Dialog>
+          </div>
+          <div className="hidden lg:inline-block">
+            <BannerNote />
+          </div>
+        </div>
+        <div className="block lg:hidden">
+          <BannerNote />
+        </div>
+        <div className="w-full h-auto flex flex-col gap-3">
+          <h3 className="text-[#1C1C1C] text-lg font-bold">Activities</h3>
+          <div className="w-full h-auto grid grid-cols-2 lg:grid-cols-4 gap-3 items-center">
+            {activities.map((activity, index) => (
+              <ActivityCard
+                key={index}
+                {...activity}
+                onClick={() => handleActivityClick(activity.buttonText)}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="w-full h-auto lg:h-[150px] flex flex-col lg:flex-row items-center gap-3">
+          <div className="bg-[#490688] h-[50px] lg:h-full w-full lg:w-[20%] p-3 rounded-bl-none lg:rounded-bl-lg rounded-tl-lg rounded-tr-lg lg:rounded-tr-none relative flex items-center lg:items-start">
+            <p className="text-xs lg:text-sm font-bold text-left lg:text-center text-white">
+              Daily Check in to Claim Rewards
+            </p>
+            <Image
+              src={tiltCup}
+              width={200}
+              height={200}
+              alt="Earn coins illustration"
+              className="absolute bottom-0 left-0 hidden lg:block"
+            />
+            <Image
+              src={tiltCup}
+              width={100}
+              height={100}
+              alt="Earn coins illustration"
+              className="absolute bottom-0 -right-5 block lg:hidden"
+            />
+          </div>
+          <div className="w-full lg:w-auto h-full px-2 py-1 flex flex-col gap-4 lg:gap-2">
+            <div className="w-full h-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 lg:gap-0">
+              <div className="flex items-center gap-2">
+                <p className="text-[#1C1C1C] text-base lg:text-lg font-bold">
+                  Daily Login
+                </p>
+                <MdInfo className="text-[#6704AE] text-lg" />
+              </div>
+              <div className="flex items-center bg-[#EDE1F9] w-full lg:w-auto px-5 py-1 rounded-lg lg:rounded-full">
+                <p className="text-[#453951] text-xs">
+                  You have logged in for{" "}
+                  <span className="font-bold text-[13px]">
+                    {streakDays <= 1
+                      ? `${streakDays} day`
+                      : `${streakDays} days`}
+                  </span>{" "}
+                  straight
+                </p>
+              </div>
+            </div>
+
+            <DailyLoginCard
+              currentDay={currentDay}
+              setCurrentDay={setCurrentDay}
+              claimedDays={claimedDays}
+              setClaimedDays={setClaimedDays}
+              streak={streakDays}
+              setStreak={setStreakDays}
+            />
+          </div>
+        </div>
+        <div className="w-full h-auto flex flex-col gap-5">
+          <h2 className="text-[#1C1C1C] text-base lg:text-lg font-bold">
+            Follow us on social media to earn coins
+          </h2>
+
+          <SocialMediaCard />
+        </div>
+      </div>
+
+      <SurveyFormDialog
+        open={isSurveyFormDialogOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            dispatch(openSurveyFormDialog());
+          } else {
+            dispatch(closeSurveyFormDialog());
+          }
+        }}
+      />
+    </>
+  );
+};
+export default Earn;

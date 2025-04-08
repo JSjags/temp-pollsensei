@@ -86,14 +86,14 @@ const CompleteInvitedMemberSetupPage = () => {
   const onSubmit = async (values: any) => {
     try {
       const userData = await completeInvitation({ ...values, token }).unwrap();
-      console.log(userData);
+      // console.log(userData);
 
       dispatch(updateUser(userData.data));
       toast.success("Invitation accepted, login successful.");
       setState(true);
       setCompleteSetupState(false);
       // Navigate to login page
-      console.log("Invitation completed successfully");
+      // console.log("Invitation completed successfully");
     } catch (err: any) {
       //   toast.error(
       //     "Failed to complete invitation " + (err?.data?.message || err.message)

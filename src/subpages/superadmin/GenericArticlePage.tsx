@@ -223,7 +223,7 @@ const GenericArticlePage = (props: Props) => {
     if (formData.file) {
       editFormData.append("file", formData.file);
     }
-    console.log(editFormData);
+    // console.log(editFormData);
     try {
       await editTutorial({ id: _id, body: editFormData }).unwrap();
       toast.success("Tutorial edited successfully");
@@ -332,7 +332,7 @@ const GenericArticlePage = (props: Props) => {
 
   useEffect(() => {
     if (previewTutorial?.data) {
-      console.log(previewTutorial);
+      // console.log(previewTutorial);
       setFormData({
         type: previewTutorial.data.type || "image",
         title: previewTutorial.data.title || "",

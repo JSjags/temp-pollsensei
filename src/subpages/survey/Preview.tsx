@@ -33,7 +33,7 @@ const Preview = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
-  console.log(questions);
+  // console.log(questions);
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {

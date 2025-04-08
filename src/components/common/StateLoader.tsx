@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,9 +14,7 @@ const StateLoader: React.FC<StateLoaderProps> = ({ goto }) => {
   const [count, setCount] = useState(5);
   const router = useRouter();
   const state = useSelector((state: RootState) => state.user);
-  console.log(state?.user?.roles);
-
-
+  // console.log(state?.user?.roles);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -41,7 +39,6 @@ const StateLoader: React.FC<StateLoaderProps> = ({ goto }) => {
 };
 
 export default StateLoader;
-
 
 // "use client";
 
@@ -103,4 +100,3 @@ export default StateLoader;
 // };
 
 // export default StateLoader;
-

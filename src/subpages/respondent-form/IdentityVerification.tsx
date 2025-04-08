@@ -13,6 +13,10 @@ import Link from "next/link";
 import congrats from "@/assets/images/congrats.svg";
 import { IoArrowBack } from "react-icons/io5";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
+import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setSurveyCompleted } from "@/redux/slices/becomePaidRespondentSlice";
 
 interface Props {
   onPrevious: () => void;
@@ -27,7 +31,8 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [submitForm, setSubmitForm] = useState<boolean>(false);
+  const [submitImage, setSubmitImage] = useState<boolean>(false);
+  const dispatch = useDispatch();
 
   // Request camera access when "proceed" is true
   useEffect(() => {
@@ -80,10 +85,114 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
     onPrevious();
   };
 
-  // function to handle the next tab/section
-  const handleContinue = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const {
+    mutate: submitForm,
+    isPending,
+    data: responseData,
+  } = useSubmitRespondentForm();
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // function to handle submit form and navigate to the next tab/section
+  const handleContinue = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setProceed(true);
+
+    if (!selectedFile) {
+      toast.error("Please select an ID document first");
+      return;
+    }
+
+    try {
+      // Convert the selected file to base64
+      const base64String = await fileToBase64(selectedFile);
+
+      // Prepare the documents array
+      const documents = [
+        {
+          base64: base64String,
+          name: selectedFile.name,
+          type: selectedFile.type,
+        },
+      ];
+
+      // If we have a captured image (selfie), add it to documents
+      if (capturedImage) {
+        documents.push({
+          base64: capturedImage,
+          name: "selfie.jpg",
+          type: "image/jpeg",
+        });
+      }
+
+      // Submit the form data
+      submitForm(
+        {
+          tab: "identityVerification",
+          formData: { documents },
+        },
+        {
+          onSuccess: () => {
+            setProceed(true);
+            dispatch(setSurveyCompleted(true));
+          },
+          onError: (error) => {
+            console.error("Form submission error:", error);
+            toast.error(error.message);
+          },
+        }
+      );
+    } catch (error: any) {
+      console.error("Error converting file:", error);
+      toast.error(error.message);
+    }
+  };
+
+  // Modified handleSubmit function
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!capturedImage) {
+      toast.error("Please take a selfie first");
+      return;
+    }
+
+    try {
+      // Prepare the documents array with just the selfie
+      const documents = [
+        {
+          base64: capturedImage,
+          name: "selfie.jpg",
+          type: "image/jpeg",
+        },
+      ];
+
+      // Submit the form data
+      submitForm(
+        {
+          tab: "identityVerification",
+          formData: { documents },
+        },
+        {
+          onSuccess: () => {
+            setSubmitImage(true);
+          },
+          onError: (error) => {
+            console.error("Form submission error:", error);
+            toast.error(error.message);
+          },
+        }
+      );
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      toast.error(error.message);
+    }
   };
 
   // function to handle image removal
@@ -102,18 +211,12 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
     }
   };
 
-  // function to handle form submission
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    setSubmitForm(true);
-  };
-
   return (
     <form
       onSubmit={handleSubmit}
       className="w-full h-full flex flex-col items-center mx-auto"
     >
-      {submitForm ? (
+      {submitImage ? (
         <div className="w-full h-full flex flex-col items-center justify-center gap-5 relative p-20">
           <IoClose
             className="text-[#231F20] text-base cursor-pointer absolute top-5 left-5"
@@ -352,6 +455,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
                     variant="outline"
                     className="w-full md:w-full bg-transparent border-[#A9A9B1] rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all text-black"
                     onClick={handlePrevious}
+                    disabled={responseData?.success === true}
                   >
                     Previous
                   </Button>
@@ -360,8 +464,9 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
                       size="default"
                       className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
                       onClick={handleContinue}
+                      disabled={!selectedFile || isPending}
                     >
-                      Next
+                      {isPending ? "Processing..." : "Next"}
                     </Button>
                   ) : (
                     <Button

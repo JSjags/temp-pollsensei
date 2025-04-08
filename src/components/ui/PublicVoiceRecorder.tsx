@@ -65,7 +65,7 @@ const PublicResponseFile = ({
         try {
           waveformRef.current.destroy();
         } catch (error) {
-          console.log("Error destroying waveform:", error);
+          console.error("Error destroying waveform:", error);
         }
       }
 
@@ -104,7 +104,7 @@ const PublicResponseFile = ({
           setDuration(waveformRef.current?.getDuration() || 0);
         });
       } catch (error) {
-        console.log("Error creating waveform:", error);
+        console.error("Error creating waveform:", error);
       }
     }
   };
@@ -208,7 +208,7 @@ const PublicResponseFile = ({
       }
       initWaveform();
     } catch (error) {
-      console.log("Error handling delete:", error);
+      console.error("Error handling delete:", error);
     }
   };
 
@@ -259,7 +259,7 @@ const PublicResponseFile = ({
       }
       initWaveform();
     } catch (error) {
-      console.log("Error handling waveform cleanup:", error);
+      console.error("Error handling waveform cleanup:", error);
     }
 
     // Automatically start new recording

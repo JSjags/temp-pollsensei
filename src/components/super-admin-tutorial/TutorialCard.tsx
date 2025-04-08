@@ -97,7 +97,7 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
       handleCloseAll();
       // refetch();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Error deleting FAQ");
     }
   };
@@ -108,7 +108,7 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
       handleCloseAll();
       // refetch();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Error deleting FAQ");
     }
   };
@@ -119,7 +119,7 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
       handleCloseAll();
       // refetch();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Error deleting FAQ");
     }
   };
@@ -143,7 +143,7 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
       question: editingFaq.question,
       answer: editingFaq.answer,
     };
-    console.log(editData);
+    // console.log(editData);
     try {
       await editTutorial(editData).unwrap();
       toast.success("FAQ updated successfully");
@@ -159,7 +159,7 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
       handleCloseAll();
       // refetch();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Error deleting FAQ");
     }
   };
@@ -170,7 +170,7 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
       handleCloseAll();
       // refetch();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Error deleting FAQ");
     }
   };
@@ -181,7 +181,7 @@ const TutorialCardItem: React.FC<TutorialCardItemProps> = ({
       handleCloseAll();
       // refetch();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("Error deleting FAQ");
     }
   };

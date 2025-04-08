@@ -12,7 +12,7 @@ const SuperadminDashboard = () => {
     isLoading: isLoadingOverview,
     isFetching,
   } = useSuperadminOverviewQuery(selected);
-  console.log(overview);
+  // console.log(overview);
 
   return (
     <div>

@@ -61,6 +61,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { LuMenu } from "react-icons/lu";
 
 interface Notification {
   _id: string;
@@ -175,8 +176,8 @@ const Navbar = () => {
     persistor.purge(); // Clear persisted storage
   };
 
-  console.log(user);
-  console.log(user2);
+  // console.log(user);
+  // console.log(user2);
 
   useEffect(() => {
     if (path && path.includes("/surveys")) {
@@ -198,7 +199,7 @@ const Navbar = () => {
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
 
-  console.log(notifications?.data);
+  // console.log(notifications?.data);
 
   return (
     <div
@@ -223,13 +224,20 @@ const Navbar = () => {
                   onClick={toogleMainSidebar}
                 />
               ) : (
-                <Image
-                  src={"/assets/sidebar/close.svg"}
-                  alt="Open sidebar"
-                  width={24}
-                  height={24}
-                  onClick={toogleMainSidebar}
-                />
+                <>
+                  <Image
+                    src={"/assets/sidebar/close.svg"}
+                    alt="Open sidebar"
+                    width={24}
+                    height={24}
+                    onClick={toogleMainSidebar}
+                    className="hidden lg:inline-block"
+                  />
+                  <LuMenu
+                    onClick={toogleMainSidebar}
+                    className="text-black text-xl inline-block lg:hidden"
+                  />
+                </>
               )}
               {/* <div className="h-10 bg-white relative rounded-lg w-52">
                 <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
@@ -239,11 +247,6 @@ const Navbar = () => {
                 />
               </div> */}
             </div>
-          </div>
-          <div className="lg:hidden flex items-center gap-2 cursor-pointer">
-            <Link href="/dashboard" className="w-full">
-              <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
-            </Link>
           </div>
 
           <div className="flex gap-4 items-center">
@@ -294,7 +297,7 @@ const Navbar = () => {
                         <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">
-                        You're all caught up! No new notifications.
+                        You&apos;re all caught up! No new notifications.
                       </p>
                       <Button
                         variant="outline"
@@ -463,31 +466,6 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
-          {/* <div className="lg:hidden flex items-center gap-3">
-            <div
-              // onClick={() => {
-              //   alert("Clicked");
-              // }}
-              className="lg:hidden size-8 rounded-full bg-[#fafafa] flex items-center justify-center cursor-pointer"
-            >
-              <Image
-                className="object-contain"
-                width={24}
-                height={24}
-                src={mobileNotification}
-                alt="Mobile Notification"
-              />
-            </div>
-            <div
-              // onClick={() => {
-              //   alert("Clicked");
-              // }}
-              className="lg:hidden font-semibold size-8 rounded-full bg-[#fafafa] flex items-center justify-center cursor-pointer"
-            >
-              {generateInitials((user as any)?.name ?? "")}
-            </div>
-          </div> */}
         </header>
       </div>
 

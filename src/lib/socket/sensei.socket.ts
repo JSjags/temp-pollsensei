@@ -39,7 +39,7 @@ export function useSocket() {
 
     // Listen for 'ai_trigger' event
     socketIo.on("ai_trigger", (data) => {
-      console.log("Received ai_trigger event:", data.message);
+      // console.log("Received ai_trigger event:", data.message);
       setAiResponse(data.message);
     });
 
@@ -59,7 +59,7 @@ export function useSocket() {
     if (socket?.connected) {
       setLoading(true); // Start loading when emitting
       socket.emit("user_trigger", { message });
-      console.log("Sent user_trigger event:", message);
+      // console.log("Sent user_trigger event:", message);
 
       // Simulate a delay for receiving ai_trigger to stop loading
       socket.once("ai_trigger", () => {

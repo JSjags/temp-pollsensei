@@ -18,30 +18,40 @@ import IdentityVerification from "@/subpages/respondent-form/IdentityVerificatio
 import Image from "next/image";
 import marker from "@/assets/images/marker.svg";
 import tech from "@/assets/images/tech.svg";
+import { z } from "zod";
+import { getInitialValuesFromSchema } from "@/utils/respondentUtils";
+import { combinedSchema, CombinedFormData } from "@/utils/combinedSchema";
 
 const RespondentForm = () => {
-  const [activeTab, setActiveTab] = useState("personal");
+  const [activeTab, setActiveTab] = useState("personalInfo");
+  const initialFormData = getInitialValuesFromSchema(combinedSchema);
+
+  const [formData, setFormData] = useState<CombinedFormData>(initialFormData);
 
   const tabs = [
     {
       id: 1,
       name: "Personal Information",
-      value: "personal",
+      value: "personalInfo",
       icon: (
         <FiUser
           className={`text-xl ${
-            activeTab === "personal" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "personalInfo" ? "text-[#5B03B2]" : "text-[#898989]"
           }`}
         />
       ),
       component: (
-        <PersonalInformation onContinue={() => setActiveTab("geography")} />
+        <PersonalInformation
+          onContinue={() => setActiveTab("geographicInfo")}
+          formData={formData}
+          setFormData={setFormData}
+        />
       ),
     },
     {
       id: 2,
       name: "Geography & Culture",
-      value: "geography",
+      value: "geographicInfo",
       icon: (
         <Image
           src={marker}
@@ -49,57 +59,67 @@ const RespondentForm = () => {
           width={15}
           height={15}
           className={`${
-            activeTab === "geography" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "geographicInfo" ? "text-[#5B03B2]" : "text-[#898989]"
           }`}
         />
       ),
       component: (
         <Geo_Culture
-          onContinue={() => setActiveTab("employment")}
-          onPrevious={() => setActiveTab("personal")}
+          onContinue={() => setActiveTab("educationEmployment")}
+          onPrevious={() => setActiveTab("personalInfo")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
     {
       id: 3,
       name: "Education & Employment",
-      value: "employment",
+      value: "educationEmployment",
       icon: (
         <LuGraduationCap
           className={`text-xl ${
-            activeTab === "employment" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "educationEmployment"
+              ? "text-[#5B03B2]"
+              : "text-[#898989]"
           }`}
         />
       ),
       component: (
         <Edu_Employment
-          onContinue={() => setActiveTab("health")}
-          onPrevious={() => setActiveTab("geography")}
+          onContinue={() => setActiveTab("healthLifestyle")}
+          onPrevious={() => setActiveTab("geographicInfo")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
     {
       id: 4,
       name: "Health & Lifestyle Markers",
-      value: "health",
+      value: "healthLifestyle",
       icon: (
         <PiHeartbeat
           className={`text-xl ${
-            activeTab === "health" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "healthLifestyle"
+              ? "text-[#5B03B2]"
+              : "text-[#898989]"
           }`}
         />
       ),
       component: (
         <Health_LifeStyle
-          onContinue={() => setActiveTab("technology")}
-          onPrevious={() => setActiveTab("employment")}
+          onContinue={() => setActiveTab("technologyMedia")}
+          onPrevious={() => setActiveTab("educationEmployment")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
     {
       id: 5,
       name: "Technology & Media Usage",
-      value: "technology",
+      value: "technologyMedia",
       icon: (
         <Image
           src={tech}
@@ -107,66 +127,80 @@ const RespondentForm = () => {
           width={20}
           height={20}
           className={`${
-            activeTab === "technology" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "technologyMedia"
+              ? "text-[#5B03B2]"
+              : "text-[#898989]"
           }`}
         />
       ),
       component: (
         <Tech_Media
-          onContinue={() => setActiveTab("housing")}
-          onPrevious={() => setActiveTab("health")}
+          onContinue={() => setActiveTab("housingLiving")}
+          onPrevious={() => setActiveTab("healthLifestyle")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
     {
       id: 6,
       name: "Housing & Living Situations",
-      value: "housing",
+      value: "housingLiving",
       icon: (
         <MdOutlineHomeWork
           className={`text-xl ${
-            activeTab === "housing" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "housingLiving" ? "text-[#5B03B2]" : "text-[#898989]"
           }`}
         />
       ),
       component: (
         <Housing_Living
-          onContinue={() => setActiveTab("mobility")}
-          onPrevious={() => setActiveTab("technology")}
+          onContinue={() => setActiveTab("mobilityTravel")}
+          onPrevious={() => setActiveTab("technologyMedia")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
     {
       id: 7,
       name: "Mobility & Travel",
-      value: "mobility",
+      value: "mobilityTravel",
       icon: (
         <BsSuitcase2
           className={`text-xl ${
-            activeTab === "mobility" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "mobilityTravel" ? "text-[#5B03B2]" : "text-[#898989]"
           }`}
         />
       ),
       component: (
         <Mobility_Travel
-          onContinue={() => setActiveTab("identity")}
-          onPrevious={() => setActiveTab("housing")}
+          onContinue={() => setActiveTab("identityVerification")}
+          onPrevious={() => setActiveTab("housingLiving")}
+          formData={formData}
+          setFormData={setFormData}
         />
       ),
     },
     {
       id: 8,
       name: "Identity Verification",
-      value: "identity",
+      value: "identityVerification",
       icon: (
         <PiUserList
           className={`text-xl ${
-            activeTab === "identity" ? "text-[#5B03B2]" : "text-[#898989]"
+            activeTab === "identityVerification"
+              ? "text-[#5B03B2]"
+              : "text-[#898989]"
           }`}
         />
       ),
       component: (
-        <IdentityVerification onPrevious={() => setActiveTab("mobility")} />
+        <IdentityVerification
+          onPrevious={() => setActiveTab("mobilityTravel")}
+          // formData={formData}
+          // setFormData={setFormData}
+        />
       ),
     },
   ];
@@ -202,4 +236,5 @@ const RespondentForm = () => {
     </Tabs>
   );
 };
+
 export default RespondentForm;

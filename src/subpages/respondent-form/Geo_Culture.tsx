@@ -1,29 +1,13 @@
 "use client";
 import React, { FC, useState, useEffect, useRef } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
-import { IoChevronDownOutline } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
-import { Checkbox } from "@/components/ui/shadcn-checkbox";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { geographyAndCultureSchema } from "@/utils/shema";
-import { IoClose } from "react-icons/io5";
+import { CombinedFormData } from "@/utils/combinedSchema";
 import { useQuery } from "@tanstack/react-query";
 import { getNationality } from "@/services/api/apiGetRequest";
 import Image from "next/image";
@@ -34,13 +18,33 @@ import {
   ethnicityOptions,
   religionOptions,
 } from "@/data/respondent-object-data";
+import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
+import { toast } from "react-toastify";
+import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
+import { ControlledMultiSelect } from "@/components/respondent-form/ControlledMultiSelect";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "@/components/ui/select";
+import { Controller } from "react-hook-form";
 
 interface Props {
   onContinue: () => void;
   onPrevious: () => void;
+  formData: CombinedFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CombinedFormData>>;
 }
 
-const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
+const Geo_Culture: FC<Props> = ({
+  onContinue,
+  onPrevious,
+  formData,
+  setFormData,
+}) => {
   const [searchNationality, setSearchNationality] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,48 +53,41 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm({
     resolver: zodResolver(geographyAndCultureSchema),
-    defaultValues: {
-      languages: [],
-    },
+    defaultValues: formData,
   });
 
-  type FormData = z.infer<typeof geographyAndCultureSchema>;
+  const { mutate: submitForm, isPending } = useSubmitRespondentForm();
 
-  // function to handle the next tab/section
-  const handleContinue = (data: FormData) => {
-    onContinue();
+  const handleContinue = (data: z.infer<typeof geographyAndCultureSchema>) => {
+    submitForm(
+      { tab: "geographicInfo", formData: data },
+      {
+        onSuccess: () => {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            ...data,
+          }));
+          onContinue();
+        },
+        onError: (error) => {
+          console.error("Form submission error:", error);
+          toast.error(error.message);
+        },
+      }
+    );
   };
 
-  // function to handle the previous tab/section
   const handlePrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     onPrevious();
-  };
-
-  // const handleLanguageChange = (
-  //   field: any,
-  //   language: string,
-  //   checked: boolean
-  // ) => {
-  //   const updatedLanguages = checked
-  //     ? [...field.value, language]
-  //     : field.value.filter((l: string) => l !== language);
-  //   field.onChange(updatedLanguages);
-  // };
-
-  // function to remove selected language
-  const removeLanguage = (field: any, language: string) => {
-    const updatedLanguages = field.value.filter((l: string) => l !== language);
-    field.onChange(updatedLanguages);
   };
 
   const { data: nationalities } = useQuery({
     queryKey: [],
     queryFn: async () => getNationality(),
     enabled: true,
-    // staleTime: Infinity,
   });
 
   const sortedNationalities = nationalities
@@ -129,116 +126,46 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
           className="flex flex-col gap-3"
           onSubmit={handleSubmit(handleContinue)}
         >
-          <div className="flex flex-col gap-2">
-            <label htmlFor="location" className="text-[#333333] text-sm">
-              Where do you currently live? (Required)
-            </label>
-            <Controller
-              name="location"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {locationOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="location"
+            control={control}
+            options={locationOptions}
+            placeholder="Select option"
+            label="Where do you currently live?"
+            required={true}
+            error={errors.location}
+            disabled={isPending}
+            otherFieldName="otherLocation"
+            register={register}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherLocation")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-            {errors.location && (
-              <p className="text-red-500 text-sm">{errors.location.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="region" className="text-[#333333] text-sm">
-              Which region do you live in? (Required)
-            </label>
-            <Controller
-              name="region"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {regionOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="region"
+            control={control}
+            options={regionOptions}
+            placeholder="Select option"
+            label="Which region do you live in?"
+            required={true}
+            error={errors.region}
+            disabled={isPending}
+            otherFieldName="otherRegion"
+            register={register}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherRegion")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-            {errors.region && (
-              <p className="text-red-500 text-sm">{errors.region.message}</p>
-            )}
-          </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="nationality" className="text-[#333333] text-sm">
-              What is your nationality? (Required)
+              What is your nationality? <span className="text-red-500">*</span>
             </label>
             <Controller
               name="nationality"
               control={control}
-              defaultValue=""
               render={({ field }) => (
                 <Select
                   value={field.value}
                   onValueChange={(value) => field.onChange(value)}
+                  disabled={isPending}
                 >
-                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
+                  <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-black text-sm rounded-md py-2 px-3 active:outline-none">
                     <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent className="w-full h-[300px] overflow-auto scrollbar-hide">
@@ -246,7 +173,7 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
                       <input
                         type="search"
                         placeholder="Search country"
-                        className="w-[98%] h-auto py-1 px-2 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md fixed top-1 left-1 bg-white z-10"
+                        className="w-[98%] h-auto py-1 px-2 border-2 border-[#E0E0E0] text-black text-sm rounded-md fixed top-1 left-1 bg-white z-10"
                         value={searchNationality}
                         onChange={(e) => setSearchNationality(e.target.value)}
                         autoFocus
@@ -267,8 +194,6 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
                                   alt={nationality?.name.common}
                                   width={20}
                                   height={15}
-                                  // layout="fill"
-                                  // objectFit="cover"
                                 />
                                 {nationality?.name?.common}
                               </div>
@@ -287,180 +212,47 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
               </p>
             )}
           </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="ethnicity" className="text-[#333333] text-sm">
-              What is your ethnicity? (Required)
-            </label>
-            <Controller
-              name="ethnicity"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {ethnicityOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherEthnicity")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="language" className="text-[#333333] text-sm">
-              What languages do you speak fluently? (Required)
-            </label>
-            <Controller
-              name="languages"
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      asChild
-                      className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none"
-                    >
-                      <Button
-                        variant="outline"
-                        size="default"
-                        className="w-full flex items-center justify-between"
-                      >
-                        <span>Select Option</span>
-                        <IoChevronDownOutline className="text-[#898989] text-lg" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[450px] h-[300px] flex flex-col overflow-auto scrollbar-hide">
-                      {languagesOptions.map((language) => (
-                        <div
-                          key={language}
-                          className="flex items-center gap-2 w-full hover:bg-[#CB85FD1A] px-5 rounded-sm"
-                        >
-                          <Checkbox
-                            id={language}
-                            checked={field.value.includes(language)}
-                            onCheckedChange={(checked) => {
-                              const updatedLanguages = checked
-                                ? [...field.value, language]
-                                : field.value.filter((l) => l !== language);
-                              field.onChange(updatedLanguages);
-                            }}
-                          />
-                          <DropdownMenuLabel className="text-base capitalize font-normal">
-                            {language}
-                          </DropdownMenuLabel>
-                        </div>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+          <ControlledSelect
+            name="ethnicity"
+            control={control}
+            options={ethnicityOptions}
+            placeholder="Select option"
+            label="What is your ethnicity?"
+            required={true}
+            error={errors.ethnicity}
+            disabled={isPending}
+            otherFieldName="otherEthnicity"
+            register={register}
+          />
 
-                  <div className="flex flex-wrap gap-2">
-                    {field.value.map((language) => (
-                      <div
-                        key={language}
-                        className={`flex items-center gap-1 bg-[#E8DEF8] rounded-xl py-1 px-2 ${
-                          language.includes("other") ? "hidden" : "inline-block"
-                        }`}
-                      >
-                        <span className="text-sm capitalize">{language}</span>
-                        <IoClose
-                          className="text-lg cursor-pointer"
-                          onClick={() => removeLanguage(field, language)}
-                        />
-                      </div>
-                    ))}
-                  </div>
+          <ControlledMultiSelect
+            name="languages"
+            control={control}
+            options={languagesOptions}
+            label="What languages do you speak fluently?"
+            placeholder="Select languages"
+            error={errors.languages}
+            disabled={isPending}
+            otherFieldName="otherLanguage"
+            register={register}
+            required={true}
+            contentHeight="300px"
+          />
 
-                  {field.value.includes("other") && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherLanguage")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-            {errors.languages && (
-              <p className="text-red-500 text-sm">{errors.languages.message}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="religion" className="text-[#333333] text-sm">
-              What religion, if any, do you identify with? (Optional)
-            </label>
-            <Controller
-              name="religion"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => field.onChange(value)}
-                  >
-                    <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md py-2 px-3 active:outline-none">
-                      <SelectValue placeholder="Select option" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full h-auto">
-                      <SelectGroup>
-                        {religionOptions.map((option) => (
-                          <SelectItem
-                            value={option.value}
-                            className="text-base"
-                            key={option.value}
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+          <ControlledSelect
+            name="religion"
+            control={control}
+            options={religionOptions}
+            placeholder="Select option"
+            label="What religion, if any, do you identify with?"
+            required={false}
+            error={errors.religion}
+            disabled={isPending}
+            otherFieldName="otherReligion"
+            register={register}
+          />
 
-                  {field.value === "other" && (
-                    <input
-                      type="text"
-                      placeholder="Other (Please specify)"
-                      className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-[#898989] text-sm rounded-md mt-2"
-                      {...register("otherReligion")}
-                      autoFocus
-                    />
-                  )}
-                </>
-              )}
-            />
-            {errors.religion && (
-              <p className="text-red-500 text-sm">{errors.religion.message}</p>
-            )}
-          </div>
           <div className="w-full flex items-center gap-5 lg:mb-10 mt-5">
             <Button
               size="default"
@@ -474,8 +266,9 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
               size="default"
               className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
               type="submit"
+              disabled={isPending}
             >
-              Save and Continue
+              {isPending ? "Saving..." : "Save and Continue"}
             </Button>
           </div>
         </form>
@@ -483,4 +276,5 @@ const Geo_Culture: FC<Props> = ({ onContinue, onPrevious }) => {
     </div>
   );
 };
+
 export default Geo_Culture;
