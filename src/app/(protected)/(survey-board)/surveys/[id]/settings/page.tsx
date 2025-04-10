@@ -50,6 +50,7 @@ const SettingsPage = () => {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [isRegionDialogOpen, setIsRegionDialogOpen] = useState(false);
   const [isThresholdEditing, setIsThresholdEditing] = useState(false);
+  const [isVoiceDurationEditing, setIsVoiceDurationEditing] = useState(false);
   const [formState, setFormState] = useState({
     language: "",
     availabile_regions: [] as string[],
@@ -57,7 +58,8 @@ const SettingsPage = () => {
     collect_name_of_respondents: false,
     allow_survey_edit: false,
     receive_email_notification: false,
-    response_threshold: 1000,
+    response_threshold: 1000000,
+    voice_response_duration_in_seconds: 600,
   });
 
   const {
@@ -91,6 +93,7 @@ const SettingsPage = () => {
     allow_survey_edit: boolean;
     receive_email_notification: boolean;
     response_threshold: number;
+    voice_response_duration_in_seconds: number;
   }>({
     queryKey: ["survey-settings", surveyId],
     queryFn: () => getSurveySettings({ surveyId }),
@@ -111,7 +114,9 @@ const SettingsPage = () => {
         collect_name_of_respondents: surveySettings.collect_name_of_respondents,
         allow_survey_edit: surveySettings.allow_survey_edit,
         receive_email_notification: surveySettings.receive_email_notification,
-        response_threshold: surveySettings.response_threshold || 1000,
+        response_threshold: surveySettings.response_threshold || 1000000,
+        voice_response_duration_in_seconds:
+          surveySettings.voice_response_duration_in_seconds || 600,
       });
     }
   }, [surveySettings]);
@@ -170,8 +175,15 @@ const SettingsPage = () => {
         allow_survey_edit: surveySettings.allow_survey_edit,
         receive_email_notification: surveySettings.receive_email_notification,
         response_threshold: surveySettings.response_threshold || 1000,
+        voice_response_duration_in_seconds:
+          surveySettings.voice_response_duration_in_seconds || 600,
       })
     );
+  };
+
+  // Function to format numbers with commas
+  const formatNumberWithCommas = (number: number) => {
+    return number.toLocaleString();
   };
 
   console.log(surveySettings);
@@ -197,7 +209,7 @@ const SettingsPage = () => {
                   <Skeleton className="h-10 w-full" />
                 </div>
                 <div className="space-y-4 pt-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                     <div key={i} className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Skeleton className="h-4 w-40" />
@@ -380,13 +392,59 @@ const SettingsPage = () => {
                           className="w-24"
                         />
                       ) : (
-                        <span>{formState.response_threshold}</span>
+                        <span>
+                          {formatNumberWithCommas(formState.response_threshold)}
+                        </span>
                       )}
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() =>
                           setIsThresholdEditing(!isThresholdEditing)
+                        }
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    variants={fadeInUpVariant}
+                    custom={10}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="space-y-0.5">
+                      <h4 className="font-medium">Voice Response Duration</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Maximum duration for voice responses in seconds
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isVoiceDurationEditing ? (
+                        <Input
+                          type="number"
+                          value={formState.voice_response_duration_in_seconds}
+                          onChange={(e) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              voice_response_duration_in_seconds:
+                                parseInt(e.target.value) || 0,
+                            }))
+                          }
+                          className="w-24"
+                        />
+                      ) : (
+                        <span>
+                          {formatNumberWithCommas(
+                            formState.voice_response_duration_in_seconds
+                          )}
+                        </span>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          setIsVoiceDurationEditing(!isVoiceDurationEditing)
                         }
                       >
                         <Edit3 className="h-4 w-4" />

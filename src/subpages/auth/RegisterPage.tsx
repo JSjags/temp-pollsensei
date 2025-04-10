@@ -126,9 +126,17 @@ const RegisterPage = () => {
       router.push(`/verify-email${ed ? `?ed=${ed}` : ""}`);
     } catch (err: any) {
       toast.error(
-        "Failed to register user " + (err?.data?.message || err.message)
+        typeof err?.data?.message === "string"
+          ? err?.data?.message
+          : err?.data &&
+            typeof err?.data === "string" &&
+            err?.data.trim() !== ""
+          ? JSON.parse(err?.data)?.message
+          : err.message,
+        {
+          toastId: "api-error",
+        }
       );
-      console.error("Failed to register user", err);
     }
   };
 
@@ -148,12 +156,14 @@ const RegisterPage = () => {
         toast.success("Register success");
         router.push("/verify-email");
       } catch (err: any) {
-        console.log(err);
-
         toast.error(
-          "Failed to register user " + (err?.data?.message || err.message)
+          typeof err?.data?.message === "string"
+            ? err?.data?.message
+            : JSON.parse(err?.data)?.message || err.message,
+          {
+            toastId: "api-error",
+          }
         );
-        console.error("Failed to sign up user", err);
       }
     },
     onError: (err) => {
@@ -169,10 +179,9 @@ const RegisterPage = () => {
       }).unwrap();
       toast.success("Register success");
     } catch (err: any) {
-      toast.error(
-        "Failed to register user " + (err?.data?.message || err.message)
-      );
-      console.error("Failed to sign up user", err);
+      toast.error(err?.data?.message || err.message, {
+        toastId: "api-error",
+      });
     }
   };
 
@@ -506,7 +515,7 @@ const RegisterPage = () => {
                               User registered successfully!
                             </motion.p>
                           )}
-                          {isError && (
+                          {/* {isError && (
                             <motion.p
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
@@ -522,7 +531,7 @@ const RegisterPage = () => {
                                 ? error.message
                                 : "An unknown error occurred"}
                             </motion.p>
-                          )}
+                          )} */}
                         </AnimatePresence>
                       </form>
                     )}
@@ -577,8 +586,9 @@ const RegisterPage = () => {
                         //   timestamp: new Date().toISOString(),
                         // });
                       } catch (err) {
-                        console.error("Error during Google sign up:", err);
-                        toast.error("Failed to sign in with Google");
+                        toast.error("Failed to sign in with Google", {
+                          toastId: "api-error",
+                        });
                       }
                     }}
                     className="flex justify-between items-center gap-2 border pr-4 rounded-full hover:shadow-lg transition-shadow duration-300 cursor-pointer bg-white"

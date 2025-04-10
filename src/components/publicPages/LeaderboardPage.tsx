@@ -203,14 +203,29 @@ const LeaderboardPage = () => {
                       Total number of surveys created by referred users
                     </p>
                   </div>
-                  <div className="flex items-start sm:items-center gap-2">
-                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
-                    <p className="text-sm">
-                      <span className="font-semibold text-[#5B03B2]">
-                        Top 3 Qualification:
-                      </span>{" "}
-                      Minimum referrals required - 1st: 500, 2nd: 300, 3rd: 200
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB] flex-shrink-0" />
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        <span className="font-semibold text-[#5B03B2]">
+                          Top 3 Qualification Requirements:
+                        </span>
+                      </p>
+                      <div className="space-y-1 text-sm">
+                        <p>
+                          🥇 1st Place: 500 referrals • 200 surveys • 150
+                          responses
+                        </p>
+                        <p>
+                          🥈 2nd Place: 300 referrals • 120 surveys • 100
+                          responses
+                        </p>
+                        <p>
+                          🥉 3rd Place: 200 referrals • 80 surveys • 60
+                          responses
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-start sm:items-center gap-2">
                     <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
@@ -466,14 +481,28 @@ const LeaderboardPage = () => {
                     Total number of surveys created by referred users
                   </p>
                 </div>
-                <div className="flex items-start sm:items-center gap-2">
-                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
-                  <p className="text-sm">
-                    <span className="font-semibold text-[#5B03B2]">
-                      Top 3 Qualification:
-                    </span>{" "}
-                    Minimum referrals required - 1st: 500, 2nd: 300, 3rd: 200
-                  </p>
+                <div className="flex items-start gap-2">
+                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB] flex-shrink-0" />
+                  <div className="space-y-2">
+                    <p className="text-sm">
+                      <span className="font-semibold text-[#5B03B2]">
+                        Top 3 Qualification Requirements:
+                      </span>
+                    </p>
+                    <div className="space-y-1 text-sm">
+                      <p>
+                        🥇 1st Place: 500 referrals • 200 surveys • 150
+                        responses
+                      </p>
+                      <p>
+                        🥈 2nd Place: 300 referrals • 120 surveys • 100
+                        responses
+                      </p>
+                      <p>
+                        🥉 3rd Place: 200 referrals • 80 surveys • 60 responses
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
                   <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />

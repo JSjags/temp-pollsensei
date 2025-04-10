@@ -69,22 +69,46 @@ const customBaseQuery: BaseQueryFn<
   let result = await baseQuery(args, api, extraOptions);
 
   if (result.error) {
-    const { status } = result.error;
-    const errorMessage = (result.error.data as { message: string })?.message;
+    // Check if status is not a number, then try to use originalStatus if available
+    let statusCode = result.error.status;
+    if (typeof statusCode !== "number" && "originalStatus" in result.error) {
+      statusCode = result.error.originalStatus as number;
+    }
+    // Extract error data, handling cases where it might be a JSON string
+    let errorData: any = result.error.data;
+
+    // If errorData is a string that looks like JSON, try to parse it
+    if (
+      typeof errorData === "string" &&
+      (errorData.startsWith("{") || errorData.startsWith("["))
+    ) {
+      try {
+        errorData = JSON.parse(errorData);
+      } catch (e) {
+        // If parsing fails, keep the original string
+        console.error("Failed to parse error data as JSON:", e);
+      }
+    }
+
+    const errorMessage = (errorData as { message: string })?.message;
 
     // Create error message based on status
     let toastMessage = "";
-    switch (status) {
+    switch (statusCode) {
       case 406:
-        toastMessage = "Inactive for too long. Please login again to continue.";
+        toastMessage =
+          errorMessage ||
+          "Inactive for too long. Please login again to continue.";
         api.dispatch(logoutUser());
         break;
       case 401:
-        toastMessage = "Unauthorized access. Please login again.";
+        toastMessage =
+          errorMessage || "Unauthorized access. Please login again.";
         api.dispatch(logoutUser());
         break;
       case 503:
-        toastMessage = "Unauthorized access. Please login again.";
+        toastMessage =
+          errorMessage || "Unauthorized access. Please login again.";
         api.dispatch(logoutUser());
         break;
       case 400:
