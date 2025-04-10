@@ -76,10 +76,18 @@ const LoginPage = () => {
         }
       }
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error(
-        "Failed to login user " +
-          (error?.response?.data?.message || error.message)
+        typeof err?.data?.message === "string"
+          ? err?.data?.message
+          : err?.data &&
+            typeof err?.data === "string" &&
+            err?.data.trim() !== ""
+          ? JSON.parse(err?.data)?.message
+          : err.message,
+        {
+          toastId: "api-error",
+        }
       );
     },
     retry: false,

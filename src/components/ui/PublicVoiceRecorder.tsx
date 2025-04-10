@@ -226,7 +226,10 @@ const PublicResponseFile = ({
       const response = await uploadResponseFile(formData).unwrap();
       const mediaUrl = response?.data?.media_url;
       if (mediaUrl) {
-        handleAnswerChange(question, { media_url: mediaUrl });
+        handleAnswerChange(question, {
+          media_url: mediaUrl,
+          duration: duration,
+        });
         setIsUploaded(true);
         toast.success("Audio uploaded successfully!");
       } else {

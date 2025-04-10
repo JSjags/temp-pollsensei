@@ -267,6 +267,8 @@ const PublicResponse = () => {
       ? psId
       : psShortUrl;
 
+  console.log(question?.data?.settings);
+
   useEffect(() => {
     if (question?.data?.sections) {
       setSelectedOptions(new Array(question.data.sections.length).fill(null));
@@ -286,11 +288,21 @@ const PublicResponse = () => {
     }
 
     // Format answers for current section
-    const formattedAnswers = currentQuestions.map((question: any) => ({
-      question: question.question,
-      question_type: question.question_type,
-      ...answers[question.question],
-    }));
+    const formattedAnswers = currentQuestions.map((question: any) => {
+      const answer = answers[question.question];
+      const formattedAnswer = {
+        question: question.question,
+        question_type: question.question_type,
+        ...answer,
+      };
+
+      // Add duration field for long text with media URL
+      if (question.question_type === "long_text" && answer?.media_url) {
+        formattedAnswer.duration = answer.duration || 0;
+      }
+
+      return formattedAnswer;
+    });
 
     // Validate required fields
     const newFormErrors: FormErrors = {
