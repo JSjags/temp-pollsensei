@@ -76,12 +76,17 @@ import tut4 from "./tut4.svg";
 import Coins from "./shop/coins.svg";
 import Arrow from "./shop/arrow.svg";
 import AvailableIcon from "./shop/available.svg";
+import NonRedeemable from './shop/non-redeemable.svg'
 import WalletIcon from "./shop/wallet.svg";
 import MoneyIcon from "./shop/money.svg";
 import RespondentIcon from "./shop/respondents.svg";
 import InfoIcon from "./shop/info.svg";
 import Purchases1 from "./shop/resp.svg";
 import Purchases2 from "./shop/credit.svg";
+import Purchases3 from "./shop/OCRScan.svg";
+import Purchases4 from "./shop/AIAnalysis.svg";
+import Purchases5 from "./shop/AIReporting.svg";
+import Purchases6 from "./shop/VoiceTranscription.svg";
 import Check from "./shop/check.svg";
 import LockIcon from "./shop/lock.svg";
 import PaystackLogo from "./shop/paystack.svg";
@@ -113,6 +118,11 @@ import CoinsObtained from "./payouts/coins-obtained.svg";
 import CoinRedeemed from "./payouts/coins-redeemed.svg";
 import RedeemableCoin from "./payouts/redeemable-coin.svg";
 import PayoutInfoIcon from "./payouts/Info.svg";
+import AIGeneration from './shop/MdOutlineFactCheck.svg'
+import OCR from './shop/MdOutlineDocumentScanner.svg'
+import Analysis from './shop/MdQueryStats.svg'
+import AIReporting from './shop/BsClipboardData.svg'
+import Voice from './shop/MdOutlineKeyboardVoice.svg'
 
 export {
   teamIcon,
@@ -120,6 +130,11 @@ export {
   X,
   Tiktok,
   Instagram,
+  AIGeneration,
+  OCR,
+  Analysis,
+  AIReporting,
+  Voice,
   Youtube,
   LinkedIn,
   RedeemCoins,
@@ -138,6 +153,7 @@ export {
   CoinRedeemed,
   CoinsObtained,
   RedeemableCoin,
+  NonRedeemable,
   Coins,
   Coin,
   CoinCard,
@@ -154,6 +170,10 @@ export {
   MoneyIcon,
   Purchases1,
   Purchases2,
+  Purchases3,
+  Purchases4,
+  Purchases5,
+  Purchases6,
   RespondentIcon,
   InfoIcon,
   userPlaceholder,

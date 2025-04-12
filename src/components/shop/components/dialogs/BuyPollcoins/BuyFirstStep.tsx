@@ -155,6 +155,10 @@ import { Dialog } from "@/components/ui/new-dialog";
 import { useDailyRate } from "@/components/shop/queries/useDailyRate";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
+import { usePollcoinOrderSummary } from "@/components/shop/queries/usePollcoinsPurchase";
+
+import { LoadingSpinner } from "./CheckoutDialog";
+import { OrderSummaryPayload } from "@/components/shop/types";
 
 export function BuyFirstStep() {
   const {
@@ -166,6 +170,9 @@ export function BuyFirstStep() {
     setPollErrors,
     clearPollError,
     setPollStep,
+    setLoading,
+    loading,
+    setOrderSummary
   } = useShopStore();
   const { data: dailyRate, isLoading } = useDailyRate();
   const {
@@ -174,6 +181,7 @@ export function BuyFirstStep() {
     isError: locationError,
   } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
+  const pollcoinSummaryMutation = usePollcoinOrderSummary();
 
   // Default global rates (for users outside Nigeria)
   const [baseAmount, setBaseAmount] = useState<number | null>(null);
@@ -232,10 +240,32 @@ export function BuyFirstStep() {
     setPollErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
-  const handleSubmit = () => {
+  
+  const handleSubmit = async () => {
     if (!validate()) return;
-    setPollStep("checkout");
+
+    const payload: OrderSummaryPayload = {
+      amount: parseFloat(pollAmount),
+      pollcoins: parseFloat(pollcoins),
+      currency: isNigeria ? "NGN" : "USD",
+    };
+
+    try {
+      setLoading(true);
+
+      const res = await pollcoinSummaryMutation.mutateAsync(payload);
+      const summary = res?.data?.orderSummary;
+
+      if (summary) {
+        setOrderSummary(summary);
+        setPollStep("checkout");
+      }
+    } catch (error) {
+      console.error("Summary error", error);
+      // Optionally show a toast or dialog error
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -275,7 +305,6 @@ export function BuyFirstStep() {
             )}
           </div>
 
-          {/* Cost */}
           <div className="mt-4 flex items-center w-full justify-between h-[54px] border rounded-md focus-within:ring-2 focus-within:ring-purple-800 focus-within:ring-offset-2">
             <div className="h-[54px] flex items-center justify-center min-w-[90px] border-r px-3">
               {locationLoading ? (
@@ -303,11 +332,12 @@ export function BuyFirstStep() {
 
       <Button
         onClick={handleSubmit}
-        disabled={!pollAmount || !pollcoins || (!baseAmount && !isNigeria)}
+        disabled={loading || !pollAmount || !pollcoins || (!baseAmount && !isNigeria)}
         variant="gradient"
-        className="w-full rounded mt-12"
+        className="w-full rounded mt-12 gap-2"
       >
-        Pay Now
+        {loading && <LoadingSpinner />}
+        {loading ? "Processing..." : "Pay"}
       </Button>
     </Dialog.Body>
   );

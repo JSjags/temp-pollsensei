@@ -1,34 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
-import axiosInstance from "./axios-instance";
 import rawAxiosInstance from "./rawAxiosInstance";
 
 type PurchasePayload = {
   paymentGateway: "paystack" | "stripe";
   currency: "NGN" | "USD";
   amount: number;
-  pollcoins: number; // Number of pollcoins to purchase
+  pollcoins: number;
   orderReferenceId: string;
   redirect_url: string;
 };
 
-// type PurchaseResponse = {
-//   success: boolean;
-//   message: string;
-//   data: {
-//     purchase: {
-//       id: string;
-//       amount: number;
-//       pollcoins: number;
-//       bonusCoins: number;
-//       status: string;
-//     };
-//     payment: {
-//       authorization_url: string;
-//       access_code: string;
-//       reference: string;
-//     };
-//   };
-// };
 type PurchaseResponse = {
   success: boolean;
   message: string;
@@ -41,8 +22,8 @@ type PurchaseResponse = {
       status: string;
     };
     payment: {
-      authorization_url?: string; // For Paystack
-      client_secret?: string;     // For Stripe
+      authorization_url?: string; 
+      client_secret?: string;
       access_code?: string;
       reference: string;
     };
@@ -59,7 +40,6 @@ export const usePollcoinPurchase = () => {
           pollcoins: Number(payload.pollcoins),
         }
       );
-      console.log(res.data, "RESPONSE!!!");
 
       return res.data;
     },

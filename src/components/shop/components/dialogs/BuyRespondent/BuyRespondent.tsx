@@ -175,15 +175,15 @@ const BuyRespondent = () => {
       {pathname !== "/filter-respondents" && (
         <>
           <div className="px-8">
-            <Image src={Purchases1} alt="icons" className="size-full" />
+            <Image src={Purchases1} alt="icons" className="" />
           </div>
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}
           >
             <DialogTrigger asChild>
-              <div className="flex flex-col items-center justify-center">
-                <Button variant="gradient" className="h-[25px] gap-1 text-xs">
+              <div className="flex flex-col items-center justify-center px-3">
+                <Button variant="gradient" className="h-[25px] gap-1 text-xs w-full">
                   Respondents{" "}
                   <Image src={Arrow} alt="icons" className="size-4" />
                 </Button>

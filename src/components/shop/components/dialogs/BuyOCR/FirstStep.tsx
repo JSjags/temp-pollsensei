@@ -1,57 +1,48 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/shadcn-input";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useShopStore } from "../../../store/useShopStore";
 import { Dialog } from "@/components/ui/new-dialog";
 import { Banner } from "../../Banner";
 import { useUserBalance } from "@/components/shop/queries/useBalance";
-import BuyPollcoinsFlow from "../BuyPollcoins";
 
 export function FirstStep() {
-  const {
-    credits,
-    aiAmount,
-    aiErrors,
-    setAiAmount,
-    setCredits,
-    setAiErrors,
-    clearAiError,
-    setAIStep,
-    setAIDialogOpen,
-    setPollStep,
-    setPollDialogOpen,
-  } = useShopStore();
+  const { ocrCredits, setOCRCredits, ocrAmount, setOCRAmount, ocrStep, setOCRStep } =
+    useShopStore();
+
+  const [error, setError] = useState("");
 
   const RATE = 5;
   const { data } = useUserBalance();
   const { unrestrictedBalance = 0 } = data || {};
 
   useEffect(() => {
-    if (credits) {
-      const calculatedAmount = (parseFloat(credits) / RATE).toFixed(2);
-      setAiAmount(calculatedAmount);
+    if (ocrCredits) {
+      const calculatedAmount = (parseFloat(ocrCredits) / RATE).toFixed(2);
+      setOCRAmount(calculatedAmount);
     } else {
-      setAiAmount("");
+      setOCRAmount("");
     }
-  }, [credits, setAiAmount]);
+  }, [ocrCredits, setOCRAmount]);
 
   const validate = () => {
-    const newErrors: { quantity?: string } = {};
-    const quantityNum = parseFloat(credits);
+    const quantityNum = parseFloat(ocrCredits);
 
-    if (!credits) {
-      newErrors.quantity = "AI-Credit amount is required.";
+    if (!ocrCredits) {
+      setError("OCR credit amount is required.");
+      return false;
     } else if (isNaN(quantityNum) || quantityNum <= 0) {
-      newErrors.quantity = "Enter a valid AI-Credit quantity.";
+      setError("Enter a valid OCR credit quantity.");
+      return false;
     }
 
-    setAiErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setError("");
+    return true;
   };
 
   const handleSubmit = () => {
     if (!validate()) return;
-    setAIStep("checkout");
+    setOCRStep("checkout");
   };
 
   const isBalanceZero = unrestrictedBalance === 0;
@@ -59,31 +50,30 @@ export function FirstStep() {
   return (
     <Dialog.Body className="flex flex-col h-full">
       <div className="mt-5 flex flex-col items-center justify-center">
-        <p className="text-2xl font-bold mb-8">AI Survey Generation Credit</p>
+        <p className="text-2xl font-bold mb-8">OCR Document Scan Credit</p>
 
         <Banner />
+
         <div className="w-full">
           <div className="mt-5">
             <label htmlFor="credits" className="text-sm">
-              Amount of AI-Credit
+              Amount of OCR Document Scan Credit
             </label>
             <Input
               type="number"
               name="credits"
-              placeholder="Enter AI-Credit amount"
+              placeholder="Enter OCR Credit amount"
               className="mt-2 h-[54px]"
-              value={credits}
+              value={ocrCredits}
               onChange={(e) => {
-                setCredits(e.target.value);
-                if (aiErrors.quantity) clearAiError("quantity");
+                setOCRCredits(e.target.value);
+                if (error) setError("");
               }}
-              disabled={isBalanceZero}
             />
-            {aiErrors.quantity && (
-              <p className="mt-1 text-xs text-red-600">{aiErrors.quantity}</p>
-            )}
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
             <p className="mt-1 text-xs">
-              Today&apos;s AI-Credit rate: 1 Pollcoin = {RATE} AI-Credits
+              Today&apos;s OCR document scan rate: 1 Pollcoin = {RATE} OCR
+              document scan
             </p>
           </div>
 
@@ -94,7 +84,7 @@ export function FirstStep() {
 
             <input
               type="text"
-              value={aiAmount}
+              value={ocrAmount}
               readOnly
               className="h-[54px] flex-1 pl-2.5 bg-transparent outline-none text-muted-foreground"
             />
@@ -103,28 +93,16 @@ export function FirstStep() {
       </div>
 
       {isBalanceZero && (
-        <div className="text-sm text-[#FF0E0E] mt-4">
-          You don’t have enough coins for this purchase.{" "}
-          <BuyPollcoinsFlow nested>
-            <button
-              className="text-tertiary cursor-pointer underline"
-              onClick={() => {
-                setAIDialogOpen(false); // Close AI dialog
-                setPollStep("buy"); // Ensure Pollcoin flow starts from first step
-                setPollDialogOpen(true); // Open Pollcoin dialog
-              }}
-            >
-              Purchase coin
-            </button>
-          </BuyPollcoinsFlow>{" "}
-          to complete your purchase
-        </div>
+        <p className="text-sm text-red-500 mt-4 text-center">
+          You don&apos;t have any Pollcoins. Please top up to buy OCR document
+          scan credit.
+        </p>
       )}
 
       <div className="flex mt-auto w-full">
         <Button
           onClick={handleSubmit}
-          disabled={!credits || isBalanceZero}
+          disabled={!ocrCredits}
           variant="gradient"
           className="w-full rounded mt-12 max-[441px]:!h-12"
         >

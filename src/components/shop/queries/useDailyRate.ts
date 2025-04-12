@@ -1,4 +1,3 @@
-// hooks/useDailyRate.ts
 import { fetchDailyRate } from "@/services/api/getDailyRate";
 import { useQuery } from "@tanstack/react-query";
 

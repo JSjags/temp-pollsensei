@@ -6,6 +6,6 @@ export const fetchDailyRate = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching daily rate:", error);
-    throw error; // or handle it as appropriate for your use case
+    throw error;
   }
 };

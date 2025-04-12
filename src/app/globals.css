@@ -640,8 +640,8 @@ input[type="radio"].radio:checked:before {
   width: 100% !important;
 }
 
-.slick-list {
-  margin: 0 -10px;
+.analytics .slick-slide {
+  padding: 0 8px;
 }
 
 .slick-prev::before,
