@@ -39,6 +39,7 @@ axiosInstance.interceptors.response.use(
     return response?.data ?? response;
   },
   function (error) {
+    console.log(error);
     // Dismiss any existing error toasts
     toast.dismiss();
 
@@ -59,13 +60,19 @@ axiosInstance.interceptors.response.use(
             "You are not Authorized. Log in to continue";
     };
 
-    if (error.request.status === 401 || error.response.status === 401) {
+    if (
+      error.request.status === 401 ||
+      error.response.status === 401 ||
+      error.status === 401 ||
+      error.status === 401
+    ) {
+      console.log(error);
       if (store.getState().user.user) {
         localStorage.removeItem("token");
         store.dispatch(logoutUser());
-        toast.error(formatErrorMessage(error), { toastId: "error" });
         return window.location.assign("/login");
       }
+      toast.error(formatErrorMessage(error), { toastId: "error" });
     } else if (
       (error?.response?.data?.msg ||
         error?.response?.data?.message ||
