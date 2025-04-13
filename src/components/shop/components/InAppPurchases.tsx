@@ -14,6 +14,7 @@ import Image from "next/image";
 import BuyAICredit from "./dialogs/BuyAICredits";
 import BuyRespondent from "@/components/shop/components/dialogs/BuyRespondent/BuyRespondent";
 import BuyOCR from "./dialogs/BuyOCR";
+import { BuyAIReport } from "./dialogs/BuyAIReporting";
 
 export function InAppPurchases() {
   return (
@@ -85,12 +86,12 @@ export function InAppPurchases() {
             />
           </div>
           <div className="mt-auto flex flex-col items-center justify-center px-3">
-            <BuyAICredit>
+            <BuyAIReport>
               <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
                 AI Reporting{" "}
                 <Image src={Arrow} alt="icons" className="w-4 h-4" />
               </Button>
-            </BuyAICredit>
+            </BuyAIReport>
           </div>
         </div>
 

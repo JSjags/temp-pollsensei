@@ -5,16 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/new-dialog";
 
 export function CheckoutDialog() {
-  const { aiAmount, credits, loading, setLoading, setAIStep } = useShopStore();
+  const { aiAmount, loading, setLoading, setAIStep, aiReportingCredit, aiReportingAmount } = useShopStore();
 
   const txnOverview = [
     {
-      label: "Amount of AI-Credits",
-      value: credits,
+      label: "Amount of AI Report Credits",
+      value: aiReportingCredit,
     },
     {
       label: "Unit Price/coin",
-      value: 5,
+      value: 0.25,
     },
   ];
 
@@ -30,48 +30,8 @@ export function CheckoutDialog() {
   return (
     <Dialog.Body className="h-full mt-4 pb-6">
       <div className="flex gap-6 h-full items-center flex-col">
-        <p className="text-2xl font-bold ">AI Survey Generation Credit</p>
-        {/* Form Details */}
-        {/* <motion.div
-          layout
-          className={cn(
-            "w-[55%] flex flex-col gap-4 details h-full max-[440px]:w-full",
-            mobileView !== "details" && "max-[440px]:hidden"
-          )}
-        >
-          <h3 className="text-2xl font-bold text-tertiary">Checkout</h3>
-          <div className="flex items-center bg-sec-bg p-4">
-            <p>
-              Payments are SSL encrypted so that your credit card and payment
-              details stay safe.
-            </p>
-            <Image src={LockIcon} alt="lock icon" />
-          </div>
-          <div className="flex items-center justify-between gap-2 border-b pb-4 w-[10vw]">
-            {PaymentOptionsData.map((option) => (
-              <PaymentOptions
-                {...option}
-                key={option.label}
-                isActive={selectedOption === option.label}
-                onClick={() => setSelectedOption(option.label)}
-              />
-            ))}
-          </div>
+        <p className="text-2xl font-bold ">AI Report Generation Credit</p>
 
-          <div className="flex flex-col h-full">
-            <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
-              <Button
-                onClick={handleCheckout}
-                disabled={loading}
-                variant="gradient"
-                className="w-full rounded !h-12 gap-2 font-bold text-base"
-              >
-                {loading && <LoadingSpinner />}
-                {loading ? "Processing..." : "Checkout"}
-              </Button>
-            </div>
-          </div>
-        </motion.div> */}
 
         {/* Overview section  */}
         <div className={cn("flex-1 overview h-full flex flex-col w-full")}>
@@ -93,7 +53,7 @@ export function CheckoutDialog() {
                 >
                   <p className="text-sm font-bold">{item.label}</p>
                   <p>
-                    {item.label === "Amount of AI-Credits"
+                    {item.label === "Amount of AI Report Credits"
                       ? item.value
                       : `${item.value}pc`}
                   </p>
@@ -102,7 +62,7 @@ export function CheckoutDialog() {
             </div>
             <div className="w-full flex items-center justify-between pt-4 mt-6">
               <p className="text-base font-bold">Total</p>
-              <p className="text-base font-bold">{aiAmount}pc</p>
+              <p className="text-base font-bold">{aiReportingAmount}pc</p>
             </div>
           </div>
           <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">

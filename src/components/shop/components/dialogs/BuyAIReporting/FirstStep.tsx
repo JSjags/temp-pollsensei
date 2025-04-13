@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/shadcn-input";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useShopStore } from "../../../store/useShopStore";
 import { Dialog } from "@/components/ui/new-dialog";
 import { Banner } from "../../Banner";
@@ -10,89 +10,92 @@ import { useAIAnalysisRate } from "@/components/shop/queries/useServicesRates";
 
 export function FirstStep() {
   const {
-    credits,
-    aiAmount,
-    aiErrors,
-    setAiAmount,
-    setCredits,
-    setAiErrors,
-    clearAiError,
-    setAIStep,
-    setAIDialogOpen,
+    aiReportingCredit,
+    setAIReportingDialogOpen,
+    setAIReportingCredits,
+    setAIReportingStep,
+    aiReportingAmount,
+    setAIReportingAmount,
     setPollStep,
     setPollDialogOpen,
   } = useShopStore();
-
+  const [error, setError] = useState("");
   const RATE = 5;
   const { data } = useUserBalance();
-  const { unrestrictedBalance = 0 } = data || {};
-
+  // const { unrestrictedBalance = 0 } = data || {};
+  const unrestrictedBalance = 400;
   // const { data: rate } = useAIAnalysisRate();
-
-  const pollcoinRequired = credits ? parseFloat(credits) / RATE : 0;
+  
+  const pollcoinRequired = aiReportingCredit
+    ? parseFloat(aiReportingCredit) / RATE
+    : 0;
 
   const hasValidCredits =
-    credits !== "" && !isNaN(pollcoinRequired) && pollcoinRequired > 0;
+    aiReportingCredit !== "" &&
+    !isNaN(pollcoinRequired) &&
+    pollcoinRequired > 0;
 
   const isBalanceInsufficient =
     hasValidCredits && pollcoinRequired > unrestrictedBalance;
 
   useEffect(() => {
-    if (credits) {
-      const calculatedAmount = (parseFloat(credits) / RATE).toFixed(2);
-      setAiAmount(calculatedAmount);
+    if (aiReportingCredit) {
+      const calculatedAmount = (parseFloat(aiReportingCredit) / RATE).toFixed(
+        2
+      );
+      setAIReportingAmount(calculatedAmount);
     } else {
-      setAiAmount("");
+      setAIReportingAmount("");
     }
-  }, [credits, setAiAmount]);
+  }, [aiReportingCredit, setAIReportingAmount]);
 
   const validate = () => {
-    const newErrors: { quantity?: string } = {};
-    const quantityNum = parseFloat(credits);
+    const quantityNum = parseFloat(aiReportingCredit);
 
-    if (!credits) {
-      newErrors.quantity = "AI-Credit amount is required.";
+    if (!aiReportingCredit) {
+      setError("AI reporting credit amount is required.");
+      return false;
     } else if (isNaN(quantityNum) || quantityNum <= 0) {
-      newErrors.quantity = "Enter a valid AI-Credit quantity.";
+      setError("Enter a valid AI reporting credit quantity.");
+      return false;
     }
 
-    setAiErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setError("");
+    return true;
   };
 
   const handleSubmit = () => {
     if (!validate()) return;
-    setAIStep("checkout");
+    setAIReportingStep("checkout");
   };
 
   return (
     <Dialog.Body className="flex flex-col h-full max-[440px]:px-6">
       <div className="mt-5 flex flex-col items-center justify-center">
-        <p className="text-2xl font-bold mb-8">AI Survey Generation Credit</p>
+        <p className="text-2xl font-bold mb-8">AI Report Generation Credit</p>
 
         <Banner />
         <div className="w-full">
           <div className="mt-5">
             <label htmlFor="credits" className="text-sm">
-              Amount of AI-Credit
+              Amount of AI Report Credit
             </label>
             <Input
               type="number"
               name="credits"
-              placeholder="Enter AI-Credit amount"
+              placeholder="Enter AI Report Generation amount"
               className="mt-2 h-[54px]"
-              value={credits}
+              value={aiReportingCredit}
               onChange={(e) => {
-                setCredits(e.target.value);
-                if (aiErrors.quantity) clearAiError("quantity");
+                setAIReportingCredits(e.target.value);
+                if (error) setError("");
               }}
               // disabled={isBalanceInsufficient}
             />
-            {aiErrors.quantity && (
-              <p className="mt-1 text-xs text-red-600">{aiErrors.quantity}</p>
-            )}
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
             <p className="mt-1 text-xs">
-              Today&apos;s AI-Credit rate: 1 Pollcoin = {RATE} AI-Credits
+              Today&apos;s AI-Credit rate: 1 Pollcoin = {RATE} Survey Report
+              Generation
             </p>
           </div>
 
@@ -103,7 +106,7 @@ export function FirstStep() {
 
             <input
               type="text"
-              value={aiAmount}
+              value={aiReportingAmount}
               readOnly
               className="h-[54px] flex-1 pl-2.5 bg-transparent outline-none text-muted-foreground"
             />
@@ -118,7 +121,7 @@ export function FirstStep() {
             <button
               className="text-tertiary cursor-pointer underline"
               onClick={() => {
-                setAIDialogOpen(false);
+                setAIReportingDialogOpen(false);
                 setPollStep("buy");
                 setPollDialogOpen(true);
               }}
@@ -133,7 +136,7 @@ export function FirstStep() {
       <div className="flex mt-auto w-full">
         <Button
           onClick={handleSubmit}
-          disabled={isBalanceInsufficient || !credits}
+          disabled={isBalanceInsufficient || !aiReportingCredit}
           variant="gradient"
           className="w-full rounded mt-12 max-[441px]:!h-12"
         >

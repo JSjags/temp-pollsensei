@@ -5,16 +5,33 @@ import { useShopStore } from "../../../store/useShopStore";
 import { Dialog } from "@/components/ui/new-dialog";
 import { Banner } from "../../Banner";
 import { useUserBalance } from "@/components/shop/queries/useBalance";
+import BuyPollcoinsFlow from "../BuyPollcoins";
 
 export function FirstStep() {
-  const { ocrCredits, setOCRCredits, ocrAmount, setOCRAmount, ocrStep, setOCRStep } =
-    useShopStore();
+  const {
+    ocrCredits,
+    setOCRCredits,
+    ocrAmount,
+    setOCRAmount,
+    setOCRStep,
+    setOCRDialogOpen,
+    setPollDialogOpen,
+    setPollStep
+  } = useShopStore();
 
   const [error, setError] = useState("");
 
   const RATE = 5;
   const { data } = useUserBalance();
   const { unrestrictedBalance = 0 } = data || {};
+  // const  unrestrictedBalance  = 400;
+  const pollcoinRequired = ocrCredits ? parseFloat(ocrCredits) / RATE : 0;
+
+  const hasValidCredits =
+    ocrCredits !== "" && !isNaN(pollcoinRequired) && pollcoinRequired > 0;
+
+  const isBalanceInsufficient =
+    hasValidCredits && pollcoinRequired > unrestrictedBalance;
 
   useEffect(() => {
     if (ocrCredits) {
@@ -45,7 +62,6 @@ export function FirstStep() {
     setOCRStep("checkout");
   };
 
-  const isBalanceZero = unrestrictedBalance === 0;
 
   return (
     <Dialog.Body className="flex flex-col h-full">
@@ -92,17 +108,29 @@ export function FirstStep() {
         </div>
       </div>
 
-      {isBalanceZero && (
-        <p className="text-sm text-red-500 mt-4 text-center">
-          You don&apos;t have any Pollcoins. Please top up to buy OCR document
-          scan credit.
-        </p>
+      {isBalanceInsufficient && (
+        <div className="text-sm text-[#FF0E0E] mt-4">
+          You don’t have enough coins for this purchase.{" "}
+          <BuyPollcoinsFlow nested>
+            <button
+              className="text-tertiary cursor-pointer underline"
+              onClick={() => {
+                setOCRDialogOpen(false);
+                setPollStep("buy");
+                setPollDialogOpen(true);
+              }}
+            >
+              Purchase coin
+            </button>
+          </BuyPollcoinsFlow>{" "}
+          to complete your purchase
+        </div>
       )}
 
       <div className="flex mt-auto w-full">
         <Button
           onClick={handleSubmit}
-          disabled={!ocrCredits}
+          disabled={!ocrCredits || isBalanceInsufficient}
           variant="gradient"
           className="w-full rounded mt-12 max-[441px]:!h-12"
         >

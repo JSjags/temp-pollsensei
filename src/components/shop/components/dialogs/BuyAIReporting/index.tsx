@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode } from "react";
 import { useShopStore } from "../../../store/useShopStore";
 
 import { CheckoutDialog } from "./CheckoutDialog";
@@ -10,19 +10,19 @@ import { FirstStep } from "./FirstStep";
 type BuyDialogProps = {
   children: ReactNode;
 };
-export default function BuyOCR({ children }: BuyDialogProps) {
+export function BuyAIReport({ children }: BuyDialogProps) {
   const {
-    credits,
     reset,
-    ocrDialogOpen,
-    ocrStep,
-    setOCRDialogOpen,
-    setOCRStep,
+    aiReportingCredit,
+    aiRepotingDialogOpen,
+    aiReportingStep,
+    setAIReportingDialogOpen,
+    setAIReportingStep,
   } = useShopStore();
-  const description = `You have purchased ${credits} Pollcoins`;
+  const description = `You have purchased ${aiReportingCredit} Pollcoins`;
   let DialogStepComponent = null;
 
-  switch (ocrStep) {
+  switch (aiReportingStep) {
     case "buy":
       DialogStepComponent = <FirstStep />;
       break;
@@ -37,14 +37,14 @@ export default function BuyOCR({ children }: BuyDialogProps) {
   }
   return (
     <Dialog.Root
-      open={ocrDialogOpen}
+      open={aiRepotingDialogOpen}
       onOpenChange={(open) => {
-        setOCRDialogOpen(open);
+        setAIReportingDialogOpen(open);
         if (!open) {
-          if (ocrStep === "success") {
+          if (aiReportingStep === "success") {
             reset();
           }
-          setOCRStep("buy");
+          setAIReportingStep("buy");
         }
       }}
     >

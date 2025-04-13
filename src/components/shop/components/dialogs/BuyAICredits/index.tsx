@@ -46,9 +46,6 @@ export default function BuyAICredit({ children }: BuyDialogProps) {
       <Dialog.Content
         className={cn(
           "z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%]",
-          {
-            "max-w-[941px]": aiStep === "checkout",
-          }
         )}
       >
         <div className="flex items-center justify-center w-full pt-3 min-[441px]:hidden">
