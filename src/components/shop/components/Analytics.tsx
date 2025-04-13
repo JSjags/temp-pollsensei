@@ -12,15 +12,11 @@ import {
   MoneyIcon,
   NonRedeemable,
   OCR,
-  PayoutInfoIcon,
   RespondentIcon,
   Voice,
-  WalletIcon,
 } from "@/assets/images";
 import Link from "next/link";
 import Image from "next/image";
-import BuyDialog from "./dialogs/BuyPollcoins";
-import { usePayoutStore } from "@/components/payouts/store/usePayoutStore";
 import { PayoutDialog } from "@/components/payouts/components/dialogs";
 import { useShopStore } from "../store/useShopStore";
 import { useUserBalance } from "../queries/useBalance";
@@ -28,7 +24,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Slider, { Settings } from "react-slick";
 import { motion } from "framer-motion";
 import BuyPollcoinsFlow from "./dialogs/BuyPollcoins";
-import BuyAICredit from "./dialogs/BuyAICredits";
 
 export function Analytics() {
   const [showAllSurveys, setShowAllSurveys] = useState(false);
@@ -188,8 +183,6 @@ export function Analytics() {
         </div>
       </div>
 
-
-
       <div className="w-full flex gap-4 my-[22px] h-full items-stretch max-sm:flex-col max-md:px-4">
         <div className="flex-1 flex flex-col gap-4 h-full items-stretch min-h-[200px]">
           <div className="grid grid-cols-3 gap-4 max-md:grid-cols-4">
@@ -197,9 +190,9 @@ export function Analytics() {
               <div
                 key={item.label}
                 className={cn(
-                  "rounded-lg p-4 text-white h-full max-md:col-span-2 max-md:order-2", // default mobile styles
+                  "rounded-lg p-4 text-white h-full max-md:col-span-2 max-md:order-2",
                   {
-                    "max-md:col-span-4 max-md:order-1": index === 1, // move second item to first on mobile
+                    "max-md:col-span-4 max-md:order-1": index === 1,
                   }
                 )}
                 style={{ backgroundColor: `${item.bgColor}` }}
@@ -239,7 +232,11 @@ export function Analytics() {
                   )}
                   {item.label === "Redeemable Pollcoins" && (
                     <PayoutDialog>
-                      <Button variant="gradient" className="h-[29px]">
+                      <Button
+                        disabled={unrestrictedBalance === 0}
+                        variant="gradient"
+                        className="h-[29px]"
+                      >
                         Redeem coins
                       </Button>
                     </PayoutDialog>
@@ -323,7 +320,7 @@ export function Analytics() {
         </div>
 
         {/* Surverys */}
-        <div className="w-[35%] max-sm:w-full rounded-lg pt-4 px-5 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col gap-5 h-full">
+        <div className="w-[35%] max-sm:w-full rounded-lg pt-4 px-5 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col gap-5 h-full items-stretch">
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-muted-foreground">
@@ -353,7 +350,7 @@ export function Analytics() {
             </div>
           </div>
 
-          <div className="bg-[#FDFAFF] max-h-[140px] overflow-y-auto">
+          <div className={cn("bg-[#FDFAFF] max-h-[135px] overflow-y-auto")}>
             <div className="px-2.5 bg-[#CB85FD1A] flex items-center justify-between rounded-tr-[15px] rounded-tl-[15px] py-1.5">
               <p className="font-bold">Survey</p>
               <p className="font-bold">Respondents</p>
@@ -364,7 +361,7 @@ export function Analytics() {
                 "flex flex-col gap-2 px-2.5 py-1.5 transition-all duration-300",
                 showAllSurveys
                   ? "max-h-[300px] overflow-y-auto"
-                  : "max-h-[150px] overflow-hidden"
+                  : "max-h-[135px] overflow-hidden"
               )}
             >
               {surveys.map((survey) => (

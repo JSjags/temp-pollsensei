@@ -11,107 +11,94 @@ import {
 } from "@/assets/images";
 import Image from "next/image";
 // import BuyDialog from "./dialogs/BuyPollcoins";
-import BuyAICredit from "./dialogs/BuyAICredits";
+
 import BuyRespondent from "@/components/shop/components/dialogs/BuyRespondent/BuyRespondent";
-import BuyOCR from "./dialogs/BuyOCR";
-import { BuyAIReport } from "./dialogs/BuyAIReporting";
+import { cn } from "@/lib/utils";
+import { BuyServicesDialog } from "./dialogs/BuyServices";
 
 export function InAppPurchases() {
+  const ServicesData = [
+    {
+      title: "AI Survey Generation Credit",
+      cta: "AI Survey Generation",
+      rate: 5,
+      placeholder: "Enter AI-Credit amount",
+      src: "/assets/shop/svg/credit.svg",
+    },
+    {
+      title: "OCR Document Scan Credit",
+      cta: "OCR Document Scan",
+      rate: 5,
+      placeholder: "Enter OCR Credit amount",
+      src: "/assets/shop/svg/OCRScan.svg",
+    },
+    {
+      title: "AI Analysis Credit",
+      cta: "AI Analysis",
+      rate: 5,
+      placeholder: "Enter AI Analysis Credit Amount",
+      src: "/assets/shop/svg/AIAnalysis.svg",
+    },
+    {
+      title: "AI Report Generation Credit",
+      cta: " AI Reporting",
+      rate: 5,
+      placeholder: "Enter AI Report Generation amount",
+      src: "/assets/shop/svg/AIReporting.svg",
+    },
+    {
+      title: "Voice Transcription credit",
+      cta: "Voice Transcription",
+      rate: 5,
+      placeholder: "Enter Voice Transcription credit amount",
+      src: "/assets/shop/svg/VoiceTranscription.svg",
+    },
+  ];
   return (
     <div className="mt-10 flex-col gap-5 flex max-md:px-4">
       <p className="text-xl font-bold">In-app Purchases</p>
       <div className="flex md:items-stretch gap-4 h-full max-md:grid grid-cols-2">
         <BuyRespondent />
 
-        <div className="bg-[#FCFCFD] rounded-lg max-w-[204px] gap-3 max-md:gap-6 py-2.5 border flex flex-col justify-between h-full w-full">
-          <div className="flex-grow px-8 flex items-center">
-            <Image
-              src={Purchases2}
-              alt="icons"
-              className="w-full h-auto object-contain"
-            />
-          </div>
-          <div className="mt-auto flex flex-col items-center justify-center px-3">
-            <BuyAICredit>
-              <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
-                AI Survey Generation{" "}
-                <Image src={Arrow} alt="icons" className="w-4 h-4" />
-              </Button>
-            </BuyAICredit>
-          </div>
-        </div>
+        {ServicesData.map((service, index) => {
+          const { title, rate, placeholder, cta, src } = service;
 
-        <div className="bg-[#FCFCFD] rounded-lg max-w-[204px] max-md:gap-6 gap-3 py-2.5 border flex flex-col justify-between h-full w-full">
-          <div className="flex-grow px-8 flex items-center">
-            <Image
-              src={Purchases3}
-              alt="icons"
-              className="w-full h-auto object-contain"
-            />
-          </div>
-          <div className="mt-auto flex flex-col items-center justify-center px-3">
-            <BuyOCR>
-              <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
-                OCR Document Scan{" "}
-                <Image src={Arrow} alt="icons" className="w-4 h-4" />
-              </Button>
-            </BuyOCR>
-          </div>
-        </div>
+          return (
+            <div
+              key={title}
+              className={cn(
+                "bg-[#FCFCFD] rounded-lg max-w-[204px] max-md:gap-6 gap-3 py-2.5 border flex flex-col justify-between h-full w-full",
+              )}
+            >
+              <div className="flex w-full items-center justify-center">
+              <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
+                <Image
+                  src={src}
+                  alt="icons"
+                  layout="fill"
+                  className="object-contain"
+                />
+              </div>
+              </div>
 
-        <div className="bg-[#FCFCFD] rounded-lg max-w-[204px] max-md:gap-6 py-2.5 border flex flex-col justify-between h-full w-full">
-          <div className="flex-grow px-8 flex items-center">
-            <Image
-              src={Purchases4}
-              alt="icons"
-              className="w-full h-auto object-contain"
-            />
-          </div>
-          <div className="mt-auto flex flex-col items-center justify-center px-3">
-            <BuyAICredit>
-              <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
-                AI Analysis{" "}
-                <Image src={Arrow} alt="icons" className="w-4 h-4" />
-              </Button>
-            </BuyAICredit>
-          </div>
-        </div>
-
-        <div className="bg-[#FCFCFD] rounded-lg max-w-[204px] max-md:gap-6 py-2.5 border flex flex-col justify-between h-full w-full">
-          <div className="flex-grow px-8 flex items-center">
-            <Image
-              src={Purchases5}
-              alt="icons"
-              className="w-full h-auto object-contain"
-            />
-          </div>
-          <div className="mt-auto flex flex-col items-center justify-center px-3">
-            <BuyAIReport>
-              <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
-                AI Reporting{" "}
-                <Image src={Arrow} alt="icons" className="w-4 h-4" />
-              </Button>
-            </BuyAIReport>
-          </div>
-        </div>
-
-        <div className="bg-[#FCFCFD] rounded-lg max-w-[204px] max-md:gap-6 py-2.5 border flex flex-col justify-between h-full w-full">
-          <div className="flex-grow px-8 flex items-center">
-            <Image
-              src={Purchases6}
-              alt="icons"
-              className="w-full h-auto object-contain"
-            />
-          </div>
-          <div className="mt-auto flex flex-col items-center justify-center px-3">
-            <BuyAICredit> 
-              <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
-                Voice Transcription{" "}
-                <Image src={Arrow} alt="icons" className="w-4 h-4" />
-              </Button>
-            </BuyAICredit>
-          </div>
-        </div>
+              <div className="mt-auto flex flex-col items-center justify-center px-3">
+                <BuyServicesDialog
+                  title={title}
+                  rate={rate}
+                  placeholder={placeholder}
+                >
+                  <Button
+                    variant="gradient"
+                    className="h-6 gap-1 text-xs w-full"
+                  >
+                    {cta}
+                    <Image src={Arrow} alt="icons" className="w-4 h-4" />
+                  </Button>
+                </BuyServicesDialog>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

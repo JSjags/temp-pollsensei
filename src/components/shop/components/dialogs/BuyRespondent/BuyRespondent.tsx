@@ -174,16 +174,27 @@ const BuyRespondent = () => {
     <div className="bg-[#FCFCFD] rounded-[11.72px] max-md:gap-6 max-w-[204px] py-2.5 border-[0.59px] flex flex-col justify-between h-full w-full">
       {pathname !== "/filter-respondents" && (
         <>
-          <div className="px-8">
-            <Image src={Purchases1} alt="icons" className="" />
+          <div className="w-full items-center justify-center flex mb-3">
+            <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
+              <Image
+                src={'/assets/shop/svg/resp.svg'}
+                alt="icons"
+                layout="fill"
+                className="object-contain"
+              />
+            </div>
           </div>
+
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}
           >
             <DialogTrigger asChild>
               <div className="flex flex-col items-center justify-center px-3">
-                <Button variant="gradient" className="h-[25px] gap-1 text-xs w-full">
+                <Button
+                  variant="gradient"
+                  className="h-[25px] gap-1 text-xs w-full"
+                >
                   Respondents{" "}
                   <Image src={Arrow} alt="icons" className="size-4" />
                 </Button>
