@@ -8,7 +8,7 @@ export const useUserBalance = () => {
   return useQuery({
     queryKey: ["balance"],
     queryFn: fetchUserBalance,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 };
 

@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import rawAxiosInstance from "./rawAxiosInstance";
+import { fetchUserBalance } from "@/services/api/getUserBalance";
 
 type PurchasePayload = {
   paymentGateway: "paystack" | "stripe";
@@ -42,6 +43,12 @@ export const usePollcoinPurchase = () => {
       );
 
       return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        // Refetch the user balance after a successful purchase
+        fetchUserBalance();
+      }
     },
   });
 };
