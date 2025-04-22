@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Columns } from "./columns";
 import { cn } from "@/lib/utils";
 import { HistoryStatus, HistoryType } from "@/components/shop/types";
+import { Button } from "../button";
 
 export type FilterConfig<
   ColumnType extends string,
@@ -29,6 +30,11 @@ type TableLayoutProps<T> = {
     table: Table<T>
   ) => void;
   seeAllLink?: string;
+  pagination?: {
+    page: number;
+    totalPages: number;
+    setPage: (page: number) => void;
+  };
 };
 
 const defaultTransactionFilters: FilterConfig<
@@ -50,6 +56,7 @@ export function TableLayout<T>({
   onFilterChange,
   renderSeeAll = false,
   seeAllLink = "#",
+  pagination,
 }: TableLayoutProps<T>) {
   const defaultFilter = filters.find((f) => f.isDefault) || filters[0];
   const [selectedFilter, setSelectedFilter] =
@@ -147,6 +154,30 @@ export function TableLayout<T>({
         </div>
       </div>
       <div className="w-full table-auto">{children}</div>
+      {pagination && (
+        <div className="flex justify-end items-center mt-6">
+          <div className="space-x-2 flex items-center">
+            <Button
+              variant="outline"
+              disabled={pagination.page === 1}
+              onClick={() => pagination.setPage(pagination.page - 1)}
+            >
+              Previous
+            </Button>
+            <div className="bg-[#F0EFFD] size-10 flex items-center justify-center rounded-sm">
+              <p className="text-sm text-muted-foreground">{pagination.page}</p>
+            </div>
+
+            <Button
+              variant="outline"
+              disabled={pagination.page === pagination.totalPages}
+              onClick={() => pagination.setPage(pagination.page + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

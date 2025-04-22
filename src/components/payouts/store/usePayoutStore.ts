@@ -15,6 +15,7 @@ type PayoutState = {
   overallEarnings: number;
   coinsObtained: number;
   redeemableCoins: number;
+  nonRedeemableCoins:number;
   coinsRedeemed: number;
   threshold: number
   setAnalytics: (
@@ -24,7 +25,7 @@ type PayoutState = {
         | "overallEarnings"
         | "coinsObtained"
         | "redeemableCoins"
-        | "coinsRedeemed"
+        | "coinsRedeemed"|"nonRedeemableCoins"
       >
     >
   ) => void;
@@ -48,6 +49,7 @@ export const usePayoutStore = create<PayoutState>((set) => ({
   overallEarnings: 0,
   coinsObtained: 0,
   redeemableCoins: 5000,
+  nonRedeemableCoins: 0,
   coinsRedeemed: 0,
   threshold:1000,
 

@@ -6,8 +6,6 @@ import {
   getExpandedRowModel,
 } from "@tanstack/react-table";
 import { makeTransactionHistoryColumns } from "./columns";
-
-import { useRouter } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { TransactionHistory } from "../../types";
 import { TableLayout } from "@/components/ui/table/table-layout";
@@ -20,14 +18,18 @@ import BuyPollcoinsFlow from "../dialogs/BuyPollcoins";
 type TxnHistoryTableProps = {
   isHistoryLoading: boolean;
   historyData: TransactionHistory[];
+  pagination?: {
+    page: number;
+    totalPages: number;
+    setPage: (page: number) => void;
+  };
 };
 
 export function TransactionHistoryTable({
   isHistoryLoading,
   historyData,
+  pagination,
 }: TxnHistoryTableProps) {
-  const router = useRouter();
-
   const table = useReactTable<TransactionHistory>({
     columns: makeTransactionHistoryColumns(),
     data: historyData ?? [],
@@ -36,13 +38,14 @@ export function TransactionHistoryTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
-  
+
   return (
     <HydrationBoundary state={dehydrate}>
       <TableLayout
         table={table}
         title="Transaction History"
         renderSeeAll
+        pagination={pagination}
       >
         <Table isLoading={isHistoryLoading} hasHover table={table}>
           <Image
