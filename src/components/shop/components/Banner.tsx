@@ -13,7 +13,7 @@ export function Banner() {
         <Skeleton className="h-6 w-full mt-2" />
       ) : (
         <h4 className="font-bold text-2xl mt-2">
-          {unrestrictedBalance || 0}pc
+          {unrestrictedBalance?.toLocaleString() || 0}pc
         </h4>
       )}
     </div>

@@ -9,56 +9,76 @@ import { Input } from "@/components/ui/shadcn-input";
 import BuyPollcoinsFlow from "../BuyPollcoins";
 import { useUserBalance } from "@/components/shop/queries/useBalance";
 import { LoadingSpinner } from "../BuyPollcoins/CheckoutDialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "react-toastify";
 
 type BuyDialogProps = {
   children: ReactNode;
   title: string;
-  unitLabel?: string;
-  rate: number;
+  creditsPerUnit: number;
+  pricePerCredit: number;
+  minimumPurchase: number;
   placeholder?: string;
+  isLoading?: boolean;
+  onPurchase: (amount: string) => void;
 };
+
 export function BuyServicesDialog(props: BuyDialogProps) {
-  const { children, title, rate, placeholder } = props;
+  const {
+    children,
+    title,
+    creditsPerUnit,
+    pricePerCredit,
+    minimumPurchase,
+    placeholder,
+    isLoading,
+    onPurchase,
+  } = props;
+
   const [analysisStep, setAnalysisStep] = useState<
     "buy" | "checkout" | "success"
   >("buy");
   const [open, setOpen] = useState(false);
-  const [analysisCredit, setAnalysisCredit] = useState("");
+  const [credit, setCredit] = useState("");
   const [analysisAmount, setAnalysisAmount] = useState("");
   const [error, setError] = useState("");
   const { reset, setPollStep, setPollDialogOpen, loading, setLoading } =
     useShopStore();
-  const description = `You have purchased ${analysisCredit} ${title}`;
+  const description = `You have purchased ${credit} ${title}`;
   const { data } = useUserBalance();
-  // const { unrestrictedBalance = 0 } = data || {};
-  const unrestrictedBalance = 400;
-  const pollcoinRequired = analysisCredit
-    ? parseFloat(analysisCredit) / rate
-    : 0;
+  const { unrestrictedBalance = 0 } = data || {};
+
+  const pollcoinRequired = credit ? parseFloat(credit) * pricePerCredit : 0;
+console.log(credit, 'Credit');
 
   const hasValidCredits =
-    analysisCredit !== "" && !isNaN(pollcoinRequired) && pollcoinRequired > 0;
+    credit !== "" &&
+    !isNaN(pollcoinRequired) &&
+    pollcoinRequired >= minimumPurchase;
 
   const isBalanceInsufficient =
     hasValidCredits && pollcoinRequired > unrestrictedBalance;
 
   useEffect(() => {
-    if (analysisCredit) {
-      const calculatedAmount = (parseFloat(analysisCredit) / rate).toFixed(2);
+    if (credit) {
+      const calculatedAmount = (parseFloat(credit) * pricePerCredit).toFixed(2);
       setAnalysisAmount(calculatedAmount);
     } else {
       setAnalysisAmount("");
     }
-  }, [analysisCredit, setAnalysisAmount]);
+  }, [credit, setAnalysisAmount, pricePerCredit]);
 
   const validate = () => {
-    const quantityNum = parseFloat(analysisCredit);
+    const quantityNum = parseFloat(credit);
 
-    if (!analysisCredit) {
-      setError("OCR credit amount is required.");
+    if (!credit) {
+      setError("Credit amount is required.");
       return false;
     } else if (isNaN(quantityNum) || quantityNum <= 0) {
-      setError("Enter a valid OCR credit quantity.");
+      setError("Enter a valid credit quantity.");
+      return false;
+    } else if (quantityNum < minimumPurchase) {
+      setError(`Minimum purchase is ${minimumPurchase} credits.`);
       return false;
     }
 
@@ -76,19 +96,19 @@ export function BuyServicesDialog(props: BuyDialogProps) {
       open={open}
       onOpenChange={(open) => {
         setOpen(open);
-    
+
         if (!open) {
           if (analysisStep === "success") {
             reset(); // Final reset
           }
-    
+
           // Reset only if dialog was closed in "buy" step
           if (analysisStep === "buy") {
-            setAnalysisCredit("");
+            setCredit("");
             setAnalysisAmount("");
             setError("");
           }
-    
+
           setAnalysisStep("buy");
         }
       }}
@@ -115,19 +135,24 @@ export function BuyServicesDialog(props: BuyDialogProps) {
                     name="credits"
                     placeholder={placeholder}
                     className="mt-2 h-[54px]"
-                    value={analysisCredit}
+                    value={credit}
                     onChange={(e) => {
-                      setAnalysisCredit(e.target.value);
+                      setCredit(e.target.value);
                       if (error) setError("");
                     }}
-                    // disabled={isBalanceInsufficient}
                   />
                   {error && (
                     <p className="mt-1 text-xs text-red-600">{error}</p>
                   )}
-                  <p className="mt-1 text-xs">
-                    Today&apos;s {title} rate: 1 Pollcoin = {rate} {title}
-                  </p>
+
+                  {isLoading ? (
+                    <Skeleton className="h-5 w-full mt-2" />
+                  ) : (
+                    <p className="mt-1 text-xs">
+                      Today&apos;s {title} rate: {pricePerCredit}pc ={" "}
+                      {creditsPerUnit} {title}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-4 flex items-center w-full justify-between h-[54px] border rounded-md bg-muted/50">
@@ -169,7 +194,7 @@ export function BuyServicesDialog(props: BuyDialogProps) {
             <div className="flex mt-auto w-full">
               <Button
                 onClick={handleSubmit}
-                disabled={isBalanceInsufficient || !analysisCredit}
+                disabled={isBalanceInsufficient || !credit} 
                 variant="gradient"
                 className="w-full rounded mt-12 max-[441px]:!h-12"
               >
@@ -181,13 +206,14 @@ export function BuyServicesDialog(props: BuyDialogProps) {
 
         {analysisStep === "checkout" && (
           <CheckoutDialog
-            amount={analysisCredit}
-            rate={rate}
+            amount={credit} // Updated to use credit instead of analysisCredit
+            rate={pricePerCredit}
             setStep={setAnalysisStep}
             loading={loading}
             pollAmount={analysisAmount}
             setLoading={setLoading}
             title={title}
+            onPurchase={onPurchase}
           />
         )}
         {analysisStep === "success" && (
@@ -206,6 +232,7 @@ type CheckoutDialogProps = {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   setStep: (step: "buy" | "checkout" | "success") => void;
+  onPurchase: (amount: string) => void;
 };
 function CheckoutDialog({
   amount,
@@ -215,6 +242,7 @@ function CheckoutDialog({
   pollAmount,
   setLoading,
   rate,
+  onPurchase,
 }: CheckoutDialogProps) {
   const txnOverview = [
     {
@@ -227,14 +255,19 @@ function CheckoutDialog({
     },
   ];
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await onPurchase(pollAmount);
       setStep("success");
-    }, 5000);
+    } catch (error) {
+      console.error("Purchase failed:", error);
+      toast.error("Purchase failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <div className="flex gap-6 h-full items-center flex-col py-6">
       <p className="text-2xl font-bold ">{title}</p>

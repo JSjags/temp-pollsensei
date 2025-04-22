@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   AIGeneration,
@@ -18,18 +18,23 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { PayoutDialog } from "@/components/payouts/components/dialogs";
-import { useShopStore } from "../store/useShopStore";
-import { useUserBalance } from "../queries/useBalance";
+import { useUserBalance, useUserServicesBalance } from "../queries/useBalance";
 import { Skeleton } from "@/components/ui/skeleton";
 import Slider, { Settings } from "react-slick";
 import { motion } from "framer-motion";
 import BuyPollcoinsFlow from "./dialogs/BuyPollcoins";
 
+type ServiceBalance = {
+  serviceType: string;
+  credits: number;
+};
+
 export function Analytics() {
   const [showAllSurveys, setShowAllSurveys] = useState(false);
   const { data, isLoading: balanceLoading } = useUserBalance();
+  const { data: servicesBalance, isLoading: servicesBalanceLoading } =
+    useUserServicesBalance();
   const { restrictedBalance, unrestrictedBalance, totalBalance } = data || {};
-  const { totalPollcoins } = useShopStore();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const analyticData = [
@@ -38,51 +43,66 @@ export function Analytics() {
       value: 0,
       icon: AIGeneration,
       iconColor: "#3575FF",
+      key: "ai-survey-generation",
     },
     {
       label: "OCR Document Scan",
       value: 0,
       icon: OCR,
       iconColor: "#F36643",
+      key: "ocr-document",
     },
     {
       label: "AI Analysis",
       value: 0,
       icon: Analysis,
       iconColor: "#4524F8",
+      key: "ai-analysis",
     },
     {
       label: "AI Reporting",
       value: 0,
       icon: AIReporting,
       iconColor: "#0ACF80",
+      key: "ai-reporting",
     },
     {
       label: "Voice Transcription",
       value: 0,
       icon: Voice,
       iconColor: "#0ACF80",
+      key: "voice-transcription",
     },
   ];
+  const populatedAnalyticData = analyticData.map((item) => {
+    const matchingService = (servicesBalance as ServiceBalance[])?.find(
+      (service) => service.serviceType === item.key
+    );
+
+    return {
+      ...item,
+      value: matchingService?.credits || 0,
+    };
+  });
 
   const coinsData = [
     {
       label: "Available Pollcoins",
-      value: parseInt(totalPollcoins) || 0,
+      value: totalBalance?.toLocaleString() || 0,
       icon: AvailableIcon,
       iconColor: "#DDC6EE",
       bgColor: "#51059D",
     },
     {
       label: "Redeemable Pollcoins",
-      value: restrictedBalance,
+      value: restrictedBalance?.toLocaleString() || 0,
       icon: MoneyIcon,
       iconColor: "#D1EAFA",
       bgColor: "#0A3F60",
     },
     {
       label: "Non-Redeemable Pollcoins",
-      value: unrestrictedBalance,
+      value: unrestrictedBalance?.toLocaleString() || 0,
       icon: NonRedeemable,
       iconColor: "#D1D3FA",
       bgColor: "#0A0E60",
@@ -106,11 +126,11 @@ export function Analytics() {
       value: 500,
     },
     {
-      title: "Service Quality Review",
+      title: "Service Quality Reviewss",
       value: 500,
     },
     {
-      title: "Service Quality Review",
+      title: "Service Quality Reviews",
       value: 500,
     },
   ];
@@ -247,7 +267,7 @@ export function Analytics() {
           </div>
 
           <div className="gap-4 w-full grid grid-cols-5 h-full max-md:hidden">
-            {analyticData.map((analytic) => (
+            {populatedAnalyticData.map((analytic) => (
               <div
                 key={analytic.label}
                 className="bg-white rounded-[6.8px] p-4 shadow-[0px_1.36px_4.08px_0px_#34037914]"
@@ -266,7 +286,13 @@ export function Analytics() {
                         {analytic.label}
                       </p>
                       <div className="flex items-center justify-between w-full">
-                        <h4 className="text-xl font-bold">{analytic.value}</h4>
+                        {servicesBalanceLoading ? (
+                          <Skeleton className="h-6 w-full" />
+                        ) : (
+                          <h4 className="text-xl font-bold">
+                            {analytic.value}
+                          </h4>
+                        )}
                         <span>
                           <Image src={InfoIcon} alt="icons" />
                         </span>
@@ -280,7 +306,7 @@ export function Analytics() {
 
           <div className="md:hidden w-full analytics">
             <Slider {...settings}>
-              {analyticData.map((analytic, index) => (
+              {populatedAnalyticData.map((analytic, index) => (
                 <div
                   key={analytic.label}
                   className={cn(
@@ -303,9 +329,13 @@ export function Analytics() {
                           {analytic.label}
                         </p>
                         <div className="flex items-center justify-between w-full">
-                          <h4 className="text-xl font-bold">
-                            {analytic.value}
-                          </h4>
+                          {servicesBalanceLoading ? (
+                            <Skeleton className="h-6 w-full" />
+                          ) : (
+                            <h4 className="text-xl font-bold">
+                              {analytic.value}
+                            </h4>
+                          )}
                           <span>
                             <Image src={InfoIcon} alt="icons" />
                           </span>
@@ -393,69 +423,3 @@ export function Analytics() {
     </div>
   );
 }
-
-// function MobileSlider({
-//   analyticData,
-// }: {
-//   analyticData: ReturnType<typeof getAnalyticData>;
-// }) {
-//   const [currentSlide, setCurrentSlide] = useState(0);
-
-//   const settings: Settings = {
-//     dots: true,
-//     infinite: true,
-//     speed: 1000,
-//     slidesToShow: 1,
-//     slidesToScroll: 1,
-//     autoplay: true,
-//     dotsClass: "flex items-center justify-center",
-//     appendDots: (dots) => (
-//       <div className="!static !flex !items-center !justify-center">
-//         <ul className="slick-dots w-full !flex gap-1 items-center justify-center">
-//           {dots}
-//         </ul>
-//       </div>
-//     ),
-//     customPaging: (i) => (
-//       <motion.div
-//         layout
-//         transition={{
-//           type: "spring",
-//           stiffness: 300,
-//           damping: 30,
-//         }}
-//         className="h-1 rounded-full"
-//         style={{
-//           backgroundColor: i === currentSlide ? "#9D50BB" : "#E0C8EA",
-//           width: i === currentSlide ? 30 : 8,
-//         }}
-//       />
-//     ),
-//     beforeChange: (current, next) => {
-//       setCurrentSlide(next);
-//     },
-//   };
-
-//   return (
-//     <Slider {...settings}>
-//       {analyticData.map(({ label, icon, value }) => (
-//         <div
-//           key={label}
-//           className="bg-white rounded-[6.8px] p-5 shadow-[0px_1.36px_4.08px_0px_#34037914]"
-//         >
-//           <div className="h-full flex flex-col justify-between">
-//             <div className="flex items-start justify-between">
-//               <div className="flex flex-col gap-1.5">
-//                 <p className="text-xs text-muted-foreground">{label}</p>
-//                 <h4 className="text-xl font-bold">{value}</h4>
-//               </div>
-//               <div className="size-12 flex items-center justify-center">
-//                 <Image src={icon} alt="icons" />
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       ))}
-//     </Slider>
-//   );
-// }

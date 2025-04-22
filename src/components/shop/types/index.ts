@@ -2,14 +2,31 @@ export type HistoryType = "Debit" | "Credit";
 export type HistoryStatus = "Completed" | "Pending" | "Failed";
 
 export type TransactionHistory = {
-  transactionId: number;
+  _id: string;
+  transactionId: string;
   date: Date;
-  timestamp: string; 
+  timestamp: number; 
   type: HistoryType;
   status: HistoryStatus;
-  activity: string;
+  category: string;
   amount: number;
+  details?: {
+    description?: string;
+  };
 };
+// export type TransactionHistory = {
+//   _id: string;
+//   amount: number;
+//   category: string;
+//   date?: string;
+//   timestamp?: number;
+//   status: string;
+//   transactionId: string;
+//   type: "credit" | "debit";
+//   details?: {
+//     description?: string;
+//   };
+// };
 
 
 export type OrderSummaryPayload = {

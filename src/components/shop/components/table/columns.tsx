@@ -36,15 +36,34 @@ export function makeTransactionHistoryColumns() {
    * Date column
    * -----------------------------------------------------------------------------------------------*/
   const DATE_HEADER_NAME = "Date";
+  // const dateColumn = columns.accessor("date", {
+  //   header: ({ column }) => (
+  //     <div className="min-w-[120px]">
+  //       <ColumnHeader column={column}>Date</ColumnHeader>
+  //     </div>
+  //   ),
+  //   cell: ({ getValue }) => {
+  //     const date = getValue() as Date;
+  //     const formattedDate = format(date, "M/d/yy");
+
+  //     return (
+  //       <div className="flex gap-2 items-center">
+  //         <p className="text-sm">{formattedDate}</p>
+  //       </div>
+  //     );
+  //   },
+  //   meta: { headerName: DATE_HEADER_NAME },
+  // });
   const dateColumn = columns.accessor("date", {
     header: ({ column }) => (
       <div className="min-w-[120px]">
-        <ColumnHeader column={column}>Date</ColumnHeader>
+        <ColumnHeader column={column}>{DATE_HEADER_NAME}</ColumnHeader>
       </div>
     ),
-    cell: ({ getValue }) => {
-      const date = getValue() as Date;
-      const formattedDate = format(date, "M/d/yy");
+    cell: ({ row }) => {
+      const rawDate = row.original.date ?? row.original.timestamp;
+      const date = new Date(rawDate);
+      const formattedDate = format(date, "MM/dd/yy");
 
       return (
         <div className="flex gap-2 items-center">
@@ -77,7 +96,7 @@ export function makeTransactionHistoryColumns() {
             }
           )}
         >
-          <p className={cn("text-sm")}>{type}</p>
+          <p className={cn("text-sm capitalize")}>{type}</p>
         </div>
       );
     },
@@ -107,7 +126,7 @@ export function makeTransactionHistoryColumns() {
             }
           )}
         >
-          <p className={cn("text-sm")}>{status}</p>
+          <p className={cn("text-sm capitalize")}>{status}</p>
         </div>
       );
     },
@@ -115,24 +134,24 @@ export function makeTransactionHistoryColumns() {
   });
 
   /* -------------------------------------------------------------------------------------------------
-   * Activity column
+   * Description column
    * -----------------------------------------------------------------------------------------------*/
-  const ACTIVITY_HEADER_NAME = "Activity";
-  const activityColumn = columns.accessor("activity", {
-    header: ({ column }) => (
-      <div className="flex min-w-[120px]">
-        <ColumnHeader column={column}>Activity Type</ColumnHeader>
-      </div>
-    ),
-    cell: ({ getValue }) => {
-      return (
-        <div>
-          <p className={cn("text-sm")}>{getValue()}</p>
+  const DESCRIPTION_HEADER_NAME = "Description";
+  const descriptionColumn = columns.accessor(
+    (row) => row.details?.description ?? "—",
+    {
+      id: "description",
+      header: ({ column }) => (
+        <div className="flex min-w-[200px]">
+          <ColumnHeader column={column}>Description</ColumnHeader>
         </div>
-      );
-    },
-    meta: { headerName: ACTIVITY_HEADER_NAME },
-  });
+      ),
+      cell: ({ getValue }) => (
+        <p className="text-sm text-muted-foreground">{getValue()}</p>
+      ),
+      meta: { headerName: DESCRIPTION_HEADER_NAME },
+    }
+  );
 
   /* -------------------------------------------------------------------------------------------------
    * Amount column
@@ -144,15 +163,24 @@ export function makeTransactionHistoryColumns() {
         <ColumnHeader column={column}>Amount</ColumnHeader>
       </div>
     ),
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
+      const amount = getValue();
+      const description = row.original.details?.description?.toLowerCase() || "";
+  
+      let displayValue = `$${amount}`; // default
+      if (description.includes("purchase") && description.includes("credits")) {
+        displayValue = `${amount}pc`;
+      }
+  
       return (
         <div>
-          <p className={cn("text-sm")}>${getValue()}</p>
+          <p className="text-sm">{displayValue}</p>
         </div>
       );
     },
     meta: { headerName: AMOUNT_HEADER_NAME },
   });
+  
   /* -------------------------------------------------------------------------------------------------
    * Timestamp column
    * -----------------------------------------------------------------------------------------------*/
@@ -160,12 +188,14 @@ export function makeTransactionHistoryColumns() {
   const timestampColumn = columns.accessor("timestamp", {
     header: ({ column }) => (
       <div className="min-w-[120px]">
-        <ColumnHeader column={column}>Time</ColumnHeader>
+        <ColumnHeader column={column}>{TIMESTAMP_HEADER_NAME}</ColumnHeader>
       </div>
     ),
-    cell: ({ getValue }) => (
-      <div className="text-sm text-muted-foreground">{getValue()}</div>
-    ),
+    cell: ({ getValue }) => {
+      const timestamp = getValue() as number;
+      const formatted = format(new Date(timestamp), "HH:mm:ss");
+      return <div className="text-sm text-muted-foreground">{formatted}</div>;
+    },
     meta: { headerName: TIMESTAMP_HEADER_NAME },
   });
 
@@ -175,7 +205,7 @@ export function makeTransactionHistoryColumns() {
     timestampColumn,
     typeColumn,
     statusColumn,
-    activityColumn,
+    descriptionColumn,
     amountColumn,
   ];
 }

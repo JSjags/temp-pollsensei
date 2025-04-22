@@ -55,7 +55,7 @@ export const fetchOCRDocumentRate = async () => {
 export const fetchAISurveyGenerationRate = async () => {
   try {
     const response = await axiosInstance.get(
-      "purchases/service/rates/ai-survey generation"
+      "purchases/service/rates/ai-survey-generation"
     );
 
     return response.data;
