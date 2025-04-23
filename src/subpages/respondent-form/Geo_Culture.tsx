@@ -9,7 +9,7 @@ import { z } from "zod";
 import { geographyAndCultureSchema } from "@/utils/shema";
 import { CombinedFormData } from "@/utils/combinedSchema";
 import { useQuery } from "@tanstack/react-query";
-import { getNationality } from "@/services/api/apiGetRequest";
+import { getNationality } from "@/services/api/apiRequest";
 import Image from "next/image";
 import {
   languagesOptions,
@@ -127,15 +127,15 @@ const Geo_Culture: FC<Props> = ({
           onSubmit={handleSubmit(handleContinue)}
         >
           <ControlledSelect
-            name="location"
+            name="currentLocation"
             control={control}
             options={locationOptions}
             placeholder="Select option"
             label="Where do you currently live?"
             required={true}
-            error={errors.location}
+            error={errors.currentLocation}
             disabled={isPending}
-            otherFieldName="otherLocation"
+            // otherFieldName="otherLocation"
             register={register}
           />
 
@@ -148,7 +148,7 @@ const Geo_Culture: FC<Props> = ({
             required={true}
             error={errors.region}
             disabled={isPending}
-            otherFieldName="otherRegion"
+            // otherFieldName="otherRegion"
             register={register}
           />
 
@@ -191,7 +191,7 @@ const Geo_Culture: FC<Props> = ({
                               <div className="w-full flex items-center gap-2">
                                 <Image
                                   src={nationality?.flags?.png}
-                                  alt={nationality?.name.common}
+                                  alt={nationality?.name?.common}
                                   width={20}
                                   height={15}
                                 />
@@ -222,7 +222,7 @@ const Geo_Culture: FC<Props> = ({
             required={true}
             error={errors.ethnicity}
             disabled={isPending}
-            otherFieldName="otherEthnicity"
+            // otherFieldName="otherEthnicity"
             register={register}
           />
 
@@ -234,7 +234,7 @@ const Geo_Culture: FC<Props> = ({
             placeholder="Select languages"
             error={errors.languages}
             disabled={isPending}
-            otherFieldName="otherLanguage"
+            // otherFieldName="otherLanguage"
             register={register}
             required={true}
             contentHeight="300px"
@@ -249,7 +249,7 @@ const Geo_Culture: FC<Props> = ({
             required={false}
             error={errors.religion}
             disabled={isPending}
-            otherFieldName="otherReligion"
+            // otherFieldName="otherReligion"
             register={register}
           />
 

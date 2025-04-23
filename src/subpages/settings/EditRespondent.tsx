@@ -20,68 +20,21 @@ import marker from "@/assets/images/marker.svg";
 import tech from "@/assets/images/tech.svg";
 import { getInitialValuesFromSchema } from "@/utils/respondentUtils";
 import { combinedSchema, CombinedFormData } from "@/utils/combinedSchema";
-import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { GetRespondentData } from "@/services/api/apiRequest";
+import { APP_KEYS } from "@/constants";
 
-const RespondentForm = () => {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState("personalInfo");
+const EditRespondent = () => {
+  const [activeTab, setActiveTab] = useState("educationEmployment");
   const initialFormData = getInitialValuesFromSchema(combinedSchema);
 
   const [formData, setFormData] = useState<CombinedFormData>(initialFormData);
 
-  useEffect(() => {
-    const currentPath = window.location.pathname;
-    if (currentPath === "/respondent-form") {
-      router.push("/respondent-form/verify-phone");
-    }
-  }, [router]);
-
   const tabs = [
     {
       id: 1,
-      name: "Personal Information",
-      value: "personalInfo",
-      icon: (
-        <FiUser
-          className={`text-xl ${
-            activeTab === "personalInfo" ? "text-[#5B03B2]" : "text-[#898989]"
-          }`}
-        />
-      ),
-      component: (
-        <PersonalInformation
-          onContinue={() => setActiveTab("geographicInfo")}
-          formData={formData}
-          setFormData={setFormData}
-        />
-      ),
-    },
-    {
-      id: 2,
-      name: "Geography & Culture",
-      value: "geographicInfo",
-      icon: (
-        <Image
-          src={marker}
-          alt="marker"
-          width={15}
-          height={15}
-          className={`${
-            activeTab === "geographicInfo" ? "text-[#5B03B2]" : "text-[#898989]"
-          }`}
-        />
-      ),
-      component: (
-        <Geo_Culture
-          onContinue={() => setActiveTab("educationEmployment")}
-          onPrevious={() => setActiveTab("personalInfo")}
-          formData={formData}
-          setFormData={setFormData}
-        />
-      ),
-    },
-    {
-      id: 3,
       name: "Education & Employment",
       value: "educationEmployment",
       icon: (
@@ -103,7 +56,7 @@ const RespondentForm = () => {
       ),
     },
     {
-      id: 4,
+      id: 2,
       name: "Health & Lifestyle Markers",
       value: "healthLifestyle",
       icon: (
@@ -125,7 +78,7 @@ const RespondentForm = () => {
       ),
     },
     {
-      id: 5,
+      id: 3,
       name: "Technology & Media Usage",
       value: "technologyMedia",
       icon: (
@@ -151,7 +104,7 @@ const RespondentForm = () => {
       ),
     },
     {
-      id: 6,
+      id: 4,
       name: "Housing & Living Situations",
       value: "housingLiving",
       icon: (
@@ -171,7 +124,7 @@ const RespondentForm = () => {
       ),
     },
     {
-      id: 7,
+      id: 5,
       name: "Mobility & Travel",
       value: "mobilityTravel",
       icon: (
@@ -190,34 +143,45 @@ const RespondentForm = () => {
         />
       ),
     },
-    {
-      id: 8,
-      name: "Identity Verification",
-      value: "identityVerification",
-      icon: (
-        <PiUserList
-          className={`text-xl ${
-            activeTab === "identityVerification"
-              ? "text-[#5B03B2]"
-              : "text-[#898989]"
-          }`}
-        />
-      ),
-      component: (
-        <IdentityVerification
-          onPrevious={() => setActiveTab("mobilityTravel")}
-          // formData={formData}
-          // setFormData={setFormData}
-        />
-      ),
-    },
   ];
+
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
+
+  const { data: respondentData, isLoading } = useQuery({
+    queryKey: [...[APP_KEYS.RESPONDENT_DATA], userAccessToken, activeTab],
+    queryFn: () => GetRespondentData(userAccessToken, activeTab),
+    enabled: !!userAccessToken,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (respondentData?.data?.sectionData) {
+      const newFormData = {
+        ...initialFormData,
+        ...respondentData.data.sectionData,
+      };
+      if (JSON.stringify(newFormData) !== JSON.stringify(formData)) {
+        setFormData(newFormData);
+      }
+    } else {
+      setFormData(initialFormData);
+    }
+  }, [respondentData, initialFormData, isLoading, formData]);
 
   return (
     <Tabs
       value={activeTab}
-      onValueChange={setActiveTab}
-      className="w-full h-auto flex gap-5 items-start"
+      onValueChange={(newTab) => {
+        setActiveTab(newTab);
+      }}
+      className="w-full h-auto flex gap-5 items-start p-2"
     >
       <TabsList className="hidden lg:flex flex-col gap-4 items-center justify-start w-[40%] h-full bg-[#F2F2F8] rounded-xl py-5 px-2">
         {tabs.map((tab) => (
@@ -225,7 +189,6 @@ const RespondentForm = () => {
             key={tab?.id}
             value={`${tab?.value}`}
             className="bg-transparent data-[state=active]:border-l-2 border-[#5B03B2] data-[state=active]:bg-white data-[state=active]:shadow-sm shadow-black w-full flex items-center justify-start gap-2"
-            disabled={activeTab !== tab?.value}
           >
             {tab?.icon}
             <p className="text-sm text-[#4F5B67]"> {tab.name} </p>
@@ -236,7 +199,7 @@ const RespondentForm = () => {
         <TabsContent
           key={tab?.id}
           value={`${tab?.value}`}
-          className="lg:bg-white lg:shadow-lg shadow-[#A9A7A72E] w-full h-full lg:h-[85vh] m-0 rounded-xl lg:p-5 overflow-y-auto"
+          className="lg:bg-white lg:shadow-lg shadow-[#A9A7A72E] w-full h-full lg:h-[85vh] m-0 rounded-xl lg:p-3 overflow-y-auto"
         >
           {tab?.component}
         </TabsContent>
@@ -245,4 +208,4 @@ const RespondentForm = () => {
   );
 };
 
-export default RespondentForm;
+export default EditRespondent;

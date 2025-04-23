@@ -8,7 +8,7 @@ import {
   petOptions,
   genderOptions,
   ageGroupOptions,
-  dependentsOptions,
+  childrenOptions,
 } from "@/data/respondent-object-data";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -30,7 +30,7 @@ const PersonalInformation: FC<Props> = ({ tab }) => {
     defaultValues: {
       gender: [],
       ageGroup: [],
-      dependents: [],
+      children: [],
       pets: [],
     },
   });
@@ -38,10 +38,10 @@ const PersonalInformation: FC<Props> = ({ tab }) => {
   type FormData = z.infer<typeof filterPersonalInformationSchema>;
 
   useEffect(() => {
-    setValue("gender", selectedCriteria.gender || []);
-    setValue("ageGroup", selectedCriteria.ageGroup || []);
-    setValue("dependents", selectedCriteria.dependents || []);
-    setValue("pets", selectedCriteria.pets || []);
+    setValue("gender", selectedCriteria.gender?.values || []);
+    setValue("ageGroup", selectedCriteria.ageGroup?.values || []);
+    setValue("children", selectedCriteria.children?.values || []);
+    setValue("pets", selectedCriteria.pets?.values || []);
   }, [tab, selectedCriteria, setValue]);
 
   return (
@@ -72,14 +72,14 @@ const PersonalInformation: FC<Props> = ({ tab }) => {
           />
 
           <DropdownSelect
-            name="dependents"
+            name="children"
             control={control}
-            options={dependentsOptions}
+            options={childrenOptions}
             selectedCriteria={selectedCriteria}
             tab={tab}
-            section="dependents"
+            section="children"
             dispatch={dispatch}
-            title="Have Children or Dependents"
+            title="Have Children or children"
           />
 
           <DropdownSelect

@@ -21,6 +21,7 @@ import {
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
 import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onContinue: () => void;
@@ -36,7 +37,7 @@ const Health_Lifestyle: FC<Props> = ({
   setFormData,
 }) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
-
+  const pathname = usePathname();
   const {
     register,
     handleSubmit,
@@ -73,7 +74,9 @@ const Health_Lifestyle: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
-      <ProgressBar skip={true} progress={50} onContinue={onContinue} />
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={true} progress={50} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack
@@ -89,88 +92,88 @@ const Health_Lifestyle: FC<Props> = ({
           onSubmit={handleSubmit(handleContinue)}
         >
           <ControlledSelect
-            name="health"
+            name="overallHealth"
             control={control}
             options={overallHealthOptions}
             placeholder="Select option"
             label="How would you describe your overall health?"
-            error={errors.health}
+            error={errors.overallHealth}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="health_insurance"
+            name="healthInsurance"
             control={control}
             options={helathInsuranceOptions}
             placeholder="Select option"
             label="Health Insurance Type"
-            error={errors.health_insurance}
+            error={errors.healthInsurance}
             disabled={isPending}
-            otherFieldName="otherHealthInsurance"
+            // otherFieldName="otherHealthInsurance"
             register={register}
           />
 
           <ControlledSelect
-            name="health_condition"
+            name="chronicConditions"
             control={control}
             options={healthConditionOptions}
             placeholder="Select option"
             label="Do you have any chronic health conditions?"
-            error={errors.health_condition}
+            error={errors.chronicConditions}
             disabled={isPending}
-            otherFieldName="otherHealthCondition"
+            // otherFieldName="otherHealthCondition"
             register={register}
           />
 
           <ControlledSelect
-            name="physical_activity"
+            name="physicalActivity"
             control={control}
             options={physicalActivityOptions}
             placeholder="Select option"
             label="Do you engage in regular physical activity?"
-            error={errors.physical_activity}
+            error={errors.physicalActivity}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="dietry_restrictions"
+            name="dietaryRestrictions"
             control={control}
             options={dietryOptions}
             placeholder="Select option"
             label="Do you have any dietary restrictions or preferences?"
-            error={errors.dietry_restrictions}
+            error={errors.dietaryRestrictions}
             disabled={isPending}
-            otherFieldName="otherDietryRestrictions"
+            // otherFieldName="otherDietryRestrictions"
             register={register}
           />
 
           <ControlledSelect
-            name="smoke"
+            name="tobaccoUse"
             control={control}
             options={smokeOptions}
             placeholder="Select option"
             label="Do you smoke or use tobacco products?"
-            error={errors.smoke}
+            error={errors.tobaccoUse}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="drink_alcohol"
+            name="alcoholUse"
             control={control}
             options={drinkOptions}
             placeholder="Select option"
             label="Do you consume alcohol?"
-            error={errors.drink_alcohol}
+            error={errors.alcoholUse}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="hours_sleep"
+            name="sleepHours"
             control={control}
             options={sleepOptions}
             placeholder="Select option"
             label="How many hours of sleep do you get on average per night?"
-            error={errors.hours_sleep}
+            error={errors.sleepHours}
             disabled={isPending}
           />
 
@@ -189,7 +192,11 @@ const Health_Lifestyle: FC<Props> = ({
               type="submit"
               disabled={isPending}
             >
-              {isPending ? "Saving..." : "Next"}
+              {isPending
+                ? "Saving..."
+                : pathname === "/respondent-form"
+                ? "Next"
+                : "Save"}
             </Button>
           </div>
         </form>

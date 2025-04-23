@@ -1,32 +1,28 @@
 "use client";
-import React, { FC, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Coin from "@/assets/images/Coin.png";
 import { GiPadlock } from "react-icons/gi";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { fetchDailyReward } from "@/services/api/apiRequest";
+import Cookies from "js-cookie";
+import { queryClient } from "@/contexts";
+import { APP_KEYS } from "@/constants";
 
-interface DailyLoginCardProps {
-  currentDay: number;
-  setCurrentDay: (day: number) => void;
-  claimedDays: number[];
-  setClaimedDays: (days: number[]) => void;
-  streak: number;
-  setStreak: (streak: number) => void;
-}
-
-const DailyLoginCard: FC<DailyLoginCardProps> = ({
-  currentDay,
-  setCurrentDay,
-  claimedDays,
-  setClaimedDays,
-  streak,
-  setStreak,
-}) => {
+const DailyLoginCard = () => {
+  const [streak, setStreak] = useState<number>(0);
+  const [currentDay, setCurrentDay] = useState<number>(0);
+  const [claimedDays, setClaimedDays] = useState<number[]>([]);
   const [daysInMonth, setDaysInMonth] = useState<number>(0);
   const [displayRange, setDisplayRange] = useState({ start: 1, end: 7 });
 
-  // Initialize date and days in month
+  const accessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
+
   useEffect(() => {
     const today = new Date();
     setCurrentDay(today.getDate());
@@ -36,17 +32,8 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     setDaysInMonth(daysInMonth);
 
-    // Calculate initial display range (showing current day in context)
-    let start = Math.max(1, currentDay - 3);
-    let end = Math.min(daysInMonth, start + 6);
-    if (end - start < 6) {
-      start = Math.max(1, end - 6);
-    }
-    setDisplayRange({ start, end });
-
-    // Load claimed days and streak from localStorage
-    const savedClaims = localStorage.getItem("claimedDays");
-    const savedStreak = localStorage.getItem("streak");
+    const savedClaims = Cookies.get("claimedDays");
+    const savedStreak = Cookies.get("streak");
     if (savedClaims) {
       setClaimedDays(JSON.parse(savedClaims));
     }
@@ -55,42 +42,45 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
     }
   }, [currentDay, setCurrentDay, setClaimedDays, setStreak]);
 
-  // Handle claiming a day
-  const handleClaimDay = (day: number) => {
+  // Function to Handle claim day
+  const handleClaimDay = async (day: number) => {
     if (!claimedDays.includes(day) && day === currentDay) {
-      const newClaimedDays = [...claimedDays, day];
-      setClaimedDays(newClaimedDays);
-      localStorage.setItem("claimedDays", JSON.stringify(newClaimedDays));
+      const { success } = await fetchDailyReward(accessToken);
 
-      // Update streak
-      const today = new Date();
-      const lastClaimedTimestamp = localStorage.getItem("lastClaimedTimestamp");
-      if (lastClaimedTimestamp) {
-        const lastClaimedDate = new Date(parseInt(lastClaimedTimestamp));
-        if (today.getTime() - lastClaimedDate.getTime() === 86400000) {
-          setStreak(streak + 1);
+      if (success) {
+        const newClaimedDays = [...claimedDays, day];
+        setClaimedDays(newClaimedDays);
+        Cookies.set("claimedDays", JSON.stringify(newClaimedDays));
+        queryClient.invalidateQueries({
+          queryKey: [APP_KEYS.UNRESTRICTED_BALANCE],
+        });
+
+        // Update streak
+        const today = new Date();
+        const lastClaimedTimestamp = Cookies.get("lastClaimedTimestamp");
+        if (lastClaimedTimestamp) {
+          const lastClaimedDate = new Date(parseInt(lastClaimedTimestamp));
+          if (today.getTime() - lastClaimedDate.getTime() === 86400000) {
+            setStreak(streak + 1);
+          } else {
+            setStreak(1);
+          }
         } else {
           setStreak(1);
         }
-      } else {
-        setStreak(1);
+        Cookies.set("lastClaimedTimestamp", today.getTime().toString());
+        Cookies.set("streak", streak.toString());
       }
-      localStorage.setItem("lastClaimedTimestamp", today.getTime().toString());
-      localStorage.setItem("streak", streak.toString());
     }
   };
 
-  // Generate login rewards data
   const generateLoginRewards = () => {
     const rewards = [];
-    const baseReward = 25;
-    const increment = 5;
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const reward = baseReward + (day - 1) * increment;
       rewards.push({
         day: day.toString(),
-        price: reward.toString(),
+        price: "1",
       });
     }
 
@@ -151,18 +141,18 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
             variant="default"
             size="sm"
             disabled={
-              parseInt(login.day) !== currentDay ||
-              claimedDays.includes(parseInt(login.day))
+              claimedDays.includes(parseInt(login.day)) ||
+              parseInt(login.day) < currentDay ||
+              parseInt(login.day) > currentDay
             }
             onClick={() => handleClaimDay(parseInt(login.day))}
             className={`${
-              parseInt(login.day) > currentDay
-                ? "bg-[#979797] font-normal cursor-not-allowed"
-                : claimedDays.includes(parseInt(login.day))
+              claimedDays.includes(parseInt(login.day))
                 ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] font-normal cursor-not-allowed"
-                : parseInt(login.day) === currentDay
-                ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] cursor-pointer hover:scale-105"
-                : "bg-[#979797] font-normal cursor-not-allowed"
+                : parseInt(login.day) < currentDay ||
+                  parseInt(login.day) > currentDay
+                ? "bg-[#979797] font-normal cursor-not-allowed"
+                : "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] cursor-pointer hover:scale-105"
             } shadow-[-5px_5px_10px_#563BFF42] text-[10px] text-[#F7F8FB] rounded-full flex items-center gap-2 transition-all w-full h-5 p-0 justify-center font-bold cursor-pointer`}
           >
             {parseInt(login.day) > currentDay && (
@@ -170,7 +160,9 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
             )}
             {claimedDays.includes(parseInt(login.day))
               ? "Claimed"
-              : parseInt(login.day) === currentDay
+              : parseInt(login.day) < currentDay
+              ? "Missed"
+              : parseInt(login.day) > currentDay
               ? "Claim"
               : "Claim"}
           </Button>
@@ -187,4 +179,5 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
     </div>
   );
 };
+
 export default DailyLoginCard;

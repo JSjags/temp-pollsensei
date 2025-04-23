@@ -40,12 +40,12 @@ const Tech_Media: FC<Props> = ({ tab }) => {
   type FormData = z.infer<typeof filterTechAndMediaSchema>;
 
   useEffect(() => {
-    setValue("internet", selectedCriteria.internet || []);
-    setValue("primary_access", selectedCriteria.primary_access || []);
-    setValue("social_media", selectedCriteria.social_media || []);
-    setValue("content", selectedCriteria.content || []);
-    setValue("platform", selectedCriteria.platform || []);
-    setValue("browser", selectedCriteria.browser || []);
+    setValue("internet", selectedCriteria.internet?.values || []);
+    setValue("primary_access", selectedCriteria.primary_access?.values || []);
+    setValue("social_media", selectedCriteria.social_media?.values || []);
+    setValue("content", selectedCriteria.content?.values || []);
+    setValue("platform", selectedCriteria.platform?.values || []);
+    setValue("browser", selectedCriteria.browser?.values || []);
   }, [tab, selectedCriteria, setValue]);
 
   const onSubmit = (data: FormData) => {

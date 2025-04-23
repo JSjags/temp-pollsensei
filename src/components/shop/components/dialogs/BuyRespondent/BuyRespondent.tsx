@@ -16,7 +16,6 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { surveySchema } from "@/utils/shema";
-import { surveyOptions } from "@/data/respondent-object-data";
 import confirm from "@/assets/images/confirm.svg";
 import congrats from "@/assets/images/congrats.svg";
 import { useRouter, usePathname } from "next/navigation";
@@ -32,10 +31,22 @@ import {
   setFormData,
   resetDialogState,
 } from "@/redux/slices/buyRespondentDialogSlice";
+import { useQuery } from "@tanstack/react-query";
+import {
+  GetUserSurveyData,
+  PurchasePaidRespondent,
+  PurchaseQualifiedPaidRespondent,
+  ScreenerSurveyPurchase,
+} from "@/services/api/apiRequest";
+import { APP_KEYS } from "@/constants";
+import { SurveyData } from "@/types/survey";
 
 const BuyRespondent = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
   const pathname = usePathname();
   const {
     surveyDialog,
@@ -45,9 +56,13 @@ const BuyRespondent = () => {
     selectedSurvey,
     selectedRespondentsNumber,
     formData,
+    filterBy,
+    qualifyingTemplateId,
+    screenerId,
   } = useSelector((state: RootState) => state.respondentDialog);
 
-  const [searchSurvey, setSearchSurvey] = useState<string>("");
+  const [isProceeding, setIsProceeding] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string>("");
 
   const {
     register,
@@ -69,21 +84,25 @@ const BuyRespondent = () => {
 
   useEffect(() => {
     const savedSurvey = sessionStorage.getItem("selectedSurvey");
+    if (savedSurvey) {
+      try {
+        const parsedSurvey = JSON.parse(savedSurvey) as SurveyData;
+        dispatch(setSelectedSurvey(parsedSurvey));
+        setValue("survey", parsedSurvey._id);
+      } catch (e) {
+        console.error("Failed to parse saved survey", e);
+      }
+    }
+
     const savedRespondentsNumber = sessionStorage.getItem(
       "selectedRespondentsNumber"
     );
-
-    if (savedSurvey) {
-      dispatch(setSelectedSurvey(savedSurvey));
-      setValue("survey", savedSurvey);
-    }
     if (savedRespondentsNumber) {
       dispatch(setSelectedRespondentsNumber(Number(savedRespondentsNumber)));
       setValue("respondentsNumber", Number(savedRespondentsNumber));
     }
   }, [dispatch, setValue]);
 
-  // Update form fields with data from Redux store
   useEffect(() => {
     if (formData.survey) {
       setValue("survey", formData.survey);
@@ -94,24 +113,25 @@ const BuyRespondent = () => {
   }, [formData, setValue]);
 
   const handleNext = (data: FormData) => {
-    const selectedSurveyLabel = surveyOptions.find(
-      (option) => option.value === data.survey
-    )?.label;
+    const selected = userSurveys.find((survey) => survey._id === data.survey);
+    if (selected) {
+      dispatch(setSelectedSurvey(selected));
+      sessionStorage.setItem("selectedSurvey", JSON.stringify(selected));
+    }
 
-    // Dispatch the selected survey and respondents number to the Redux store
-    dispatch(setSelectedSurvey(selectedSurveyLabel || ""));
     dispatch(setSelectedRespondentsNumber(data.respondentsNumber));
+    sessionStorage.setItem(
+      "selectedRespondentsNumber",
+      data.respondentsNumber.toString()
+    );
 
-    // Close the survey dialog and open the purchase dialog
     dispatch(setSurveyDialog(false));
     dispatch(setPurchaseDialog(true));
-
-    // Save the form data to the Redux store
     dispatch(setFormData(data));
   };
 
   const handlePurchaseCancel = () => {
-    dispatch(setPurchaseDialog(false)); // Only close the dialog
+    dispatch(setPurchaseDialog(false));
     dispatch(setSurveyDialog(false));
   };
 
@@ -126,9 +146,95 @@ const BuyRespondent = () => {
     reset();
   };
 
-  const handleConfirmProceed = () => {
-    dispatch(setConfirmDialog(false));
-    dispatch(setCongratulationsDialog(true));
+  const handleConfirmProceed = async () => {
+    setIsProceeding(true);
+    if (filterBy === "qualifyingCriteria") {
+      try {
+        if (!selectedSurvey?._id) {
+          throw new Error("No survey selected");
+        }
+
+        const response = await PurchaseQualifiedPaidRespondent(
+          userAccessToken,
+          selectedSurvey._id,
+          selectedRespondentsNumber,
+          qualifyingTemplateId
+        );
+
+        if (response.success) {
+          dispatch(setConfirmDialog(false));
+          dispatch(setCongratulationsDialog(true));
+        } else {
+          setApiError(response.message || "Purchase failed");
+        }
+      } catch (error) {
+        console.error("Error purchasing respondents:", error);
+        setApiError(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while processing your purchase"
+        );
+      } finally {
+        setIsProceeding(false);
+      }
+    } else if (filterBy === "screenerSurvey") {
+      try {
+        if (!selectedSurvey?._id) {
+          throw new Error("No survey selected");
+        }
+
+        const response = await ScreenerSurveyPurchase(
+          userAccessToken,
+          selectedSurvey._id,
+          selectedRespondentsNumber,
+          screenerId
+        );
+
+        if (response.success) {
+          dispatch(setConfirmDialog(false));
+          dispatch(setCongratulationsDialog(true));
+        } else {
+          setApiError(response.message || "Purchase failed");
+        }
+      } catch (error) {
+        console.error("Error purchasing respondents:", error);
+        setApiError(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while processing your purchase"
+        );
+      } finally {
+        setIsProceeding(false);
+      }
+    } else {
+      try {
+        if (!selectedSurvey?._id) {
+          throw new Error("No survey selected");
+        }
+
+        const response = await PurchasePaidRespondent(
+          userAccessToken,
+          selectedSurvey._id,
+          selectedRespondentsNumber
+        );
+
+        if (response.success) {
+          dispatch(setConfirmDialog(false));
+          dispatch(setCongratulationsDialog(true));
+        } else {
+          setApiError(response.message || "Purchase failed");
+        }
+      } catch (error) {
+        console.error("Error purchasing respondents:", error);
+        setApiError(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while processing your purchase"
+        );
+      } finally {
+        setIsProceeding(false);
+      }
+    }
   };
 
   const handleCongratulationsContinue = () => {
@@ -139,62 +245,54 @@ const BuyRespondent = () => {
   };
 
   const handleFilterRespondentsRedirect = (data: FormData) => {
-    // Save the access state to session storage
-    sessionStorage.setItem("allowFilterRespondentsAccess", "true");
+    const selected = userSurveys.find((survey) => survey._id === data.survey);
+    if (selected) {
+      dispatch(setSelectedSurvey(selected));
+    }
 
-    // Navigate to the filter respondents route
-    router.push("/filter-respondents");
-
-    const selectedSurveyLabel = surveyOptions.find(
-      (option) => option.value === data.survey
-    )?.label;
-
-    // Dispatch the selected survey and respondents number to the Redux store
-    dispatch(setSelectedSurvey(selectedSurveyLabel || ""));
     dispatch(setSelectedRespondentsNumber(data.respondentsNumber));
-
-    // Close the survey dialog and open the purchase dialog
+    sessionStorage.setItem("allowFilterRespondentsAccess", "true");
+    console.log("allowFilterRespondentsAccess set to true");
+    router.push("/filter-respondents");
     dispatch(setSurveyDialog(false));
     dispatch(setPurchaseDialog(false));
-
-    // Save the form data to the Redux store
     dispatch(setFormData(data));
   };
 
-  // Wrapper function for the onClick handler
   const handleClick = () => {
     const data = {
-      survey: watch("survey"), // Get the current value of the survey field
-      respondentsNumber: watch("respondentsNumber"), // Get the current value of the respondentsNumber field
+      survey: watch("survey"),
+      respondentsNumber: watch("respondentsNumber"),
     };
     handleFilterRespondentsRedirect(data);
   };
+
+  const { data: userSurveysResponse } = useQuery({
+    queryKey: [...[APP_KEYS.USER_SURVEYS], userAccessToken],
+    queryFn: () => GetUserSurveyData(userAccessToken),
+    enabled: !!userAccessToken,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const userSurveys: SurveyData[] = userSurveysResponse?.data || [];
+  // console.log({ userSurveysResponse, userSurveys });
+  const hasActiveSurveys = userSurveys.length > 0;
 
   return (
     <div className="bg-[#FCFCFD] rounded-[11.72px] max-md:gap-6 max-w-[204px] py-2.5 border-[0.59px] flex flex-col justify-between h-full w-full">
       {pathname !== "/filter-respondents" && (
         <>
-          <div className="w-full items-center justify-center flex mb-3">
-            <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
-              <Image
-                src={'/assets/shop/svg/resp.svg'}
-                alt="icons"
-                layout="fill"
-                className="object-contain"
-              />
-            </div>
+          <div className="px-8">
+            <Image src={Purchases1} alt="icons" className="size-full" />
           </div>
-
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}
           >
             <DialogTrigger asChild>
-              <div className="flex flex-col items-center justify-center px-3">
-                <Button
-                  variant="gradient"
-                  className="h-[25px] gap-1 text-xs w-full"
-                >
+              <div className="flex flex-col items-center justify-center">
+                <Button variant="gradient" className="h-[25px] gap-1 text-xs">
                   Respondents{" "}
                   <Image src={Arrow} alt="icons" className="size-4" />
                 </Button>
@@ -226,41 +324,53 @@ const BuyRespondent = () => {
                         render={({ field }) => (
                           <Select
                             value={field.value}
-                            onValueChange={(value) => field.onChange(value)}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              const selected = userSurveys.find(
+                                (survey) => survey?._id === value
+                              );
+                              if (selected) {
+                                dispatch(setSelectedSurvey(selected));
+                                sessionStorage.setItem(
+                                  "selectedSurvey",
+                                  JSON.stringify(selected)
+                                );
+                              }
+                            }}
                           >
-                            <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-black text-sm rounded-md py-2 px-3 active:outline-none">
+                            <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-black text-xs rounded-md py-2 px-3 active:outline-none">
                               <SelectValue placeholder="Select Survey" />
                             </SelectTrigger>
                             <SelectContent className="w-full h-auto p-2 overflow-auto scrollbar-hide z-[1000000]">
-                              <div className="w-full h-full flex flex-col gap-4 relative pt-8">
-                                <input
-                                  type="search"
-                                  placeholder="Search surveys"
-                                  className="w-[98%] h-auto py-1 px-2 border-2 border-[#E0E0E0] text-black text-sm rounded-md fixed top-1 left-1 bg-white z-10"
-                                  value={searchSurvey}
-                                  onChange={(e) =>
-                                    setSearchSurvey(e.target.value)
-                                  }
-                                  autoFocus
-                                />
-                                <SelectGroup>
-                                  {surveyOptions
-                                    .filter((option) =>
-                                      option.label
-                                        .toLowerCase()
-                                        .includes(searchSurvey.toLowerCase())
-                                    )
-                                    .map((item) => (
-                                      <SelectItem
-                                        className="text-black text-sm"
-                                        key={item.value}
-                                        value={item.value}
-                                      >
-                                        {item.label}
-                                      </SelectItem>
-                                    ))}
+                              {hasActiveSurveys ? (
+                                <SelectGroup className="w-full h-full flex flex-col gap-2">
+                                  {userSurveys.map((survey) => (
+                                    <SelectItem
+                                      key={survey._id}
+                                      value={survey._id}
+                                      className="text-xs text-center"
+                                    >
+                                      {survey.topic}
+                                    </SelectItem>
+                                  ))}
                                 </SelectGroup>
-                              </div>
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center py-4">
+                                  <p className="text-sm text-gray-500 text-center">
+                                    You don&apos;t have any active surveys.
+                                  </p>
+                                  <Button
+                                    variant="link"
+                                    className="text-[#5B03B2] mt-2"
+                                    onClick={() => {
+                                      dispatch(setSurveyDialog(false));
+                                      router.push("/surveys/create-survey");
+                                    }}
+                                  >
+                                    Click here to create one
+                                  </Button>
+                                </div>
+                              )}
                             </SelectContent>
                           </Select>
                         )}
@@ -273,7 +383,7 @@ const BuyRespondent = () => {
                     </div>
                     <p className="text-[10px] lg:text-xs">
                       Average Respondent rate per Survey:{" "}
-                      <span className="font-semibold">500coins/Respondent</span>{" "}
+                      <span className="font-semibold">5coins/Respondent</span>{" "}
                     </p>
                   </div>
                 </div>
@@ -305,7 +415,10 @@ const BuyRespondent = () => {
                         </span>
                       </p>
                       <p className="text-[10px]  lg:text-xs">
-                        Cost: <span className="font-bold">500 coins</span>
+                        Cost:{" "}
+                        <span className="font-bold">
+                          {respondentsNumber * 5 || 0} coins
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -319,6 +432,7 @@ const BuyRespondent = () => {
                     }`}
                     type="button"
                     onClick={handleClick}
+                    disabled={!hasActiveSurveys}
                   >
                     <span className="hidden lg:inline-block">
                       {" "}
@@ -335,6 +449,7 @@ const BuyRespondent = () => {
                       surveyType && respondentsNumber ? "w-1/2" : "w-full"
                     } bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 hover:scale-x-105 transition-all`}
                     type="submit"
+                    disabled={!hasActiveSurveys}
                   >
                     <span
                       className={`${
@@ -376,7 +491,10 @@ const BuyRespondent = () => {
               <p className="font-bold text-sm border-b-2 border-[#A9A9B1] border-dotted pb-2">
                 Title of Survey
               </p>
-              <p className="text-sm capitalize">{selectedSurvey}</p>{" "}
+              <p className="text-sm capitalize">
+                {" "}
+                {selectedSurvey?.topic || "No survey selected"}
+              </p>{" "}
             </div>
             <p className="font-bold text-sm">Respondents:</p>
             <div className="w-full flex flex-col gap-7">
@@ -392,16 +510,14 @@ const BuyRespondent = () => {
                 <p className="text-xs lg:text-sm font-bold">
                   Unit cost per Respondent
                 </p>
-                <p className="text-base lg:text-lg text-[#5F08B2]">
-                  {selectedRespondentsNumber / 10}coins
-                </p>
+                <p className="text-base lg:text-lg text-[#5F08B2]">5 coins</p>
               </div>
               <div className="w-full flex justify-between items-center border-b border-dotted border-[#A9A9B1] pb-2">
                 <p className="text-xs lg:text-sm font-bold">
                   Number of PollCoins
                 </p>
                 <p className="text-base lg:text-lg text-[#5F08B2]">
-                  {selectedRespondentsNumber * 10}pc
+                  {selectedRespondentsNumber * 5}pc
                 </p>
               </div>
             </div>
@@ -441,6 +557,9 @@ const BuyRespondent = () => {
           <h1 className="text-base lg:text-2xl font-bold text-center">
             Confirm Purchase
           </h1>
+          {apiError && (
+            <p className="text-red-500 text-sm text-center">{apiError}</p>
+          )}
           <p className="text-sm lg:text-base text-[#898989] text-center">
             Are you sure you want to purchase the selected amount of Respondents
             for your Survey
@@ -459,8 +578,9 @@ const BuyRespondent = () => {
               size="sm"
               className="w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 hover:scale-x-105 transition-all"
               onClick={handleConfirmProceed}
+              disabled={isProceeding}
             >
-              Proceed
+              {isProceeding ? "Processing..." : "Proceed"}
             </Button>
           </div>
         </DialogContent>

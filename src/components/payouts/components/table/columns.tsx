@@ -6,10 +6,16 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { TransactionHistory } from "@/components/shop/types";
 
-export type PayoutTransaction = Omit<TransactionHistory, "timestamp" | "type" | 'status'> & {
+export type PayoutTransaction = Omit<
+  TransactionHistory,
+  "timestamp" | "type" | "status"
+> & {
+  transactionId: number;
+  date: Date;
   details: string;
-  activity: "Ads" | "Survey";
-  status: "Pending" | "Paid";
+  status: "Paid" | "Pending";
+  activity: "Survey" | "Ads";
+  amount: number;
 };
 
 export function makeTransactionHistoryColumns() {
@@ -74,7 +80,7 @@ export function makeTransactionHistoryColumns() {
     ),
     cell: ({ getValue }) => {
       const status = getValue();
-    
+
       return (
         <div
           className={cn(
@@ -82,7 +88,6 @@ export function makeTransactionHistoryColumns() {
             {
               "bg-[#FCCC951A] text-[#AE5F04]": status === "Pending",
               "bg-[#D3FAEC] text-[#04AE73]": status === "Paid",
-
             }
           )}
         >
@@ -105,7 +110,7 @@ export function makeTransactionHistoryColumns() {
     ),
     cell: ({ getValue }) => {
       const activity = getValue(); // "Ads" | "Survey"
-  
+
       return (
         <div
           className={cn(
@@ -122,7 +127,6 @@ export function makeTransactionHistoryColumns() {
     },
     meta: { headerName: ACTIVITY_HEADER_NAME },
   });
-  
 
   /* -------------------------------------------------------------------------------------------------
    * Details column

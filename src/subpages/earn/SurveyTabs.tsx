@@ -1,43 +1,86 @@
 "use client";
-import React from "react";
+import React, { FC, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Available from "@/subpages/earn/Available";
 import Apply from "@/subpages/earn/Apply";
-import Approved from "@/subpages/earn/Approved";
+import Applications from "@/subpages/earn/Applications";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import {
   openSurveyTabs,
   closeSurveyTabs,
 } from "@/redux/slices/earnDialogSlice";
+import {
+  fetchAvailableSurveys,
+  fetchApplySurveys,
+  fetchApplicationSurveys,
+} from "@/services/api/apiRequest";
+import { useQuery } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
 
 const SurveyTabs = () => {
+  const dispatch = useDispatch();
+  const { isSurveyTabsOpen } = useSelector(
+    (state: RootState) => state.earnDialogSlice
+  );
+
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
+
+  const { data: availableSurveys } = useQuery({
+    queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS], userAccessToken],
+    queryFn: () => fetchAvailableSurveys(userAccessToken),
+    enabled: !!userAccessToken && isSurveyTabsOpen,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const { data: applySurveys } = useQuery({
+    queryKey: [...[APP_KEYS.APPLY_SURVEYS], userAccessToken],
+    queryFn: () => fetchApplySurveys(userAccessToken),
+    enabled: !!userAccessToken && isSurveyTabsOpen,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const { data: applicationSurveys } = useQuery({
+    queryKey: [...[APP_KEYS.APPLICATION_SURVEYS], userAccessToken],
+    queryFn: () => fetchApplicationSurveys(userAccessToken),
+    enabled: !!userAccessToken && isSurveyTabsOpen,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
   const tabs = [
     {
       id: 1,
       name: "Available Now",
       value: "available",
-      component: <Available />,
+      component: <Available availableSurveys={availableSurveys?.data} />,
     },
     {
       id: 2,
       name: "Apply",
       value: "apply",
-      component: <Apply />,
+      component: <Apply applySurveys={applySurveys?.data} />,
     },
     {
       id: 3,
-      name: "Approved",
-      value: "approved",
-      component: <Approved />,
+      name: "Applications",
+      value: "applications",
+      component: <Applications applicationSurveys={applicationSurveys?.data} />,
     },
   ];
 
-  const dispatch = useDispatch();
-  const { isSurveyTabsOpen } = useSelector(
-    (state: RootState) => state.earnDialogSlice
-  );
+  useEffect(() => {
+    if (isSurveyTabsOpen) {
+      // Fetch data for Apply and Approved tabs when SurveyTabs are opened
+      fetchApplySurveys(userAccessToken);
+      fetchApplicationSurveys(userAccessToken);
+    }
+  }, [isSurveyTabsOpen, userAccessToken]);
 
   return (
     <Dialog
