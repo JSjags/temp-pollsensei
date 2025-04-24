@@ -5,13 +5,16 @@ interface DialogState {
   purchaseDialog: boolean;
   confirmDialog: boolean;
   congratulationsDialog: boolean;
-  selectedSurvey: string;
+  selectedSurvey: any;
   selectedRespondentsNumber: number;
   formData: {
     survey: string;
     respondentsNumber: number;
   };
   allowFilterRespondentsAccess: boolean;
+  filterBy: string | null;
+  qualifyingTemplateId: string | null;
+  screenerId: string | null;
 }
 
 const initialState: DialogState = {
@@ -19,13 +22,16 @@ const initialState: DialogState = {
   purchaseDialog: false,
   confirmDialog: false,
   congratulationsDialog: false,
-  selectedSurvey: "",
+  selectedSurvey: null,
   selectedRespondentsNumber: 0,
   formData: {
     survey: "",
     respondentsNumber: 0,
   },
   allowFilterRespondentsAccess: false,
+  filterBy: null,
+  qualifyingTemplateId: null,
+  screenerId: null,
 };
 
 const buyRespondentDialogSlice = createSlice({
@@ -44,7 +50,7 @@ const buyRespondentDialogSlice = createSlice({
     setCongratulationsDialog: (state, action: PayloadAction<boolean>) => {
       state.congratulationsDialog = action.payload;
     },
-    setSelectedSurvey: (state, action: PayloadAction<string>) => {
+    setSelectedSurvey: (state, action: PayloadAction<any>) => {
       state.selectedSurvey = action.payload;
     },
     setSelectedRespondentsNumber: (state, action: PayloadAction<number>) => {
@@ -62,15 +68,27 @@ const buyRespondentDialogSlice = createSlice({
     ) => {
       state.allowFilterRespondentsAccess = action.payload;
     },
+    setFilterBy: (state, action: PayloadAction<string | null>) => {
+      state.filterBy = action.payload;
+    },
+    setQualifyingTemplateId: (state, action: PayloadAction<string | null>) => {
+      state.qualifyingTemplateId = action.payload;
+    },
+    setScreenerId: (state, action: PayloadAction<string | null>) => {
+      state.screenerId = action.payload;
+    },
     resetDialogState: (state) => {
       state.surveyDialog = false;
       state.purchaseDialog = false;
       state.confirmDialog = false;
       state.congratulationsDialog = false;
-      state.selectedSurvey = "";
+      state.selectedSurvey = null;
       state.selectedRespondentsNumber = 0;
       state.formData = { survey: "", respondentsNumber: 0 };
       state.allowFilterRespondentsAccess = false;
+      state.filterBy = null;
+      state.qualifyingTemplateId = null;
+      state.screenerId = null;
     },
   },
 });
@@ -84,6 +102,9 @@ export const {
   setSelectedRespondentsNumber,
   setFormData,
   setAllowFilterRespondentsAccess,
+  setFilterBy,
+  setQualifyingTemplateId,
+  setScreenerId,
   resetDialogState,
 } = buyRespondentDialogSlice.actions;
 

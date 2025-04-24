@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,9 +34,13 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({
   tab,
   section,
   dispatch,
-  required = false,
+  required,
   title,
 }) => {
+  const [isRequired, setIsRequired] = useState(
+    selectedCriteria[section]?.required || false
+  );
+
   const handleCheckboxChange = (field: any, item: string, checked: boolean) => {
     const updatedValues = checked
       ? [...field.value, item]
@@ -45,7 +49,9 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({
     field.onChange(updatedValues);
 
     if (checked) {
-      dispatch(addCriteria({ tab, section, criteria: item }));
+      dispatch(
+        addCriteria({ tab, section, criteria: item, required: isRequired })
+      );
     } else {
       dispatch(removeCriteria({ tab, section, criteria: item }));
     }
@@ -57,12 +63,37 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({
     dispatch(removeCriteria({ tab, section, criteria: item }));
   };
 
+  const handleRequiredToggle = () => {
+    setIsRequired(!isRequired);
+    const existingCriteria = selectedCriteria[section]?.values;
+    if (existingCriteria && existingCriteria.length > 0) {
+      dispatch(
+        addCriteria({
+          tab,
+          section,
+          criteria: existingCriteria.join(","),
+          required: !isRequired,
+        })
+      );
+    } else {
+      dispatch({
+        type: "criteria/addCriteria",
+        payload: { tab, section, criteria: "", required: !isRequired },
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <div className="w-full flex justify-between items-center pl-10">
         <p className="text-[#333333] text-sm">{title}</p>
         <div className="flex items-center space-x-2">
-          <Switch id={name} className="h-5" />
+          <Switch
+            id={name}
+            className="h-5"
+            checked={isRequired}
+            onCheckedChange={handleRequiredToggle}
+          />
           <Label htmlFor={name} className="text-[#333333] text-sm font-normal">
             Required
           </Label>
@@ -76,7 +107,7 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({
           <div className="relative w-full h-auto flex flex-col gap-2 pl-10">
             <Checkbox
               className="absolute left-0 top-[30%] -translate-y-1/2"
-              checked={selectedCriteria[section]?.length > 0}
+              checked={selectedCriteria[section]?.values?.length > 0}
             />
             <DropdownMenu>
               <DropdownMenuTrigger

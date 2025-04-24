@@ -37,7 +37,7 @@ export const ageGroupOptions = [
   { value: "65+", label: "65+ yrs" },
 ];
 
-export const dependentsOptions = [
+export const childrenOptions = [
   { value: "children", label: "Yes, I have children" },
   { value: "dependents", label: "Yes, I have other dependents" },
   { value: "no", label: "No" },
@@ -48,6 +48,9 @@ export const dependentsOptions = [
 }
 
 export const languagesOptions = [
+  { value: "yoruba", label: "Yoruba" },
+  { value: "hausa", label: "Hausa" },
+  { value: "igbo", label: "Igbo" },
   { value: "mandarin", label: "Mandarin" },
   { value: "spanish", label: "Spanish" },
   { value: "english", label: "English" },

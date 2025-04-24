@@ -22,6 +22,7 @@ import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
 import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
 import { ControlledMultiSelect } from "@/components/respondent-form/ControlledMultiSelect";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onContinue: () => void;
@@ -37,7 +38,7 @@ const Tech_Media: FC<Props> = ({
   setFormData,
 }) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
-
+  const pathname = usePathname();
   const {
     register,
     handleSubmit,
@@ -80,7 +81,9 @@ const Tech_Media: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
-      <ProgressBar skip={true} progress={62.5} onContinue={onContinue} />
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={true} progress={62.5} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack
@@ -96,44 +99,44 @@ const Tech_Media: FC<Props> = ({
           onSubmit={handleSubmit(handleContinue)}
         >
           <ControlledSelect
-            name="internet"
+            name="internetUsage"
             control={control}
             options={internetUsageOptions}
             placeholder="Select option"
             label="Do you use the internet regularly?"
-            error={errors.internet}
+            error={errors.internetUsage}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="primary_access"
+            name="internetAccess"
             control={control}
             options={internetAccessOptions}
             placeholder="Select option"
             label="How do you primarily access the internet?"
-            error={errors.primary_access}
+            error={errors.internetAccess}
             disabled={isPending}
-            otherFieldName="otherPrimaryAccess"
+            // otherFieldName="otherPrimaryAccess"
             register={register}
           />
 
           <ControlledSelect
-            name="social_media"
+            name="socialMediaUsage"
             control={control}
             options={socialMediaUsageOptions}
             placeholder="Select option"
             label="How often do you use social media?"
-            error={errors.social_media}
+            error={errors.socialMediaUsage}
             disabled={isPending}
           />
 
           <ControlledMultiSelect
-            name="content"
+            name="contentEngagement"
             control={control}
             options={contentOptions}
             label="What type of content do you engage with the most? (Select all that apply)"
             placeholder="Select content types"
-            error={errors.content}
+            error={errors.contentEngagement}
             disabled={isPending}
           />
 
@@ -142,35 +145,35 @@ const Tech_Media: FC<Props> = ({
           </h2>
 
           <ControlledMultiSelect
-            name="platform"
+            name="socialMediaPlatforms"
             control={control}
             options={platformOptions}
             label="What social media platform(s) do you use?"
             placeholder="Select platforms"
-            error={errors.platform}
+            error={errors.socialMediaPlatforms}
             disabled={isPending}
             contentHeight="300px"
           />
 
           <ControlledMultiSelect
-            name="browser"
+            name="internetBrowsers"
             control={control}
             options={browserOptions}
             label="Which internet browser(s) do you use?"
             placeholder="Select browsers"
-            error={errors.browser}
+            error={errors.internetBrowsers}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="pc_operating_system"
+            name="computerOS"
             control={control}
             options={PcOperatingSystemOptions}
             placeholder="Select option"
             label="What computer operating system(s) do you use?"
-            error={errors.pc_operating_system}
+            error={errors.computerOS}
             disabled={isPending}
-            otherFieldName="otherPcOperatingSystem"
+            // otherFieldName="otherPcOperatingSystem"
             register={register}
           />
 
@@ -180,21 +183,21 @@ const Tech_Media: FC<Props> = ({
             options={operatingSystemOptions}
             placeholder="Select option"
             label="What Smartphone operating system(s) do you use?"
-            error={errors.mobile_operating_system}
+            error={errors.smartphoneOS}
             disabled={isPending}
-            otherFieldName="otherMobileOperatingSystem"
+            // otherFieldName="otherMobileOperatingSystem"
             register={register}
           />
 
           <ControlledSelect
-            name="tablet_operating_system"
+            name="tabletOS"
             control={control}
             options={operatingSystemOptions}
             placeholder="Select option"
             label="What tablet operating system(s) do you use?"
-            error={errors.tablet_operating_system}
+            error={errors.tabletOS}
             disabled={isPending}
-            otherFieldName="otherTabletOperatingSystem"
+            // otherFieldName="otherTabletOperatingSystem"
             register={register}
           />
 
@@ -213,7 +216,11 @@ const Tech_Media: FC<Props> = ({
               type="submit"
               disabled={isPending}
             >
-              {isPending ? "Saving..." : "Next"}
+              {isPending
+                ? "Saving..."
+                : pathname === "/respondent-form"
+                ? "Next"
+                : "Save"}
             </Button>
           </div>
         </form>

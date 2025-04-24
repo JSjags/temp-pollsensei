@@ -13,7 +13,7 @@ import {
 interface Props {
   title: string;
   description: string;
-  image: StaticImageData;
+  image: string;
   poll_coins: number;
   time: number;
   isComplete?: boolean;

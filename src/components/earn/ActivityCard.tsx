@@ -73,14 +73,6 @@ const ActivityCard: FC<Props> = ({
   }, [hasNextVideo]);
 
   const renderButtonContent = () => {
-    // if (
-    //   buttonText === "Watch ads" &&
-    //   !hasNextVideo &&
-    //   timeUntilReset !== null &&
-    //   timeUntilReset > 0
-    // ) {
-    //   return `Available in ${Math.ceil(timeUntilReset / 1000)}s`;
-    // }
     return (
       <>
         <div className="hidden lg:flex items-center justify-center w-full">
@@ -134,12 +126,6 @@ const ActivityCard: FC<Props> = ({
           className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] text-[9px] lg:text-xs font-bold text-white"
           type="button"
           onClick={onClick}
-          // disabled={
-          //   buttonText === "Watch ads" &&
-          //   !hasNextVideo &&
-          //   timeUntilReset !== null &&
-          //   timeUntilReset > 0
-          // }
         >
           {renderButtonContent()}
         </Button>

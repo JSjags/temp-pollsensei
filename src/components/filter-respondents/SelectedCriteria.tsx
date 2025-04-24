@@ -11,19 +11,19 @@ const SelectedCriteria = () => {
     (state: RootState) => state.criteria.selectedCriteria
   );
 
-  // Count the number of sections with at least one selected criterion
   const totalCriteria = Object.values(selectedCriteria).reduce((acc, tab) => {
     return (
-      acc + Object.values(tab).filter((section) => section.length > 0).length
+      acc +
+      Object.values(tab).filter(
+        (section: { required: boolean; values: string[] }) =>
+          section.values.length > 0
+      ).length
     );
   }, 0);
 
   useEffect(() => {
-    // Clear criteria when the component mounts
     dispatch(clearCriteria());
   }, [dispatch]);
-
-  //   console.log("Selected Criteria:", selectedCriteria);
 
   return (
     <div className="flex items-center justify-start lg:justify-end gap-1 w-[300px]">
@@ -32,4 +32,5 @@ const SelectedCriteria = () => {
     </div>
   );
 };
+
 export default SelectedCriteria;

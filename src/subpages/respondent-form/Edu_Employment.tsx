@@ -20,6 +20,7 @@ import {
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
 import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onContinue: () => void;
@@ -35,6 +36,7 @@ const Edu_Employment: FC<Props> = ({
   setFormData,
 }) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
+  const pathname = usePathname();
   const {
     register,
     handleSubmit,
@@ -73,7 +75,9 @@ const Edu_Employment: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
-      <ProgressBar skip={true} progress={37.5} onContinue={onContinue} />
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={true} progress={37.5} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack
@@ -89,74 +93,74 @@ const Edu_Employment: FC<Props> = ({
           onSubmit={handleSubmit(handleContinue)}
         >
           <ControlledSelect
-            name="education_level"
+            name="educationLevel"
             control={control}
             options={educationLevelOptions}
             placeholder="Select highest level of education"
             label="What is your highest level of education?"
-            error={errors.education_level}
+            error={errors.educationLevel}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="employment_status"
+            name="employmentStatus"
             control={control}
             options={employmentStatusOptions}
             placeholder="Select employment status"
             label="What is your current employment status?"
-            error={errors.employment_status}
+            error={errors.employmentStatus}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="employment_industry"
+            name="industry"
             control={control}
             options={industryOptions}
             placeholder="Select employment Industry"
             label="Employment industry"
-            error={errors.employment_industry}
+            error={errors.industry}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="job_role"
+            name="jobRole"
             control={control}
             options={jobRoleOptions}
             placeholder="Select job role"
             label="What is your job role?"
-            error={errors.job_role}
+            error={errors.jobRole}
             disabled={isPending}
-            otherFieldName="otherJob"
+            // otherFieldName="otherJob"
             register={register}
           />
 
           <ControlledSelect
-            name="working_hours"
+            name="workingHours"
             control={control}
             options={workingHoursOptions}
             placeholder="Select average weekly working hours"
             label="What is your average working hours per week?"
-            error={errors.working_hours}
+            error={errors.workingHours}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="income_range"
+            name="incomeRange"
             control={control}
             options={incomeOptions}
             placeholder="Select Household income range"
             label="What is your household income range?"
-            error={errors.income_range}
+            error={errors.incomeRange}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="tech_savvy"
+            name="techSavvy"
             control={control}
             options={savvyOptions}
             placeholder="Select tech savvy level"
             label="Are you tech savvy?"
-            error={errors.tech_savvy}
+            error={errors.techSavvy}
             disabled={isPending}
           />
 
@@ -175,7 +179,11 @@ const Edu_Employment: FC<Props> = ({
               type="submit"
               disabled={isPending}
             >
-              {isPending ? "Saving..." : "Next"}
+              {isPending
+                ? "Saving..."
+                : pathname === "/respondent-form"
+                ? "Next"
+                : "Save"}
             </Button>
           </div>
         </form>

@@ -50,8 +50,9 @@ const DashboardPage = () => {
   const { data: surveyLeaderboard, isLoading: isSurveyLeaderboardLoading } =
     useSurveyLeaderboardQuery("year");
   const { data: surveys, isLoading: isSurveysLoading } = useSurveyQuery("year");
-  const isSurveyCompleted = useSelector(
-    (state: RootState) => state.becomePaidRespondentSlice.isSurveyCompleted
+  const isBecomeRespondentSurveyCompleted = useSelector(
+    (state: RootState) =>
+      state.becomePaidRespondentSlice.isBecomeRespondentSurveyCompleted
   );
 
   function DashboardSkeleton() {
@@ -69,14 +70,22 @@ const DashboardPage = () => {
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="flex items-center p-2 md:p-4 gap-2 md:gap-4">
                 <Skeleton className="size-16 md:size-20 rounded-full" />
+
                 <div className="space-y-2">
                   <Skeleton className="h-3 md:h-4 w-12 md:w-16" />
                   <Skeleton className="h-3 md:h-4 w-16 md:w-20" />
                 </div>
               </CardContent>
             </Card>
-            <Separator orientation="vertical" className="h-6 bg-[#00000030]" />
-            <Skeleton className="h-10 w-full md:w-36 rounded-full" />
+            {!isBecomeRespondentSurveyCompleted && (
+              <>
+                <Separator
+                  orientation="vertical"
+                  className="h-6 bg-[#00000030]"
+                />
+                <Skeleton className="h-10 w-full md:w-36 rounded-full" />
+              </>
+            )}
           </div>
         </div>
         {/********* Large screens skeleton ********/}
@@ -169,16 +178,24 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
             </Card>
-            <Separator orientation="vertical" className="h-6 bg-[#00000030]" />
-            <Button
-              size="default"
-              className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-full text-xs md:text-sm p-2 lg:p-4 hover:scale-x-105 transition-all"
-              onClick={() => router.push("/respondent-form")}
-              disabled={isSurveyCompleted}
-            >
-              Become a Paid Respondent
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+
+            {!isBecomeRespondentSurveyCompleted && (
+              <>
+                <Separator
+                  orientation="vertical"
+                  className="h-6 bg-[#00000030]"
+                />
+                <Button
+                  size="default"
+                  className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-full text-xs md:text-sm p-2 lg:p-4 hover:scale-x-105 transition-all"
+                  onClick={() => router.push("/respondent-form/verify-phone")}
+                  disabled={isBecomeRespondentSurveyCompleted}
+                >
+                  Become a Paid Respondent
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </>
+            )}
           </div>
           <div className="flex lg:hidden">
             {" "}

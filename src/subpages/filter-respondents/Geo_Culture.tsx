@@ -36,9 +36,9 @@ const Geo_Culture: FC<Props> = ({ tab }) => {
   type FormData = z.infer<typeof filterGeographyAndCultureSchema>;
 
   useEffect(() => {
-    setValue("location", selectedCriteria.location || []);
-    setValue("region", selectedCriteria.region || []);
-    setValue("ethnicity", selectedCriteria.ethnicity || []);
+    setValue("location", selectedCriteria.location?.values || []);
+    setValue("region", selectedCriteria.region?.values || []);
+    setValue("ethnicity", selectedCriteria.ethnicity?.values || []);
   }, [tab, selectedCriteria, setValue]);
 
   return (

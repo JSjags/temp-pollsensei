@@ -3,12 +3,22 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface CriteriaState {
   selectedCriteria: {
     [tab: string]: {
-      [section: string]: string[];
+      [section: string]: {
+        required: boolean;
+        values: string[];
+      };
     };
   };
 }
 
 interface CriteriaPayload {
+  tab: string;
+  section: string;
+  criteria: string;
+  required: boolean;
+}
+
+interface RemoveCriteriaPayload {
   tab: string;
   section: string;
   criteria: string;
@@ -31,27 +41,34 @@ const criteriaSlice = createSlice({
   initialState,
   reducers: {
     addCriteria: (state, action: PayloadAction<CriteriaPayload>) => {
-      const { tab, section, criteria } = action.payload;
+      const { tab, section, criteria, required } = action.payload;
 
-      // 🔄 Auto-initialize tab/section if not exists (safer than manual checks)
       state.selectedCriteria[tab] ??= {};
-      state.selectedCriteria[tab][section] ??= [];
+      state.selectedCriteria[tab][section] ??= { required: false, values: [] };
 
-      // Avoid duplicates
-      if (!state.selectedCriteria[tab][section].includes(criteria)) {
-        state.selectedCriteria[tab][section].push(criteria);
+      state.selectedCriteria[tab][section].required = required;
+
+      if (criteria) {
+        const criteriaArray = criteria.split(",").filter(Boolean);
+        criteriaArray.forEach((criterion) => {
+          if (
+            !state.selectedCriteria[tab][section].values.includes(criterion)
+          ) {
+            state.selectedCriteria[tab][section].values.push(criterion);
+          }
+        });
       }
     },
-    removeCriteria: (state, action: PayloadAction<CriteriaPayload>) => {
+
+    removeCriteria: (state, action: PayloadAction<RemoveCriteriaPayload>) => {
       const { tab, section, criteria } = action.payload;
 
-      // 🛡️ Null-safe deletion
       if (state.selectedCriteria[tab]?.[section]) {
-        state.selectedCriteria[tab][section] = state.selectedCriteria[tab][
-          section
-        ].filter((item) => item !== criteria);
+        state.selectedCriteria[tab][section].values = state.selectedCriteria[
+          tab
+        ][section].values.filter((item) => item !== criteria);
 
-        if (state.selectedCriteria[tab][section].length === 0) {
+        if (state.selectedCriteria[tab][section].values.length === 0) {
           delete state.selectedCriteria[tab][section];
         }
         if (Object.keys(state.selectedCriteria[tab]).length === 0) {
@@ -59,11 +76,6 @@ const criteriaSlice = createSlice({
         }
       }
     },
-    // New: Reset a specific tab (useful when switching parent tabs)
-    // resetTabCriteria: (state, action: PayloadAction<{ tab: string }>) => {
-    //   const { tab } = action.payload;
-    //   delete state.selectedCriteria[tab];
-    // },
     clearCriteria: (state) => {
       state.selectedCriteria = { ...initialState.selectedCriteria };
     },

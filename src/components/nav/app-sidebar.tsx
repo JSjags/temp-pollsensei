@@ -96,106 +96,119 @@ export function AppSidebar() {
     }
   };
 
+  const shouldShowSidebar = !pathname.includes("/respondent-form/verify-phone");
+
   return (
-    <Sidebar
-      collapsible={isMobile ? "offcanvas" : "icon"}
-      variant="floating"
-      className="transition-all pr-0 z-[100000]"
-    >
-      <SidebarContent className={cn("pt-4")}>
-        <SidebarHeader
-          className={cn(
-            "w-full items-center",
-            !open ? "flex justify-center" : "pl-6"
-          )}
+    <>
+      {shouldShowSidebar && (
+        <Sidebar
+          collapsible={isMobile ? "offcanvas" : "icon"}
+          variant="floating"
+          className={`transition-all pr-0 z-[100000] ${
+            pathname.includes("/respondent-form/verify-phone") ? "hidden" : ""
+          }`}
         >
-          {!open ? (
-            <div className="w-full flex flex-col gap-5 items-center justify-center">
-              <Link
-                href="/dashboard"
-                className="w-fit -translate-x-0"
-                onClick={handleNavClick}
-              >
-                <Image src={pollsensei_icon} alt="Logo" />
-              </Link>
-
-              <Image
-                src={"/assets/sidebar/close.svg"}
-                alt="Open sidebar"
-                width={24}
-                height={24}
-                onClick={toogleMainSidebar}
-                className="cursor-pointer hidden lg:flex"
-              />
-            </div>
-          ) : (
-            <div className="w-full flex gap-3 items-center justify-between">
-              <Link
-                href="/dashboard"
-                className="w-full"
-                onClick={handleNavClick}
-              >
-                <Image
-                  src={pollsensei_new_logo}
-                  alt="Logo"
-                  className="w-[60%]"
-                />
-              </Link>
-
-              <Image
-                src={"/assets/sidebar/open.svg"}
-                alt="Close sidebar"
-                width={24}
-                height={24}
-                onClick={toogleMainSidebar}
-                className="cursor-pointer"
-              />
-            </div>
-          )}
-        </SidebarHeader>
-        <SidebarGroup className="pt-6 px-0">
-          <SidebarGroupContent>
-            <SidebarMenu
-              className={cn("gap-y-6", !open && "flex flex-col items-center")}
+          <SidebarContent className={cn("pt-4")}>
+            <SidebarHeader
+              className={cn(
+                "w-full items-center",
+                !open ? "flex justify-center" : "pl-6"
+              )}
             >
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title} className="px-4 relative">
-                  {isActive(item.url) && (
-                    <div className="bg-[#3734A9] w-[3.15px] h-[70%] absolute left-0 top-1/2 -translate-y-1/2" />
-                  )}
-                  <SidebarMenuButton
-                    asChild
-                    className={cn(
-                      "gap-4 h-10 px-3 rounded-xl",
-                      isActive(item.url) &&
-                        "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42]"
-                    )}
-                    isActive={isActive(item.url)}
+              {!open ? (
+                <div className="w-full flex flex-col gap-5 items-center justify-center">
+                  <Link
+                    href="/dashboard"
+                    className="w-fit -translate-x-0"
+                    onClick={handleNavClick}
                   >
-                    <Link href={item.url} onClick={handleNavClick}>
-                      <Image
-                        src={item.icon}
-                        alt={item.title}
-                        width={24}
-                        height={24}
-                        className={cn(isActive(item.url) && "brightness-200")}
-                      />
-                      <span
+                    <Image src={pollsensei_icon} alt="Logo" />
+                  </Link>
+
+                  <Image
+                    src={"/assets/sidebar/close.svg"}
+                    alt="Open sidebar"
+                    width={24}
+                    height={24}
+                    onClick={toogleMainSidebar}
+                    className="cursor-pointer hidden lg:flex"
+                  />
+                </div>
+              ) : (
+                <div className="w-full flex gap-3 items-center justify-between">
+                  <Link
+                    href="/dashboard"
+                    className="w-full"
+                    onClick={handleNavClick}
+                  >
+                    <Image
+                      src={pollsensei_new_logo}
+                      alt="Logo"
+                      className="w-[60%]"
+                    />
+                  </Link>
+
+                  <Image
+                    src={"/assets/sidebar/open.svg"}
+                    alt="Close sidebar"
+                    width={24}
+                    height={24}
+                    onClick={toogleMainSidebar}
+                    className="cursor-pointer"
+                  />
+                </div>
+              )}
+            </SidebarHeader>
+            <SidebarGroup className="pt-6 px-0">
+              <SidebarGroupContent>
+                <SidebarMenu
+                  className={cn(
+                    "gap-y-6",
+                    !open && "flex flex-col items-center"
+                  )}
+                >
+                  {items.map((item) => (
+                    <SidebarMenuItem key={item.title} className="px-4 relative">
+                      {isActive(item.url) && (
+                        <div className="bg-[#3734A9] w-[3.15px] h-[70%] absolute left-0 top-1/2 -translate-y-1/2" />
+                      )}
+                      <SidebarMenuButton
+                        asChild
                         className={cn(
-                          "text-foreground/50",
-                          isActive(item.url) && "text-white"
+                          "gap-4 h-10 px-3 rounded-xl",
+                          isActive(item.url) &&
+                            "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42]"
                         )}
+                        isActive={isActive(item.url)}
                       >
-                        {item.title}
-                      </span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+                        <Link href={item.url} onClick={handleNavClick}>
+                          <Image
+                            src={item.icon}
+                            alt={item.title}
+                            width={24}
+                            height={24}
+                            className={cn(
+                              isActive(item.url) && "brightness-200"
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              "text-foreground/50",
+                              isActive(item.url) && "text-white"
+                            )}
+                          >
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+      )}
+    </>
   );
 }

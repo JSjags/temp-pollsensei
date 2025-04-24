@@ -16,6 +16,7 @@ import {
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
 import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onContinue: () => void;
@@ -31,7 +32,7 @@ const Mobility_Travel: FC<Props> = ({
   setFormData,
 }) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
-
+  const pathname = usePathname();
   const {
     register,
     handleSubmit,
@@ -68,7 +69,9 @@ const Mobility_Travel: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
-      <ProgressBar skip={true} progress={87.5} onContinue={onContinue} />
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={true} progress={87.5} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack
@@ -90,29 +93,29 @@ const Mobility_Travel: FC<Props> = ({
             required
             error={errors.commute}
             disabled={isPending}
-            otherFieldName="otherCommute"
+            // otherFieldName="otherCommute"
             register={register}
           />
 
           <ControlledSelect
-            name="travel"
+            name="travelFrequency"
             control={control}
             options={travelOptions}
             placeholder="Select option"
             label="How often do you travel outside your city/town?"
             required
-            error={errors.travel}
+            error={errors.travelFrequency}
             disabled={isPending}
           />
 
           <ControlledSelect
-            name="vehicle"
+            name="vehicleOwnership"
             control={control}
             options={vehicleOwnershipOptions}
             placeholder="Select option"
             label="Do you own a vehicle?"
             required
-            error={errors.vehicle}
+            error={errors.vehicleOwnership}
             disabled={isPending}
           />
 
@@ -131,7 +134,11 @@ const Mobility_Travel: FC<Props> = ({
               type="submit"
               disabled={isPending}
             >
-              {isPending ? "Saving..." : "Next"}
+              {isPending
+                ? "Saving..."
+                : pathname === "/respondent-form"
+                ? "Next"
+                : "Save"}
             </Button>
           </div>
         </form>

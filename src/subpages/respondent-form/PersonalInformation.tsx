@@ -10,7 +10,7 @@ import {
   genderOptions,
   marriageStatusOptions,
   ageGroupOptions,
-  dependentsOptions,
+  childrenOptions,
 } from "@/data/respondent-object-data";
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
@@ -48,15 +48,15 @@ const PersonalInformation: FC<Props> = ({
     defaultValues: {
       firstName: firstName,
       lastName: lastName,
-      otherName: otherName,
+      // otherName: otherName,
       email: user?.email || "",
       phoneNumber: formData.phoneNumber || "",
       gender: formData.gender || "",
       maritalStatus: formData.maritalStatus || "",
       ageGroup: formData.ageGroup || "",
-      dependents: formData.dependents || "",
-      pets: formData.pets || [],
-      otherPet: formData.otherPet || "",
+      children: formData.children || "",
+      // pets: formData.pets || [],
+      // otherPet: formData.otherPet || "",
     },
   });
 
@@ -121,14 +121,14 @@ const PersonalInformation: FC<Props> = ({
             disabled={isPending}
           />
 
-          <FormInput
+          {/* <FormInput
             id="otherName"
             label="Other Name (Optional)"
             placeholder="Enter other name"
             register={register}
             error={errors.otherName}
             disabled={isPending}
-          />
+          /> */}
 
           <FormInput
             id="email"
@@ -186,17 +186,17 @@ const PersonalInformation: FC<Props> = ({
           />
 
           <ControlledSelect
-            name="dependents"
+            name="children"
             control={control}
-            options={dependentsOptions}
+            options={childrenOptions}
             placeholder="Select option"
-            label="Do you have children or dependents?"
-            error={errors.dependents}
+            label="Do you have children or children?"
+            error={errors.children}
             required
             disabled={isPending}
           />
 
-          <ControlledMultiSelect
+          {/* <ControlledMultiSelect
             name="pets"
             control={control}
             options={petOptions}
@@ -205,7 +205,7 @@ const PersonalInformation: FC<Props> = ({
             disabled={isPending}
             otherFieldName="otherPet"
             register={register}
-          />
+          /> */}
 
           <Button
             size="default"

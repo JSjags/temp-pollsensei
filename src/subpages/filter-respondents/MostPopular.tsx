@@ -23,6 +23,12 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const MostPopular = () => {
   const router = useRouter();
@@ -145,7 +151,7 @@ const MostPopular = () => {
             >
               <div className="flex items-center justify-start gap-2">
                 {Object.values(selectedCriteria[tab.value] || {}).some(
-                  (section) => section.length > 0
+                  (section: any) => section.values.length > 0
                 ) ? (
                   <IoMdCheckmarkCircle className="text-xl text-[#5B03B2]" />
                 ) : (
@@ -167,6 +173,38 @@ const MostPopular = () => {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/******* MOBILE DROPDOWN */}
+
+      <h1 className="block lg:hidden text-lg font-bold text-left mb-5">
+        Filter Respondents
+      </h1>
+
+      <Accordion type="single" collapsible className="w-full">
+        {tabs.map((tab) => (
+          <AccordionItem value={tab?.value} key={tab.id}>
+            <AccordionTrigger className="w-full h-auto block lg:hidden">
+              <Button
+                variant="outline"
+                size="default"
+                className="w-full flex items-center justify-start gap-2 active:outline-none bg-transparent border-0 border-b-0 border-[#898989] text-black text-sm"
+              >
+                {Object.values(selectedCriteria[tab.value] || {}).some(
+                  (section: any) => section.values.length > 0
+                ) ? (
+                  <IoMdCheckmarkCircle className="text-lg text-[#5B03B2]" />
+                ) : (
+                  <MdOutlineCircle className="text-lg text-[#5B03B2]" />
+                )}
+                <span className="text-[#4F5B67]">{tab.name}</span>
+              </Button>
+            </AccordionTrigger>
+            <AccordionContent className="shadow-lg shadow-[#A9A7A72E] w-full h-auto m-0 rounded-xl">
+              {tab.component}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </div>
   );
 };
