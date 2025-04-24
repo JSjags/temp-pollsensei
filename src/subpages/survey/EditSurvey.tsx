@@ -22,6 +22,7 @@ import {
   resetSurvey,
   updateSection,
   updateSurvey,
+  addSection,
 } from "@/redux/slices/survey.slice";
 import store from "@/redux/store";
 import PaginationBtn from "@/components/common/PaginationBtn";
@@ -147,6 +148,9 @@ const EditSurvey = () => {
   const [pendingNavigation, setPendingNavigation] = useState<
     (() => void) | null
   >(null);
+  const [isEditingSection, setIsEditingSection] = useState(false);
+  const [sectionTitle, setSectionTitle] = useState("");
+  const [sectionDescription, setSectionDescription] = useState("");
 
   const [surveyData, setSurveyData] = useState<SurveyData>({
     topic: "",
@@ -646,12 +650,97 @@ const EditSurvey = () => {
     router.push(url);
   };
 
+  const handleAddNewSection = () => {
+    const newSection = {
+      section_topic: `Section ${questions.length + 1}`,
+      section_description: "",
+      questions: [],
+    };
+
+    dispatch(addSection(newSection));
+    setCurrentSection(questions.length);
+    setIsEditingSection(true);
+    setSectionTitle(newSection.section_topic);
+    setSectionDescription(newSection.section_description);
+    toast.success("New section added successfully");
+  };
+
+  const handleSaveSection = () => {
+    const updatedSections = [...questions];
+    const currentSectionData = updatedSections[currentSection];
+
+    const updatedSection = {
+      ...currentSectionData,
+      section_topic: sectionTitle,
+      section_description: sectionDescription,
+    };
+
+    dispatch(
+      updateSection({ index: currentSection, newSection: updatedSection })
+    );
+    setIsEditingSection(false);
+    toast.success("Section updated successfully");
+  };
+
+  const handleSectionChange = (index: number) => {
+    setCurrentSection(index);
+    setIsEditingSection(false);
+  };
+
+  console.log(survey);
+
   return (
     <div className={`${theme} flex flex-col gap-5 w-full relative`}>
       <div className={`${theme} flex justify-between gap-10 w-full`}>
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-4 sm:px-0 lg:pl-10">
           {isNewSection ? (
             <div>
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-xl font-semibold">
+                    Section {currentSection + 1} of {questions.length}
+                  </h2>
+                  {isEditingSection ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={sectionTitle}
+                        onChange={(e) => setSectionTitle(e.target.value)}
+                        placeholder="Section Title"
+                        className="w-48"
+                      />
+                      <Input
+                        value={sectionDescription}
+                        onChange={(e) => setSectionDescription(e.target.value)}
+                        placeholder="Section Description"
+                        className="w-64"
+                      />
+                      <Button onClick={handleSaveSection}>Save</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditingSection(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSectionTitle(
+                          questions[currentSection]?.section_topic || ""
+                        );
+                        setSectionDescription(
+                          questions[currentSection]?.section_description || ""
+                        );
+                        setIsEditingSection(true);
+                      }}
+                    >
+                      Edit Section
+                    </Button>
+                  )}
+                </div>
+              </div>
+
               <SurveyHeader
                 logoUrl={surveyData.logo_url}
                 headerUrl={surveyData.header_url}
@@ -691,7 +780,6 @@ const EditSurvey = () => {
                   <Button
                     variant="outline"
                     className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                    // onClick={() => setAddMoreQuestion((prev) => !prev)}
                     disabled={generatingSingleSurvey}
                   >
                     {generatingSingleSurvey ? (
@@ -778,78 +866,58 @@ const EditSurvey = () => {
                     </span>
                     <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
                   </Button>
-                </div>
-                {/* {questions?.length > 1 && (
-                  <div className="flex w-full md:w-auto md:justify-end items-center">
-                    <PaginationBtn
-                      currentSection={currentSection}
-                      totalSections={questions.length}
-                      onNavigate={navigatePage}
-                    />
-                  </div>
-                )} */}
-              </div>
-              <WaitingMessagesModal
-                otherPossibleCondition={generatingSingleSurvey}
-                openModal={openModal}
-                setOpenModal={
-                  generatingSingleSurvey === false
-                    ? () => setOpenModal(false)
-                    : () => setOpenModal(true)
-                }
-              />
 
-              <div className="rounded-md flex flex-col justify-center w-full md:w-[16rem] overflow-visible py-5 text-center">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
                   <Button
-                    onClick={handleSurveyCreation}
-                    className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 w-full"
-                    disabled={isLoading}
+                    variant="outline"
+                    className="group relative rounded-full transition-all duration-200 border-purple-200 text-purple-500 hover:!text-purple-600 overflow-hidden"
+                    onClick={handleAddNewSection}
                   >
-                    <span className="group-hover:tracking-wider transition-all duration-200">
-                      {isLoading ? "Submitting" : "Continue"}
+                    <IoDocumentOutline className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
+                    <span className="group-hover:tracking-wide group-hover:text-purple-600 transition-all duration-200">
+                      Add Section
                     </span>
-                    {!isLoading && (
-                      <motion.div
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                        className="flex items-center"
-                      >
-                        <ArrowRight className="h-4 w-4" />
-                      </motion.div>
-                    )}
-                    {isLoading && (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="flex items-center"
-                      >
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      </motion.div>
-                    )}
-                    <motion.div
-                      className="absolute inset-0 bg-white"
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileHover={{ scale: 1, opacity: 0.1 }}
-                      transition={{ duration: 0.2 }}
-                    />
+                    <div className="absolute inset-0 bg-purple-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
                   </Button>
-                </motion.div>
+                </div>
               </div>
+
+              <div className="flex justify-between items-center mt-8 mb-4">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-lg font-medium">
+                    Section {currentSection + 1} of {questions.length}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      handleSectionChange(Math.max(0, currentSection - 1))
+                    }
+                    disabled={currentSection === 0}
+                    className="group relative rounded-full transition-all duration-200"
+                  >
+                    <span className="group-hover:tracking-wide transition-all duration-200">
+                      Previous Section
+                    </span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      handleSectionChange(
+                        Math.min(questions.length - 1, currentSection + 1)
+                      )
+                    }
+                    disabled={currentSection === questions.length - 1}
+                    className="group relative rounded-full transition-all duration-200"
+                  >
+                    <span className="group-hover:tracking-wide transition-all duration-200">
+                      Next Section
+                    </span>
+                  </Button>
+                </div>
+              </div>
+
               <WatermarkBanner className="mb-10" />
-              {/* <CreateNewSection /> */}
             </div>
           ) : (
             <CreateNewSection />
@@ -858,7 +926,6 @@ const EditSurvey = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
           <StyleEditor
             surveyData={survey as SurveyData}
             setSurveyData={setSurveyData}

@@ -83,8 +83,6 @@ const surveySlice = createSlice({
       };
       if (state.sections.length > 0) {
         state.sections[0].questions.push(newQuestion);
-      } else {
-        state.sections.push({ questions: [newQuestion] });
       }
     },
     updateSurvey: (
