@@ -8,6 +8,9 @@ export default function Shop() {
   const [page, setPage] = useState(1);
   const { data, isLoading } = useShopTransactionsHistory({ page });
   const paginationData = data?.pagination;
+
+  console.log(data?.transactions, 'Transactions');
+  
   return (
     <>
       <Analytics />

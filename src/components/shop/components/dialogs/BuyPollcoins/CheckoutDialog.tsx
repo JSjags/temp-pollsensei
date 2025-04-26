@@ -694,8 +694,8 @@
 //                 pollcoinsInt.toString()
 //               );
 //               handleStripePaymentConfirm(res.data.payment.client_secret);
-//             } 
-            
+//             }
+
 //             else if (res.data?.payment?.authorization_url) {
 //               // Handle Paystack redirect
 //               window.location.href = res.data.payment.authorization_url;
@@ -964,6 +964,7 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import { SuccessDialog } from "../SuccessDialog";
 
 // Initialize Stripe (you'll need to replace with your publishable key)
 const stripePromise = loadStripe(
@@ -1056,11 +1057,11 @@ function CheckoutDialog() {
     ? PaymentOptionsData.filter((opt) => opt.label !== "Stripe")
     : PaymentOptionsData;
 
-  useEffect(() => {
-    if (isNigeria && selectedOption === "Stripe") {
-      setSelectedOption("Card");
-    }
-  }, [isNigeria, selectedOption]);
+  // useEffect(() => {
+  //   if (isNigeria && selectedOption === "Stripe") {
+  //     setSelectedOption("Card");
+  //   }
+  // }, [isNigeria, selectedOption]);
 
   const {
     pollAmount,
@@ -1070,7 +1071,7 @@ function CheckoutDialog() {
     setPollStep,
     orderSummary,
   } = useShopStore();
-
+  const description = `You have purchased ${pollcoins} Pollcoins`;
   const txnOverview = [
     {
       label: "Amount of Pollcoins",
@@ -1138,10 +1139,10 @@ function CheckoutDialog() {
       setLoading(false);
       return;
     }
-    
+
     const pollcoinsInt = Number(pollcoins);
     setIsProcessingStripe(true);
-    
+
     try {
       const cardElement = elements.getElement(CardElement);
 
@@ -1150,23 +1151,29 @@ function CheckoutDialog() {
       }
 
       // Use createPaymentMethod first to get a payment method ID
-      const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: {
-          name: cardHolder,
-        },
-      });
+      const { error: paymentMethodError, paymentMethod } =
+        await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+          billing_details: {
+            name: cardHolder,
+          },
+        });
 
       if (paymentMethodError) {
-        throw new Error(paymentMethodError.message || "Failed to create payment method");
+        throw new Error(
+          paymentMethodError.message || "Failed to create payment method"
+        );
       }
 
       // Now use confirmCardPayment with the payment method ID
-      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: paymentMethod.id,
-        setup_future_usage: 'off_session',
-      });
+      const { error, paymentIntent } = await stripe.confirmCardPayment(
+        clientSecret,
+        {
+          payment_method: paymentMethod.id,
+          setup_future_usage: "off_session",
+        }
+      );
 
       if (error) {
         throw new Error(error.message || "Payment failed");
@@ -1174,24 +1181,37 @@ function CheckoutDialog() {
         // Payment successful
         toast.success("Payment successful!");
         localStorage.setItem("purchasedPollcoins", pollcoinsInt.toString());
-        window.location.href = `${window.location.origin}/shop?success=true`;
+
+        // Show success dialog instead of redirecting for Stripe payments
+        useShopStore.getState().setPollStep("success");
       } else if (paymentIntent?.status === "processing") {
-        toast.info("Payment processing. We'll update you when payment is received.");
+        toast.info(
+          "Payment processing. We'll update you when payment is received."
+        );
         localStorage.setItem("purchasedPollcoins", pollcoinsInt.toString());
+
+        // Show processing message in success dialog
+        useShopStore.getState().setPollStep("success");
       } else if (paymentIntent?.status === "requires_action") {
         // Handle 3D Secure or other authentication
-        const { error: actionError } = await stripe.handleCardAction(clientSecret);
+        const { error: actionError } = await stripe.handleCardAction(
+          clientSecret
+        );
         if (actionError) {
           throw new Error(actionError.message || "Authentication failed");
         } else {
           // After successful authentication, confirm again to complete payment
-          const { error: finalError } = await stripe.confirmCardPayment(clientSecret);
+          const { error: finalError } = await stripe.confirmCardPayment(
+            clientSecret
+          );
           if (finalError) {
             throw new Error(finalError.message || "Final confirmation failed");
           } else {
             toast.success("Payment successful!");
             localStorage.setItem("purchasedPollcoins", pollcoinsInt.toString());
-            window.location.href = `${window.location.origin}/shop?success=true`;
+
+            // Show success dialog instead of redirecting for Stripe payments
+            useShopStore.getState().setPollStep("success");
           }
         }
       } else {
@@ -1200,6 +1220,8 @@ function CheckoutDialog() {
       }
     } catch (error: any) {
       toast.error(error.message || "Payment failed");
+      console.log(error.message, "Stripe Error");
+
       localStorage.removeItem("purchasedPollcoins");
     } finally {
       setIsProcessingStripe(false);
@@ -1207,6 +1229,9 @@ function CheckoutDialog() {
     }
   };
 
+  {
+    /* <SuccessDialog successMessage={description} />; */
+  }
   const handleCheckout = async () => {
     setLoading(true);
 
@@ -1260,11 +1285,11 @@ function CheckoutDialog() {
 
       // Create payload based on payment gateway type
       let paymentPayload: PurchasePayload;
-
+      const currency = isNigeria ? "NGN" : "USD";
       if (paymentGateway === "stripe") {
         paymentPayload = {
           paymentGateway,
-          currency: "NGN",
+          currency: currency,
           orderReferenceId: orderSummary.referenceId,
           redirect_url: redirectUrl,
           // orderSummaryId: orderSummary._id // Assuming orderSummary has an ID field
@@ -1292,10 +1317,8 @@ function CheckoutDialog() {
                 "purchasedPollcoins",
                 pollcoinsInt.toString()
               );
-              handleStripePaymentConfirm('res.data.payment.client_secret');
-            } 
-            
-            else if (res.data?.payment?.authorization_url) {
+              handleStripePaymentConfirm(res.data.payment.client_secret);
+            } else if (res.data?.payment?.authorization_url) {
               // Handle Paystack redirect
               window.location.href = res.data.payment.authorization_url;
             } else {
@@ -1341,7 +1364,7 @@ function CheckoutDialog() {
             <Image src={LockIcon} alt="lock icon" />
           </div>
           <div className="flex items-center justify-between gap-2 border-b pb-4">
-            {paymentOptions.map((option) => (
+            {PaymentOptionsData.map((option) => (
               <PaymentOptions
                 {...option}
                 key={option.label}

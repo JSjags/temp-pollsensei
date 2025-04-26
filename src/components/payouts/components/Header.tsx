@@ -8,10 +8,17 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { PayoutDialog } from "./dialogs";
 import { usePayoutStore } from "../store/usePayoutStore";
+import { useUserBalance } from "@/components/shop/queries/useBalance";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNigerianBanks } from "../queries/useNigerianBanks";
 
 export function Header() {
   const user = useSelector((state: RootState) => state.user.user);
+  const { data, isLoading } = useUserBalance();
+  const { restrictedBalance } = data || {};
   const { redeemableCoins, threshold } = usePayoutStore();
+
+  
 
   return (
     <div className="flex md:items-center justify-between max-md:flex-col gap-5 max-md:px-5 ">
@@ -36,20 +43,25 @@ export function Header() {
             <div className="max-w-12 w-full">
               <Image src={PayoutCash} alt="money" />
             </div>
-            <div>
+            <div className="w-full">
               <p className="text-xs text-[#7A8699]">Redeemble Coins</p>
-              <h4 className="font-bold text-[1.75rem]">
-                {redeemableCoins} <span className="font-normal">Pollcoins</span>
-              </h4>
+              {isLoading ? (
+                <Skeleton className="h-7 w-full" />
+              ) : (
+                <h4 className="font-bold text-[1.75rem]">
+                  {restrictedBalance?.toLocaleString() || 0}{" "}
+                  <span className="font-normal">Pollcoins</span>
+                </h4>
+              )}
               <div className="flex items-center gap-2">
                 <div
                   className={cn(
                     "size-2 bg-[#05BF43] rounded-full animate-pulse",
-                    { "bg-red-500": redeemableCoins < threshold }
+                    { "bg-red-500": restrictedBalance < threshold }
                   )}
                 />
                 <p className="text-xs text-[#7A8699]">
-                  {redeemableCoins < threshold
+                  {restrictedBalance < threshold
                     ? "Below Threshold"
                     : "Above Threshold"}
                 </p>

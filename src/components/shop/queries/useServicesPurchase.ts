@@ -40,12 +40,6 @@ export const useCreditPurchase = (serviceType: string) => {
 
       return res.data;
     },
-    // onSuccess: (data) => {
-    //   if (data.success) {
-    //     fetchServicesBalance();
-    //     fetchUserBalance();
-    //   }
-    // },
 
     onSuccess: (data) => {
       if (data.success) {

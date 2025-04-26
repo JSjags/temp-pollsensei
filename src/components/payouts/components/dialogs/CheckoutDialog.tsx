@@ -8,6 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/new-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePayoutStore } from "@/components/payouts/store/usePayoutStore";
+import { Bank, useNigerianBanks } from "../../queries/useNigerianBanks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PayoutPayload, usePaystackPayout } from "@/lib/payout";
+import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
+import { toast } from "react-toastify";
 
 const PaymentOptionsData = [
   {
@@ -26,25 +37,28 @@ const PaymentOptionsData = [
 
 export function CheckoutDialog() {
   const [selectedOption, setSelectedOption] = useState<string | null>("Card");
-  const [cardHolder, setCardHolder] = useState("");
+  const [name, setName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCVV, setCardCVV] = useState("");
   const [mobileView, setMobileView] = useState<"details" | "overview">(
     "overview"
   );
-
+  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { coinAmount, coinQuantity, loading, setLoading, setStep } =
     usePayoutStore();
-
+  const { data: banks, isLoading } = useNigerianBanks();
+  const { mutate: paystackPayout, isPending: payoutLoading } =
+    usePaystackPayout();
+  const { data: locationData } = useGeoLocation();
+  const isNigeria = locationData?.isNigeria;
+  // console.log(banks, "Nigerian Banks");
   const txnOverview = [
     {
       label: "Amount of Pollcoins",
-      value: coinQuantity,
-    },
-    {
-      label: "Unit Price/coin",
-      value: 0.25,
+      value: coinQuantity.toLocaleString(),
     },
 
     {
@@ -55,23 +69,52 @@ export function CheckoutDialog() {
 
   // These are just for testing
   const resetLocalState = () => {
-    setCardHolder("");
+    setName("");
     setCardNumber("");
     setCardExpiry("");
     setCardCVV("");
     setSelectedOption("Card");
   };
-
+  const handleSelectChange = (bankCode: string) => {
+    const foundBank = banks?.find((bank) => bank.bank_code === bankCode);
+    if (foundBank) {
+      setSelectedBank(foundBank);
+      setSearchQuery("");
+    }
+  };
   const handleCheckout = () => {
     setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      setStep("success");
-      resetLocalState();
-    }, 5000);
+  
+    if (selectedOption === "Paystack" && selectedBank) {
+      const payoutData: PayoutPayload = {
+        account_name: name,
+        account_number: accountNumber,
+        bank_code: Number(selectedBank.bank_code),
+        payout_bank_id: Number(selectedBank.bank_code),
+        amount: Number(coinQuantity),
+      };
+  
+      paystackPayout(payoutData, {
+        onSuccess: (data) => {
+          setLoading(false);   // <-- add here
+          setStep("success");
+          resetLocalState();
+        },
+        onError: (error) => {
+          setLoading(false);   // <-- and also here
+          toast.error("Payout failed");
+          console.error("Payout failed:", error);
+        },
+      });
+    } else {
+      // Other payment methods
+      setTimeout(() => {
+        setLoading(false);
+        resetLocalState();
+      }, 5000);
+    }
   };
-
+  
   return (
     <Dialog.Body className="h-full mt-2.5 min-[441px]:min-h-[620px]">
       <div className="flex gap-14 h-full max-[440px]:flex-row-reverse">
@@ -102,96 +145,182 @@ export function CheckoutDialog() {
             ))}
           </div>
 
-          <div className="flex flex-col h-full">
-            <AnimatePresence mode="wait">
-              <motion.form
-                key="card-form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="flex flex-col gap-4 h-full"
-              >
-                <div>
-                  <label htmlFor="name" className="text-sm">
-                    Card Holder Name
-                  </label>
-                  <Input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Enter card holder name"
-                    className="mt-2 h-[54px]"
-                    value={cardHolder}
-                    onChange={(e) => {
-                      setCardHolder(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="number" className="text-sm">
-                    Card Number
-                  </label>
-                  <Input
-                    type="number"
-                    id="number"
-                    name="number"
-                    placeholder="Enter card number"
-                    className="mt-2 h-[54px]"
-                    value={cardNumber}
-                    onChange={(e) => {
-                      setCardNumber(e.target.value);
-                    }}
-                  />
-                </div>
-                <div className="flex w-full items-center gap-2.5 min-[440px]:mt-auto">
-                  <div className="w-1/2">
-                    <label htmlFor="expiry" className="text-sm">
-                      Card Expiry Date
+          {selectedOption !== "Stripe" && (
+            <div className="flex flex-col h-full">
+              <AnimatePresence mode="wait">
+                <motion.form
+                  key="card-form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="flex flex-col gap-4 h-full"
+                >
+                  <div>
+                    <label htmlFor="name" className="text-sm">
+                      {selectedOption === "Paystack"
+                        ? "Account Name"
+                        : "Card Holder Name"}
                     </label>
                     <Input
-                      type="number"
-                      id="expiry"
-                      name="expiry"
-                      placeholder="Enter CVV"
+                      type="text"
+                      id="name"
+                      name="name"
+                      placeholder={
+                        selectedOption === "Paystack"
+                          ? "Enter account name"
+                          : "Enter card holder name"
+                      }
                       className="mt-2 h-[54px]"
-                      value={cardExpiry}
+                      value={name}
                       onChange={(e) => {
-                        setCardExpiry(e.target.value);
+                        setName(e.target.value);
                       }}
                     />
                   </div>
-                  <div className="flex-1">
-                    <label htmlFor="number" className="text-sm">
-                      CVV
-                    </label>
-                    <Input
-                      type="number"
-                      id="cvv"
-                      name="cvv"
-                      placeholder="Enter CVV"
-                      className="mt-2 h-[54px]"
-                      value={cardCVV}
-                      onChange={(e) => {
-                        setCardCVV(e.target.value);
-                      }}
-                    />
-                  </div>
-                </div>
-              </motion.form>
-            </AnimatePresence>
-            <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
-              <Button
-                onClick={handleCheckout}
-                disabled={loading}
-                variant="gradient"
-                className="w-full rounded !h-12 gap-2 font-bold text-base"
-              >
-                {loading && <LoadingSpinner />}
-                {loading ? "Processing..." : "Checkout"}
-              </Button>
+                  {selectedOption !== "Paystack" && (
+                    <>
+                      <div>
+                        <label htmlFor="number" className="text-sm">
+                          Card Number
+                        </label>
+                        <Input
+                          type="number"
+                          id="number"
+                          name="number"
+                          placeholder="Enter card number"
+                          className="mt-2 h-[54px]"
+                          value={cardNumber}
+                          onChange={(e) => {
+                            setCardNumber(e.target.value);
+                          }}
+                        />
+                      </div>
+                      <div className="flex w-full items-center gap-2.5 min-[440px]:mt-auto">
+                        <div className="w-1/2">
+                          <label htmlFor="expiry" className="text-sm">
+                            Card Expiry Date
+                          </label>
+                          <Input
+                            type="number"
+                            id="expiry"
+                            name="expiry"
+                            placeholder="Enter CVV"
+                            className="mt-2 h-[54px]"
+                            value={cardExpiry}
+                            onChange={(e) => {
+                              setCardExpiry(e.target.value);
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label htmlFor="number" className="text-sm">
+                            CVV
+                          </label>
+                          <Input
+                            type="number"
+                            id="cvv"
+                            name="cvv"
+                            placeholder="Enter CVV"
+                            className="mt-2 h-[54px]"
+                            value={cardCVV}
+                            onChange={(e) => {
+                              setCardCVV(e.target.value);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {selectedOption === "Paystack" && (
+                    <>
+                      <div>
+                        <label htmlFor="number" className="text-sm">
+                          Account Number
+                        </label>
+                        <Input
+                          type="number"
+                          id="number"
+                          name="number"
+                          placeholder="Enter card number"
+                          className="mt-2 h-[54px]"
+                          value={accountNumber}
+                          onChange={(e) => {
+                            setAccountNumber(e.target.value);
+                          }}
+                        />
+                      </div>
+                      <div className="flex w-full items-center gap-2.5">
+                        <div className="w-full">
+                          <label htmlFor="bank" className="text-sm">
+                            Select Bank
+                          </label>
+                          <Select
+                            value={selectedBank?.bank_code}
+                            onValueChange={handleSelectChange}
+                          >
+                            <SelectTrigger className="mt-2 h-[54px] w-full">
+                              <SelectValue placeholder="Choose a bank" />
+                            </SelectTrigger>
+
+                            <SelectContent
+                              align="end"
+                              className="rounded-xl z-[10000000000000000] relative"
+                            >
+                              {/* Search Input */}
+                              <div className="px-2 py-1 fixed top-1 w-full z-40 left-0 right-0">
+                                <input
+                                  type="text"
+                                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-300"
+                                  placeholder="Search banks..."
+                                  value={searchQuery}
+                                  onChange={(e) =>
+                                    setSearchQuery(e.target.value)
+                                  }
+                                  autoFocus
+                                />
+                              </div>
+
+                              <div className="mt-12">
+                                {banks
+                                  ?.filter(
+                                    (bank) =>
+                                      bank.is_active &&
+                                      bank.bank_name
+                                        .toLowerCase()
+                                        .includes(searchQuery.toLowerCase())
+                                  )
+                                  .map((bank) => (
+                                    <SelectItem
+                                      key={bank.bank_code}
+                                      value={bank.bank_code}
+                                    >
+                                      {bank.bank_name}
+                                    </SelectItem>
+                                  ))}
+                              </div>
+                              {/* Filtered Banks List */}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </motion.form>
+              </AnimatePresence>
+              <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
+                <Button
+                  onClick={handleCheckout}
+                  disabled={loading || !selectedBank || !accountNumber || !name}
+                  variant="gradient"
+                  className="w-full rounded !h-12 gap-2 font-bold text-base"
+                >
+                  {loading && <LoadingSpinner />}
+                  {loading ? "Processing..." : "Checkout"}
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </motion.div>
 
         {/* Overview section  */}
@@ -220,8 +349,10 @@ export function CheckoutDialog() {
                   <p className="text-sm font-bold">{item.label}</p>
                   <p>
                     {item.label === "Amount of Pollcoins"
-                      ? item.value
-                      : `$${item.value}`}
+                      ? item.value.toLocaleString()
+                      : `${isNigeria ? "₦" : "$"}${Number(item.value).toFixed(
+                          2
+                        )}`}
                   </p>
                 </div>
               ))}
@@ -245,7 +376,7 @@ export function CheckoutDialog() {
             <div className="w-full flex items-center justify-between pt-4 mt-6">
               <p className="text-base font-bold">Total</p>
               <p className="text-base font-bold">
-                $
+                {isNigeria ? "₦" : "$"}
                 {txnOverview
                   .filter((item) => item.label !== "Amount of Pollcoins")
                   .reduce((acc, item) => acc + Number(item.value), 0)
@@ -288,6 +419,7 @@ export function CheckoutDialog() {
     </Dialog.Body>
   );
 }
+
 type PaymentOptionsProps = {
   label: string;
   src: string;

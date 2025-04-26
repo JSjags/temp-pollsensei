@@ -81,7 +81,7 @@ export function Analytics() {
 
     return {
       ...item,
-      value: matchingService?.credits || 0,
+      value: matchingService?.credits.toLocaleString() || 0,
     };
   });
 
@@ -105,7 +105,7 @@ export function Analytics() {
       value: unrestrictedBalance?.toLocaleString() || 0,
       icon: NonRedeemable,
       iconColor: "#D1D3FA",
-      bgColor: "#0A0E60",
+      bgColor: "#0053B8",
     },
   ];
   const surveys = [
@@ -253,7 +253,7 @@ export function Analytics() {
                   {item.label === "Redeemable Pollcoins" && (
                     <PayoutDialog>
                       <Button
-                        disabled={unrestrictedBalance === 0}
+                        disabled={restrictedBalance === 0 ||balanceLoading}
                         variant="gradient"
                         className="h-[29px]"
                       >

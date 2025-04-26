@@ -15,12 +15,15 @@ import { motion } from "framer-motion";
 import Slider, { Settings } from "react-slick";
 import { usePayoutStore } from "@/components/payouts/store/usePayoutStore";
 import { PayoutDialog } from "@/components/payouts/components/dialogs";
+import { useUserBalance } from "@/components/shop/queries/useBalance";
 
 
 
 export function Analytics() {
   const { redeemableCoins } = usePayoutStore();
-  const updatedAnalyticData = getAnalyticData(redeemableCoins);
+   const { data, isLoading } = useUserBalance();
+    const { restrictedBalance } = data || {};
+  const updatedAnalyticData = getAnalyticData(restrictedBalance);
 
   return (
     <div className="w-full">
@@ -74,7 +77,7 @@ function getAnalyticData(redeemableCoins: number) {
     },
     {
       label: "Redeemable Coins",
-      value: redeemableCoins, // Use dynamic value here
+      value: redeemableCoins.toLocaleString(),
       icon: RedeemCoins,
     },
     {

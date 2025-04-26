@@ -65,7 +65,7 @@
 // };
 
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import rawAxiosInstance from "./rawAxiosInstance";
 import { fetchUserBalance } from "@/services/api/getUserBalance";
 
@@ -101,6 +101,7 @@ type PurchaseResponse = {
 };
 
 export const usePollcoinPurchase = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: PurchasePayload) => {
       let requestPayload: Record<string, any>;
@@ -153,7 +154,7 @@ export const usePollcoinPurchase = () => {
     onSuccess: (data) => {
       if (data.success) {
         // Refetch the user balance after a successful purchase
-        fetchUserBalance();
+        queryClient.invalidateQueries({ queryKey: ["user-balance"] });
       }
     },
   });

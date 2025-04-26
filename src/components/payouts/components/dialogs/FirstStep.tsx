@@ -121,6 +121,10 @@ import { Input } from "@/components/ui/shadcn-input";
 import React, { useEffect } from "react";
 import { Dialog } from "@/components/ui/new-dialog";
 import { usePayoutStore } from "@/components/payouts/store/usePayoutStore";
+import { usePayoutConversionRate } from "../../queries/usePayoutConverionrate";
+import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useUserBalance } from "@/components/shop/queries/useBalance";
 
 export function FirstStep() {
   const {
@@ -134,20 +138,39 @@ export function FirstStep() {
     clearError,
     setStep,
   } = usePayoutStore();
-
+  const { data, isLoading } = usePayoutConversionRate();
+  const {
+    data: locationData,
+    isLoading: locationLoading,
+    isError: locationError,
+  } = useGeoLocation();
+  const isNigeria = locationData?.isNigeria;
   const COINS_PER_DOLLAR = 50;
   const leastPay = 50;
+  const { data: userBalance } = useUserBalance();
+  const { restrictedBalance = 0 } = userBalance || {};
 
   useEffect(() => {
-    if (coinQuantity) {
-      const calculatedAmount = (
-        parseFloat(coinQuantity) / COINS_PER_DOLLAR
+    if (!data || !coinQuantity) {
+      setCoinAmount("");
+      return;
+    }
+
+    const convertibleAmount = data.convertible_amount;
+    const rate = isNigeria
+      ? data.conversion_rate?.NGN
+      : data.conversion_rate?.USD;
+
+    if (convertibleAmount && rate && parseFloat(coinQuantity)) {
+      const coinToCash = (
+        (parseFloat(coinQuantity) / convertibleAmount) *
+        rate
       ).toFixed(2);
-      setCoinAmount(calculatedAmount);
+      setCoinAmount(coinToCash);
     } else {
       setCoinAmount("");
     }
-  }, [coinQuantity, setCoinAmount]);
+  }, [coinQuantity, data, isNigeria, setCoinAmount]);
 
   const validate = () => {
     const newErrors: { quantity?: string } = {};
@@ -164,7 +187,7 @@ export function FirstStep() {
   };
 
   const handleSubmit = () => {
-    if (redeemableCoins === 0) return;
+    if (restrictedBalance === 0) return;
     if (!validate()) return;
     setStep("checkout");
   };
@@ -185,7 +208,7 @@ export function FirstStep() {
               placeholder="Enter Amount of Coins"
               className="mt-2 h-[54px]"
               value={coinQuantity}
-              disabled={redeemableCoins === 0}
+              disabled={restrictedBalance === 0}
               onChange={(e) => {
                 setCoinQuantity(e.target.value);
                 if (errors.quantity) clearError("quantity");
@@ -199,15 +222,29 @@ export function FirstStep() {
                 You currently have no redeemable coins.
               </p>
             )}
-            <p className="mt-1 text-xs">
-              Conversion rate: {COINS_PER_DOLLAR} coins = $1
-            </p>
+
+            {isLoading ? (
+              <Skeleton className="h-3 w-[50%] mt-2" />
+            ) : (
+              <p className="mt-1 text-xs">
+                Conversion rate: {data?.convertible_amount} coins ={" "}
+                {isNigeria
+                  ? `₦${data?.conversion_rate?.NGN}`
+                  : `$${data?.conversion_rate?.USD}`}
+              </p>
+            )}
           </div>
 
           <div className="mt-4 flex items-center w-full justify-between h-[54px] border rounded-md bg-muted/50">
             <div className="h-[54px] flex items-center justify-center min-w-[90px] border-r px-3">
               <p className="text-sm text-muted-foreground">
-                Amount in cash ($)
+                {locationLoading ? (
+                  <Skeleton className="h-3 w-[50%] mt-2" />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Amount in cash ({isNigeria ? "₦" : "$"})
+                  </p>
+                )}
               </p>
             </div>
 
@@ -221,7 +258,10 @@ export function FirstStep() {
 
           <div className="mt-4 rounded-[10px] bg-[#F7F8FB] w-full py-1.5 px-2.5">
             <p className="text-[#898989] text-xs">
-              NB: The least payout amount is ${leastPay.toFixed(2)}
+              NB: The least payout amount is{" "}
+              {isNigeria
+                ? `₦${data?.conversion_rate?.NGN}`
+                : `$${data?.conversion_rate?.USD}`}
             </p>
           </div>
         </div>
@@ -232,8 +272,11 @@ export function FirstStep() {
           onClick={handleSubmit}
           disabled={
             !coinQuantity ||
-            parseFloat(coinAmount) < leastPay ||
-            redeemableCoins === 0
+            restrictedBalance === 0 ||
+            parseFloat(coinAmount || "0") <
+              (isNigeria
+                ? parseFloat(data?.conversion_rate?.NGN || "0")
+                : parseFloat(data?.conversion_rate?.USD || "0"))
           }
           variant="gradient"
           className="w-full rounded mt-12 max-[441px]:!h-12"

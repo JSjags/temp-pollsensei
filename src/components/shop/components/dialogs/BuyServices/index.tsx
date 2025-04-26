@@ -46,10 +46,9 @@ export function BuyServicesDialog(props: BuyDialogProps) {
     useShopStore();
   const description = `You have purchased ${credit} ${title}`;
   const { data } = useUserBalance();
-  const { unrestrictedBalance = 0 } = data || {};
+  const { restrictedBalance = 0 } = data || {};
 
   const pollcoinRequired = credit ? parseFloat(credit) * pricePerCredit : 0;
-console.log(credit, 'Credit');
 
   const hasValidCredits =
     credit !== "" &&
@@ -57,7 +56,7 @@ console.log(credit, 'Credit');
     pollcoinRequired >= minimumPurchase;
 
   const isBalanceInsufficient =
-    hasValidCredits && pollcoinRequired > unrestrictedBalance;
+    hasValidCredits && pollcoinRequired > restrictedBalance;
 
   useEffect(() => {
     if (credit) {

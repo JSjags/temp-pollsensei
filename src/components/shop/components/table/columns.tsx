@@ -4,9 +4,12 @@ import { ColumnHeader } from "@/components/ui/table/header";
 import { HistoryStatus, HistoryType, TransactionHistory } from "../../types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 
 export function makeTransactionHistoryColumns() {
   const columns = createColumnHelper<TransactionHistory>();
+  const { data: locationData } = useGeoLocation();
+  const isNigeria = locationData?.isNigeria;
 
   /* -------------------------------------------------------------------------------------------------
    * Transaction Id column
@@ -92,7 +95,7 @@ export function makeTransactionHistoryColumns() {
           className={cn(
             "bg-[#FFDFE080] text-[#BF0508] min-w-[100px] py-1 flex items-center justify-center rounded-full",
             {
-              "bg-[#D3FAEC]/60 text-[#069662]": type === "Credit",
+              "bg-[#D3FAEC]/60 text-[#069662]": type === "credit",
             }
           )}
         >
@@ -164,8 +167,9 @@ export function makeTransactionHistoryColumns() {
       </div>
     ),
     cell: ({ getValue, row }) => {
-      const amount = getValue();
+      const amount = getValue().toLocaleString();
       const description = row.original.details?.description?.toLowerCase() || "";
+
   
       let displayValue = `$${amount}`; // default
       if (description.includes("purchase") && description.includes("credits")) {
