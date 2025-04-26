@@ -32,9 +32,15 @@ const Housing_Living: FC<Props> = ({ tab }) => {
   type FormData = z.infer<typeof filterHousingAndLivingSchema>;
 
   useEffect(() => {
-    setValue("living_condition", selectedCriteria.living_condition || []);
-    setValue("living_arrangement", selectedCriteria.living_arrangement || []);
-    setValue("household", selectedCriteria.household || []);
+    setValue(
+      "living_condition",
+      selectedCriteria.living_condition?.values || []
+    );
+    setValue(
+      "living_arrangement",
+      selectedCriteria.living_arrangement?.values || []
+    );
+    setValue("household", selectedCriteria.household?.values || []);
   }, [tab, selectedCriteria, setValue]);
 
   return (

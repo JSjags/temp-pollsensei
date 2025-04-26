@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { FaArrowRightLong } from "react-icons/fa6";
 import ActivityCard from "@/components/earn/ActivityCard";
@@ -27,12 +27,32 @@ import Redeemable from "@/components/shop/components/dialogs/Redeemable";
 import { useRouter } from "next/navigation";
 import SurveyFormDialog from "@/subpages/earn/SurveyFormDialog";
 import BannerNote from "@/components/earn/BannerNote";
+import Cookies from "js-cookie";
+import { fetchUnrestrictedBalance } from "@/services/api/apiRequest";
+import { useQuery } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Earn = () => {
   const router = useRouter();
-  const [streakDays, setStreakDays] = useState<number>(0);
-  const [currentDay, setCurrentDay] = useState<number>(0);
-  const [claimedDays, setClaimedDays] = useState<number[]>([]);
+  const streak = Cookies.get("streak");
+  const [unrestrictedBalance, setUnrestrictedBalance] = useState<number>(0);
+  const [activitiesCompleted, setActivitiesCompleted] = useState<number>(0);
+  const accessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
+
+  const { data: balance, isLoading } = useQuery({
+    queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], accessToken],
+    queryFn: () => fetchUnrestrictedBalance(accessToken),
+    enabled: !!accessToken,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  useEffect(() => {
+    setUnrestrictedBalance(balance?.unrestrictedBalance);
+  }, [balance]);
 
   const activities = [
     {
@@ -78,7 +98,7 @@ const Earn = () => {
     (state: RootState) => state.earnDialogSlice
   );
 
-  const handleActivityClick = (buttonText: string) => {
+  const handleActivityClick = async (buttonText: string) => {
     if (buttonText === "Complete Survey") {
       dispatch(openSurveyTabs());
     } else if (buttonText === "Watch ads") {
@@ -104,7 +124,11 @@ const Earn = () => {
             <div className="flex gap-1 items-center">
               <Image src={stakedCoins} width={30} height={30} alt="Coins" />
               <h1 className="text-[32px] md:text-[42px] font-bold text-white">
-                5260
+                {isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  unrestrictedBalance
+                )}
               </h1>
             </div>
             <p className="text-xs lg:text-sm text-white/80">
@@ -115,7 +139,7 @@ const Earn = () => {
           <div className="flex flex-col lg:flex-row items-center gap-5 h-[120px] lg:h-auto">
             <div className="flex flex-col items-center">
               <h1 className="text-[32px] md:text-[42px] font-bold text-white">
-                10
+                {activitiesCompleted}
               </h1>
               <p className="text-xs lg:text-sm text-white/80">
                 Activities completed
@@ -190,23 +214,16 @@ const Earn = () => {
                 <p className="text-[#453951] text-xs">
                   You have logged in for{" "}
                   <span className="font-bold text-[13px]">
-                    {streakDays <= 1
-                      ? `${streakDays} day`
-                      : `${streakDays} days`}
+                    {streak && Number(streak) <= 1
+                      ? `${streak} day`
+                      : `${streak} days`}
                   </span>{" "}
                   straight
                 </p>
               </div>
             </div>
 
-            <DailyLoginCard
-              currentDay={currentDay}
-              setCurrentDay={setCurrentDay}
-              claimedDays={claimedDays}
-              setClaimedDays={setClaimedDays}
-              streak={streakDays}
-              setStreak={setStreakDays}
-            />
+            <DailyLoginCard />
           </div>
         </div>
         <div className="w-full h-auto flex flex-col gap-5">

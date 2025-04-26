@@ -32,9 +32,15 @@ const Health_Lifestyle: FC<Props> = ({ tab }) => {
   type FormData = z.infer<typeof filterHealthAndLifestyleSchema>;
 
   useEffect(() => {
-    setValue("health", selectedCriteria.health || []);
-    setValue("health_insurance", selectedCriteria.health_insurance || []);
-    setValue("health_condition", selectedCriteria.health_condition || []);
+    setValue("health", selectedCriteria.health?.values || []);
+    setValue(
+      "health_insurance",
+      selectedCriteria.health_insurance?.values || []
+    );
+    setValue(
+      "health_condition",
+      selectedCriteria.health_condition?.values || []
+    );
   }, [tab, selectedCriteria, setValue]);
 
   return (

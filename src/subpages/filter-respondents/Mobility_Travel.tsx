@@ -37,9 +37,9 @@ const Mobility_Travel: FC<Props> = ({ tab }) => {
   type FormData = z.infer<typeof filterMobilityAndTravelSchema>;
 
   useEffect(() => {
-    setValue("commute", selectedCriteria.commute || []);
-    setValue("travel", selectedCriteria.travel || []);
-    setValue("vehicle", selectedCriteria.vehicle || []);
+    setValue("commute", selectedCriteria.commute?.values || []);
+    setValue("travel", selectedCriteria.travel?.values || []);
+    setValue("vehicle", selectedCriteria.vehicle?.values || []);
   }, [tab, selectedCriteria, setValue]);
 
   const onSubmit = (data: FormData) => {

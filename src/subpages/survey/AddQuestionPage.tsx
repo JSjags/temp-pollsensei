@@ -45,7 +45,6 @@ import {
 import store from "@/redux/store";
 import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
 import MatrixQuestionEdit from "@/components/survey/MatrixQuestionEdit";
-
 import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import ShortTextQuestion from "@/components/survey/LongTextQuestion";
 import SingleChoiceQuestion from "@/components/survey/SingleChoiceQuestion";
@@ -73,13 +72,6 @@ import { X } from "lucide-react";
 import { SurveyData } from "./EditSubmittedSurvey";
 import { cn } from "@/lib/utils";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
-import { RxCardStack } from "react-icons/rx";
-import { Spinner } from "@/components/loaders/page-loaders/AnalysisPageLoader";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { Question } from "@/types/survey";
 import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
 import TextEditor from "@/components/reusable/TextEditor";

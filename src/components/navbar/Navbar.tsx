@@ -62,6 +62,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { LuMenu } from "react-icons/lu";
+import { RxCheckCircled, RxCrossCircled } from "react-icons/rx";
 
 interface Notification {
   _id: string;
@@ -198,6 +199,11 @@ const Navbar = () => {
   };
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
+
+  const isBecomeRespondentSurveyCompleted = useSelector(
+    (state: RootState) =>
+      state.becomePaidRespondentSlice.isBecomeRespondentSurveyCompleted
+  );
 
   // console.log(notifications?.data);
 
@@ -414,9 +420,21 @@ const Navbar = () => {
                     <p className="text-xs leading-none text-muted-foreground">
                       {(user as any)?.email}
                     </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      Admin
-                    </p>
+                    <div className="w-full flex items-center justify-between">
+                      <p className="text-xs leading-none text-muted-foreground">
+                        Admin
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <p className="text-xs leading-none text-muted-foreground">
+                          Paid Respondent
+                        </p>
+                        {isBecomeRespondentSurveyCompleted ? (
+                          <RxCheckCircled className="text-lg text-[green]" />
+                        ) : (
+                          <RxCrossCircled className="text-lg text-[red]" />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

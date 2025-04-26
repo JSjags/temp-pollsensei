@@ -3,9 +3,9 @@ export type HistoryStatus = "Completed" | "Pending" | "Failed";
 
 export type TransactionHistory = {
   _id: string;
-  transactionId: string;
+  transactionId: number;
   date: Date;
-  timestamp: number; 
+  timestamp: number;
   type: HistoryType;
   status: HistoryStatus;
   category: string;
@@ -27,7 +27,6 @@ export type TransactionHistory = {
 //     description?: string;
 //   };
 // };
-
 
 export type OrderSummaryPayload = {
   currency: "NGN" | "USD";

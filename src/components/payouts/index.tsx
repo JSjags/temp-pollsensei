@@ -9,10 +9,7 @@ export function PayoutPage() {
     <>
       <Analytics />
       <div className="max-md:px-5 ">
-        <PayoutsHistoryTable
-          payoutData={[]}
-          isHistoryLoading={false}
-        />
+        <PayoutsHistoryTable payoutData={[]} isHistoryLoading={false} />
       </div>
     </>
   );
@@ -24,6 +21,8 @@ function generateMockTransaction(id: number): PayoutTransaction {
   const date = new Date(now.getTime() - randomOffset);
 
   return {
+    _id: id.toString(),
+    category: "some category",
     transactionId: id,
     date,
     details: [

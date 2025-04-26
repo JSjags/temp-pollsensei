@@ -21,12 +21,14 @@ const SelectCriteria = () => {
             <TabsTrigger
               value="mostPopular"
               className="w-fit text-[#333333] text-sm lg:text-base border-2 border-transparent data-[state=active]:border-[#5B03B2] bg-[#F1EFF4] data-[state=active]:bg-[#E6D7F466] text-center rounded-full p-2 py-1"
+              disabled
             >
               Most Popular
             </TabsTrigger>
             <TabsTrigger
               value="recentlyUsed"
               className="w-fit text-[#333333] text-sm lg:text-base border-2 border-transparent data-[state=active]:border-[#5B03B2] bg-[#F1EFF4] data-[state=active]:bg-[#E6D7F466] text-center rounded-full p-2 py-1"
+              disabled
             >
               Recently Used
             </TabsTrigger>

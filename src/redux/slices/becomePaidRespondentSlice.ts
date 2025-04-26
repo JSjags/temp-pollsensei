@@ -1,23 +1,32 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SurveyState {
-  isSurveyCompleted: boolean;
+  isBecomeRespondentSurveyCompleted: boolean;
+  isPhoneVerified: boolean;
 }
 
 const initialState: SurveyState = {
-  isSurveyCompleted: false,
+  isBecomeRespondentSurveyCompleted: false,
+  isPhoneVerified: false,
 };
 
 export const becomePaidRespondentSlice = createSlice({
   name: "becomePaidRespondentSlice",
   initialState,
   reducers: {
-    setSurveyCompleted: (state, action: PayloadAction<boolean>) => {
-      state.isSurveyCompleted = action.payload;
+    setIsPhoneVerified: (state, action: PayloadAction<boolean>) => {
+      state.isPhoneVerified = action.payload;
+    },
+    setBecomePaidRespondentSurveyCompleted: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.isBecomeRespondentSurveyCompleted = action.payload;
     },
   },
 });
 
-export const { setSurveyCompleted } = becomePaidRespondentSlice.actions;
+export const { setIsPhoneVerified, setBecomePaidRespondentSurveyCompleted } =
+  becomePaidRespondentSlice.actions;
 
 export default becomePaidRespondentSlice.reducer;

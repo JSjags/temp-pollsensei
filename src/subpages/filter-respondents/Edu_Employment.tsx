@@ -40,11 +40,17 @@ const Edu_Employment: FC<Props> = ({ tab }) => {
   type FormData = z.infer<typeof filterEducationAndEmploymentSchema>;
 
   useEffect(() => {
-    setValue("education_level", selectedCriteria.education_level || []);
-    setValue("employment_status", selectedCriteria.employment_status || []);
-    setValue("employment_industry", selectedCriteria.employment_industry || []);
-    setValue("job_role", selectedCriteria.job_role || []);
-    setValue("tech_savvy", selectedCriteria.tech_savvy || []);
+    setValue("education_level", selectedCriteria.education_level?.values || []);
+    setValue(
+      "employment_status",
+      selectedCriteria.employment_status?.values || []
+    );
+    setValue(
+      "employment_industry",
+      selectedCriteria.employment_industry?.values || []
+    );
+    setValue("job_role", selectedCriteria.job_role?.values || []);
+    setValue("tech_savvy", selectedCriteria.tech_savvy?.values || []);
   }, [tab, selectedCriteria, setValue]);
 
   return (

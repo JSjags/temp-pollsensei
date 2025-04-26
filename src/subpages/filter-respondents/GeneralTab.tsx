@@ -1,4 +1,3 @@
-"use client";
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FiUser } from "react-icons/fi";
@@ -27,9 +26,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
 import { Button } from "@/components/ui/button";
-import { IoChevronDownOutline, IoClose } from "react-icons/io5";
 
 const GeneralTab = () => {
   const [activeTab, setActiveTab] = useState<string>("personalInfo");
@@ -145,8 +142,6 @@ const GeneralTab = () => {
     },
   ];
 
-  // console.log({ activeTab, selectedCriteria });
-
   return (
     <div className="w-full h-full flex flex-col gap-5">
       <Tabs
@@ -157,13 +152,13 @@ const GeneralTab = () => {
         <TabsList className="flex flex-col gap-4 items-center justify-start w-[40%] min-h-[60vh] bg-[#F2F2F8] rounded-xl py-5 px-2">
           {tabs.map((tab) => (
             <TabsTrigger
-              key={tab?.id}
-              value={`${tab?.value}`}
+              key={tab.id}
+              value={`${tab.value}`}
               className="bg-transparent border-l-2 border-transparent data-[state=active]:border-[#5B03B2] data-[state=active]:bg-white data-[state=active]:shadow-sm shadow-black w-full flex items-center justify-between"
             >
               <div className="flex items-center justify-start gap-2">
                 {Object.values(selectedCriteria[tab.value] || {}).some(
-                  (section) => section.length > 0
+                  (section: any) => section.values.length > 0
                 ) ? (
                   <IoMdCheckmarkCircle className="text-xl text-[#5B03B2]" />
                 ) : (
@@ -178,21 +173,18 @@ const GeneralTab = () => {
         <div className="relative w-full">
           {tabs.map((tab) => (
             <TabsContent
-              key={tab?.id}
-              value={`${tab?.value}`}
+              key={tab.id}
+              value={`${tab.value}`}
               forceMount
               className={`lg:bg-white lg:shadow-lg shadow-[#A9A7A72E] w-full h-full lg:h-auto m-0 rounded-xl lg:p-5 overflow-y-auto absolute top-0 left-0 ${
                 activeTab === tab.value ? "block" : "hidden"
               }`}
             >
-              {/* {tab?.component} */}
               {React.cloneElement(tab.component, { tab: activeTab })}
             </TabsContent>
           ))}
         </div>
       </Tabs>
-
-      {/******* MOBILE DROPDOWN */}
 
       <h1 className="block lg:hidden text-lg font-bold text-left mb-5">
         Filter Respondents
@@ -200,15 +192,15 @@ const GeneralTab = () => {
 
       <Accordion type="single" collapsible className="w-full">
         {tabs.map((tab) => (
-          <AccordionItem value={tab?.value} key={tab.id}>
-            <AccordionTrigger className="w-full h-auto">
+          <AccordionItem value={tab.value} key={tab.id}>
+            <AccordionTrigger className="w-full h-auto block lg:hidden">
               <Button
                 variant="outline"
                 size="default"
                 className="w-full flex items-center justify-start gap-2 active:outline-none bg-transparent border-0 border-b-0 border-[#898989] text-black text-sm"
               >
                 {Object.values(selectedCriteria[tab.value] || {}).some(
-                  (section) => section.length > 0
+                  (section: any) => section.values.length > 0
                 ) ? (
                   <IoMdCheckmarkCircle className="text-lg text-[#5B03B2]" />
                 ) : (

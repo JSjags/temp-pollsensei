@@ -33,9 +33,9 @@ export interface SurveyState {
   description: string;
   sections: Section[];
   theme: string;
-  header_text: TextStyle | null;
-  question_text: TextStyle | null;
-  body_text: TextStyle | null;
+  header_text: TextStyle;
+  question_text: TextStyle;
+  body_text: TextStyle;
   color_theme: string;
   logo_url: File | string | null;
   header_url: File | string | null;

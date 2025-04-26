@@ -16,6 +16,7 @@ import {
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
 import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onContinue: () => void;
@@ -31,7 +32,7 @@ const Housing_Living: FC<Props> = ({
   setFormData,
 }) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
-
+  const pathname = usePathname();
   const {
     register,
     handleSubmit,
@@ -68,7 +69,9 @@ const Housing_Living: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
-      <ProgressBar skip={true} progress={75} onContinue={onContinue} />
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={true} progress={75} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack
@@ -84,39 +87,37 @@ const Housing_Living: FC<Props> = ({
           onSubmit={handleSubmit(handleContinue)}
         >
           <ControlledSelect
-            name="living_arrangement"
+            name="livingArrangement"
             control={control}
             options={livingConditionOptions}
             placeholder="Select option"
             label="What is your current living arrangement?"
             required
-            error={errors.living_arrangement}
+            error={errors.livingArrangement}
             disabled={isPending}
-            otherFieldName="otherLivingArrangement"
             register={register}
           />
 
           <ControlledSelect
-            name="home_status"
+            name="homeOwnership"
             control={control}
             options={livingArrangementOptions}
             placeholder="Select option"
             label="Do you own or rent your home?"
             required
-            error={errors.home_status}
+            error={errors.homeOwnership}
             disabled={isPending}
-            otherFieldName="otherHomeStatus"
             register={register}
           />
 
           <ControlledSelect
-            name="household"
+            name="householdSize"
             control={control}
             options={householdNumbersOptions}
             placeholder="Select option"
             label="How many people live in your household?"
             required
-            error={errors.household}
+            error={errors.householdSize}
             disabled={isPending}
           />
 
@@ -135,7 +136,11 @@ const Housing_Living: FC<Props> = ({
               type="submit"
               disabled={isPending}
             >
-              {isPending ? "Saving..." : "Next"}
+              {isPending
+                ? "Saving..."
+                : pathname === "/respondent-form"
+                ? "Next"
+                : "Save"}
             </Button>
           </div>
         </form>

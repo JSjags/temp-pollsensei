@@ -1,13 +1,14 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { TwitterPicker } from "react-color";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useAddSurveyHeaderMutation } from "@/services/survey.service";
 import {
-  saveBodyText,
-  saveColorTheme,
   saveHeaderText,
   saveQuestionText,
+  saveBodyText,
+  saveColorTheme,
 } from "@/redux/slices/survey.slice";
 import ThemeSelector from "@/components/style-editor/ThemeSelector";
 import FontSelector from "@/components/style-editor/FontSelector";
@@ -53,67 +54,48 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
   const headerUrl = useSelector(
     (state: RootState) => state?.survey?.header_url
   );
+  const headerText = useSelector(
+    (state: RootState) => state.survey.header_text
+  );
+  const questionText = useSelector(
+    (state: RootState) => state.survey.question_text
+  );
+  const bodyText = useSelector((state: RootState) => state.survey.body_text);
   const colorTheme = useSelector(
-    (state: RootState) => state?.survey?.color_theme
+    (state: RootState) => state.survey.color_theme
   );
 
-  const [headerFont, setHeaderFont] = useState(surveyData?.header_text);
-  const [questionFont, setQuestionFont] = useState(surveyData?.question_text);
-  const [bodyFont, setBodyFont] = useState(surveyData?.body_text);
+  const [headerFont, setHeaderFont] = useState(headerText);
+  const [questionFont, setQuestionFont] = useState(questionText);
+  const [bodyFont, setBodyFont] = useState(bodyText);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
   const [color, setColor] = useState(
     surveyData?.color_theme || colorTheme || "#ff5722"
   );
 
-  // console.log(surveyData);
-
-  // Update state when props change
   useEffect(() => {
-    setHeaderFont(surveyData?.header_text);
-    setQuestionFont(surveyData?.question_text);
-    setBodyFont(surveyData?.body_text);
-    setColor(surveyData?.color_theme || colorTheme || "#ff5722");
-  }, [surveyData, colorTheme]);
+    setHeaderFont(headerText);
+    setQuestionFont(questionText);
+    setBodyFont(bodyText);
+    setColor(colorTheme);
+  }, [headerText, questionText, bodyText, colorTheme]);
 
   useEffect(() => {
     dispatch(saveHeaderText(headerFont));
-    if (setSurveyData) {
-      setSurveyData((prev: any) => ({
-        ...prev,
-        // header_text: headerFont,
-      }));
-    }
-  }, [headerFont, dispatch, setSurveyData]);
+  }, [headerFont, dispatch]);
 
   useEffect(() => {
     dispatch(saveQuestionText(questionFont));
-    if (setSurveyData) {
-      setSurveyData((prev: any) => ({
-        ...prev,
-        // question_text: questionFont,
-      }));
-    }
-  }, [questionFont, dispatch, setSurveyData]);
+  }, [questionFont, dispatch]);
 
   useEffect(() => {
     dispatch(saveBodyText(bodyFont));
-    if (setSurveyData) {
-      setSurveyData((prev: any) => ({
-        ...prev,
-        // body_text: bodyFont,
-      }));
-    }
-  }, [bodyFont, dispatch, setSurveyData]);
+  }, [bodyFont, dispatch]);
 
   useEffect(() => {
-    if (setSurveyData) {
-      setSurveyData((prev: any) => ({
-        ...prev,
-        // color_theme: color,
-      }));
-    }
-  }, [color, setSurveyData]);
+    dispatch(saveColorTheme(color));
+  }, [color, dispatch]);
 
   return (
     <div className="style-editor bg-white h-full flex flex-col">
@@ -121,10 +103,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
         <h2 className="px-10 font-bold">Style Editor</h2>
       </div>
 
-      <ThemeSelector
-        initialTheme={surveyData?.theme}
-        setSurveyData={setSurveyData}
-      />
+      <ThemeSelector />
 
       <div className="text-style px-10 border-b py-5">
         <h4 className="font-bold">Text Style</h4>
@@ -135,7 +114,6 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
           setFont={setHeaderFont}
           fontOptions={fontOptions}
           sizeOptions={sizeOptions}
-          setSurveyData={setSurveyData}
         />
         <FontSelector
           label="Question"
@@ -144,7 +122,6 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
           setFont={setQuestionFont}
           fontOptions={fontOptions}
           sizeOptions={sizeOptions}
-          setSurveyData={setSurveyData}
         />
         <FontSelector
           label="Body text"
@@ -153,7 +130,6 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
           setFont={setBodyFont}
           fontOptions={fontOptions}
           sizeOptions={sizeOptions}
-          setSurveyData={setSurveyData}
         />
       </div>
 
@@ -162,10 +138,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
         <div className="pt-5 w-full">
           <ColorPicker
             value={color}
-            onChange={(newColor) => {
-              setColor(newColor);
-              dispatch(saveColorTheme(newColor));
-            }}
+            onChange={(newColor) => setColor(newColor)}
           />
         </div>
       </div>
