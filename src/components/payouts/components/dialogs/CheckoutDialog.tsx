@@ -16,9 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PayoutPayload, usePaystackPayout } from "@/lib/payout";
+import {
+  PayoutPayload,
+  usePaystackPayout,
+  usePaystackPreviousPayoutBank,
+} from "@/lib/payout";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 import { toast } from "react-toastify";
+import { usePreviousPayoutBank } from "../../queries/usePreviousPayoutBank";
 
 const PaymentOptionsData = [
   {
@@ -52,13 +57,17 @@ export function CheckoutDialog() {
   const { data: banks, isLoading } = useNigerianBanks();
   const { mutate: paystackPayout, isPending: payoutLoading } =
     usePaystackPayout();
+  const { mutate: previousPaystackPayout, isPending: previousPayoutLoading } =
+    usePaystackPreviousPayoutBank();
+  const { data: previousBank } = usePreviousPayoutBank();
+  const hasPreviousBank = previousBank?.data?.length > 0;
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
-  // console.log(banks, "Nigerian Banks");
+  const isProcessing = loading || payoutLoading;
   const txnOverview = [
     {
       label: "Amount of Pollcoins",
-      value: coinQuantity.toLocaleString(),
+      value: coinQuantity,
     },
 
     {
@@ -82,39 +91,106 @@ export function CheckoutDialog() {
       setSearchQuery("");
     }
   };
+
   const handleCheckout = () => {
+    // Validate form fields
+    if (
+      !name.trim() ||
+      name
+        .trim()
+        .split(" ")
+        .filter((part) => part.length > 0).length < 2
+    ) {
+      toast.error("Please enter your full name (first and last name)");
+      return;
+    }
+
+    if (!accountNumber.trim()) {
+      toast.error("Account number is required");
+      return;
+    }
+
+    if (!selectedBank) {
+      toast.error("Please select a bank");
+      return;
+    }
+
+    // Validate amount
+    const amount = Number(coinQuantity);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Amount must be a positive number");
+      return;
+    }
+
     setLoading(true);
-  
-    if (selectedOption === "Paystack" && selectedBank) {
-      const payoutData: PayoutPayload = {
-        account_name: name,
-        account_number: accountNumber,
-        bank_code: Number(selectedBank.bank_code),
-        payout_bank_id: Number(selectedBank.bank_code),
-        amount: Number(coinQuantity),
-      };
-  
-      paystackPayout(payoutData, {
-        onSuccess: (data) => {
-          setLoading(false);   // <-- add here
-          setStep("success");
-          resetLocalState();
-        },
-        onError: (error) => {
-          setLoading(false);   // <-- and also here
-          toast.error("Payout failed");
-          console.error("Payout failed:", error);
-        },
-      });
+
+    // Only process for Paystack
+    if (selectedOption === "Paystack") {
+      // Check if we should use previous bank information
+      if (hasPreviousBank && previousBank?.data?.length > 0) {
+        const previousPayoutData = {
+          payout_bank_id: previousBank.data[0]._id,
+          amount: amount,
+        };
+
+        // Use previous bank payout mutation
+        previousPaystackPayout(previousPayoutData, {
+          onSuccess: (data) => {
+            setLoading(false);
+            setStep("success");
+            resetLocalState();
+          },
+          onError: (error) => {
+            setLoading(false);
+            toast.error("Payout failed");
+            console.error("Previous bank payout failed:", error);
+          },
+        });
+      } else {
+        // Use new bank payout mutation
+        const payoutData = {
+          account_name: name.trim(),
+          account_number: accountNumber,
+          bank_code: selectedBank.bank_code,
+          amount: amount,
+        };
+
+        paystackPayout(payoutData, {
+          onSuccess: (data) => {
+            setLoading(false);
+            setStep("success");
+            resetLocalState();
+          },
+          onError: (error) => {
+            setLoading(false);
+            toast.error("Payout failed");
+            console.error("New bank payout failed:", error);
+          },
+        });
+      }
     } else {
-      // Other payment methods
+      // Handle other payment methods (Card, Stripe)
       setTimeout(() => {
         setLoading(false);
+        setStep("success");
         resetLocalState();
       }, 5000);
     }
   };
-  
+  const handleUsePreviousBank = () => {
+    if (hasPreviousBank) {
+      const bankData = previousBank.data[0];
+      setName(bankData.account_name || "");
+      setAccountNumber(bankData.account_number || "");
+      const foundBank = banks?.find(
+        (bank) => bank.bank_code === bankData.bank_code
+      );
+      if (foundBank) {
+        setSelectedBank(foundBank);
+      }
+    }
+  };
+
   return (
     <Dialog.Body className="h-full mt-2.5 min-[441px]:min-h-[620px]">
       <div className="flex gap-14 h-full max-[440px]:flex-row-reverse">
@@ -157,6 +233,17 @@ export function CheckoutDialog() {
                   className="flex flex-col gap-4 h-full"
                 >
                   <div>
+                    {selectedOption === "Paystack" && hasPreviousBank && (
+                      <div className="flex justify-end">
+                        <button
+                          onClick={handleUsePreviousBank}
+                          type="button"
+                          className="text-tertiary underline"
+                        >
+                          Use previous payout bank
+                        </button>
+                      </div>
+                    )}
                     <label htmlFor="name" className="text-sm">
                       {selectedOption === "Paystack"
                         ? "Account Name"
@@ -311,12 +398,18 @@ export function CheckoutDialog() {
               <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
                 <Button
                   onClick={handleCheckout}
-                  disabled={loading || !selectedBank || !accountNumber || !name}
+                  disabled={
+                    isProcessing ||
+                    !selectedBank ||
+                    !accountNumber ||
+                    !name ||
+                    accountNumber.length !== 10
+                  }
                   variant="gradient"
                   className="w-full rounded !h-12 gap-2 font-bold text-base"
                 >
-                  {loading && <LoadingSpinner />}
-                  {loading ? "Processing..." : "Checkout"}
+                  {isProcessing && <LoadingSpinner />}
+                  {isProcessing ? "Processing..." : "Checkout"}
                 </Button>
               </div>
             </div>
@@ -349,29 +442,16 @@ export function CheckoutDialog() {
                   <p className="text-sm font-bold">{item.label}</p>
                   <p>
                     {item.label === "Amount of Pollcoins"
-                      ? item.value.toLocaleString()
-                      : `${isNigeria ? "₦" : "$"}${Number(item.value).toFixed(
-                          2
-                        )}`}
+                      ? Number(item.value).toLocaleString()
+                      : `${isNigeria ? "₦" : "$"}${Number(
+                          item.value
+                        ).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}`}
                   </p>
                 </div>
               ))}
-              {/* {(selectedOption === "Coin only"
-                ? txnOverview.slice(0, 2)
-                : txnOverview
-              ).map((item) => (
-                <div
-                  key={item.label}
-                  className="w-full flex items-center justify-between border-b border-dashed pb-[14px]"
-                >
-                  <p className="text-sm font-bold">{item.label}</p>
-                  <p>
-                    {item.label === "Amount of AI-Credits"
-                      ? item.value
-                      : `$${item.value}`}
-                  </p>
-                </div>
-              ))} */}
             </div>
             <div className="w-full flex items-center justify-between pt-4 mt-6">
               <p className="text-base font-bold">Total</p>
@@ -380,14 +460,23 @@ export function CheckoutDialog() {
                 {txnOverview
                   .filter((item) => item.label !== "Amount of Pollcoins")
                   .reduce((acc, item) => acc + Number(item.value), 0)
-                  .toFixed(2)}{" "}
+                  .toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
               </p>
             </div>
           </div>
           <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
             <Button
               onClick={handleCheckout}
-              disabled={loading}
+              disabled={
+                isProcessing ||
+                !selectedBank ||
+                !accountNumber ||
+                !name ||
+                accountNumber.length !== 10
+              }
               variant="gradient"
               className="w-full rounded h-[53px] gap-2"
             >

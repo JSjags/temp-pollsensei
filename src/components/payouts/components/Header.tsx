@@ -15,7 +15,7 @@ import { useNigerianBanks } from "../queries/useNigerianBanks";
 export function Header() {
   const user = useSelector((state: RootState) => state.user.user);
   const { data, isLoading } = useUserBalance();
-  const { restrictedBalance } = data || {};
+  const { unrestrictedBalance } = data || {};
   const { redeemableCoins, threshold } = usePayoutStore();
 
   
@@ -49,7 +49,7 @@ export function Header() {
                 <Skeleton className="h-7 w-full" />
               ) : (
                 <h4 className="font-bold text-[1.75rem]">
-                  {restrictedBalance?.toLocaleString() || 0}{" "}
+                  {unrestrictedBalance?.toLocaleString() || 0}{" "}
                   <span className="font-normal">Pollcoins</span>
                 </h4>
               )}
@@ -57,11 +57,11 @@ export function Header() {
                 <div
                   className={cn(
                     "size-2 bg-[#05BF43] rounded-full animate-pulse",
-                    { "bg-red-500": restrictedBalance < threshold }
+                    { "bg-red-500": unrestrictedBalance < threshold }
                   )}
                 />
                 <p className="text-xs text-[#7A8699]">
-                  {restrictedBalance < threshold
+                  {unrestrictedBalance < threshold
                     ? "Below Threshold"
                     : "Above Threshold"}
                 </p>
@@ -69,7 +69,7 @@ export function Header() {
             </div>
           </div>
           <PayoutDialog>
-            <Button variant="gradient" className="gap-2">
+            <Button disabled={unrestrictedBalance===0} variant="gradient" className="gap-2">
               Request Payout <Image src={Arrow} alt="arrow" />
             </Button>
           </PayoutDialog>

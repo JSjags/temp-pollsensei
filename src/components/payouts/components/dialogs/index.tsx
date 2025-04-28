@@ -6,6 +6,7 @@ import { usePayoutStore } from "../../store/usePayoutStore";
 import { CheckoutDialog } from "./CheckoutDialog";
 import { SuccessDialog } from "./SuccessDialog";
 import Redeemable from "@/components/shop/components/dialogs/Redeemable";
+import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 
 type BuyDialogProps = {
   children: ReactNode;
@@ -23,8 +24,9 @@ export function PayoutDialog({ children }: BuyDialogProps) {
     redeemableCoins,
     threshold,
   } = usePayoutStore();
-
-  const description = `You have successfully converted and withdrawn ${coinQuantity} coins ~ $${coinAmount}`;
+  const { data: locationData } = useGeoLocation();
+  const isNigeria = locationData?.isNigeria;
+  const description = `You have successfully converted and withdrawn ${coinQuantity} coins ~ ${isNigeria ? "₦" : "$"}${Number(coinAmount).toLocaleString()}`;
 
   let DialogStepComponent: React.ReactNode;
   const desc =

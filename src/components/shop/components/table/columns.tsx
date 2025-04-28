@@ -6,10 +6,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 
-export function makeTransactionHistoryColumns() {
+export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
   const columns = createColumnHelper<TransactionHistory>();
-  const { data: locationData } = useGeoLocation();
-  const isNigeria = locationData?.isNigeria;
 
   /* -------------------------------------------------------------------------------------------------
    * Transaction Id column
@@ -167,13 +165,13 @@ export function makeTransactionHistoryColumns() {
       </div>
     ),
     cell: ({ getValue, row }) => {
-      const amount = getValue().toLocaleString();
+      const amount = getValue()
       const description = row.original.details?.description?.toLowerCase() || "";
-
+      const formattedAmount = amount.toLocaleString();
   
-      let displayValue = `$${amount}`; // default
+      let displayValue = `${isNigeria ? "₦" : "$"}${formattedAmount}`;
       if (description.includes("purchase") && description.includes("credits")) {
-        displayValue = `${amount}pc`;
+        displayValue = `${formattedAmount}pc`;
       }
   
       return (

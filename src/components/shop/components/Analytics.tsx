@@ -95,14 +95,14 @@ export function Analytics() {
     },
     {
       label: "Redeemable Pollcoins",
-      value: restrictedBalance?.toLocaleString() || 0,
+      value: unrestrictedBalance?.toLocaleString() || 0,
       icon: MoneyIcon,
       iconColor: "#D1EAFA",
       bgColor: "#0A3F60",
     },
     {
       label: "Non-Redeemable Pollcoins",
-      value: unrestrictedBalance?.toLocaleString() || 0,
+      value: restrictedBalance?.toLocaleString() || 0,
       icon: NonRedeemable,
       iconColor: "#D1D3FA",
       bgColor: "#0053B8",
@@ -177,7 +177,7 @@ export function Analytics() {
       <div className="bg-gradient-to-br w-full from-[#9D50BB] max-md:flex-col via-[#5B03B2] max-md:w-full text-white to-[#260D3E] px-4 py-6 max-md:pb-0 md:rounded-[6.8px] relative flex md:items-center justify-between">
         <div className="md:w-1/3">
           <p>Welcome to the</p>
-          <h3 className="text-3xl max-md:text-2xl font-bold">Sensei Shop</h3>
+          <h3 className="text-3xl max-md:text-2xl font-bold">Pollsensei Shop</h3>
         </div>
         <div className="flex max-md:items-center max-md:justify-center w-full max-md:pt-6">
           <div className="rounded-tr-[27px] rounded-tl-[27px] flex max-md:items-center max-md:flex-col max-md:justify-center justify-between w-full gap-[11px] max-md:bg-white/10 md:px-[18px] px-10 pt-[14px] max-md:max-w-[317px] max-md:pb-8">
@@ -253,7 +253,7 @@ export function Analytics() {
                   {item.label === "Redeemable Pollcoins" && (
                     <PayoutDialog>
                       <Button
-                        disabled={restrictedBalance === 0 ||balanceLoading}
+                        disabled={unrestrictedBalance === 0 || balanceLoading}
                         variant="gradient"
                         className="h-[29px]"
                       >

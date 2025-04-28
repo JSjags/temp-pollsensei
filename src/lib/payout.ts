@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import rawAxiosInstance from "./rawAxiosInstance";
 import axiosInstance from "./axios-instance";
 
 
@@ -7,18 +6,18 @@ import axiosInstance from "./axios-instance";
 export type PayoutPayload = {
   account_name: string;
   account_number: string;
-  bank_code: number;
+  bank_code: string;
   amount: number;
-  payout_bank_id: number
 };
-
+export type PreviousPayoutPayload = {
+  payout_bank_id: string;
+  amount: number;
+};
 export const usePaystackPayout = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payoutData: PayoutPayload) => {
-      const res = await axiosInstance.post("/payout/paystack", {
-        payoutData,
-      });
+      const res = await axiosInstance.post("/payout/paystack", payoutData); // <--- fix here
 
       if (!res.data) {
         throw new Error("Failed to process payout");
@@ -29,6 +28,33 @@ export const usePaystackPayout = () => {
       if (data.success) {
         // Refetch the user balance after a successful payout
         queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+        queryClient.invalidateQueries({ queryKey: ["payout-history"] });
+      }
+    },
+  });
+};
+
+
+
+export const usePaystackPreviousPayoutBank = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payoutData: PreviousPayoutPayload) => {
+      const res = await axiosInstance.post("/payout/paystack", {
+        payout_bank_id: payoutData.payout_bank_id,
+        amount: payoutData.amount,
+      });
+
+      if (!res.data) {
+        throw new Error("Failed to process payout");
+      }
+      return res.data;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ["user-balance"] });
+        queryClient.invalidateQueries({ queryKey: ["payout-history"] });
       }
     },
   });

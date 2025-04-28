@@ -42,8 +42,8 @@ const defaultTransactionFilters: FilterConfig<
   TransactionFilterValue | null
 >[] = [
   { label: "All", value: "All", column: null, isDefault: true },
-  { label: "Credit", value: "Credit", column: "type" },
-  { label: "Debit", value: "Debit", column: "type" },
+  { label: "Credit", value: "credit", column: "type" },
+  { label: "Debit", value: "debit", column: "type" },
   { label: "Completed", value: "Completed", column: "status" },
   { label: "Pending", value: "Pending", column: "status" },
 ];
@@ -61,7 +61,6 @@ export function TableLayout<T>({
   const defaultFilter = filters.find((f) => f.isDefault) || filters[0];
   const [selectedFilter, setSelectedFilter] =
     useState<FilterConfig<string, string | null>>(defaultFilter);
-  const disabled = table.getRowModel().rows.length === 0;
 
   const filterColumns = useMemo(() => {
     const columns = new Set<string>();
@@ -101,9 +100,7 @@ export function TableLayout<T>({
   }, [selectedFilter, table, filterColumns, onFilterChange]);
 
   const handleFilterChange = (filter: FilterConfig<string, string | null>) => {
-    if (!disabled) {
-      setSelectedFilter(filter);
-    }
+    setSelectedFilter(filter);
   };
 
   return (
@@ -128,15 +125,10 @@ export function TableLayout<T>({
                   className="flex items-center gap-2"
                 >
                   <Checkbox
-                    disabled={disabled}
                     checked={selectedFilter.value === filter.value}
                     onCheckedChange={() => handleFilterChange(filter)}
                   />
-                  <label
-                    className={cn("max-md:text-xs", {
-                      "opacity-30": disabled,
-                    })}
-                  >
+                  <label className={cn("max-md:text-xs", {})}>
                     {filter.label}
                   </label>
                 </div>

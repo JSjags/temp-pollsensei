@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Header } from "./Header";
 import {
   CoinRedeemed,
@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function Analytics() {
   const { data, isLoading } = useUserBalance();
-  const { restrictedBalance } = data || {};
+  const { unrestrictedBalance } = data || {};
   const { overallEarnings, coinsObtained, redeemableCoins, coinsRedeemed } =
     usePayoutStore();
 
@@ -32,7 +32,7 @@ export function Analytics() {
     },
     {
       label: "Redeemable Coins",
-      value: restrictedBalance || 0,
+      value: unrestrictedBalance || 0,
       icon: RedeemableCoin,
     },
     {
@@ -59,7 +59,9 @@ export function Analytics() {
                     {isLoading ? (
                       <Skeleton className="h-5 w-full" />
                     ) : (
-                      <h4 className="text-xl font-bold">{value.toLocaleString()}</h4>
+                      <h4 className="text-xl font-bold">
+                        {value.toLocaleString()}
+                      </h4>
                     )}
                   </div>
                   <div

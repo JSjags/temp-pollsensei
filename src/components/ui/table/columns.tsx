@@ -37,13 +37,13 @@ export function Columns<T>({ table }: ColumnsProps<T>) {
   return (
     <Popover.Root>
       <Popover.Trigger>
-        <Button
-          variant="secondary"
-          className="!h-9 !px-2 gap-2 !text-sm !text-new-foreground !font-sans !bg-new-terciary !border !border-new-elements-border !font-medium"
+        <div
+          // variant="secondary"
+          className="!h-9 cursor-pointer flex items-center gap-2 !px-2 gap-2 !text-sm !text-new-foreground !font-sans !bg-new-terciary !border !border-new-elements-border !font-medium"
         >
           <ColumnsIcon />
           Columns
-        </Button>
+        </div>
       </Popover.Trigger>
       <Popover.Content
         align="end"

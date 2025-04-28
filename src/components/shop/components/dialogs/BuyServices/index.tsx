@@ -11,6 +11,7 @@ import { useUserBalance } from "@/components/shop/queries/useBalance";
 import { LoadingSpinner } from "../BuyPollcoins/CheckoutDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "react-toastify";
+import { formatNumber } from "@/components/payouts/functions";
 
 type BuyDialogProps = {
   children: ReactNode;
@@ -163,7 +164,7 @@ export function BuyServicesDialog(props: BuyDialogProps) {
 
                   <input
                     type="text"
-                    value={analysisAmount}
+                    value={formatNumber(Number(analysisAmount))}
                     readOnly
                     className="h-[54px] flex-1 pl-2.5 bg-transparent outline-none text-muted-foreground"
                   />
@@ -193,7 +194,7 @@ export function BuyServicesDialog(props: BuyDialogProps) {
             <div className="flex mt-auto w-full">
               <Button
                 onClick={handleSubmit}
-                disabled={isBalanceInsufficient || !credit} 
+                disabled={isBalanceInsufficient || !credit}
                 variant="gradient"
                 className="w-full rounded mt-12 max-[441px]:!h-12"
               >

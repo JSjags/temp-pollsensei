@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Arrow } from "@/assets/images";
 import BuyPollcoinsFlow from "../dialogs/BuyPollcoins";
+import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 
 type TxnHistoryTableProps = {
   isHistoryLoading: boolean;
@@ -30,8 +31,10 @@ export function TransactionHistoryTable({
   historyData,
   pagination,
 }: TxnHistoryTableProps) {
+  const { data: locationData } = useGeoLocation();
+  const isNigeria = locationData?.isNigeria;
   const table = useReactTable<TransactionHistory>({
-    columns: makeTransactionHistoryColumns(),
+    columns: makeTransactionHistoryColumns(isNigeria),
     data: historyData ?? [],
     getExpandedRowModel: getExpandedRowModel(),
     getCoreRowModel: getCoreRowModel(),
@@ -48,27 +51,41 @@ export function TransactionHistoryTable({
         pagination={pagination}
       >
         <Table isLoading={isHistoryLoading} hasHover table={table}>
-          <Image
-            src={"/assets/shop/table_empty.png"}
-            alt="empty state"
-            width={285}
-            height={220}
-            className="max-w-[285px] w-full"
-          />
+          {table.getRowModel().rows.length === 0 ? (
+            <div className="flex flex-col items-center gap-4">
+              <Image
+                src={"/assets/shop/table_empty.png"}
+                alt="empty state"
+                width={285}
+                height={220}
+                className="max-w-[285px] w-full"
+              />
 
-          <div className="md:max-w-[223px] max-md:text-center">
-            <p className="mb-6 text-lg">
-              Oops! No recorded transactions yet. Buy Pollcoins to use the AI
-              features of PollSensei
-            </p>
-
-            <BuyPollcoinsFlow>
-              <Button variant={"gradient"} className="font-bold gap-1 text-sm">
-                Buy Pollcoins{" "}
-                <Image src={Arrow} alt="icons" className="size-3.5" />
-              </Button>
-            </BuyPollcoinsFlow>
-          </div>
+              <div className="md:max-w-[223px] max-md:text-center">
+                {historyData.length === 0 ? (
+                  <>
+                    <p className="mb-6 text-lg">
+                      Oops! No recorded transactions yet. Buy Pollcoins to use
+                      the AI features of PollSensei
+                    </p>
+                    <BuyPollcoinsFlow>
+                      <Button
+                        variant={"gradient"}
+                        className="font-bold gap-1 text-sm"
+                      >
+                        Buy Pollcoins{" "}
+                        <Image src={Arrow} alt="icons" className="size-3.5" />
+                      </Button>
+                    </BuyPollcoinsFlow>
+                  </>
+                ) : (
+                  <p className="text-lg">
+                    You have no data for the selected filter
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : null}
         </Table>
       </TableLayout>
     </HydrationBoundary>
