@@ -186,6 +186,7 @@ const GeneralTab = () => {
         </div>
       </Tabs>
 
+      {/************* MOBILE VIEW **********/}
       <h1 className="block lg:hidden text-lg font-bold text-left mb-5">
         Filter Respondents
       </h1>

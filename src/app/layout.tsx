@@ -25,6 +25,7 @@ import { SenseiProvider } from "@/contexts/SenseiContext";
 import UpgradeModal from "@/components/subscription/modal-upgrade";
 import { AOSInit } from "@/components/ui/Aos";
 import MetaPixel from "@/components/MetaPixel";
+import ContextProvider from "@/contexts/index";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -138,15 +139,17 @@ export default function RootLayout({
         {/* <CookieConsent /> */}
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
-          <TanstackProvider>
-            <ToastContainer limit={1} />
-            <ReduxContext>
-              <SenseiProvider>
-                <UpgradeModal />
-                <MixPanelProvider>{children}</MixPanelProvider>
-              </SenseiProvider>
-            </ReduxContext>
-          </TanstackProvider>
+          <ContextProvider>
+            <TanstackProvider>
+              <ToastContainer limit={1} />
+              <ReduxContext>
+                <SenseiProvider>
+                  <UpgradeModal />
+                  <MixPanelProvider>{children}</MixPanelProvider>
+                </SenseiProvider>
+              </ReduxContext>
+            </TanstackProvider>
+          </ContextProvider>
         </GoogleOAuthProvider>
       </body>
     </html>

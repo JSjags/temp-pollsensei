@@ -22,33 +22,45 @@ import {
   openSurveyFormDialog,
   closeSurveyFormDialog,
 } from "@/redux/slices/earnDialogSlice";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
-import Redeemable from "@/components/shop/components/dialogs/Redeemable";
+import { PayoutDialog } from "@/components/payouts/components/dialogs";
 import { useRouter } from "next/navigation";
 import SurveyFormDialog from "@/subpages/earn/SurveyFormDialog";
 import BannerNote from "@/components/earn/BannerNote";
-import Cookies from "js-cookie";
 import { fetchUnrestrictedBalance } from "@/services/api/apiRequest";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchLoginStreak } from "@/services/api/apiRequest";
 
 const Earn = () => {
   const router = useRouter();
-  const streak = Cookies.get("streak");
   const [unrestrictedBalance, setUnrestrictedBalance] = useState<number>(0);
   const [activitiesCompleted, setActivitiesCompleted] = useState<number>(0);
   const accessToken = useSelector(
     (state: RootState) => state.user.access_token
   );
 
-  const { data: balance, isLoading } = useQuery({
+  const {
+    data: balance,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], accessToken],
     queryFn: () => fetchUnrestrictedBalance(accessToken),
     enabled: !!accessToken,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
+
+  const { data: streak } = useQuery({
+    queryKey: [...[APP_KEYS.LOGIN_STREAK], accessToken],
+    queryFn: () => fetchLoginStreak(accessToken),
+    enabled: !!accessToken,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const currentStreak = streak?.data?.currentStreak;
 
   useEffect(() => {
     setUnrestrictedBalance(balance?.unrestrictedBalance);
@@ -62,7 +74,6 @@ const Earn = () => {
       mobileDescription: "Earn coins by filling surveys",
       image: stethoscope,
       buttonText: "Complete Survey",
-      coins: 1000,
     },
     {
       title: "Ads",
@@ -71,7 +82,6 @@ const Earn = () => {
       mobileDescription: "Earn coins by watching Ads",
       image: walk,
       buttonText: "Watch ads",
-      coins: 500,
     },
     {
       title: "Referrals",
@@ -80,7 +90,6 @@ const Earn = () => {
       mobileDescription: "Earn coins by referring ",
       image: stethoscope,
       buttonText: "Refer a Friend ",
-      coins: 20,
     },
     {
       title: "Newsletter",
@@ -89,7 +98,6 @@ const Earn = () => {
       mobileDescription: "Subscribe to earn coins",
       image: walk,
       buttonText: "Subscribe to Newsletter",
-      coins: 10,
     },
   ];
 
@@ -146,22 +154,18 @@ const Earn = () => {
               </p>
             </div>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] flex items-center gap-2 text-white hover:scale-105 transition-all rounded-full text-sm lg:text-base"
-                  type="button"
-                >
-                  Redeem Coins
-                  <FaArrowRightLong className="text-base text-white" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="flex flex-col items-center gap-5 p-10 max-w-[442px]">
-                <Redeemable />
-              </DialogContent>
-            </Dialog>
+            <PayoutDialog>
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] flex items-center gap-2 text-white hover:scale-105 transition-all rounded-full text-sm lg:text-base"
+                type="button"
+                disabled={unrestrictedBalance === 0}
+              >
+                Redeem Coins
+                <FaArrowRightLong className="text-base text-white" />
+              </Button>
+            </PayoutDialog>
           </div>
           <div className="hidden lg:inline-block">
             <BannerNote />
@@ -214,16 +218,16 @@ const Earn = () => {
                 <p className="text-[#453951] text-xs">
                   You have logged in for{" "}
                   <span className="font-bold text-[13px]">
-                    {streak && Number(streak) <= 1
-                      ? `${streak} day`
-                      : `${streak} days`}
+                    {currentStreak && Number(currentStreak) <= 1
+                      ? `${currentStreak} day`
+                      : `${currentStreak} days`}
                   </span>{" "}
                   straight
                 </p>
               </div>
             </div>
 
-            <DailyLoginCard />
+            <DailyLoginCard onClaimSuccess={refetch} />
           </div>
         </div>
         <div className="w-full h-auto flex flex-col gap-5">

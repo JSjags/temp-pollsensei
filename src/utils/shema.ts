@@ -36,7 +36,7 @@ export const joiSchemas = {
 export const personalInformationSchema = z.object({
   firstName: z.string().min(3, "First Name is required"),
   lastName: z.string().min(3, "Last Name is required"),
-  // otherName: z.string().optional(),
+  otherName: z.string().optional(),
   email: z.string().email("Invalid email address"),
   phoneNumber: z.string().min(10, "Phone number is required"),
   gender: z.string().min(1, "Gender is required"),
@@ -44,8 +44,8 @@ export const personalInformationSchema = z.object({
   maritalStatus: z.string().min(1, "Marital status is required"),
   ageGroup: z.string().min(1, "Age group is required"),
   children: z.string().min(1, "Children/Dependents field is required"),
-  // pets: z.array(z.string()).min(1, "At least one pet is required"),
-  // otherPet: z.string().optional(),
+  pets: z.array(z.string()).min(1, "At least one pet is required"),
+  otherPet: z.string().optional(),
 });
 
 export const geographyAndCultureSchema = z.object({

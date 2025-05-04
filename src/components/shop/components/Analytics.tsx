@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -23,11 +24,32 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Slider, { Settings } from "react-slick";
 import { motion } from "framer-motion";
 import BuyPollcoinsFlow from "./dialogs/BuyPollcoins";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useQuery } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
+import { fetchTotalPurchasedRespondents } from "@/services/api/apiRequest";
 
 type ServiceBalance = {
   serviceType: string;
   credits: number;
 };
+
+interface Purchase {
+  _id: string;
+  numberOfRespondents: number;
+  totalCost: number;
+  status: string;
+  completedResponses: number;
+  purchaseId: string;
+  surveyName: string;
+  purchaseDate: string;
+}
+
+interface TotalPurchasedRespondentsData {
+  purchases: Purchase[];
+  total: number;
+}
 
 export function Analytics() {
   const [showAllSurveys, setShowAllSurveys] = useState(false);
@@ -36,6 +58,10 @@ export function Analytics() {
     useUserServicesBalance();
   const { restrictedBalance, unrestrictedBalance, totalBalance } = data || {};
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
 
   const analyticData = [
     {
@@ -108,32 +134,43 @@ export function Analytics() {
       bgColor: "#0A0E60",
     },
   ];
-  const surveys = [
-    {
-      title: "Client Satisfaction Questionnaire",
-      value: 500,
-    },
-    {
-      title: "Product Review Survey",
-      value: 200,
-    },
-    {
-      title: "Payment Processing Survey",
-      value: 300,
-    },
-    {
-      title: "Service Quality Review",
-      value: 500,
-    },
-    {
-      title: "Service Quality Reviewss",
-      value: 500,
-    },
-    {
-      title: "Service Quality Reviews",
-      value: 500,
-    },
-  ];
+
+  const { data: surveys, isLoading: loadingSurveys } = useQuery({
+    queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS], userAccessToken],
+    queryFn: () => fetchTotalPurchasedRespondents(userAccessToken),
+    enabled: !!userAccessToken,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  // console.log({ surveys });
+
+  // const surveys = [
+  //   {
+  //     title: "Client Satisfaction Questionnaire",
+  //     value: 500,
+  //   },
+  //   {
+  //     title: "Product Review Survey",
+  //     value: 200,
+  //   },
+  //   {
+  //     title: "Payment Processing Survey",
+  //     value: 300,
+  //   },
+  //   {
+  //     title: "Service Quality Review",
+  //     value: 500,
+  //   },
+  //   {
+  //     title: "Service Quality Reviewss",
+  //     value: 500,
+  //   },
+  //   {
+  //     title: "Service Quality Reviews",
+  //     value: 500,
+  //   },
+  // ];
 
   const settings: Settings = {
     dots: false,
@@ -356,7 +393,9 @@ export function Analytics() {
               <p className="text-xs text-muted-foreground">
                 Total Purchased Respondents
               </p>
-              <h4 className="text-xl font-bold">0</h4>
+              <h4 className="text-xl font-bold">
+                {surveys?.data?.totalRespondents ?? 0}
+              </h4>
             </div>
             <div
               className={cn(
@@ -394,18 +433,18 @@ export function Analytics() {
                   : "max-h-[135px] overflow-hidden"
               )}
             >
-              {surveys.map((survey) => (
+              {surveys?.data?.purchases?.purchases.map((purchase: Purchase) => (
                 <div
-                  key={survey.title}
+                  key={purchase?._id}
                   className="flex items-center justify-between text-sec-text"
                 >
-                  <p className="text-sm">{survey.title}</p>
-                  <p className="text-sm">{survey.value}</p>
+                  <p className="text-sm">{purchase?.surveyName}</p>
+                  <p className="text-sm">{purchase?.numberOfRespondents}</p>
                 </div>
               ))}
             </div>
 
-            {surveys.length > 4 && (
+            {surveys?.data?.purchases?.length > 4 && (
               <div className="text-center mt-2 absolute left-[45%] z-30 bottom-1.5 flex items-center justify-center">
                 <button
                   onClick={() => setShowAllSurveys((prev) => !prev)}

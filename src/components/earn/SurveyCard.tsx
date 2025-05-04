@@ -2,75 +2,112 @@
 import React, { FC } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { StaticImageData } from "next/image";
 import { pollsensei_icon } from "@/assets/images";
-import { useDispatch } from "react-redux";
 import {
   openSurveyFormDialog,
   closeSurveyTabs,
+  setSurveyID,
+  setScreenerSurvey,
 } from "@/redux/slices/earnDialogSlice";
+import stethoscope from "@/assets/images/stethoscope.jpg";
+import { fetchScreenerSurveyById } from "@/services/api/apiRequest";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
-interface Props {
-  title: string;
+interface SurveyData {
+  _id: string;
+  surveyType: string;
+  topic: string;
   description: string;
-  image: string;
-  poll_coins: number;
-  time: number;
-  isComplete?: boolean;
-  isApplied?: boolean;
-  isApproved?: boolean;
+  status: string;
 }
 
-const SurveyCard: FC<Props> = ({
-  title,
-  description,
-  image,
-  poll_coins,
-  time,
-  isComplete,
-  isApplied,
-  isApproved,
-}) => {
-  const dispatch = useDispatch();
+interface Survey {
+  _id: string;
+  title: string;
+  description: string;
+  survey: any;
+}
 
-  const handleStartNow = () => {
-    if (!isComplete && !isApproved && !isApplied) {
-      dispatch(closeSurveyTabs());
+interface Props {
+  survey: any;
+  activeTab: string;
+}
+
+const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
+  const dispatch = useDispatch();
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
+
+  const handleAvailableSurvey = async () => {
+    dispatch(closeSurveyTabs());
+    dispatch(setSurveyID(survey?._id));
+
+    const screenerSurvey = await fetchScreenerSurveyById(
+      userAccessToken,
+      survey?._id
+    );
+    if (screenerSurvey) {
       dispatch(openSurveyFormDialog());
+      dispatch(setScreenerSurvey(screenerSurvey));
+    }
+    // console.log({ response });
+  };
+
+  const handleApplySurvey = async () => {
+    dispatch(closeSurveyTabs());
+    dispatch(setSurveyID(survey?._id));
+
+    const response = await fetchScreenerSurveyById(
+      userAccessToken,
+      survey?._id
+    );
+    if (response) {
+      dispatch(openSurveyFormDialog(response));
     }
   };
 
-  const getStatusText = () => {
-    if (isComplete || isApproved) return "Completed";
-    if (isApplied) return "Applied";
-    return "Not Started";
+  const handleStartNow = () => {
+    if (activeTab === "available") {
+      handleAvailableSurvey();
+    } else if (activeTab === "apply") {
+      handleApplySurvey();
+    } else {
+      dispatch(closeSurveyTabs());
+    }
   };
 
   const getStatusStyle = () => {
-    if (isComplete || isApproved || isApplied) {
+    if (survey?.survey?.status === "On going") {
       return "bg-[#E3FEF3] text-[#05BF43]";
     }
     return "bg-[#FEE3F2] text-[#BF0558]";
   };
 
   const getButtonText = () => {
-    if (isComplete || isApproved) return "Completed";
-    if (isApplied) return "Applied";
-    return "Start Now";
+    if (activeTab === "available") {
+      return survey?.survey?.status === "On going"
+        ? "Start Now"
+        : "Survey Completed";
+    } else if (activeTab === "apply") {
+      return survey?.survey?.status === "On going"
+        ? "Apply Now"
+        : "Survey Completed";
+    } else if (activeTab === "applications") {
+      return survey?.status;
+    } else {
+      return "Not Qualified";
+    }
   };
 
-  const getButtonStyle = () => {
-    if (isComplete || isApproved || isApplied) {
-      return "bg-[#C7C7C7] hover:bg-[#C7C7C7] cursor-not-allowed text-[#79737E]";
-    }
-    return "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] cursor-pointer text-white";
-  };
+  // console.log({ survey });
 
   return (
     <div className="bg-white h-auto w-full flex flex-col gap-1 lg:gap-3 rounded-2xl hover:scale-105 transition-all justify-between">
       <div className="relative h-[100px] lg:h-[150px] w-full border-b-2 border-[#08CE26] rounded-t-2xl">
         <Image
-          src={image}
+          src={stethoscope}
           alt="Activity image"
           fill
           className="object-cover rounded-t-2xl"
@@ -80,15 +117,25 @@ const SurveyCard: FC<Props> = ({
         <div
           className={`${getStatusStyle()} rounded-full p-3 py-1 w-fit text-[8px] lg:text-[10px] block capitalize`}
         >
-          {getStatusText()}
+          {survey?.survey?.status || survey?.status}
         </div>
         <h3 className="text-[9px] lg:text-xs text-[#1C1C1C] font-bold">
-          {title.length > 30 ? `${title.slice(0, 30)}...` : title}
+          {survey?.survey?.topic.length > 30 ||
+          survey?.surveyId?.topic?.length > 30
+            ? `${
+                survey?.survey?.topic.slice(0, 30) ||
+                survey?.surveyId?.topic.slice(0, 30)
+              }...`
+            : survey?.survey?.topic || survey?.surveyId?.topic}
         </h3>
         <p className="text-[#AAAAAA] text-[10px]">
-          {description.length > 40
-            ? `${description.slice(0, 40)}...`
-            : description}
+          {survey?.survey?.description.length > 40 ||
+          survey?.surveyId?.description.length > 40
+            ? `${
+                survey?.survey?.description.slice(0, 40) ||
+                survey?.surveyId?.description.slice(0, 40)
+              }...`
+            : survey?.survey?.description || survey?.surveyId?.description}
         </p>
         <div className="w-full h-auto flex items-center gap-2">
           <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-3 flex items-center gap-1">
@@ -98,20 +145,21 @@ const SurveyCard: FC<Props> = ({
               height={10}
               alt="pollsensei_icon"
             />
-            {poll_coins}pollcoins
+            3 pollcoins
           </div>
-          <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-2 block">
+          {/* <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-2 block">
             {time}minutes
-          </div>
+          </div> */}
         </div>
       </div>
 
       <Button
         variant="default"
         size="sm"
-        className={`${getButtonStyle()} text-xs font-bold text-center rounded-none rounded-b-2xl capitalize`}
+        className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] cursor-pointer text-white text-xs font-bold text-center rounded-none rounded-b-2xl capitalize"
         type="button"
         onClick={handleStartNow}
+        disabled={survey?.survey?.status !== "On going"}
       >
         {getButtonText()}
       </Button>

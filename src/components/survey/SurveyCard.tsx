@@ -45,6 +45,9 @@ import {
   useEditSurveyMutation,
   useFetchSurveysQuery,
 } from "@/services/survey.service";
+import { VscOpenPreview } from "react-icons/vsc";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import ReviewDialog from "@/components/survey/ReviewDialog";
 
 interface SurveyCardProps {
   topic: string;
@@ -73,7 +76,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   });
 
   const [surveyName, setSurveyName] = useState<string>("");
-
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState<boolean>(false);
   const router = useRouter();
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
@@ -181,6 +184,10 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     }
   }, [_id, deleteSurvey, handleCloseAll, refetch]);
 
+  const handleReview = () => {
+    setIsReviewDialogOpen(true);
+  };
+
   const statusStyles = {
     Closed: {
       text: "Closed",
@@ -223,8 +230,14 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                 <DropdownMenuContent align="end" className="w-48">
                   {[
                     { label: "Rename", icon: Pencil, action: "rename" },
-                    { label: "Edit Survey", icon: Edit, action: "edit" },
                     { label: "Preview", icon: Eye, action: "preview" },
+                    { label: "Edit Survey", icon: Edit, action: "edit" },
+                    {
+                      label: "Participant Review",
+                      icon: VscOpenPreview,
+                      action: "review",
+                      onReviewClick: handleReview,
+                    },
                     { label: "Share", icon: Share2, action: "share" },
                     { label: "Make a copy", icon: Copy, action: "copy" },
                     status === "On going"
@@ -245,16 +258,27 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                       className:
                         "text-red-600 focus:text-red-600 focus:bg-red-50",
                     },
-                  ].map(({ label, icon: Icon, action, className }) => (
-                    <DropdownMenuItem
-                      key={action}
-                      onClick={() => handleSelectOption(action)}
-                      className={`gap-2 cursor-pointer ${className || ""}`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{label}</span>
-                    </DropdownMenuItem>
-                  ))}
+                  ].map(
+                    ({
+                      label,
+                      icon: Icon,
+                      action,
+                      className,
+                      onReviewClick,
+                    }) => (
+                      <DropdownMenuItem
+                        key={action}
+                        onClick={() => {
+                          handleSelectOption(action);
+                          onReviewClick && onReviewClick();
+                        }}
+                        className={`gap-2 cursor-pointer ${className || ""}`}
+                      >
+                        <Icon className="h-4 w-4 text-xl" />
+                        <span>{label}</span>
+                      </DropdownMenuItem>
+                    )
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -375,6 +399,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         onClose={handleCloseAll}
         _id={_id}
       />
+
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[95vh] lg:max-h-[90vw] overflow-y-auto flex flex-col gap-5">
+          <ReviewDialog />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

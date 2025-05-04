@@ -280,21 +280,31 @@ const BuyRespondent = () => {
   const hasActiveSurveys = userSurveys.length > 0;
 
   return (
-    <div className="bg-[#FCFCFD] rounded-[11.72px] max-md:gap-6 max-w-[204px] py-2.5 border-[0.59px] flex flex-col justify-between h-full w-full">
+    <div className="bg-[#FCFCFD] rounded-lg max-md:gap-3 max-w-[204px] py-2.5 border flex flex-col justify-between w-full">
       {pathname !== "/filter-respondents" && (
         <>
-          <div className="px-8">
-            <Image src={Purchases1} alt="icons" className="size-full" />
+          <div className="flex w-full items-center justify-center">
+            <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
+              <Image
+                src={Purchases1}
+                alt="icons"
+                layout="fill"
+                className="object-contain"
+              />
+            </div>
           </div>
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}
           >
-            <DialogTrigger asChild>
+            <DialogTrigger
+              asChild
+              className="mt-auto flex flex-col items-center justify-center px-3"
+            >
               <div className="flex flex-col items-center justify-center">
-                <Button variant="gradient" className="h-[25px] gap-1 text-xs">
+                <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
                   Respondents{" "}
-                  <Image src={Arrow} alt="icons" className="size-4" />
+                  <Image src={Arrow} alt="icons" className="w-4 h-4" />
                 </Button>
               </div>
             </DialogTrigger>

@@ -25,24 +25,6 @@ export const getNationality = async () => {
   return data;
 };
 
-export const fetchCountryCode = async (dialCode: string) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}country/${dialCode}`,
-    requestOptions
-  );
-  const data = await response.json();
-  return data;
-};
-
 export const fetchOTP = async (phone: string) => {
   const headers = new Headers({
     "Content-Type": "application/json",
@@ -336,7 +318,33 @@ export const fetchDailyReward = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}auth/daily-login`,
+    `${pollsenseiAPIEndpoint}daily-login`,
+    requestOptions
+  );
+  const data = await response.json();
+  // console.log("Daily reward api response - ", data);
+  return data;
+};
+
+export const fetchLoginStreak = async (
+  accessToken: string | null | undefined
+) => {
+  if (!accessToken) {
+    throw new Error("No access token available");
+  }
+
+  const headers = new Headers({
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  });
+
+  const requestOptions: RequestInit = {
+    method: "GET",
+    headers: headers,
+  };
+
+  const response = await fetch(
+    `${pollsenseiAPIEndpoint}daily-login/streak`,
     requestOptions
   );
   const data = await response.json();
@@ -414,7 +422,7 @@ export const fetchApplySurveys = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}survey-apply/approved`,
+    `${pollsenseiAPIEndpoint}screener-survey/screened-surveys`,
     requestOptions
   );
   const data = await response.json();
@@ -445,5 +453,95 @@ export const fetchApplicationSurveys = async (
   );
   const data = await response.json();
   // console.log("Apply Surveys api response - ", data);
+  return data;
+};
+
+export const fetchScreenerSurveyById = async (
+  accessToken: string | null | undefined,
+  screenerId: string
+) => {
+  if (!accessToken) {
+    throw new Error("No access token available");
+  }
+
+  const headers = new Headers({
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  });
+
+  const requestOptions: RequestInit = {
+    method: "GET",
+    headers: headers,
+  };
+
+  const response = await fetch(
+    `${pollsenseiAPIEndpoint}screener-survey/${screenerId}`,
+    requestOptions
+  );
+  const data = await response.json();
+  // console.log("Available Surveys api response - ", data);
+  return data;
+};
+
+export const submitScreenerSurvey = async (
+  userAccessToken: string | null | undefined,
+  payload: any,
+  screenerId: string
+) => {
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${userAccessToken}`,
+  });
+
+  const body = JSON.stringify(payload);
+
+  const requestOptions: RequestInit = {
+    method: "POST",
+    headers,
+    body,
+  };
+
+  try {
+    const response = await fetch(
+      `${pollsenseiAPIEndpoint}survey-apply/submit-screener/${screenerId}`,
+      requestOptions
+    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
+
+/************** SHOP ***********/
+
+export const fetchTotalPurchasedRespondents = async (
+  accessToken: string | null | undefined
+) => {
+  if (!accessToken) {
+    throw new Error("No access token available");
+  }
+
+  const headers = new Headers({
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  });
+
+  const requestOptions: RequestInit = {
+    method: "GET",
+    headers: headers,
+  };
+
+  const response = await fetch(
+    `${pollsenseiAPIEndpoint}purchases/respondents/history`,
+    requestOptions
+  );
+  const data = await response.json();
+  // console.log("Total Surveys api response - ", data);
   return data;
 };

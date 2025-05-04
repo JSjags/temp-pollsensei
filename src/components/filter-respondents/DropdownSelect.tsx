@@ -9,8 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { IoChevronDownOutline, IoClose } from "react-icons/io5";
 import { Checkbox } from "@/components/ui/shadcn-checkbox";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+// import { Switch } from "@/components/ui/switch";
+// import { Label } from "@/components/ui/label";
 import { Controller } from "react-hook-form";
 import { addCriteria, removeCriteria } from "@/redux/slices/criteriaSlice";
 
@@ -37,9 +37,11 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({
   required,
   title,
 }) => {
-  const [isRequired, setIsRequired] = useState(
-    selectedCriteria[section]?.required || false
-  );
+  // const [isRequired, setIsRequired] = useState(
+  //   selectedCriteria[section]?.required || false
+  // );
+
+  const isRequired = selectedCriteria[section]?.values?.length > 0;
 
   const handleCheckboxChange = (field: any, item: string, checked: boolean) => {
     const updatedValues = checked
@@ -63,31 +65,31 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({
     dispatch(removeCriteria({ tab, section, criteria: item }));
   };
 
-  const handleRequiredToggle = () => {
-    setIsRequired(!isRequired);
-    const existingCriteria = selectedCriteria[section]?.values;
-    if (existingCriteria && existingCriteria.length > 0) {
-      dispatch(
-        addCriteria({
-          tab,
-          section,
-          criteria: existingCriteria.join(","),
-          required: !isRequired,
-        })
-      );
-    } else {
-      dispatch({
-        type: "criteria/addCriteria",
-        payload: { tab, section, criteria: "", required: !isRequired },
-      });
-    }
-  };
+  // const handleRequiredToggle = () => {
+  //   setIsRequired(!isRequired);
+  //   const existingCriteria = selectedCriteria[section]?.values;
+  //   if (existingCriteria && existingCriteria.length > 0) {
+  //     dispatch(
+  //       addCriteria({
+  //         tab,
+  //         section,
+  //         criteria: existingCriteria.join(","),
+  //         required: !isRequired,
+  //       })
+  //     );
+  //   } else {
+  //     dispatch({
+  //       type: "criteria/addCriteria",
+  //       payload: { tab, section, criteria: "", required: !isRequired },
+  //     });
+  //   }
+  // };
 
   return (
     <div className="flex flex-col gap-2">
       <div className="w-full flex justify-between items-center pl-10">
         <p className="text-[#333333] text-sm">{title}</p>
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <Switch
             id={name}
             className="h-5"
@@ -97,7 +99,7 @@ const DropdownSelect: React.FC<DropdownSelectProps> = ({
           <Label htmlFor={name} className="text-[#333333] text-sm font-normal">
             Required
           </Label>
-        </div>
+        </div> */}
       </div>
       <Controller
         name={name}

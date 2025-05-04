@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Coin from "@/assets/images/Coin.png";
@@ -7,13 +7,19 @@ import { GiPadlock } from "react-icons/gi";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { fetchDailyReward } from "@/services/api/apiRequest";
+import {
+  fetchDailyReward,
+  fetchUnrestrictedBalance,
+} from "@/services/api/apiRequest";
 import Cookies from "js-cookie";
-import { queryClient } from "@/contexts";
+import { queryClient } from "@/contexts/index";
 import { APP_KEYS } from "@/constants";
 
-const DailyLoginCard = () => {
-  const [streak, setStreak] = useState<number>(0);
+interface DailyLoginCardProps {
+  onClaimSuccess?: () => void;
+}
+
+const DailyLoginCard: FC<DailyLoginCardProps> = ({ onClaimSuccess }) => {
   const [currentDay, setCurrentDay] = useState<number>(0);
   const [claimedDays, setClaimedDays] = useState<number[]>([]);
   const [daysInMonth, setDaysInMonth] = useState<number>(0);
@@ -22,25 +28,36 @@ const DailyLoginCard = () => {
   const accessToken = useSelector(
     (state: RootState) => state.user.access_token
   );
+  const userId = useSelector((state: RootState) => state.user.user?._id);
+
+  const CLAIMED_DAYS_COOKIE_KEY = `claimedDays_${userId}`;
 
   useEffect(() => {
     const today = new Date();
-    setCurrentDay(today.getDate());
+    const currentDate = today.getDate();
+    setCurrentDay(currentDate);
 
     const year = today.getFullYear();
     const month = today.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     setDaysInMonth(daysInMonth);
 
-    const savedClaims = Cookies.get("claimedDays");
-    const savedStreak = Cookies.get("streak");
+    // Calculate initial display range to include current day
+    const start = Math.max(1, Math.min(currentDate - 3, daysInMonth - 6));
+    const end = Math.min(daysInMonth, start + 6);
+    setDisplayRange({ start, end });
+
+    const savedClaims = Cookies.get(CLAIMED_DAYS_COOKIE_KEY);
     if (savedClaims) {
       setClaimedDays(JSON.parse(savedClaims));
     }
-    if (savedStreak) {
-      setStreak(parseInt(savedStreak));
-    }
-  }, [currentDay, setCurrentDay, setClaimedDays, setStreak]);
+  }, [
+    currentDay,
+    setCurrentDay,
+    setClaimedDays,
+    userId,
+    CLAIMED_DAYS_COOKIE_KEY,
+  ]);
 
   // Function to Handle claim day
   const handleClaimDay = async (day: number) => {
@@ -50,26 +67,9 @@ const DailyLoginCard = () => {
       if (success) {
         const newClaimedDays = [...claimedDays, day];
         setClaimedDays(newClaimedDays);
-        Cookies.set("claimedDays", JSON.stringify(newClaimedDays));
-        queryClient.invalidateQueries({
-          queryKey: [APP_KEYS.UNRESTRICTED_BALANCE],
-        });
+        Cookies.set(CLAIMED_DAYS_COOKIE_KEY, JSON.stringify(newClaimedDays));
 
-        // Update streak
-        const today = new Date();
-        const lastClaimedTimestamp = Cookies.get("lastClaimedTimestamp");
-        if (lastClaimedTimestamp) {
-          const lastClaimedDate = new Date(parseInt(lastClaimedTimestamp));
-          if (today.getTime() - lastClaimedDate.getTime() === 86400000) {
-            setStreak(streak + 1);
-          } else {
-            setStreak(1);
-          }
-        } else {
-          setStreak(1);
-        }
-        Cookies.set("lastClaimedTimestamp", today.getTime().toString());
-        Cookies.set("streak", streak.toString());
+        onClaimSuccess?.();
       }
     }
   };
@@ -98,7 +98,7 @@ const DailyLoginCard = () => {
   const handleNext = () => {
     if (displayRange.end >= daysInMonth) return;
 
-    const newStart = displayRange.end;
+    const newStart = displayRange.start + 7;
     const newEnd = Math.min(daysInMonth, newStart + 6);
     setDisplayRange({ start: newStart, end: newEnd });
   };
@@ -106,8 +106,8 @@ const DailyLoginCard = () => {
   const handlePrev = () => {
     if (displayRange.start <= 1) return;
 
-    const newEnd = displayRange.start;
-    const newStart = Math.max(1, newEnd - 6);
+    const newStart = Math.max(1, displayRange.start - 7);
+    const newEnd = newStart + 6;
     setDisplayRange({ start: newStart, end: newEnd });
   };
 
