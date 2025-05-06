@@ -10,6 +10,18 @@ import { toast } from "react-toastify";
 import { useUserProfileQuery } from "@/services/user.service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { useMutation } from "@tanstack/react-query";
+import { postReferralPayout } from "@/services/api/referrals.api";
 
 interface UserData {
   referral_code: string;
@@ -24,8 +36,72 @@ const Page = () => {
     referral_code: "",
     referral_link: "",
   });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [form, setForm] = useState({
+    account_name: "",
+    account_number: "",
+    bank_name: "",
+  });
+  const [formErrors, setFormErrors] = useState({
+    account_name: "",
+    account_number: "",
+    bank_name: "",
+  });
 
   const { data, isLoading } = useUserProfileQuery({});
+
+  const minPayout = 3000; // Naira
+  const accruedAmount = referral_reward?.accrued_amount || 0;
+  const hasRequested = referral_reward?.has_requested_payout;
+
+  const payoutMutation = useMutation({
+    mutationFn: postReferralPayout,
+    onSuccess: (res) => {
+      toast.success((res as any)?.message || "Payout request submitted!");
+      setDialogOpen(false);
+    },
+    onError: (err: any) => {
+      toast.error(
+        err?.response?.data?.msg ||
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to request payout."
+      );
+    },
+  });
+
+  const validateForm = () => {
+    let valid = true;
+    const errors = { account_name: "", account_number: "", bank_name: "" };
+    if (!form.account_name.trim()) {
+      errors.account_name = "Account name is required";
+      valid = false;
+    }
+    if (!form.account_number.trim()) {
+      errors.account_number = "Account number is required";
+      valid = false;
+    } else if (!/^\d{10}$/.test(form.account_number.trim())) {
+      errors.account_number = "Account number must be 10 digits";
+      valid = false;
+    }
+    if (!form.bank_name.trim()) {
+      errors.bank_name = "Bank name is required";
+      valid = false;
+    }
+    setFormErrors(errors);
+    return valid;
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setFormErrors({ ...formErrors, [e.target.name]: "" });
+  };
+
+  const handleDialogSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    payoutMutation.mutate(form);
+  };
 
   useEffect(() => {
     if (data?.data) {
@@ -150,29 +226,109 @@ const Page = () => {
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">Request Payout</h2>
         <p className="text-gray-600 mb-4">
-          You can request a payout once your accrued amount reaches $50.00.
+          You can request a payout once your accrued amount reaches ₦
+          {minPayout.toLocaleString()}.00.
         </p>
-
-        <Button
-          className={`px-6 py-2 rounded-md font-medium ${
-            (referral_reward?.accrued_amount || 0) >= 50 &&
-            !referral_reward?.has_requested_payout
-              ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
-              : "bg-gray-200 text-gray-500 cursor-not-allowed"
-          }`}
-          disabled={
-            (referral_reward?.accrued_amount || 0) < 50 ||
-            referral_reward?.has_requested_payout
-          }
-        >
-          {referral_reward?.has_requested_payout
-            ? "Payout Requested"
-            : "Request Payout"}
-        </Button>
-
-        {(referral_reward?.accrued_amount || 0) < 50 && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className={`px-6 py-2 rounded-md font-medium ${
+                accruedAmount >= minPayout && !hasRequested
+                  ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              }`}
+              // disabled={accruedAmount < minPayout || hasRequested}
+              onClick={() => {
+                if (accruedAmount >= minPayout && !hasRequested)
+                  setDialogOpen(true);
+              }}
+            >
+              {hasRequested ? "Payout Requested" : "Request Payout"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="z-[1000000]" overlayClassName="z-[100000]">
+            <DialogHeader>
+              <DialogTitle>Request Payout</DialogTitle>
+              <DialogDescription>
+                Enter your bank details to request your referral payout.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleDialogSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Account Name
+                </label>
+                <Input
+                  name="account_name"
+                  value={form.account_name}
+                  onChange={handleFormChange}
+                  placeholder="e.g. Chinedu Emesue"
+                  disabled={payoutMutation.isPending}
+                />
+                {formErrors.account_name && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {formErrors.account_name}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Account Number
+                </label>
+                <Input
+                  name="account_number"
+                  value={form.account_number}
+                  onChange={handleFormChange}
+                  placeholder="e.g. 0123456789"
+                  maxLength={10}
+                  disabled={payoutMutation.isPending}
+                />
+                {formErrors.account_number && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {formErrors.account_number}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Bank Name
+                </label>
+                <Input
+                  name="bank_name"
+                  value={form.bank_name}
+                  onChange={handleFormChange}
+                  placeholder="e.g. First Bank"
+                  disabled={payoutMutation.isPending}
+                />
+                {formErrors.bank_name && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {formErrors.bank_name}
+                  </p>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  disabled={payoutMutation.isPending}
+                  className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
+                >
+                  {payoutMutation.isPending ? "Submitting..." : "Submit"}
+                </Button>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">
+                    Cancel
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+        {accruedAmount < minPayout && (
           <p className="text-sm text-amber-600 mt-2">
-            You need ${(50 - (referral_reward?.accrued_amount || 0)).toFixed(2)}{" "}
+            You need ₦
+            {(minPayout - accruedAmount).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}{" "}
             more to request a payout.
           </p>
         )}
