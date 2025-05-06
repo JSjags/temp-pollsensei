@@ -48,14 +48,14 @@ const PersonalInformation: FC<Props> = ({
     defaultValues: {
       firstName: firstName,
       lastName: lastName,
-      // otherName: otherName,
+      otherName: otherName,
       email: user?.email || "",
       phoneNumber: formData.phoneNumber || "",
       gender: formData.gender || "",
       maritalStatus: formData.maritalStatus || "",
       ageGroup: formData.ageGroup || "",
       children: formData.children || "",
-      // pets: formData.pets || [],
+      pets: formData.pets || [],
       // otherPet: formData.otherPet || "",
     },
   });
@@ -121,14 +121,14 @@ const PersonalInformation: FC<Props> = ({
             disabled={isPending}
           />
 
-          {/* <FormInput
+          <FormInput
             id="otherName"
             label="Other Name (Optional)"
             placeholder="Enter other name"
             register={register}
             error={errors.otherName}
             disabled={isPending}
-          /> */}
+          />
 
           <FormInput
             id="email"
@@ -196,7 +196,7 @@ const PersonalInformation: FC<Props> = ({
             disabled={isPending}
           />
 
-          {/* <ControlledMultiSelect
+          <ControlledMultiSelect
             name="pets"
             control={control}
             options={petOptions}
@@ -205,7 +205,7 @@ const PersonalInformation: FC<Props> = ({
             disabled={isPending}
             otherFieldName="otherPet"
             register={register}
-          /> */}
+          />
 
           <Button
             size="default"

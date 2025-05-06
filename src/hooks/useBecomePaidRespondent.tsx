@@ -31,7 +31,7 @@ export function useSubmitRespondentForm() {
           },
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json", // Changed to application/json
+            "Content-Type": "application/json",
           },
         });
         // console.log("API Response:", response.data);

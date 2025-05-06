@@ -31,6 +31,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Controller } from "react-hook-form";
+import { APP_KEYS } from "@/constants";
 
 interface Props {
   onContinue: () => void;
@@ -85,7 +86,7 @@ const Geo_Culture: FC<Props> = ({
   };
 
   const { data: nationalities } = useQuery({
-    queryKey: [],
+    queryKey: [...[APP_KEYS.COUNTRY_FLAG]],
     queryFn: async () => getNationality(),
     enabled: true,
   });

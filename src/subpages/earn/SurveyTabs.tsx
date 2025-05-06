@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useEffect } from "react";
+import React from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Available from "@/subpages/earn/Available";
@@ -28,8 +28,9 @@ const SurveyTabs = () => {
   const userAccessToken = useSelector(
     (state: RootState) => state.user.access_token
   );
+  const [activeTab, setActiveTab] = React.useState<string>("available");
 
-  const { data: availableSurveys } = useQuery({
+  const { data: availableSurveys, isLoading: loadingAvailable } = useQuery({
     queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS], userAccessToken],
     queryFn: () => fetchAvailableSurveys(userAccessToken),
     enabled: !!userAccessToken && isSurveyTabsOpen,
@@ -37,7 +38,7 @@ const SurveyTabs = () => {
     refetchOnMount: false,
   });
 
-  const { data: applySurveys } = useQuery({
+  const { data: applySurveys, isLoading: loadingApply } = useQuery({
     queryKey: [...[APP_KEYS.APPLY_SURVEYS], userAccessToken],
     queryFn: () => fetchApplySurveys(userAccessToken),
     enabled: !!userAccessToken && isSurveyTabsOpen,
@@ -45,7 +46,7 @@ const SurveyTabs = () => {
     refetchOnMount: false,
   });
 
-  const { data: applicationSurveys } = useQuery({
+  const { data: applicationSurveys, isLoading: loadingApplication } = useQuery({
     queryKey: [...[APP_KEYS.APPLICATION_SURVEYS], userAccessToken],
     queryFn: () => fetchApplicationSurveys(userAccessToken),
     enabled: !!userAccessToken && isSurveyTabsOpen,
@@ -58,29 +59,39 @@ const SurveyTabs = () => {
       id: 1,
       name: "Available Now",
       value: "available",
-      component: <Available availableSurveys={availableSurveys?.data} />,
+      component: (
+        <Available
+          availableSurveys={availableSurveys?.data}
+          isLoading={loadingAvailable}
+          activeTab={activeTab}
+        />
+      ),
     },
     {
       id: 2,
       name: "Apply",
       value: "apply",
-      component: <Apply applySurveys={applySurveys?.data} />,
+      component: (
+        <Apply
+          applySurveys={applySurveys?.data}
+          isLoading={loadingApply}
+          activeTab={activeTab}
+        />
+      ),
     },
     {
       id: 3,
       name: "Applications",
       value: "applications",
-      component: <Applications applicationSurveys={applicationSurveys?.data} />,
+      component: (
+        <Applications
+          applicationSurveys={applicationSurveys?.data}
+          isLoading={loadingApplication}
+          activeTab={activeTab}
+        />
+      ),
     },
   ];
-
-  useEffect(() => {
-    if (isSurveyTabsOpen) {
-      // Fetch data for Apply and Approved tabs when SurveyTabs are opened
-      fetchApplySurveys(userAccessToken);
-      fetchApplicationSurveys(userAccessToken);
-    }
-  }, [isSurveyTabsOpen, userAccessToken]);
 
   return (
     <Dialog
@@ -94,7 +105,11 @@ const SurveyTabs = () => {
       }}
     >
       <DialogContent className="w-[90%] lg:min-w-[1100px] min-h-auto bg-[#F8F8F8F2] border-0 outline-none p-2 lg:p-10 z-[1000000] flex flex-col justify-center items-center gap-5">
-        <Tabs className="w-full h-auto">
+        <Tabs
+          className="w-full h-auto"
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
           <TabsList className="w-full h-auto bg-white flex justify-start mt-5 lg:mt-0 mb-5 lg:mb-0">
             {tabs.map((tab) => (
               <TabsTrigger
@@ -113,7 +128,7 @@ const SurveyTabs = () => {
             <TabsContent
               key={tab?.id}
               value={`${tab?.value}`}
-              className="w-full h-[75vh] lg:h-full lg:p-5 overflow-y-auto"
+              className="w-full max-h-[75vh] overflow-y-auto lg:p-5"
             >
               {tab?.component}
             </TabsContent>

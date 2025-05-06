@@ -18,7 +18,6 @@ interface Props {
   mobileDescription: string;
   image: StaticImageData;
   buttonText: string;
-  coins: number;
   onClick?: () => void;
 }
 
@@ -28,7 +27,6 @@ const ActivityCard: FC<Props> = ({
   mobileDescription,
   image,
   buttonText,
-  coins,
   onClick,
 }) => {
   const hasNextVideo = useSelector(selectHasNextVideo);
@@ -77,13 +75,11 @@ const ActivityCard: FC<Props> = ({
       <>
         <div className="hidden lg:flex items-center justify-center w-full">
           {buttonText}
-          (<Image src={Coin} width={20} height={20} alt="Coin" /> +{coins})
         </div>
         <div className="flex items-center justify-center w-full lg:hidden">
           {buttonText.includes("Subscribe")
             ? buttonText.slice(0, 9)
             : buttonText}
-          (<Image src={Coin} width={10} height={10} alt="Coin" /> +{coins})
         </div>
       </>
     );
