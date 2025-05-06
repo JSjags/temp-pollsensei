@@ -237,7 +237,7 @@ const Page = () => {
                   ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
-              // disabled={accruedAmount < minPayout || hasRequested}
+              disabled={accruedAmount < minPayout || hasRequested}
               onClick={() => {
                 if (accruedAmount >= minPayout && !hasRequested)
                   setDialogOpen(true);
