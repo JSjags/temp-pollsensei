@@ -29,6 +29,11 @@ const supportMenu: MenuItem[] = [
     path: "/settings/notifications",
     icons: <FaRegBell />,
   },
+  {
+    label: "Referral Reward",
+    path: "/settings/referral-reward",
+    icons: <LuCreditCard />,
+  },
   // {
   //   label: "Payment",
   //   path: "/settings/payment",
