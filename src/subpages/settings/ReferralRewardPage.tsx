@@ -201,7 +201,7 @@ const Page = () => {
               <div>
                 <p className="text-sm text-gray-600">Accrued Amount</p>
                 <p className="text-2xl font-bold">
-                  ${referral_reward?.accrued_amount?.toFixed(2) || "0.00"}
+                  ₦{referral_reward?.accrued_amount?.toFixed(2) || "0.00"}
                 </p>
               </div>
             </div>
