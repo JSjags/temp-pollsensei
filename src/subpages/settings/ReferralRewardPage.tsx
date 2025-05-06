@@ -50,7 +50,7 @@ const Page = () => {
 
   const { data, isLoading } = useUserProfileQuery({});
 
-  const minPayout = 3000; // Naira
+  const minPayout = 20000; // Naira
   const accruedAmount = referral_reward?.accrued_amount || 0;
   const hasRequested = referral_reward?.has_requested_payout;
 
