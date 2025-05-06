@@ -1,0 +1,231 @@
+"use client";
+import { RootState } from "@/redux/store";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { FaUsers, FaMoneyBillWave } from "react-icons/fa";
+import { MdOutlinePayments } from "react-icons/md";
+import { Input } from "@/components/ui/shadcn-input";
+import { ClipboardCopy } from "lucide-react";
+import { toast } from "react-toastify";
+import { useUserProfileQuery } from "@/services/user.service";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+
+interface UserData {
+  referral_code: string;
+  referral_link: string;
+}
+
+const Page = () => {
+  const referral_reward = useSelector(
+    (state: RootState) => state.user?.user?.referral_reward
+  );
+  const [userData, setUserData] = useState<UserData>({
+    referral_code: "",
+    referral_link: "",
+  });
+
+  const { data, isLoading } = useUserProfileQuery({});
+
+  useEffect(() => {
+    if (data?.data) {
+      const { referral_code } = data.data;
+
+      const baseUrl =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "https://pollsensei.ai";
+      const referral_link = referral_code
+        ? `${baseUrl}/register?ref=${referral_code}`
+        : "";
+
+      setUserData({
+        referral_code: referral_code || "",
+        referral_link: referral_link,
+      });
+    }
+  }, [data]);
+
+  const handleCopy = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${type} copied to clipboard!`);
+  };
+
+  return (
+    <div className="p-6 w-full">
+      <h1 className="text-2xl font-bold mb-6">Referral Rewards</h1>
+
+      {isLoading ? (
+        <>
+          {/* Referral Summary Skeleton */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <Skeleton className="h-6 w-48 mb-4" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-4 rounded-lg flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-full mr-4" />
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Request Payout Skeleton */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <Skeleton className="h-6 w-40 mb-4" />
+            <Skeleton className="h-4 w-80 mb-4" />
+            <Skeleton className="h-10 w-40 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+
+          {/* Referral Link Skeleton */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mt-6 mb-6">
+            <Skeleton className="h-6 w-40 mb-4" />
+            <Skeleton className="h-4 w-80 mb-4" />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Skeleton className="h-10 w-full sm:w-96" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+          </div>
+
+          {/* Referral Code Skeleton */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+            <Skeleton className="h-6 w-40 mb-4" />
+            <Skeleton className="h-4 w-80 mb-4" />
+            <div className="flex items-center gap-2 bg-gray-50 p-4 rounded-md border border-gray-200 w-fit">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-6 w-6 rounded-full" />
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Your Referral Summary</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-blue-50 p-4 rounded-lg flex items-center">
+              <div className="bg-blue-100 p-3 rounded-full mr-4">
+                <FaUsers className="text-blue-600 text-xl" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Referred Users</p>
+                <p className="text-2xl font-bold">
+                  {referral_reward?.number_of_referred_users || 0}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-green-50 p-4 rounded-lg flex items-center">
+              <div className="bg-green-100 p-3 rounded-full mr-4">
+                <FaMoneyBillWave className="text-green-600 text-xl" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Accrued Amount</p>
+                <p className="text-2xl font-bold">
+                  ${referral_reward?.accrued_amount?.toFixed(2) || "0.00"}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-purple-50 p-4 rounded-lg flex items-center">
+              <div className="bg-purple-100 p-3 rounded-full mr-4">
+                <MdOutlinePayments className="text-purple-600 text-xl" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Payout Status</p>
+                <p className="text-lg font-semibold">
+                  {referral_reward?.has_requested_payout
+                    ? "Requested"
+                    : "Available"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">Request Payout</h2>
+        <p className="text-gray-600 mb-4">
+          You can request a payout once your accrued amount reaches $50.00.
+        </p>
+
+        <Button
+          className={`px-6 py-2 rounded-md font-medium ${
+            (referral_reward?.accrued_amount || 0) >= 50 &&
+            !referral_reward?.has_requested_payout
+              ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
+              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+          }`}
+          disabled={
+            (referral_reward?.accrued_amount || 0) < 50 ||
+            referral_reward?.has_requested_payout
+          }
+        >
+          {referral_reward?.has_requested_payout
+            ? "Payout Requested"
+            : "Request Payout"}
+        </Button>
+
+        {(referral_reward?.accrued_amount || 0) < 50 && (
+          <p className="text-sm text-amber-600 mt-2">
+            You need ${(50 - (referral_reward?.accrued_amount || 0)).toFixed(2)}{" "}
+            more to request a payout.
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+        <h2 className="text-xl font-semibold mb-4">Your Referral Link</h2>
+        <p className="text-gray-600 mb-4">
+          Share this link with friends and earn rewards when they sign up!
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Input
+            type="text"
+            readOnly
+            value={userData.referral_link}
+            className="flex-1 border border-gray-300 rounded-md px-4 py-2 bg-gray-50"
+          />
+          <button
+            onClick={() => handleCopy(userData.referral_link, "Referral link")}
+            className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white px-6 py-2 rounded-md font-medium flex items-center justify-center gap-2"
+          >
+            <span>Copy Link</span>
+            <ClipboardCopy size={16} />
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+        <h2 className="text-xl font-semibold mb-4">Your Referral Code</h2>
+        <p className="text-gray-600 mb-4">
+          Share this code with friends who prefer to enter it manually during
+          signup.
+        </p>
+
+        <div className="flex items-center gap-2 bg-gray-50 p-4 rounded-md border border-gray-200 w-fit">
+          <h3 className="text-[#070707] text-[1rem] font-medium">
+            {userData?.referral_code || "Not set"}
+          </h3>
+          {userData?.referral_code && (
+            <button
+              onClick={() =>
+                handleCopy(userData.referral_code, "Referral code")
+              }
+              className="text-[#5B03B2] hover:text-[#4A029A] transition-all duration-200 hover:scale-110"
+            >
+              <ClipboardCopy size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Page;
