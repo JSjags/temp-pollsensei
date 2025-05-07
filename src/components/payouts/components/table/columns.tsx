@@ -13,7 +13,8 @@ export type PayoutStatus =
   | "failed"
   | "reversed"
   | "canceled"
-  | "otp";
+  | "otp"
+  |'abandoned';
 
 export type PayoutTransaction = {
   _id: string;
@@ -31,7 +32,7 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
   /* -------------------------------------------------------------------------------------------------
    * Transaction Id column
    * -----------------------------------------------------------------------------------------------*/
-  const transactionIdColumn = columns.accessor("_id", {
+  const transactionIdColumn = columns.accessor("transaction_id", {
     header: ({ column }) => (
       <div className="flex items-center gap-3 min-w-[103px]">
         <ColumnHeader column={column}>Transaction Id</ColumnHeader>
@@ -96,6 +97,8 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
               "bg-[#FCCC951A] text-[#AE5F04]": status === "pending",
               "bg-[#D3FAEC]/60 text-[#069662]": status === "paid",
               "bg-[#DB44371A] text-[#DB4437]": status === "failed",
+              "bg-gray-200 text-black": status === "otp",
+              "bg-black/50 text-white": status === "abandoned",
             }
           )}
         >

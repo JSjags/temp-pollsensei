@@ -70,6 +70,11 @@ const SuperAdminSidebar: React.FC = () => {
       path: "/referrers",
       icon: <Users2 className="h-4 w-4" />,
     },
+    {
+      label: "Payouts",
+      path: "/payout",
+      icon: <CreditCard className="h-4 w-4" />,
+    },
   ];
 
   return (

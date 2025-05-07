@@ -26,7 +26,7 @@ export function PayoutDialog({ children }: BuyDialogProps) {
   } = usePayoutStore();
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
-  const description = `You have successfully converted and withdrawn ${coinQuantity} coins ~ ${isNigeria ? "₦" : "$"}${Number(coinAmount).toLocaleString()}`;
+  const description = `You have successfully initiated the withdrawal of ${coinQuantity} coins ~ ${isNigeria ? "₦" : "$"}${Number(coinAmount).toLocaleString()}`;
 
   let DialogStepComponent: React.ReactNode;
   const desc =

@@ -49,6 +49,7 @@ export function PayoutsHistoryTable({
     { label: "All", value: "All", column: null, isDefault: true },
     { label: "Paid", value: "paid", column: "status" },
     { label: "Pending", value: "pending", column: "status" },
+    { label: "Abandoned", value: "abandoned", column: "status" },
     { label: "Failed", value: "failed", column: "status" },
     // { label: "Reversed", value: "reversed", column: "status" },
     // { label: "Canceled", value: "canceled", column: "status" },

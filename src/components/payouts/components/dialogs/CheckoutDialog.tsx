@@ -24,6 +24,7 @@ import {
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 import { toast } from "react-toastify";
 import { usePreviousPayoutBank } from "../../queries/usePreviousPayoutBank";
+import ConfirmationDialog from "./Confirmation";
 
 const PaymentOptionsData = [
   {
@@ -42,6 +43,7 @@ const PaymentOptionsData = [
 
 export function CheckoutDialog() {
   const [selectedOption, setSelectedOption] = useState<string | null>("Card");
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -122,60 +124,60 @@ export function CheckoutDialog() {
       return;
     }
 
-    setLoading(true);
+    setOpen(true);
 
-    // Only process for Paystack
-    if (selectedOption === "Paystack") {
-      // Check if we should use previous bank information
-      if (hasPreviousBank && previousBank?.data?.length > 0) {
-        const previousPayoutData = {
-          payout_bank_id: previousBank.data[0]._id,
-          amount: amount,
-        };
+    // // Only process for Paystack
+    // if (selectedOption === "Paystack") {
+    //   // Check if we should use previous bank information
+    //   if (hasPreviousBank && previousBank?.data?.length > 0) {
+    //     const previousPayoutData = {
+    //       payout_bank_id: previousBank.data[0]._id,
+    //       amount: amount,
+    //     };
 
-        // Use previous bank payout mutation
-        previousPaystackPayout(previousPayoutData, {
-          onSuccess: (data) => {
-            setLoading(false);
-            setStep("success");
-            resetLocalState();
-          },
-          onError: (error) => {
-            setLoading(false);
-            toast.error("Payout failed");
-            console.error("Previous bank payout failed:", error);
-          },
-        });
-      } else {
-        // Use new bank payout mutation
-        const payoutData = {
-          account_name: name.trim(),
-          account_number: accountNumber,
-          bank_code: selectedBank.bank_code,
-          amount: amount,
-        };
+    //     // Use previous bank payout mutation
+    //     previousPaystackPayout(previousPayoutData, {
+    //       onSuccess: (data) => {
+    //         setLoading(false);
+    //         setStep("success");
+    //         resetLocalState();
+    //       },
+    //       onError: (error) => {
+    //         setLoading(false);
+    //         toast.error("Payout failed");
+    //         console.error("Previous bank payout failed:", error);
+    //       },
+    //     });
+    //   } else {
+    //     // Use new bank payout mutation
+    //     const payoutData = {
+    //       account_name: name.trim(),
+    //       account_number: accountNumber,
+    //       bank_code: selectedBank.bank_code,
+    //       amount: amount,
+    //     };
 
-        paystackPayout(payoutData, {
-          onSuccess: (data) => {
-            setLoading(false);
-            setStep("success");
-            resetLocalState();
-          },
-          onError: (error) => {
-            setLoading(false);
-            toast.error("Payout failed");
-            console.error("New bank payout failed:", error);
-          },
-        });
-      }
-    } else {
-      // Handle other payment methods (Card, Stripe)
-      setTimeout(() => {
-        setLoading(false);
-        setStep("success");
-        resetLocalState();
-      }, 5000);
-    }
+    //     paystackPayout(payoutData, {
+    //       onSuccess: (data) => {
+    //         setLoading(false);
+    //         setStep("success");
+    //         resetLocalState();
+    //       },
+    //       onError: (error) => {
+    //         setLoading(false);
+    //         toast.error("Payout failed");
+    //         console.error("New bank payout failed:", error);
+    //       },
+    //     });
+    //   }
+    // } else {
+    //   // Handle other payment methods (Card, Stripe)
+    //   setTimeout(() => {
+    //     setLoading(false);
+    //     setStep("success");
+    //     resetLocalState();
+    //   }, 5000);
+    // }
   };
   const handleUsePreviousBank = () => {
     if (hasPreviousBank) {
@@ -329,7 +331,7 @@ export function CheckoutDialog() {
                           type="number"
                           id="number"
                           name="number"
-                          placeholder="Enter card number"
+                          placeholder="Enter account number"
                           className="mt-2 h-[54px]"
                           value={accountNumber}
                           onChange={(e) => {
@@ -396,21 +398,45 @@ export function CheckoutDialog() {
                 </motion.form>
               </AnimatePresence>
               <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
-                <Button
-                  onClick={handleCheckout}
-                  disabled={
-                    isProcessing ||
-                    !selectedBank ||
-                    !accountNumber ||
-                    !name ||
-                    accountNumber.length !== 10
-                  }
-                  variant="gradient"
-                  className="w-full rounded !h-12 gap-2 font-bold text-base"
-                >
-                  {isProcessing && <LoadingSpinner />}
-                  {isProcessing ? "Processing..." : "Checkout"}
-                </Button>
+                {selectedOption === "Paystack" ? (
+                  <ConfirmationDialog
+                    name={name}
+                    bankCode={selectedBank?.bank_code || ""}
+                    bankName={selectedBank?.bank_name || ""}
+                    accountNumber={accountNumber}
+                    amount={coinQuantity}
+                  >
+                    <Button
+                      disabled={
+                        isProcessing ||
+                        !selectedBank ||
+                        !accountNumber ||
+                        !name ||
+                        accountNumber.length !== 10
+                      }
+                      variant="gradient"
+                      className="w-full rounded !h-12 gap-2 font-bold text-base"
+                    >
+                      Proceed
+                    </Button>
+                  </ConfirmationDialog>
+                ) : (
+                  <Button
+                    disabled={
+                      isProcessing ||
+                      !cardNumber ||
+                      !cardExpiry ||
+                      !cardCVV ||
+                      !name
+                    }
+                    variant="gradient"
+                    className="w-full rounded !h-12 gap-2 font-bold text-base"
+                    onClick={handleCheckout}
+                  >
+                    {isProcessing && <LoadingSpinner />}
+                    {isProcessing ? "Processing..." : "Checkout"}
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -468,21 +494,45 @@ export function CheckoutDialog() {
             </div>
           </div>
           <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
-            <Button
-              onClick={handleCheckout}
-              disabled={
-                isProcessing ||
-                !selectedBank ||
-                !accountNumber ||
-                !name ||
-                accountNumber.length !== 10
-              }
-              variant="gradient"
-              className="w-full rounded h-[53px] gap-2"
-            >
-              {loading && <LoadingSpinner />}
-              {loading ? "Processing..." : "Checkout"}
-            </Button>
+            {selectedOption === "Paystack" ? (
+              <ConfirmationDialog
+                name={name}
+                bankCode={selectedBank?.bank_code || ""}
+                bankName={selectedBank?.bank_name || ""}
+                accountNumber={accountNumber}
+                amount={coinQuantity}
+              >
+                <Button
+                  disabled={
+                    isProcessing ||
+                    !selectedBank ||
+                    !accountNumber ||
+                    !name ||
+                    accountNumber.length !== 10
+                  }
+                  variant="gradient"
+                  className="w-full rounded !h-12 gap-2 font-bold text-base"
+                >
+                  Proceed
+                </Button>
+              </ConfirmationDialog>
+            ) : (
+              <Button
+                disabled={
+                  isProcessing ||
+                  !cardNumber ||
+                  !cardExpiry ||
+                  !cardCVV ||
+                  !name
+                }
+                variant="gradient"
+                className="w-full rounded !h-12 gap-2 font-bold text-base"
+                onClick={handleCheckout}
+              >
+                {isProcessing && <LoadingSpinner />}
+                {isProcessing ? "Processing..." : "Checkout"}
+              </Button>
+            )}
           </div>
 
           <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden gap-6">

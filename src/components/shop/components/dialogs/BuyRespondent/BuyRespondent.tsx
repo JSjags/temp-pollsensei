@@ -280,12 +280,22 @@ const BuyRespondent = () => {
   const hasActiveSurveys = userSurveys.length > 0;
 
   return (
-    <div className="bg-[#FCFCFD] rounded-[11.72px] max-md:gap-6 max-w-[204px] py-2.5 border-[0.59px] flex flex-col justify-between h-full w-full">
+    <div className="bg-[#FCFCFD] rounded-[11.72px] max-md:gap-6 max-w-[204px] py-2.5 border-[0.59px] gap-3 flex flex-col justify-between h-full w-full">
       {pathname !== "/filter-respondents" && (
         <>
-          <div className="px-8">
-            <Image src={Purchases1} alt="icons" className="size-full" />
+          <div className="flex w-full items-center justify-center">
+            <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
+              <Image
+                src={Purchases1}
+                alt="icons"
+                layout="fill"
+                className="object-contain"
+              />
+            </div>
           </div>
+          {/* <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
+            <Image src={Purchases1} alt="icons" layout="fill" className="object-contain" />
+          </div> */}
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}

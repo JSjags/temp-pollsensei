@@ -83,17 +83,21 @@ export function FirstStep() {
               Amount of Coins
             </label>
             <Input
-              type="number"
+              type="text"
               name="credits"
               placeholder="Enter Amount of Coins"
               className="mt-2 h-[54px]"
               value={coinQuantity}
               disabled={unrestrictedBalance === 0}
               onChange={(e) => {
-                setCoinQuantity(e.target.value);
-                if (errors.quantity) clearError("quantity");
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) {
+                  setCoinQuantity(value);
+                  if (errors.quantity) clearError("quantity");
+                }
               }}
             />
+
             {errors.quantity && (
               <p className="mt-1 text-xs text-red-600">{errors.quantity}</p>
             )}

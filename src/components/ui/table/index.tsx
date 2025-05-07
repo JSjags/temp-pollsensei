@@ -16,13 +16,14 @@ type TableProps<T> = {
   rowDivider?: boolean;
   onRowClick?: (row: T) => void;
   isLoading?: boolean;
+  superAdmin?: boolean;
   onRowPointerEnter?: (event: PointerEvent) => void;
   onRowPointerLeave?: (event?: PointerEvent) => void;
 };
 
 export function Table<T>({
   table,
-  hasHover,
+  superAdmin = false,
   onRowClick,
   isLoading,
   children,
@@ -105,7 +106,10 @@ export function Table<T>({
                           className={cn(
                             "group/row h-16 hover:bg-table-hover",
                             "first:sticky first:left-0 max-md:first:bg-[#FEF5FED6] first:pl-3 first:z-10 group-first/row:hover:bg-table-hover",
-                            "md:last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl"
+                            "md:last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl",{
+                              '!md:last:z-0': superAdmin
+                            }
+                            
                           )}
                         >
                           <div className="h-full flex items-center group-last/row:justify-start first:pl-3 last:pr-3 group-last/row:rounded-r-xl group-data-[highlighted]:ring-2 ring-new-terciary group-first/row:rounded-l-xl first:group-data-[highlighted]:bg-tertiary">
