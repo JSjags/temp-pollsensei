@@ -39,10 +39,25 @@ export function Table<T>({
   }
 
   return (
-    <div className="overflow-x-auto" suppressHydrationWarning>
-      <div className="w-full overflow-hidden">
+    <div
+      id="table-wrapper"
+      className="relative"
+      // onPointerLeave={() => {
+      //   if (!highlightRef.current) return;
+      //   highlightRef.current.style.opacity = '0';
+      // }}
+    >
+      <div suppressHydrationWarning>
+        {/* <div className="w-full"> */}
         <ScrollArea.Root>
-          <table className="w-full">
+          <table
+            className={cn(
+              "w-full border-none",
+              // {
+              //   "!table-auto": (isOpen && isBelow1280) || isBelow1320,
+              // }
+            )}
+          >
             {isLoading ? (
               <SkeletonEl />
             ) : (
@@ -106,10 +121,10 @@ export function Table<T>({
                           className={cn(
                             "group/row h-16 hover:bg-table-hover",
                             "first:sticky first:left-0 max-md:first:bg-[#FEF5FED6] first:pl-3 first:z-10 group-first/row:hover:bg-table-hover",
-                            "md:last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl",{
-                              '!md:last:z-0': superAdmin
+                            "last:sticky md:last:right-0 md:last:card md:last:pr-3 md:last:z-10 first:rounded-l-xl last:rounded-r-xl",
+                            {
+                              "!md:last:z-0": superAdmin,
                             }
-                            
                           )}
                         >
                           <div className="h-full flex items-center group-last/row:justify-start first:pl-3 last:pr-3 group-last/row:rounded-r-xl group-data-[highlighted]:ring-2 ring-new-terciary group-first/row:rounded-l-xl first:group-data-[highlighted]:bg-tertiary">
@@ -127,6 +142,7 @@ export function Table<T>({
             )}
           </table>
         </ScrollArea.Root>
+        {/* </div> */}
       </div>
     </div>
   );

@@ -8,9 +8,9 @@ export default function Shop() {
   const [page, setPage] = useState(1);
   const { data, isLoading } = useShopTransactionsHistory({ page });
   const paginationData = data?.pagination;
-  
+
   return (
-    <>
+    <div className="w-full">
       <Analytics />
       <InAppPurchases />
       <div className="max-md:px-4">
@@ -26,6 +26,6 @@ export default function Shop() {
           }
         />
       </div>
-    </>
+    </div>
   );
 }

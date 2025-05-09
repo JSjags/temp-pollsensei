@@ -87,7 +87,7 @@ export function InAppPurchases() {
 
   return (
     <div className="mt-10 flex-col gap-5 flex max-md:px-4">
-      <p className="text-xl font-bold">In-app Purchases</p>
+      <p className="text-xl font-bold">In-App Purchases</p>
       <div className="flex md:items-stretch gap-4 h-full max-md:grid grid-cols-2">
         <BuyRespondent />
 
@@ -120,7 +120,7 @@ export function InAppPurchases() {
                 </div>
               </div>
 
-              <div className="mt-auto flex flex-col items-center justify-center px-3">
+              <div className="mt-auto flex flex-col items-center justify-center px-1.5">
                 <BuyServicesDialog
                   title={title}
                   creditsPerUnit={creditsPerUnit}
@@ -150,7 +150,7 @@ export function InAppPurchases() {
                 >
                   <Button
                     variant="gradient"
-                    className="h-6 gap-1 text-xs w-full"
+                    className="h-6 gap-1 text-xs w-full px-0.5"
                   >
                     {cta}
                     <Image src={Arrow} alt="icons" className="w-4 h-4" />

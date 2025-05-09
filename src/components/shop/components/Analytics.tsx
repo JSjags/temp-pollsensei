@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -23,11 +24,33 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Slider, { Settings } from "react-slick";
 import { motion } from "framer-motion";
 import BuyPollcoinsFlow from "./dialogs/BuyPollcoins";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useQuery } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
+import { fetchTotalPurchasedRespondents } from "@/services/api/apiRequest";
+import { useWindowSize } from "@uidotdev/usehooks";
 
 type ServiceBalance = {
   serviceType: string;
   credits: number;
 };
+
+interface Purchase {
+  _id: string;
+  numberOfRespondents: number;
+  totalCost: number;
+  status: string;
+  completedResponses: number;
+  purchaseId: string;
+  surveyName: string;
+  purchaseDate: string;
+}
+
+interface TotalPurchasedRespondentsData {
+  purchases: Purchase[];
+  total: number;
+}
 
 export function Analytics() {
   const [showAllSurveys, setShowAllSurveys] = useState(false);
@@ -36,6 +59,12 @@ export function Analytics() {
     useUserServicesBalance();
   const { restrictedBalance, unrestrictedBalance, totalBalance } = data || {};
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { width } = useWindowSize();
+  console.log(width);
+
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
 
   const analyticData = [
     {
@@ -108,32 +137,15 @@ export function Analytics() {
       bgColor: "#0053B8",
     },
   ];
-  const surveys = [
-    {
-      title: "Client Satisfaction Questionnaire",
-      value: 500,
-    },
-    {
-      title: "Product Review Survey",
-      value: 200,
-    },
-    {
-      title: "Payment Processing Survey",
-      value: 300,
-    },
-    {
-      title: "Service Quality Review",
-      value: 500,
-    },
-    {
-      title: "Service Quality Reviewss",
-      value: 500,
-    },
-    {
-      title: "Service Quality Reviews",
-      value: 500,
-    },
-  ];
+
+  const { data: surveys, isLoading: loadingSurveys } = useQuery({
+    queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS], userAccessToken],
+    queryFn: () => fetchTotalPurchasedRespondents(userAccessToken),
+    enabled: !!userAccessToken,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
 
   const settings: Settings = {
     dots: false,
@@ -177,7 +189,9 @@ export function Analytics() {
       <div className="bg-gradient-to-br w-full from-[#9D50BB] max-md:flex-col via-[#5B03B2] max-md:w-full text-white to-[#260D3E] px-4 py-6 max-md:pb-0 md:rounded-[6.8px] relative flex md:items-center justify-between">
         <div className="md:w-1/3">
           <p>Welcome to the</p>
-          <h3 className="text-3xl max-md:text-2xl font-bold">Pollsensei Shop</h3>
+          <h3 className="text-3xl max-md:text-2xl font-bold">
+            Pollsensei Shop
+          </h3>
         </div>
         <div className="flex max-md:items-center max-md:justify-center w-full max-md:pt-6">
           <div className="rounded-tr-[27px] rounded-tl-[27px] flex max-md:items-center max-md:flex-col max-md:justify-center justify-between w-full gap-[11px] max-md:bg-white/10 md:px-[18px] px-10 pt-[14px] max-md:max-w-[317px] max-md:pb-8">
@@ -203,7 +217,7 @@ export function Analytics() {
         </div>
       </div>
 
-      <div className="w-full flex gap-4 my-[22px] h-full items-stretch max-sm:flex-col max-md:px-4">
+      <div className="w-full flex gap-4 my-[22px] h-full items-stretch max-[1400px]:flex-col max-md:px-4">
         <div className="flex-1 flex flex-col gap-4 h-full items-stretch min-h-[200px]">
           <div className="grid grid-cols-3 gap-4 max-md:grid-cols-4">
             {coinsData.map((item, index) => (
@@ -310,7 +324,7 @@ export function Analytics() {
                 <div
                   key={analytic.label}
                   className={cn(
-                    "bg-white rounded-[6.8px] p-4 shadow-[0px_1.36px_4.08px_0px_#34037914]",
+                    "bg-white rounded-[6.8px] min-h-[150px] p-4 shadow-[0px_1.36px_4.08px_0px_#34037914]",
                     "mr-3",
                     { "mr-0": index === analyticData.length - 1 }
                   )}
@@ -350,13 +364,15 @@ export function Analytics() {
         </div>
 
         {/* Surverys */}
-        <div className="w-[35%] max-sm:w-full rounded-lg pt-4 px-5 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col gap-5 h-full items-stretch">
+        <div className="w-[35%] max-[1400px]:w-full max-sm:w-full rounded-lg pt-4 px-5 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col gap-5 h-full items-stretch">
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-muted-foreground">
                 Total Purchased Respondents
               </p>
-              <h4 className="text-xl font-bold">0</h4>
+              <h4 className="text-xl font-bold">
+                {surveys?.data?.totalRespondents ?? 0}
+              </h4>
             </div>
             <div
               className={cn(
@@ -380,32 +396,44 @@ export function Analytics() {
             </div>
           </div>
 
-          <div className={cn("bg-[#FDFAFF] max-h-[135px] overflow-y-auto")}>
+          <div
+            className={cn("bg-[#FDFAFF] max-h-[135px] h-full overflow-y-auto", {
+              "min-h-[136px]": !surveys?.data?.purchases?.purchases?.length,
+            })}
+          >
             <div className="px-2.5 bg-[#CB85FD1A] flex items-center justify-between rounded-tr-[15px] rounded-tl-[15px] py-1.5">
               <p className="font-bold">Survey</p>
               <p className="font-bold">Respondents</p>
             </div>
 
-            <div
-              className={cn(
-                "flex flex-col gap-2 px-2.5 py-1.5 transition-all duration-300",
-                showAllSurveys
-                  ? "max-h-[300px] overflow-y-auto"
-                  : "max-h-[135px] overflow-hidden"
-              )}
-            >
-              {surveys.map((survey) => (
-                <div
-                  key={survey.title}
-                  className="flex items-center justify-between text-sec-text"
-                >
-                  <p className="text-sm">{survey.title}</p>
-                  <p className="text-sm">{survey.value}</p>
-                </div>
-              ))}
-            </div>
+            {!surveys?.data?.purchases?.purchases?.length ? (
+              <div className="text-center text-sm text-gray-500 py-2 flex items-center justify-center w-full border h-[100px]">
+                You haven&apos;t purchased any respondents yet.
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  "flex flex-col gap-2 px-2.5 py-1.5 transition-all duration-300",
+                  showAllSurveys
+                    ? "max-h-[300px] overflow-y-auto"
+                    : "max-h-[135px] overflow-hidden"
+                )}
+              >
+                {surveys?.data?.purchases?.purchases.map(
+                  (purchase: Purchase) => (
+                    <div
+                      key={purchase?._id}
+                      className="flex items-center justify-between text-sec-text"
+                    >
+                      <p className="text-sm">{purchase?.surveyName}</p>
+                      <p className="text-sm">{purchase?.numberOfRespondents}</p>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
 
-            {surveys.length > 4 && (
+            {surveys?.data?.purchases?.length > 4 && (
               <div className="text-center mt-2 absolute left-[45%] z-30 bottom-1.5 flex items-center justify-center">
                 <button
                   onClick={() => setShowAllSurveys((prev) => !prev)}

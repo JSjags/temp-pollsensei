@@ -8,6 +8,8 @@ interface DialogState {
   adsWatched: number;
   totalAds: number;
   lastResetTime: number | null;
+  surveyID: string | null;
+  screenerSurvey: any;
 }
 
 const initialState: DialogState = {
@@ -17,27 +19,24 @@ const initialState: DialogState = {
   adsWatched: 0,
   totalAds: 3,
   lastResetTime: Date.now(),
+  surveyID: null,
+  screenerSurvey: null,
 };
 
 export const earnDialogSlice = createSlice({
   name: "dialog",
   initialState,
   reducers: {
-    // earnDialogSlice.js
     openSurveyFormDialog: (state) => {
-      // console.log("Opening SurveyFormDialog");
       state.isSurveyFormDialogOpen = true;
     },
     closeSurveyFormDialog: (state) => {
-      // console.log("Closing SurveyFormDialog");
       state.isSurveyFormDialogOpen = false;
     },
     openSurveyTabs: (state) => {
-      // console.log("Opening SurveyTabs");
       state.isSurveyTabsOpen = true;
     },
     closeSurveyTabs: (state) => {
-      // console.log("Closing SurveyTabs");
       state.isSurveyTabsOpen = false;
     },
     openAdsDialog: (state) => {
@@ -60,10 +59,22 @@ export const earnDialogSlice = createSlice({
     setLastResetTime: (state, action: PayloadAction<number>) => {
       state.lastResetTime = action.payload;
     },
+    setSurveyID: (state, action: PayloadAction<string>) => {
+      state.surveyID = action.payload;
+    },
+    setScreenerSurvey: (state, action: PayloadAction<any>) => {
+      state.screenerSurvey = action.payload;
+    },
   },
 });
+
 export const selectLastResetTime = (state: RootState) =>
   state.earnDialogSlice.lastResetTime;
+
+export const selectSurveyID = (state: RootState) =>
+  state.earnDialogSlice.surveyID;
+export const screenerSurvey = (state: RootState) =>
+  state.earnDialogSlice.screenerSurvey;
 
 export const {
   openSurveyFormDialog,
@@ -76,10 +87,14 @@ export const {
   resetAdsWatched,
   forceResetAds,
   setLastResetTime,
+  setSurveyID,
+  setScreenerSurvey,
 } = earnDialogSlice.actions;
 
 export const selectAdsState = (state: RootState) => state.earnDialogSlice;
 export const selectHasNextVideo = (state: RootState) =>
   state.earnDialogSlice.adsWatched < state.earnDialogSlice.totalAds;
+export const selectScreenerSurvey = (state: RootState) =>
+  state.earnDialogSlice.screenerSurvey;
 
 export default earnDialogSlice.reducer;

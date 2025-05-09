@@ -116,7 +116,7 @@ export function BuyServicesDialog(props: BuyDialogProps) {
       <Dialog.Trigger>{children}</Dialog.Trigger>
       <Dialog.Content
         className={cn(
-          "z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%]"
+          "z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%] max-[441px]:px-4"
         )}
       >
         {analysisStep === "buy" && (

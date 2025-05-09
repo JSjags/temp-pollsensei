@@ -145,7 +145,7 @@ export function TableLayout<T>({
           </div>
         </div>
       </div>
-      <div className="w-full table-auto">{children}</div>
+      {children}
       {pagination && (
         <div className="flex justify-end items-center mt-6">
           <div className="space-x-2 flex items-center">

@@ -1,3 +1,5 @@
+"use client";
+import React, { FC, useEffect, useState } from "react";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import AppReactQuill from "@/components/common/forms/AppReactQuill";
 import PaginationBtn from "@/components/common/PaginationBtn";
@@ -13,7 +15,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { FaStar } from "react-icons/fa6";
 import { useSelector } from "react-redux";
@@ -40,6 +41,8 @@ import { Switch } from "@/components/ui/switch";
 import PublicResponseFile from "@/components/ui/PublicVoiceRecorder";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { submitScreenerSurvey } from "@/services/api/apiRequest";
+import { selectScreenerSurvey } from "@/redux/slices/earnDialogSlice";
 
 interface Question {
   question: string;
@@ -59,17 +62,35 @@ interface FormErrors {
   questions: Record<string, string>;
 }
 
-const PublicResponse = () => {
+interface Props {
+  surveyId?: string | null;
+}
+
+const PublicResponse: FC<Props> = ({ surveyId }) => {
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const params = useParams();
-  const { data: psId, isLoading: psIdLoading } = useGetPublicSurveyByIdQuery(
-    params.id
+
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
   );
+
+  const screenerSurvey = useSelector(selectScreenerSurvey);
+
+  const shouldFetchSurvey = !screenerSurvey;
+
+  const { data: psId, isLoading: psIdLoading } = useGetPublicSurveyByIdQuery(
+    surveyId ? surveyId : params.id,
+    { skip: !shouldFetchSurvey }
+  );
+
   const { data: psShortUrl, isLoading: psShUrLoading } =
-    useGetPublicSurveyByShortUrlQuery(params.id);
+    useGetPublicSurveyByShortUrlQuery(params.id, {
+      skip: !shouldFetchSurvey,
+    });
+
   const [
     submitPublicResponse,
     { isSuccess: submitSuccess, isLoading: submitting, error: errorSubmitting },
@@ -273,10 +294,16 @@ const PublicResponse = () => {
   // console.log(selectedOptions);
 
   // console.log(psId);
+  // const question =
+  //   typeof params?.id === "string" && params.id.startsWith("ps-")
+  //     ? psId
+  //     : psShortUrl;
+
   const question =
-    typeof params?.id === "string" && params.id.startsWith("ps-")
+    screenerSurvey ||
+    (typeof params?.id === "string" && params.id.startsWith("ps-")
       ? psId
-      : psShortUrl;
+      : psShortUrl);
 
   useEffect(() => {
     if (question?.data?.sections) {
@@ -303,63 +330,54 @@ const PublicResponse = () => {
       ...answers[question.question],
     }));
 
-    // Validate required fields
-    const newFormErrors: FormErrors = {
-      questions: {},
-    };
+    const screenerFormattedAnswers = currentQuestions.map((question: any) => {
+      const answerData = answers[question.question];
+      let answerValue;
 
-    if (
-      question?.data?.settings?.collect_email_addresses &&
-      !respondent_email
-    ) {
-      newFormErrors.respondent_email = "Email is required";
-    }
-
-    if (
-      question?.data?.settings?.collect_name_of_respondents &&
-      !respondent_name
-    ) {
-      newFormErrors.respondent_name = "Name is required";
-    }
-
-    // Validate all questions in current section
-    currentQuestions.forEach((quest: any) => {
-      // Only validate if question is required
-      if (quest.is_required) {
-        const error = validateQuestionResponse(quest, answers[quest.question]);
-        if (error) {
-          newFormErrors.questions[quest.question] = error;
-        }
+      if (question.question_type === "checkbox") {
+        answerValue = answerData?.selected_options || [];
+      } else if (question.question_type === "boolean") {
+        answerValue = answerData?.selected_options?.[0] || "";
+      } else if (
+        question.question_type === "single_choice" ||
+        question.question_type === "drop_down"
+      ) {
+        answerValue = answerData?.selected_options?.[0] || "";
+      } else if (question.question_type === "text") {
+        answerValue = answerData?.text_response || "";
+      } else {
+        answerValue = "";
       }
+
+      return {
+        questionId: question.question,
+        question: question.question,
+        questionType: question.question_type,
+        answer: answerValue,
+        section: screenerSurvey?.data?.sections[0]?.sectionTitle,
+      };
     });
 
-    setFormErrors(newFormErrors);
+    // console.log({ screenerFormattedAnswers });
 
-    // Check if there are any errors
-    if (
-      Object.keys(newFormErrors.questions).length > 0 ||
-      newFormErrors.respondent_email ||
-      newFormErrors.respondent_name
-    ) {
-      toast.error("Please fix the validation errors before submitting");
-      return;
-    }
-
-    // Submit response
-    const responsePayload = {
-      survey_id: question?.data?._id,
-      respondent_name,
-      respondent_email,
-      answers: formattedAnswers,
+    const screenerSurveyResponsePayload = {
+      screenerId: screenerSurvey?.data?._id,
+      responses: screenerFormattedAnswers,
     };
 
-    try {
-      await submitPublicResponse(responsePayload).unwrap();
-      toast.success("Your response was saved successfully");
-      setSubmitSurveySuccess(true);
-    } catch (error) {
-      console.error(error);
-      toast.error("An error occurred while submitting your response");
+    if (screenerSurvey) {
+      try {
+        await submitScreenerSurvey(
+          userAccessToken,
+          screenerSurveyResponsePayload,
+          screenerSurvey?.data?.surveyIds[0]
+        );
+        toast.success("Your response was saved successfully");
+        setSubmitSurveySuccess(true);
+      } catch (error) {
+        console.error(error);
+        toast.error("An error occurred while submitting your response");
+      }
     }
   };
 
@@ -1172,7 +1190,7 @@ const PublicResponse = () => {
         <div>
           {question?.data && (
             <div
-              className={`${question?.data?.theme} min-h-screen flex justify-center px-5 bg-fixed lg:px-16 mx-auto gap-10 w-full`}
+              className={`${question?.data?.theme} max-h-[80vh] overflow-y-auto flex justify-center px-5 bg-[red] lg:px-16 mx-auto gap-10 w-full`}
             >
               <form
                 onSubmit={handleSubmitResponse}

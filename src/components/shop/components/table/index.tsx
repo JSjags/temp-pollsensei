@@ -47,7 +47,7 @@ export function TransactionHistoryTable({
       <TableLayout
         table={table}
         title="Transaction History"
-        renderSeeAll
+        // renderSeeAll
         pagination={pagination}
       >
         <Table isLoading={isHistoryLoading} hasHover table={table}>
