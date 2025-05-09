@@ -1,35 +1,33 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
-
-const initialState:  {
-    questions: any;
-    sectionTopic: string;
-    sectionDescription: string;
-  } = {
+const initialState: {
+  questions: any;
+  sectionTopic: string;
+  sectionDescription: string;
+} = {
   questions: [],
-  sectionTopic:'',
-  sectionDescription:'',
+  sectionTopic: "",
+  sectionDescription: "",
 };
 
 const questionSlice = createSlice({
-  name: 'questions',
+  name: "questions",
   initialState,
   reducers: {
     setQuestionObject: (_state, action) => {
       return {
-        questions: action.payload.questions,
-        sectionTopic: action.payload.sectionTopic,
-        sectionDescription: action.payload.sectionDescription,
+        questions: action.payload.questions || [],
+        sectionTopic: action.payload.sectionTopic || "",
+        sectionDescription: action.payload.sectionDescription || "",
       };
     },
- 
     updateSectionDescription: (state, action) => {
       state.sectionDescription = action.payload;
     },
     updateSectionTopic: (state, action) => {
       state.sectionTopic = action.payload;
     },
-    
+
     updateQuestions: (state, action) => {
       state.questions = action.payload;
     },
@@ -39,17 +37,20 @@ const questionSlice = createSlice({
     deleteQuestion: (state, action) => {
       state.questions.splice(action.payload, 1);
     },
-    updateQuestion: (state, action: { payload: { index: number; updatedQuestion: any } }) => {
+    updateQuestion: (
+      state,
+      action: { payload: { index: number; updatedQuestion: any } }
+    ) => {
       const { index, updatedQuestion } = action.payload;
       if (index >= 0 && index < state.questions.length) {
         state.questions[index] = updatedQuestion;
       } else {
-        console.error('Invalid index for updating question');
+        console.error("Invalid index for updating question");
       }
     },
-    resetQuestion:(_state)=>{
-      return initialState
-    }
+    resetQuestion: (_state) => {
+      return initialState;
+    },
   },
 });
 

@@ -42,11 +42,18 @@ interface TestProps {
 }
 
 const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
-  const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(props.test_results.results[0])[0]
+  // Filter out empty result objects
+  const validResults = props.test_results.results.filter(
+    (result) => Object.keys(result).length > 0
   );
 
-  const currentResult = props.test_results.results.find(
+  // Set initial selectedResult to the first valid result key, if any
+  const [selectedResult, setSelectedResult] = useState<string>(
+    validResults.length > 0 ? Object.keys(validResults[0])[0] : ""
+  );
+
+  // Find the current result from validResults
+  const currentResult = validResults.find(
     (result) => Object.keys(result)[0] === selectedResult
   )?.[selectedResult];
 
@@ -93,25 +100,31 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>{props.test_name}</span>
-            <Select value={selectedResult} onValueChange={setSelectedResult}>
-              <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
-                <SelectValue placeholder="Select variables" />
-              </SelectTrigger>
-              <SelectContent>
-                {props.test_results.results.map((result) => {
-                  const key = Object.keys(result)[0];
-                  return (
-                    <SelectItem key={key} value={key}>
-                      {formatKey(key)}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
+            {validResults.length > 0 ? (
+              <Select value={selectedResult} onValueChange={setSelectedResult}>
+                <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
+                  <SelectValue placeholder="Select variables" />
+                </SelectTrigger>
+                <SelectContent>
+                  {validResults.map((result) => {
+                    const key = Object.keys(result)[0];
+                    return (
+                      <SelectItem key={key} value={key}>
+                        {formatKey(key)}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            ) : null}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!currentResult ? (
+          {validResults.length === 0 ? (
+            <div className="p-4">
+              <p>No valid results available for this analysis.</p>
+            </div>
+          ) : !currentResult ? (
             <div className="p-4">
               <p>No data available for this selection.</p>
             </div>
