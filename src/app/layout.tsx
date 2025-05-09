@@ -90,6 +90,12 @@ export default function RootLayout({
       <AOSInit />
       <MetaPixel />
       <head>
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2428405645589002"
+          crossOrigin="anonymous"
+        />
         {/* Hotjar Tracking Code (Production Only) */}
         {process.env.NODE_ENV === "production" && (
           <script

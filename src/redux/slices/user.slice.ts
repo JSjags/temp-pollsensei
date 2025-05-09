@@ -6,6 +6,11 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+  referral_reward?: {
+    number_of_referred_users?: number;
+    accrued_amount?: number;
+    has_requested_payout?: boolean;
+  };
   roles: Array<{
     organization: string;
     role: string[];
