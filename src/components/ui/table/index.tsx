@@ -1,8 +1,6 @@
 "use client";
 import { flexRender, Table as ReactTable } from "@tanstack/react-table";
-
 import { TableEmptyState } from "./empty";
-
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ReactNode, useRef } from "react";
@@ -30,31 +28,16 @@ export function Table<T>({
   isLoading,
   children,
 }: TableProps<T>) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const highlightRef = useRef<HTMLDivElement | null>(null);
-  const isDataEmpty = table.getRowModel().rows.length === 0;
-  const isNoData = table.options.data.length === 0;
   const { open } = useSidebar();
   const isBelow1280 = useMediaQuery("(max-width: 1280px)");
   const isBelow1320 = useMediaQuery("(max-width: 1320px)");
   const rows = table.getRowModel().rows;
   const totalColumns = table.getAllColumns().length;
-  // if (!isLoading && rows.length===0) {
-  //   return (
-  //     <div className="w-full your-table-container" suppressHydrationWarning>
-  //       <TableEmptyState>{children}</TableEmptyState>
-  //     </div>
-  //   );
-  // }
   if (isLoading) return <SkeletonEl />;
   return (
     <div
       id="table-wrapper"
       className="relative"
-      // onPointerLeave={() => {
-      //   if (!highlightRef.current) return;
-      //   highlightRef.current.style.opacity = '0';
-      // }}
     >
       <div suppressHydrationWarning>
         <ScrollArea.Root>

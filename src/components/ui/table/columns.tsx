@@ -1,7 +1,6 @@
 import React from "react";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { Table } from "@tanstack/react-table";
-
 import { ScrollArea } from "../scrollarea";
 import { Button } from "../button";
 import * as Popover from "@radix-ui/react-popover";

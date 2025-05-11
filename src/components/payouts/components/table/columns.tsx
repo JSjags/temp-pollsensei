@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { TransactionHistory } from "@/components/shop/types";
 
 export type PayoutStatus =
   | "pending"
