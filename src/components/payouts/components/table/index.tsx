@@ -74,7 +74,7 @@ export function PayoutsHistoryTable({
   return (
     <HydrationBoundary state={dehydrate}>
       <TableLayout<PayoutTransaction>
-        title="Transaction History"
+        title="Payout History"
         table={table}
         filters={payoutFilters}
         onFilterChange={handlePayoutFilterChange}
@@ -92,8 +92,8 @@ export function PayoutsHistoryTable({
             <div className="max-md:text-center">
               <p className="mb-6 text-lg">
                 {payoutData.length === 0
-                  ? "You have not made any payout"
-                  : "You do not have payouts with this status"}
+                  ? "You have not made any payout."
+                  : "No data found."}
               </p>
             </div>
           </div>

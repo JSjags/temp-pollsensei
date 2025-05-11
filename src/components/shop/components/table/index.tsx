@@ -61,10 +61,10 @@ export function TransactionHistoryTable({
                 className="max-w-[285px] w-full"
               />
 
-              <div className="md:max-w-[223px] max-md:text-center">
+              <div className="md:max-w-[500px] max-md:text-center">
                 {historyData.length === 0 ? (
-                  <>
-                    <p className="mb-6 text-lg">
+                  <div className="flex items-center justify-center flex-col">
+                    <p className="mb-6 text-lg text-center">
                       Oops! No recorded transactions yet. Buy Pollcoins to use
                       the AI features of PollSensei
                     </p>
@@ -77,10 +77,10 @@ export function TransactionHistoryTable({
                         <Image src={Arrow} alt="icons" className="size-3.5" />
                       </Button>
                     </BuyPollcoinsFlow>
-                  </>
+                  </div>
                 ) : (
                   <p className="text-lg">
-                    You have no data for the selected filter
+                    No data found.
                   </p>
                 )}
               </div>

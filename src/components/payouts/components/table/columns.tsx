@@ -1,7 +1,11 @@
 "use client";
 import { createColumnHelper } from "@tanstack/react-table";
 import { ColumnHeader } from "@/components/ui/table/header";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { TransactionHistory } from "@/components/shop/types";
@@ -14,7 +18,7 @@ export type PayoutStatus =
   | "reversed"
   | "canceled"
   | "otp"
-  |'abandoned';
+  | "abandoned";
 
 export type PayoutTransaction = {
   _id: string;
@@ -34,7 +38,7 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
    * -----------------------------------------------------------------------------------------------*/
   const transactionIdColumn = columns.accessor("transaction_id", {
     header: ({ column }) => (
-      <div className="flex items-center gap-3 min-w-[103px]">
+      <div className="flex items-center gap-3">
         <ColumnHeader column={column}>Transaction Id</ColumnHeader>
       </div>
     ),
@@ -59,7 +63,7 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
   const DATE_HEADER_NAME = "Date";
   const dateColumn = columns.accessor("createdAt", {
     header: ({ column }) => (
-      <div className="min-w-[120px]">
+      <div className="">
         <ColumnHeader column={column}>Date</ColumnHeader>
       </div>
     ),
@@ -82,7 +86,7 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
   const STATUS_HEADER_NAME = "Status";
   const statusColumn = columns.accessor("status", {
     header: ({ column }) => (
-      <div className="flex min-w-[120px]">
+      <div className="flex">
         <ColumnHeader column={column}>Status</ColumnHeader>
       </div>
     ),
@@ -92,7 +96,7 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
       return (
         <div
           className={cn(
-            "min-w-[100px] py-1 flex items-center justify-center rounded-full text-sm",
+            "px-2 py-1 flex items-center justify-center rounded-full text-sm",
             {
               "bg-[#FCCC951A] text-[#AE5F04]": status === "pending",
               "bg-[#D3FAEC]/60 text-[#069662]": status === "paid",
@@ -115,15 +119,20 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
   const DETAILS_HEADER_NAME = "Details";
   const detailsColumn = columns.accessor("details", {
     header: ({ column }) => (
-      <div className="flex min-w-[120px]">
+      <div className="flex">
         <ColumnHeader column={column}>Type</ColumnHeader>
       </div>
     ),
     cell: ({ getValue }) => {
       return (
-        <div className="min-w-[100px] py-1 flex items-center justify-center">
-          <p className={cn("text-sm")}>{getValue()}</p>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <p className="text-sm text-muted-foreground max-w-[170px] truncate">
+              {getValue()}
+            </p>
+          </TooltipTrigger>
+          <TooltipContent>{getValue()}</TooltipContent>
+        </Tooltip>
       );
     },
     meta: { headerName: DETAILS_HEADER_NAME },
@@ -135,7 +144,7 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
   const AMOUNT_HEADER_NAME = "Amount";
   const amountColumn = columns.accessor("amount", {
     header: ({ column }) => (
-      <div className="flex min-w-[120px]">
+      <div className="flex">
         <ColumnHeader column={column}>Amount</ColumnHeader>
       </div>
     ),

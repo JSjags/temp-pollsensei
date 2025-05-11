@@ -39,7 +39,7 @@ export function Columns<T>({ table }: ColumnsProps<T>) {
       <Popover.Trigger>
         <Button
           variant="secondary"
-          className="!h-9 cursor-pointer flex items-center gap-2 !px-2 !text-sm !text-new-foreground !font-sans !bg-new-terciary !border !border-new-elements-border !font-medium"
+          className="!h-9 cursor-pointer flex items-center gap-2 !px-2 !text-sm !font-semibold !text-new-foreground !font-sans !bg-new-terciary !border !border-border"
         >
           <ColumnsIcon />
           Columns
@@ -52,43 +52,50 @@ export function Columns<T>({ table }: ColumnsProps<T>) {
       >
         <div className="w-full h-[0.5px] bg-new-elements-border" />
         <ScrollArea.Root className="p-3 flex flex-col gap-1 max-h-[300px]">
-          {columns?.map((col) => (
-            <div
-              key={col.id}
-              className="flex items-center  gap-2 py-2 text-sm cursor-pointer"
-            >
-              <Checkbox.Root
-                id={col.id}
-                checked={col.getIsVisible()}
-                onCheckedChange={() => col.toggleVisibility()}
-                className={cn(
-                  "size-4 !rounded-[4px] transition-none flex items-center justify-center",
-                  "data-[state=unchecked]:ring-1 data-[state=unchecked]:ring-new-elements-border",
-                  "data-[state=checked]:bg-primary"
-                )}
+          {columns?.length ? (
+            columns.map((col) => (
+              <div
+                key={col.id}
+                className="flex items-center gap-2 py-2 text-sm cursor-pointer"
               >
-                <Checkbox.Indicator>
-                  <svg
-                    width="10"
-                    height="8"
-                    viewBox="0 0 10 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M9.53032 2.03039L4 7.56072L0.469666 4.03039L1.53033 2.96973L4 5.4394L8.46967 0.969727L9.53032 2.03039Z"
-                      fill="white"
-                    />
-                  </svg>
-                </Checkbox.Indicator>
-              </Checkbox.Root>
-              <label htmlFor={col.id} className="cursor-pointer">
-                {col.columnDef.meta?.headerName}
-              </label>
-            </div>
-          ))}
+                <Checkbox.Root
+                  id={col.id}
+                  checked={col.getIsVisible()}
+                  onCheckedChange={() => col.toggleVisibility()}
+                  className={cn(
+                    "size-4 !rounded-[4px] transition-none flex items-center justify-center",
+                    "data-[state=unchecked]:ring-1 data-[state=unchecked]:ring-new-elements-border",
+                    "data-[state=checked]:bg-primary"
+                  )}
+                  aria-label={`Toggle column ${col.columnDef.meta?.headerName}`}
+                >
+                  <Checkbox.Indicator>
+                    <svg
+                      width="10"
+                      height="8"
+                      viewBox="0 0 10 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M9.53032 2.03039L4 7.56072L0.469666 4.03039L1.53033 2.96973L4 5.4394L8.46967 0.969727L9.53032 2.03039Z"
+                        fill="white"
+                      />
+                    </svg>
+                  </Checkbox.Indicator>
+                </Checkbox.Root>
+                <label htmlFor={col.id} className="cursor-pointer">
+                  {col.columnDef.meta?.headerName}
+                </label>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted-foreground text-sm px-2">
+              No columns found
+            </p>
+          )}
         </ScrollArea.Root>
       </Popover.Content>
     </Popover.Root>

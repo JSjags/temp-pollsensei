@@ -4,7 +4,11 @@ import { ColumnHeader } from "@/components/ui/table/header";
 import { HistoryStatus, HistoryType, TransactionHistory } from "../../types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
   const columns = createColumnHelper<TransactionHistory>();
@@ -14,7 +18,7 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
    * -----------------------------------------------------------------------------------------------*/
   const transactionIdColumn = columns.accessor("transactionId", {
     header: ({ column }) => (
-      <div className="flex items-center gap-3 min-w-[103px]">
+      <div className="flex items-center gap-3">
         <ColumnHeader column={column}>Transaction Id</ColumnHeader>
       </div>
     ),
@@ -37,27 +41,9 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
    * Date column
    * -----------------------------------------------------------------------------------------------*/
   const DATE_HEADER_NAME = "Date";
-  // const dateColumn = columns.accessor("date", {
-  //   header: ({ column }) => (
-  //     <div className="min-w-[120px]">
-  //       <ColumnHeader column={column}>Date</ColumnHeader>
-  //     </div>
-  //   ),
-  //   cell: ({ getValue }) => {
-  //     const date = getValue() as Date;
-  //     const formattedDate = format(date, "M/d/yy");
-
-  //     return (
-  //       <div className="flex gap-2 items-center">
-  //         <p className="text-sm">{formattedDate}</p>
-  //       </div>
-  //     );
-  //   },
-  //   meta: { headerName: DATE_HEADER_NAME },
-  // });
   const dateColumn = columns.accessor("date", {
     header: ({ column }) => (
-      <div className="min-w-[120px]">
+      <div className="">
         <ColumnHeader column={column}>{DATE_HEADER_NAME}</ColumnHeader>
       </div>
     ),
@@ -81,7 +67,7 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
   const TYPE_HEADER_NAME = "Type";
   const typeColumn = columns.accessor("type", {
     header: ({ column }) => (
-      <div className="flex min-w-[120px]">
+      <div className="flex">
         <ColumnHeader column={column}>Type</ColumnHeader>
       </div>
     ),
@@ -91,7 +77,7 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
       return (
         <div
           className={cn(
-            "bg-[#FFDFE080] text-[#BF0508] min-w-[100px] py-1 flex items-center justify-center rounded-full",
+            "bg-[#FFDFE080] text-[#BF0508] py-1 flex items-center justify-center rounded-full px-2",
             {
               "bg-[#D3FAEC]/60 text-[#069662]": type === "credit",
             }
@@ -110,7 +96,7 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
   const STATUS_HEADER_NAME = "Status";
   const statusColumn = columns.accessor("status", {
     header: ({ column }) => (
-      <div className="flex min-w-[120px]">
+      <div className="flex">
         <ColumnHeader column={column}>Status</ColumnHeader>
       </div>
     ),
@@ -120,7 +106,7 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
       return (
         <div
           className={cn(
-            "bg-[#D195FC1A] text-[#6704AE] min-w-[100px] py-1 flex items-center justify-center rounded-full",
+            "bg-[#D195FC1A] text-[#6704AE] py-1 flex items-center justify-center rounded-full px-2",
             {
               "bg-[#FFDFE080] text-[#BF0508]": status === "Failed",
               "bg-[#FCCC951A] text-[#AE5F04]": status === "Pending",
@@ -143,12 +129,19 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
     {
       id: "description",
       header: ({ column }) => (
-        <div className="flex min-w-[200px]">
+        <div className="flex">
           <ColumnHeader column={column}>Description</ColumnHeader>
         </div>
       ),
       cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">{getValue()}</p>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <p className="text-sm text-muted-foreground max-w-[170px] truncate">
+              {getValue()}
+            </p>
+          </TooltipTrigger>
+          <TooltipContent>{getValue()}</TooltipContent>
+        </Tooltip>
       ),
       meta: { headerName: DESCRIPTION_HEADER_NAME },
     }
@@ -160,20 +153,21 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
   const AMOUNT_HEADER_NAME = "Amount";
   const amountColumn = columns.accessor("amount", {
     header: ({ column }) => (
-      <div className="flex min-w-[120px]">
+      <div className="flex">
         <ColumnHeader column={column}>Amount</ColumnHeader>
       </div>
     ),
     cell: ({ getValue, row }) => {
-      const amount = getValue()
-      const description = row.original.details?.description?.toLowerCase() || "";
+      const amount = getValue();
+      const description =
+        row.original.details?.description?.toLowerCase() || "";
       const formattedAmount = amount.toLocaleString();
-  
+
       let displayValue = `${isNigeria ? "₦" : "$"}${formattedAmount}`;
       if (description.includes("purchase") && description.includes("credits")) {
         displayValue = `${formattedAmount}pc`;
       }
-  
+
       return (
         <div>
           <p className="text-sm">{displayValue}</p>
@@ -182,14 +176,14 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
     },
     meta: { headerName: AMOUNT_HEADER_NAME },
   });
-  
+
   /* -------------------------------------------------------------------------------------------------
    * Timestamp column
    * -----------------------------------------------------------------------------------------------*/
   const TIMESTAMP_HEADER_NAME = "Timestamp";
   const timestampColumn = columns.accessor("timestamp", {
     header: ({ column }) => (
-      <div className="min-w-[120px]">
+      <div className="">
         <ColumnHeader column={column}>{TIMESTAMP_HEADER_NAME}</ColumnHeader>
       </div>
     ),
