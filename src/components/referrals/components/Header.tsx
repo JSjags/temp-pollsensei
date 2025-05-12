@@ -44,7 +44,7 @@ export function Header() {
     }
   }, [data]);
   return (
-    <div className="flex md:items-center justify-between max-md:flex-col gap-5">
+    <div className="flex lg:items-center justify-between max-lg:flex-col gap-5">
       <div className="space-y-2 flex-1">
         <div className="flex lg:items-center gap-2">
           <h1 className="text-xl md:text-[38px] font-bold">
@@ -55,10 +55,10 @@ export function Header() {
           Here’s your Referral Activity
         </p>
       </div>
-      <div className="flex justify-end w-[65%] max-md:w-full">
+      <div className="flex justify-end w-[65%] max-lg:w-full">
         <div
           className={cn(
-            "border border-[#5B03B24D] rounded-[10px] h-12 flex items-center w-fit max-md:w-full gap-4 px-5 overflow-hidden",
+            "border border-[#5B03B24D] rounded-[10px] h-12 flex items-center justify-center w-fit max-md:w-full gap-4 px-5 max-sm:px-2 overflow-hidden",
             {
               "w-[55%]": isLoading,
             }
@@ -67,7 +67,7 @@ export function Header() {
           {isLoading ? (
             <Skeleton className="h-6 w-full" />
           ) : (
-            <div className="flex md:items-center gap-4 w-full overflow-hidden">
+            <div className="flex items-center gap-4 w-full overflow-hidden">
               <p className="flex items-center gap-1 max-md:text-sm">
                 Referral Link:{" "}
                 <span className="text-sm font-medium text-[#837575] truncate max-md:max-w-[200px] inline-block">

@@ -293,6 +293,9 @@ const BuyRespondent = () => {
               />
             </div>
           </div>
+          {/* <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
+            <Image src={Purchases1} alt="icons" layout="fill" className="object-contain" />
+          </div> */}
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}

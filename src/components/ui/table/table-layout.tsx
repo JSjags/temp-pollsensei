@@ -42,8 +42,8 @@ const defaultTransactionFilters: FilterConfig<
   TransactionFilterValue | null
 >[] = [
   { label: "All", value: "All", column: null, isDefault: true },
-  { label: "Credit", value: "Credit", column: "type" },
-  { label: "Debit", value: "Debit", column: "type" },
+  { label: "Credit", value: "credit", column: "type" },
+  { label: "Debit", value: "debit", column: "type" },
   { label: "Completed", value: "Completed", column: "status" },
   { label: "Pending", value: "Pending", column: "status" },
 ];
@@ -61,7 +61,6 @@ export function TableLayout<T>({
   const defaultFilter = filters.find((f) => f.isDefault) || filters[0];
   const [selectedFilter, setSelectedFilter] =
     useState<FilterConfig<string, string | null>>(defaultFilter);
-  const disabled = table.getRowModel().rows.length === 0;
 
   const filterColumns = useMemo(() => {
     const columns = new Set<string>();
@@ -101,24 +100,17 @@ export function TableLayout<T>({
   }, [selectedFilter, table, filterColumns, onFilterChange]);
 
   const handleFilterChange = (filter: FilterConfig<string, string | null>) => {
-    if (!disabled) {
-      setSelectedFilter(filter);
-    }
+    setSelectedFilter(filter);
   };
 
   return (
     <div className="flex flex-col w-full mt-10">
-      <div className="flex md:items-center justify-between mt-[29px] mb-[51px] max-md:flex-col max-md:gap-4">
-        <div className="flex items-center max-md:justify-between max-md:w-full">
+      <div className="flex justify-between mt-[29px] mb-[51px] flex-col gap-6">
+        <div className="flex items-center justify-between w-full mb-8">
           <p className="text-xl font-bold">{title}</p>
-          {table.getRowModel().rows.length > 0 && (
-            <div className="md:hidden">
-              <Columns table={table} />
-            </div>
-          )}
         </div>
 
-        <div className="flex md:justify-end w-1/2 max-md:w-full">
+        <div className="flex items-center justify-between">
           <div className="md:flex items-center justify-between w-auto gap-7">
             <div className="flex md:items-center md:gap-[22.5px] gap-3 flex-wrap">
               {filters.map((filter) => (
@@ -128,15 +120,10 @@ export function TableLayout<T>({
                   className="flex items-center gap-2"
                 >
                   <Checkbox
-                    disabled={disabled}
                     checked={selectedFilter.value === filter.value}
                     onCheckedChange={() => handleFilterChange(filter)}
                   />
-                  <label
-                    className={cn("max-md:text-xs", {
-                      "opacity-30": disabled,
-                    })}
-                  >
+                  <label className={cn("max-md:text-xs", {})}>
                     {filter.label}
                   </label>
                 </div>
@@ -151,9 +138,10 @@ export function TableLayout<T>({
               </Link>
             )}
           </div>
+          <Columns table={table} />
         </div>
       </div>
-      <div className="w-full table-auto">{children}</div>
+      {children}
       {pagination && (
         <div className="flex justify-end items-center mt-6">
           <div className="space-x-2 flex items-center">

@@ -11,6 +11,7 @@ import { useUserBalance } from "@/components/shop/queries/useBalance";
 import { LoadingSpinner } from "../BuyPollcoins/CheckoutDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "react-toastify";
+import { formatNumber } from "@/components/payouts/functions";
 
 type BuyDialogProps = {
   children: ReactNode;
@@ -46,10 +47,9 @@ export function BuyServicesDialog(props: BuyDialogProps) {
     useShopStore();
   const description = `You have purchased ${credit} ${title}`;
   const { data } = useUserBalance();
-  const { unrestrictedBalance = 0 } = data || {};
+  const { restrictedBalance = 0 } = data || {};
 
   const pollcoinRequired = credit ? parseFloat(credit) * pricePerCredit : 0;
-console.log(credit, 'Credit');
 
   const hasValidCredits =
     credit !== "" &&
@@ -57,7 +57,7 @@ console.log(credit, 'Credit');
     pollcoinRequired >= minimumPurchase;
 
   const isBalanceInsufficient =
-    hasValidCredits && pollcoinRequired > unrestrictedBalance;
+    hasValidCredits && pollcoinRequired > restrictedBalance;
 
   useEffect(() => {
     if (credit) {
@@ -116,7 +116,7 @@ console.log(credit, 'Credit');
       <Dialog.Trigger>{children}</Dialog.Trigger>
       <Dialog.Content
         className={cn(
-          "z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%]"
+          "z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%] max-[441px]:px-4"
         )}
       >
         {analysisStep === "buy" && (
@@ -164,7 +164,7 @@ console.log(credit, 'Credit');
 
                   <input
                     type="text"
-                    value={analysisAmount}
+                    value={formatNumber(Number(analysisAmount))}
                     readOnly
                     className="h-[54px] flex-1 pl-2.5 bg-transparent outline-none text-muted-foreground"
                   />
@@ -194,7 +194,7 @@ console.log(credit, 'Credit');
             <div className="flex mt-auto w-full">
               <Button
                 onClick={handleSubmit}
-                disabled={isBalanceInsufficient || !credit} 
+                disabled={isBalanceInsufficient || !credit}
                 variant="gradient"
                 className="w-full rounded mt-12 max-[441px]:!h-12"
               >

@@ -1,4 +1,4 @@
-export type HistoryType = "Debit" | "Credit";
+export type HistoryType = "debit" | "credit";
 export type HistoryStatus = "Completed" | "Pending" | "Failed";
 
 export type TransactionHistory = {

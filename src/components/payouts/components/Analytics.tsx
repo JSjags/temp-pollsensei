@@ -10,14 +10,14 @@ import {
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { usePayoutStore } from "../store/usePayoutStore";
+import { useUserBalance } from "@/components/shop/queries/useBalance";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Analytics() {
-  const {
-    overallEarnings,
-    coinsObtained,
-    redeemableCoins,
-    coinsRedeemed,
-  } = usePayoutStore();
+  const { data, isLoading } = useUserBalance();
+  const { unrestrictedBalance } = data || {};
+  const { overallEarnings, coinsObtained, redeemableCoins, coinsRedeemed } =
+    usePayoutStore();
 
   const analyticData = [
     {
@@ -32,7 +32,7 @@ export function Analytics() {
     },
     {
       label: "Redeemable Coins",
-      value: redeemableCoins,
+      value: unrestrictedBalance || 0,
       icon: RedeemableCoin,
     },
     {
@@ -56,7 +56,13 @@ export function Analytics() {
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col gap-1.5">
                     <p className="text-xs text-muted-foreground">{label}</p>
-                    <h4 className="text-xl font-bold">{value}</h4>
+                    {isLoading ? (
+                      <Skeleton className="h-5 w-full" />
+                    ) : (
+                      <h4 className="text-xl font-bold">
+                        {value.toLocaleString()}
+                      </h4>
+                    )}
                   </div>
                   <div
                     className={cn(

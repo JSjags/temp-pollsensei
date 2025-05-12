@@ -1,48 +1,31 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Analytics } from "./components/Analytics";
 import { PayoutsHistoryTable } from "./components/table";
-import { PayoutTransaction } from "./components/table/columns";
+import { usePayoutHistory } from "./queries/usePayoutHistory";
 
 export function PayoutPage() {
+  const [page, setPage] = useState(1);
+  const { data, isLoading } = usePayoutHistory({ page });
+  const total = data?.total ?? 0;
+  const pageSize = data?.page_size ?? 20;
+  const totalPages = Math.ceil(total / pageSize);
   return (
     <>
       <Analytics />
       <div className="max-md:px-5 ">
-        <PayoutsHistoryTable payoutData={[]} isHistoryLoading={false} />
+        <PayoutsHistoryTable
+          payoutData={data?.data || []}
+          isHistoryLoading={isLoading}
+          pagination={
+            data?.page && {
+              page: data.page,
+              totalPages: totalPages,
+              setPage: setPage,
+            }
+          }
+        />
       </div>
     </>
   );
 }
-
-function generateMockTransaction(id: number): PayoutTransaction {
-  const now = new Date();
-  const randomOffset = Math.floor(Math.random() * 100000000);
-  const date = new Date(now.getTime() - randomOffset);
-
-  return {
-    _id: id.toString(),
-    category: "some category",
-    transactionId: id,
-    date,
-    details: [
-      "Répartition des / du revenu(s)",
-      "Report de solde",
-      "Remise sur les frais de gestion",
-      "Ajustement d'achat",
-    ][Math.floor(Math.random() * 4)],
-    status: ["Paid", "Pending"][Math.floor(Math.random() * 2)] as
-      | "Paid"
-      | "Pending",
-    activity: ["Survey", "Ads"][Math.floor(Math.random() * 2)] as
-      | "Survey"
-      | "Ads",
-
-    amount: Number((Math.random() * 1000).toFixed(2)),
-  };
-}
-
-export const mockPayoutHistory: PayoutTransaction[] = Array.from(
-  { length: 20 },
-  (_, i) => generateMockTransaction(i + 1)
-);
