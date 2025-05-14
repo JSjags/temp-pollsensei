@@ -16,15 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  PayoutPayload,
-  usePaystackPayout,
-  usePaystackPreviousPayoutBank,
-} from "@/lib/payout";
+import { usePaystackPayout, usePaystackPreviousPayoutBank } from "@/lib/payout";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 import { toast } from "react-toastify";
 import { usePreviousPayoutBank } from "../../queries/usePreviousPayoutBank";
 import ConfirmationDialog from "./Confirmation";
+import StripeDialog from "./Stripe";
 
 const PaymentOptionsData = [
   {
@@ -45,6 +42,7 @@ export function CheckoutDialog() {
   const [selectedOption, setSelectedOption] = useState<string | null>("Card");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+
   const [cardNumber, setCardNumber] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -223,51 +221,56 @@ export function CheckoutDialog() {
             ))}
           </div>
 
-          {selectedOption !== "Stripe" && (
-            <div className="flex flex-col h-full">
-              <AnimatePresence mode="wait">
-                <motion.form
-                  key="card-form"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="flex flex-col gap-4 h-full"
-                >
-                  <div>
-                    {selectedOption === "Paystack" && hasPreviousBank && (
-                      <div className="flex justify-end">
-                        <button
-                          onClick={handleUsePreviousBank}
-                          type="button"
-                          className="text-tertiary underline"
-                        >
-                          Use previous payout bank
-                        </button>
-                      </div>
-                    )}
-                    <label htmlFor="name" className="text-sm">
-                      {selectedOption === "Paystack"
-                        ? "Account Name"
-                        : "Card Holder Name"}
-                    </label>
-                    <Input
-                      type="text"
-                      id="name"
-                      name="name"
-                      placeholder={
-                        selectedOption === "Paystack"
-                          ? "Enter account name"
-                          : "Enter card holder name"
-                      }
-                      className="mt-2 h-[54px]"
-                      value={name}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                      }}
-                    />
-                  </div>
-                  {selectedOption !== "Paystack" && (
+          {/* {selectedOption !== "Stripe" && ( */}
+          <div className="flex flex-col h-full">
+            <AnimatePresence mode="wait">
+              <motion.form
+                key="card-form"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="flex flex-col gap-4 h-full"
+              >
+                <div>
+                  {selectedOption === "Paystack" && hasPreviousBank && (
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleUsePreviousBank}
+                        type="button"
+                        className="text-tertiary underline"
+                      >
+                        Use previous payout bank
+                      </button>
+                    </div>
+                  )}
+                  {selectedOption !== "Stripe" && (
+                    <>
+                      <label htmlFor="name" className="text-sm">
+                        {selectedOption === "Paystack"
+                          ? "Account Name"
+                          : "Card Holder Name"}
+                      </label>
+                      <Input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder={
+                          selectedOption === "Paystack"
+                            ? "Enter account name"
+                            : "Enter card holder name"
+                        }
+                        className="mt-2 h-[54px]"
+                        value={name}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
+                {selectedOption !== "Paystack" &&
+                  selectedOption !== "Stripe" && (
                     <>
                       <div>
                         <label htmlFor="number" className="text-sm">
@@ -321,125 +324,123 @@ export function CheckoutDialog() {
                       </div>
                     </>
                   )}
-                  {selectedOption === "Paystack" && (
-                    <>
-                      <div>
-                        <label htmlFor="number" className="text-sm">
-                          Account Number
+                {selectedOption === "Paystack" && (
+                  <>
+                    <div>
+                      <label htmlFor="number" className="text-sm">
+                        Account Number
+                      </label>
+                      <Input
+                        type="number"
+                        id="number"
+                        name="number"
+                        placeholder="Enter account number"
+                        className="mt-2 h-[54px]"
+                        value={accountNumber}
+                        onChange={(e) => {
+                          setAccountNumber(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div className="flex w-full items-center gap-2.5">
+                      <div className="w-full">
+                        <label htmlFor="bank" className="text-sm">
+                          Select Bank
                         </label>
-                        <Input
-                          type="number"
-                          id="number"
-                          name="number"
-                          placeholder="Enter account number"
-                          className="mt-2 h-[54px]"
-                          value={accountNumber}
-                          onChange={(e) => {
-                            setAccountNumber(e.target.value);
-                          }}
-                        />
-                      </div>
-                      <div className="flex w-full items-center gap-2.5">
-                        <div className="w-full">
-                          <label htmlFor="bank" className="text-sm">
-                            Select Bank
-                          </label>
-                          <Select
-                            value={selectedBank?.bank_code}
-                            onValueChange={handleSelectChange}
+                        <Select
+                          value={selectedBank?.bank_code}
+                          onValueChange={handleSelectChange}
+                        >
+                          <SelectTrigger className="mt-2 h-[54px] w-full">
+                            <SelectValue placeholder="Choose a bank" />
+                          </SelectTrigger>
+
+                          <SelectContent
+                            align="end"
+                            className="rounded-xl z-[10000000000000000] relative"
                           >
-                            <SelectTrigger className="mt-2 h-[54px] w-full">
-                              <SelectValue placeholder="Choose a bank" />
-                            </SelectTrigger>
+                            {/* Search Input */}
+                            <div className="px-2 py-1 fixed top-1 w-full z-40 left-0 right-0">
+                              <input
+                                type="text"
+                                className="w-full px-3 py-2 text-sm rounded-md border border-gray-300"
+                                placeholder="Search banks..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                autoFocus
+                              />
+                            </div>
 
-                            <SelectContent
-                              align="end"
-                              className="rounded-xl z-[10000000000000000] relative"
-                            >
-                              {/* Search Input */}
-                              <div className="px-2 py-1 fixed top-1 w-full z-40 left-0 right-0">
-                                <input
-                                  type="text"
-                                  className="w-full px-3 py-2 text-sm rounded-md border border-gray-300"
-                                  placeholder="Search banks..."
-                                  value={searchQuery}
-                                  onChange={(e) =>
-                                    setSearchQuery(e.target.value)
-                                  }
-                                  autoFocus
-                                />
-                              </div>
-
-                              <div className="mt-12">
-                                {banks
-                                  ?.filter(
-                                    (bank) =>
-                                      bank.is_active &&
-                                      bank.bank_name
-                                        .toLowerCase()
-                                        .includes(searchQuery.toLowerCase())
-                                  )
-                                  .map((bank) => (
-                                    <SelectItem
-                                      key={bank.bank_code}
-                                      value={bank.bank_code}
-                                    >
-                                      {bank.bank_name}
-                                    </SelectItem>
-                                  ))}
-                              </div>
-                              {/* Filtered Banks List */}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                            <div className="mt-12">
+                              {banks
+                                ?.filter(
+                                  (bank) =>
+                                    bank.is_active &&
+                                    bank.bank_name
+                                      .toLowerCase()
+                                      .includes(searchQuery.toLowerCase())
+                                )
+                                .map((bank) => (
+                                  <SelectItem
+                                    key={bank.bank_code}
+                                    value={bank.bank_code}
+                                  >
+                                    {bank.bank_name}
+                                  </SelectItem>
+                                ))}
+                            </div>
+                            {/* Filtered Banks List */}
+                          </SelectContent>
+                        </Select>
                       </div>
-                    </>
-                  )}
-                </motion.form>
-              </AnimatePresence>
-              <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
-                {selectedOption === "Paystack" ? (
-                  <ConfirmationDialog
-                    name={name}
-                    bankCode={selectedBank?.bank_code || ""}
-                    bankName={selectedBank?.bank_name || ""}
-                    accountNumber={accountNumber}
-                    amount={coinQuantity}
-                  >
-                    <Button
-                      disabled={
-                        isProcessing ||
-                        !selectedBank ||
-                        !accountNumber ||
-                        !name ||
-                        accountNumber.length !== 10
-                      }
-                      variant="gradient"
-                      className="w-full rounded !h-12 gap-2 font-bold text-base"
-                    >
-                      Proceed
-                    </Button>
-                  </ConfirmationDialog>
-                ) : (
+                    </div>
+                  </>
+                )}
+              </motion.form>
+            </AnimatePresence>
+            <div className="mt-auto w-full flex items-end justify-end min-[440px]:hidden">
+              {selectedOption === "Paystack" ? (
+                <ConfirmationDialog
+                  name={name}
+                  bankCode={selectedBank?.bank_code || ""}
+                  bankName={selectedBank?.bank_name || ""}
+                  accountNumber={accountNumber}
+                  amount={coinQuantity}
+                >
                   <Button
                     disabled={
                       isProcessing ||
-                      !cardNumber ||
-                      !cardExpiry ||
-                      !cardCVV ||
-                      !name
+                      !selectedBank ||
+                      !accountNumber ||
+                      !name ||
+                      accountNumber.length !== 10
                     }
                     variant="gradient"
                     className="w-full rounded !h-12 gap-2 font-bold text-base"
-                    onClick={handleCheckout}
                   >
-                    {isProcessing && <LoadingSpinner />}
-                    {isProcessing ? "Processing..." : "Checkout"}
+                    Proceed
                   </Button>
-                )}
-              </div>
+                </ConfirmationDialog>
+              ) : (
+                <Button
+                  disabled={
+                    isProcessing ||
+                    !cardNumber ||
+                    !cardExpiry ||
+                    !cardCVV ||
+                    !name
+                  }
+                  variant="gradient"
+                  className="w-full rounded !h-12 gap-2 font-bold text-base"
+                  onClick={handleCheckout}
+                >
+                  {isProcessing && <LoadingSpinner />}
+                  {isProcessing ? "Processing..." : "Checkout"}
+                </Button>
+              )}
             </div>
-          )}
+          </div>
+          {/* // )} */}
         </motion.div>
 
         {/* Overview section  */}
@@ -493,7 +494,7 @@ export function CheckoutDialog() {
               </p>
             </div>
           </div>
-          <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
+          {/* <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
             {selectedOption === "Paystack" ? (
               <ConfirmationDialog
                 name={name}
@@ -531,6 +532,56 @@ export function CheckoutDialog() {
               >
                 {isProcessing && <LoadingSpinner />}
                 {isProcessing ? "Processing..." : "Checkout"}
+              </Button>
+            )}
+            <StripeDialog>
+
+            </StripeDialog>
+          </div> */}
+          <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
+            {selectedOption === "Paystack" ? (
+              <ConfirmationDialog
+                name={name}
+                bankCode={selectedBank?.bank_code || ""}
+                bankName={selectedBank?.bank_name || ""}
+                accountNumber={accountNumber}
+                amount={coinQuantity}
+              >
+                <Button
+                  disabled={
+                    isProcessing ||
+                    !selectedBank ||
+                    !accountNumber ||
+                    !name ||
+                    accountNumber.length !== 10
+                  }
+                  variant="gradient"
+                  className="w-full rounded !h-12 gap-2 font-bold text-base"
+                >
+                  Proceed
+                </Button>
+              </ConfirmationDialog>
+            ) : selectedOption === "Stripe" ? (
+              <StripeDialog>
+                <Button
+                  variant="gradient"
+                  className="w-full rounded !h-12 gap-2 font-bold text-base"
+                  // onClick={handleCheckout}
+                >
+                  {/* {isProcessing && <LoadingSpinner />} */}
+                  {/* {isProcessing ? "Processing..." : "Checkout"} */}
+                  Proceed
+                </Button>
+              </StripeDialog>
+            ) : (
+              <Button
+                variant="gradient"
+                className="w-full rounded !h-12 gap-2 font-bold text-base"
+                // onClick={handleCheckout}
+              >
+                {/* {isProcessing && <LoadingSpinner />} */}
+                {/* {isProcessing ? "Processing..." : "Checkout"} */}
+                Proceed
               </Button>
             )}
           </div>
