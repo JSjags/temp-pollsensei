@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pollsensei-web-app
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pollsensei-web-app
+  template:
+    metadata:
+      labels:
+        app: pollsensei-web-app
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+        - name:  pollsensei-web-app
+          image: oaksacr.azurecr.io/pollsensei-web:${IMAGE_TAG}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+          env:
+            - name: NEXT_PUBLIC_APP_ENV
+              value: "production"
+            - name: NEXT_PUBLIC_APP_DOMAIN
+              value: "https://pollsensei.ai"
+            - name: NEXT_PUBLIC_APP_ENCRYPT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pollsensei-web-secrets
+                  key: NEXT_PUBLIC_APP_ENCRYPT_KEY
+            - name: NEXT_PUBLIC_APP_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: pollsensei-web-secrets
+                  key: NEXT_PUBLIC_APP_BASE_URL
+            - name: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pollsensei-web-secrets
+                  key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+            - name: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: pollsensei-web-secrets
+                  key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+            - name: NEXT_PUBLIC_FACEBOOK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: pollsensei-web-secrets
+                  key: NEXT_PUBLIC_FACEBOOK_CLIENT_ID

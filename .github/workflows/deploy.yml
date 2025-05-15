@@ -1,33 +1,109 @@
-name: Generate a build and push to another branch
+name: Deploy Pollsensei to AKS
 
 on:
   push:
     branches:
       - main
+      - staging
+      - staging-v2
+      - release
+
+env:
+  AZURE_CONTAINER_REGISTRY: oaksacr.azurecr.io
+  ACR_RESOURCE_GROUP: OAKS_SERVICES_RG
+  AKS_RESOURCE_GROUP: Pollsensei-RG
+  CLUSTER_NAME: pollsenseiCluster
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    name: Build and Push
     steps:
-      - name: git-checkout
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install all dependencies
-        run: npm install
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Build
-        env:
-          NEXT_PUBLIC_APP_ENV: production
-          NEXT_PUBLIC_APP_ENCRYPT_KEY: ${{ secrets.NEXT_PUBLIC_APP_ENCRYPT_KEY }}
-          NEXT_PUBLIC_APP_BASE_URL: ""
-        run: npm run build # The build command of your project
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
 
-      - name: Push
-        uses: s0/git-publish-subdir-action@develop
-        env:
-          REPO: self
-          BRANCH: build # The branch name where you want to push the assets
-          FOLDER: out # The directory where your assets are generated
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
-          MESSAGE: "Build: ({sha}) {msg}" # The commit message
+      - name: Set Environment Variables
+        run: |
+          COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "DEPLOY_ENV=production" >> $GITHUB_ENV
+            echo "IMAGE_TAG=prod-$COMMIT_SHA" >> $GITHUB_ENV
+            echo "NAMESPACE=production" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_DOMAIN=https://pollsensei.ai" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL }}" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+            echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
+            echo "IMAGE_TAG=stg-$COMMIT_SHA" >> $GITHUB_ENV
+            echo "NAMESPACE=staging" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_DOMAIN=https://staging.pollsensei.ai" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL_DEV }}" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_DEV }}" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/staging-v2" ]; then
+            echo "DEPLOY_ENV=staging-v2" >> $GITHUB_ENV
+            echo "IMAGE_TAG=stg2-$COMMIT_SHA" >> $GITHUB_ENV
+            echo "NAMESPACE=staging-v2" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_DOMAIN=https://staging-v2.pollsensei.ai" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL_DEV2 }}" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_DEV }}" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/release" ]; then
+            echo "DEPLOY_ENV=release" >> $GITHUB_ENV
+            echo "IMAGE_TAG=rel-$COMMIT_SHA" >> $GITHUB_ENV
+            echo "NAMESPACE=release" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_DOMAIN=https://release.pollsensei.ai" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL }}" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_DEV }}" >> $GITHUB_ENV
+          fi
+
+      - name: Build and push Docker image
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_APP_ENV=${{ env.DEPLOY_ENV }} \
+            --build-arg NEXT_PUBLIC_APP_DOMAIN=${{ env.NEXT_PUBLIC_APP_DOMAIN }} \
+            --build-arg NEXT_PUBLIC_APP_BASE_URL=${{ env.NEXT_PUBLIC_APP_BASE_URL }} \
+            --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }} \
+            --build-arg NEXT_PUBLIC_APP_ENCRYPT_KEY=${{ secrets.NEXT_PUBLIC_APP_ENCRYPT_KEY }} \
+            --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }} \
+            --build-arg NEXT_PUBLIC_FACEBOOK_CLIENT_ID=${{ secrets.NEXT_PUBLIC_FACEBOOK_CLIENT_ID }} \
+            -t ${{ env.AZURE_CONTAINER_REGISTRY }}/pollsensei-web:${{ env.IMAGE_TAG }} .
+
+          docker push ${{ env.AZURE_CONTAINER_REGISTRY }}/pollsensei-web:${{ env.IMAGE_TAG }}
+
+      - name: Set up kubectl
+        run: |
+          az aks get-credentials --resource-group ${{ env.AKS_RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }}
+
+      - name: Create or Update Kubernetes Secret Safely
+        run: |
+          kubectl create secret generic pollsensei-web-secrets \
+            --from-literal=NEXT_PUBLIC_APP_BASE_URL_DEV="${{ secrets.NEXT_PUBLIC_APP_BASE_URL_DEV }}" \
+            --from-literal=NEXT_PUBLIC_APP_BASE_URL_DEV2="${{ secrets.NEXT_PUBLIC_APP_BASE_URL_DEV2 }}" \
+            --from-literal=NEXT_PUBLIC_APP_ENCRYPT_KEY="${{ secrets.NEXT_PUBLIC_APP_ENCRYPT_KEY }}" \
+            --from-literal=NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}" \
+            --from-literal=NEXT_PUBLIC_GOOGLE_CLIENT_ID="${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}" \
+            --from-literal=NEXT_PUBLIC_FACEBOOK_CLIENT_ID="${{ secrets.NEXT_PUBLIC_FACEBOOK_CLIENT_ID }}" \
+            --from-literal=NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_DEV="${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_DEV }}" \
+            --from-literal=NEXT_PUBLIC_APP_BASE_URL="${{ secrets.NEXT_PUBLIC_APP_BASE_URL }}" \
+            -n ${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Inject image tag into deployment YAML
+        run: |
+          sed "s|\${IMAGE_TAG}|${{ env.IMAGE_TAG }}|g" src/manifests/${{ env.DEPLOY_ENV }}/deployment.yaml > temp-deployment.yaml
+
+
+      - name: Deploy to AKS
+        run: |
+          kubectl apply -f temp-deployment.yaml
+          kubectl apply -f src/manifests/${{ env.DEPLOY_ENV }}/service.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/pollsensei-web-app -n ${{ env.NAMESPACE }}
