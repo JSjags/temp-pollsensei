@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+*.log
+
+# Build output
+.next
+out
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Docker files
+Dockerfile
+docker-compose.yml
+
+# Miscellaneous
+.DS_Store
+*.swp
+*.swo
+.idea
+.vscode
+*.bak
+*.tmp
