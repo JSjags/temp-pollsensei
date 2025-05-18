@@ -165,7 +165,9 @@ const UserRegistry: React.FC = () => {
   const [resetUserPassword, { isLoading: isResetPassword }] =
     useResetUserPasswordMutation();
 
-  const totalItems = data?.data?.total || 0;
+  console.log(data);
+
+  const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
   const handleFilterApply = (filterType: string, selected: string[]) => {
@@ -215,7 +217,7 @@ const UserRegistry: React.FC = () => {
   const navigatePage = (direction: "next" | "prev") => {
     setCurrentPage((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < (data?.total_pages || 1) ? prevIndex + 1 : prevIndex;
+        return prevIndex < (totalPages || 1) ? prevIndex + 1 : prevIndex;
       } else {
         return prevIndex > 1 ? prevIndex - 1 : prevIndex;
       }
