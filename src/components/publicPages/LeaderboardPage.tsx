@@ -443,15 +443,23 @@ const LeaderboardPage = () => {
           </div>
         </Card>
 
-        <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
-          <AlertCircle className="h-4 w-4" />
-          <p className="text-sm italic">
-            Fake and duplicate accounts are being purged from our database on an
-            ongoing basis
-          </p>
+        <div className="flex flex-col sm:flex-row items-start justify-start gap-3 text-muted-foreground py-4 px-3 bg-amber-50 rounded-lg border border-amber-200 mt-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-amber-800">
+                Important Notice:
+              </p>
+              <p className="text-sm">
+                Fake and duplicate accounts are being purged from our database
+                on an ongoing basis. Fake/bot-generated referral emails will
+                lead to the referrer's account being banned.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        {/* <div className="grid sm:grid-cols-2 gap-4">
           <Card className="border-[#5B03B2]/20">
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl sm:text-2xl text-[#5B03B2]">
@@ -572,7 +580,7 @@ const LeaderboardPage = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );
