@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - staging
+      - v2-main
       - staging-v2
       - release
 
@@ -39,7 +39,7 @@ jobs:
             echo "NEXT_PUBLIC_APP_DOMAIN=https://pollsensei.ai" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL }}" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}" >> $GITHUB_ENV
-          elif [ "${{ github.ref }}" == "refs/heads/staging" ]; then
+          elif [ "${{ github.ref }}" == "refs/heads/v2-main" ]; then
             echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
             echo "IMAGE_TAG=stg-$COMMIT_SHA" >> $GITHUB_ENV
             echo "NAMESPACE=staging" >> $GITHUB_ENV
@@ -97,7 +97,6 @@ jobs:
       - name: Inject image tag into deployment YAML
         run: |
           sed "s|\${IMAGE_TAG}|${{ env.IMAGE_TAG }}|g" src/manifests/${{ env.DEPLOY_ENV }}/deployment.yaml > temp-deployment.yaml
-
 
       - name: Deploy to AKS
         run: |
