@@ -102,6 +102,8 @@ jobs:
         run: |
           kubectl apply -f temp-deployment.yaml
           kubectl apply -f src/manifests/${{ env.DEPLOY_ENV }}/service.yaml
+          kubectl apply -f src/manifests/${{ env.DEPLOY_ENV }}/ingress.yaml
+          kubectl apply -f src/manifests/${{ env.DEPLOY_ENV }}/serviceMonitor.yaml
 
       - name: Verify Deployment
         run: |
