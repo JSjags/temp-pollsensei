@@ -141,9 +141,9 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
         description: surveyDescription,
       })
     );
-    // router.push(
-    //   userToken && user ? "/surveys/edit-survey" : "/demo/edit-survey"
-    // );
+    router.push(
+      userToken && user ? "/surveys/edit-survey" : "/demo/edit-survey"
+    );
   };
 
   console.log(survey);
