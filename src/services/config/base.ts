@@ -16,7 +16,8 @@ const environment: EnvironmentConfig = {
   },
   development: {
     API_BASE_URL:
-      "https://pollsensei-staging-v2-3a23f320c170.herokuapp.com/api/v1",
+      // "https://pollsensei-staging-v2-3a23f320c170.herokuapp.com/api/v1",
+      "https://api-staging-v2.pollsensei.ai/api/v1"
   },
 };
 

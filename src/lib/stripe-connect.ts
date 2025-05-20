@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "./axios-instance";
+import  { AxiosError } from "axios";
+import { toast } from "react-toastify";
+
 
 type ConnectPayload = {
   first_name: string;
@@ -23,14 +26,34 @@ type ConnectPayload = {
     month: number;
     year: number;
   };
-  ssnLast4?: string; // Optional, only for US
-  routing_number?: string; // Optional, only for US
+  ssnLast4?: string;
+  routing_number?: string;
+};
+
+type ConnectResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    account: {
+      stripe_account_id: string;
+      account_name: string;
+      account_number: string;
+      sort_code: string;
+      is_verified: boolean;
+    };
+    account_setup_url: string;
+  };
+};
+
+
+type ErrorResponse = {
+  message: string;
 };
 
 export const useStripeConnectAccount = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<ConnectResponse, AxiosError<ErrorResponse>, ConnectPayload>({
     mutationFn: async (payoutData: ConnectPayload) => {
       const res = await axiosInstance.post("/payout/stripe/connect-account", payoutData);
       if (!res.data) {
@@ -44,6 +67,12 @@ export const useStripeConnectAccount = () => {
         queryClient.invalidateQueries({ queryKey: ["payout-history"] });
         queryClient.invalidateQueries({ queryKey: ["pending-paystack-payouts"] });
       }
+    },
+    onError: (error) => {
+      const backendMessage = error.response?.data?.message || "";
+      const message = backendMessage || error.message || "Failed to confirm payout";
+      console.log(error, "stripe error");
+      toast.error(message);
     },
   });
 };

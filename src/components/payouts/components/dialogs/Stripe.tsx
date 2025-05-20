@@ -32,13 +32,13 @@ export default function StripeDialog({ children }: StripeDialogProps) {
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
   const [error, setError] = useState("");
-
   const { mutate: connectStripeAccount, isPending } = useStripeConnectAccount();
+  const [redirecting, setRedirecting] = useState(false);
 
   const personalFields = [
     { label: "First Name", value: firstName, setValue: setFirstName },
     { label: "Last Name", value: lastName, setValue: setLastName },
-    { label: "SSN Last 4 Digits", value: ssn, setValue: setSSN },
+    // { label: "SSN Last 4 Digits", value: ssn, setValue: setSSN },
     { label: "Phone Number", value: phoneNumber, setValue: setPhoneNumber },
   ];
 
@@ -53,11 +53,11 @@ export default function StripeDialog({ children }: StripeDialogProps) {
       value: holderName,
       setValue: setHolderName,
     },
-    {
-      label: "Routing Number",
-      value: routingNumber,
-      setValue: setRoutingNumber,
-    },
+    // {
+    //   label: "Routing Number",
+    //   value: routingNumber,
+    //   setValue: setRoutingNumber,
+    // },
     { label: "Sort Code", value: sortCode, setValue: setSortCode },
   ];
 
@@ -107,7 +107,17 @@ export default function StripeDialog({ children }: StripeDialogProps) {
     if (routingNumber.trim()) payload.routing_number = routingNumber;
 
     connectStripeAccount(payload, {
-      onSuccess: () => toast.success("Stripe account connected successfully!"),
+      onSuccess: (response: any) => {
+        const url = response?.account_setup_url;
+
+        if (url) {
+          toast.success("Redirecting to Stripe Dashboard...");
+          setRedirecting(true);
+          window.location.href = url;
+        } else {
+          toast.success("Stripe account connected successfully!");
+        }
+      },
       onError: (err: any) => toast.error(err.message || "Submission failed"),
     });
   };
@@ -141,7 +151,7 @@ export default function StripeDialog({ children }: StripeDialogProps) {
         {children}
       </DialogTrigger>
       <DialogContent
-        overlayClassName="z-[10000000000000]"
+        overlayClassName="z-[1000000000]"
         className="z-[10000000000000000] max-w-2xl"
       >
         <DialogHeader>
@@ -209,11 +219,15 @@ export default function StripeDialog({ children }: StripeDialogProps) {
 
           <Button
             variant="gradient"
-            disabled={!isFormValid() || isPending}
+            disabled={!isFormValid() || isPending || redirecting}
             onClick={handleSubmit}
             className="rounded-md"
           >
-            {isPending ? "Connecting..." : "Connect Account"}
+            {redirecting
+              ? "Redirecting..."
+              : isPending
+              ? "Connecting..."
+              : "Connect Account"}
           </Button>
         </div>
       </DialogContent>

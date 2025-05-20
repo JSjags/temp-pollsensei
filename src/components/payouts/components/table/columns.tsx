@@ -18,13 +18,14 @@ export type PayoutStatus =
   | "canceled"
   | "otp"
   | "abandoned";
-
+type GateWayTypes = 'paystack'|'stripe'
 export type PayoutTransaction = {
   _id: string;
   transaction_id: string;
   status: PayoutStatus;
   details: string;
   amount: number;
+  gateway:GateWayTypes;
   createdAt: string;
   updatedAt: string;
   __v?: number;
@@ -147,19 +148,24 @@ export function makePayoutHistoryColumns(isNigeria: boolean = true) {
         <ColumnHeader column={column}>Amount</ColumnHeader>
       </div>
     ),
-    cell: ({ getValue }) => {
+    cell: ({ row, getValue }) => {
+      const gateway = row.original.gateway;
+      const currencySymbol = gateway === "stripe" ? "$" : "₦";
       return (
         <div>
-          <p className={cn("text-sm")}>
-            {" "}
-            {isNigeria ? "₦" : "$"}
-            {getValue().toLocaleString()}
+          <p className="text-sm">
+            {currencySymbol}
+            {getValue().toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </p>
         </div>
       );
     },
     meta: { headerName: AMOUNT_HEADER_NAME },
   });
+  
 
   return [
     transactionIdColumn,

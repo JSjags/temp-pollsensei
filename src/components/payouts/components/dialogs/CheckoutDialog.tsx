@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Image from "next/image";
 import { VisaLogo, StripeLogo, LockIcon, PaystackLogo } from "@/assets/images";
@@ -16,12 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePaystackPayout, usePaystackPreviousPayoutBank } from "@/lib/payout";
+import {
+  usePaystackPayout,
+  usePaystackPreviousPayoutBank,
+  useStripePayout,
+} from "@/lib/payout";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 import { toast } from "react-toastify";
 import { usePreviousPayoutBank } from "../../queries/usePreviousPayoutBank";
 import ConfirmationDialog from "./Confirmation";
 import StripeDialog from "./Stripe";
+import { useStripePayoutBanks } from "../../queries/useStripePayoutBanks";
+import { usePayoutConversionRate } from "../../queries/usePayoutConverionrate";
+import StripeConfirmDialog from "./StripeConfirmDialog";
 
 const PaymentOptionsData = [
   {
@@ -39,7 +46,7 @@ const PaymentOptionsData = [
 ];
 
 export function CheckoutDialog() {
-  const [selectedOption, setSelectedOption] = useState<string | null>("Card");
+  // const [selectedOption, setSelectedOption] = useState<string | null>("Card");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
 
@@ -52,18 +59,51 @@ export function CheckoutDialog() {
   );
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { coinAmount, coinQuantity, loading, setLoading, setStep } =
-    usePayoutStore();
+  const {
+    coinAmount,
+    coinQuantity,
+    loading,
+    setStep,
+    selectedOption,
+    setSelectedOption,
+    wasRedirected,
+    setWasRedirected,
+    setCoinAmount,
+  } = usePayoutStore();
   const { data: banks, isLoading } = useNigerianBanks();
+
+  const { data: PayoutBanks } = useStripePayoutBanks();
   const { mutate: paystackPayout, isPending: payoutLoading } =
     usePaystackPayout();
-  const { mutate: previousPaystackPayout, isPending: previousPayoutLoading } =
-    usePaystackPreviousPayoutBank();
+
+  const { data, isLoading: conversionLoading } = usePayoutConversionRate();
+  const { mutate: stripePayout, isPending: stripePayoutLoading } =
+    useStripePayout();
   const { data: previousBank } = usePreviousPayoutBank();
   const hasPreviousBank = previousBank?.data?.length > 0;
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
   const isProcessing = loading || payoutLoading;
+
+  useEffect(() => {
+    if (!data) {
+      setCoinAmount("");
+      return;
+    }
+    const convertibleAmount = data?.convertible_amount;
+    const rate =
+      selectedOption === "Stripe"
+        ? data?.conversion_rate?.USD
+        : data?.conversion_rate?.NGN;
+
+    if (convertibleAmount && rate && parseFloat(coinQuantity)) {
+      const coinToCash = (parseFloat(coinQuantity) * rate).toFixed(2);
+      setCoinAmount(coinToCash);
+    } else {
+      setCoinAmount("");
+    }
+  }, [coinQuantity, data, selectedOption, setCoinAmount]);
+
   const txnOverview = [
     {
       label: "Amount of Pollcoins",
@@ -76,14 +116,6 @@ export function CheckoutDialog() {
     },
   ];
 
-  // These are just for testing
-  const resetLocalState = () => {
-    setName("");
-    setCardNumber("");
-    setCardExpiry("");
-    setCardCVV("");
-    setSelectedOption("Card");
-  };
   const handleSelectChange = (bankCode: string) => {
     const foundBank = banks?.find((bank) => bank.bank_code === bankCode);
     if (foundBank) {
@@ -123,59 +155,6 @@ export function CheckoutDialog() {
     }
 
     setOpen(true);
-
-    // // Only process for Paystack
-    // if (selectedOption === "Paystack") {
-    //   // Check if we should use previous bank information
-    //   if (hasPreviousBank && previousBank?.data?.length > 0) {
-    //     const previousPayoutData = {
-    //       payout_bank_id: previousBank.data[0]._id,
-    //       amount: amount,
-    //     };
-
-    //     // Use previous bank payout mutation
-    //     previousPaystackPayout(previousPayoutData, {
-    //       onSuccess: (data) => {
-    //         setLoading(false);
-    //         setStep("success");
-    //         resetLocalState();
-    //       },
-    //       onError: (error) => {
-    //         setLoading(false);
-    //         toast.error("Payout failed");
-    //         console.error("Previous bank payout failed:", error);
-    //       },
-    //     });
-    //   } else {
-    //     // Use new bank payout mutation
-    //     const payoutData = {
-    //       account_name: name.trim(),
-    //       account_number: accountNumber,
-    //       bank_code: selectedBank.bank_code,
-    //       amount: amount,
-    //     };
-
-    //     paystackPayout(payoutData, {
-    //       onSuccess: (data) => {
-    //         setLoading(false);
-    //         setStep("success");
-    //         resetLocalState();
-    //       },
-    //       onError: (error) => {
-    //         setLoading(false);
-    //         toast.error("Payout failed");
-    //         console.error("New bank payout failed:", error);
-    //       },
-    //     });
-    //   }
-    // } else {
-    //   // Handle other payment methods (Card, Stripe)
-    //   setTimeout(() => {
-    //     setLoading(false);
-    //     setStep("success");
-    //     resetLocalState();
-    //   }, 5000);
-    // }
   };
   const handleUsePreviousBank = () => {
     if (hasPreviousBank) {
@@ -191,6 +170,42 @@ export function CheckoutDialog() {
     }
   };
 
+  const handleStripeRedirectedConfirmation = () => {
+    if (!PayoutBanks || PayoutBanks?.length === 0) {
+      toast.error("No payout bank available for Stripe");
+      return;
+    }
+
+    // Get the first available payout bank ID
+    const payoutBankId = PayoutBanks[0]?._id;
+
+    // Validate amount
+    const amount = Number(coinQuantity);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Amount must be a positive number");
+      return;
+    }
+
+    // Call the Stripe payout mutation with the amount and payout bank ID
+    stripePayout(
+      {
+        amount,
+        payout_bank_id: payoutBankId,
+      },
+      {
+        onSuccess: (data) => {
+          toast.success("Stripe payout processed successfully");
+          setWasRedirected(false);
+          setStep("success");
+          // Additional success handling if needed
+        },
+        onError: (error) => {
+          toast.error("Failed to process Stripe payout");
+          console.error("Stripe payout error:", error);
+        },
+      }
+    );
+  };
   return (
     <Dialog.Body className="h-full mt-2.5 min-[441px]:min-h-[620px]">
       <div className="flex gap-14 h-full max-[440px]:flex-row-reverse">
@@ -406,6 +421,7 @@ export function CheckoutDialog() {
                   bankName={selectedBank?.bank_name || ""}
                   accountNumber={accountNumber}
                   amount={coinQuantity}
+                  gateway={selectedOption}
                 >
                   <Button
                     disabled={
@@ -470,7 +486,7 @@ export function CheckoutDialog() {
                   <p>
                     {item.label === "Amount of Pollcoins"
                       ? Number(item.value).toLocaleString()
-                      : `${isNigeria ? "₦" : "$"}${Number(
+                      : `${selectedOption === "Stripe" ? "$" : "₦"}${Number(
                           item.value
                         ).toLocaleString(undefined, {
                           minimumFractionDigits: 2,
@@ -483,7 +499,7 @@ export function CheckoutDialog() {
             <div className="w-full flex items-center justify-between pt-4 mt-6">
               <p className="text-base font-bold">Total</p>
               <p className="text-base font-bold">
-                {isNigeria ? "₦" : "$"}
+                {selectedOption !== "Stripe" ? "₦" : "$"}
                 {txnOverview
                   .filter((item) => item.label !== "Amount of Pollcoins")
                   .reduce((acc, item) => acc + Number(item.value), 0)
@@ -494,50 +510,6 @@ export function CheckoutDialog() {
               </p>
             </div>
           </div>
-          {/* <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
-            {selectedOption === "Paystack" ? (
-              <ConfirmationDialog
-                name={name}
-                bankCode={selectedBank?.bank_code || ""}
-                bankName={selectedBank?.bank_name || ""}
-                accountNumber={accountNumber}
-                amount={coinQuantity}
-              >
-                <Button
-                  disabled={
-                    isProcessing ||
-                    !selectedBank ||
-                    !accountNumber ||
-                    !name ||
-                    accountNumber.length !== 10
-                  }
-                  variant="gradient"
-                  className="w-full rounded !h-12 gap-2 font-bold text-base"
-                >
-                  Proceed
-                </Button>
-              </ConfirmationDialog>
-            ) : (
-              <Button
-                disabled={
-                  isProcessing ||
-                  !cardNumber ||
-                  !cardExpiry ||
-                  !cardCVV ||
-                  !name
-                }
-                variant="gradient"
-                className="w-full rounded !h-12 gap-2 font-bold text-base"
-                onClick={handleCheckout}
-              >
-                {isProcessing && <LoadingSpinner />}
-                {isProcessing ? "Processing..." : "Checkout"}
-              </Button>
-            )}
-            <StripeDialog>
-
-            </StripeDialog>
-          </div> */}
           <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
             {selectedOption === "Paystack" ? (
               <ConfirmationDialog
@@ -546,6 +518,7 @@ export function CheckoutDialog() {
                 bankName={selectedBank?.bank_name || ""}
                 accountNumber={accountNumber}
                 amount={coinQuantity}
+                gateway={selectedOption}
               >
                 <Button
                   disabled={
@@ -562,17 +535,38 @@ export function CheckoutDialog() {
                 </Button>
               </ConfirmationDialog>
             ) : selectedOption === "Stripe" ? (
-              <StripeDialog>
-                <Button
-                  variant="gradient"
-                  className="w-full rounded !h-12 gap-2 font-bold text-base"
-                  // onClick={handleCheckout}
+              wasRedirected || PayoutBanks?.length > 0 ? (
+                <StripeConfirmDialog
+                 response={PayoutBanks[0] || []}
+                 payAmount={coinQuantity}
+                 gateway={selectedOption}
                 >
-                  {/* {isProcessing && <LoadingSpinner />} */}
-                  {/* {isProcessing ? "Processing..." : "Checkout"} */}
-                  Proceed
-                </Button>
-              </StripeDialog>
+                  <Button
+                    variant="gradient"
+                    className="w-full rounded !h-12 gap-2 font-bold text-base"
+                    // onClick={handleStripeRedirectedConfirmation}
+                    disabled={
+                      isProcessing ||
+                      !PayoutBanks ||
+                      PayoutBanks.length === 0 ||
+                      stripePayoutLoading
+                    }
+                  >
+                    Proceed
+                    {/* {stripePayoutLoading && <LoadingSpinner />}
+                    {stripePayoutLoading ? "Processing..." : "Checkout"} */}
+                  </Button>
+                </StripeConfirmDialog>
+              ) : (
+                <StripeDialog>
+                  <Button
+                    variant="gradient"
+                    className="w-full rounded !h-12 gap-2 font-bold text-base"
+                  >
+                    Proceed
+                  </Button>
+                </StripeDialog>
+              )
             ) : (
               <Button
                 variant="gradient"
