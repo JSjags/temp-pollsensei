@@ -47,7 +47,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, Pencil, Ban, Trash2, MoreVertical } from "lucide-react";
+import {
+  Eye,
+  Pencil,
+  Ban,
+  Trash2,
+  MoreVertical,
+  CheckCircle,
+} from "lucide-react";
 import { PlayCircle, FileText, FileX } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -473,13 +480,23 @@ const GenericArticlePage = (props: Props) => {
                         <Pencil className="mr-2 h-4 w-4" />
                         <span>Edit</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleUnpublish(card._id)}
-                        className="cursor-pointer"
-                      >
-                        <Ban className="mr-2 h-4 w-4" />
-                        <span>Unpublish</span>
-                      </DropdownMenuItem>
+                      {card.is_published ? (
+                        <DropdownMenuItem
+                          onClick={() => handleUnpublish(card._id)}
+                          className="cursor-pointer"
+                        >
+                          <Ban className="mr-2 h-4 w-4" />
+                          <span>Unpublish</span>
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() => handlePublish(card._id)}
+                          className="cursor-pointer"
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          <span>Publish</span>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() => handleDelete(card._id)}
                         className="cursor-pointer text-red-600"
