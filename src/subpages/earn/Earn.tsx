@@ -31,10 +31,10 @@ import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchLoginStreak } from "@/services/api/apiRequest";
+import { formatLargeNumber } from "@/utils";
 
 const Earn = () => {
   const router = useRouter();
-  const [unrestrictedBalance, setUnrestrictedBalance] = useState<number>(0);
   const [activitiesCompleted, setActivitiesCompleted] = useState<number>(0);
   const accessToken = useSelector(
     (state: RootState) => state.user.access_token
@@ -61,10 +61,6 @@ const Earn = () => {
   });
 
   const currentStreak = streak?.data?.currentStreak;
-
-  useEffect(() => {
-    setUnrestrictedBalance(balance?.unrestrictedBalance);
-  }, [balance]);
 
   const activities = [
     {
@@ -135,7 +131,7 @@ const Earn = () => {
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  unrestrictedBalance
+                  formatLargeNumber(balance?.data?.unrestrictedBalance || 0)
                 )}
               </h1>
             </div>
@@ -160,7 +156,7 @@ const Earn = () => {
                 size="sm"
                 className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] flex items-center gap-2 text-white hover:scale-105 transition-all rounded-full text-sm lg:text-base"
                 type="button"
-                disabled={unrestrictedBalance === 0}
+                disabled={balance?.data?.unrestrictedBalance === 0}
               >
                 Redeem Coins
                 <FaArrowRightLong className="text-base text-white" />
@@ -243,7 +239,7 @@ const Earn = () => {
         open={isSurveyFormDialogOpen}
         onOpenChange={(open) => {
           if (open) {
-            dispatch(openSurveyFormDialog());
+            dispatch(openSurveyFormDialog(""));
           } else {
             dispatch(closeSurveyFormDialog());
           }

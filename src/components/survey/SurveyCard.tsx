@@ -401,8 +401,11 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
       />
 
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
-        <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[95vh] lg:max-h-[90vw] overflow-y-auto flex flex-col gap-5">
-          <ReviewDialog />
+        <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[95vh] lg:max-h-[90vw] overflow-hidden">
+          <ReviewDialog
+            setIsReviewDialogOpen={setIsReviewDialogOpen}
+            surveyId={_id}
+          />
         </DialogContent>
       </Dialog>
     </>

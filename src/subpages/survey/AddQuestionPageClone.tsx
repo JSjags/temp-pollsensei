@@ -1,8 +1,10 @@
+"use client";
+import React, { FC, useMemo } from "react";
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { VscLayersActive } from "react-icons/vsc";
-import { Fragment, useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -80,11 +82,23 @@ import {
 } from "@/components/ui/tooltip";
 import type { Question } from "@/types/survey";
 import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
+import TextEditor from "@/components/reusable/TextEditor";
 
-const AddQuestionPage = () => {
+interface Props {
+  previewSurvey?: boolean;
+}
+
+const AddQuestionPageClone: FC<Props> = ({ previewSurvey }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
+
+  // Use useRef to prevent unnecessary re-renders and track initialization
+  const initializedRef = useRef(false);
+  const lastErrorRef = useRef<any>(null);
+  const isUpdatingRef = useRef(false);
+
+  // Get values from Redux store with proper memoization
   const sectionTopic = useSelector((state: RootState) => state?.survey?.topic);
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const sectionDescription = useSelector(
@@ -93,8 +107,23 @@ const AddQuestionPage = () => {
   const selectedSurveyType = useSelector(
     (state: RootState) => state?.survey?.survey_type
   );
-  const qq = useSelector((state: RootState) => state?.question);
-  const [sections, setSections] = useState<any[][]>([[]]); // Initialize with one empty section
+  const questions = useSelector(
+    (state: RootState) => state?.question?.questions
+  );
+  const userToken = useSelector(
+    (state: RootState) => state?.user?.access_token || state.user.token
+  );
+  const user = useSelector((state: RootState) => state?.user?.user);
+  const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
+  const headerUrl = useSelector((state: RootState) => state.survey.header_url);
+  const headerText = useSelector(
+    (state: RootState) => state.survey.header_text
+  );
+  const bodyText = useSelector((state: RootState) => state.survey.body_text);
+  const survey = useSelector((state: RootState) => state?.survey);
+
+  // Local state - initialize with default values to prevent undefined states
+  const [sections, setSections] = useState<any[][]>(() => [[]]);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
@@ -108,23 +137,11 @@ const AddQuestionPage = () => {
     (() => void) | null
   >(null);
 
-  useEffect(() => {
-    // Check if device supports touch
-    setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
-  }, []);
-
-  const questions = useSelector(
-    (state: RootState) => state?.question?.questions
+  // Initialize local state without triggering Redux updates
+  const [sectionTitle, setSectionTitle] = useState(() => sectionTopic || "");
+  const [sDescription, setsDescription] = useState(
+    () => sectionDescription || ""
   );
-
-  const userToken = useSelector(
-    (state: RootState) => state?.user?.access_token || state.user.token
-  );
-  const user = useSelector((state: RootState) => state?.user?.user);
-
-  const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
-  const [sectionTitle, setSectionTitle] = useState(sectionTopic || "");
-  const [sDescription, setsDescription] = useState(sectionDescription || "");
   const [isEditing, setIsEditing] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -132,7 +149,10 @@ const AddQuestionPage = () => {
   const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isSidebar, setIsSidebarOpen] = useState(true);
+  const [addQuestions, setAddQuestions] = useState(false);
 
+  // Mutations
   const [
     createSurvey,
     { data: createdSurveyData, isLoading, isSuccess, isError, error },
@@ -145,83 +165,9 @@ const AddQuestionPage = () => {
       error: progressError,
     },
   ] = useSaveProgressMutation();
-  const survey = useSelector((state: RootState) => state?.survey);
-  const [isSidebar, setIsSidebarOpen] = useState(true);
-  const [addQuestions, setAddQuestions] = useState(false);
-  const headerUrl = useSelector((state: RootState) => state.survey.header_url);
-  const headerText = useSelector(
-    (state: RootState) => state.survey.header_text
-  );
-  const bodyText = useSelector((state: RootState) => state.survey.body_text);
 
-  const pageVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0,
-      rotateY: direction > 0 ? 90 : -90,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-      rotateY: 0,
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0,
-      rotateY: direction < 0 ? 90 : -90,
-    }),
-  };
-
-  const pageTransition = {
-    type: "spring",
-    damping: 20,
-    stiffness: 100,
-    timing: {
-      duration: 0.5,
-      ease: "easeInOut",
-    },
-  };
-
-  const handleAddSection = () => {
-    setSections([...sections, []]);
-    setCurrentSectionIndex(sections.length);
-  };
-
-  const handleDeleteSection = (index: number) => {
-    setSectionToDelete(index);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDeleteSection = () => {
-    if (sectionToDelete !== null) {
-      const newSections = sections.filter((_, i) => i !== sectionToDelete);
-      setSections(newSections);
-      if (currentSectionIndex >= newSections.length) {
-        setCurrentSectionIndex(Math.max(0, newSections.length - 1));
-      }
-      dispatch(deleteSection(sectionToDelete));
-      setShowDeleteModal(false);
-    }
-  };
-
-  const handleDiscard = () => {
-    setShowDiscardModal(true);
-  };
-
-  const confirmDiscard = () => {
-    dispatch(resetQuestion());
-    dispatch(resetSurvey());
-    if (!userToken || !user) {
-      router.push("/demo/create-survey");
-    } else {
-      router.push("/surveys/survey-list");
-    }
-  };
-
-  // Default survey data state
-  const [surveyData, setSurveyData] = useState<SurveyData>({
+  // Stable survey data initialization with memoization
+  const [surveyData, setSurveyData] = useState<SurveyData>(() => ({
     topic: sectionTopic || "Untitled Survey",
     description: sectionDescription || "",
     sections: [],
@@ -257,187 +203,318 @@ const AddQuestionPage = () => {
       typeof headerUrl === "string" && headerUrl.startsWith("#")
         ? ""
         : (headerUrl as string),
-  });
+  }));
 
-  const handleSave = () => {
+  // Memoized processed questions to prevent unnecessary recalculations
+  const processedQuestions = useMemo(() => {
+    if (!questions || !Array.isArray(questions)) return [];
+
+    return questions.map((question: Question) => {
+      const baseQuestion = {
+        question: question.question,
+        description: question.description || question.question,
+        question_type: question.question_type,
+        is_required: question.is_required || false,
+      };
+
+      switch (question.question_type) {
+        case "checkbox":
+        case "multiple_choice":
+        case "single_choice":
+        case "drop_down":
+          return {
+            ...baseQuestion,
+            options: question.options || [],
+          };
+
+        case "likert_scale":
+        case "rating_scale":
+          return {
+            ...baseQuestion,
+            options: question.options || ["1", "2", "3", "4", "5"],
+          };
+
+        case "star_rating":
+          return {
+            ...baseQuestion,
+            options: ["1 Star", "2 Star", "3 Star", "4 Star", "5 Star"],
+          };
+
+        case "boolean":
+          return {
+            ...baseQuestion,
+            options: ["Yes", "No"],
+          };
+
+        case "matrix_multiple_choice":
+        case "matrix_checkbox":
+          return {
+            ...baseQuestion,
+            rows: Array.isArray(question.rows) ? question.rows : [],
+            columns: Array.isArray(question.columns) ? question.columns : [],
+          };
+
+        case "slider":
+          return {
+            ...baseQuestion,
+            min: typeof question.min === "number" ? question.min : 1,
+            max: typeof question.max === "number" ? question.max : 10,
+            step: 1,
+          };
+
+        case "number":
+          return {
+            ...baseQuestion,
+            min: typeof question.min === "number" ? question.min : 0,
+            max:
+              typeof question.max === "number"
+                ? question.max
+                : Number.MAX_SAFE_INTEGER,
+          };
+
+        case "long_text":
+          return {
+            ...baseQuestion,
+            can_accept_media: Boolean(question.can_accept_media),
+          };
+
+        case "media":
+        case "short_text":
+          return baseQuestion;
+
+        default:
+          return baseQuestion;
+      }
+    });
+  }, [questions]);
+
+  // Animation variants - memoized to prevent re-creation
+  const pageVariants = useMemo(
+    () => ({
+      enter: (direction: number) => ({
+        x: direction > 0 ? 1000 : -1000,
+        opacity: 0,
+        rotateY: direction > 0 ? 90 : -90,
+      }),
+      center: {
+        zIndex: 1,
+        x: 0,
+        opacity: 1,
+        rotateY: 0,
+      },
+      exit: (direction: number) => ({
+        zIndex: 0,
+        x: direction < 0 ? 1000 : -1000,
+        opacity: 0,
+        rotateY: direction < 0 ? 90 : -90,
+      }),
+    }),
+    []
+  );
+
+  const pageTransition = useMemo(
+    () => ({
+      type: "spring",
+      damping: 20,
+      stiffness: 100,
+      timing: {
+        duration: 0.5,
+        ease: "easeInOut",
+      },
+    }),
+    []
+  );
+
+  // Stable event handlers using useCallback
+  const handleAddSection = useCallback(() => {
+    setSections((prev) => [...prev, []]);
+    setCurrentSectionIndex((prev) => prev + 1);
+  }, []);
+
+  const handleDeleteSection = useCallback((index: number) => {
+    setSectionToDelete(index);
+    setShowDeleteModal(true);
+  }, []);
+
+  const confirmDeleteSection = useCallback(() => {
+    if (sectionToDelete !== null) {
+      setSections((prev) => prev.filter((_, i) => i !== sectionToDelete));
+      setCurrentSectionIndex((prev) => {
+        const newLength = sections.length - 1;
+        return prev >= newLength ? Math.max(0, newLength - 1) : prev;
+      });
+      dispatch(deleteSection(sectionToDelete));
+      setShowDeleteModal(false);
+      setSectionToDelete(null);
+    }
+  }, [sectionToDelete, sections.length, dispatch]);
+
+  const handleDiscard = useCallback(() => {
+    setShowDiscardModal(true);
+  }, []);
+
+  const confirmDiscard = useCallback(() => {
+    dispatch(resetQuestion());
+    dispatch(resetSurvey());
+    if (!userToken || !user) {
+      router.push("/demo/create-survey");
+    } else {
+      router.push("/surveys/survey-list");
+    }
+    setShowDiscardModal(false);
+  }, [dispatch, userToken, user, router]);
+
+  // FIX: Separate the state update and dispatch to prevent infinite loops
+  const handleSave = useCallback(() => {
+    // First update Redux
     dispatch(updateSectionTopic(sectionTitle));
     dispatch(updateSectionDescription(sDescription));
+
+    // Then update local state separately to avoid loops
     setSurveyData((prev) => ({
       ...prev,
       topic: sectionTitle,
       description: sDescription,
     }));
+
     setIsEditing(false);
-  };
+  }, [dispatch, sectionTitle, sDescription]);
 
-  const handleSaveEdittedQuestion = (
-    updatedQuestion: string,
-    updatedOptions: string[],
-    updatedQuestionType: string,
-    isRequired: boolean
-  ) => {
-    // Ensure `editIndex` is valid
-    if (editIndex === null || editIndex < 0 || editIndex >= questions.length) {
-      console.error("Invalid edit index.");
-      return;
-    }
+  const handleSaveEdittedQuestion = useCallback(
+    (
+      updatedQuestion: string,
+      updatedOptions: string[],
+      updatedQuestionType: string,
+      isRequired: boolean
+    ) => {
+      if (
+        editIndex === null ||
+        editIndex < 0 ||
+        editIndex >= questions.length
+      ) {
+        console.error("Invalid edit index.");
+        return;
+      }
 
-    // Create the updated question object with default options for boolean type
-    const updatedQuestionData = {
-      question: updatedQuestion,
-      options:
-        updatedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions,
-      question_type: updatedQuestionType,
-      is_required: isRequired,
-    };
+      const updatedQuestionData = {
+        question: updatedQuestion,
+        options:
+          updatedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions,
+        question_type: updatedQuestionType,
+        is_required: isRequired,
+      };
 
-    console.log(updatedQuestionData);
+      dispatch(
+        updateQuestion({
+          index: editIndex,
+          updatedQuestion: updatedQuestionData,
+        })
+      );
+      setEditIndex(null);
+      setIsEdit(false);
+    },
+    [editIndex, questions.length, dispatch]
+  );
 
-    // Update the question in the store
-    dispatch(
-      updateQuestion({ index: editIndex, updatedQuestion: updatedQuestionData })
-    );
+  const handleDragEnd = useCallback(
+    (result: any) => {
+      if (!result.destination) return;
 
-    // Reset editing state
-    setEditIndex(null);
+      const items = Array.from(questions);
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(result.destination.index, 0, reorderedItem);
+
+      dispatch(updateQuestions(items));
+    },
+    [questions, dispatch]
+  );
+
+  const EditQuestion = useCallback(
+    (id: number) => {
+      const questionIndex = questions?.findIndex(
+        (_: any, index: number) => index === id
+      );
+      setEditIndex(questionIndex);
+      setIsEdit(true);
+      setIsSidebarOpen(false);
+    },
+    [questions]
+  );
+
+  const handleCancel = useCallback(() => {
     setIsEdit(false);
-  };
+    setIsSidebarOpen((prev) => !prev);
+  }, []);
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const handleDeleteQuestion = useCallback(
+    (id: number) => {
+      const questionIndex = questions?.findIndex(
+        (_: any, index: number) => index === id
+      );
+      setEditIndex(questionIndex);
+      dispatch(deleteQuestion({ questions, editIndex: questionIndex }));
+    },
+    [questions, dispatch]
+  );
 
-    // Create a new array from the questions
-    const items = Array.from(questions);
+  const renderQuestionActions = useCallback(
+    (index: number) => {
+      const showActions = isTouchDevice || hoveredQuestionIndex === index;
 
-    // Remove the dragged item from its original position
-    const [reorderedItem] = items.splice(result.source.index, 1);
+      if (!showActions) return null;
 
-    // Insert the dragged item at its new position
-    items.splice(result.destination.index, 0, reorderedItem);
+      return (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute top-2 right-2 flex gap-2"
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 hover:bg-gray-100 rounded-full"
+            onClick={() => EditQuestion(index)}
+          >
+            <Pencil className="h-4 w-4 text-gray-500" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 hover:bg-red-100 rounded-full"
+            onClick={() => handleDeleteQuestion(index)}
+          >
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
+        </motion.div>
+      );
+    },
+    [isTouchDevice, hoveredQuestionIndex, EditQuestion, handleDeleteQuestion]
+  );
 
-    // Update the questions array in the store with the new order
-    dispatch(updateQuestions(items));
-  };
-
-  const EditQuestion = async (id: any) => {
-    const questionIndex = questions?.findIndex(
-      (_question: any, index: any) => index === id
-    );
-    setEditIndex(questionIndex);
-    setIsEdit(true);
-    console.log(questions[questionIndex]);
-    setIsSidebarOpen(false);
-  };
-
-  const handleSurveyCreation = async () => {
+  const handleSurveyCreation = useCallback(async () => {
     if (!userToken || !user) {
       setShowAuthModal(true);
       return;
     }
 
     try {
-      // Get current survey state
-      const updatedSurvey = { ...survey }; // Create a copy to avoid direct mutation
-
-      // Create a section with current questions if no sections exist
-      // or if the current questions aren't already in a section
+      const updatedSurvey = { ...survey };
       const currentSection = {
         section_topic: sectionTitle,
         section_description: sDescription,
-        questions: questions.map((question: Question) => {
-          // Base question structure with required fields
-          const baseQuestion = {
-            question: question.question,
-            description: question.description || question.question,
-            question_type: question.question_type,
-            is_required: question.is_required || false,
-          };
-
-          // Process question based on type with exact structure
-          switch (question.question_type) {
-            case "checkbox":
-            case "multiple_choice":
-            case "single_choice":
-            case "drop_down":
-            case "likert_scale":
-            case "rating_scale":
-              return {
-                ...baseQuestion,
-                options: question.options,
-              };
-
-            case "likert_scale":
-            case "rating_scale":
-            case "star_rating":
-              return {
-                ...baseQuestion,
-                options: ["1 Star", "2 Star", "3 Star", "4 Star", "5 Star"],
-              };
-
-            case "boolean":
-              return {
-                ...baseQuestion,
-                options: ["Yes", "No"],
-              };
-
-            case "matrix_multiple_choice":
-            case "matrix_checkbox":
-              return {
-                ...baseQuestion,
-                rows: Array.isArray(question.rows) ? question.rows : [],
-                columns: Array.isArray(question.columns)
-                  ? question.columns
-                  : [],
-              };
-
-            case "slider":
-              return {
-                ...baseQuestion,
-                min: typeof question.min === "number" ? question.min : 1,
-                max: typeof question.max === "number" ? question.max : 10,
-                step: 1,
-              };
-
-            case "number":
-              return {
-                ...baseQuestion,
-                min: typeof question.min === "number" ? question.min : 0,
-                max:
-                  typeof question.max === "number"
-                    ? question.max
-                    : Number.MAX_SAFE_INTEGER,
-              };
-
-            case "long_text":
-              return {
-                ...baseQuestion,
-                can_accept_media: Boolean(question.can_accept_media),
-              };
-
-            case "media":
-            case "short_text":
-              return baseQuestion;
-
-            default:
-              return baseQuestion;
-          }
-        }),
+        questions: processedQuestions,
       };
 
-      // If no sections exist or if current section is different from last section
       if (
         !updatedSurvey.sections.length ||
         JSON.stringify(
           updatedSurvey.sections[updatedSurvey.sections.length - 1]
         ) !== JSON.stringify(currentSection)
       ) {
-        // Create new array instead of pushing
         updatedSurvey.sections = [currentSection];
       }
 
-      console.log(updatedSurvey.sections.length);
-
-      // Process the final survey data
       const processedSurvey = {
         ...updatedSurvey,
         header_text: {
@@ -461,102 +538,131 @@ const AddQuestionPage = () => {
       };
 
       await createSurvey(processedSurvey).unwrap();
-      setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
     } catch (e) {
       console.error("Survey creation error:", e);
     }
-  };
+  }, [
+    userToken,
+    user,
+    survey,
+    sectionTitle,
+    sDescription,
+    processedQuestions,
+    headerUrl,
+    logoUrl,
+    createSurvey,
+  ]);
+
+  const handleSaveDraft = useCallback(async () => {
+    try {
+      const draftSurvey = {
+        ...survey,
+        sections: [
+          {
+            section_topic: sectionTitle,
+            section_description: sDescription,
+            questions: processedQuestions,
+          },
+        ],
+      };
+
+      await saveprogress(draftSurvey);
+      toast.success("Survey saved as draft");
+      if (pendingNavigation) {
+        pendingNavigation();
+      }
+      setShowExitDialog(false);
+    } catch (error) {
+      toast.error("Failed to save draft");
+    }
+  }, [
+    survey,
+    sectionTitle,
+    sDescription,
+    processedQuestions,
+    saveprogress,
+    pendingNavigation,
+  ]);
+
+  const handleRouterPush = useCallback(
+    (url: string) => {
+      if (questions?.length > 0) {
+        setShowExitDialog(true);
+        setPendingNavigation(() => () => router.push(url));
+        return;
+      }
+      router.push(url);
+    },
+    [questions?.length, router]
+  );
+
+  // FIX: Prevent loops in textarea changes
+  const handleSectionTitleChange = useCallback((value: string) => {
+    setSectionTitle(value);
+    // Debounce or batch Redux updates to prevent excessive dispatches
+  }, []);
+
+  const handleSectionDescriptionChange = useCallback((value: string) => {
+    setsDescription(value);
+    // Debounce or batch Redux updates to prevent excessive dispatches
+  }, []);
+
+  // One-time initialization effect
+  useEffect(() => {
+    if (!initializedRef.current) {
+      setIsTouchDevice(
+        "ontouchstart" in window || navigator.maxTouchPoints > 0
+      );
+
+      // FIX: Initialize local state from Redux only once
+      setSectionTitle(sectionTopic || "");
+      setsDescription(sectionDescription || "");
+
+      initializedRef.current = true;
+    }
+  }, []); // Empty dependency array to run only once
+
+  // FIX: Sync Redux state to local state only when Redux state changes
+  // and prevent infinite loops by checking if we're already updating
+  useEffect(() => {
+    if (!isUpdatingRef.current && initializedRef.current) {
+      setSectionTitle(sectionTopic || "");
+    }
+  }, [sectionTopic]);
 
   useEffect(() => {
-    if (isSuccess) {
-      setReview((prev) => !prev);
-      dispatch(resetSurvey());
+    if (!isUpdatingRef.current && initializedRef.current) {
+      setsDescription(sectionDescription || "");
+    }
+  }, [sectionDescription]);
+
+  // Handle survey creation success - only run once per success
+  useEffect(() => {
+    if (
+      isSuccess &&
+      createdSurveyData?.data?._id &&
+      survey_id !== createdSurveyData.data._id
+    ) {
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
-      // router.push("/surveys/survey-list");
+      dispatch(resetSurvey());
     }
+  }, [isSuccess, createdSurveyData?.data?._id, survey_id, dispatch]);
 
-    if (isError || error) {
-      const SaveProgress = async () => {
+  // Handle survey creation error - prevent duplicate error handling
+  useEffect(() => {
+    if (isError && error && lastErrorRef.current !== error) {
+      lastErrorRef.current = error;
+
+      const saveProgress = async () => {
         try {
-          await saveprogress({
+          const surveyToSave = {
             ...survey,
             sections: [
               {
                 section_topic: sectionTitle,
                 section_description: sDescription,
-                questions: questions.map((question: Question) => {
-                  const baseQuestion = {
-                    question: question.question,
-                    description: question.description || question.question,
-                    question_type: question.question_type,
-                    is_required: question.is_required || false,
-                  };
-
-                  switch (question.question_type) {
-                    case "checkbox":
-                    case "multiple_choice":
-                    case "single_choice":
-                    case "drop_down":
-                    case "likert_scale":
-                    case "rating_scale":
-                    case "star_rating":
-                      return {
-                        ...baseQuestion,
-                        options: [
-                          "1 Star",
-                          "2 Star",
-                          "3 Star",
-                          "4 Star",
-                          "5 Star",
-                        ],
-                      };
-                    case "boolean":
-                      return {
-                        ...baseQuestion,
-                        options: ["Yes", "No"],
-                      };
-                    case "matrix_multiple_choice":
-                    case "matrix_checkbox":
-                      return {
-                        ...baseQuestion,
-                        rows: Array.isArray(question.rows) ? question.rows : [],
-                        columns: Array.isArray(question.columns)
-                          ? question.columns
-                          : [],
-                      };
-                    case "slider":
-                      return {
-                        ...baseQuestion,
-                        min:
-                          typeof question.min === "number" ? question.min : 1,
-                        max:
-                          typeof question.max === "number" ? question.max : 10,
-                        step: 1,
-                      };
-                    case "number":
-                      return {
-                        ...baseQuestion,
-                        min:
-                          typeof question.min === "number" ? question.min : 0,
-                        max:
-                          typeof question.max === "number"
-                            ? question.max
-                            : Number.MAX_SAFE_INTEGER,
-                      };
-                    case "long_text":
-                      return {
-                        ...baseQuestion,
-                        can_accept_media: Boolean(question.can_accept_media),
-                      };
-                    case "media":
-                    case "short_text":
-                      return baseQuestion;
-                    default:
-                      return baseQuestion;
-                  }
-                }),
+                questions: processedQuestions,
               },
             ],
             header_text: {
@@ -579,107 +685,42 @@ const AddQuestionPage = () => {
               typeof logoUrl === "string" && logoUrl.startsWith("#")
                 ? ""
                 : logoUrl,
-          });
+          };
+
+          await saveprogress(surveyToSave);
         } catch (e) {
           console.error(e);
         }
       };
-      SaveProgress();
+
+      saveProgress();
       toast.error(
         "Failed to create survey, Don't panic, your progress was saved"
       );
     }
-  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
+  }, [
+    isError,
+    error,
+    survey,
+    sectionTitle,
+    sDescription,
+    processedQuestions,
+    headerUrl,
+    logoUrl,
+    saveprogress,
+  ]);
 
+  // Handle progress save results
   useEffect(() => {
     if (progressSuccess) {
       router.push("/surveys/survey-list");
     }
-    if (progressIsError || progressError) {
+    if (progressIsError && progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError, progressSuccess]);
+  }, [progressSuccess, progressIsError, progressError, router]);
 
-  const handleCancel = () => {
-    // setEditIndex(null);
-    setIsEdit(false);
-    setIsSidebarOpen((prev) => !prev);
-  };
-
-  const handleDeleteQuestion = (id: number) => {
-    const questionIndex = questions?.findIndex(
-      (_question: any, index: any) => index === id
-    );
-    setEditIndex(questionIndex);
-    dispatch(deleteQuestion({ questions, editIndex }));
-  };
-
-  const renderQuestionActions = (index: number) => {
-    const showActions = isTouchDevice || hoveredQuestionIndex === index;
-
-    if (!showActions) return null;
-
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute top-2 right-2 flex gap-2"
-      >
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 hover:bg-gray-100 rounded-full"
-          onClick={() => EditQuestion(index)}
-        >
-          <Pencil className="h-4 w-4 text-gray-500" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 hover:bg-red-100 rounded-full"
-          onClick={() => handleDeleteQuestion(index)}
-        >
-          <Trash2 className="h-4 w-4 text-red-500" />
-        </Button>
-      </motion.div>
-    );
-  };
-
-  const handleSaveDraft = async () => {
-    try {
-      await saveprogress({
-        ...survey,
-        sections: [
-          {
-            section_topic: sectionTitle,
-            section_description: sDescription,
-            questions: questions,
-          },
-        ],
-      });
-      toast.success("Survey saved as draft");
-      if (pendingNavigation) {
-        pendingNavigation();
-      }
-      setShowExitDialog(false);
-    } catch (error) {
-      toast.error("Failed to save draft");
-    }
-  };
-
-  const handleRouterPush = useCallback(
-    (url: string) => {
-      if (questions?.length > 0) {
-        setShowExitDialog(true);
-        setPendingNavigation(() => () => router.push(url));
-        return;
-      }
-      router.push(url);
-    },
-    [questions, router]
-  );
-
+  // Browser navigation handling
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       if (questions?.length > 0) {
@@ -690,11 +731,6 @@ const AddQuestionPage = () => {
       }
     };
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [questions, pathname]);
-
-  useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (questions?.length > 0) {
         e.preventDefault();
@@ -702,11 +738,6 @@ const AddQuestionPage = () => {
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [questions]);
-
-  useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a");
@@ -724,15 +755,27 @@ const AddQuestionPage = () => {
       }
     };
 
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("click", handleClick, true);
-    return () => document.removeEventListener("click", handleClick, true);
-  }, [handleRouterPush, pathname]);
 
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [questions, pathname, handleRouterPush]);
+
+  // Render component
   return (
     <div className={`${theme} flex flex-col gap-5 w-full`}>
       <div className={`flex flex-1 justify-between gap-10 w-full`}>
-        <motion.div className="w-full lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-5 pr-0 lg:pl-10">
-          {/* ... existing content ... */}
+        <motion.div
+          className={`w-full ${
+            previewSurvey ? "lg:w-full" : "lg:w-1/3"
+          } lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-5 pr-0 lg:pl-10`}
+        >
+          {/* Logo and Header */}
           <motion.div className="h-fit">
             {surveyData?.logo_url &&
               typeof surveyData.logo_url === "string" &&
@@ -791,162 +834,245 @@ const AddQuestionPage = () => {
                 </motion.div>
               )}
           </motion.div>
+
+          {/* Section Title and Description */}
           <AnimatePresence mode="wait">
-            {isEditing && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="w-full my-4 border-none">
-                  <CardContent className="flex flex-col gap-2 px-11 py-4">
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: 20, opacity: 0 }}
-                      transition={{ delay: 0.1 }}
+            {pathname.includes("filter-respondents") ? (
+              !sectionTitle || isEditing ? (
+                <div className="mb-5 lg:mb-0">
+                  <TextEditor
+                    sectionTitle={sectionTitle}
+                    setSectionTitle={handleSectionTitleChange}
+                    surveyData={surveyData}
+                    sDescription={sDescription}
+                    setsDescription={handleSectionDescriptionChange}
+                    handleSave={handleSave}
+                    setIsEditing={setIsEditing}
+                  />
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-white rounded-lg w-full my-4 gap-2 px-4 md:px-6 py-6 flex flex-col shadow-md hover:shadow-lg transition-shadow duration-300"
+                >
+                  <motion.h2
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className={cn(
+                      "text-[1.5rem] font-normal font-lexend bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+                      `font-${surveyData?.header_text?.name
+                        .split(" ")
+                        .join("-")
+                        .toLowerCase()}`
+                    )}
+                    style={{
+                      fontSize: `${surveyData?.header_text?.size}px`,
+                      // fontFamily: `${surveyData?.header_text?.name}`,
+                    }}
+                  >
+                    {sectionTitle}
+                  </motion.h2>
+                  <motion.p
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className={cn(
+                      "text-gray-600 leading-relaxed",
+                      `font-${surveyData?.body_text?.name
+                        .split(" ")
+                        .join("-")
+                        .toLowerCase()}`
+                    )}
+                    style={{
+                      fontSize: `${surveyData?.body_text?.size}px`,
+                      // fontFamily: `${surveyData?.body_text?.name}`,
+                    }}
+                  >
+                    {sDescription}
+                  </motion.p>
+                  <motion.div
+                    className="flex justify-end"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
+                  >
+                    <Button
+                      variant="outline"
+                      className="rounded-full px-5 py-1 hover:scale-105 transition-all duration-300 hover:bg-gray-50 hover:shadow-md flex items-center gap-2"
+                      onClick={() => setIsEditing(true)}
                     >
-                      <Textarea
-                        value={sectionTitle}
-                        onChange={(e) => {
-                          setSectionTitle(e.target.value);
-                          dispatch(updateSectionTopic(e.target.value));
-                        }}
-                        placeholder="Untitled Section"
-                        className={cn(
-                          "resize-none",
-                          `font-${surveyData?.header_text?.name
-                            .split(" ")
-                            .join("-")
-                            .toLowerCase()}`
-                        )}
-                        style={{
-                          fontSize: `${surveyData?.header_text?.size}px`,
-                          // fontFamily: `${headerText?.name}`,
-                        }}
-                      />
-                    </motion.div>
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              )
+            ) : (
+              <>
+                {!sectionTitle || isEditing ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="w-full my-4 border-none">
+                      <CardContent className="flex flex-col gap-2 px-11 py-4">
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{ x: 20, opacity: 0 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          <Textarea
+                            value={sectionTitle}
+                            onChange={(e) => {
+                              setSectionTitle(e.target.value);
+                              dispatch(updateSectionTopic(e.target.value));
+                            }}
+                            placeholder="Untitled Section"
+                            className={cn(
+                              "resize-none",
+                              `font-${surveyData?.header_text?.name
+                                .split(" ")
+                                .join("-")
+                                .toLowerCase()}`
+                            )}
+                            style={{
+                              fontSize: `${surveyData?.header_text?.size}px`,
+                              // fontFamily: `${headerText?.name}`,
+                            }}
+                          />
+                        </motion.div>
 
-                    <motion.div
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={{ x: 20, opacity: 0 }}
-                      transition={{ delay: 0.2 }}
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          exit={{ x: 20, opacity: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <Textarea
+                            value={sDescription}
+                            onChange={(e) => {
+                              setsDescription(e.target.value);
+                              dispatch(
+                                updateSectionDescription(e.target.value)
+                              );
+                            }}
+                            placeholder="Describe section (optional)"
+                            className={cn(
+                              "resize-none",
+                              `font-${surveyData?.body_text?.name
+                                .split(" ")
+                                .join("-")
+                                .toLowerCase()}`
+                            )}
+                            style={{
+                              fontSize: `${surveyData?.body_text?.size}px`,
+                              // fontFamily: `${bodyText?.name}`,
+                            }}
+                          />
+                        </motion.div>
+
+                        <motion.div
+                          className="flex justify-end gap-5 mt-4"
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -20, opacity: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <Button
+                            variant="outline"
+                            className="rounded-full flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-md hover:bg-gray-50"
+                            onClick={() => setIsEditing(false)}
+                          >
+                            <X className="h-4 w-4" />
+                            Cancel
+                          </Button>
+                          <Button
+                            className="rounded-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
+                            onClick={handleSave}
+                            disabled={!sectionTitle.trim()}
+                          >
+                            <Save className="h-4 w-4" />
+                            Save
+                          </Button>
+                        </motion.div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-white rounded-lg w-full my-4 gap-2 px-4 md:px-6 py-6 flex flex-col shadow-md hover:shadow-lg transition-shadow duration-300"
+                  >
+                    <motion.h2
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                      className={cn(
+                        "text-[1.5rem] font-normal font-lexend bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+                        `font-${surveyData?.header_text?.name
+                          .split(" ")
+                          .join("-")
+                          .toLowerCase()}`
+                      )}
+                      style={{
+                        fontSize: `${surveyData?.header_text?.size}px`,
+                        // fontFamily: `${surveyData?.header_text?.name}`,
+                      }}
                     >
-                      <Textarea
-                        value={sDescription}
-                        onChange={(e) => {
-                          setsDescription(e.target.value);
-                          dispatch(updateSectionDescription(e.target.value));
-                        }}
-                        placeholder="Describe section (optional)"
-                        className={cn(
-                          "resize-none",
-                          `font-${surveyData?.body_text?.name
-                            .split(" ")
-                            .join("-")
-                            .toLowerCase()}`
-                        )}
-                        style={{
-                          fontSize: `${surveyData?.body_text?.size}px`,
-                          // fontFamily: `${bodyText?.name}`,
-                        }}
-                      />
-                    </motion.div>
-
+                      {sectionTitle}
+                    </motion.h2>
+                    <motion.p
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className={cn(
+                        "text-gray-600 leading-relaxed",
+                        `font-${surveyData?.body_text?.name
+                          .split(" ")
+                          .join("-")
+                          .toLowerCase()}`
+                      )}
+                      style={{
+                        fontSize: `${surveyData?.body_text?.size}px`,
+                        // fontFamily: `${surveyData?.body_text?.name}`,
+                      }}
+                    >
+                      {sDescription}
+                    </motion.p>
                     <motion.div
-                      className="flex justify-end gap-5 mt-4"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      transition={{ delay: 0.3 }}
+                      className="flex justify-end"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.3, delay: 0.4 }}
                     >
                       <Button
                         variant="outline"
-                        className="rounded-full flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-md hover:bg-gray-50"
-                        onClick={() => setIsEditing(false)}
+                        className="rounded-full px-5 py-1 hover:scale-105 transition-all duration-300 hover:bg-gray-50 hover:shadow-md flex items-center gap-2"
+                        onClick={() => setIsEditing(true)}
                       >
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </Button>
-                      <Button
-                        className="rounded-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
-                        onClick={handleSave}
-                        disabled={!sectionTitle.trim()}
-                      >
-                        <Save className="h-4 w-4" />
-                        Save
+                        <Edit className="h-4 w-4" />
+                        Edit
                       </Button>
                     </motion.div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-
-            {!isEditing && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-lg w-full my-4 flex gap-2 px-4 md:px-6 py-6 flex-col shadow-md hover:shadow-lg transition-shadow duration-300"
-              >
-                <motion.h2
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className={cn(
-                    "text-[1.5rem] font-normal font-lexend bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
-                    `font-${surveyData?.header_text?.name
-                      .split(" ")
-                      .join("-")
-                      .toLowerCase()}`
-                  )}
-                  style={{
-                    fontSize: `${surveyData?.header_text?.size}px`,
-                    // fontFamily: `${surveyData?.header_text?.name}`,
-                  }}
-                >
-                  {sectionTitle}
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className={cn(
-                    "text-gray-600 leading-relaxed",
-                    `font-${surveyData?.body_text?.name
-                      .split(" ")
-                      .join("-")
-                      .toLowerCase()}`
-                  )}
-                  style={{
-                    fontSize: `${surveyData?.body_text?.size}px`,
-                    // fontFamily: `${surveyData?.body_text?.name}`,
-                  }}
-                >
-                  {sDescription}
-                </motion.p>
-                <motion.div
-                  className="flex justify-end"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                >
-                  <Button
-                    variant="outline"
-                    className="rounded-full px-5 py-1 hover:scale-105 transition-all duration-300 hover:bg-gray-50 hover:shadow-md flex items-center gap-2"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                </motion.div>
-              </motion.div>
+                  </motion.div>
+                )}
+              </>
             )}
           </AnimatePresence>
 
@@ -1207,7 +1333,7 @@ const AddQuestionPage = () => {
                         min: min,
                         max: max,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else if (
@@ -1222,7 +1348,7 @@ const AddQuestionPage = () => {
                         rows: rows,
                         columns: columns,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else if (questionType === "long_text") {
@@ -1233,7 +1359,7 @@ const AddQuestionPage = () => {
                         is_required: is_required,
                         can_accept_media: can_accept_media,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     } else {
@@ -1243,7 +1369,7 @@ const AddQuestionPage = () => {
                         options: options,
                         is_required: is_required,
                       };
-                      console.log(newQuestion);
+                      // console.log(newQuestion);
                       dispatch(addQuestion(newQuestion));
                       setAddQuestions((prev) => !prev);
                     }
@@ -1264,6 +1390,18 @@ const AddQuestionPage = () => {
                 >
                   <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
                   Add Question
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full gap-2 items-center justify-center ${
+                    pathname.includes("filter-respondents") ? "flex" : "hidden"
+                  }`}
+                  onClick={handleAddSection}
+                >
+                  <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                  New Section
                 </Button>
 
                 {/* <Tooltip>
@@ -1297,11 +1435,12 @@ const AddQuestionPage = () => {
                     Delete Section
                   </Button>
                 )} */}
-
                 <Button
                   variant="outline"
                   size="sm"
-                  className="group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full"
+                  className={`group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full ${
+                    pathname.includes("filter-respondents") && "hidden"
+                  }`}
                   onClick={handleDiscard}
                 >
                   <GiCardDiscard className="mr-2 h-4 w-4 group-hover:rotate-12" />
@@ -1333,7 +1472,6 @@ const AddQuestionPage = () => {
                 ))}
               </div>
             </div>
-
             <Button
               disabled={
                 isLoading ||
@@ -1342,7 +1480,9 @@ const AddQuestionPage = () => {
                 !questions.length
               }
               size="lg"
-              className="w-full md:w-auto md:self-end bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl"
+              className={`w-full md:w-auto md:self-end bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl ${
+                pathname.includes("filter-respondents") && "hidden"
+              }`}
               onClick={handleSurveyCreation}
             >
               {isLoading ? (
@@ -1361,7 +1501,9 @@ const AddQuestionPage = () => {
           <WatermarkBanner />
         </motion.div>
         <div
-          className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
+          className={`hidden ${
+            previewSurvey ? "lg:hidden" : "lg:flex"
+          } lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
           {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
           <StyleEditor surveyData={surveyData} setSurveyData={setSurveyData} />
@@ -1489,4 +1631,4 @@ const AddQuestionPage = () => {
   );
 };
 
-export default AddQuestionPage;
+export default AddQuestionPageClone;

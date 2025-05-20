@@ -27,8 +27,11 @@ export const earnDialogSlice = createSlice({
   name: "dialog",
   initialState,
   reducers: {
-    openSurveyFormDialog: (state) => {
+    openSurveyFormDialog: (state, action: PayloadAction<any | undefined>) => {
       state.isSurveyFormDialogOpen = true;
+      if (action.payload) {
+        state.screenerSurvey = action.payload;
+      }
     },
     closeSurveyFormDialog: (state) => {
       state.isSurveyFormDialogOpen = false;
@@ -73,7 +76,8 @@ export const selectLastResetTime = (state: RootState) =>
 
 export const selectSurveyID = (state: RootState) =>
   state.earnDialogSlice.surveyID;
-export const screenerSurvey = (state: RootState) =>
+
+export const selectScreenerSurvey = (state: RootState) =>
   state.earnDialogSlice.screenerSurvey;
 
 export const {
@@ -94,7 +98,5 @@ export const {
 export const selectAdsState = (state: RootState) => state.earnDialogSlice;
 export const selectHasNextVideo = (state: RootState) =>
   state.earnDialogSlice.adsWatched < state.earnDialogSlice.totalAds;
-export const selectScreenerSurvey = (state: RootState) =>
-  state.earnDialogSlice.screenerSurvey;
 
 export default earnDialogSlice.reducer;

@@ -1,19 +1,12 @@
-import { pollsensei_new_logo, sparkly } from "@/assets/images";
-import AppReactQuill from "@/components/common/forms/AppReactQuill";
+"use client";
+import React, { useEffect, useState } from "react";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import StarRating from "@/components/survey/StarRating";
 import ResponseFile from "@/components/ui/VoiceRecorder";
 import VoiceRecorder from "@/components/ui/VoiceRecorder";
 import { RootState } from "@/redux/store";
-import {
-  useGetPublicSurveyByIdQuery,
-  useGetPublicSurveyByShortUrlQuery,
-  useSubmitPublicResponseMutation,
-} from "@/services/survey.service";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { FaStar } from "react-icons/fa6";
 import { useSelector } from "react-redux";
@@ -28,11 +21,18 @@ import { RadioGroup } from "@/components/ui/radio-group";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
+  SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { SelectTrigger } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/shadcn-textarea";
 import { Checkbox } from "@/components/ui/shadcn-checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -40,6 +40,24 @@ import { Switch } from "@/components/ui/switch";
 import PublicResponseFile from "@/components/ui/PublicVoiceRecorder";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import {
+  submitScreenerSurvey,
+  submitPaidSurvey,
+  fetchScreenerSurveyBySurveyId,
+  fetchScreenerParticipants,
+  fetchUnrestrictedBalance,
+  GetRespondentSectionData,
+  fetchApplicationSurveys,
+  startPaidSurvey,
+} from "@/services/api/apiRequest";
+import {
+  selectScreenerSurvey,
+  closeSurveyFormDialog,
+} from "@/redux/slices/earnDialogSlice";
+import { useDispatch } from "react-redux";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
+import {} from "@tanstack/react-query";
 
 interface Question {
   question: string;
@@ -59,37 +77,26 @@ interface FormErrors {
   questions: Record<string, string>;
 }
 
-const PublicResponse = () => {
-  const questionText = useSelector(
-    (state: RootState) => state?.survey?.question_text
-  );
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+const PaidRespondentSurveyResponse = () => {
   const params = useParams();
-  const { data: psId, isLoading: psIdLoading } = useGetPublicSurveyByIdQuery(
-    params.id
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
   );
-  const { data: psShortUrl, isLoading: psShUrLoading } =
-    useGetPublicSurveyByShortUrlQuery(params.id);
-  const [
-    submitPublicResponse,
-    { isSuccess: submitSuccess, isLoading: submitting, error: errorSubmitting },
-  ] = useSubmitPublicResponseMutation();
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [currentSection, setCurrentSection] = useState(0);
-  const OCRresponses: string | any[] = [];
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [textResponses, setTextResponses] = useState<string[]>([]);
-  const [respondent_name, setRespondent_name] = useState("");
-  const [respondent_phone, setRespondent_phone] = useState("");
-  const [respondent_country, setRespondent_country] = useState("");
-  const [respondent_email, setRespondent_email] = useState("");
-  const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
-  const router = useRouter();
 
   const [activeInput, setActiveInput] = useState<
     Record<string, "textarea" | "audio" | null>
   >({});
-  const [quilValue, setQuilValue] = useState("");
   const [showAudio, setShowAudio] = useState<Record<string, boolean>>({});
+  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [textResponses, setTextResponses] = useState<string[]>([]);
+
+  const screenerSurvey = useSelector(selectScreenerSurvey);
 
   // Single source of validation errors
   const [formErrors, setFormErrors] = useState<FormErrors>({
@@ -100,7 +107,6 @@ const PublicResponse = () => {
   const validateQuestion = (question: any, value: any) => {
     const error = validateQuestionResponse(question, value);
 
-    // Additional validation for matrix questions
     if (
       (question.question_type === "matrix_checkbox" ||
         question.question_type === "matrix_multiple_choice") &&
@@ -109,7 +115,6 @@ const PublicResponse = () => {
       const matrixAnswers = value?.matrix_answers || [];
       const answeredRows = new Set(matrixAnswers.map((ans: any) => ans.row));
 
-      // Check if all rows have at least one selection
       if (question.rows?.length !== answeredRows.size) {
         const missingRows = question.rows.filter(
           (row: string) => !answeredRows.has(row)
@@ -149,25 +154,38 @@ const PublicResponse = () => {
     return error;
   };
 
-  const handleInputFocus = (
-    question: string,
-    inputType: "textarea" | "audio"
-  ) => {
-    setActiveInput((prev) => ({ ...prev, [question]: inputType }));
-  };
-
-  const handleInputBlur = (question: string) => {
-    setActiveInput((prev) => ({ ...prev, [question]: null }));
-  };
-
-  const isTextareaDisabled = (question: string) =>
-    activeInput[question] === "audio";
-  const isAudioDisabled = (question: string) =>
-    activeInput[question] === "textarea" || !!answers[question]?.text;
-
   // Enhanced answer change handler with validation
   const handleAnswerChange = (key: string, value: any, question?: any) => {
-    setAnswers((prev) => ({ ...prev, [key]: value }));
+    setAnswers((prev) => {
+      // For text inputs (short_text and long_text)
+      if (value?.text !== undefined) {
+        return {
+          ...prev,
+          [key]: {
+            ...prev[key],
+            text_response: value.text,
+          },
+        };
+      }
+      // For drop_down
+      else if (value?.drop_down_value !== undefined) {
+        return {
+          ...prev,
+          [key]: {
+            ...prev[key],
+            selected_options: [value.drop_down_value],
+          },
+        };
+      }
+      // For other types (single_choice, multiple_choice)
+      else {
+        return {
+          ...prev,
+          [key]: value,
+        };
+      }
+    });
+
     if (question) {
       validateQuestion(question, value);
     }
@@ -269,106 +287,276 @@ const PublicResponse = () => {
     });
   };
 
-  console.log(textResponses);
-  console.log(selectedOptions);
-
-  console.log(psId);
-  const question =
-    typeof params?.id === "string" && params.id.startsWith("ps-")
-      ? psId
-      : psShortUrl;
+  const question = screenerSurvey;
 
   useEffect(() => {
-    if (question?.data?.sections) {
+    if (question?.data?.sections[currentSection]?.questions) {
       setSelectedOptions(new Array(question.data.sections.length).fill(null));
       setTextResponses(new Array(question.data.sections.length).fill(""));
     }
-  }, [question]);
+  }, [currentSection, question]);
 
-  // Enhanced submit handler with full validation
+  const currentQuestions = question?.data?.sections[currentSection]?.questions;
+  const surveyType = question?.data?.survey_type ?? question?.data?.survey_type;
+
+  const { data: screenerSuveyBySurveyId } = useQuery({
+    queryKey: [...[APP_KEYS.SCREENER_SURVEY_BY_SURVEY_ID], userAccessToken],
+    queryFn: () =>
+      fetchScreenerSurveyBySurveyId(userAccessToken, question.data._id),
+    enabled: !!userAccessToken && !!question,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const screenerSurveyID = screenerSuveyBySurveyId?.data?.[0]?._id || null;
+
+  const { data: respondent, error: respondentError } = useQuery({
+    queryKey: [...[APP_KEYS.START_SURVEY], userAccessToken],
+    queryFn: () =>
+      startPaidSurvey(userAccessToken, question.data._id, screenerSurveyID),
+    enabled: !!userAccessToken && !!screenerSurveyID,
+  });
+
+  const respondentId = respondent?.data?.respondentId || null;
+  const canSubmit = !respondentError && !!respondentId;
+
+  // useEffect(() => {
+  //   if (!canSubmit) {
+  //     toast.error("This survey has been filled. Please fill the next survey.");
+  //     dispatch(closeSurveyFormDialog());
+  //     return;
+  //   }
+  // }, [canSubmit, dispatch]);
+
+  // console.log({
+  //   screenerSuveyBySurveyId,
+  //   respondent,
+  //   respondentId,
+  //   screenerSurveyID,
+  // });
+
+  const { data: screenerParticipants } = useQuery({
+    queryKey: [
+      APP_KEYS.RESPONDENT_DATA_BY_SECTION,
+      "personalInfo",
+      userAccessToken,
+    ],
+    queryFn: () => GetRespondentSectionData(userAccessToken, "personalInfo"),
+    enabled: !!userAccessToken,
+  });
+
+  const { data: screenerParticipantsGeo } = useQuery({
+    queryKey: [
+      APP_KEYS.RESPONDENT_DATA_BY_SECTION,
+      "geographicInfo",
+      userAccessToken,
+    ],
+    queryFn: () => GetRespondentSectionData(userAccessToken, "geographicInfo"),
+    enabled: !!userAccessToken,
+  });
+
+  // console.log({ screenerParticipants, screenerParticipantsGeo });
+
   const handleSubmitResponse = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    const currentQuestions =
-      question?.data?.sections[currentSection]?.questions;
     if (!currentQuestions) {
       toast.warning("No questions found in this section");
       return;
     }
 
-    // Format answers for current section
-    const formattedAnswers = currentQuestions.map((question: any) => ({
-      question: question.question,
-      question_type: question.question_type,
-      ...answers[question.question],
-    }));
-
-    // Validate required fields
-    const newFormErrors: FormErrors = {
-      questions: {},
-    };
-
-    if (
-      question?.data?.settings?.collect_email_addresses &&
-      !respondent_email
-    ) {
-      newFormErrors.respondent_email = "Email is required";
-    }
-
-    if (
-      question?.data?.settings?.collect_name_of_respondents &&
-      !respondent_name
-    ) {
-      newFormErrors.respondent_name = "Name is required";
-    }
-
-    // Validate all questions in current section
-    currentQuestions.forEach((quest: any) => {
-      // Only validate if question is required
-      if (quest.is_required) {
-        const error = validateQuestionResponse(quest, answers[quest.question]);
-        if (error) {
-          newFormErrors.questions[quest.question] = error;
+    // Check if all required questions are answered
+    const allQuestionsAnswered = currentQuestions.every((question: any) => {
+      if (question.is_required) {
+        const answerData = answers[question.question];
+        if (question.question_type === "checkbox") {
+          return answerData?.selected_options.length > 0;
+        } else if (
+          question.question_type === "single_choice" ||
+          question.question_type === "drop_down" ||
+          question.question_type === "boolean"
+        ) {
+          return answerData?.selected_options?.[0] !== undefined;
+        } else if (question.question_type === "text") {
+          return answerData?.text_response !== "";
         }
       }
+      return true;
     });
 
-    setFormErrors(newFormErrors);
+    // Format answers for all sections
+    const allFormattedAnswers = question.data.sections.flatMap((section: any) =>
+      section.questions.map((question: any) => {
+        const answerData = answers[question.question];
+        let answerValue;
 
-    // Check if there are any errors
-    if (
-      Object.keys(newFormErrors.questions).length > 0 ||
-      newFormErrors.respondent_email ||
-      newFormErrors.respondent_name
-    ) {
-      toast.error("Please fix the validation errors before submitting");
-      return;
-    }
+        if (question.question_type === "checkbox") {
+          answerValue = answerData?.selected_options || [];
+        } else if (
+          question.question_type === "single_choice" ||
+          question.question_type === "drop_down"
+        ) {
+          answerValue = answerData?.selected_options?.[0] || "";
+        } else if (question.question_type === "boolean") {
+          answerValue =
+            answerData?.selected_options?.[0] === true ? "Yes" : "No";
+        } else if (question.question_type === "text") {
+          answerValue = answerData?.text_response || "";
+        } else {
+          answerValue = "";
+        }
 
-    // Submit response
-    const responsePayload = {
-      survey_id: question?.data?._id,
-      respondent_name,
-      respondent_email,
-      answers: formattedAnswers,
+        return {
+          questionId: question.question,
+          question: question.question,
+          questionType: question.question_type,
+          answer: answerValue,
+          section: section.sectionTitle,
+        };
+      })
+    );
+
+    const allSurveyFormattedAnswers = question.data.sections.flatMap(
+      (section: any) =>
+        section.questions.map((quest: any) => {
+          const answerData = answers[quest.question];
+          const questionType =
+            quest.question_type?.toLowerCase() || "short_text";
+
+          if (questionType === "multiple_choice") {
+            return {
+              question: quest.question,
+              question_type: "multiple_choice",
+              selected_options: answerData?.selected_options || [],
+            };
+          } else if (questionType === "checkbox") {
+            return {
+              question: quest.question,
+              question_type: "checkbox",
+              selected_options: answerData?.selected_options || [],
+            };
+          } else if (questionType === "single_choice") {
+            return {
+              question: quest.question,
+              question_type: "single_choice",
+              selected_options: answerData?.selected_options
+                ? [answerData.selected_options[0]]
+                : [],
+            };
+          } else if (questionType === "drop_down") {
+            return {
+              question: quest.question,
+              question_type: "drop_down",
+              selected_options: answerData?.selected_options
+                ? [answerData.selected_options[0]]
+                : [],
+            };
+          } else if (questionType === "boolean") {
+            return {
+              question: quest.question,
+              question_type: "boolean",
+              selected_options: [
+                answerData?.selected_options?.[0] === true ? "Yes" : "No",
+              ],
+            };
+          } else if (questionType === "long_text") {
+            return {
+              question: quest.question,
+              question_type: "long_text",
+              text: answerData?.text_response || "",
+            };
+          } else if (questionType === "short_text") {
+            return {
+              question: quest.question,
+              question_type: "short_text",
+              text: answerData?.text_response || "",
+            };
+          } else if (questionType === "likert_scale") {
+            return {
+              question: quest.question,
+              question_type: "likert_scale",
+              scale_value: answerData?.scale_value || "",
+            };
+          } else if (questionType === "star_rating") {
+            return {
+              question: quest.question,
+              question_type: "star_rating",
+              scale_value: answerData?.scale_value || "",
+            };
+          } else if (questionType === "rating_scale") {
+            return {
+              question: quest.question,
+              question_type: "rating_scale",
+              scale_value: answerData?.scale_value || "",
+            };
+          } else if (questionType === "slider") {
+            return {
+              question: quest.question,
+              question_type: "slider",
+              scale_value: answerData?.scale_value || "",
+            };
+          } else {
+            return {
+              question: quest.question,
+              question_type: "short_text",
+              text:
+                answerData?.text_response ||
+                answerData?.selected_options?.[0] ||
+                "",
+            };
+          }
+        })
+    );
+
+    const screenerSurveyResponsePayload = {
+      screenerId: question.data._id,
+      responses: allFormattedAnswers,
+    };
+
+    const paidSurveyResponsePayload = {
+      survey_id: question.data._id,
+      respondent_id: respondentId,
+      respondent_name: screenerParticipants?.data?.sectionData?.firstName,
+      respondent_country:
+        screenerParticipantsGeo?.data?.sectionData?.nationality,
+      respondent_email: screenerParticipants?.data?.sectionData?.email,
+      answers: allSurveyFormattedAnswers,
     };
 
     try {
-      await submitPublicResponse(responsePayload).unwrap();
+      setLoading(true);
+      !surveyType
+        ? await submitScreenerSurvey(
+            userAccessToken,
+            screenerSurveyResponsePayload,
+            question.data.surveyIds[0]
+          )
+        : await submitPaidSurvey(userAccessToken, paidSurveyResponsePayload);
+      queryClient.invalidateQueries({
+        queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], userAccessToken],
+      });
+      dispatch(closeSurveyFormDialog());
+      await fetchApplicationSurveys(userAccessToken);
       toast.success("Your response was saved successfully");
-      setSubmitSurveySuccess(true);
-    } catch (error) {
-      console.error(error);
-      toast.error("An error occurred while submitting your response");
+      setLoading(false);
+    } catch (error: any) {
+      if (error.message) {
+        const { message, error: { hint } = {} } = error;
+        toast.error(`${message}`);
+      } else {
+        toast.error("An error occurred while submitting your response");
+      }
+    } finally {
+      setLoading(false);
     }
   };
-
-  console.log(question);
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < OCRresponses.length - 1 ? prevIndex + 1 : prevIndex;
+        return prevIndex < question.data.sections.length - 1
+          ? prevIndex + 1
+          : prevIndex;
       } else {
         return prevIndex > 0 ? prevIndex - 1 : prevIndex;
       }
@@ -384,11 +572,43 @@ const PublicResponse = () => {
       "Other",
       "other",
       "others",
+      "Other...",
+      "Others...",
+      "Other option",
+      "Other options",
+      "Other choice",
+      "Other choices",
+      "Something else",
+      "Something else...",
+      "Specify other",
+      "Please specify",
+      "Please specify other",
+      "Please specify others",
+      "Custom option",
+      "Custom choice",
+      "Please specify here",
+      "Please specify below",
+      "Please provide details",
+      "Please explain",
+      "Please describe",
+      "Please elaborate",
+      "Please write here",
+      "Please enter details",
+      "Please tell us more",
+      "Specify here",
+      "Enter other option",
+      "Write your answer",
+      "Other option (please specify)",
+      "Other options (please specify)",
+      "Other choice (please specify)",
+      "Other choices (please specify)",
+      "Specify other option",
+      "Specify other options",
     ];
-    return otherOptions.includes(option);
+    return otherOptions.some(
+      (otherOption) => otherOption.toLowerCase() === option.toLowerCase().trim()
+    );
   };
-
-  console.log(question);
 
   // Question rendering with enhanced UI and animations
   const renderQuestion = (quest: any, index: number, theme: string) => {
@@ -418,7 +638,7 @@ const PublicResponse = () => {
             {index + 1}.
           </span>
           <div className="flex-1">
-            <p className="font-medium text-lg">
+            <p className="font-medium text-lg capitalize">
               {quest.question}
               {quest.is_required && (
                 <span className="text-red-500 font-extrabold text-base ml-1">
@@ -434,7 +654,7 @@ const PublicResponse = () => {
 
         <motion.div
           variants={fadeInUp}
-          className="mt-4 px-4 lg:px-10"
+          className="mt-4 px-4 lg:px-10 h-auto"
           style={{
             fontSize: `${question?.data?.question_text?.size}px`,
           }}
@@ -567,7 +787,7 @@ const PublicResponse = () => {
                 );
 
               case "likert_scale":
-                console.log(quest);
+                // console.log(quest);
 
                 return (
                   <RadioGroup
@@ -622,44 +842,42 @@ const PublicResponse = () => {
 
               case "drop_down":
                 return (
-                  <>
-                    <Select
-                      onValueChange={(value) =>
-                        handleAnswerChange(quest.question, {
-                          drop_down_value: value,
-                        })
-                      }
-                    >
-                      <SelectTrigger
-                        className="mb-4 bg-[#FAFAFA] w-full"
-                        style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
-                        }}
+                  <div className="mb-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-[#FAFAFA] flex justify-between"
+                        >
+                          {answers[quest.question]?.selected_options?.[0] ||
+                            "Select an option"}
+                          <ChevronDown className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="w-[var(--radix-dropdown-menu-trigger-width)] bg-white z-[1000000]"
+                        side="bottom"
+                        align="start"
+                        sideOffset={4}
                       >
-                        <SelectValue
-                          placeholder="Select an option"
-                          style={{
-                            fontSize: `${question?.data?.question_text?.size}px`,
-                          }}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
                         {quest.options?.map((option: any) => (
-                          <SelectItem
+                          <DropdownMenuItem
                             key={option}
-                            value={option}
-                            style={{
-                              fontSize: `${question?.data?.question_text?.size}px`,
+                            onSelect={() => {
+                              handleAnswerChange(quest.question, {
+                                selected_options: [option],
+                              });
                             }}
+                            className="cursor-pointer text-black"
                           >
                             {option}
-                          </SelectItem>
+                          </DropdownMenuItem>
                         ))}
-                      </SelectContent>
-                    </Select>
-                    {answers[quest.question]?.drop_down_value &&
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {answers[quest.question]?.selected_options?.[0] &&
                       isOtherOption(
-                        answers[quest.question]?.drop_down_value
+                        answers[quest.question]?.selected_options?.[0]
                       ) && (
                         <Input
                           type="text"
@@ -668,13 +886,14 @@ const PublicResponse = () => {
                           value={answers[quest.question]?.other_value || ""}
                           onChange={(e) =>
                             handleAnswerChange(quest.question, {
-                              ...answers[quest.question],
+                              selected_options:
+                                answers[quest.question]?.selected_options,
                               other_value: e.target.value,
                             })
                           }
                         />
                       )}
-                  </>
+                  </div>
                 );
 
               case "boolean":
@@ -742,14 +961,11 @@ const PublicResponse = () => {
                       <Textarea
                         rows={4}
                         className="mb-4 bg-[#FAFAFA]"
-                        value={answers[quest.question]?.text || ""}
-                        onChange={(e) =>
+                        value={answers[quest.question]?.text_response || ""}
+                        onChange={(e) => {
                           handleAnswerChange(quest.question, {
                             text: e.target.value,
-                          })
-                        }
-                        style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          });
                         }}
                       />
                     ) : (
@@ -765,20 +981,16 @@ const PublicResponse = () => {
 
               case "short_text":
                 return (
-                  <div className="flex flex-col">
-                    <Input
-                      placeholder="Your response here..."
-                      className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
-                      onChange={(e) =>
-                        handleAnswerChange(quest.question, {
-                          text: e.target.value,
-                        })
-                      }
-                      style={{
-                        fontSize: `${question?.data?.question_text?.size}px`,
-                      }}
-                    />
-                  </div>
+                  <Input
+                    placeholder="Your response here..."
+                    className="w-full border mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                    value={answers[quest.question]?.text_response || ""}
+                    onChange={(e) => {
+                      handleAnswerChange(quest.question, {
+                        text: e.target.value,
+                      });
+                    }}
+                  />
                 );
 
               case "star_rating":
@@ -1000,287 +1212,107 @@ const PublicResponse = () => {
     }
   };
 
-  console.log();
-
   return (
     <div className={`flex flex-col gap-5 w-full`}>
-      {(psIdLoading || psShUrLoading) && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative w-32 h-32">
-              <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl animate-pulse" />
-              <Image
-                src={pollsensei_new_logo}
-                alt="Loading..."
-                className="relative z-10 w-full h-full object-contain animate-pulse"
-              />
-            </div>
-            <p className="text-gray-600 animate-pulse">Loading survey...</p>
-          </div>
-        </div>
-      )}
-      {submitSurveySuccess && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-        >
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.5, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-            }}
-            className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full mx-4 shadow-[0_0_50px_rgba(157,80,187,0.25)] border border-purple-100"
+      <div>
+        {question?.data && (
+          <div
+            className={`${question?.data?.theme} max-h-[80vh] overflow-y-auto flex justify-center px-5 lg:px-16 mx-auto gap-10 w-full`}
           >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-col items-center"
+            <form
+              onSubmit={handleSubmitResponse}
+              className={` flex flex-col overflow-y-auto custom-scrollbar w-full max-w-screen-lg`}
             >
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 260,
-                  damping: 20,
-                  delay: 0.2,
-                }}
-                className="relative"
-              >
-                <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-xl animate-pulse" />
-                <FaCheckCircle className="text-[#9D50BB] text-7xl mb-6 relative z-10 drop-shadow-lg" />
-              </motion.div>
-
-              <motion.h1
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-3xl font-bold mb-3 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent"
-              >
-                Thank You!
-              </motion.h1>
-
-              <motion.p
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-gray-600 text-lg mb-8 text-center"
-              >
-                Your response has been submitted successfully.
-              </motion.p>
-
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="flex gap-4"
-              >
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white h-10 px-4 py-2 hover:opacity-90 group relative"
-                >
-                  <span className="absolute inset-0 rounded-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="relative flex items-center gap-2">
-                    <motion.span
-                      initial={{ x: 0 }}
-                      whileHover={{ x: -4 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                    >
-                      Home
-                    </motion.span>
-                    <motion.span
-                      initial={{ x: 0, opacity: 0.5 }}
-                      whileHover={{ x: 4, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                      className="transition-transform duration-200"
-                    >
-                      →
-                    </motion.span>
-                  </span>
-                </Link>
-
-                <Button
-                  onClick={() => {
-                    location.reload();
-                  }}
-                  variant="outline"
-                  className="relative inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#9D50BB] hover:bg-gradient-to-r hover:from-[#5B03B2] hover:to-[#9D50BB] hover:text-white h-10 px-4 py-2 group overflow-hidden"
-                >
-                  <span className="relative flex items-center gap-2 z-20">
-                    <motion.span
-                      animate={{ rotate: [0, 360] }}
-                      transition={{
-                        duration: 0.5,
-                        delay: 0.1,
-                        ease: "easeInOut",
-                      }}
-                      className="text-lg"
-                    >
-                      ↺
-                    </motion.span>
-                    Take survey again
-                  </span>
-                  <span className="absolute inset-0 translate-y-[102%] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                </Button>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      )}
-      {!submitSurveySuccess && (
-        <div>
-          {question?.data && (
-            <div
-              className={`${question?.data?.theme} min-h-screen flex justify-center px-5 bg-fixed lg:px-16 mx-auto gap-10 w-full`}
-            >
-              <form
-                onSubmit={handleSubmitResponse}
-                className={` flex flex-col overflow-y-auto custom-scrollbar w-full max-w-screen-lg`}
-              >
-                {question?.data?.logo_url && (
-                  <div className="bg-gray-100 w-16 rounded my-5 text-white flex items-center flex-col ">
-                    <Image
-                      src={question?.data?.logo_url}
-                      alt=""
-                      className="w-full object-cover rounded bg-no-repeat h-16"
-                      width={"100"}
-                      height={"200"}
-                    />
-                  </div>
-                )}
-                {question?.data?.header_url && (
-                  <div className="bg-gray-100 rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
-                    <Image
-                      src={question?.data?.header_url}
-                      alt=""
-                      className="w-full object-cover bg-no-repeat h-24 rounded-lg"
-                      width={"100"}
-                      height={"200"}
-                    />
-                  </div>
-                )}
-
-                <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
-                  <h2
-                    className={cn(
-                      "text-[1.5rem] font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
-                      getFontClass(question?.data?.header_text?.name)
-                    )}
-                    style={{
-                      fontSize: `${question?.data?.header_text?.size}px`,
-                    }}
-                  >
-                    {question?.data?.topic}
-                  </h2>
-                  <p
-                    className={cn(
-                      "text-gray-600 leading-relaxed",
-                      getFontClass(question?.data?.body_text?.name)
-                    )}
-                    style={{
-                      fontSize: `${question?.data?.body_text?.size}px`,
-                    }}
-                  >
-                    {question?.data?.description}
-                  </p>
+              {question?.data?.logo_url && (
+                <div className="bg-gray-100 w-16 rounded my-5 text-white flex items-center flex-col ">
+                  <Image
+                    src={question?.data?.logo_url}
+                    alt=""
+                    className="w-full object-cover rounded bg-no-repeat h-16"
+                    width={"100"}
+                    height={"200"}
+                  />
                 </div>
+              )}
+              {question?.data?.header_url && (
+                <div className="bg-gray-100 rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
+                  <Image
+                    src={question?.data?.header_url}
+                    alt=""
+                    className="w-full object-cover bg-no-repeat h-24 rounded-lg"
+                    width={"100"}
+                    height={"200"}
+                  />
+                </div>
+              )}
 
-                <div
+              <div className="bg-white rounded-lg w-full my-4 flex gap-2 px-11 py-4 flex-col ">
+                <h2
                   className={cn(
-                    "flex flex-col gap-2 w-full bg-white px-11 py-4 rounded-lg mb-4",
+                    "text-[1.5rem] font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
+                    getFontClass(question?.data?.header_text?.name)
+                  )}
+                  style={{
+                    fontSize: `${question?.data?.header_text?.size}px`,
+                  }}
+                >
+                  {question?.data?.topic || question?.data?.title}
+                </h2>
+                <p
+                  className={cn(
+                    "text-gray-600 leading-relaxed",
                     getFontClass(question?.data?.body_text?.name)
                   )}
+                  style={{
+                    fontSize: `${question?.data?.body_text?.size}px`,
+                  }}
                 >
-                  {question?.data?.settings?.collect_email_addresses && (
-                    <div className="flex flex-col w-full">
-                      <Label htmlFor="full name" className="">
-                        Full name{" "}
-                        <span className="text-red-500 text-base">*</span>
-                      </Label>
-                      <Input
-                        type="text"
-                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none"
-                        required
-                        onChange={(e) => setRespondent_name(e.target.value)}
-                        value={respondent_name}
-                      />
-                    </div>
-                  )}
-                  {question?.data?.settings?.collect_name_of_respondents && (
-                    <div className="flex flex-col w-full">
-                      <Label htmlFor="full name" className="">
-                        Email <span className="text-red-500 text-base">*</span>
-                      </Label>
-                      <Input
-                        type="email"
-                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none "
-                        required
-                        onChange={(e) => setRespondent_email(e.target.value)}
-                        value={respondent_email}
-                      />
-                    </div>
-                  )}
-                </div>
-                <AnimatePresence mode="wait">
-                  <motion.div className="flex flex-col gap-4">
-                    {question?.data?.sections[currentSection]?.questions?.map(
-                      renderQuestion
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                  {question?.data?.description}
+                </p>
+              </div>
 
-                <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
-                  <div className="flex gap-2 items-center"></div>
-                  {/* {question?.data?.sections?.length > 1 && (
-                    <div className="flex w-full md:w-auto md:justify-end items-center">
-                      <PaginationBtn
-                        currentSection={currentSection}
-                        totalSections={question?.data?.sections?.length}
-                        onNavigate={navigatePage}
-                      />
-                    </div>
-                  )} */}
-                </div>
+              <AnimatePresence mode="wait">
+                <motion.div className="flex flex-col gap-4 h-auto">
+                  {question?.data?.sections[currentSection]?.questions?.map(
+                    renderQuestion
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
-                <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium"
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      "Submit"
-                    )}
-                  </Button>
-                </div>
-                {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
-                  <div className="flex flex-col">
-                    <p>Form created by</p>
-                    <Image src={pollsensei_new_logo} alt="Logo" />
+              <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
+                <div className="flex gap-2 items-center"></div>
+                {question?.data?.sections?.length > 1 && (
+                  <div className="flex w-full md:w-auto md:justify-end items-center">
+                    <PaginationBtn
+                      currentSection={currentSection}
+                      totalSections={question?.data?.sections?.length}
+                      onNavigate={navigatePage}
+                    />
                   </div>
-                  <span className="absolute bottom-2 right-4 text-[#828282]">
-                    Remove watermark
-                  </span>
-                </div> */}
-              </form>
-            </div>
-          )}
-        </div>
-      )}
+                )}
+              </div>
+
+              <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default PublicResponse;
+export default PaidRespondentSurveyResponse;
