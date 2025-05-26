@@ -67,6 +67,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { UserData } from "@/subpages/settings/ProfilePage";
+import { useUserProfileQuery } from "@/services/user.service";
 
 interface Notification {
   _id: string;

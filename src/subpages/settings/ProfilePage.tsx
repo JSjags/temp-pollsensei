@@ -64,7 +64,7 @@ export const ProfileSkeleton = () => {
   );
 };
 
-interface UserData {
+export interface UserData {
   name: string;
   lastName: string;
   email: string;

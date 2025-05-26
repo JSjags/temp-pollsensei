@@ -507,10 +507,10 @@ const GenericArticlePage = (props: Props) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <h3 className="text-lg font-semibold mb-2 line-clamp-2">
+                <h3 className="text-lg font-semibold mb-2 line-clamp-1">
                   {card.title}
                 </h3>
-                <p className="text-gray-600 text-sm mb-auto line-clamp-3">
+                <p className="text-gray-600 text-sm mb-auto line-clamp-2">
                   {card.description}
                 </p>
                 <div className="mt-4 pt-2 flex items-center text-xs text-gray-500 border-t">

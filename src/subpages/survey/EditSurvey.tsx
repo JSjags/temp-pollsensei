@@ -407,7 +407,7 @@ const EditSurvey = () => {
           surveyData.logo_url.startsWith("#")
             ? ""
             : surveyData.logo_url,
-        sections: updatedSurvey.sections.map((section) => ({
+        sections: [updatedSurvey.sections[0]].map((section) => ({
           ...section,
           questions: section.questions.map((question: Question) => {
             // Check if empty question type but has matrix structure
@@ -491,8 +491,14 @@ const EditSurvey = () => {
                 return {
                   ...baseQuestion,
                   description: question.description || "Matrix Question",
-                  rows: question.rows || [],
-                  columns: question.columns || [],
+                  rows:
+                    question.rows ||
+                    (question as any)?.Rows ||
+                    (question?.options as any)?.Rows,
+                  columns:
+                    question.columns ||
+                    (question as any)?.Columns ||
+                    (question?.options as any)?.Columns,
                 } as Question;
 
               case "number":

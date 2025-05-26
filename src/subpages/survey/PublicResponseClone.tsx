@@ -1080,7 +1080,14 @@ const PublicResponse = () => {
   const isFetchBaseQueryError = (
     error: any
   ): error is { data: { message: string } } => {
-    return "data" in error;
+    if (!error || typeof error !== "object") return false;
+    return (
+      "data" in error &&
+      typeof error.data === "object" &&
+      error.data !== null &&
+      "message" in error.data &&
+      typeof error.data.message === "string"
+    );
   };
 
   return (

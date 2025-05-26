@@ -2,7 +2,7 @@
 
 import React from "react";
 import { FaRegBell, FaRegUserCircle } from "react-icons/fa";
-import { TbShieldHalf, TbStack } from "react-icons/tb";
+import { TbChartBar, TbShieldHalf, TbStack } from "react-icons/tb";
 import { LuCreditCard } from "react-icons/lu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -43,6 +43,11 @@ const supportMenu: MenuItem[] = [
     label: "Subscription",
     path: "/settings/subscription",
     icons: <TbStack />,
+  },
+  {
+    label: "Resource Monitor",
+    path: "/settings/resource-monitor",
+    icons: <TbChartBar />,
   },
 ];
 

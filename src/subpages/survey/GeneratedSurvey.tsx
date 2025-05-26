@@ -403,8 +403,10 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 <MatrixQuestion
                                   key={index}
                                   index={index + 1}
-                                  rows={item.rows}
-                                  columns={item.columns}
+                                  rows={item?.rows || item?.options?.Rows}
+                                  columns={
+                                    item?.columns || item?.options?.Columns
+                                  }
                                   question={item.question}
                                   questionType={item.question_type}
                                 />
@@ -421,8 +423,10 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   key={index}
                                   index={index + 1}
                                   question={item.question}
-                                  rows={item.rows}
-                                  columns={item.columns}
+                                  rows={item?.rows || item?.options?.Rows}
+                                  columns={
+                                    item?.columns || item?.options?.Columns
+                                  }
                                   questionType={item.question_type}
                                 />
                               ) : item.question_type === "rating_scale" ? (
