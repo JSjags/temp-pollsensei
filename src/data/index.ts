@@ -1,0 +1,81 @@
+export const participants = [
+  {
+    id: "1",
+    firstName: "John",
+    lastName: "Doe",
+    gender: "male",
+    age: 35,
+    email: "johndoe@email.com",
+  },
+];
+
+export const surveyResponse = [
+  {
+    id: "1",
+    personalInfo: {
+      age: "25-43yrs",
+      gender: "male",
+      status: "married",
+      education: "Masters",
+      dependents: "N/A",
+      location: "Lagos",
+      occupation: "Software Engineer",
+      language: "English, Yoruba",
+      ethnicity: "African/Black American",
+      religion: "Christianity",
+      pets: "Cat",
+    },
+    eductaion: {
+      job: "Software Engineer",
+      industry: "Blockchain",
+      employmentStatus: "employed (full-time)",
+      educationLevel: "Bachelor's degree",
+      incomeRange: "$50,000 - $100,000",
+      workHours: "More than 40 hours per week",
+      techSavvy: "Yes",
+    },
+    geographicInfo: {
+      nationality: "Nigeria",
+      region: "Africa",
+      state: "Lagos",
+      settlement: "Rural",
+    },
+    health: {
+      healthStatus: "Good",
+      insuranceType: "A plan through my employer",
+      physicalActivity: "Yes, daily",
+      dietryRestrictions: "No",
+      smoke: "No",
+      drink: "No",
+      hoursOfSleep: "7-9 hours",
+    },
+    technology: {
+      socialPlatforms: [
+        "facebook",
+        "x (twitter)",
+        "instagram",
+        "tiktok",
+        "telegram",
+        "whatsapp",
+      ],
+      internetUsage: "Yes",
+      gadgets: ["phone", "laptop", "tablet"],
+      socialMediaUsage: "Daily",
+      contentEngaged: "educational",
+      browserUsed: "Chrome",
+      computerOS: "Mac",
+      smartPhoneOS: "iOS",
+      tabletOS: "Android",
+    },
+    housing: {
+      livingArrangement: "Living alone",
+      livingCondition: "Rent",
+      householdNumber: "2",
+    },
+    mobility: {
+      commutingMode: ["Walking", "Public transport", "Car"],
+      travelFrequency: "Rarely",
+      ownCar: "No",
+    },
+  },
+];

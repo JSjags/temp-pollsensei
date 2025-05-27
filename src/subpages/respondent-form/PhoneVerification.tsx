@@ -11,7 +11,7 @@ import {
 } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setIsPhoneVerified } from "@/redux/slices/becomePaidRespondentSlice";
 import {
   InputOTP,
@@ -28,6 +28,9 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { FaChevronLeft } from "react-icons/fa6";
+import { RootState } from "@/redux/store";
+import { useRouter } from "next/navigation";
+import { formatTime } from "@/utils";
 
 const PhoneVerification = () => {
   const [dialCode, setDialCode] = useState<string>("+234");
@@ -36,11 +39,14 @@ const PhoneVerification = () => {
   const [otp, setOTP] = useState<string>("");
   const [isOtp, setIsOtp] = useState<boolean>(false);
   const [inputOtp, setInputOtp] = useState<string>("");
-  const [confirmOtp, setConfirmOTP] = useState<string>("");
-  const cleanDialCode = dialCode.replace(/[+-]/, "");
+  const [confirmOtp, setConfirmOTP] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [timeLeft, setTimeLeft] = useState<number>(59);
+  const [timeLeft, setTimeLeft] = useState<number>(300);
   const dispatch = useDispatch();
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
+  const router = useRouter();
 
   const { data: nationalities } = useQuery({
     queryKey: [...[APP_KEYS.COUNTRY_FLAG]],
@@ -73,15 +79,17 @@ const PhoneVerification = () => {
     return () => clearTimeout(timer);
   }, [timeLeft, isOtp]);
 
+  const phoneNumber = dialCode + phone;
+
   const handlePhoneVerification = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
     setIsOtp(true);
-    setTimeLeft(59);
+    setTimeLeft(300);
     setOTP("");
     try {
-      const response = await fetchOTP(phone);
+      const response = await fetchOTP(userAccessToken, phoneNumber);
       setOTP(response);
     } catch (error: any) {
       console.error(error);
@@ -97,10 +105,11 @@ const PhoneVerification = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await confirmOTP(inputOtp);
-      setConfirmOTP(response);
+      const response = await confirmOTP(userAccessToken, phoneNumber, inputOtp);
+      setConfirmOTP(response.data.isPhoneVerified);
       if (response) {
         dispatch(setIsPhoneVerified(true));
+        router.push("/respondent-form");
       }
     } catch (error: any) {
       console.error(error);
@@ -120,7 +129,7 @@ const PhoneVerification = () => {
 
   const handleResendCode = () => {
     setOTP("");
-    setTimeLeft(59);
+    setTimeLeft(300);
   };
 
   return (
@@ -128,7 +137,7 @@ const PhoneVerification = () => {
       {!isOtp ? (
         <div className="w-[70%] h-[70vh] flex flex-col gap-5 justify-center items-center bg-white rounded-lg m-auto shadow-md shadow-[A9A7A72E]">
           <h2 className="text-2xl font-bold">Verify Your Phone Number</h2>
-          <p className="text-sm text-center px-16 lg:px-0 w-full lg:w-[70%]">
+          <p className="text-sm text-center px-16 lg:px-0 w-full lg:w-[50%]">
             To continue with the process if becoming a paid respondent, Add your
             phone number and enter the verification code that will be sent to
             you so we know you&apos;re real
@@ -185,7 +194,7 @@ const PhoneVerification = () => {
                   <input
                     type="tel"
                     id="Phone number"
-                    placeholder="8115 6556 28"
+                    placeholder="8115655628"
                     className={`flex-1 h-auto border-none outline-none bg-transparent active:bg-transparent text-black text-base py-2 px-3 active:outline-none`}
                     value={phone}
                     onChange={(e) => {
@@ -308,7 +317,10 @@ const PhoneVerification = () => {
                 className={`text-sm ${
                   timeLeft <= 10 ? "text-red-500" : "text-[#898989]"
                 }`}
-              >{`00:${timeLeft.toString().padStart(2, "0")}s`}</p>
+              >
+                {" "}
+                {formatTime(timeLeft)}
+              </p>
               <p className="text-xs text-[#333333]">
                 Didn’t receive any code?{" "}
                 <span
@@ -325,7 +337,7 @@ const PhoneVerification = () => {
               size="default"
               className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 text-white hover:text-white rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all lg:mb-10 mt-5"
               type="submit"
-              disabled={!isOTPComplete || isLoading}
+              disabled={!isOTPComplete || isLoading || confirmOtp}
             >
               Verify Now
             </Button>

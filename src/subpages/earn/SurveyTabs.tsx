@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Available from "@/subpages/earn/Available";
@@ -28,7 +28,7 @@ const SurveyTabs = () => {
   const userAccessToken = useSelector(
     (state: RootState) => state.user.access_token
   );
-  const [activeTab, setActiveTab] = React.useState<string>("available");
+  const [activeTab, setActiveTab] = useState<string>("available");
 
   const { data: availableSurveys, isLoading: loadingAvailable } = useQuery({
     queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS], userAccessToken],

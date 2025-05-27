@@ -18,6 +18,7 @@ import { z } from "zod";
 import { surveySchema } from "@/utils/shema";
 import confirm from "@/assets/images/confirm.svg";
 import congrats from "@/assets/images/congrats.svg";
+import { pollsensei_icon } from "@/assets/images";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -293,9 +294,6 @@ const BuyRespondent = () => {
               />
             </div>
           </div>
-          {/* <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
-            <Image src={Purchases1} alt="icons" layout="fill" className="object-contain" />
-          </div> */}
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}
@@ -529,9 +527,17 @@ const BuyRespondent = () => {
                 <p className="text-xs lg:text-sm font-bold">
                   Number of PollCoins
                 </p>
-                <p className="text-base lg:text-lg text-[#5F08B2]">
-                  {selectedRespondentsNumber * 5}pc
-                </p>
+                <div className="w-auto flex items-center gap-1">
+                  <p className="text-base lg:text-lg text-[#5F08B2]">
+                    {selectedRespondentsNumber * 5}
+                  </p>
+                  <Image
+                    src={pollsensei_icon}
+                    width={15}
+                    height={15}
+                    alt="pollsensei_icon"
+                  />
+                </div>
               </div>
             </div>
             <p className="text-[#898989] text-xs lg:text-sm">

@@ -1,9 +1,9 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SelectCriteria from "@/subpages/filter-respondents/SelectCriteria";
 import ScreenerSurvey from "@/subpages/filter-respondents/ScreenerSurvey";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -24,18 +24,13 @@ import { createScreenerSurvey } from "@/redux/slices/questions.slice";
 const FilterRespondents = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<string>("selectCriteria");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [hasAccess, setHasAccess] = useState(
     sessionStorage.getItem("allowFilterRespondentsAccess") === "true"
   );
-  const activeTab = searchParams.get("tab") || "selectCriteria";
-  const searchParamsString = searchParams.toString();
-
-  // console.log({ activeTab, hasAccess });
 
   const selectedCriteria = useSelector(
     (state: RootState) => state.criteria.selectedCriteria
@@ -153,14 +148,17 @@ const FilterRespondents = () => {
     router.push("/shop");
   }, [dispatch, router]);
 
-  const handleTabChange = useCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParamsString);
-      params.set("tab", value);
-      router.replace(`${pathname}?${params.toString()}`);
-    },
-    [router, pathname, searchParamsString]
-  );
+  const prevTabRef = useRef(activeTab);
+
+  // const handleTabChange = (value: string) => {
+  //   if (
+  //     (value === "selectCriteria" || value === "screenerSurvey") &&
+  //     prevTabRef.current !== value // Only update if tab actually changed
+  //   ) {
+  //     prevTabRef.current = value;
+  //     setActiveTab(value);
+  //   }
+  // };
 
   const handleMainButtonClick = useCallback(() => {
     if (activeTab === "selectCriteria") {
@@ -204,7 +202,7 @@ const FilterRespondents = () => {
       <Tabs
         className="w-full h-auto"
         value={activeTab}
-        onValueChange={handleTabChange}
+        onValueChange={setActiveTab}
       >
         <TabsList className="w-full bg-white flex items-center justify-center gap-5 py-1">
           <TabsTrigger

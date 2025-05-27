@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import AddQuestionPage from "@/subpages/survey/AddQuestionPage";
+// import AddQuestionPage from "@/subpages/survey/AddQuestionPage";
+import AddQuestionPageClone from "@/subpages/survey/AddQuestionPageClone";
 import { FiEdit2 } from "react-icons/fi";
 
 const ScreenerSurvey = () => {
@@ -40,7 +41,8 @@ const ScreenerSurvey = () => {
           Close Preview
         </Button>
       </div>
-      <AddQuestionPage previewSurvey={previewSurvey} />
+      {/* <AddQuestionPage /> */}
+      <AddQuestionPageClone previewSurvey={previewSurvey} />
     </div>
   );
 };

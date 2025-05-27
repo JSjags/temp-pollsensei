@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 interface PaginationProps {
@@ -7,14 +7,13 @@ interface PaginationProps {
   onNavigate: (direction: "next" | "prev") => void;
 }
 
-const PaginationBtn:React.FC<PaginationProps>  = ({
+const PaginationBtn: React.FC<PaginationProps> = ({
   currentSection,
   totalSections,
   onNavigate,
 }) => {
-
   // THIS WORKS FINE FOR QUESTION SECTION CONTROLS
-  
+
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
@@ -38,7 +37,7 @@ const PaginationBtn:React.FC<PaginationProps>  = ({
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PaginationBtn
+export default PaginationBtn;
