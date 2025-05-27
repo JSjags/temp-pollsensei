@@ -88,11 +88,11 @@ function getAnalyticData({
   availableCoins: number;
 }) {
   return [
-    // {
-    //   label: "Total Referrals",
-    //   value: totalReferrals?.toLocaleString(),
-    //   icon: ReferralIcon,
-    // },
+    {
+      label: "Total Referrals",
+      value: totalReferrals?.toLocaleString(),
+      icon: ReferralIcon,
+    },
     {
       label: "Successful Referrals",
       value: successfulReferrals?.toLocaleString(),

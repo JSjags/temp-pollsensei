@@ -16,11 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  usePaystackPayout,
-  usePaystackPreviousPayoutBank,
-  useStripePayout,
-} from "@/lib/payout";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 import { toast } from "react-toastify";
 import { usePreviousPayoutBank } from "../../queries/usePreviousPayoutBank";
@@ -46,7 +41,6 @@ const PaymentOptionsData = [
 ];
 
 export function CheckoutDialog() {
-  // const [selectedOption, setSelectedOption] = useState<string | null>("Card");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
 
@@ -67,24 +61,26 @@ export function CheckoutDialog() {
     selectedOption,
     setSelectedOption,
     wasRedirected,
-    setWasRedirected,
     setCoinAmount,
   } = usePayoutStore();
   const { data: banks, isLoading } = useNigerianBanks();
 
   const { data: PayoutBanks } = useStripePayoutBanks();
-  const { mutate: paystackPayout, isPending: payoutLoading } =
-    usePaystackPayout();
 
   const { data, isLoading: conversionLoading } = usePayoutConversionRate();
-  const { mutate: stripePayout, isPending: stripePayoutLoading } =
-    useStripePayout();
   const { data: previousBank } = usePreviousPayoutBank();
   const hasPreviousBank = previousBank?.data?.length > 0;
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
-  const isProcessing = loading || payoutLoading;
+  const isProcessing = loading;
 
+  const paymentOptions = PaymentOptionsData.filter((opt) => {
+    if (isNigeria) {
+      return opt.label === "Card" || opt.label === "Paystack";
+    } else {
+      return opt.label === "Card" || opt.label === "Stripe";
+    }
+  });
   useEffect(() => {
     if (!data) {
       setCoinAmount("");
@@ -170,42 +166,6 @@ export function CheckoutDialog() {
     }
   };
 
-  const handleStripeRedirectedConfirmation = () => {
-    if (!PayoutBanks || PayoutBanks?.length === 0) {
-      toast.error("No payout bank available for Stripe");
-      return;
-    }
-
-    // Get the first available payout bank ID
-    const payoutBankId = PayoutBanks[0]?._id;
-
-    // Validate amount
-    const amount = Number(coinQuantity);
-    if (isNaN(amount) || amount <= 0) {
-      toast.error("Amount must be a positive number");
-      return;
-    }
-
-    // Call the Stripe payout mutation with the amount and payout bank ID
-    stripePayout(
-      {
-        amount,
-        payout_bank_id: payoutBankId,
-      },
-      {
-        onSuccess: (data) => {
-          toast.success("Stripe payout processed successfully");
-          setWasRedirected(false);
-          setStep("success");
-          // Additional success handling if needed
-        },
-        onError: (error) => {
-          toast.error("Failed to process Stripe payout");
-          console.error("Stripe payout error:", error);
-        },
-      }
-    );
-  };
   return (
     <Dialog.Body className="h-full mt-2.5 min-[441px]:min-h-[620px]">
       <div className="flex gap-14 h-full max-[440px]:flex-row-reverse">
@@ -226,7 +186,7 @@ export function CheckoutDialog() {
             <Image src={LockIcon} alt="lock icon" />
           </div>
           <div className="flex items-center justify-between gap-2 border-b pb-4">
-            {PaymentOptionsData.map((option) => (
+            {paymentOptions.map((option) => (
               <PaymentOptions
                 {...option}
                 key={option.label}
@@ -236,7 +196,6 @@ export function CheckoutDialog() {
             ))}
           </div>
 
-          {/* {selectedOption !== "Stripe" && ( */}
           <div className="flex flex-col h-full">
             <AnimatePresence mode="wait">
               <motion.form
@@ -537,19 +496,16 @@ export function CheckoutDialog() {
             ) : selectedOption === "Stripe" ? (
               wasRedirected || PayoutBanks?.length > 0 ? (
                 <StripeConfirmDialog
-                 response={PayoutBanks[0] || []}
-                 payAmount={coinQuantity}
-                 gateway={selectedOption}
+                  response={PayoutBanks[0] || []}
+                  payAmount={coinQuantity}
+                  gateway={selectedOption}
                 >
                   <Button
                     variant="gradient"
                     className="w-full rounded !h-12 gap-2 font-bold text-base"
                     // onClick={handleStripeRedirectedConfirmation}
                     disabled={
-                      isProcessing ||
-                      !PayoutBanks ||
-                      PayoutBanks.length === 0 ||
-                      stripePayoutLoading
+                      isProcessing || !PayoutBanks || PayoutBanks.length === 0
                     }
                   >
                     Proceed

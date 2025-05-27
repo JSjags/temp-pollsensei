@@ -108,6 +108,9 @@ export function TableLayout<T>({
       <div className="flex justify-between mt-[29px] mb-[51px] flex-col gap-6">
         <div className="flex items-center justify-between w-full mb-8">
           <p className="text-xl font-bold">{title}</p>
+          <div className="md:hidden block">
+          <Columns table={table} />
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
@@ -138,7 +141,10 @@ export function TableLayout<T>({
               </Link>
             )}
           </div>
+          <div className="hidden md:block">
           <Columns table={table} />
+          </div>
+
         </div>
       </div>
       {children}

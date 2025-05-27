@@ -106,9 +106,14 @@ function CheckoutDialog() {
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
 
-  const paymentOptions = isNigeria
-    ? PaymentOptionsData.filter((opt) => opt.label !== "Stripe")
-    : PaymentOptionsData;
+  const paymentOptions = PaymentOptionsData.filter((opt) => {
+    if (isNigeria) {
+      return opt.label === "Card" || opt.label === "Paystack";
+    } else {
+      return opt.label === "Card" || opt.label === "Stripe";
+    }
+  });
+  
 
   useEffect(() => {
     if (isNigeria && selectedOption === "Stripe") {

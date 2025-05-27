@@ -13,6 +13,7 @@ import {
   MoneyIcon,
   NonRedeemable,
   OCR,
+  Pollcoin,
   RespondentIcon,
   Voice,
 } from "@/assets/images";
@@ -59,8 +60,6 @@ export function Analytics() {
     useUserServicesBalance();
   const { restrictedBalance, unrestrictedBalance, totalBalance } = data || {};
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { width } = useWindowSize();
-  console.log(width);
 
   const userAccessToken = useSelector(
     (state: RootState) => state.user.access_token
@@ -146,7 +145,6 @@ export function Analytics() {
     refetchOnMount: false,
   });
 
-
   const settings: Settings = {
     dots: false,
     infinite: true,
@@ -219,14 +217,14 @@ export function Analytics() {
 
       <div className="w-full flex gap-4 my-[22px] h-full items-stretch max-[1400px]:flex-col max-md:px-4">
         <div className="flex-1 flex flex-col gap-4 h-full items-stretch min-h-[200px]">
-          <div className="grid grid-cols-3 gap-4 max-md:grid-cols-4">
+          <div className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-4">
             {coinsData.map((item, index) => (
               <div
                 key={item.label}
                 className={cn(
-                  "rounded-lg p-4 text-white h-full max-md:col-span-2 max-md:order-2",
+                  "rounded-lg p-4 text-white h-full max-[1100px]:col-span-2 max-[1100px]:order-2",
                   {
-                    "max-md:col-span-4 max-md:order-1": index === 1,
+                    "max-[1100px]:col-span-4 max-[1100px]:order-1": index === 1,
                   }
                 )}
                 style={{ backgroundColor: `${item.bgColor}` }}
@@ -237,7 +235,10 @@ export function Analytics() {
                     {balanceLoading ? (
                       <Skeleton className="h-6 w-full mt-2" />
                     ) : (
-                      <h4 className="text-xl font-bold">{item.value}</h4>
+                      <div className="flex items-center gap-1.5">
+                        <Image src={Pollcoin} alt="icons" className="size-8" />
+                        <h4 className="text-xl font-bold">{item.value}</h4>
+                      </div>
                     )}
                   </div>
                   <div
@@ -280,11 +281,18 @@ export function Analytics() {
             ))}
           </div>
 
-          <div className="gap-4 w-full grid grid-cols-5 h-full max-md:hidden">
-            {populatedAnalyticData.map((analytic) => (
+          <div className="gap-4 w-full grid grid-cols-5 max-[1100px]:grid-cols-4 h-full max-md:hidden">
+            {populatedAnalyticData.map((analytic, index) => (
               <div
                 key={analytic.label}
-                className="bg-white rounded-[6.8px] p-4 shadow-[0px_1.36px_4.08px_0px_#34037914]"
+                className={cn(
+                  "bg-white rounded-[6.8px] p-4 shadow-[0px_1.36px_4.08px_0px_#34037914]",
+                  "max-[1100px]:col-span-2 max-[1100px]:order-2",
+                  {
+                    "max-[1100px]:col-span-4 max-[1100px]:order-1":
+                      index === populatedAnalyticData.length - 1,
+                  }
+                )}
               >
                 <div className="h-full flex flex-col justify-between">
                   <div

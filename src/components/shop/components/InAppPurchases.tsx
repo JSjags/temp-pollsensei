@@ -88,7 +88,7 @@ export function InAppPurchases() {
   return (
     <div className="mt-10 flex-col gap-5 flex max-md:px-4">
       <p className="text-xl font-bold">In-App Purchases</p>
-      <div className="flex md:items-stretch  gap-4 h-full max-lg:grid grid-cols-2">
+      <div className="flex md:items-stretch gap-4 h-full max-lg:grid grid-cols-2">
         <BuyRespondent />
 
         {servicesWithPurchaseHandlers.map((service, index) => {

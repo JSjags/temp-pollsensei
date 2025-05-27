@@ -123,6 +123,7 @@ import OCR from './shop/MdOutlineDocumentScanner.svg'
 import Analysis from './shop/MdQueryStats.svg'
 import AIReporting from './shop/BsClipboardData.svg'
 import Voice from './shop/MdOutlineKeyboardVoice.svg'
+import Pollcoin from './shop/pollcoin.svg'
 
 export {
   teamIcon,
@@ -130,6 +131,7 @@ export {
   X,
   Tiktok,
   Instagram,
+  Pollcoin,
   AIGeneration,
   OCR,
   Analysis,

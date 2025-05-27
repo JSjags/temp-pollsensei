@@ -9,6 +9,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Image from "next/image";
+import { Pollcoin } from "@/assets/images";
 
 export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
   const columns = createColumnHelper<TransactionHistory>();
@@ -162,14 +164,21 @@ export function makeTransactionHistoryColumns(isNigeria: boolean = true) {
       const description =
         row.original.details?.description?.toLowerCase() || "";
       const formattedAmount = amount.toLocaleString();
-
+      
+      const isPurchaseCredits = description.includes("purchase") && description.includes("credits");
       let displayValue = `${isNigeria ? "₦" : "$"}${formattedAmount}`;
-      if (description.includes("purchase") && description.includes("credits")) {
-        displayValue = `${formattedAmount}pc`;
+      
+      if (isPurchaseCredits) {
+        displayValue = formattedAmount;
       }
-
+      
       return (
-        <div>
+        <div className="flex items-center gap-1">
+          {isPurchaseCredits && (
+            <div className="size-4">
+              <Image src={Pollcoin} alt="icons" />
+            </div>
+          )}
           <p className="text-sm">{displayValue}</p>
         </div>
       );
