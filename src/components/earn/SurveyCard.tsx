@@ -2,7 +2,7 @@
 import React, { FC } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { pollsensei_icon } from "@/assets/images";
+import logoGold from "@/assets/images/logo-gold.png";
 import {
   openSurveyFormDialog,
   closeSurveyTabs,
@@ -42,6 +42,9 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
       const surveyData = await fetchSurveyById(userAccessToken, id);
       if (surveyData) {
         dispatch(openSurveyFormDialog(surveyData));
+        queryClient.invalidateQueries({
+          queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], userAccessToken],
+        });
         dispatch(closeSurveyTabs());
         dispatch(setSurveyID(id));
       }
@@ -55,11 +58,11 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
       const response = await fetchScreenerSurveyById(userAccessToken, id);
       if (response) {
         dispatch(openSurveyFormDialog(response));
-        dispatch(closeSurveyTabs());
-        dispatch(setSurveyID(id));
         queryClient.invalidateQueries({
           queryKey: [...[APP_KEYS.APPLICATION_SURVEYS], userAccessToken],
         });
+        dispatch(closeSurveyTabs());
+        dispatch(setSurveyID(id));
       }
     } catch (error) {
       console.error("Error fetching screener survey:", error);
@@ -152,13 +155,8 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
         </p>
         <div className="w-full h-auto flex items-center gap-2">
           <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-3 flex items-center gap-1">
-            <Image
-              src={pollsensei_icon}
-              width={10}
-              height={10}
-              alt="pollsensei_icon"
-            />
-            3 pollcoins
+            <Image src={logoGold} width={10} height={10} alt="logoGold" />3
+            pollcoins
           </div>
         </div>
       </div>

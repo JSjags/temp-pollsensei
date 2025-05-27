@@ -93,7 +93,7 @@ const ProfilePage: React.FC = () => {
         lastName: "",
         email: email || "",
         username: username || "",
-        bio: bios[0]?.bio || "",
+        bio: bios?.[0]?.bio || "",
         file: file || photo_url || "",
         referral_code: referral_code || "",
         referral_link: referral_link,

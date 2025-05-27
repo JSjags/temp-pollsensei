@@ -29,7 +29,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
-import { fetchTotalPurchasedRespondents } from "@/services/api/apiRequest";
+import {
+  fetchTotalPurchasedRespondents,
+  fetchPurchasedRespondentsStats,
+} from "@/services/api/apiRequest";
 import { useWindowSize } from "@uidotdev/usehooks";
 
 type ServiceBalance = {
@@ -140,6 +143,14 @@ export function Analytics() {
   const { data: surveys, isLoading: loadingSurveys } = useQuery({
     queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS], userAccessToken],
     queryFn: () => fetchTotalPurchasedRespondents(userAccessToken),
+    enabled: !!userAccessToken,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const { data: surveyStats, isLoading: loadingSurveyStats } = useQuery({
+    queryKey: [...[APP_KEYS.SURVEY_STATS], userAccessToken],
+    queryFn: () => fetchPurchasedRespondentsStats(userAccessToken),
     enabled: !!userAccessToken,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -372,49 +383,90 @@ export function Analytics() {
         </div>
 
         {/* Surverys */}
-        <div className="w-[35%] max-[1400px]:w-full max-sm:w-full rounded-lg pt-4 px-5 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col gap-5 h-full items-stretch">
-          <div className="flex items-start justify-between">
-            <div className="flex flex-col gap-1.5">
-              <p className="text-xs text-muted-foreground">
-                Total Purchased Respondents
-              </p>
-              <h4 className="text-xl font-bold">
-                {surveys?.data?.totalRespondents ?? 0}
-              </h4>
-            </div>
-            <div
-              className={cn(
-                "size-[34px] rounded-[6.8px] flex items-center justify-center bg-[#4524F8]/10"
-              )}
-            >
-              <Image src={RespondentIcon} alt="icons" />
-            </div>
-          </div>
-          <div className="flex justify-end w-full">
-            <div className="flex items-center gap-1">
-              <span>
-                <Image src={InfoIcon} alt="icons" />
-              </span>
-              <Link
-                href="#"
-                className="text-muted-foreground text-xs underline"
-              >
-                Learn more
-              </Link>
-            </div>
-          </div>
+        <div className="w-[35%] max-[1400px]:w-full max-sm:w-full rounded-lg pt-4 px-5 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col md:flex-row justify-between gap-5 md:gap-10 h-auto items-stretch">
+          <div className="flex items-start justify-between w-full md:w-1/2 h-full">
+            <div className="w-full flex flex-col gap-5">
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-xs text-muted-foreground">
+                    Total Purchased Respondents
+                  </p>
+                  <h4 className="text-xl font-bold">
+                    {loadingSurveyStats ? (
+                      <Skeleton className="h-6 w-16" />
+                    ) : (
+                      surveyStats?.data?.total_purchased ?? 0
+                    )}
+                  </h4>
+                </div>
+                <div
+                  className={cn(
+                    "w-auto h-auto p-3 rounded-[6.8px] flex items-center justify-center bg-[#4524F8]/10"
+                  )}
+                >
+                  <Image
+                    src={RespondentIcon}
+                    width={20}
+                    height={15}
+                    alt="icons"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <span>
+                  <Image src={InfoIcon} alt="icons" />
+                </span>
+                <Link
+                  href="#"
+                  className="text-muted-foreground text-xs underline"
+                >
+                  Learn more
+                </Link>
+              </div>
 
+              <div className="flex gap-3">
+                <div className="flex flex-col">
+                  <p className="text-[#7A8699] text-xs">
+                    Available respondents
+                  </p>
+                  <p className="text-[#00A912] text-xl font-bold">
+                    {loadingSurveyStats ? (
+                      <Skeleton className="h-6 w-16" />
+                    ) : (
+                      surveyStats?.data?.remaining ?? 0
+                    )}
+                  </p>
+                </div>
+                <span className="w-[2px] h-[40px] bg-[#7A8699]">&nbsp;</span>
+                <div className="flex flex-col">
+                  <p className="text-[#7A8699] text-xs">Used respondents</p>
+                  <p className="text-[#FF9E4F] text-xl font-bold">
+                    {loadingSurveyStats ? (
+                      <Skeleton className="h-6 w-16" />
+                    ) : (
+                      surveyStats?.data?.completed_responses ?? 0
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
           <div
-            className={cn("bg-[#FDFAFF] max-h-[135px] h-full overflow-y-auto", {
-              "min-h-[136px]": !surveys?.data?.purchases?.purchases?.length,
-            })}
+            className={cn(
+              "bg-[#FDFAFF] max-h-[150px] h-full overflow-y-auto w-full md:w-1/2 relative",
+              {
+                "min-h-[150px]": !surveys?.data?.purchases?.purchases?.length,
+              }
+            )}
           >
             <div className="px-2.5 bg-[#CB85FD1A] flex items-center justify-between rounded-tr-[15px] rounded-tl-[15px] py-1.5">
               <p className="font-bold">Survey</p>
               <p className="font-bold">Respondents</p>
             </div>
 
-            {!surveys?.data?.purchases?.purchases?.length ? (
+            {loadingSurveys ? (
+              <Skeleton className="w-full h-[100px]" />
+            ) : !surveys?.data?.purchases?.purchases?.length ? (
               <div className="text-center text-sm text-gray-500 py-2 flex items-center justify-center w-full border h-[100px]">
                 You haven&apos;t purchased any respondents yet.
               </div>
@@ -424,7 +476,7 @@ export function Analytics() {
                   "flex flex-col gap-2 px-2.5 py-1.5 transition-all duration-300",
                   showAllSurveys
                     ? "max-h-[300px] overflow-y-auto"
-                    : "max-h-[135px] overflow-hidden"
+                    : "max-h-[150px] overflow-hidden"
                 )}
               >
                 {surveys?.data?.purchases?.purchases.map(
@@ -442,7 +494,7 @@ export function Analytics() {
             )}
 
             {surveys?.data?.purchases?.length > 4 && (
-              <div className="text-center mt-2 absolute left-[45%] z-30 bottom-1.5 flex items-center justify-center">
+              <div className="text-center mt-2 absolute left-1/2 z-30 bottom-1.5 flex items-center justify-center">
                 <button
                   onClick={() => setShowAllSurveys((prev) => !prev)}
                   className="text-sm text-tertiary underline font-medium"

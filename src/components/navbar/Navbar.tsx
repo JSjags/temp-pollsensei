@@ -63,6 +63,8 @@ import {
 } from "../ui/tooltip";
 import { LuMenu } from "react-icons/lu";
 import { RxCheckCircled, RxCrossCircled } from "react-icons/rx";
+import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
+import { APP_KEYS } from "@/constants";
 
 interface Notification {
   _id: string;
@@ -113,7 +115,10 @@ const markNotificationAsRead = async (notificationId: string) => {
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
-  const user2 = useSelector((state: RootState) => state.user);
+  // const user2 = useSelector((state: RootState) => state.user);
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -130,6 +135,14 @@ const Navbar = () => {
     queryKey: ["notifications"],
     queryFn: fetchNotifications,
   });
+
+  const { data: isPaidRespondent } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
+    queryFn: () => fetchPaidRespondentStatus(userAccessToken),
+    enabled: !!userAccessToken,
+  });
+
+  const isPaidRespondentStatus = isPaidRespondent?.data?.isPaidRespondent;
 
   const { mutate: markAsRead } = useMutation({
     mutationFn: markNotificationAsRead,
@@ -199,11 +212,6 @@ const Navbar = () => {
   };
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
-
-  const isBecomeRespondentSurveyCompleted = useSelector(
-    (state: RootState) =>
-      state.becomePaidRespondentSlice.isBecomeRespondentSurveyCompleted
-  );
 
   // console.log(notifications?.data);
 
@@ -428,7 +436,7 @@ const Navbar = () => {
                         <p className="text-xs leading-none text-muted-foreground">
                           Paid Respondent
                         </p>
-                        {isBecomeRespondentSurveyCompleted ? (
+                        {isPaidRespondentStatus ? (
                           <RxCheckCircled className="text-lg text-[green]" />
                         ) : (
                           <RxCrossCircled className="text-lg text-[red]" />

@@ -325,6 +325,37 @@ export const GetRespondentSectionData = async (
   }
 };
 
+export const fetchPaidRespondentStatus = async (
+  userAccessToken: string | null | undefined
+) => {
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${userAccessToken}`,
+  });
+
+  const requestOptions: RequestInit = {
+    method: "GET",
+    headers,
+  };
+
+  try {
+    const response = await fetch(
+      `${pollsenseiAPIEndpoint}paid-respondent/check-status`,
+      requestOptions
+    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message);
+    }
+    const data = await response.json();
+    // console.log({ data });
+    return data;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw error;
+  }
+};
+
 export const CreateScreenerSurvey = async (
   userAccessToken: string | undefined,
   payload: any
@@ -350,6 +381,32 @@ export const CreateScreenerSurvey = async (
     console.error("Error creating screener survey:", error);
     throw error;
   }
+};
+
+export const fetchPurchasedRespondentsStats = async (
+  accessToken: string | null | undefined
+) => {
+  if (!accessToken) {
+    throw new Error("No access token available");
+  }
+
+  const headers = new Headers({
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  });
+
+  const requestOptions: RequestInit = {
+    method: "GET",
+    headers: headers,
+  };
+
+  const response = await fetch(
+    `${pollsenseiAPIEndpoint}paid-respondent/stats`,
+    requestOptions
+  );
+  const data = await response.json();
+  // console.log("Total Surveys api response - ", data);
+  return data;
 };
 
 /************** EARN ***********/

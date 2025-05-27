@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { SurveyData } from "@/subpages/survey/EditSubmittedSurvey";
 import { getSurveyResponses } from "@/services/analysis";
 import { useQuery } from "@tanstack/react-query";
+import BuyRespondent from "@/components/shop/components/dialogs/BuyRespondent/BuyRespondent";
 
 // icons paths
 const start = "/assets/milestones/Start.svg";
@@ -466,7 +467,7 @@ export default function Milestones({
           // alert(label);
         }
         if (label === "Buy Respondents") {
-          // alert(label);
+          <BuyRespondent />;
         }
         if (label === "Share Survey") {
           router.push(`/surveys/question/${surveyId}`);

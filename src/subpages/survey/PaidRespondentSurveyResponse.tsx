@@ -44,8 +44,6 @@ import {
   submitScreenerSurvey,
   submitPaidSurvey,
   fetchScreenerSurveyBySurveyId,
-  fetchScreenerParticipants,
-  fetchUnrestrictedBalance,
   GetRespondentSectionData,
   fetchApplicationSurveys,
   startPaidSurvey,
