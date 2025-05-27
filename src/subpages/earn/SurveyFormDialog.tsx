@@ -1,9 +1,7 @@
 "use client";
 import React, { FC } from "react";
 import { IoClose } from "react-icons/io5";
-import PublicResponse from "@/subpages/survey/PublicResponseClone";
-import { useSelector } from "react-redux";
-import { selectSurveyID } from "@/redux/slices/earnDialogSlice";
+import PaidRespondentSurveyResponse from "@/subpages/survey/PaidRespondentSurveyResponse";
 
 interface SurveyDialogProps {
   open: boolean;
@@ -11,8 +9,6 @@ interface SurveyDialogProps {
 }
 
 const SurveyFormDialog: FC<SurveyDialogProps> = ({ open, onOpenChange }) => {
-  const surveyID = useSelector(selectSurveyID);
-
   return (
     <>
       {open && (
@@ -22,7 +18,7 @@ const SurveyFormDialog: FC<SurveyDialogProps> = ({ open, onOpenChange }) => {
               onClick={() => onOpenChange(false)}
               className="text-xl text-black cursor-pointer absolute top-2 right-2"
             />
-            <PublicResponse surveyId={surveyID} />
+            <PaidRespondentSurveyResponse />
           </div>
         </div>
       )}

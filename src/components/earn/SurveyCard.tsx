@@ -10,24 +10,14 @@ import {
   setScreenerSurvey,
 } from "@/redux/slices/earnDialogSlice";
 import stethoscope from "@/assets/images/stethoscope.jpg";
-import { fetchScreenerSurveyById } from "@/services/api/apiRequest";
+import {
+  fetchSurveyById,
+  fetchScreenerSurveyById,
+} from "@/services/api/apiRequest";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-
-interface SurveyData {
-  _id: string;
-  surveyType: string;
-  topic: string;
-  description: string;
-  status: string;
-}
-
-interface Survey {
-  _id: string;
-  title: string;
-  description: string;
-  survey: any;
-}
+import { useQueryClient } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
 
 interface Props {
   survey: any;
@@ -36,50 +26,67 @@ interface Props {
 
 const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const userAccessToken = useSelector(
     (state: RootState) => state.user.access_token
   );
 
-  const handleAvailableSurvey = async () => {
-    dispatch(closeSurveyTabs());
-    dispatch(setSurveyID(survey?._id));
-
-    const screenerSurvey = await fetchScreenerSurveyById(
-      userAccessToken,
-      survey?._id
-    );
-    if (screenerSurvey) {
-      dispatch(openSurveyFormDialog());
-      dispatch(setScreenerSurvey(screenerSurvey));
-    }
-    // console.log({ response });
+  const getCorrectSurveyId = () => {
+    if (activeTab === "available") return survey?.surveyId;
+    if (activeTab === "applications") return survey?.surveyId?._id;
+    return survey?._id;
   };
 
-  const handleApplySurvey = async () => {
-    dispatch(closeSurveyTabs());
-    dispatch(setSurveyID(survey?._id));
+  const handleAvailableSurvey = async (id: string) => {
+    try {
+      const surveyData = await fetchSurveyById(userAccessToken, id);
+      if (surveyData) {
+        dispatch(openSurveyFormDialog(surveyData));
+        dispatch(closeSurveyTabs());
+        dispatch(setSurveyID(id));
+      }
+    } catch (error) {
+      console.error("Error fetching survey:", error);
+    }
+  };
 
-    const response = await fetchScreenerSurveyById(
-      userAccessToken,
-      survey?._id
-    );
-    if (response) {
-      dispatch(openSurveyFormDialog(response));
+  const handleApplySurvey = async (id: string) => {
+    try {
+      const response = await fetchScreenerSurveyById(userAccessToken, id);
+      if (response) {
+        dispatch(openSurveyFormDialog(response));
+        dispatch(closeSurveyTabs());
+        dispatch(setSurveyID(id));
+        queryClient.invalidateQueries({
+          queryKey: [...[APP_KEYS.APPLICATION_SURVEYS], userAccessToken],
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching screener survey:", error);
     }
   };
 
   const handleStartNow = () => {
+    const id = getCorrectSurveyId();
+
+    if (!id) {
+      console.error("No survey ID found");
+      return;
+    }
+
     if (activeTab === "available") {
-      handleAvailableSurvey();
+      handleAvailableSurvey(id);
     } else if (activeTab === "apply") {
-      handleApplySurvey();
-    } else {
-      dispatch(closeSurveyTabs());
+      handleApplySurvey(id);
+    } else if (activeTab === "applications") {
+      handleAvailableSurvey(id);
     }
   };
 
   const getStatusStyle = () => {
     if (survey?.survey?.status === "On going") {
+      return "bg-[#E3FEF3] text-[#05BF43]";
+    } else if (survey?.status === "approved") {
       return "bg-[#E3FEF3] text-[#05BF43]";
     }
     return "bg-[#FEE3F2] text-[#BF0558]";
@@ -87,21 +94,21 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
 
   const getButtonText = () => {
     if (activeTab === "available") {
-      return survey?.survey?.status === "On going"
+      return survey?.alreadyApplied === false
         ? "Start Now"
         : "Survey Completed";
     } else if (activeTab === "apply") {
-      return survey?.survey?.status === "On going"
-        ? "Apply Now"
-        : "Survey Completed";
+      return survey?.survey?.status === "On going" && "Apply Now";
     } else if (activeTab === "applications") {
-      return survey?.status;
+      return survey?.status === "pending"
+        ? "Pending"
+        : survey?.status === "approved"
+        ? "Start Now"
+        : "Declined";
     } else {
       return "Not Qualified";
     }
   };
-
-  // console.log({ survey });
 
   return (
     <div className="bg-white h-auto w-full flex flex-col gap-1 lg:gap-3 rounded-2xl hover:scale-105 transition-all justify-between">
@@ -120,22 +127,28 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
           {survey?.survey?.status || survey?.status}
         </div>
         <h3 className="text-[9px] lg:text-xs text-[#1C1C1C] font-bold">
-          {survey?.survey?.topic.length > 30 ||
-          survey?.surveyId?.topic?.length > 30
+          {survey?.survey?.topic?.length > 30 ||
+          survey?.surveyId?.topic?.length > 30 ||
+          survey?.title?.length > 30
             ? `${
-                survey?.survey?.topic.slice(0, 30) ||
-                survey?.surveyId?.topic.slice(0, 30)
+                survey?.survey?.topic?.slice(0, 30) ||
+                survey?.surveyId?.topic?.slice(0, 30) ||
+                survey?.title?.slice(0, 30)
               }...`
-            : survey?.survey?.topic || survey?.surveyId?.topic}
+            : survey?.survey?.topic || survey?.surveyId?.topic || survey?.title}
         </h3>
         <p className="text-[#AAAAAA] text-[10px]">
-          {survey?.survey?.description.length > 40 ||
-          survey?.surveyId?.description.length > 40
+          {survey?.survey?.description?.length > 40 ||
+          survey?.surveyId?.description?.length > 40 ||
+          survey?.description?.length > 40
             ? `${
-                survey?.survey?.description.slice(0, 40) ||
-                survey?.surveyId?.description.slice(0, 40)
+                survey?.survey?.description?.slice(0, 40) ||
+                survey?.surveyId?.description?.slice(0, 40) ||
+                survey?.description?.slice(0, 40)
               }...`
-            : survey?.survey?.description || survey?.surveyId?.description}
+            : survey?.survey?.description ||
+              survey?.surveyId?.description ||
+              survey?.description}
         </p>
         <div className="w-full h-auto flex items-center gap-2">
           <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-3 flex items-center gap-1">
@@ -147,9 +160,6 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
             />
             3 pollcoins
           </div>
-          {/* <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-2 block">
-            {time}minutes
-          </div> */}
         </div>
       </div>
 
@@ -159,7 +169,11 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
         className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] cursor-pointer text-white text-xs font-bold text-center rounded-none rounded-b-2xl capitalize"
         type="button"
         onClick={handleStartNow}
-        disabled={survey?.survey?.status !== "On going"}
+        disabled={
+          survey?.alreadyApplied === true ||
+          survey?.status === "pending" ||
+          survey?.status === "rejected"
+        }
       >
         {getButtonText()}
       </Button>
