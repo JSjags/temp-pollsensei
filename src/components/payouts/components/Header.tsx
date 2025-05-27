@@ -1,5 +1,5 @@
 import React from "react";
-import { Arrow, PayoutCash } from "@/assets/images";
+import { Arrow, PayoutCash, Pollcoin } from "@/assets/images";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
@@ -17,8 +17,6 @@ export function Header() {
   const { data, isLoading } = useUserBalance();
   const { unrestrictedBalance } = data || {};
   const { redeemableCoins, threshold } = usePayoutStore();
-
-  
 
   return (
     <div className="flex md:items-center justify-between max-md:flex-col gap-5 max-md:px-5 ">
@@ -48,10 +46,12 @@ export function Header() {
               {isLoading ? (
                 <Skeleton className="h-7 w-full" />
               ) : (
-                <h4 className="font-bold text-[1.75rem]">
-                  {unrestrictedBalance?.toLocaleString() || 0}{" "}
-                  <span className="font-normal">Pollcoins</span>
-                </h4>
+                <div className="flex items-center gap-1.5">
+                  <Image src={Pollcoin} alt="icons" className="size-8" />
+                  <h4 className="font-bold text-[1.75rem]">
+                    {unrestrictedBalance?.toLocaleString() || 0}{" "}
+                  </h4>
+                </div>
               )}
               <div className="flex items-center gap-2">
                 <div
@@ -69,7 +69,11 @@ export function Header() {
             </div>
           </div>
           <PayoutDialog>
-            <Button disabled={unrestrictedBalance===0} variant="gradient" className="gap-2">
+            <Button
+              disabled={unrestrictedBalance === 0}
+              variant="gradient"
+              className="gap-2"
+            >
               Request Payout <Image src={Arrow} alt="arrow" />
             </Button>
           </PayoutDialog>

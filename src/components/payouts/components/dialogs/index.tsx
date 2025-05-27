@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog } from "@/components/ui/new-dialog";
 import { FirstStep } from "./FirstStep";
@@ -23,10 +23,20 @@ export function PayoutDialog({ children }: BuyDialogProps) {
     reset,
     redeemableCoins,
     threshold,
+    gateway,
   } = usePayoutStore();
+  
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
-  const description = `You have successfully initiated the withdrawal of ${coinQuantity} coins ~ ${isNigeria ? "₦" : "$"}${Number(coinAmount).toLocaleString()}`;
+  
+  let currencySymbol = isNigeria ? "₦" : "$";
+  
+  if (step === "success" && typeof window !== 'undefined') {
+    const storedGateway = localStorage.getItem('payoutGateway');
+    currencySymbol = storedGateway === 'Stripe' ? "$" : "₦";
+  }
+  
+  const description = `You have successfully initiated the withdrawal of ${coinQuantity} coins ~ ${currencySymbol}${Number(coinAmount).toLocaleString()}`;
 
   let DialogStepComponent: React.ReactNode;
   const desc =
@@ -49,6 +59,13 @@ export function PayoutDialog({ children }: BuyDialogProps) {
     }
   }
 
+  // Clean up localStorage when dialog is closed after success
+  useEffect(() => {
+    if (!dialogOpen && step === "success" && typeof window !== 'undefined') {
+      localStorage.removeItem('payoutGateway');
+    }
+  }, [dialogOpen, step]);
+
   return (
     <Dialog.Root
       open={dialogOpen}
@@ -65,7 +82,7 @@ export function PayoutDialog({ children }: BuyDialogProps) {
       <Dialog.Trigger>{children}</Dialog.Trigger>
       <Dialog.Content
         className={cn(
-          "z-[100000000000] max-w-[442px] w-full max-[440px]:max-h-[85%]",
+          "z-[1000000000] max-w-[442px] w-full max-[440px]:max-h-[85%]",
           {
             "max-w-[941px]": step === "checkout",
           }

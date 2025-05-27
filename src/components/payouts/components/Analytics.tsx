@@ -5,6 +5,7 @@ import {
   CoinsObtained,
   OverallEarnings,
   PayoutInfoIcon,
+  Pollcoin,
   RedeemableCoin,
 } from "@/assets/images";
 import { cn } from "@/lib/utils";
@@ -59,9 +60,12 @@ export function Analytics() {
                     {isLoading ? (
                       <Skeleton className="h-5 w-full" />
                     ) : (
-                      <h4 className="text-xl font-bold">
-                        {value.toLocaleString()}
-                      </h4>
+                      <div className="flex items-center gap-1.5">
+                        <Image src={Pollcoin} alt="icons" className="size-6" />
+                        <h4 className="text-xl font-bold">
+                          {value.toLocaleString()}
+                        </h4>
+                      </div>
                     )}
                   </div>
                   <div

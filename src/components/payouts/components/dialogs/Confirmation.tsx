@@ -23,11 +23,13 @@ type ConfirmationDialogProps = {
   bankCode: string | undefined;
   children: ReactNode;
   amount: string;
+  gateway: string;
 };
 
 export default function ConfirmationDialog(props: ConfirmationDialogProps) {
-  const { name, accountNumber, bankName, children, bankCode, amount } = props;
-  const { setLoading, setStep, loading } = usePayoutStore();
+  const { name, accountNumber, bankName, children, bankCode, amount, gateway } =
+    props;
+  const { setLoading, setStep, loading, setGateway } = usePayoutStore();
   const { mutate: paystackPayout, isPending: payoutLoading } =
     usePaystackPayout();
   const { mutate: previousPaystackPayout, isPending: previousPayoutLoading } =
@@ -83,9 +85,9 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
       toast.error("Amount must be a positive number");
       return;
     }
-
+    localStorage.setItem("payoutGateway", gateway);
+    setGateway(gateway);
     setLoading(true);
-
     if (hasPreviousBank && previousBank?.data?.length > 0) {
       const previousPayoutData = {
         payout_bank_id: previousBank.data[0]._id,
@@ -108,6 +110,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
         account_number: accountNumber,
         bank_code: bankCode,
         amount: numericAmount,
+        gateway: gateway,
       };
 
       paystackPayout(payoutData, {
@@ -125,7 +128,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
   };
 
   return (
-    <Dialog >
+    <Dialog>
       <DialogTrigger asChild className="w-full">
         {children}
       </DialogTrigger>
@@ -156,7 +159,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
           <div className="flex gap-4 w-full">
             <DialogClose className="w-1/2">
               <Button variant={"outline"} className="min-w-full">
-                Edit
+                Close
               </Button>
             </DialogClose>
             <Button

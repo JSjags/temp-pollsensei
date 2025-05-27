@@ -35,7 +35,7 @@ export function HowItWorks() {
             <div>
               <p className="text-[#DFDFDF]">Direct Referral</p>
               <p className="font-bold text-[28px] text-white">
-                20 <span className="text-lg font-normal">PollCoins</span>
+                15 <span className="text-lg font-normal">PollCoins</span>
               </p>
             </div>
           </div>
@@ -55,16 +55,16 @@ const howItWorksData = [
   {
     title: "Refer a friend",
     description:
-      "To refer a friend, simply copy and share your personal referral link with them, and ensure they sign up on PollSensei using your referral",
+      "To refer a friend, simply copy and share your personal referral link with them, and ensure they sign up on PollSensei using your referral.",
   },
   {
     title: "Earn Referral Coin",
     description:
-      "You are awarded PollCoins for each successful referral. You also earn PollCoins for referrals made by your friends on PollSensei",
+      "You are awarded PollCoins for each successful referral.",
   },
   {
     title: "Redeem earned Coins",
     description:
-      "You can convert the PollCoins earned from referrals to cash once you have passed the coin threshold",
+      "You can convert the PollCoins earned from referrals to cash once you have passed the coin threshold.",
   },
 ];

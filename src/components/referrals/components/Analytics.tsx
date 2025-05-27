@@ -1,31 +1,36 @@
 "use client";
 import {
   RedeemableCoins,
-  RedeemableHowIcon,
-  RedeemCoins,
   RedeemedCoins,
   ReferralIcon,
 } from "@/assets/images";
 import React, { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Header } from "./Header";
 import { motion } from "framer-motion";
 
 import Slider, { Settings } from "react-slick";
-import { usePayoutStore } from "@/components/payouts/store/usePayoutStore";
-import { PayoutDialog } from "@/components/payouts/components/dialogs";
-import { useUserBalance } from "@/components/shop/queries/useBalance";
 import { useWindowSize } from "@uidotdev/usehooks";
+import { useReferralStats } from "../queries/useReferralStats";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Analytics() {
-  const { redeemableCoins } = usePayoutStore();
-  const { data, isLoading } = useUserBalance();
-  const { restrictedBalance } = data || {};
-  const updatedAnalyticData = getAnalyticData(restrictedBalance);
   const { width } = useWindowSize();
   const isTablet = width && width <= 768;
+  const { data: referralStats, isLoading: referralLoading } =
+    useReferralStats();
+  const totalReferrals = referralStats?.total_referrals;
+  const successfulReferrals = referralStats?.successful_referrals;
+  const coinsObtained = referralStats?.referral_rewards?.total_earned;
+  const availableCoins = referralStats?.referral_rewards?.available;
 
+  const updatedAnalyticData = getAnalyticData({
+    // redeemableCoins: restrictedBalance,
+    totalReferrals,
+    successfulReferrals,
+    coinsObtained,
+    availableCoins,
+  });
   return (
     <div className="w-full">
       <Header />
@@ -34,7 +39,7 @@ export function Analytics() {
           <MobileSlider analyticData={updatedAnalyticData} />
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-4 w-full max-md:px-5 mt-6">
+        <div className="grid grid-cols-3 gap-4 w-full max-md:px-5 mt-6">
           {updatedAnalyticData.map(({ label, icon, value }) => (
             <div
               key={label}
@@ -44,7 +49,11 @@ export function Analytics() {
                 <div className="flex items-start justify-between">
                   <div className="flex flex-col gap-1.5">
                     <p className="text-xs text-muted-foreground">{label}</p>
-                    <h4 className="text-xl font-bold">{value}</h4>
+                    {referralLoading ? (
+                      <Skeleton className="h-5 w-full" />
+                    ) : (
+                      <h4 className="text-xl font-bold">{value}</h4>
+                    )}
                   </div>
                   <div className="size-12 flex items-center justify-center">
                     <Image src={icon} alt="icons" />
@@ -56,35 +65,52 @@ export function Analytics() {
         </div>
       )}
 
-      <div className="w-full md:justify-end flex mt-4 max-md:mt-16">
+      {/* <div className="w-full md:justify-end flex mt-4 max-md:mt-16">
         <PayoutDialog>
           <Button variant="gradient">Redeem coins</Button>
         </PayoutDialog>
-      </div>
+      </div> */}
     </div>
   );
 }
 
-function getAnalyticData(redeemableCoins: number) {
+function getAnalyticData({
+  // redeemableCoins,
+  totalReferrals,
+  successfulReferrals,
+  coinsObtained,
+  availableCoins,
+}: {
+  // redeemableCoins: number;
+  totalReferrals: number;
+  successfulReferrals: number;
+  coinsObtained: number;
+  availableCoins: number;
+}) {
   return [
     {
-      label: "Referred",
-      value: 0,
+      label: "Total Referrals",
+      value: totalReferrals?.toLocaleString(),
       icon: ReferralIcon,
     },
     {
-      label: "Coins Obtained",
-      value: 0,
+      label: "Successful Referrals",
+      value: successfulReferrals?.toLocaleString(),
+      icon: ReferralIcon,
+    },
+    {
+      label: "Referral Coins Obtained",
+      value: coinsObtained?.toLocaleString(),
       icon: RedeemableCoins,
     },
+    // {
+    //   label: "Redeemable Coins",
+    //   value: redeemableCoins?.toLocaleString(),
+    //   icon: RedeemCoins,
+    // },
     {
-      label: "Redeemable Coins",
-      value: redeemableCoins?.toLocaleString(),
-      icon: RedeemCoins,
-    },
-    {
-      label: "Coins Redeemed",
-      value: 0,
+      label: "Available Referral Coins",
+      value: availableCoins?.toLocaleString(),
       icon: RedeemedCoins,
     },
   ];
