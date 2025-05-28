@@ -45,7 +45,7 @@ export const fetchOTP = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}//auth/send-phone-verification`,
+    `${pollsenseiAPIEndpoint}/auth/send-phone-verification`,
     requestOptions
   );
   const data = await response.json();
@@ -74,7 +74,7 @@ export const confirmOTP = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}//auth/verify-phone`,
+    `${pollsenseiAPIEndpoint}/auth/verify-phone`,
     requestOptions
   );
   const data = await response.json();
@@ -86,7 +86,7 @@ export const GetUserSurveyData = async (
   userAccessToken: string | null | undefined
 ): Promise<BuyPaidRespondentResponse> => {
   try {
-    const url = `${pollsenseiAPIEndpoint}//survey`;
+    const url = `${pollsenseiAPIEndpoint}/survey`;
 
     const response = await axios.get(url, {
       params: {
@@ -130,7 +130,7 @@ export const PurchasePaidRespondent = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}//purchases/respondents/standard`,
+      `${pollsenseiAPIEndpoint}/purchases/respondents/standard`,
       requestOptions
     );
     if (!response.ok) {
@@ -170,7 +170,7 @@ export const PurchaseQualifiedPaidRespondent = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}//purchases/respondents/qualifying`,
+      `${pollsenseiAPIEndpoint}/purchases/respondents/qualifying`,
       requestOptions
     );
     if (!response.ok) {
@@ -210,7 +210,7 @@ export const ScreenerSurveyPurchase = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}//screener-survey/purchase`,
+      `${pollsenseiAPIEndpoint}/screener-survey/purchase`,
       requestOptions
     );
     if (!response.ok) {
