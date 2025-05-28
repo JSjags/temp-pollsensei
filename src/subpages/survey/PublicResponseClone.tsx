@@ -347,12 +347,21 @@ const PublicResponse = () => {
     }
 
     // Submit response
-    const responsePayload = {
+    const responsePayload: any = {
       survey_id: question?.data?._id,
-      respondent_name,
-      respondent_email,
       answers: formattedAnswers,
     };
+
+    if (
+      question?.data?.settings?.collect_name_of_respondents &&
+      respondent_name
+    ) {
+      responsePayload.respondent_name = respondent_name;
+    }
+
+    if (question?.data?.settings?.collect_email_addresses && respondent_email) {
+      responsePayload.respondent_email = respondent_email;
+    }
 
     try {
       await submitPublicResponse(responsePayload).unwrap();
@@ -1282,50 +1291,62 @@ const PublicResponse = () => {
                   </p>
                 </div>
 
-                <div
-                  className={cn(
-                    "flex flex-col gap-2 w-full bg-white px-4 sm:px-8 md:px-11 py-3 sm:py-4 rounded-lg mb-4",
-                    getFontClass(question?.data?.body_text?.name)
-                  )}
-                >
-                  {question?.data?.settings?.collect_email_addresses && (
-                    <div className="flex flex-col w-full">
-                      <Label
-                        htmlFor="full_name"
-                        className="text-sm sm:text-base mb-1"
-                      >
-                        Full name{" "}
-                        <span className="text-red-500 text-base">*</span>
-                      </Label>
-                      <Input
-                        id="full_name"
-                        type="text"
-                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
-                        required
-                        onChange={(e) => setRespondent_name(e.target.value)}
-                        value={respondent_name}
-                      />
-                    </div>
-                  )}
-                  {question?.data?.settings?.collect_name_of_respondents && (
-                    <div className="flex flex-col w-full mt-3 sm:mt-4">
-                      <Label
-                        htmlFor="email"
-                        className="text-sm sm:text-base mb-1"
-                      >
-                        Email <span className="text-red-500 text-base">*</span>
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
-                        required
-                        onChange={(e) => setRespondent_email(e.target.value)}
-                        value={respondent_email}
-                      />
-                    </div>
-                  )}
-                </div>
+                {(question?.data?.settings?.collect_name_of_respondents ||
+                  question?.data?.settings?.collect_email_addresses) && (
+                  <div
+                    className={cn(
+                      "flex flex-col gap-2 w-full bg-white px-4 sm:px-8 md:px-11 py-3 sm:py-4 rounded-lg mb-4",
+                      getFontClass(question?.data?.body_text?.name)
+                    )}
+                  >
+                    {question?.data?.settings?.collect_name_of_respondents && (
+                      <div className="flex flex-col w-full">
+                        <Label
+                          htmlFor="full_name"
+                          className="text-sm sm:text-base mb-1"
+                        >
+                          Full name{" "}
+                          {question?.data?.settings
+                            ?.collect_name_of_respondents && (
+                            <span className="text-red-500 text-base">*</span>
+                          )}
+                        </Label>
+                        <Input
+                          id="full_name"
+                          type="text"
+                          className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
+                          required={
+                            question?.data?.settings
+                              ?.collect_name_of_respondents
+                          }
+                          onChange={(e) => setRespondent_name(e.target.value)}
+                          value={respondent_name}
+                        />
+                      </div>
+                    )}
+                    {question?.data?.settings?.collect_email_addresses && (
+                      <div className="flex flex-col w-full mt-3 sm:mt-4">
+                        <Label
+                          htmlFor="email"
+                          className="text-sm sm:text-base mb-1"
+                        >
+                          Email{" "}
+                          <span className="text-red-500 text-base">*</span>
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
+                          required={
+                            question?.data?.settings?.collect_email_addresses
+                          }
+                          onChange={(e) => setRespondent_email(e.target.value)}
+                          value={respondent_email}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
                 <AnimatePresence mode="wait">
                   <motion.div className="flex flex-col gap-4">
                     {question?.data?.sections[currentSection]?.questions?.map(

@@ -478,6 +478,7 @@ const EditSurvey = () => {
               case "single_choice":
               case "drop_down":
               case "likert_scale":
+
               case "rating_scale":
               case "star_rating":
               case "boolean":
