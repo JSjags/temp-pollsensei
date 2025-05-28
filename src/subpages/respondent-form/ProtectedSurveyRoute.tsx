@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation"; // Add usePathname
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useQuery } from "@tanstack/react-query";
@@ -15,13 +15,14 @@ const ProtectedSurveyRoute: React.FC<ProtectedSurveyRouteProps> = ({
   children,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const user = useSelector((state: RootState) => state.user.user);
   const userAccessToken = useSelector(
     (state: RootState) => state.user.access_token
   );
   const isPhoneVerified = (user as any)?.phoneVerified;
 
-  const { data: isPaidRespondent } = useQuery({
+  const { data: isPaidRespondent, isLoading } = useQuery({
     queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
     queryFn: () => fetchPaidRespondentStatus(userAccessToken),
     enabled: !!userAccessToken,
@@ -30,39 +31,24 @@ const ProtectedSurveyRoute: React.FC<ProtectedSurveyRouteProps> = ({
   const isPaidRespondentStatus = isPaidRespondent?.data?.isPaidRespondent;
 
   useEffect(() => {
-    const currentPath = window.location.pathname;
-
-    if (isPhoneVerified) {
-      if (currentPath === "/respondent-form/verify-phone") {
-        router.push("/respondent-form");
-      }
-    } else {
-      if (currentPath !== "/respondent-form/verify-phone") {
-        router.push("/respondent-form/verify-phone");
-      }
-    }
+    if (isLoading) return;
 
     if (isPaidRespondentStatus) {
       router.push("/dashboard");
-    }
-  }, [isPhoneVerified, isPaidRespondentStatus, router]);
-
-  const currentPath =
-    typeof window !== "undefined" ? window.location.pathname : "";
-
-  const shouldRenderChildren = () => {
-    if (isPaidRespondentStatus) return false;
-    if (currentPath === "/respondent-form/verify-phone") {
-      return !isPhoneVerified;
-    }
-    if (currentPath === "/respondent-form") {
-      return isPhoneVerified;
+      return;
     }
 
-    return false;
-  };
+    if (isPhoneVerified && pathname === "/respondent-form/verify-phone") {
+      router.push("/respondent-form");
+    } else if (
+      !isPhoneVerified &&
+      pathname !== "/respondent-form/verify-phone"
+    ) {
+      router.push("/respondent-form/verify-phone");
+    }
+  }, [isPhoneVerified, isPaidRespondentStatus, router, pathname, isLoading]);
 
-  return <>{shouldRenderChildren() && children}</>;
+  return <>{children}</>;
 };
 
 export default ProtectedSurveyRoute;
