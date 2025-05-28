@@ -3,7 +3,7 @@ import React, { FC, useState } from "react";
 import Image from "next/image";
 import congrats from "@/assets/images/congrats.svg";
 import Coin from "@/assets/images/Coin.png";
-import { pollsensei_icon } from "@/assets/images";
+import logoGold from "@/assets/images/logo-gold.png";
 import { Button } from "@/components/ui/button";
 import { FaVideo } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -42,7 +42,7 @@ const CompletedVideoDialog: FC<CompletedVideoDialogProps> = ({
             </h1>
             <div className="flex items-center gap-1">
               <Image
-                src={pollsensei_icon}
+                src={logoGold}
                 width={20}
                 height={20}
                 alt="Stacked Coins"

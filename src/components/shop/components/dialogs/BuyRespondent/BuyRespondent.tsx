@@ -18,7 +18,7 @@ import { z } from "zod";
 import { surveySchema } from "@/utils/shema";
 import confirm from "@/assets/images/confirm.svg";
 import congrats from "@/assets/images/congrats.svg";
-import { pollsensei_icon } from "@/assets/images";
+import logoGold from "@/assets/images/logo-gold.png";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -284,16 +284,18 @@ const BuyRespondent = () => {
     <div className="bg-[#FCFCFD] rounded-lg max-md:gap-3 max-w-[204px] py-2.5 border flex flex-col justify-between w-full">
       {pathname !== "/filter-respondents" && (
         <>
-          <div className="flex w-full items-center justify-center">
-            <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
-              <Image
-                src={Purchases1}
-                alt="icons"
-                layout="fill"
-                className="object-contain"
-              />
+          {pathname === "/shop" && (
+            <div className="flex w-full items-center justify-center">
+              <div className="px-8 w-[127px] h-[127px] flex items-center justify-center relative">
+                <Image
+                  src={Purchases1}
+                  alt="icons"
+                  layout="fill"
+                  className="object-contain"
+                />
+              </div>
             </div>
-          </div>
+          )}
           <Dialog
             open={surveyDialog}
             onOpenChange={(open) => dispatch(setSurveyDialog(open))}
@@ -531,12 +533,7 @@ const BuyRespondent = () => {
                   <p className="text-base lg:text-lg text-[#5F08B2]">
                     {selectedRespondentsNumber * 5}
                   </p>
-                  <Image
-                    src={pollsensei_icon}
-                    width={15}
-                    height={15}
-                    alt="pollsensei_icon"
-                  />
+                  <Image src={logoGold} width={15} height={15} alt="logoGold" />
                 </div>
               </div>
             </div>

@@ -15,8 +15,11 @@ import { IoArrowBack } from "react-icons/io5";
 import ProgressBar from "@/components/respondent-form/ProgressBar";
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setBecomePaidRespondentSurveyCompleted } from "@/redux/slices/becomePaidRespondentSlice";
+import { useQueryClient } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
+import { RootState } from "@/redux/store";
 
 interface Props {
   onPrevious: () => void;
@@ -33,6 +36,10 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [submitImage, setSubmitImage] = useState<boolean>(false);
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
 
   // Request camera access when "proceed" is true
   // useEffect(() => {
@@ -135,6 +142,9 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
           onSuccess: () => {
             // setProceed(true);
             dispatch(setBecomePaidRespondentSurveyCompleted(true));
+            queryClient.invalidateQueries({
+              queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
+            });
             setSubmitImage(true);
           },
           onError: (error) => {

@@ -28,6 +28,9 @@ import { Separator } from "@/components/ui/separator";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
+import { APP_KEYS } from "@/constants";
+import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
+import { useQuery } from "@tanstack/react-query";
 
 // Move the styles definition outside the component
 const twinkleStyles = `
@@ -41,6 +44,9 @@ const twinkleStyles = `
 const DashboardPage = () => {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
+  );
   const { data: item, isLoading: isItemLoading } =
     useFormResponseRateQuery("year");
   const { data: collectedDataCount, isLoading: isCollectedDataLoading } =
@@ -50,10 +56,14 @@ const DashboardPage = () => {
   const { data: surveyLeaderboard, isLoading: isSurveyLeaderboardLoading } =
     useSurveyLeaderboardQuery("year");
   const { data: surveys, isLoading: isSurveysLoading } = useSurveyQuery("year");
-  const isBecomeRespondentSurveyCompleted = useSelector(
-    (state: RootState) =>
-      state.becomePaidRespondentSlice.isBecomeRespondentSurveyCompleted
-  );
+
+  const { data: isPaidRespondent } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
+    queryFn: () => fetchPaidRespondentStatus(userAccessToken),
+    enabled: !!userAccessToken,
+  });
+
+  const isPaidRespondentStatus = isPaidRespondent?.data?.isPaidRespondent;
 
   function DashboardSkeleton() {
     return (
@@ -77,7 +87,7 @@ const DashboardPage = () => {
                 </div>
               </CardContent>
             </Card>
-            {!isBecomeRespondentSurveyCompleted && (
+            {!isPaidRespondentStatus && (
               <>
                 <Separator
                   orientation="vertical"
@@ -179,7 +189,7 @@ const DashboardPage = () => {
               </CardContent>
             </Card>
 
-            {!isBecomeRespondentSurveyCompleted && (
+            {!isPaidRespondentStatus && (
               <>
                 <Separator
                   orientation="vertical"
@@ -189,7 +199,7 @@ const DashboardPage = () => {
                   size="default"
                   className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-full text-xs md:text-sm p-2 lg:p-4 hover:scale-x-105 transition-all"
                   onClick={() => router.push("/respondent-form/verify-phone")}
-                  disabled={isBecomeRespondentSurveyCompleted}
+                  disabled={isPaidRespondentStatus}
                 >
                   Become a Paid Respondent
                   <ArrowRight className="ml-2 w-5 h-5" />

@@ -1,4 +1,3 @@
-// respondent-form.tsx
 "use client";
 import ProtectedSurveyRoute from "@/subpages/respondent-form/ProtectedSurveyRoute";
 import RespondentForm from "@/subpages/respondent-form/RespondentForm";

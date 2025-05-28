@@ -3,6 +3,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
+import { APP_KEYS } from "@/constants";
 
 interface ProtectedSurveyRouteProps {
   children: React.ReactNode;
@@ -12,36 +15,54 @@ const ProtectedSurveyRoute: React.FC<ProtectedSurveyRouteProps> = ({
   children,
 }) => {
   const router = useRouter();
-  const isPhoneVerified = useSelector(
-    (state: RootState) => state.becomePaidRespondentSlice.isPhoneVerified
+  const user = useSelector((state: RootState) => state.user.user);
+  const userAccessToken = useSelector(
+    (state: RootState) => state.user.access_token
   );
-  const isBecomeRespondentSurveyCompleted = useSelector(
-    (state: RootState) =>
-      state.becomePaidRespondentSlice.isBecomeRespondentSurveyCompleted
-  );
+  const isPhoneVerified = (user as any)?.phoneVerified;
+
+  const { data: isPaidRespondent } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
+    queryFn: () => fetchPaidRespondentStatus(userAccessToken),
+    enabled: !!userAccessToken,
+  });
+
+  const isPaidRespondentStatus = isPaidRespondent?.data?.isPaidRespondent;
 
   useEffect(() => {
     const currentPath = window.location.pathname;
 
     if (isPhoneVerified) {
-      // If the phone is verified, allow access to /respondent-form
       if (currentPath === "/respondent-form/verify-phone") {
         router.push("/respondent-form");
       }
     } else {
-      // If the phone is not verified, redirect to /respondent-form/verify-phone
       if (currentPath !== "/respondent-form/verify-phone") {
         router.push("/respondent-form/verify-phone");
       }
     }
 
-    if (isBecomeRespondentSurveyCompleted) {
-      // If the survey is completed, redirect to /dashboard
+    if (isPaidRespondentStatus) {
       router.push("/dashboard");
     }
-  }, [isPhoneVerified, isBecomeRespondentSurveyCompleted, router]);
+  }, [isPhoneVerified, isPaidRespondentStatus, router]);
 
-  return <>{isPhoneVerified && children}</>;
+  const currentPath =
+    typeof window !== "undefined" ? window.location.pathname : "";
+
+  const shouldRenderChildren = () => {
+    if (isPaidRespondentStatus) return false;
+    if (currentPath === "/respondent-form/verify-phone") {
+      return !isPhoneVerified;
+    }
+    if (currentPath === "/respondent-form") {
+      return isPhoneVerified;
+    }
+
+    return false;
+  };
+
+  return <>{shouldRenderChildren() && children}</>;
 };
 
 export default ProtectedSurveyRoute;
