@@ -19,7 +19,7 @@ export function useSubmitRespondentForm() {
       tab: string;
       formData: Partial<RespondentFormData>;
     }) => {
-      const url = `${pollsenseiAPIEndpoint}paid-respondent`;
+      const url = `${pollsenseiAPIEndpoint}/paid-respondent`;
       if (!accessToken) {
         throw new Error("No access token available");
       }
