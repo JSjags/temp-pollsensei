@@ -1,8 +1,6 @@
 "use client";
 import axios from "axios";
 import { BuyPaidRespondentResponse } from "@/types/survey";
-import { participants } from "@/data";
-import { NullableType } from "joi";
 
 const pollsenseiAPIEndpoint = `${process.env.NEXT_PUBLIC_APP_BASE_URL}`;
 
@@ -47,7 +45,7 @@ export const fetchOTP = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}auth/send-phone-verification`,
+    `${pollsenseiAPIEndpoint}//auth/send-phone-verification`,
     requestOptions
   );
   const data = await response.json();
@@ -76,7 +74,7 @@ export const confirmOTP = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}auth/verify-phone`,
+    `${pollsenseiAPIEndpoint}//auth/verify-phone`,
     requestOptions
   );
   const data = await response.json();
@@ -88,7 +86,7 @@ export const GetUserSurveyData = async (
   userAccessToken: string | null | undefined
 ): Promise<BuyPaidRespondentResponse> => {
   try {
-    const url = `${pollsenseiAPIEndpoint}survey`;
+    const url = `${pollsenseiAPIEndpoint}//survey`;
 
     const response = await axios.get(url, {
       params: {
@@ -132,7 +130,7 @@ export const PurchasePaidRespondent = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}purchases/respondents/standard`,
+      `${pollsenseiAPIEndpoint}//purchases/respondents/standard`,
       requestOptions
     );
     if (!response.ok) {
@@ -172,7 +170,7 @@ export const PurchaseQualifiedPaidRespondent = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}purchases/respondents/qualifying`,
+      `${pollsenseiAPIEndpoint}//purchases/respondents/qualifying`,
       requestOptions
     );
     if (!response.ok) {
@@ -212,7 +210,7 @@ export const ScreenerSurveyPurchase = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}screener-survey/purchase`,
+      `${pollsenseiAPIEndpoint}//screener-survey/purchase`,
       requestOptions
     );
     if (!response.ok) {
@@ -246,7 +244,7 @@ export const FilterPaidRespondent = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}purchases/respondents/criteria`,
+      `${pollsenseiAPIEndpoint}/purchases/respondents/criteria`,
       requestOptions
     );
     if (!response.ok) {
@@ -277,7 +275,7 @@ export const GetRespondentData = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}paid-respondent/section/${activeTab}`,
+      `${pollsenseiAPIEndpoint}/paid-respondent/section/${activeTab}`,
       requestOptions
     );
     if (!response.ok) {
@@ -309,7 +307,7 @@ export const GetRespondentSectionData = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}paid-respondent/section/${section}`,
+      `${pollsenseiAPIEndpoint}/paid-respondent/section/${section}`,
       requestOptions
     );
     if (!response.ok) {
@@ -340,7 +338,7 @@ export const fetchPaidRespondentStatus = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}paid-respondent/check-status`,
+      `${pollsenseiAPIEndpoint}/paid-respondent/check-status`,
       requestOptions
     );
     if (!response.ok) {
@@ -362,7 +360,7 @@ export const CreateScreenerSurvey = async (
 ) => {
   try {
     const response = await axios.post(
-      `${pollsenseiAPIEndpoint}screener-survey`,
+      `${pollsenseiAPIEndpoint}/screener-survey`,
       payload,
       {
         params: {
@@ -401,7 +399,7 @@ export const fetchPurchasedRespondentsStats = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}paid-respondent/stats`,
+    `${pollsenseiAPIEndpoint}/paid-respondent/stats`,
     requestOptions
   );
   const data = await response.json();
@@ -428,7 +426,7 @@ export const fetchDailyReward = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}daily-login`,
+    `${pollsenseiAPIEndpoint}/daily-login`,
     requestOptions
   );
   const data = await response.json();
@@ -454,7 +452,7 @@ export const fetchLoginStreak = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}daily-login/streak`,
+    `${pollsenseiAPIEndpoint}/daily-login/streak`,
     requestOptions
   );
   const data = await response.json();
@@ -480,7 +478,7 @@ export const fetchUnrestrictedBalance = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}wallet/user-balance`,
+    `${pollsenseiAPIEndpoint}/wallet/user-balance`,
     requestOptions
   );
   const data = await response.json();
@@ -506,7 +504,7 @@ export const fetchAvailableSurveys = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}survey-apply/recommendations`,
+    `${pollsenseiAPIEndpoint}/survey-apply/recommendations`,
     requestOptions
   );
   const data = await response.json();
@@ -532,7 +530,7 @@ export const fetchApplySurveys = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}screener-survey/screened-surveys`,
+    `${pollsenseiAPIEndpoint}/screener-survey/screened-surveys`,
     requestOptions
   );
   const data = await response.json();
@@ -558,7 +556,7 @@ export const fetchApplicationSurveys = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}survey-apply/applications`,
+    `${pollsenseiAPIEndpoint}/survey-apply/applications`,
     requestOptions
   );
   const data = await response.json();
@@ -585,7 +583,7 @@ export const fetchScreenerSurveyById = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}screener-survey/${screenerId}`,
+    `${pollsenseiAPIEndpoint}/screener-survey/${screenerId}`,
     requestOptions
   );
   const data = await response.json();
@@ -612,7 +610,7 @@ export const fetchScreenerSurveyBySurveyId = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}screener-survey/survey/${surveyId}`,
+    `${pollsenseiAPIEndpoint}/screener-survey/survey/${surveyId}`,
     requestOptions
   );
   const data = await response.json();
@@ -640,7 +638,7 @@ export const submitScreenerSurvey = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}survey-apply/submit-screener/${surveyId}`,
+      `${pollsenseiAPIEndpoint}/survey-apply/submit-screener/${surveyId}`,
       requestOptions
     );
     if (!response.ok) {
@@ -674,7 +672,7 @@ export const submitPaidSurvey = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}ps/survey/respond`,
+      `${pollsenseiAPIEndpoint}/ps/survey/respond`,
       requestOptions
     );
     if (!response.ok) {
@@ -711,7 +709,7 @@ export const startPaidSurvey = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}survey-apply/start/${surveyId}`,
+      `${pollsenseiAPIEndpoint}/survey-apply/start/${surveyId}`,
       requestOptions
     );
     if (!response.ok) {
@@ -745,7 +743,7 @@ export const fetchSurveyById = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}survey/public/${surveyId}`,
+    `${pollsenseiAPIEndpoint}/survey/public/${surveyId}`,
     requestOptions
   );
   const data = await response.json();
@@ -773,7 +771,7 @@ export const fetchTotalPurchasedRespondents = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}purchases/respondents/history`,
+    `${pollsenseiAPIEndpoint}/purchases/respondents/history`,
     requestOptions
   );
   const data = await response.json();
@@ -803,7 +801,7 @@ export const fetchScreenerParticipants = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}screener-survey/participant-review/${surveyId}/${screenerId}`,
+    `${pollsenseiAPIEndpoint}/screener-survey/participant-review/${surveyId}/${screenerId}`,
     requestOptions
   );
   const data = await response.json();
@@ -830,7 +828,7 @@ export const fetchParticipantById = async (
   };
 
   const response = await fetch(
-    `${pollsenseiAPIEndpoint}paid-respondent/${participantId}`,
+    `${pollsenseiAPIEndpoint}/paid-respondent/${participantId}`,
     requestOptions
   );
   const data = await response.json();
@@ -861,7 +859,7 @@ export const submitReviewedParticipant = async (
 
   try {
     const response = await fetch(
-      `${pollsenseiAPIEndpoint}screener-survey/applications/bulk-update`,
+      `${pollsenseiAPIEndpoint}/screener-survey/applications/bulk-update`,
       requestOptions
     );
     if (!response.ok) {
