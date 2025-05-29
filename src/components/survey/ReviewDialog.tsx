@@ -16,8 +16,6 @@ import { IoEyeOutline } from "react-icons/io5";
 import ParticipantReview from "@/components/survey/ParticipantReview";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import {
   fetchScreenerSurveyBySurveyId,
   fetchScreenerParticipants,
@@ -61,20 +59,16 @@ const ReviewDialog: FC<Props> = ({ setIsReviewDialogOpen, surveyId }) => {
   );
   const itemsPerPage = 20;
 
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
-
   const { data: screenerSuveyBySurveyId, isLoading: loadingScreenerSurvey } =
     useQuery({
       queryKey: [...[APP_KEYS.SCREENER_SURVEY_BY_SURVEY_ID], surveyId],
-      queryFn: () => fetchScreenerSurveyBySurveyId(userAccessToken, surveyId),
-      enabled: !!userAccessToken && !!surveyId,
+      queryFn: () => fetchScreenerSurveyBySurveyId(surveyId),
+      enabled: !!surveyId,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     });
 
-  const screenerSurveyID = screenerSuveyBySurveyId?.data[0]?._id;
+  const screenerSurveyID = screenerSuveyBySurveyId?.[0]?._id;
 
   const {
     data: participants,
@@ -82,12 +76,12 @@ const ReviewDialog: FC<Props> = ({ setIsReviewDialogOpen, surveyId }) => {
     refetch: refetchParticipants,
   } = useQuery({
     queryKey: [...[APP_KEYS.PARTICIPANTS], screenerSuveyBySurveyId],
-    queryFn: () =>
-      fetchScreenerParticipants(userAccessToken, surveyId, screenerSurveyID),
-    enabled: !!userAccessToken && !!screenerSuveyBySurveyId,
+    queryFn: () => fetchScreenerParticipants(surveyId, screenerSurveyID),
+    enabled: !!screenerSuveyBySurveyId,
   });
 
-  const allItems = participants?.data?.data || [];
+  const allItems = participants?.data || [];
+  // console.log({ participants, allItems });
   const totalPages = Math.ceil(allItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -103,11 +97,7 @@ const ReviewDialog: FC<Props> = ({ setIsReviewDialogOpen, surveyId }) => {
   ) => {
     try {
       setIsLoading(true);
-      const response = await submitReviewedParticipant(
-        userAccessToken,
-        applicationIds,
-        status
-      );
+      const response = await submitReviewedParticipant(applicationIds, status);
       await refetchParticipants();
       resetSelected();
       setResponse(response?.success);

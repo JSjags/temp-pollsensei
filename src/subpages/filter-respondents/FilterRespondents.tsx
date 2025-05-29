@@ -14,8 +14,8 @@ import {
   setQualifyingTemplateId,
   setScreenerId,
 } from "@/redux/slices/buyRespondentDialogSlice";
-import { resetQuestion, deleteQuestion } from "@/redux/slices/questions.slice";
-import { resetSurvey, deleteSection } from "@/redux/slices/survey.slice";
+// import { resetQuestion, deleteQuestion } from "@/redux/slices/questions.slice";
+// import { resetSurvey, deleteSection } from "@/redux/slices/survey.slice";
 import BuyRespondent from "@/components/shop/components/dialogs/BuyRespondent/BuyRespondent";
 import { FilterPaidRespondent } from "@/services/api/apiRequest";
 import { toast } from "react-toastify";
@@ -35,9 +35,7 @@ const FilterRespondents = () => {
   const selectedCriteria = useSelector(
     (state: RootState) => state.criteria.selectedCriteria
   );
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
+
   const questions = useSelector(
     (state: RootState) => state?.question?.questions
   );
@@ -64,20 +62,21 @@ const FilterRespondents = () => {
     };
 
     try {
-      const response = await FilterPaidRespondent(userAccessToken, payload);
+      const response = await FilterPaidRespondent(payload);
       dispatch(setFilterBy("qualifyingCriteria"));
-      dispatch(setQualifyingTemplateId(response.data._id));
+      dispatch(setQualifyingTemplateId(response?._id));
       dispatch(setPurchaseDialog(true));
+      // console.log({ response });
     } catch (e: any) {
       toast.error(
-        e?.data?.message ??
+        e?.message ??
           "Error encountered while saving criteria, please try again."
       );
       console.error("Error saving criteria:", e);
     } finally {
       setIsLoading(false);
     }
-  }, [selectedCriteria, userAccessToken, dispatch]);
+  }, [selectedCriteria, dispatch]);
 
   const handleCreateScreenerSurvey = useCallback(async () => {
     setIsLoading(true);
@@ -119,46 +118,27 @@ const FilterRespondents = () => {
 
     try {
       const response = await dispatch(
-        createScreenerSurvey({ userToken: userAccessToken, payload }) as any
+        createScreenerSurvey({ payload }) as any
       ).unwrap();
+      // console.log({ response });
       dispatch(setFilterBy("screenerSurvey"));
       dispatch(setScreenerId(response?._id));
       dispatch(setPurchaseDialog(true));
-      dispatch(resetQuestion());
-      dispatch(resetSurvey());
+      // dispatch(resetQuestion());
+      // dispatch(resetSurvey());
     } catch (e: any) {
       console.error("Failed to save and continue:", e);
       toast.error(e ?? "Error encountered while creating survey screener.");
     } finally {
       setIsLoading(false);
     }
-  }, [
-    dispatch,
-    userAccessToken,
-    questions,
-    survey,
-    sectionDescription,
-    sectionTopic,
-  ]);
+  }, [dispatch, questions, survey, sectionDescription, sectionTopic]);
 
   const handleCloseTab = useCallback(() => {
     // dispatch(setSurveyDialog(false));
-    dispatch(resetQuestion());
-    dispatch(resetSurvey());
+
     router.push("/shop");
-  }, [dispatch, router]);
-
-  const prevTabRef = useRef(activeTab);
-
-  // const handleTabChange = (value: string) => {
-  //   if (
-  //     (value === "selectCriteria" || value === "screenerSurvey") &&
-  //     prevTabRef.current !== value // Only update if tab actually changed
-  //   ) {
-  //     prevTabRef.current = value;
-  //     setActiveTab(value);
-  //   }
-  // };
+  }, [router]);
 
   const handleMainButtonClick = useCallback(() => {
     if (activeTab === "selectCriteria") {
@@ -245,7 +225,7 @@ const FilterRespondents = () => {
           disabled={
             activeTab === "selectCriteria"
               ? isLoading || totalCriteria <= 0
-              : isLoading || questions.length <= 0
+              : isLoading || questions?.length <= 0
           }
         >
           {isLoading ? "Loading..." : "Save and Continue"}

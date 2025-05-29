@@ -14,8 +14,7 @@ import {
   fetchSurveyById,
   fetchScreenerSurveyById,
 } from "@/services/api/apiRequest";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useDispatch } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 
@@ -27,9 +26,6 @@ interface Props {
 const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
 
   const getCorrectSurveyId = () => {
     if (activeTab === "available") return survey?.surveyId;
@@ -39,11 +35,11 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
 
   const handleAvailableSurvey = async (id: string) => {
     try {
-      const surveyData = await fetchSurveyById(userAccessToken, id);
+      const surveyData = await fetchSurveyById(id);
       if (surveyData) {
         dispatch(openSurveyFormDialog(surveyData));
         queryClient.invalidateQueries({
-          queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], userAccessToken],
+          queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
         });
         dispatch(closeSurveyTabs());
         dispatch(setSurveyID(id));
@@ -55,11 +51,11 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
 
   const handleApplySurvey = async (id: string) => {
     try {
-      const response = await fetchScreenerSurveyById(userAccessToken, id);
+      const response = await fetchScreenerSurveyById(id);
       if (response) {
         dispatch(openSurveyFormDialog(response));
         queryClient.invalidateQueries({
-          queryKey: [...[APP_KEYS.APPLICATION_SURVEYS], userAccessToken],
+          queryKey: [...[APP_KEYS.APPLICATION_SURVEYS]],
         });
         dispatch(closeSurveyTabs());
         dispatch(setSurveyID(id));

@@ -7,10 +7,7 @@ import { GiPadlock } from "react-icons/gi";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import {
-  fetchDailyReward,
-  fetchUnrestrictedBalance,
-} from "@/services/api/apiRequest";
+import { fetchDailyReward } from "@/services/api/apiRequest";
 import Cookies from "js-cookie";
 import { queryClient } from "@/contexts/index";
 import { APP_KEYS } from "@/constants";
@@ -25,9 +22,6 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({ onClaimSuccess }) => {
   const [daysInMonth, setDaysInMonth] = useState<number>(0);
   const [displayRange, setDisplayRange] = useState({ start: 1, end: 7 });
 
-  const accessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const userId = useSelector((state: RootState) => state.user.user?._id);
 
   const CLAIMED_DAYS_COOKIE_KEY = `claimedDays_${userId}`;
@@ -62,14 +56,16 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({ onClaimSuccess }) => {
   // Function to Handle claim day
   const handleClaimDay = async (day: number) => {
     if (!claimedDays.includes(day) && day === currentDay) {
-      const { success } = await fetchDailyReward(accessToken);
+      const { success } = await fetchDailyReward();
 
       if (success) {
         const newClaimedDays = [...claimedDays, day];
         setClaimedDays(newClaimedDays);
         Cookies.set(CLAIMED_DAYS_COOKIE_KEY, JSON.stringify(newClaimedDays));
-
         onClaimSuccess?.();
+        queryClient.invalidateQueries({
+          queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
+        });
       }
     }
   };

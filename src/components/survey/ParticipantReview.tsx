@@ -1,17 +1,14 @@
 "use client";
 import React, { FC, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { AiOutlineEye } from "react-icons/ai";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import Image from "next/image";
 import participantAvatar from "@/assets/images/participant.png";
-import { FaQuoteLeft } from "react-icons/fa";
 import ParticipantInfoRow from "@/components/survey/ParticipantInfoRow";
 import { fetchParticipantById } from "@/services/api/apiRequest";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import { Skeleton } from "@/components/ui/skeleton";
 import ScreenerSurveyResponse from "@/components/survey/ScreenerSurveyResponse";
 
@@ -44,21 +41,16 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
   const [reviewScrenerResponse, setReviewScrenerResponse] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
 
   const { data: participantData, isLoading: loadingParticipant } = useQuery({
     queryKey: [...[APP_KEYS.PARTICIPANT_BY_ID], participantID],
-    queryFn: () => fetchParticipantById(userAccessToken, participantID),
-    enabled: !!userAccessToken && !!participantID,
+    queryFn: () => fetchParticipantById(participantID),
+    enabled: !!participantID,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  const participant = participantData?.data;
-
-  // console.log({ response });
+  // console.log({ participantData });
 
   const handleReviewParticipant = async (status: string) => {
     try {
@@ -164,43 +156,45 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
                     <div className="flex-1 flex flex-col gap-1">
                       <ParticipantInfoRow
                         label="Age Group"
-                        value={participant?.personalInfo?.ageGroup}
+                        value={participantData?.personalInfo?.ageGroup}
                       />
                       <ParticipantInfoRow
                         label="Gender"
-                        value={participant?.personalInfo?.gender}
+                        value={participantData?.personalInfo?.gender}
                       />
                       <ParticipantInfoRow
                         label="Status"
-                        value={participant?.personalInfo?.maritalStatus}
+                        value={participantData?.personalInfo?.maritalStatus}
                       />
                       <ParticipantInfoRow
                         label="Education"
-                        value={participant?.educationEmployment?.educationLevel}
+                        value={
+                          participantData?.educationEmployment?.educationLevel
+                        }
                       />
                       <ParticipantInfoRow
                         label="Children/Dependents"
-                        value={participant?.personalInfo?.children}
+                        value={participantData?.personalInfo?.children}
                       />
                       <ParticipantInfoRow
                         label="Occupation"
-                        value={participant?.educationEmployment?.jobRole}
+                        value={participantData?.educationEmployment?.jobRole}
                       />
                       <ParticipantInfoRow
                         label="Languages"
-                        value={participant?.geographicInfo?.languages}
+                        value={participantData?.geographicInfo?.languages}
                       />
                       <ParticipantInfoRow
                         label="Ethnicity"
-                        value={participant?.geographicInfo?.ethnicity}
+                        value={participantData?.geographicInfo?.ethnicity}
                       />
                       <ParticipantInfoRow
                         label="Religion"
-                        value={participant?.geographicInfo?.religion}
+                        value={participantData?.geographicInfo?.religion}
                       />
                       <ParticipantInfoRow
                         label="Pets"
-                        value={participant?.personalInfo?.pets}
+                        value={participantData?.personalInfo?.pets}
                       />
                     </div>
                   </div>
@@ -213,33 +207,39 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
                     <div className="flex-1 flex flex-col gap-1">
                       <ParticipantInfoRow
                         label="Job"
-                        value={participant?.educationEmployment?.jobRole}
+                        value={participantData?.educationEmployment?.jobRole}
                       />
                       <ParticipantInfoRow
                         label="industry"
-                        value={participant?.educationEmployment?.industry}
+                        value={participantData?.educationEmployment?.industry}
                       />
                       <ParticipantInfoRow
                         label="employment status"
                         value={
-                          participant?.educationEmployment?.employmentStatus
+                          participantData?.educationEmployment?.employmentStatus
                         }
                       />
                       <ParticipantInfoRow
                         label="education"
-                        value={participant?.educationEmployment?.educationLevel}
+                        value={
+                          participantData?.educationEmployment?.educationLevel
+                        }
                       />
                       <ParticipantInfoRow
                         label="income range"
-                        value={participant?.educationEmployment?.incomeRange}
+                        value={
+                          participantData?.educationEmployment?.incomeRange
+                        }
                       />
                       <ParticipantInfoRow
                         label="Avg work hours weekly"
-                        value={participant?.educationEmployment?.workingHours}
+                        value={
+                          participantData?.educationEmployment?.workingHours
+                        }
                       />
                       <ParticipantInfoRow
                         label="Tech savvy"
-                        value={participant?.educationEmployment?.techSavvy}
+                        value={participantData?.educationEmployment?.techSavvy}
                       />
                     </div>
                   </div>
@@ -250,23 +250,23 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
                     <div className="flex-1 flex flex-col gap-1">
                       <ParticipantInfoRow
                         label="country"
-                        value={participant?.geographicInfo?.nationality}
+                        value={participantData?.geographicInfo?.nationality}
                       />
                       <ParticipantInfoRow
                         label="region"
-                        value={participant?.geographicInfo?.region}
+                        value={participantData?.geographicInfo?.region}
                       />
                       <ParticipantInfoRow
                         label="ethnicity"
-                        value={participant?.geographicInfo?.ethnicity}
+                        value={participantData?.geographicInfo?.ethnicity}
                       />
                       <ParticipantInfoRow
                         label="languages"
-                        value={participant?.geographicInfo?.languages}
+                        value={participantData?.geographicInfo?.languages}
                       />
                       <ParticipantInfoRow
                         label="settlement type"
-                        value={participant?.geographicInfo?.currentLocation}
+                        value={participantData?.geographicInfo?.currentLocation}
                       />
                     </div>
                   </div>
@@ -279,33 +279,37 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
                     <div className="flex-1 flex flex-col gap-1">
                       <ParticipantInfoRow
                         label="overall health status"
-                        value={participant?.healthLifestyle?.overallHealth}
+                        value={participantData?.healthLifestyle?.overallHealth}
                       />
                       <ParticipantInfoRow
                         label="health insurance type"
-                        value={participant?.healthLifestyle?.healthInsurance}
+                        value={
+                          participantData?.healthLifestyle?.healthInsurance
+                        }
                       />
                       <ParticipantInfoRow
                         label="Engagement in regular physical activity"
-                        value={participant?.healthLifestyle?.physicalActivity}
+                        value={
+                          participantData?.healthLifestyle?.physicalActivity
+                        }
                       />
                       <ParticipantInfoRow
                         label="Dietary restrictions or preferences"
                         value={
-                          participant?.healthLifestyle?.dietaryRestrictions
+                          participantData?.healthLifestyle?.dietaryRestrictions
                         }
                       />
                       <ParticipantInfoRow
                         label="Smoking or use of tobacco products"
-                        value={participant?.healthLifestyle?.tobaccoUse}
+                        value={participantData?.healthLifestyle?.tobaccoUse}
                       />
                       <ParticipantInfoRow
                         label="Alcohol consumption"
-                        value={participant?.healthLifestyle?.alcoholUse}
+                        value={participantData?.healthLifestyle?.alcoholUse}
                       />
                       <ParticipantInfoRow
                         label="Average Hours of sleep per night"
-                        value={participant?.healthLifestyle?.sleepHours}
+                        value={participantData?.healthLifestyle?.sleepHours}
                       />
                     </div>
                   </div>
@@ -317,40 +321,46 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
                       <ParticipantInfoRow
                         label="Social media platforms"
                         value={
-                          participant?.technologyMedia?.socialMediaPlatforms
+                          participantData?.technologyMedia?.socialMediaPlatforms
                         }
                       />
                       <ParticipantInfoRow
                         label="Frequency of use of Internet"
-                        value={participant?.technologyMedia?.internetUsage}
+                        value={participantData?.technologyMedia?.internetUsage}
                       />
                       <ParticipantInfoRow
                         label="Gadgets"
-                        value={participant?.technologyMedia?.internetAccess}
+                        value={participantData?.technologyMedia?.internetAccess}
                       />
                       <ParticipantInfoRow
                         label="Frequency of Social media usage"
-                        value={participant?.technologyMedia?.socialMediaUsage}
+                        value={
+                          participantData?.technologyMedia?.socialMediaUsage
+                        }
                       />
                       <ParticipantInfoRow
                         label="Most popular content engaged"
-                        value={participant?.technologyMedia?.contentEngagement}
+                        value={
+                          participantData?.technologyMedia?.contentEngagement
+                        }
                       />
                       <ParticipantInfoRow
                         label="Internet browser used"
-                        value={participant?.technologyMedia?.internetBrowsers}
+                        value={
+                          participantData?.technologyMedia?.internetBrowsers
+                        }
                       />
                       <ParticipantInfoRow
                         label="Computer operating system(s)"
-                        value={participant?.technologyMedia?.computerOS}
+                        value={participantData?.technologyMedia?.computerOS}
                       />
                       <ParticipantInfoRow
                         label="Smartphone operating system(s)"
-                        value={participant?.technologyMedia?.smartphoneOS}
+                        value={participantData?.technologyMedia?.smartphoneOS}
                       />
                       <ParticipantInfoRow
                         label="Tablet operating system(s)"
-                        value={participant?.technologyMedia?.tabletOS}
+                        value={participantData?.technologyMedia?.tabletOS}
                       />
                     </div>
                   </div>
@@ -363,15 +373,17 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
                     <div className="flex-1 flex flex-col gap-1">
                       <ParticipantInfoRow
                         label="Current living arrangement"
-                        value={participant?.housingLiving?.livingArrangement}
+                        value={
+                          participantData?.housingLiving?.livingArrangement
+                        }
                       />
                       <ParticipantInfoRow
                         label="Owner/Rent"
-                        value={participant?.housingLiving?.homeOwnership}
+                        value={participantData?.housingLiving?.homeOwnership}
                       />
                       <ParticipantInfoRow
                         label="People living in your household"
-                        value={participant?.housingLiving?.householdSize}
+                        value={participantData?.housingLiving?.householdSize}
                       />
                     </div>
                   </div>
@@ -382,15 +394,17 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
                     <div className="flex-1 flex flex-col gap-1">
                       <ParticipantInfoRow
                         label="Means of commuting"
-                        value={participant?.mobilityTravel?.commute}
+                        value={participantData?.mobilityTravel?.commute}
                       />
                       <ParticipantInfoRow
                         label="Frequency of out-of-town/Intercity travel"
-                        value={participant?.mobilityTravel?.travelFrequency}
+                        value={participantData?.mobilityTravel?.travelFrequency}
                       />
                       <ParticipantInfoRow
                         label="Ownership of a vehilce"
-                        value={participant?.mobilityTravel?.vehicleOwnership}
+                        value={
+                          participantData?.mobilityTravel?.vehicleOwnership
+                        }
                       />
                     </div>
                   </div>

@@ -40,14 +40,15 @@ import {
   ScreenerSurveyPurchase,
 } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
-import { SurveyData } from "@/types/survey";
+import { BuyPaidRespondentResponse, SurveyData } from "@/types/survey";
+import { resetQuestion, deleteQuestion } from "@/redux/slices/questions.slice";
+import { resetSurvey, deleteSection } from "@/redux/slices/survey.slice";
+import { useQueryClient } from "@tanstack/react-query";
 
 const BuyRespondent = () => {
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
   const router = useRouter();
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const pathname = usePathname();
   const {
     surveyDialog,
@@ -61,6 +62,8 @@ const BuyRespondent = () => {
     qualifyingTemplateId,
     screenerId,
   } = useSelector((state: RootState) => state.respondentDialog);
+
+  // console.log({ screenerId });
 
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string>("");
@@ -156,15 +159,20 @@ const BuyRespondent = () => {
         }
 
         const response = await PurchaseQualifiedPaidRespondent(
-          userAccessToken,
           selectedSurvey._id,
           selectedRespondentsNumber,
           qualifyingTemplateId
         );
 
-        if (response.success) {
+        if (response) {
           dispatch(setConfirmDialog(false));
           dispatch(setCongratulationsDialog(true));
+          queryClient.invalidateQueries({
+            queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS]],
+          });
+          queryClient.invalidateQueries({
+            queryKey: [...[APP_KEYS.SURVEY_STATS]],
+          });
         } else {
           setApiError(response.message || "Purchase failed");
         }
@@ -185,15 +193,20 @@ const BuyRespondent = () => {
         }
 
         const response = await ScreenerSurveyPurchase(
-          userAccessToken,
           selectedSurvey._id,
           selectedRespondentsNumber,
           screenerId
         );
 
-        if (response.success) {
+        if (response) {
           dispatch(setConfirmDialog(false));
           dispatch(setCongratulationsDialog(true));
+          queryClient.invalidateQueries({
+            queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS]],
+          });
+          queryClient.invalidateQueries({
+            queryKey: [...[APP_KEYS.SURVEY_STATS]],
+          });
         } else {
           setApiError(response.message || "Purchase failed");
         }
@@ -214,14 +227,19 @@ const BuyRespondent = () => {
         }
 
         const response = await PurchasePaidRespondent(
-          userAccessToken,
           selectedSurvey._id,
           selectedRespondentsNumber
         );
 
-        if (response.success) {
+        if (response) {
           dispatch(setConfirmDialog(false));
           dispatch(setCongratulationsDialog(true));
+          queryClient.invalidateQueries({
+            queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS]],
+          });
+          queryClient.invalidateQueries({
+            queryKey: [...[APP_KEYS.SURVEY_STATS]],
+          });
         } else {
           setApiError(response.message || "Purchase failed");
         }
@@ -241,6 +259,14 @@ const BuyRespondent = () => {
   const handleCongratulationsContinue = () => {
     dispatch(setCongratulationsDialog(false));
     dispatch(resetDialogState());
+    dispatch(resetQuestion());
+    dispatch(resetSurvey());
+    queryClient.invalidateQueries({
+      queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS]],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [...[APP_KEYS.SURVEY_STATS]],
+    });
     reset();
     router.push("/shop");
   };
@@ -253,7 +279,7 @@ const BuyRespondent = () => {
 
     dispatch(setSelectedRespondentsNumber(data.respondentsNumber));
     sessionStorage.setItem("allowFilterRespondentsAccess", "true");
-    console.log("allowFilterRespondentsAccess set to true");
+    // console.log("allowFilterRespondentsAccess set to true");
     router.push("/filter-respondents");
     dispatch(setSurveyDialog(false));
     dispatch(setPurchaseDialog(false));
@@ -268,15 +294,19 @@ const BuyRespondent = () => {
     handleFilterRespondentsRedirect(data);
   };
 
-  const { data: userSurveysResponse } = useQuery({
-    queryKey: [...[APP_KEYS.USER_SURVEYS], userAccessToken],
-    queryFn: () => GetUserSurveyData(userAccessToken),
-    enabled: !!userAccessToken,
+  const { data: userSurveysResponse } = useQuery<BuyPaidRespondentResponse>({
+    queryKey: [...[APP_KEYS.USER_SURVEYS]],
+    queryFn: () => GetUserSurveyData(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
   const userSurveys: SurveyData[] = userSurveysResponse?.data || [];
+  // const totalSurveys = userSurveysResponse?.total || 0;
+  // const currentPage = userSurveysResponse?.page || 1;
+  // const pageSize = userSurveysResponse?.page_size || 6;
+
   // console.log({ userSurveysResponse, userSurveys });
   const hasActiveSurveys = userSurveys.length > 0;
 

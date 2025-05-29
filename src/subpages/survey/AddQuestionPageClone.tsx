@@ -538,6 +538,8 @@ const AddQuestionPageClone: FC<Props> = ({ previewSurvey }) => {
       };
 
       await createSurvey(processedSurvey).unwrap();
+      dispatch(resetQuestion());
+      dispatch(resetSurvey());
     } catch (e) {
       console.error("Survey creation error:", e);
     }
@@ -645,6 +647,7 @@ const AddQuestionPageClone: FC<Props> = ({ previewSurvey }) => {
     ) {
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
+      dispatch(resetQuestion());
       dispatch(resetSurvey());
     }
   }, [isSuccess, createdSurveyData?.data?._id, survey_id, dispatch]);

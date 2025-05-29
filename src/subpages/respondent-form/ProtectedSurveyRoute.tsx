@@ -17,18 +17,15 @@ const ProtectedSurveyRoute: React.FC<ProtectedSurveyRouteProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const user = useSelector((state: RootState) => state.user.user);
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const isPhoneVerified = (user as any)?.phoneVerified;
 
   const { data: isPaidRespondent, isLoading } = useQuery({
-    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
-    queryFn: () => fetchPaidRespondentStatus(userAccessToken),
-    enabled: !!userAccessToken,
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
+    queryFn: () => fetchPaidRespondentStatus(),
+    enabled: true,
   });
 
-  const isPaidRespondentStatus = isPaidRespondent?.data?.isPaidRespondent;
+  const isPaidRespondentStatus = isPaidRespondent?.isPaidRespondent;
 
   useEffect(() => {
     if (isLoading) return;

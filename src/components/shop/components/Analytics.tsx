@@ -25,8 +25,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Slider, { Settings } from "react-slick";
 import { motion } from "framer-motion";
 import BuyPollcoinsFlow from "./dialogs/BuyPollcoins";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 import {
@@ -63,10 +61,6 @@ export function Analytics() {
     useUserServicesBalance();
   const { restrictedBalance, unrestrictedBalance, totalBalance } = data || {};
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
 
   const analyticData = [
     {
@@ -141,17 +135,17 @@ export function Analytics() {
   ];
 
   const { data: surveys, isLoading: loadingSurveys } = useQuery({
-    queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS], userAccessToken],
-    queryFn: () => fetchTotalPurchasedRespondents(userAccessToken),
-    enabled: !!userAccessToken,
+    queryKey: [...[APP_KEYS.TOTAL_RESPONDENTS]],
+    queryFn: () => fetchTotalPurchasedRespondents(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
   const { data: surveyStats, isLoading: loadingSurveyStats } = useQuery({
-    queryKey: [...[APP_KEYS.SURVEY_STATS], userAccessToken],
-    queryFn: () => fetchPurchasedRespondentsStats(userAccessToken),
-    enabled: !!userAccessToken,
+    queryKey: [...[APP_KEYS.SURVEY_STATS]],
+    queryFn: () => fetchPurchasedRespondentsStats(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -395,7 +389,7 @@ export function Analytics() {
                     {loadingSurveyStats ? (
                       <Skeleton className="h-6 w-16" />
                     ) : (
-                      surveyStats?.data?.total_purchased ?? 0
+                      surveyStats?.total_purchased ?? 0
                     )}
                   </h4>
                 </div>
@@ -433,7 +427,7 @@ export function Analytics() {
                     {loadingSurveyStats ? (
                       <Skeleton className="h-6 w-16" />
                     ) : (
-                      surveyStats?.data?.remaining ?? 0
+                      surveyStats?.remaining ?? 0
                     )}
                   </p>
                 </div>
@@ -444,7 +438,7 @@ export function Analytics() {
                     {loadingSurveyStats ? (
                       <Skeleton className="h-6 w-16" />
                     ) : (
-                      surveyStats?.data?.completed_responses ?? 0
+                      surveyStats?.completed_responses ?? 0
                     )}
                   </p>
                 </div>
@@ -455,7 +449,7 @@ export function Analytics() {
             className={cn(
               "bg-[#FDFAFF] max-h-[150px] h-full overflow-y-auto w-full md:w-1/2 relative",
               {
-                "min-h-[150px]": !surveys?.data?.purchases?.purchases?.length,
+                "min-h-[150px]": !surveys?.purchases?.purchases?.length,
               }
             )}
           >
@@ -466,7 +460,7 @@ export function Analytics() {
 
             {loadingSurveys ? (
               <Skeleton className="w-full h-[100px]" />
-            ) : !surveys?.data?.purchases?.purchases?.length ? (
+            ) : !surveys?.purchases?.purchases?.length ? (
               <div className="text-center text-sm text-gray-500 py-2 flex items-center justify-center w-full border h-[100px]">
                 You haven&apos;t purchased any respondents yet.
               </div>
@@ -479,21 +473,19 @@ export function Analytics() {
                     : "max-h-[150px] overflow-hidden"
                 )}
               >
-                {surveys?.data?.purchases?.purchases.map(
-                  (purchase: Purchase) => (
-                    <div
-                      key={purchase?._id}
-                      className="flex items-center justify-between text-sec-text"
-                    >
-                      <p className="text-sm">{purchase?.surveyName}</p>
-                      <p className="text-sm">{purchase?.numberOfRespondents}</p>
-                    </div>
-                  )
-                )}
+                {surveys?.purchases?.purchases.map((purchase: Purchase) => (
+                  <div
+                    key={purchase?._id}
+                    className="flex items-center justify-between text-sec-text"
+                  >
+                    <p className="text-sm">{purchase?.surveyName}</p>
+                    <p className="text-sm">{purchase?.numberOfRespondents}</p>
+                  </div>
+                ))}
               </div>
             )}
 
-            {surveys?.data?.purchases?.length > 4 && (
+            {surveys?.purchases?.length > 4 && (
               <div className="text-center mt-2 absolute left-1/2 z-30 bottom-1.5 flex items-center justify-center">
                 <button
                   onClick={() => setShowAllSurveys((prev) => !prev)}
