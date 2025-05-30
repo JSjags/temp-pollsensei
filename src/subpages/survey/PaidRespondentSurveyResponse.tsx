@@ -79,9 +79,6 @@ const PaidRespondentSurveyResponse = () => {
   const params = useParams();
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const [loading, setLoading] = useState<boolean>(false);
 
   const [currentSection, setCurrentSection] = useState(0);
@@ -287,36 +284,38 @@ const PaidRespondentSurveyResponse = () => {
 
   const question = screenerSurvey;
 
+  // console.log({ screenerSurvey });
+
   useEffect(() => {
-    if (question?.data?.sections[currentSection]?.questions) {
-      setSelectedOptions(new Array(question.data.sections.length).fill(null));
-      setTextResponses(new Array(question.data.sections.length).fill(""));
+    if (question?.sections[currentSection]?.questions) {
+      setSelectedOptions(new Array(question.sections.length).fill(null));
+      setTextResponses(new Array(question.sections.length).fill(""));
     }
   }, [currentSection, question]);
 
-  const currentQuestions = question?.data?.sections[currentSection]?.questions;
-  const surveyType = question?.data?.survey_type ?? question?.data?.survey_type;
+  const currentQuestions = question?.sections[currentSection]?.questions;
+  const surveyType = question?.survey_type ?? question?.survey_type;
 
   const { data: screenerSuveyBySurveyId } = useQuery({
-    queryKey: [...[APP_KEYS.SCREENER_SURVEY_BY_SURVEY_ID], userAccessToken],
-    queryFn: () =>
-      fetchScreenerSurveyBySurveyId(userAccessToken, question.data._id),
-    enabled: !!userAccessToken && !!question,
+    queryKey: [...[APP_KEYS.SCREENER_SURVEY_BY_SURVEY_ID]],
+    queryFn: () => fetchScreenerSurveyBySurveyId(question._id),
+    enabled: !!question,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  const screenerSurveyID = screenerSuveyBySurveyId?.data?.[0]?._id || null;
+  const screenerSurveyID = screenerSuveyBySurveyId?.[0]?._id || null;
 
   const { data: respondent, error: respondentError } = useQuery({
-    queryKey: [...[APP_KEYS.START_SURVEY], userAccessToken],
-    queryFn: () =>
-      startPaidSurvey(userAccessToken, question.data._id, screenerSurveyID),
-    enabled: !!userAccessToken && !!screenerSurveyID,
+    queryKey: [...[APP_KEYS.START_SURVEY]],
+    queryFn: () => startPaidSurvey(question._id, screenerSurveyID),
+    enabled: !!screenerSurveyID,
   });
 
-  const respondentId = respondent?.data?.respondentId || null;
+  const respondentId = respondent?.respondentId || null;
   const canSubmit = !respondentError && !!respondentId;
+
+  console.log({ screenerSurveyID, respondentId });
 
   // useEffect(() => {
   //   if (!canSubmit) {
@@ -334,23 +333,15 @@ const PaidRespondentSurveyResponse = () => {
   // });
 
   const { data: screenerParticipants } = useQuery({
-    queryKey: [
-      APP_KEYS.RESPONDENT_DATA_BY_SECTION,
-      "personalInfo",
-      userAccessToken,
-    ],
-    queryFn: () => GetRespondentSectionData(userAccessToken, "personalInfo"),
-    enabled: !!userAccessToken,
+    queryKey: [APP_KEYS.RESPONDENT_DATA_BY_SECTION, "personalInfo"],
+    queryFn: () => GetRespondentSectionData("personalInfo"),
+    enabled: true,
   });
 
   const { data: screenerParticipantsGeo } = useQuery({
-    queryKey: [
-      APP_KEYS.RESPONDENT_DATA_BY_SECTION,
-      "geographicInfo",
-      userAccessToken,
-    ],
-    queryFn: () => GetRespondentSectionData(userAccessToken, "geographicInfo"),
-    enabled: !!userAccessToken,
+    queryKey: [APP_KEYS.RESPONDENT_DATA_BY_SECTION, "geographicInfo"],
+    queryFn: () => GetRespondentSectionData("geographicInfo"),
+    enabled: true,
   });
 
   // console.log({ screenerParticipants, screenerParticipantsGeo });
@@ -383,7 +374,7 @@ const PaidRespondentSurveyResponse = () => {
     });
 
     // Format answers for all sections
-    const allFormattedAnswers = question.data.sections.flatMap((section: any) =>
+    const allFormattedAnswers = question.sections.flatMap((section: any) =>
       section.questions.map((question: any) => {
         const answerData = answers[question.question];
         let answerValue;
@@ -414,7 +405,7 @@ const PaidRespondentSurveyResponse = () => {
       })
     );
 
-    const allSurveyFormattedAnswers = question.data.sections.flatMap(
+    const allSurveyFormattedAnswers = question.sections.flatMap(
       (section: any) =>
         section.questions.map((quest: any) => {
           const answerData = answers[quest.question];
@@ -507,17 +498,16 @@ const PaidRespondentSurveyResponse = () => {
     );
 
     const screenerSurveyResponsePayload = {
-      screenerId: question.data._id,
+      screenerId: question._id,
       responses: allFormattedAnswers,
     };
 
     const paidSurveyResponsePayload = {
-      survey_id: question.data._id,
+      survey_id: question._id,
       respondent_id: respondentId,
-      respondent_name: screenerParticipants?.data?.sectionData?.firstName,
-      respondent_country:
-        screenerParticipantsGeo?.data?.sectionData?.nationality,
-      respondent_email: screenerParticipants?.data?.sectionData?.email,
+      respondent_name: screenerParticipants?.sectionData?.firstName,
+      respondent_country: screenerParticipantsGeo?.sectionData?.nationality,
+      respondent_email: screenerParticipants?.sectionData?.email,
       answers: allSurveyFormattedAnswers,
     };
 
@@ -525,16 +515,15 @@ const PaidRespondentSurveyResponse = () => {
       setLoading(true);
       !surveyType
         ? await submitScreenerSurvey(
-            userAccessToken,
             screenerSurveyResponsePayload,
-            question.data.surveyIds[0]
+            question.surveyIds[0]
           )
-        : await submitPaidSurvey(userAccessToken, paidSurveyResponsePayload);
+        : await submitPaidSurvey(paidSurveyResponsePayload);
       queryClient.invalidateQueries({
-        queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], userAccessToken],
+        queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
       });
       dispatch(closeSurveyFormDialog());
-      await fetchApplicationSurveys(userAccessToken);
+      await fetchApplicationSurveys();
       toast.success("Your response was saved successfully");
       setLoading(false);
     } catch (error: any) {
@@ -552,7 +541,7 @@ const PaidRespondentSurveyResponse = () => {
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < question.data.sections.length - 1
+        return prevIndex < question.sections.length - 1
           ? prevIndex + 1
           : prevIndex;
       } else {
@@ -619,17 +608,17 @@ const PaidRespondentSurveyResponse = () => {
         exit="exit"
         className="space-y-4 py-6 bg-white rounded-lg shadow-sm"
         style={{
-          fontSize: `${question?.data?.question_text?.size}px`,
+          fontSize: `${question?.question_text?.size}px`,
         }}
       >
         <motion.div
           variants={slideIn}
           className={cn(
             "flex items-start gap-3 px-4 lg:px-10",
-            getFontClass(question?.data?.question_text?.name)
+            getFontClass(question?.question_text?.name)
           )}
           style={{
-            fontSize: `${question?.data?.question_text?.size}px`,
+            fontSize: `${question?.question_text?.size}px`,
           }}
         >
           <span className="bg-gradient-to-r font-medium text-lg rounded-full flex items-center justify-center">
@@ -654,7 +643,7 @@ const PaidRespondentSurveyResponse = () => {
           variants={fadeInUp}
           className="mt-4 px-4 lg:px-10 h-auto"
           style={{
-            fontSize: `${question?.data?.question_text?.size}px`,
+            fontSize: `${question?.question_text?.size}px`,
           }}
         >
           {(() => {
@@ -670,7 +659,7 @@ const PaidRespondentSurveyResponse = () => {
                         custom={idx}
                         className="flex items-center font-normal p-3 gap-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                         style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          fontSize: `${question?.question_text?.size}px`,
                         }}
                       >
                         <Checkbox
@@ -703,7 +692,7 @@ const PaidRespondentSurveyResponse = () => {
                           htmlFor={`${quest.question}-${option}`}
                           className="flex-1 cursor-pointer font-normal"
                           style={{
-                            fontSize: `${question?.data?.question_text?.size}px`,
+                            fontSize: `${question?.question_text?.size}px`,
                           }}
                         >
                           {option}
@@ -758,7 +747,7 @@ const PaidRespondentSurveyResponse = () => {
                           htmlFor={`${quest.question}-${option}`}
                           className="flex-1 cursor-pointer font-normal"
                           style={{
-                            fontSize: `${question?.data?.question_text?.size}px`,
+                            fontSize: `${question?.question_text?.size}px`,
                           }}
                         >
                           {option}
@@ -812,7 +801,7 @@ const PaidRespondentSurveyResponse = () => {
                             htmlFor={`${quest.question}-${idx}`}
                             className="text-sm text-center font-normal"
                             style={{
-                              fontSize: `${question?.data?.question_text?.size}px`,
+                              fontSize: `${question?.question_text?.size}px`,
                             }}
                           >
                             {option}
@@ -914,7 +903,7 @@ const PaidRespondentSurveyResponse = () => {
                         htmlFor={`${quest.question}-yes`}
                         className="font-normal"
                         style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          fontSize: `${question?.question_text?.size}px`,
                         }}
                       >
                         Yes
@@ -929,7 +918,7 @@ const PaidRespondentSurveyResponse = () => {
                         htmlFor={`${quest.question}-no`}
                         className="font-normal"
                         style={{
-                          fontSize: `${question?.data?.question_text?.size}px`,
+                          fontSize: `${question?.question_text?.size}px`,
                         }}
                       >
                         No
@@ -1027,7 +1016,7 @@ const PaidRespondentSurveyResponse = () => {
                             htmlFor={`${quest.question}-${idx}`}
                             className="font-normal"
                             style={{
-                              fontSize: `${question?.data?.question_text?.size}px`,
+                              fontSize: `${question?.question_text?.size}px`,
                             }}
                           >
                             {option}
@@ -1164,7 +1153,7 @@ const PaidRespondentSurveyResponse = () => {
                       })
                     }
                     style={{
-                      fontSize: `${question?.data?.question_text?.size}px`,
+                      fontSize: `${question?.question_text?.size}px`,
                     }}
                   />
                 );
@@ -1213,18 +1202,18 @@ const PaidRespondentSurveyResponse = () => {
   return (
     <div className={`flex flex-col gap-5 w-full`}>
       <div>
-        {question?.data && (
+        {question && (
           <div
-            className={`${question?.data?.theme} max-h-[80vh] overflow-y-auto flex justify-center px-5 lg:px-16 mx-auto gap-10 w-full`}
+            className={`${question?.theme} max-h-[80vh] overflow-y-auto flex justify-center px-5 lg:px-16 mx-auto gap-10 w-full`}
           >
             <form
               onSubmit={handleSubmitResponse}
               className={` flex flex-col overflow-y-auto custom-scrollbar w-full max-w-screen-lg`}
             >
-              {question?.data?.logo_url && (
+              {question?.logo_url && (
                 <div className="bg-gray-100 w-16 rounded my-5 text-white flex items-center flex-col ">
                   <Image
-                    src={question?.data?.logo_url}
+                    src={question?.logo_url}
                     alt=""
                     className="w-full object-cover rounded bg-no-repeat h-16"
                     width={"100"}
@@ -1232,10 +1221,10 @@ const PaidRespondentSurveyResponse = () => {
                   />
                 </div>
               )}
-              {question?.data?.header_url && (
+              {question?.header_url && (
                 <div className="bg-gray-100 rounded-lg w-full my-4 text-white h-24 flex items-center flex-col ">
                   <Image
-                    src={question?.data?.header_url}
+                    src={question?.header_url}
                     alt=""
                     className="w-full object-cover bg-no-repeat h-24 rounded-lg"
                     width={"100"}
@@ -1248,30 +1237,30 @@ const PaidRespondentSurveyResponse = () => {
                 <h2
                   className={cn(
                     "text-[1.5rem] font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
-                    getFontClass(question?.data?.header_text?.name)
+                    getFontClass(question?.header_text?.name)
                   )}
                   style={{
-                    fontSize: `${question?.data?.header_text?.size}px`,
+                    fontSize: `${question?.header_text?.size}px`,
                   }}
                 >
-                  {question?.data?.topic || question?.data?.title}
+                  {question?.topic || question?.title}
                 </h2>
                 <p
                   className={cn(
                     "text-gray-600 leading-relaxed",
-                    getFontClass(question?.data?.body_text?.name)
+                    getFontClass(question?.body_text?.name)
                   )}
                   style={{
-                    fontSize: `${question?.data?.body_text?.size}px`,
+                    fontSize: `${question?.body_text?.size}px`,
                   }}
                 >
-                  {question?.data?.description}
+                  {question?.description}
                 </p>
               </div>
 
               <AnimatePresence mode="wait">
                 <motion.div className="flex flex-col gap-4 h-auto">
-                  {question?.data?.sections[currentSection]?.questions?.map(
+                  {question?.sections[currentSection]?.questions?.map(
                     renderQuestion
                   )}
                 </motion.div>
@@ -1279,11 +1268,11 @@ const PaidRespondentSurveyResponse = () => {
 
               <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
                 <div className="flex gap-2 items-center"></div>
-                {question?.data?.sections?.length > 1 && (
+                {question?.sections?.length > 1 && (
                   <div className="flex w-full md:w-auto md:justify-end items-center">
                     <PaginationBtn
                       currentSection={currentSection}
-                      totalSections={question?.data?.sections?.length}
+                      totalSections={question?.sections?.length}
                       onNavigate={navigatePage}
                     />
                   </div>

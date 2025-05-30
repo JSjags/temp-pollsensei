@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FaArrowRightLong } from "react-icons/fa6";
 import ActivityCard from "@/components/earn/ActivityCard";
@@ -36,31 +36,28 @@ import { formatLargeNumber } from "@/utils";
 const Earn = () => {
   const router = useRouter();
   const [activitiesCompleted, setActivitiesCompleted] = useState<number>(0);
-  const accessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
 
   const {
     data: balance,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], accessToken],
-    queryFn: () => fetchUnrestrictedBalance(accessToken),
-    enabled: !!accessToken,
+    queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
+    queryFn: () => fetchUnrestrictedBalance(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
   const { data: streak } = useQuery({
-    queryKey: [...[APP_KEYS.LOGIN_STREAK], accessToken],
-    queryFn: () => fetchLoginStreak(accessToken),
-    enabled: !!accessToken,
+    queryKey: [...[APP_KEYS.LOGIN_STREAK]],
+    queryFn: () => fetchLoginStreak(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  const currentStreak = streak?.data?.currentStreak;
+  const currentStreak = streak?.currentStreak;
 
   const activities = [
     {
@@ -131,7 +128,7 @@ const Earn = () => {
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  formatLargeNumber(balance?.data?.unrestrictedBalance || 0)
+                  formatLargeNumber(balance?.unrestrictedBalance || 0)
                 )}
               </h1>
             </div>
@@ -156,7 +153,7 @@ const Earn = () => {
                 size="sm"
                 className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] flex items-center gap-2 text-white hover:scale-105 transition-all rounded-full text-sm lg:text-base"
                 type="button"
-                disabled={balance?.data?.unrestrictedBalance === 0}
+                disabled={balance?.unrestrictedBalance === 0}
               >
                 Redeem Coins
                 <FaArrowRightLong className="text-base text-white" />

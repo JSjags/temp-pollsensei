@@ -37,9 +37,6 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
   const [submitImage, setSubmitImage] = useState<boolean>(false);
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
 
   // Request camera access when "proceed" is true
   // useEffect(() => {
@@ -143,7 +140,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
             // setProceed(true);
             dispatch(setBecomePaidRespondentSurveyCompleted(true));
             queryClient.invalidateQueries({
-              queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
+              queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
             });
             setSubmitImage(true);
           },

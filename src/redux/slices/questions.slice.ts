@@ -24,14 +24,11 @@ const initialState: QuestionState = {
 
 export const createScreenerSurvey = createAsyncThunk(
   "questions/createScreenerSurvey",
-  async (
-    { userToken, payload }: { userToken: any; payload: any },
-    { dispatch }
-  ) => {
+  async ({ payload }: { payload: any }, { dispatch }) => {
     try {
-      const response = await CreateScreenerSurvey(userToken, payload);
+      const response = await CreateScreenerSurvey(payload);
       dispatch(setSurveyCreated(true));
-      return response.data;
+      return response;
     } catch (e) {
       console.error("Failed to save and continue:", e);
       dispatch(setSurveyCreated(false));

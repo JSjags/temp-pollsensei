@@ -43,9 +43,6 @@ const PhoneVerification = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(300);
   const dispatch = useDispatch();
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const router = useRouter();
 
   const { data: nationalities } = useQuery({
@@ -89,7 +86,7 @@ const PhoneVerification = () => {
     setTimeLeft(300);
     setOTP("");
     try {
-      const response = await fetchOTP(userAccessToken, phoneNumber);
+      const response = await fetchOTP(phoneNumber);
       setOTP(response);
     } catch (error: any) {
       console.error(error);
@@ -105,7 +102,7 @@ const PhoneVerification = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await confirmOTP(userAccessToken, phoneNumber, inputOtp);
+      const response = await confirmOTP(phoneNumber, inputOtp);
       setConfirmOTP(response.data.isPhoneVerified);
       if (response) {
         dispatch(setIsPhoneVerified(true));

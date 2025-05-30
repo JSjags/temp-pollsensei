@@ -44,9 +44,6 @@ const twinkleStyles = `
 const DashboardPage = () => {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user.user);
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const { data: item, isLoading: isItemLoading } =
     useFormResponseRateQuery("year");
   const { data: collectedDataCount, isLoading: isCollectedDataLoading } =
@@ -57,13 +54,13 @@ const DashboardPage = () => {
     useSurveyLeaderboardQuery("year");
   const { data: surveys, isLoading: isSurveysLoading } = useSurveyQuery("year");
 
-  const { data: isPaidRespondent } = useQuery({
-    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
-    queryFn: () => fetchPaidRespondentStatus(userAccessToken),
-    enabled: !!userAccessToken,
+  const { data: isPaidRespondent, isSuccess } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
+    queryFn: () => fetchPaidRespondentStatus(),
+    enabled: true,
   });
 
-  const isPaidRespondentStatus = isPaidRespondent?.data?.isPaidRespondent;
+  const isPaidRespondentStatus = isPaidRespondent?.isPaidRespondent;
 
   function DashboardSkeleton() {
     return (
@@ -189,7 +186,7 @@ const DashboardPage = () => {
               </CardContent>
             </Card>
 
-            {!isPaidRespondentStatus && (
+            {isSuccess && !isPaidRespondentStatus && (
               <>
                 <Separator
                   orientation="vertical"

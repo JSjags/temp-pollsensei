@@ -1,8 +1,6 @@
 "use client";
-import axios from "axios";
-import { BuyPaidRespondentResponse } from "@/types/survey";
-
-const pollsenseiAPIEndpoint = `${process.env.NEXT_PUBLIC_APP_BASE_URL}`;
+import axiosInstance from "@/lib/axios-instance";
+import { BuyPaidRespondentResponse, SurveyData } from "@/types/survey";
 
 /************** BECOME PAID RESPONDENT ***********/
 
@@ -25,355 +23,171 @@ export const getNationality = async () => {
   return data;
 };
 
-export const fetchOTP = async (
-  userAccessToken: string | null | undefined,
-  phone: string
-) => {
-  const headers = new Headers({
-    Authorization: `Bearer ${userAccessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const body = JSON.stringify({
-    phone_number: phone,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers: headers,
-    body,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/auth/send-phone-verification`,
-    requestOptions
-  );
-  const data = await response.json();
-  return data;
+export const fetchOTP = async (phone: string) => {
+  try {
+    const response = await axiosInstance.post("/auth/send-phone-verification", {
+      phone_number: phone,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching OTP:", error);
+    throw error;
+  }
 };
 
-export const confirmOTP = async (
-  userAccessToken: string | null | undefined,
-  phone: string,
-  otp: string
-) => {
-  const headers = new Headers({
-    Authorization: `Bearer ${userAccessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const body = JSON.stringify({
-    phone_number: phone,
-    otp,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers: headers,
-    body,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/auth/verify-phone`,
-    requestOptions
-  );
-  const data = await response.json();
-  return data;
+export const confirmOTP = async (phone: string, otp: string) => {
+  try {
+    const response = await axiosInstance.post("/auth/verify-phone", {
+      phone_number: phone,
+      otp,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error confirming OTP:", error);
+    throw error;
+  }
 };
 
 /************** BUY PAID RESPONDENT ***********/
-export const GetUserSurveyData = async (
-  userAccessToken: string | null | undefined
-): Promise<BuyPaidRespondentResponse> => {
+export const GetUserSurveyData =
+  async (): Promise<BuyPaidRespondentResponse> => {
+    try {
+      const response = await axiosInstance.get("/survey", {
+        params: {
+          page: 1,
+          page_size: 6,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user survey data:", error);
+      throw error;
+    }
+  };
+
+export const GetUserSurveysArray = async (): Promise<SurveyData[]> => {
   try {
-    const url = `${pollsenseiAPIEndpoint}/survey`;
-
-    const response = await axios.get(url, {
-      params: {
-        page: 1,
-        page_size: 6,
-      },
-      headers: {
-        Authorization: `Bearer ${userAccessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    // consoel.log({response})
-    return response.data.data;
+    const response = await GetUserSurveyData();
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching user surveys array:", error);
     throw error;
   }
 };
 
 export const PurchasePaidRespondent = async (
-  userAccessToken: string | null | undefined,
   surveyId: string,
   selectedRespondentsNumber: number
 ) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify({
-    surveyId,
-    numberOfRespondents: selectedRespondentsNumber,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers,
-    body,
-  };
-
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/purchases/respondents/standard`,
-      requestOptions
+    const response = await axiosInstance.post(
+      "/purchases/respondents/standard",
+      {
+        surveyId,
+        numberOfRespondents: selectedRespondentsNumber,
+      }
     );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
-    }
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error purchasing paid respondent:", error);
     throw error;
   }
 };
 
 export const PurchaseQualifiedPaidRespondent = async (
-  userAccessToken: string | null | undefined,
   surveyId: string,
   selectedRespondentsNumber: number,
   qualifyingTemplateId: string | null
 ) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify({
-    surveyId,
-    numberOfRespondents: selectedRespondentsNumber,
-    qualifyingTemplateId,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers,
-    body,
-  };
-
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/purchases/respondents/qualifying`,
-      requestOptions
+    const response = await axiosInstance.post(
+      "/purchases/respondents/qualifying",
+      {
+        surveyId,
+        numberOfRespondents: selectedRespondentsNumber,
+        qualifyingTemplateId,
+      }
     );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
-    }
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error purchasing qualified paid respondent:", error);
     throw error;
   }
 };
 
 export const ScreenerSurveyPurchase = async (
-  userAccessToken: string | null | undefined,
   surveyId: string,
   selectedRespondentsNumber: number,
   screenerId: string | null
 ) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify({
-    screenerId,
-    surveyId,
-    numberOfRespondents: selectedRespondentsNumber,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers,
-    body,
-  };
-
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/screener-survey/purchase`,
-      requestOptions
-    );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
-    }
-    const data = await response.json();
-    return data;
+    const response = await axiosInstance.post("/screener-survey/purchase", {
+      screenerId,
+      surveyId,
+      numberOfRespondents: selectedRespondentsNumber,
+    });
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error purchasing screener survey:", error);
     throw error;
   }
 };
 
-export const FilterPaidRespondent = async (
-  userAccessToken: string | null | undefined,
-  payload: any
-) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify(payload);
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers,
-    body,
-  };
-
+export const FilterPaidRespondent = async (payload: any) => {
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/purchases/respondents/criteria`,
-      requestOptions
+    const response = await axiosInstance.post(
+      "/purchases/respondents/criteria",
+      payload
     );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
-    }
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error filtering paid respondent:", error);
     throw error;
   }
 };
 
-export const GetRespondentData = async (
-  userAccessToken: string | null | undefined,
-  activeTab: string
-) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers,
-  };
-
+export const GetRespondentData = async (activeTab: string) => {
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/paid-respondent/section/${activeTab}`,
-      requestOptions
+    const response = await axiosInstance.get(
+      `/paid-respondent/section/${activeTab}`
     );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
-    }
-    const data = await response.json();
-    // console.log({ data });
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching respondent data:", error);
     throw error;
   }
 };
 
-export const GetRespondentSectionData = async (
-  userAccessToken: string | null | undefined,
-  section: string
-) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers,
-  };
-
+export const GetRespondentSectionData = async (section: string) => {
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/paid-respondent/section/${section}`,
-      requestOptions
+    const response = await axiosInstance.get(
+      `/paid-respondent/section/${section}`
     );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
-    }
-    const data = await response.json();
-    // console.log({ data });
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching respondent section data:", error);
     throw error;
   }
 };
 
-export const fetchPaidRespondentStatus = async (
-  userAccessToken: string | null | undefined
-) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers,
-  };
-
+export const fetchPaidRespondentStatus = async () => {
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/paid-respondent/check-status`,
-      requestOptions
-    );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message);
-    }
-    const data = await response.json();
-    // console.log({ data });
-    return data;
+    const response = await axiosInstance.get("/paid-respondent/check-status");
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching paid respondent status:", error);
     throw error;
   }
 };
 
-export const CreateScreenerSurvey = async (
-  userAccessToken: string | undefined,
-  payload: any
-) => {
+export const CreateScreenerSurvey = async (payload: any) => {
   try {
-    const response = await axios.post(
-      `${pollsenseiAPIEndpoint}/screener-survey`,
-      payload,
-      {
-        params: {
-          page: 1,
-          page_size: 10,
-        },
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userAccessToken}`,
-        },
-      }
-    );
-
+    const response = await axiosInstance.post("/screener-survey", payload, {
+      params: {
+        page: 1,
+        page_size: 10,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error creating screener survey:", error);
@@ -381,495 +195,208 @@ export const CreateScreenerSurvey = async (
   }
 };
 
-export const fetchPurchasedRespondentsStats = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/paid-respondent/stats`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Total Surveys api response - ", data);
-  return data;
-};
-
-/************** EARN ***********/
-export const fetchDailyReward = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/daily-login`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Daily reward api response - ", data);
-  return data;
-};
-
-export const fetchLoginStreak = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/daily-login/streak`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Daily reward api response - ", data);
-  return data;
-};
-
-export const fetchUnrestrictedBalance = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/wallet/user-balance`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Usere balance api response - ", data);
-  return data;
-};
-
-export const fetchAvailableSurveys = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/survey-apply/recommendations`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Available Surveys api response - ", data);
-  return data;
-};
-
-export const fetchApplySurveys = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/screener-survey/screened-surveys`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Apply Surveys api response - ", data);
-  return data;
-};
-
-export const fetchApplicationSurveys = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/survey-apply/applications`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Apply Surveys api response - ", data);
-  return data;
-};
-
-export const fetchScreenerSurveyById = async (
-  accessToken: string | null | undefined,
-  screenerId: string | null
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/screener-survey/${screenerId}`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Available Surveys api response - ", data);
-  return data;
-};
-
-export const fetchScreenerSurveyBySurveyId = async (
-  accessToken: string | null | undefined,
-  surveyId: string | null
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
-  }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/screener-survey/survey/${surveyId}`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Available Surveys api response - ", data);
-  return data;
-};
-
-export const submitScreenerSurvey = async (
-  userAccessToken: string | null | undefined,
-  payload: any,
-  surveyId: string
-) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify(payload);
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers,
-    body,
-  };
-
+export const fetchPurchasedRespondentsStats = async () => {
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/survey-apply/submit-screener/${surveyId}`,
-      requestOptions
-    );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
-    }
-    const data = await response.json();
-    return data;
+    const response = await axiosInstance.get("/paid-respondent/stats");
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching purchased respondents stats:", error);
     throw error;
   }
 };
 
-export const submitPaidSurvey = async (
-  userAccessToken: string | null | undefined,
-  payload: any
-) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify(payload);
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers,
-    body,
-  };
-
+/************** EARN ***********/
+export const fetchDailyReward = async () => {
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/ps/survey/respond`,
-      requestOptions
-    );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
-    }
-    const data = await response.json();
-    return data;
+    const response = await axiosInstance.get("/daily-login");
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching daily reward:", error);
+    throw error;
+  }
+};
+
+export const fetchLoginStreak = async () => {
+  try {
+    const response = await axiosInstance.get("/daily-login/streak");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching login streak:", error);
+    throw error;
+  }
+};
+
+export const fetchUnrestrictedBalance = async () => {
+  try {
+    const response = await axiosInstance.get("/wallet/user-balance");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching unrestricted balance:", error);
+    throw error;
+  }
+};
+
+export const fetchAvailableSurveys = async () => {
+  try {
+    const response = await axiosInstance.get("/survey-apply/recommendations");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching available surveys:", error);
+    throw error;
+  }
+};
+
+export const fetchApplySurveys = async () => {
+  try {
+    const response = await axiosInstance.get(
+      "/screener-survey/screened-surveys"
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching apply surveys:", error);
+    throw error;
+  }
+};
+
+export const fetchApplicationSurveys = async () => {
+  try {
+    const response = await axiosInstance.get("/survey-apply/applications");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching application surveys:", error);
+    throw error;
+  }
+};
+
+export const fetchScreenerSurveyById = async (screenerId: string | null) => {
+  try {
+    const response = await axiosInstance.get(`/screener-survey/${screenerId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching screener survey by ID:", error);
+    throw error;
+  }
+};
+
+export const fetchScreenerSurveyBySurveyId = async (
+  surveyId: string | null
+) => {
+  try {
+    const response = await axiosInstance.get(
+      `/screener-survey/survey/${surveyId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching screener survey by survey ID:", error);
+    throw error;
+  }
+};
+
+export const submitScreenerSurvey = async (payload: any, surveyId: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `/survey-apply/submit-screener/${surveyId}`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting screener survey:", error);
+    throw error;
+  }
+};
+
+export const submitPaidSurvey = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/ps/survey/respond", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting paid survey:", error);
     throw error;
   }
 };
 
 export const startPaidSurvey = async (
-  userAccessToken: string | null | undefined,
   surveyId: string | null,
   screenerId: string | null
 ) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify({
-    screenerId: screenerId,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "POST",
-    headers,
-    body,
-  };
-
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/survey-apply/start/${surveyId}`,
-      requestOptions
+    const response = await axiosInstance.post(
+      `/survey-apply/start/${surveyId}`,
+      {
+        screenerId: screenerId,
+      }
     );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
-    }
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error starting paid survey:", error);
     throw error;
   }
 };
 
-export const fetchSurveyById = async (
-  accessToken: string | null | undefined,
-  surveyId: string | null
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
+export const fetchSurveyById = async (surveyId: string | null) => {
+  try {
+    const response = await axiosInstance.get(`/survey/public/${surveyId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching survey by ID:", error);
+    throw error;
   }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/survey/public/${surveyId}`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Apply Surveys api response - ", data);
-  return data;
 };
 
 /************** SHOP ***********/
-
-export const fetchTotalPurchasedRespondents = async (
-  accessToken: string | null | undefined
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
+export const fetchTotalPurchasedRespondents = async () => {
+  try {
+    const response = await axiosInstance.get("/purchases/respondents/history");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching total purchased respondents:", error);
+    throw error;
   }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/purchases/respondents/history`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Total Surveys api response - ", data);
-  return data;
 };
 
 /************** SURVEY BOARD ***********/
-
 export const fetchScreenerParticipants = async (
-  accessToken: string | null | undefined,
   surveyId: string | null,
   screenerId: string | null
 ) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
+  try {
+    const response = await axiosInstance.get(
+      `/screener-survey/participant-review/${surveyId}/${screenerId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching screener participants:", error);
+    throw error;
   }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/screener-survey/participant-review/${surveyId}/${screenerId}`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Participants api response - ", data);
-  return data;
 };
 
-export const fetchParticipantById = async (
-  accessToken: string | null | undefined,
-  participantId: string | null
-) => {
-  if (!accessToken) {
-    throw new Error("No access token available");
+export const fetchParticipantById = async (participantId: string | null) => {
+  try {
+    const response = await axiosInstance.get(
+      `/paid-respondent/${participantId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching participant by ID:", error);
+    throw error;
   }
-
-  const headers = new Headers({
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  });
-
-  const requestOptions: RequestInit = {
-    method: "GET",
-    headers: headers,
-  };
-
-  const response = await fetch(
-    `${pollsenseiAPIEndpoint}/paid-respondent/${participantId}`,
-    requestOptions
-  );
-  const data = await response.json();
-  // console.log("Participants api response - ", data);
-  return data;
 };
 
 export const submitReviewedParticipant = async (
-  userAccessToken: string | null | undefined,
   participantID: any,
   status: string
 ) => {
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${userAccessToken}`,
-  });
-
-  const body = JSON.stringify({
-    applicationIds: participantID,
-    status,
-  });
-
-  const requestOptions: RequestInit = {
-    method: "PATCH",
-    headers,
-    body,
-  };
-
   try {
-    const response = await fetch(
-      `${pollsenseiAPIEndpoint}/screener-survey/applications/bulk-update`,
-      requestOptions
+    const response = await axiosInstance.patch(
+      "/screener-survey/applications/bulk-update",
+      {
+        applicationIds: participantID,
+        status,
+      }
     );
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
-    }
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error submitting reviewed participant:", error);
     throw error;
   }
 };

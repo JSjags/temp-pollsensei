@@ -25,31 +25,28 @@ const SurveyTabs = () => {
     (state: RootState) => state.earnDialogSlice
   );
 
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const [activeTab, setActiveTab] = useState<string>("available");
 
   const { data: availableSurveys, isLoading: loadingAvailable } = useQuery({
-    queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS], userAccessToken],
-    queryFn: () => fetchAvailableSurveys(userAccessToken),
-    enabled: !!userAccessToken && isSurveyTabsOpen,
+    queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS]],
+    queryFn: () => fetchAvailableSurveys(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
   const { data: applySurveys, isLoading: loadingApply } = useQuery({
-    queryKey: [...[APP_KEYS.APPLY_SURVEYS], userAccessToken],
-    queryFn: () => fetchApplySurveys(userAccessToken),
-    enabled: !!userAccessToken && isSurveyTabsOpen,
+    queryKey: [...[APP_KEYS.APPLY_SURVEYS]],
+    queryFn: () => fetchApplySurveys(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
   const { data: applicationSurveys, isLoading: loadingApplication } = useQuery({
-    queryKey: [...[APP_KEYS.APPLICATION_SURVEYS], userAccessToken],
-    queryFn: () => fetchApplicationSurveys(userAccessToken),
-    enabled: !!userAccessToken && isSurveyTabsOpen,
+    queryKey: [...[APP_KEYS.APPLICATION_SURVEYS]],
+    queryFn: () => fetchApplicationSurveys(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -61,7 +58,7 @@ const SurveyTabs = () => {
       value: "available",
       component: (
         <Available
-          availableSurveys={availableSurveys?.data}
+          availableSurveys={availableSurveys}
           isLoading={loadingAvailable}
           activeTab={activeTab}
         />
@@ -73,7 +70,7 @@ const SurveyTabs = () => {
       value: "apply",
       component: (
         <Apply
-          applySurveys={applySurveys?.data}
+          applySurveys={applySurveys}
           isLoading={loadingApply}
           activeTab={activeTab}
         />
@@ -85,7 +82,7 @@ const SurveyTabs = () => {
       value: "applications",
       component: (
         <Applications
-          applicationSurveys={applicationSurveys?.data}
+          applicationSurveys={applicationSurveys}
           isLoading={loadingApplication}
           activeTab={activeTab}
         />
