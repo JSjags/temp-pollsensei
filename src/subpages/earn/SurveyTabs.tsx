@@ -30,7 +30,7 @@ const SurveyTabs = () => {
   const { data: availableSurveys, isLoading: loadingAvailable } = useQuery({
     queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS]],
     queryFn: () => fetchAvailableSurveys(),
-    enabled: !!isSurveyTabsOpen,
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -38,7 +38,7 @@ const SurveyTabs = () => {
   const { data: applySurveys, isLoading: loadingApply } = useQuery({
     queryKey: [...[APP_KEYS.APPLY_SURVEYS]],
     queryFn: () => fetchApplySurveys(),
-    enabled: !!isSurveyTabsOpen,
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -46,7 +46,7 @@ const SurveyTabs = () => {
   const { data: applicationSurveys, isLoading: loadingApplication } = useQuery({
     queryKey: [...[APP_KEYS.APPLICATION_SURVEYS]],
     queryFn: () => fetchApplicationSurveys(),
-    enabled: !!isSurveyTabsOpen,
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

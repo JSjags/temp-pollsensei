@@ -304,7 +304,7 @@ const PaidRespondentSurveyResponse = () => {
     refetchOnMount: false,
   });
 
-  const screenerSurveyID = screenerSuveyBySurveyId?.data?.[0]?._id || null;
+  const screenerSurveyID = screenerSuveyBySurveyId?.[0]?._id || null;
 
   const { data: respondent, error: respondentError } = useQuery({
     queryKey: [...[APP_KEYS.START_SURVEY]],
@@ -312,8 +312,10 @@ const PaidRespondentSurveyResponse = () => {
     enabled: !!screenerSurveyID,
   });
 
-  const respondentId = respondent?.data?.respondentId || null;
+  const respondentId = respondent?.respondentId || null;
   const canSubmit = !respondentError && !!respondentId;
+
+  console.log({ screenerSurveyID, respondentId });
 
   // useEffect(() => {
   //   if (!canSubmit) {

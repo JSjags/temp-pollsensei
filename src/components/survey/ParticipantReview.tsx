@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import ScreenerSurveyResponse from "@/components/survey/ScreenerSurveyResponse";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ParticipantReviewProps {
   participantID: string;
@@ -38,6 +39,7 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
   response,
   getStatus,
 }) => {
+  const queryClient = useQueryClient();
   const [reviewScrenerResponse, setReviewScrenerResponse] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -59,6 +61,9 @@ const ParticipantReview: FC<ParticipantReviewProps> = ({
       if (success) {
         await refetchParticipants();
         setIsLoading(false);
+        queryClient.invalidateQueries({
+          queryKey: [...[APP_KEYS.APPLICATION_SURVEYS]],
+        });
       }
     } catch (error) {
       console.error(error);

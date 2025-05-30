@@ -36,6 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
   setIsReviewDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -43,6 +44,7 @@ interface Props {
 }
 
 const ReviewDialog: FC<Props> = ({ setIsReviewDialogOpen, surveyId }) => {
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isParticipantReview, setIsParticipantReview] =
     useState<boolean>(false);
@@ -102,6 +104,9 @@ const ReviewDialog: FC<Props> = ({ setIsReviewDialogOpen, surveyId }) => {
       resetSelected();
       setResponse(response?.success);
       setIsLoading(false);
+      queryClient.invalidateQueries({
+        queryKey: [...[APP_KEYS.APPLICATION_SURVEYS]],
+      });
       return response?.success;
     } catch (error) {
       console.error(error);
