@@ -8,7 +8,7 @@ import {
 import customBaseQuery from "../builder/query";
 // import { updateUser } from "../../redux/slices/user.slice";
 
-const apiSlice = createApi({
+export const apiSlice = createApi({
   reducerPath: "api" as const,
   baseQuery: customBaseQuery as BaseQueryFn<
     string | FetchArgs,

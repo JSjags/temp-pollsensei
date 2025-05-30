@@ -20,12 +20,12 @@ const PageControl: React.FC<PaginationProps> = ({
   // currentPage position, and isLoading was only used in the className and click handler.
   // To properly disable the buttons when loading, we need to include isLoading in the disabled prop condition.
   return (
-    <div className="flex justify-between items-center">
-      <div className="flex items-center gap-4">
+    <div className="w-full flex justify-center">
+      <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4">
         <motion.button
           whileHover={!isLoading ? { scale: 1.05 } : {}}
           whileTap={!isLoading ? { scale: 0.95 } : {}}
-          className={`flex items-center gap-1 px-4 py-2 rounded-lg transition-all duration-300 
+          className={`flex items-center gap-1 px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 text-sm sm:text-base
             ${
               currentPage === 1 || isLoading
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -34,11 +34,11 @@ const PageControl: React.FC<PaginationProps> = ({
           onClick={() => !isLoading && onNavigate("prev")}
           disabled={isLoading || currentPage === 1}
         >
-          <MdKeyboardArrowLeft size={24} />
-          <span className="font-medium">Previous</span>
+          <MdKeyboardArrowLeft size={20} />
+          <span className="font-medium hidden sm:inline">Previous</span>
         </motion.button>
 
-        <div className="flex items-center bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex items-center justify-center bg-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg shadow-sm border border-gray-200 text-sm sm:text-base">
           <motion.span
             key={currentPage}
             initial={{ y: -20, opacity: 0 }}
@@ -54,7 +54,7 @@ const PageControl: React.FC<PaginationProps> = ({
         <motion.button
           whileHover={!isLoading ? { scale: 1.05 } : {}}
           whileTap={!isLoading ? { scale: 0.95 } : {}}
-          className={`flex items-center gap-1 px-4 py-2 rounded-lg transition-all duration-300
+          className={`flex items-center gap-1 px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 text-sm sm:text-base
             ${
               currentPage === totalPages || isLoading
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -63,8 +63,8 @@ const PageControl: React.FC<PaginationProps> = ({
           onClick={() => !isLoading && onNavigate("next")}
           disabled={isLoading || currentPage === totalPages}
         >
-          <span className="font-medium">Next</span>
-          <MdKeyboardArrowRight size={24} />
+          <span className="font-medium hidden sm:inline">Next</span>
+          <MdKeyboardArrowRight size={20} />
         </motion.button>
       </div>
     </div>

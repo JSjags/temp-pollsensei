@@ -47,7 +47,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, Pencil, Ban, Trash2, MoreVertical } from "lucide-react";
+import {
+  Eye,
+  Pencil,
+  Ban,
+  Trash2,
+  MoreVertical,
+  CheckCircle,
+} from "lucide-react";
 import { PlayCircle, FileText, FileX } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -473,13 +480,23 @@ const GenericArticlePage = (props: Props) => {
                         <Pencil className="mr-2 h-4 w-4" />
                         <span>Edit</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleUnpublish(card._id)}
-                        className="cursor-pointer"
-                      >
-                        <Ban className="mr-2 h-4 w-4" />
-                        <span>Unpublish</span>
-                      </DropdownMenuItem>
+                      {card.is_published ? (
+                        <DropdownMenuItem
+                          onClick={() => handleUnpublish(card._id)}
+                          className="cursor-pointer"
+                        >
+                          <Ban className="mr-2 h-4 w-4" />
+                          <span>Unpublish</span>
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() => handlePublish(card._id)}
+                          className="cursor-pointer"
+                        >
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          <span>Publish</span>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem
                         onClick={() => handleDelete(card._id)}
                         className="cursor-pointer text-red-600"
@@ -490,10 +507,10 @@ const GenericArticlePage = (props: Props) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <h3 className="text-lg font-semibold mb-2 line-clamp-2">
+                <h3 className="text-lg font-semibold mb-2 line-clamp-1">
                   {card.title}
                 </h3>
-                <p className="text-gray-600 text-sm mb-auto line-clamp-3">
+                <p className="text-gray-600 text-sm mb-auto line-clamp-2">
                   {card.description}
                 </p>
                 <div className="mt-4 pt-2 flex items-center text-xs text-gray-500 border-t">
