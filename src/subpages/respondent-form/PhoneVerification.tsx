@@ -90,9 +90,7 @@ const PhoneVerification = () => {
       setOTP(response);
     } catch (error: any) {
       console.error(error);
-      toast.error(
-        error?.data?.message ?? "Wrong phone number, please try again."
-      );
+      toast.error(error?.message ?? "Wrong phone number, please try again.");
     }
   };
 
@@ -103,14 +101,14 @@ const PhoneVerification = () => {
     setIsLoading(true);
     try {
       const response = await confirmOTP(phoneNumber, inputOtp);
-      setConfirmOTP(response.data.isPhoneVerified);
+      setConfirmOTP(response.isPhoneVerified);
       if (response) {
         dispatch(setIsPhoneVerified(true));
         router.push("/respondent-form");
       }
     } catch (error: any) {
       console.error(error);
-      toast.error(error?.data?.message ?? "Wrong OTP, please try again.");
+      toast.error(error?.message ?? "Wrong OTP, please try again.");
     } finally {
       setIsLoading(false);
     }
