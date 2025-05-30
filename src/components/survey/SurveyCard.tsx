@@ -409,7 +409,7 @@ const WhatsAppShareAndCopy: React.FC<{
 }> = ({ _id, whatsappUrl }) => {
   const { data: share, isLoading } = useShareSurveyQuery(_id);
   const [copied, setCopied] = useState(false);
-  const shareLink = share?.data?.link || "";
+  const shareLink = whatsappUrl;
 
   useEffect(() => {
     if (copied) {
@@ -434,7 +434,7 @@ const WhatsAppShareAndCopy: React.FC<{
             Share on WhatsApp
           </span>
           <CopyToClipboard
-            text={shareLink}
+            text={shareLink || ""}
             onCopy={() => {
               toast.success("Whatsapp link copied to clipboard");
               setCopied(true);
