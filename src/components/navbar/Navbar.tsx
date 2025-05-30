@@ -331,7 +331,7 @@ const Navbar = () => {
               </div> */}
             </div>
           </div>
-          <div className="lg:hidden flex items-center gap-2 cursor-pointer">
+          <div className="lg:hidden ml-2 flex items-center gap-2 cursor-pointer">
             <Link href="/dashboard" className="w-full">
               <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
             </Link>

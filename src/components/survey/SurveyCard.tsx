@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,12 @@ import {
   MoreVertical,
   PlayCircle,
   Cog,
+  Check,
+  Loader2,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
 
 import { Switch } from "../ui/switch";
 import {
@@ -45,7 +50,10 @@ import {
   useDuplicateSurveyMutation,
   useEditSurveyMutation,
   useFetchSurveysQuery,
+  useShareSurveyQuery,
 } from "@/services/survey.service";
+import { Button } from "../ui/button";
+import { Spinner } from "../loaders/page-loaders/AnalysisPageLoader";
 
 interface SurveyCardProps {
   topic: string;
@@ -87,6 +95,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   const [editSurvey, { isLoading: isEditing }] = useEditSurveyMutation();
   const [duplicateSurvey, { isLoading: isDuplicating }] =
     useDuplicateSurveyMutation();
+  const { data: shareData } = useShareSurveyQuery(_id);
 
   const handleCloseAll = useCallback(() => {
     document.documentElement.style.overflow = "";
@@ -211,7 +220,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
 
   return (
     <>
-      <div className="bg-white relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px] transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-purple-400">
+      <div className="bg-white relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[720px] h-auto sm:h-[314px] transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-purple-400">
         <div>
           <div className="flex justify-between items-center mb-1 gap-2">
             <h3 className="text-[16px] sm:text-[20px] text-[#333333] truncate">
@@ -305,8 +314,8 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         </div>
 
         <div className="mt-6 sm:mt-[42px]">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 sm:gap-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 !gap-x-1 w-full sm:w-auto">
               {!isEditor && (
                 <Link href={`/surveys/question/${_id}`}>
                   <Image
@@ -318,29 +327,37 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                   />
                 </Link>
               )}
-              {isDataCollector && (
-                <div className="relative">
-                  <Image
-                    className="cursor-pointer shrink-0 size-10 transition-all duration-200 hover:scale-110"
-                    src={share}
-                    alt="Share"
-                    width={24}
-                    height={24}
-                    onClick={() =>
-                      setModalStates((prev) => ({ ...prev, share: true }))
-                    }
-                  />
-                </div>
-              )}
+              {/* {isDataCollector && ( */}
+              <div className="relative flex items-center gap-2 gap-x-0">
+                <Image
+                  className="cursor-pointer shrink-0 size-10 transition-all duration-200 hover:scale-110"
+                  src={share}
+                  alt="Share"
+                  width={24}
+                  height={24}
+                  onClick={() =>
+                    setModalStates((prev) => ({ ...prev, share: true }))
+                  }
+                />
+                <WhatsAppShareAndCopy
+                  _id={_id}
+                  whatsappUrl={shareData?.data?.whatsapp_link}
+                />
+              </div>
+              {/* )} */}
             </div>
             {isAdmin && (
-              <Switch
-                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[#5B03B2] data-[state=checked]:to-[#9D50BB] data-[state=unchecked]:bg-gray-400 transition-colors duration-200"
-                checked={status === "On going"}
-                onCheckedChange={() => {
-                  handleSelectOption(status === "On going" ? "close" : "open");
-                }}
-              />
+              <div className="w-full sm:w-auto flex justify-end sm:justify-normal mt-2 sm:mt-0">
+                <Switch
+                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[#5B03B2] data-[state=checked]:to-[#9D50BB] data-[state=unchecked]:bg-gray-400 transition-colors duration-200"
+                  checked={status === "On going"}
+                  onCheckedChange={() => {
+                    handleSelectOption(
+                      status === "On going" ? "close" : "open"
+                    );
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -382,6 +399,60 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         onClose={handleCloseAll}
         _id={_id}
       />
+    </>
+  );
+};
+
+const WhatsAppShareAndCopy: React.FC<{
+  _id: string;
+  whatsappUrl: string | undefined;
+}> = ({ _id, whatsappUrl }) => {
+  const { data: share, isLoading } = useShareSurveyQuery(_id);
+  const [copied, setCopied] = useState(false);
+  const shareLink = share?.data?.link || "";
+
+  useEffect(() => {
+    if (copied) {
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    }
+  }, [copied]);
+
+  return (
+    <>
+      <div>
+        <div
+          className="flex items-center gap-2 bg-[#FFFAEF] rounded-full px-2 h-fit py-1 hover:shadow transition-all"
+          // style={{ marginLeft: 8 }}
+        >
+          <FaWhatsapp
+            className="bg-green-600 rounded-full p-1 text-white"
+            size={24}
+          />
+          <span className="text-gray-600 font-medium text-sm whitespace-nowrap">
+            Share on WhatsApp
+          </span>
+          <CopyToClipboard
+            text={shareLink}
+            onCopy={() => {
+              toast.success("Whatsapp link copied to clipboard");
+              setCopied(true);
+            }}
+          >
+            {!whatsappUrl ? (
+              <Loader2 className="size-4 ml-2 animate-spin" />
+            ) : (
+              <Button
+                className="h-6 bg-transparent border-none text-black/90 hover:text-black hover:bg-transparent p-2 rounded transition-colors px-2"
+                onMouseLeave={() => setCopied(false)}
+              >
+                {copied ? <Check size={14} /> : <Copy size={14} />}
+              </Button>
+            )}
+          </CopyToClipboard>
+        </div>
+      </div>
     </>
   );
 };
