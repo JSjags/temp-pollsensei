@@ -21,10 +21,6 @@ const ProtectedSurveyRoute: React.FC<ProtectedSurveyRouteProps> = ({
   const isPhoneVerified = useSelector(
     (state: RootState) => state.becomePaidRespondentSlice.isPhoneVerified
   );
-  const isBecomeRespondentSurveyCompleted = useSelector(
-    (state: RootState) =>
-      state.becomePaidRespondentSlice.isBecomeRespondentSurveyCompleted
-  );
 
   const { data: isPaidRespondent, isLoading } = useQuery({
     queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
@@ -50,18 +46,10 @@ const ProtectedSurveyRoute: React.FC<ProtectedSurveyRouteProps> = ({
     ) {
       router.push("/respondent-form/verify-phone");
     }
+  }, [isPhoneVerified, isPaidRespondentStatus, router, pathname, isLoading]);
 
-    if (isBecomeRespondentSurveyCompleted) {
-      router.push("/dashboard");
-    }
-  }, [
-    isPhoneVerified,
-    isPaidRespondentStatus,
-    router,
-    pathname,
-    isLoading,
-    isBecomeRespondentSurveyCompleted,
-  ]);
+  console.log("isPhoneVerified", isPhoneVerified);
+  console.log("isPaidRespondentStatus", isPaidRespondentStatus);
 
   return <>{children}</>;
 };

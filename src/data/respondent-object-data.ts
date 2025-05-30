@@ -8,6 +8,7 @@ export const petOptions = [
   { value: "rabbit", label: "Rabbit" },
   { value: "bird", label: "Bird" },
   { value: "snake", label: "Snake" },
+  { value: "none", label: "None" },
   { value: "other", label: "Other" },
 ];
 
