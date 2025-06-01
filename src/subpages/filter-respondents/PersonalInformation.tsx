@@ -79,7 +79,7 @@ const PersonalInformation: FC<Props> = ({ tab }) => {
             tab={tab}
             section="children"
             dispatch={dispatch}
-            title="Have Children or children"
+            title="Have Children or Dependents"
           />
 
           <DropdownSelect

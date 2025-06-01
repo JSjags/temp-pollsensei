@@ -400,3 +400,19 @@ export const submitReviewedParticipant = async (
     throw error;
   }
 };
+
+export const quickSurvey = async (
+  surveyId: string,
+  numberOfRespondents: string
+) => {
+  try {
+    const response = await axiosInstance.post("/quick-survey", {
+      survey_id: surveyId,
+      target_responses: Number(numberOfRespondents),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating survey:", error);
+    throw error;
+  }
+};
