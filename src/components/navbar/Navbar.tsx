@@ -434,7 +434,7 @@ const Navbar = () => {
                           <p className="text-xs leading-none text-muted-foreground">
                             Paid Respondent
                           </p>
-                          {isPaidRespondentStatus ? (
+                          {isSuccess && isPaidRespondentStatus ? (
                             <RxCheckCircled className="text-lg text-[green]" />
                           ) : (
                             <RxCrossCircled className="text-lg text-[red]" />

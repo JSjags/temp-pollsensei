@@ -6,7 +6,7 @@ import ActivityCard from "@/components/earn/ActivityCard";
 import stethoscope from "@/assets/images/stethoscope.jpg";
 import walk from "@/assets/images/walk.jpg";
 import Image from "next/image";
-import stakedCoins from "@/assets/images/stacked-coins.png";
+import logoGold from "@/assets/images/logo-gold.png";
 import tiltCup from "@/assets/images/tilt-cup.png";
 import { MdInfo } from "react-icons/md";
 import DailyLoginCard from "@/components/earn/DailyLoginCard";
@@ -123,7 +123,6 @@ const Earn = () => {
         <div className="w-full h-auto rounded-xl bg-gradient-to-r from-[#260D3E] via-[#260D3E] to-[#EB06AB] px-4 py-2 flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1 items-center justify-start lg:justify-normal h-[120px] lg:h-auto">
             <div className="flex gap-1 items-center">
-              <Image src={stakedCoins} width={30} height={30} alt="Coins" />
               <h1 className="text-[32px] md:text-[42px] font-bold text-white">
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
@@ -131,10 +130,9 @@ const Earn = () => {
                   formatLargeNumber(balance?.unrestrictedBalance || 0)
                 )}
               </h1>
+              <Image src={logoGold} width={20} height={20} alt="pollcoin" />
             </div>
-            <p className="text-xs lg:text-sm text-white/80">
-              Pollcoins generated
-            </p>
+            <p className="text-xs lg:text-sm text-white/80">Pollcoins Earned</p>
           </div>
           <span className="w-[1px] h-16 bg-white/50">&nbsp;</span>
           <div className="flex flex-col lg:flex-row items-center gap-5 h-[120px] lg:h-auto">

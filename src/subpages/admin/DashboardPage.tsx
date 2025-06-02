@@ -152,7 +152,7 @@ const DashboardPage = () => {
       return <DashboardSkeleton />;
     }
 
-    console.log({ isPaidRespondentStatus });
+    // console.log({ isPaidRespondentStatus });
 
     return (
       <div className="p-2 md:p-6 w-full mx-auto">
