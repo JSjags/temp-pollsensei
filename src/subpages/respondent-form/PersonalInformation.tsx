@@ -190,7 +190,7 @@ const PersonalInformation: FC<Props> = ({
             control={control}
             options={childrenOptions}
             placeholder="Select option"
-            label="Do you have children or children?"
+            label="Do you have children or dependents?"
             error={errors.children}
             required
             disabled={isPending}
