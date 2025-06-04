@@ -21,9 +21,9 @@ export default function ResoureLayout({
             {breadcrumbs.map((breadcrumb, index) => (
               <li key={index} className="breadcrumb-item">
                 {index < breadcrumbs.length - 1 ? (
-                  <Link href={breadcrumb.to} className="font-semibold">
+                  <a href={breadcrumb.to} className="font-semibold">
                     {breadcrumb.label}
-                  </Link>
+                  </a>
                 ) : (
                   breadcrumb.label
                 )}
@@ -31,7 +31,7 @@ export default function ResoureLayout({
               </li>
             ))}
           </ol>
-          <form
+          {/* <form
             action=""
             className="bg-white mt-4 md:mt-0 lg:w-[27.5rem] px-10 rounded-full flex justify-between items-center"
           >
@@ -41,7 +41,7 @@ export default function ResoureLayout({
               className="border-none w-full py-2"
             />
             <FaSearch />
-          </form>
+          </form> */}
         </div>
       </div>
       <main>{children}</main>
