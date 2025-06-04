@@ -90,10 +90,9 @@ const Mobility_Travel: FC<Props> = ({
             options={commuteOptions}
             placeholder="Select option"
             label="How do you usually commute?"
-            required
             error={errors.commute}
             disabled={isPending}
-            // otherFieldName="otherCommute"
+            otherFieldName="otherCommute"
             register={register}
           />
 
@@ -103,7 +102,6 @@ const Mobility_Travel: FC<Props> = ({
             options={travelOptions}
             placeholder="Select option"
             label="How often do you travel outside your city/town?"
-            required
             error={errors.travelFrequency}
             disabled={isPending}
           />
@@ -114,7 +112,6 @@ const Mobility_Travel: FC<Props> = ({
             options={vehicleOwnershipOptions}
             placeholder="Select option"
             label="Do you own a vehicle?"
-            required
             error={errors.vehicleOwnership}
             disabled={isPending}
           />

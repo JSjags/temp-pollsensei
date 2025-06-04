@@ -34,8 +34,6 @@ const Applications: FC<Props> = ({
     );
   }
 
-  // console.log({ applicationSurveys });
-
   return (
     <div className="w-full h-auto grid grid-cols-2 lg:grid-cols-4 gap-5 items-center">
       {applicationSurveys?.data?.map((survey: any, index: any) => (

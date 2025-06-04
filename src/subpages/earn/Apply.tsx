@@ -5,11 +5,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   applySurveys: any;
+  applicationSurveys: any;
   isLoading: boolean;
   activeTab: string;
 }
 
-const Apply: FC<Props> = ({ applySurveys, isLoading, activeTab }) => {
+const Apply: FC<Props> = ({
+  applySurveys,
+  applicationSurveys,
+  isLoading,
+  activeTab,
+}) => {
   if (isLoading) {
     return (
       <div className="w-full h-auto grid grid-cols-2 lg:grid-cols-4 gap-5 items-center">
@@ -28,12 +34,15 @@ const Apply: FC<Props> = ({ applySurveys, isLoading, activeTab }) => {
     );
   }
 
-  // console.log({ applySurveys });
-
   return (
     <div className="w-full h-auto grid grid-cols-2 lg:grid-cols-4 gap-5 items-center">
       {applySurveys?.data?.map((survey: any, index: any) => (
-        <SurveyCard key={index} survey={survey} activeTab={activeTab} />
+        <SurveyCard
+          key={index}
+          survey={survey}
+          activeTab={activeTab}
+          applicationSurveys={applicationSurveys} // Pass applicationSurveys to SurveyCard
+        />
       ))}
     </div>
   );

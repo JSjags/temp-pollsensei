@@ -278,12 +278,12 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                       action: "review",
                       onReviewClick: handleReview,
                     },
-                    {
-                      label: "Quick Survey",
-                      icon: FcSurvey,
-                      action: "survey",
-                      onReviewClick: handleQuickSurvey,
-                    },
+                    // {
+                    //   label: "Quick Survey",
+                    //   icon: FcSurvey,
+                    //   action: "survey",
+                    //   onReviewClick: handleQuickSurvey,
+                    // },
                     { label: "Share", icon: Share2, action: "share" },
                     { label: "Make a copy", icon: Copy, action: "copy" },
                     status === "On going"

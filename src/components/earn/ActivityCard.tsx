@@ -122,6 +122,10 @@ const ActivityCard: FC<Props> = ({
           className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] text-[9px] lg:text-xs font-bold text-white"
           type="button"
           onClick={onClick}
+          disabled={
+            buttonText === "Watch ads" ||
+            buttonText === "Subscribe to Newsletter"
+          }
         >
           {renderButtonContent()}
         </Button>

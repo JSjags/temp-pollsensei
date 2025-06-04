@@ -31,24 +31,30 @@ const SurveyTabs = () => {
     queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS]],
     queryFn: () => fetchAvailableSurveys(),
     enabled: true,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: applySurveys, isLoading: loadingApply } = useQuery({
     queryKey: [...[APP_KEYS.APPLY_SURVEYS]],
     queryFn: () => fetchApplySurveys(),
     enabled: true,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: applicationSurveys, isLoading: loadingApplication } = useQuery({
     queryKey: [...[APP_KEYS.APPLICATION_SURVEYS]],
     queryFn: () => fetchApplicationSurveys(),
     enabled: true,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   });
 
   const tabs = [
@@ -71,6 +77,7 @@ const SurveyTabs = () => {
       component: (
         <Apply
           applySurveys={applySurveys}
+          applicationSurveys={applicationSurveys}
           isLoading={loadingApply}
           activeTab={activeTab}
         />
