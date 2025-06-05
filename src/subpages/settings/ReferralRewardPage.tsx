@@ -183,7 +183,7 @@ const Page = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Your Referral Summary</h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             <div className="bg-blue-50 p-4 rounded-lg flex items-center">
               <div className="bg-blue-100 p-3 rounded-full mr-4">
                 <FaUsers className="text-blue-600 text-xl" />
