@@ -185,7 +185,6 @@ export function Analytics() {
       setCurrentSlide(next);
     },
   };
-
   return (
     <div className="w-full">
       {/*desktop Banner */}
@@ -377,8 +376,8 @@ export function Analytics() {
         </div>
 
         {/* Surverys */}
-        <div className="w-[35%] max-[1400px]:w-full max-sm:w-full rounded-lg pt-4 px-5 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col md:flex-row justify-between gap-5 md:gap-10 h-auto items-stretch">
-          <div className="flex items-start justify-between w-full md:w-1/2 h-full">
+        <div className="w-[35%] max-[1400px]:w-full max-sm:w-full rounded-lg py-4 px-4 relative bg-white shadow-[0px_1.36px_4px_0px_#34037914] flex flex-col md:flex-row justify-between gap-5 md:gap-5 h-auto items-stretch">
+          <div className="flex justify-between w-full md:w-[48%] h-full items-stretch">
             <div className="w-full flex flex-col gap-5">
               <div className="flex items-start justify-between">
                 <div className="flex flex-col gap-1.5">
@@ -418,7 +417,7 @@ export function Analytics() {
                 </Link>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 mt-auto">
                 <div className="flex flex-col">
                   <p className="text-[#7A8699] text-xs">
                     Available respondents
@@ -445,48 +444,51 @@ export function Analytics() {
               </div>
             </div>
           </div>
+
           <div
             className={cn(
-              "bg-[#FDFAFF] max-h-[150px] h-full overflow-y-auto w-full md:w-1/2 relative",
+              "bg-[#FDFAFF] h-full w-full md:w-full relative overflow-hidden",
               {
                 "min-h-[150px]": !surveys?.purchases?.purchases?.length,
               }
             )}
           >
-            <div className="px-2.5 bg-[#CB85FD1A] flex items-center justify-between rounded-tr-[15px] rounded-tl-[15px] py-1.5">
-              <p className="font-bold">Survey</p>
-              <p className="font-bold">Respondents</p>
+            <div className="max-h-[200px] pb-12">
+              <div className="px-2.5 bg-[#CB85FD1A] flex items-center justify-between rounded-tr-[15px] rounded-tl-[15px] py-1.5">
+                <p className="font-bold">Survey</p>
+                <p className="font-bold">Respondents</p>
+              </div>
+
+              {loadingSurveys ? (
+                <Skeleton className="w-full h-full" />
+              ) : !surveys?.purchases?.purchases?.length ? (
+                <div className="text-center text-sm text-gray-500 py-2 flex items-center justify-center w-full border h-[100px]">
+                  You haven&apos;t purchased any respondents yet.
+                </div>
+              ) : (
+                <div
+                  className={cn(
+                    "flex flex-col gap-2 px-2.5 py-1.5 transition-all duration-300",
+                    showAllSurveys
+                      ? "max-h-[400px] overflow-y-auto pb-64"
+                      : "max-h-[180px] overflow-hidden"
+                  )}
+                >
+                  {surveys?.purchases?.purchases.map((purchase: Purchase) => (
+                    <div
+                      key={purchase?._id}
+                      className="flex items-center justify-between text-sec-text"
+                    >
+                      <p className="text-sm">{purchase?.surveyName}</p>
+                      <p className="text-sm">{purchase?.numberOfRespondents}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {loadingSurveys ? (
-              <Skeleton className="w-full h-[100px]" />
-            ) : !surveys?.purchases?.purchases?.length ? (
-              <div className="text-center text-sm text-gray-500 py-2 flex items-center justify-center w-full border h-[100px]">
-                You haven&apos;t purchased any respondents yet.
-              </div>
-            ) : (
-              <div
-                className={cn(
-                  "flex flex-col gap-2 px-2.5 py-1.5 transition-all duration-300",
-                  showAllSurveys
-                    ? "max-h-[300px] overflow-y-auto"
-                    : "max-h-[150px] overflow-hidden"
-                )}
-              >
-                {surveys?.purchases?.purchases.map((purchase: Purchase) => (
-                  <div
-                    key={purchase?._id}
-                    className="flex items-center justify-between text-sec-text"
-                  >
-                    <p className="text-sm">{purchase?.surveyName}</p>
-                    <p className="text-sm">{purchase?.numberOfRespondents}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {surveys?.purchases?.length > 4 && (
-              <div className="text-center mt-2 absolute left-1/2 z-30 bottom-1.5 flex items-center justify-center">
+            {surveys?.purchases?.purchases.length > 4 && (
+              <div className="text-center mt-2 absolute left-[40%] z-50 bottom-1.5 flex items-center justify-center">
                 <button
                   onClick={() => setShowAllSurveys((prev) => !prev)}
                   className="text-sm text-tertiary underline font-medium"
@@ -495,7 +497,6 @@ export function Analytics() {
                 </button>
               </div>
             )}
-
             <div className="bg-gradient-to-t from-white to-transparent h-[58px] right-0 left-0 absolute bottom-0 w-full pointer-events-none" />
           </div>
         </div>
