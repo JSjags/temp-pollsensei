@@ -191,7 +191,9 @@ const Page = () => {
               <div>
                 <p className="text-sm text-gray-600">Total Referred Users</p>
                 <p className="text-2xl font-bold">
-                  {referral_reward?.number_of_referred_users || 0}
+                  {(
+                    referral_reward?.number_of_referred_users ?? 0
+                  ).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -203,7 +205,13 @@ const Page = () => {
               <div>
                 <p className="text-sm text-gray-600">Accrued Amount</p>
                 <p className="text-2xl font-bold">
-                  ₦{referral_reward?.accrued_amount?.toFixed(2) || "0.00"}
+                  ₦
+                  {typeof referral_reward?.accrued_amount === "number"
+                    ? referral_reward.accrued_amount.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "0.00"}
                 </p>
               </div>
             </div>
@@ -214,7 +222,9 @@ const Page = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">New Referred Users</p>
-                <p className="text-2xl font-bold">{newReferredUsers}</p>
+                <p className="text-2xl font-bold">
+                  {(newReferredUsers ?? 0).toLocaleString()}
+                </p>
               </div>
             </div>
 
@@ -225,7 +235,13 @@ const Page = () => {
               <div>
                 <p className="text-sm text-gray-600">Payout Amount</p>
                 <p className="text-2xl font-bold">
-                  ₦{payoutAmount?.toFixed(2) || "0.00"}
+                  ₦
+                  {typeof payoutAmount === "number"
+                    ? payoutAmount.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "0.00"}
                 </p>
               </div>
             </div>

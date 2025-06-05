@@ -12,7 +12,10 @@ import BreadcrumbsIcon from "../ui/BreadcrumsIcon";
 import Image from "next/image";
 import { hyphen } from "@/assets/images";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useFetchASurveyQuery } from "@/services/survey.service";
+import {
+  useFetchASurveyQuery,
+  useGetPublicSurveyByShortUrlQuery,
+} from "@/services/survey.service";
 import { useDispatch } from "react-redux";
 import { openUpload } from "@/redux/slices/upload.slice";
 import { FiShare2, FiUpload } from "react-icons/fi";
@@ -20,7 +23,7 @@ import ShareSurvey from "../survey/ShareSurvey";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSurveyResponses } from "@/services/analysis";
-import { extractMongoId } from "@/lib/utils";
+import { cn, extractMongoId } from "@/lib/utils";
 import { openSurveySettings } from "@/redux/slices/survey_settings.slice";
 import {
   Dialog,
@@ -37,6 +40,8 @@ import { RootState } from "@/redux/store";
 import { Skeleton } from "../ui/skeleton";
 import { UserData } from "@/subpages/settings/ProfilePage";
 import { useUserProfileQuery } from "@/services/user.service";
+import { toast } from "react-toastify";
+import { getSurveySettings } from "@/services/survey";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -144,6 +149,36 @@ const SurveyCreationNav = () => {
       <Skeleton className="h-4 w-16" />
     </div>
   );
+  const {
+    data: surveySettings,
+    isLoading: isSurveySettingsLoading,
+    isSuccess: isSurveySettingsSuccess,
+    isError: isSurveySettingsError,
+    refetch: refetchSettings,
+    error: surveyError,
+  } = useQuery<{
+    regional_availability: {
+      status: boolean;
+      regions: string[];
+    };
+    survey_id: {
+      _id: string;
+      topic: string;
+    };
+    _id: string;
+    language: string;
+    collect_email_addresses: boolean;
+    collect_name_of_respondents: boolean;
+    allow_survey_edit: boolean;
+    receive_email_notification: boolean;
+    response_threshold: number;
+    voice_response_duration_in_seconds: number;
+  }>({
+    queryKey: ["survey-settings", params.id],
+    queryFn: () => getSurveySettings({ surveyId: params?.id as string }),
+  });
+
+  console.log(surveySettings);
 
   // Update renderNavItem to use the new isLoading helper
   const renderNavItem = (
@@ -614,8 +649,14 @@ const SurveyCreationNav = () => {
           {path.includes("survey-response-upload") ? (
             userData.plan?.name === "Pro Plan" ? (
               <Button
-                className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+                className={cn(
+                  "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
+                  (surveyError as any)?.data.message && "grayscale"
+                )}
                 onClick={() => {
+                  if ((surveyError as any)?.data.message) {
+                    return toast.error((surveyError as any)?.data.message);
+                  }
                   dispatch(openUpload());
                 }}
               >
@@ -1069,8 +1110,14 @@ const SurveyCreationNav = () => {
           {path.includes("survey-response-upload") &&
           userData.plan?.name !== "Basic Plan" ? (
             <Button
-              className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+              className={cn(
+                "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
+                (surveyError as any)?.data.message && "grayscale"
+              )}
               onClick={() => {
+                if ((surveyError as any)?.data.message) {
+                  return toast.error((surveyError as any)?.data.message);
+                }
                 dispatch(openUpload());
               }}
             >

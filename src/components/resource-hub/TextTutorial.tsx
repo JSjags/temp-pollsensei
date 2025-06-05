@@ -11,6 +11,8 @@ import { DEFAULT_API_PAGE_SIZE } from "@/services/api/tutorial";
 import { ChatBotIcon } from "../icons";
 import Link from "next/link";
 import routes from "@/config/routes";
+import EmptyState from "../common/EmptyState";
+import { NewspaperIcon } from "lucide-react";
 
 const TextTutorial = (): JSX.Element => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -172,9 +174,20 @@ const TextTutorial = (): JSX.Element => {
           ))
         )}
       </div>
+      {totalItems <= 0 && (
+        <div className="col-span-full flex flex-col items-center justify-center min-h-[40vh] w-full">
+          <EmptyState
+            title="No articles found"
+            description="We couldn't find any articles matching your search or filters. Try adjusting your criteria or check back later for new content."
+            icon={
+              <NewspaperIcon className="w-12 h-12 text-purple-400 mx-auto" />
+            }
+          />
+        </div>
+      )}
       <div className="mt-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div className="flex-1 flex items-center min-h-[32px]">
-          {totalItems > 0 ? (
+          {totalItems > 0 && (
             <span className="text-sm text-gray-600">
               <span className="font-semibold text-purple-600">
                 {((currentPage - 1) * 20 + 1).toLocaleString()}
@@ -189,8 +202,6 @@ const TextTutorial = (): JSX.Element => {
               </span>
               {" articles"}
             </span>
-          ) : (
-            <span className="text-sm text-gray-400">No articles found.</span>
           )}
         </div>
         <div className="flex-shrink-0">
