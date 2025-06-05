@@ -39,7 +39,7 @@ const TextTutorial = (): JSX.Element => {
         {isLoading ? (
           // Skeleton loader: 8 cards with pulsing effect
           // Skeleton loader: 4 cards with pulsing effect
-          Array.from({ length: 4 }).map((_, idx) => (
+          Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={idx}
               className="animate-pulse bg-white flex flex-col rounded-lg shadow-lg overflow-hidden border border-gray-200"
