@@ -17,9 +17,12 @@ import settingsActive from "../../assets/images/settingsActive.svg";
 import help from "../../assets/images/help.svg";
 import helpActive from "../../assets/images/helpActive.svg";
 import "./styles.css";
+import { useUserProfileQuery } from "@/services/user.service";
+import { UserData } from "@/subpages/settings/ProfilePage";
 
 const DesktopNavigation = () => {
   const user = useSelector((state: RootState) => state.user.user);
+  const [isClient, setIsClient] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const path = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,7 +38,6 @@ const DesktopNavigation = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-
   useEffect(() => {
     if (isSurveySubpath) {
       // Here, handle any specific logic for survey subpaths
@@ -49,9 +51,9 @@ const DesktopNavigation = () => {
       handleSetActiveTab("settings");
     } else if (path.includes("/help-centre")) {
       handleSetActiveTab("help-centre");
-    }else if(path.includes("/user-review")){
+    } else if (path.includes("/user-review")) {
       handleSetActiveTab("user-review");
-    }else {
+    } else {
       handleSetActiveTab("dashboard");
     }
   }, [path]);
@@ -60,6 +62,31 @@ const DesktopNavigation = () => {
     return null;
   }
 
+  const [userData, setUserData] = useState<UserData>({
+    name: "",
+    lastName: "",
+    email: "",
+    username: "",
+    bio: "",
+    file: "",
+    referral_code: "",
+    referral_link: "",
+    plan: null,
+  });
+
+  const {
+    data: userdata,
+    refetch,
+    isLoading: userLoading,
+  } = useUserProfileQuery({
+    skip: !isClient,
+  });
+
+  useEffect(() => {
+    if (userdata) {
+      setUserData(userdata.data);
+    }
+  }, [userdata]);
 
   return (
     <nav className="container pt-5 px-5">
@@ -110,29 +137,32 @@ const DesktopNavigation = () => {
             />
           </li>
         </Link>
-        <Link href="/team-members">
-          <li
-            onClick={() => handleSetActiveTab("team-members")}
-            className={`flex items-center flex-col cursor-pointer ${
-              activeTab == "team-members"
-                ? "text-[#9D50BB]"
-                : "text-[#4F5B67] pb-[17px]"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Image
-                src={activeTab == "team-members" ? usersActive : users}
-                alt="Team Icon"
+
+        {userData.plan?.name !== "Basic Plan" && (
+          <Link href="/team-members">
+            <li
+              onClick={() => handleSetActiveTab("team-members")}
+              className={`flex items-center flex-col cursor-pointer ${
+                activeTab == "team-members"
+                  ? "text-[#9D50BB]"
+                  : "text-[#4F5B67] pb-[17px]"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Image
+                  src={activeTab == "team-members" ? usersActive : users}
+                  alt="Team Icon"
+                />
+                <p className="lg:text-[16px] text-[14px]">Team members</p>
+              </div>
+              <div
+                className={`${
+                  activeTab == "team-members" ? "block" : "hidden"
+                } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
               />
-              <p className="lg:text-[16px] text-[14px]">Team members</p>
-            </div>
-            <div
-              className={`${
-                activeTab == "team-members" ? "block" : "hidden"
-              } w-[50%] border-b-[3px] border-[#9D50BB] rounded-lg mt-[14px]`}
-            />
-          </li>
-        </Link>
+            </li>
+          </Link>
+        )}
         <Link href="/settings/profile">
           <li
             onClick={() => handleSetActiveTab("settings")}

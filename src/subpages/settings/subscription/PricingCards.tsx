@@ -74,6 +74,17 @@ export interface TPricing {
   __v: number;
 }
 
+export interface TCurrentPlan {
+  name: string;
+  description: string;
+  currency: string;
+  monthly_cost: number;
+  yearly_cost: number;
+  next_billing_date: string;
+  next_billing_amount: number;
+  auto_renewal: boolean;
+}
+
 export const useGeoLocation = () => {
   return useQuery({
     queryKey: ["geolocation"],
@@ -215,12 +226,42 @@ export function PricingCards() {
     setDialogOpen(true);
   };
 
-  console.log("Helele");
-  console.log(userData.data?.data);
-
   const renderButton = (tier: TPricing, index: number) => {
     if (index === 0) {
-      return null;
+      if (tier._id === userData.data?.data?.plan._id) {
+        return (
+          <Button
+            className={cn(
+              "w-full text-xs sm:text-sm bg-transparent border-0 hover:bg-transparent",
+              index === 0 ? "text-black" : ""
+            )}
+            variant={"secondary"}
+            disabled
+          >
+            Current plan
+          </Button>
+        );
+      } else if (
+        tiersData.data?.[0]._id !== userData.data?.data?.plan._id &&
+        userData.data?.data?.plan._id !== tiersData.data?.[1]._id
+      ) {
+        return (
+          <Button
+            onClick={() => handleUpgrade(index)}
+            className={cn(
+              "w-full text-xs sm:text-sm border-0",
+              index === 0
+                ? "bg-gradient-to-r from-[#5B03B2] to-black hover:from-[#5B03B2]/90 hover:to-black/90 text-white"
+                : "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] hover:from-[#5B03B2]/90 hover:to-[#9D50BB]/90"
+            )}
+            variant={"secondary"}
+          >
+            Upgrade plan
+          </Button>
+        );
+      } else {
+        return null;
+      }
     }
     if (index === 1) {
       if (tier._id === userData.data?.data?.plan._id) {
@@ -236,7 +277,10 @@ export function PricingCards() {
             Current plan
           </Button>
         );
-      } else if (tiersData.data?.[0]._id === userData.data?.data?.plan._id) {
+      } else if (
+        tiersData.data?.[1]._id !== userData.data?.data?.plan._id ||
+        userData.data?.data?.plan._id === tiersData.data?.[0]._id
+      ) {
         return (
           <Button
             onClick={() => handleUpgrade(index)}
@@ -268,7 +312,7 @@ export function PricingCards() {
             Current plan
           </Button>
         );
-      } else if (tiersData.data?.[0]._id === userData.data?.data?.plan._id) {
+      } else if (tiersData.data?.[2]._id === userData.data?.data?.plan._id) {
         return (
           <Button
             onClick={() => handleUpgrade(index)}
@@ -392,8 +436,8 @@ export function PricingCards() {
                         )}
                       >
                         {!locationData?.isNigeria
-                          ? `$${tier.monthly_price_dollar}`
-                          : `₦${tier.monthly_price_naira}`}
+                          ? `$${tier.monthly_price_dollar.toLocaleString()}`
+                          : `₦${tier.monthly_price_naira.toLocaleString()}`}
                       </span>
                       {tiers[index].period && (
                         <span
@@ -444,7 +488,10 @@ export function PricingCards() {
           </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent
+              className="sm:max-w-md z-[100000]"
+              overlayClassName="z-[100000] backdrop-blur-md"
+            >
               <DialogHeader>
                 <DialogTitle className="text-center mb-4">
                   Choose Payment Method

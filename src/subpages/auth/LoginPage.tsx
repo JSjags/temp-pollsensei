@@ -111,7 +111,7 @@ const LoginPage = () => {
       }
     },
     onError: (error: any) => {
-      return toast.error(
+      toast.error(
         "Failed to register user " +
           (error?.response?.data?.message || error.message)
       );

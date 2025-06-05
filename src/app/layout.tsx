@@ -23,6 +23,7 @@ import { SenseiProvider } from "@/contexts/SenseiContext";
 import UpgradeModal from "@/components/subscription/modal-upgrade";
 import { AOSInit } from "@/components/ui/Aos";
 import MetaPixel from "@/components/MetaPixel";
+import FeatureLimitation from "@/components/feature-limitation/feature-limitation";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],

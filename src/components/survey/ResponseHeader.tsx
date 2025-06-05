@@ -75,12 +75,14 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
     useLazyDownloadSingleResponseQuery();
 
   const handleDownload = async (
+    e: any,
     type: "all" | "single",
     format: "pdf" | "csv" | "xlsx"
   ) => {
+    e.preventDefault();
     if (
       user?.plan.name === "Basic Plan" &&
-      (format === "csv" || format === "xlsx")
+      (format === "csv" || format === "xlsx" || format === "pdf")
     ) {
       dispatch(showModal(format));
       return;
@@ -190,7 +192,7 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                   {["pdf", "csv", "xlsx"].map((format) => (
                     <React.Fragment key={format}>
                       <DropdownMenuItem
-                        onClick={() => handleDownload("all", format as any)}
+                        onClick={(e) => handleDownload(e, "all", format as any)}
                       >
                         <Link
                           href={allDownloadData?.data?.url || ""}
@@ -200,14 +202,17 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                           <span className="flex-1">
                             Download all as {format.toUpperCase()}
                           </span>
-                          {user?.plan.name === "Basic Plan" &&
-                            format !== "pdf" && (
-                              <Crown className="ml-2 h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0" />
-                            )}
+                          {user?.plan.name === "Basic Plan" && (
+                            // &&
+                            //   format !== "pdf"
+                            <Crown className="ml-2 h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0" />
+                          )}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDownload("single", format as any)}
+                        onClick={(e) =>
+                          handleDownload(e, "single", format as any)
+                        }
                       >
                         <Link
                           href={singleDownloadData?.data?.url || ""}

@@ -9,7 +9,7 @@ import {
 } from "@/services/superadmin.service";
 import PageControl from "@/components/common/PageControl";
 import DropdownFilter from "@/components/superAdmin/DropdownFilter";
-import { generateInitials } from "@/lib/utils";
+import { cn, generateInitials } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FadeLoader } from "react-spinners";
 import { formatDateOption } from "@/lib/helpers";
@@ -108,6 +108,8 @@ const UserRegistry: React.FC = () => {
   );
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedUserDisabledStatus, setSelectedUserDisabledStatus] =
+    useState<boolean>(false);
 
   const path_params: PathParamsProps = {};
   if (email) path_params.email = email;
@@ -226,6 +228,17 @@ const UserRegistry: React.FC = () => {
 
   const getRandomColor = () => {
     return statusColorMap[Math.floor(Math.random() * statusColorMap.length)];
+  };
+
+  const handleOpenConfirmation = (
+    email: string,
+    type: "reset" | "status",
+    disabledStatus: boolean
+  ) => {
+    setSelectedUserEmail(email);
+    setConfirmationType(type);
+    setSelectedUserDisabledStatus(disabledStatus);
+    setIsConfirmationOpen(true);
   };
 
   return (
@@ -537,104 +550,43 @@ const UserRegistry: React.FC = () => {
                             </div>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-fit">
-                            <AlertDialog
-                              open={isConfirmationOpen}
-                              onOpenChange={setIsConfirmationOpen}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                handleOpenConfirmation(
+                                  user?.email,
+                                  "status",
+                                  user.disabled[0].status
+                                );
+                              }}
+                              className={cn(
+                                `text-sm cursor-pointer flex items-center gap-2`,
+                                user.disabled[0].status
+                                  ? "text-green-600 focus:text-green-600"
+                                  : "text-red-600 focus:text-red-600"
+                              )}
                             >
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedUserEmail(user?.email);
-                                    setConfirmationType("status");
-                                    setIsConfirmationOpen(true);
-                                  }}
-                                  className={`text-sm cursor-pointer flex items-center gap-2 ${
-                                    user.disabled[0].status
-                                      ? "text-green-600 focus:text-green-600"
-                                      : "text-red-600 focus:text-red-600"
-                                  }`}
-                                >
-                                  {user.disabled[0].status ? (
-                                    <UserCheck2 className="h-4 w-4" />
-                                  ) : (
-                                    <UserRoundMinusIcon className="h-4 w-4" />
-                                  )}
-                                  {user.disabled[0].status
-                                    ? "Activate Account"
-                                    : "Deactivate Account"}
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedUserEmail(user?.email);
-                                    setConfirmationType("reset");
-                                    setIsConfirmationOpen(true);
-                                  }}
-                                  className="text-sm cursor-pointer text-gray-600 focus:text-gray-600 flex items-center gap-2"
-                                >
-                                  <Lock className="h-4 w-4" />
-                                  Reset Password
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    {confirmationType === "reset"
-                                      ? "Reset Password"
-                                      : user.disabled[0].status
-                                      ? "Activate Account"
-                                      : "Deactivate Account"}
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    {confirmationType === "reset"
-                                      ? "Are you sure you want to reset this user's password? They will receive an email with instructions to set a new password."
-                                      : user.disabled[0].status
-                                      ? "Are you sure you want to activate this account? The user will regain access to their account."
-                                      : "Are you sure you want to deactivate this account? The user will lose access to their account."}
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => {
-                                      if (confirmationType === "reset") {
-                                        ResetPassword(selectedUserEmail);
-                                      } else {
-                                        handleSubmit(selectedUserEmail);
-                                      }
-                                    }}
-                                    className={`${
-                                      confirmationType === "reset"
-                                        ? "bg-blue-600 hover:bg-blue-700"
-                                        : user.disabled[0].status
-                                        ? "bg-green-600 hover:bg-green-700"
-                                        : "bg-red-600 hover:bg-red-700"
-                                    }`}
-                                  >
-                                    {isDisabling || isResetPassword
-                                      ? "Processing..."
-                                      : confirmationType === "reset"
-                                      ? "Reset Password"
-                                      : user.disabled[0].status
-                                      ? "Activate"
-                                      : "Deactivate"}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                              {user.disabled[0].status ? (
+                                <UserCheck2 className="h-4 w-4" />
+                              ) : (
+                                <UserRoundMinusIcon className="h-4 w-4" />
+                              )}
+                              {user.disabled[0].status
+                                ? "Activate Account"
+                                : "Deactivate Account"}
+                            </DropdownMenuItem>
 
                             <DropdownMenuItem
                               onClick={() => {
-                                setSelectedUser(user);
-                                setIsDetailsOpen(true);
+                                handleOpenConfirmation(
+                                  user?.email,
+                                  "reset",
+                                  user.disabled[0].status
+                                );
                               }}
                               className="text-sm cursor-pointer text-gray-600 focus:text-gray-600 flex items-center gap-2"
                             >
-                              <Eye className="h-4 w-4" />
-                              View Details
+                              <Lock className="h-4 w-4" />
+                              Reset Password
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -668,6 +620,58 @@ const UserRegistry: React.FC = () => {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <UserDetailsDialog user={selectedUser} isOpen={isDetailsOpen} />
       </Dialog>
+
+      {/* Single AlertDialog outside DropdownMenu */}
+      <AlertDialog
+        open={isConfirmationOpen}
+        onOpenChange={setIsConfirmationOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmationType === "reset"
+                ? "Reset Password"
+                : selectedUserDisabledStatus
+                ? "Activate Account"
+                : "Deactivate Account"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmationType === "reset"
+                ? "Are you sure you want to reset this user's password? They will receive an email with instructions to set a new password."
+                : selectedUserDisabledStatus
+                ? "Are you sure you want to activate this account? The user will regain access to their account."
+                : "Are you sure you want to deactivate this account? The user will lose access to their account."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmationType === "reset") {
+                  ResetPassword(selectedUserEmail);
+                } else {
+                  handleSubmit(selectedUserEmail);
+                }
+              }}
+              className={`${
+                confirmationType === "reset"
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : selectedUserDisabledStatus
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
+            >
+              {isDisabling || isResetPassword
+                ? "Processing..."
+                : confirmationType === "reset"
+                ? "Reset Password"
+                : selectedUserDisabledStatus
+                ? "Activate"
+                : "Deactivate"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

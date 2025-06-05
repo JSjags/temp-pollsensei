@@ -4,22 +4,20 @@ import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useUserProfileQuery } from "@/services/user.service";
 import { useDispatch } from "react-redux";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const dynamic = "force-dynamic";
 
-function SuccessPage({
-  searchParams: { amount },
-}: {
-  searchParams: { amount: string };
-}) {
+function SuccessPage() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { data, refetch } = useUserProfileQuery({});
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const amount = searchParams.get("amount");
 
   useEffect(() => {
     // Launch confetti when component mounts
@@ -50,6 +48,8 @@ function SuccessPage({
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ["profile"] });
   }, [queryClient]);
+
+  // alert("Payment successful");
 
   return (
     <main className="w-full h-full mx-auto flex items-center justify-center">
