@@ -50,24 +50,25 @@ export const personalInformationSchema = z.object({
 
 export const geographyAndCultureSchema = z.object({
   currentLocation: z.string().min(1, "Location is required"),
-  // otherLocation: z.string().optional(),
+  otherLocation: z.string().optional(),
   region: z.string().min(1, "Region is required"),
-  // otherRegion: z.string().optional(),
+  otherRegion: z.string().optional(),
   nationality: z.string().min(1, "Nationality is required"),
   ethnicity: z.string().min(1, "Ethnicity field is required"),
-  // otherEthnicity: z.string().optional(),
+  otherEthnicity: z.string().optional(),
   languages: z.array(z.string()).min(1, "At least one language is required"),
-  // otherLanguage: z.string().optional(),
+  otherLanguage: z.string().optional(),
   religion: z.string().optional(),
-  // otherReligion: z.string().optional(),
+  otherReligion: z.string().optional(),
 });
 
 export const educationAndEmploymentSchema = z.object({
   educationLevel: z.string().optional(),
   employmentStatus: z.string().optional(),
   industry: z.string().optional(),
+  otherIndustry: z.string().optional(),
   jobRole: z.string().optional(),
-  // oterJobRole: z.string().optional(),
+  otherJobRole: z.string().optional(),
   workingHours: z.string().optional(),
   incomeRange: z.string().optional(),
   techSavvy: z.string().optional(),
@@ -76,12 +77,12 @@ export const educationAndEmploymentSchema = z.object({
 export const healthAndLifestyleSchema = z.object({
   overallHealth: z.string().optional(),
   healthInsurance: z.string().optional(),
-  // otherHealthInsurance: z.string().optional(),
+  otherHealthInsurance: z.string().optional(),
   chronicConditions: z.string().optional(),
-  // otherHealthCondition: z.string().optional(),
+  otherHealthCondition: z.string().optional(),
   physicalActivity: z.string().optional(),
   dietaryRestrictions: z.string().optional(),
-  // otherDietryRestrictions: z.string().optional(),
+  otherDietryRestrictions: z.string().optional(),
   tobaccoUse: z.string().optional(),
   alcoholUse: z.string().optional(),
   sleepHours: z.string().optional(),
@@ -106,15 +107,15 @@ export const techAndMediaSchema = z.object({
 
 export const housingAndLivingSchema = z.object({
   livingArrangement: z.string().optional(),
-  // otherLivingArrangement: z.string().optional(),
+  otherLivingArrangement: z.string().optional(),
   homeOwnership: z.string().optional(),
-  // otherHomeOwnership: z.string().optional(),
+  otherHomeOwnership: z.string().optional(),
   householdSize: z.string().optional(),
 });
 
 export const mobilityAndTravelSchema = z.object({
   commute: z.string().optional(),
-  // otherCommute: z.string().optional(),
+  otherCommute: z.string().optional(),
   travelFrequency: z.string().optional(),
   vehicleOwnership: z.string().optional(),
 });

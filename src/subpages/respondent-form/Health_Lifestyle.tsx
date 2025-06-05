@@ -109,7 +109,7 @@ const Health_Lifestyle: FC<Props> = ({
             label="Health Insurance Type"
             error={errors.healthInsurance}
             disabled={isPending}
-            // otherFieldName="otherHealthInsurance"
+            otherFieldName="otherHealthInsurance"
             register={register}
           />
 
@@ -121,7 +121,7 @@ const Health_Lifestyle: FC<Props> = ({
             label="Do you have any chronic health conditions?"
             error={errors.chronicConditions}
             disabled={isPending}
-            // otherFieldName="otherHealthCondition"
+            otherFieldName="otherHealthCondition"
             register={register}
           />
 
@@ -143,7 +143,7 @@ const Health_Lifestyle: FC<Props> = ({
             label="Do you have any dietary restrictions or preferences?"
             error={errors.dietaryRestrictions}
             disabled={isPending}
-            // otherFieldName="otherDietryRestrictions"
+            otherFieldName="otherDietryRestrictions"
             register={register}
           />
 

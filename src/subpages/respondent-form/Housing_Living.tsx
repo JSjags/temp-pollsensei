@@ -92,7 +92,6 @@ const Housing_Living: FC<Props> = ({
             options={livingConditionOptions}
             placeholder="Select option"
             label="What is your current living arrangement?"
-            required
             error={errors.livingArrangement}
             disabled={isPending}
             register={register}
@@ -104,7 +103,6 @@ const Housing_Living: FC<Props> = ({
             options={livingArrangementOptions}
             placeholder="Select option"
             label="Do you own or rent your home?"
-            required
             error={errors.homeOwnership}
             disabled={isPending}
             register={register}
@@ -116,7 +114,6 @@ const Housing_Living: FC<Props> = ({
             options={householdNumbersOptions}
             placeholder="Select option"
             label="How many people live in your household?"
-            required
             error={errors.householdSize}
             disabled={isPending}
           />

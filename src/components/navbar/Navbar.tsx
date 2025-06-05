@@ -434,10 +434,10 @@ const Navbar = () => {
                           <p className="text-xs leading-none text-muted-foreground">
                             Paid Respondent
                           </p>
-                          {isSuccess && isPaidRespondentStatus ? (
-                            <RxCheckCircled className="text-lg text-[green]" />
-                          ) : (
+                          {isSuccess && !isPaidRespondentStatus ? (
                             <RxCrossCircled className="text-lg text-[red]" />
+                          ) : (
+                            <RxCheckCircled className="text-lg text-[green]" />
                           )}
                         </div>
                       )}

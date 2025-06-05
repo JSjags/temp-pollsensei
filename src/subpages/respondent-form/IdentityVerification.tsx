@@ -39,46 +39,46 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
   const queryClient = useQueryClient();
 
   // Request camera access when "proceed" is true
-  // useEffect(() => {
-  //   if (proceed && videoRef.current) {
-  //     navigator.mediaDevices
-  //       .getUserMedia({ video: true })
-  //       .then((stream) => {
-  //         if (videoRef.current) {
-  //           videoRef.current.srcObject = stream;
-  //           setStream(stream);
-  //         }
-  //       })
-  //       .catch((err) => console.error("Error accessing the camera: ", err));
-  //   }
-  // }, [proceed]);
+  useEffect(() => {
+    if (proceed && videoRef.current) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            setStream(stream);
+          }
+        })
+        .catch((err) => console.error("Error accessing the camera: ", err));
+    }
+  }, [proceed]);
 
   // Clean up the stream when the component unmounts
-  // useEffect(() => {
-  //   return () => {
-  //     if (stream) {
-  //       stream.getTracks().forEach((track) => track.stop());
-  //     }
-  //   };
-  // }, [stream]);
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
 
   // function to handle the image capture
-  // const handleCapture = () => {
-  //   if (canvasRef.current && videoRef.current) {
-  //     const context = canvasRef.current.getContext("2d");
-  //     if (context) {
-  //       context.drawImage(
-  //         videoRef.current,
-  //         0,
-  //         0,
-  //         canvasRef.current.width,
-  //         canvasRef.current.height
-  //       );
-  //       const imageUrl = canvasRef.current.toDataURL("image/png");
-  //       setCapturedImage(imageUrl);
-  //     }
-  //   }
-  // };
+  const handleCapture = () => {
+    if (canvasRef.current && videoRef.current) {
+      const context = canvasRef.current.getContext("2d");
+      if (context) {
+        context.drawImage(
+          videoRef.current,
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+        const imageUrl = canvasRef.current.toDataURL("image/png");
+        setCapturedImage(imageUrl);
+      }
+    }
+  };
 
   // function to handle the previous tab/section
   const handlePrevious = (e: React.MouseEvent) => {
@@ -104,7 +104,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
     });
   };
 
-  // function to handle submit form and navigate to the next tab/section
+  // Modified function to handle submit form and navigate to the webcam section
   const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -120,15 +120,6 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
       // Prepare the documents array
       const identityVerification = { idDocument: { base64String } };
 
-      // If we have a captured image (selfie), add it to documents
-      // if (capturedImage) {
-      //   documents.push({
-      //     idDocument: capturedImage,
-      //     // name: "selfie.jpg",
-      //     // type: "image/jpeg",
-      //   });
-      // }
-
       // Submit the form data
       submitForm(
         {
@@ -137,12 +128,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
         },
         {
           onSuccess: () => {
-            // setProceed(true);
-            dispatch(setBecomePaidRespondentSurveyCompleted(true));
-            queryClient.invalidateQueries({
-              queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
-            });
-            setSubmitImage(true);
+            setProceed(true);
           },
           onError: (error) => {
             console.error("Form submission error:", error);
@@ -156,46 +142,30 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
     }
   };
 
-  // Modified handleSubmit function
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  //   if (!capturedImage) {
-  //     toast.error("Please take a selfie first");
-  //     return;
-  //   }
+    if (!capturedImage) {
+      toast.error("Please take a selfie first");
+      return;
+    }
 
-  //   try {
-  //     // Prepare the documents array with just the selfie
-  //     const documents = [
-  //       {
-  //         idDocument: capturedImage,
-  //         // name: "selfie.jpg",
-  //         // type: "image/jpeg",
-  //       },
-  //     ];
-  //     // Submit the form data
-  //     submitForm(
-  //       {
-  //         tab: "identityVerification",
-  //         formData: { documents },
-  //       },
-  //       {
-  //         onSuccess: () => {
-  //           setSubmitImage(true);
-  //           dispatch(setBecomePaidRespondentSurveyCompleted(true));
-  //         },
-  //         onError: (error) => {
-  //           console.error("Form submission error:", error);
-  //           toast.error(error.message);
-  //         },
-  //       }
-  //     );
-  //   } catch (error: any) {
-  //     console.error("Error submitting form:", error);
-  //     toast.error(error.message);
-  //   }
-  // };
+    try {
+      setSubmitImage(true);
+      dispatch(setBecomePaidRespondentSurveyCompleted(true));
+      queryClient.invalidateQueries({
+        queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
+      });
+
+      // Clean up camera stream
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      toast.error(error.message);
+    }
+  };
 
   // function to handle image removal
   const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -215,7 +185,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
 
   return (
     <form
-      onSubmit={handleContinue}
+      onSubmit={proceed ? handleSubmit : handleContinue}
       className="w-full h-full flex flex-col items-center mx-auto"
     >
       {submitImage ? (
@@ -248,9 +218,9 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
               </h2>
             </div>
           </div>
-          {/* {proceed ? (
+          {proceed ? (
             <div className="w-full flex flex-col gap-10">
-              {/* {capturedImage ? (
+              {capturedImage ? (
                 <div className="w-full flex flex-col lg:flex-row gap-5">
                   <div className="h-[60vh] md:h-[400px] w-[80%] md:w-[70%] border-2 border-[#A9A9B1] border-dashed rounded-lg relative hidden lg:flex">
                     <Image
@@ -279,6 +249,7 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
                     size="default"
                     className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all lg:hidden text-center"
                     onClick={handleCapture}
+                    type="button"
                   >
                     START
                   </Button>
@@ -290,7 +261,12 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
                       height="100%"
                       className="object-cover rounded-full w-[80%] h-full"
                     />
-                    <canvas ref={canvasRef} className="hidden" />
+                    <canvas
+                      ref={canvasRef}
+                      width="640"
+                      height="480"
+                      className="hidden"
+                    />
                   </div>
                   <div className="flex-1 flex flex-col items-center lg:items-normal">
                     <h3 className="text-lg font-bold text-[#333333] mb-2 text-center">
@@ -305,150 +281,11 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
                       size="default"
                       className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all hidden lg:flex items-center justify-center"
                       onClick={handleCapture}
+                      type="button"
                     >
                       START
                     </Button>
                   </div>
-                </div>
-              )} 
-              <div className="w-full flex items-center gap-5 mt-5">
-                <Button
-                  size="default"
-                  variant="outline"
-                  className="w-full md:w-full bg-transparent border-[#A9A9B1] rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all text-black"
-                  onClick={handlePrevious}
-                >
-                  Previous
-                </Button>
-                <Button
-                  size="default"
-                  className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
-                  // disabled={!capturedImage}
-                  type="submit"
-                >
-                  Finish
-                </Button>
-              </div>
-            </div>
-          ) */}
-          <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto items-center justify-center">
-            <h2 className="text-2xl font-bold hidden lg:inline-block">
-              Identity Verification
-            </h2>
-            <h4 className="text-lg text-[#898989]">Please Upload your ID</h4>
-            <p className="text-[13px] text-[#00000099] text-center mb-5">
-              Upload a valid government issued ID card to enable us verify your
-              identity and information provided
-            </p>
-            <div
-              className={`flex flex-col w-full ${
-                imageSelected ? "gap-3 lg:gap-10" : "gap-3"
-              }`}
-            >
-              <div
-                className={`w-full flex items-center border-dashed border-2 border-[#00000040] rounded-lg ${
-                  imageSelected
-                    ? "h-[250px] lg:h-auto flex-col lg:flex-row lg:p-3 gap-3 justify-center lg:justify-normal"
-                    : "h-[250px] flex-col justify-center gap-5"
-                }`}
-              >
-                <FiUploadCloud
-                  className={`text-[#00000066] ${
-                    imageSelected ? "text-5xl lg:text-4xl" : "text-5xl"
-                  }`}
-                />
-                <div
-                  className={`flex items-center gap-3 w-full ${
-                    imageSelected
-                      ? "flex-col lg:flex-row lg:justify-between"
-                      : "flex-col justify-center"
-                  }`}
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <p className="text-[13px]">
-                      Select a file or drag and drop here
-                    </p>
-
-                    {imageSelected ? (
-                      <p className="text-xs text-[#00000066]">
-                        JPG, PNG, file size no more than 10MB{" "}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-[#00000066]">
-                        {" "}
-                        JPG, PNG, DOCX or PDF, file size no more than 10MB{" "}
-                      </p>
-                    )}
-                  </div>
-                  <label
-                    htmlFor="file"
-                    className={`flex items-center justify-center py-1 border-2 border-[#5B03B2] bg-transparent rounded-full w-fit cursor-pointer hover:scale-x-105 transition-all ${
-                      imageSelected ? "px-2" : "px-5 mx-auto"
-                    }`}
-                  >
-                    <span
-                      className={`text-[#5B03B2] cursor-pointer ${
-                        imageSelected ? "text-xs" : "text-base"
-                      }`}
-                    >
-                      Select file
-                    </span>
-                  </label>
-                  <input
-                    id="file"
-                    type="file"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                </div>
-              </div>
-              {imageSelected && selectedFile && (
-                <div className="border-2 border-[#E8E4FF] rounded-lg h-auto w-full px-3 py-2 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <BsFileEarmarkImage className="text-[#5B03B2] text-2xl" />
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs text-black hidden lg:inline-block">
-                        {selectedFile?.name}
-                      </p>
-                      <p className="text-xs text-black lg:hidden">
-                        {selectedFile?.name.toString().length > 10
-                          ? `${selectedFile.name.slice(0, 7)}...`
-                          : selectedFile.name}
-                      </p>
-                      <GoDotFill className="text-sm text-[#767676]" />
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="default"
-                            className="text-[#9D50BB] text-xs h-fit bg-transparent hover:bg-transparent"
-                          >
-                            Preview
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-[80%] md:max-w-[425px] max-h-[60vh] lg:max-h-[425px] flex justify-center p-0 bg-transparent border-0 outline-none">
-                          <Image
-                            src={URL.createObjectURL(selectedFile)}
-                            alt="Preview"
-                            width={400}
-                            height={400}
-                            className="rounded-lg"
-                          />
-                        </DialogContent>
-                      </Dialog>
-
-                      <span className="text-[#00000066]">|</span>
-                      <Button
-                        variant="default"
-                        className="text-[#FC3135] text-xs h-fit bg-transparent hover:bg-transparent"
-                        onClick={handleRemove}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-[#000000B2] text-[10px] uppercase">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)}MB
-                  </p>
                 </div>
               )}
               <div className="w-full flex items-center gap-5 mt-5">
@@ -457,24 +294,167 @@ const IdentityVerification: FC<Props> = ({ onPrevious }) => {
                   variant="outline"
                   className="w-full md:w-full bg-transparent border-[#A9A9B1] rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all text-black"
                   onClick={handlePrevious}
-                  disabled={responseData?.success === true}
+                  type="button"
                 >
                   Previous
                 </Button>
-                {imageSelected && (
-                  <Button
-                    size="default"
-                    className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
-                    onClick={handleContinue}
-                    disabled={!selectedFile || isPending}
-                    type="submit"
-                  >
-                    {isPending ? "Processing..." : "Submit"}
-                  </Button>
-                )}
+                <Button
+                  size="default"
+                  className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
+                  disabled={!capturedImage}
+                  type="submit"
+                >
+                  Finish
+                </Button>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto items-center justify-center">
+              <h2 className="text-2xl font-bold hidden lg:inline-block">
+                Identity Verification
+              </h2>
+              <h4 className="text-lg text-[#898989]">Please Upload your ID</h4>
+              <p className="text-[13px] text-[#00000099] text-center mb-5">
+                Upload a valid government issued ID card to enable us verify
+                your identity and information provided
+              </p>
+              <div
+                className={`flex flex-col w-full ${
+                  imageSelected ? "gap-3 lg:gap-10" : "gap-3"
+                }`}
+              >
+                <div
+                  className={`w-full flex items-center border-dashed border-2 border-[#00000040] rounded-lg ${
+                    imageSelected
+                      ? "h-[250px] lg:h-auto flex-col lg:flex-row lg:p-3 gap-3 justify-center lg:justify-normal"
+                      : "h-[250px] flex-col justify-center gap-5"
+                  }`}
+                >
+                  <FiUploadCloud
+                    className={`text-[#00000066] ${
+                      imageSelected ? "text-5xl lg:text-4xl" : "text-5xl"
+                    }`}
+                  />
+                  <div
+                    className={`flex items-center gap-3 w-full ${
+                      imageSelected
+                        ? "flex-col lg:flex-row lg:justify-between"
+                        : "flex-col justify-center"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-[13px]">
+                        Select a file or drag and drop here
+                      </p>
+
+                      {imageSelected ? (
+                        <p className="text-xs text-[#00000066]">
+                          JPG, PNG, file size no more than 10MB{" "}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-[#00000066]">
+                          {" "}
+                          JPG, PNG, DOCX or PDF, file size no more than 10MB{" "}
+                        </p>
+                      )}
+                    </div>
+                    <label
+                      htmlFor="file"
+                      className={`flex items-center justify-center py-1 border-2 border-[#5B03B2] bg-transparent rounded-full w-fit cursor-pointer hover:scale-x-105 transition-all ${
+                        imageSelected ? "px-2" : "px-5 mx-auto"
+                      }`}
+                    >
+                      <span
+                        className={`text-[#5B03B2] cursor-pointer ${
+                          imageSelected ? "text-xs" : "text-base"
+                        }`}
+                      >
+                        Select file
+                      </span>
+                    </label>
+                    <input
+                      id="file"
+                      type="file"
+                      className="hidden"
+                      onChange={handleImageChange}
+                      accept="image/*,.pdf,.docx"
+                    />
+                  </div>
+                </div>
+                {imageSelected && selectedFile && (
+                  <div className="border-2 border-[#E8E4FF] rounded-lg h-auto w-full px-3 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <BsFileEarmarkImage className="text-[#5B03B2] text-2xl" />
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-black hidden lg:inline-block">
+                          {selectedFile?.name}
+                        </p>
+                        <p className="text-xs text-black lg:hidden">
+                          {selectedFile?.name.toString().length > 10
+                            ? `${selectedFile.name.slice(0, 7)}...`
+                            : selectedFile.name}
+                        </p>
+                        <GoDotFill className="text-sm text-[#767676]" />
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="default"
+                              className="text-[#9D50BB] text-xs h-fit bg-transparent hover:bg-transparent"
+                            >
+                              Preview
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-[80%] md:max-w-[425px] max-h-[60vh] lg:max-h-[425px] flex justify-center p-0 bg-transparent border-0 outline-none">
+                            <Image
+                              src={URL.createObjectURL(selectedFile)}
+                              alt="Preview"
+                              width={400}
+                              height={400}
+                              className="rounded-lg"
+                            />
+                          </DialogContent>
+                        </Dialog>
+
+                        <span className="text-[#00000066]">|</span>
+                        <Button
+                          variant="default"
+                          className="text-[#FC3135] text-xs h-fit bg-transparent hover:bg-transparent"
+                          onClick={handleRemove}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-[#000000B2] text-[10px] uppercase">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)}MB
+                    </p>
+                  </div>
+                )}
+                <div className="w-full flex items-center gap-5 mt-5">
+                  <Button
+                    size="default"
+                    variant="outline"
+                    className="w-full md:w-full bg-transparent border-[#A9A9B1] rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all text-black"
+                    onClick={handlePrevious}
+                    disabled={responseData?.success === true}
+                    type="button"
+                  >
+                    Previous
+                  </Button>
+                  {imageSelected && (
+                    <Button
+                      size="default"
+                      className="w-full md:w-full bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all"
+                      disabled={!selectedFile || isPending}
+                      type="submit"
+                    >
+                      {isPending ? "Processing..." : "Proceed"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </form>

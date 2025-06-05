@@ -3,6 +3,7 @@ import { RootState } from "@/redux/store";
 
 interface DialogState {
   isSurveyFormDialogOpen: boolean;
+  isSuccessDialogOpen: boolean;
   isAdsDialogOpen: boolean;
   isSurveyTabsOpen: boolean;
   adsWatched: number;
@@ -14,6 +15,7 @@ interface DialogState {
 
 const initialState: DialogState = {
   isSurveyFormDialogOpen: false,
+  isSuccessDialogOpen: false,
   isAdsDialogOpen: false,
   isSurveyTabsOpen: false,
   adsWatched: 0,
@@ -36,6 +38,13 @@ export const earnDialogSlice = createSlice({
     closeSurveyFormDialog: (state) => {
       state.isSurveyFormDialogOpen = false;
     },
+    openSuccessDialog: (state) => {
+      state.isSuccessDialogOpen = true;
+    },
+    closeSuccessDialog: (state) => {
+      state.isSuccessDialogOpen = false;
+    },
+
     openSurveyTabs: (state) => {
       state.isSurveyTabsOpen = true;
     },
@@ -83,6 +92,8 @@ export const selectScreenerSurvey = (state: RootState) =>
 export const {
   openSurveyFormDialog,
   closeSurveyFormDialog,
+  openSuccessDialog,
+  closeSuccessDialog,
   openAdsDialog,
   closeAdsDialog,
   openSurveyTabs,

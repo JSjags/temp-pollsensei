@@ -51,6 +51,7 @@ import {
 import {
   selectScreenerSurvey,
   closeSurveyFormDialog,
+  openSuccessDialog,
 } from "@/redux/slices/earnDialogSlice";
 import { useDispatch } from "react-redux";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -306,31 +307,23 @@ const PaidRespondentSurveyResponse = () => {
 
   const screenerSurveyID = screenerSuveyBySurveyId?.[0]?._id || null;
 
-  const { data: respondent, error: respondentError } = useQuery({
+  const { data: respondent } = useQuery({
     queryKey: [...[APP_KEYS.START_SURVEY]],
     queryFn: () => startPaidSurvey(question._id, screenerSurveyID),
     enabled: !!screenerSurveyID,
   });
 
   const respondentId = respondent?.respondentId || null;
-  const canSubmit = !respondentError && !!respondentId;
-
-  console.log({ screenerSurveyID, respondentId });
 
   // useEffect(() => {
-  //   if (!canSubmit) {
-  //     toast.error("This survey has been filled. Please fill the next survey.");
+  //   if (respondentId === null) {
+  //     toast.error(
+  //       "You have already responded to this survey. Please fill the other surveys."
+  //     );
   //     dispatch(closeSurveyFormDialog());
   //     return;
   //   }
-  // }, [canSubmit, dispatch]);
-
-  // console.log({
-  //   screenerSuveyBySurveyId,
-  //   respondent,
-  //   respondentId,
-  //   screenerSurveyID,
-  // });
+  // }, [respondentId, dispatch]);
 
   const { data: screenerParticipants } = useQuery({
     queryKey: [APP_KEYS.RESPONDENT_DATA_BY_SECTION, "personalInfo"],
@@ -513,18 +506,28 @@ const PaidRespondentSurveyResponse = () => {
 
     try {
       setLoading(true);
-      !surveyType
-        ? await submitScreenerSurvey(
-            screenerSurveyResponsePayload,
-            question.surveyIds[0]
-          )
-        : await submitPaidSurvey(paidSurveyResponsePayload);
+      let isPaidSurvey = false;
+
+      if (!surveyType) {
+        await submitScreenerSurvey(
+          screenerSurveyResponsePayload,
+          question.surveyIds[0]
+        );
+      } else {
+        await submitPaidSurvey(paidSurveyResponsePayload);
+        isPaidSurvey = true;
+      }
       queryClient.invalidateQueries({
         queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
       });
       dispatch(closeSurveyFormDialog());
       await fetchApplicationSurveys();
-      toast.success("Your response was saved successfully");
+      if (isPaidSurvey) {
+        dispatch(openSuccessDialog());
+      } else {
+        toast.success("Your response was saved successfully");
+      }
+
       setLoading(false);
     } catch (error: any) {
       if (error.message) {

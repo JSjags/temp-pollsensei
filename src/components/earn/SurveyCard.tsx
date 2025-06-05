@@ -1,5 +1,5 @@
 "use client";
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import logoGold from "@/assets/images/logo-gold.png";
@@ -21,11 +21,24 @@ import { APP_KEYS } from "@/constants";
 interface Props {
   survey: any;
   activeTab: string;
+  applicationSurveys?: any;
 }
 
-const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
+const SurveyCard: FC<Props> = ({ survey, activeTab, applicationSurveys }) => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
+
+  // Check if current survey has already been applied to
+  const hasAlreadyApplied = useMemo(() => {
+    if (activeTab !== "apply" || !applicationSurveys?.data) return false;
+
+    const currentSurveyId = survey?.survey?._id;
+    if (!currentSurveyId) return false;
+
+    return applicationSurveys.data.some(
+      (app: any) => app.surveyId?._id === currentSurveyId
+    );
+  }, [activeTab, survey, applicationSurveys]);
 
   const getCorrectSurveyId = () => {
     if (activeTab === "available") return survey?.surveyId;
@@ -97,6 +110,9 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
         ? "Start Now"
         : "Survey Completed";
     } else if (activeTab === "apply") {
+      if (hasAlreadyApplied) {
+        return "Already Applied";
+      }
       return survey?.survey?.status === "On going" && "Apply Now";
     } else if (activeTab === "applications") {
       return survey?.status === "pending"
@@ -107,6 +123,18 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
     } else {
       return "Not Qualified";
     }
+  };
+
+  const isButtonDisabled = () => {
+    if (activeTab === "apply" && hasAlreadyApplied) {
+      return true;
+    }
+
+    return (
+      survey?.alreadyApplied === true ||
+      survey?.status === "pending" ||
+      survey?.status === "rejected"
+    );
   };
 
   return (
@@ -151,8 +179,7 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
         </p>
         <div className="w-full h-auto flex items-center gap-2">
           <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-3 flex items-center gap-1">
-            <Image src={logoGold} width={10} height={10} alt="logoGold" />3
-            pollcoins
+            3<Image src={logoGold} width={10} height={10} alt="logoGold" />
           </div>
         </div>
       </div>
@@ -163,11 +190,7 @@ const SurveyCard: FC<Props> = ({ survey, activeTab }) => {
         className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] cursor-pointer text-white text-xs font-bold text-center rounded-none rounded-b-2xl capitalize"
         type="button"
         onClick={handleStartNow}
-        disabled={
-          survey?.alreadyApplied === true ||
-          survey?.status === "pending" ||
-          survey?.status === "rejected"
-        }
+        disabled={isButtonDisabled()}
       >
         {getButtonText()}
       </Button>

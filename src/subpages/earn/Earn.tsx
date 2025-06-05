@@ -21,6 +21,8 @@ import {
   closeAdsDialog,
   openSurveyFormDialog,
   closeSurveyFormDialog,
+  openSuccessDialog,
+  closeSuccessDialog,
 } from "@/redux/slices/earnDialogSlice";
 import { PayoutDialog } from "@/components/payouts/components/dialogs";
 import { useRouter } from "next/navigation";
@@ -32,6 +34,13 @@ import { APP_KEYS } from "@/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchLoginStreak } from "@/services/api/apiRequest";
 import { formatLargeNumber } from "@/utils";
+import congrats from "@/assets/images/congrats.svg";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+} from "@/components/ui/dialog";
 
 const Earn = () => {
   const router = useRouter();
@@ -40,7 +49,7 @@ const Earn = () => {
   const {
     data: balance,
     isLoading,
-    refetch,
+    refetch: refetchBalance,
   } = useQuery({
     queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
     queryFn: () => fetchUnrestrictedBalance(),
@@ -49,7 +58,7 @@ const Earn = () => {
     refetchOnMount: false,
   });
 
-  const { data: streak } = useQuery({
+  const { data: streak, refetch: refetchStreak } = useQuery({
     queryKey: [...[APP_KEYS.LOGIN_STREAK]],
     queryFn: () => fetchLoginStreak(),
     enabled: true,
@@ -57,7 +66,7 @@ const Earn = () => {
     refetchOnMount: false,
   });
 
-  const currentStreak = streak?.currentStreak;
+  const currentStreak = streak?.current_streak || 0;
 
   const activities = [
     {
@@ -95,9 +104,8 @@ const Earn = () => {
   ];
 
   const dispatch = useDispatch();
-  const { isAdsDialogOpen, isSurveyFormDialogOpen } = useSelector(
-    (state: RootState) => state.earnDialogSlice
-  );
+  const { isAdsDialogOpen, isSurveyFormDialogOpen, isSuccessDialogOpen } =
+    useSelector((state: RootState) => state.earnDialogSlice);
 
   const handleActivityClick = async (buttonText: string) => {
     if (buttonText === "Complete Survey") {
@@ -218,7 +226,11 @@ const Earn = () => {
               </div>
             </div>
 
-            <DailyLoginCard onClaimSuccess={refetch} />
+            <DailyLoginCard
+              onClaimSuccess={refetchBalance}
+              streak={streak}
+              refetchStreak={refetchStreak}
+            />
           </div>
         </div>
         <div className="w-full h-auto flex flex-col gap-5">
@@ -240,6 +252,32 @@ const Earn = () => {
           }
         }}
       />
+
+      <Dialog
+        open={isSuccessDialogOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            dispatch(openSuccessDialog());
+          } else {
+            dispatch(closeSuccessDialog());
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogDescription className="h-[400px] flex flex-col gap-10 justify-center items-center">
+              <Image src={congrats} width={250} height={250} alt="congrats" />
+              <h1 className="text-2xl font-bold text-center">Successful!</h1>
+              <div className="flex items-center gap-1">
+                <p className="text-base text-center">
+                  You have successfully filled the survey and earned 3
+                </p>
+                <Image src={logoGold} width={15} height={15} alt="pollcoin" />
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
