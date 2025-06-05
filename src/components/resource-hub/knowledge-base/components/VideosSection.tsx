@@ -48,7 +48,7 @@ const VideosSection = (): JSX.Element => {
               </dl>
             ))}
             <Link
-              href="/articles"
+              href="/resource-hub/articles"
               className="inline-flex items-center text-purple-700 font-medium mt-6"
             >
               Watch more tutorials <span className="ml-1">&gt;</span>
