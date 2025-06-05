@@ -302,6 +302,8 @@ const page = (props: Props) => {
         return res.data as CouponDetails;
       },
       enabled: !!couponId,
+      gcTime: 0,
+      staleTime: 0,
     });
 
     // Local state for domains and emails
