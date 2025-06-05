@@ -52,7 +52,9 @@ const Page = () => {
 
   const minPayout = 20000; // Naira
   const accruedAmount = referral_reward?.accrued_amount || 0;
-  const hasRequested = referral_reward?.has_requested_payout;
+  const payoutAmount = referral_reward?.payout_amount || 0;
+  const lastDateRequested = referral_reward?.date_requested;
+  const newReferredUsers = referral_reward?.new_referred_users || 0;
 
   const payoutMutation = useMutation({
     mutationFn: postReferralPayout,
@@ -136,8 +138,8 @@ const Page = () => {
           {/* Referral Summary Skeleton */}
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <Skeleton className="h-6 w-48 mb-4" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+              {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="p-4 rounded-lg flex items-center gap-4">
                   <Skeleton className="h-12 w-12 rounded-full mr-4" />
                   <div>
@@ -181,13 +183,13 @@ const Page = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Your Referral Summary</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div className="bg-blue-50 p-4 rounded-lg flex items-center">
               <div className="bg-blue-100 p-3 rounded-full mr-4">
                 <FaUsers className="text-blue-600 text-xl" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Referred Users</p>
+                <p className="text-sm text-gray-600">Total Referred Users</p>
                 <p className="text-2xl font-bold">
                   {referral_reward?.number_of_referred_users || 0}
                 </p>
@@ -206,19 +208,44 @@ const Page = () => {
               </div>
             </div>
 
+            <div className="bg-yellow-50 p-4 rounded-lg flex items-center">
+              <div className="bg-yellow-100 p-3 rounded-full mr-4">
+                <FaUsers className="text-yellow-600 text-xl" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">New Referred Users</p>
+                <p className="text-2xl font-bold">{newReferredUsers}</p>
+              </div>
+            </div>
+
+            <div className="bg-pink-50 p-4 rounded-lg flex items-center">
+              <div className="bg-pink-100 p-3 rounded-full mr-4">
+                <FaMoneyBillWave className="text-pink-600 text-xl" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Payout Amount</p>
+                <p className="text-2xl font-bold">
+                  ₦{payoutAmount?.toFixed(2) || "0.00"}
+                </p>
+              </div>
+            </div>
+            {/* 
             <div className="bg-purple-50 p-4 rounded-lg flex items-center">
               <div className="bg-purple-100 p-3 rounded-full mr-4">
                 <MdOutlinePayments className="text-purple-600 text-xl" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Payout Status</p>
+                <p className="text-sm text-gray-600">Last Payout Date</p>
                 <p className="text-lg font-semibold">
-                  {referral_reward?.has_requested_payout
-                    ? "Requested"
-                    : "Available"}
+                  {lastDateRequested
+                    ? new Date(lastDateRequested).toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })
+                    : "Never"}
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       )}
@@ -226,24 +253,23 @@ const Page = () => {
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">Request Payout</h2>
         <p className="text-gray-600 mb-4">
-          You can request a payout once your accrued amount reaches ₦
+          You can request a payout once your payout amount reaches ₦
           {minPayout.toLocaleString()}.00.
         </p>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button
               className={`px-6 py-2 rounded-md font-medium ${
-                accruedAmount >= minPayout && !hasRequested
+                payoutAmount >= minPayout
                   ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
-              disabled={accruedAmount < minPayout || hasRequested}
+              disabled={payoutAmount < minPayout}
               onClick={() => {
-                if (accruedAmount >= minPayout && !hasRequested)
-                  setDialogOpen(true);
+                if (payoutAmount >= minPayout) setDialogOpen(true);
               }}
             >
-              {hasRequested ? "Payout Requested" : "Request Payout"}
+              Request Payout
             </Button>
           </DialogTrigger>
           <DialogContent className="z-[1000000]" overlayClassName="z-[100000]">
@@ -323,15 +349,27 @@ const Page = () => {
             </form>
           </DialogContent>
         </Dialog>
-        {accruedAmount < minPayout && (
+        {payoutAmount < minPayout && (
           <p className="text-sm text-amber-600 mt-2">
             You need ₦
-            {(minPayout - accruedAmount).toLocaleString(undefined, {
+            {(minPayout - payoutAmount).toLocaleString(undefined, {
               minimumFractionDigits: 2,
             })}{" "}
             more to request a payout.
           </p>
         )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">Last Payout Date</h2>
+        <p className="text-gray-600 mb-4">
+          {lastDateRequested
+            ? new Date(lastDateRequested).toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })
+            : "Never requested"}
+        </p>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
