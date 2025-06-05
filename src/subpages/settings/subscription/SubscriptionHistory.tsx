@@ -11,9 +11,7 @@ import {
   FaStripe,
   FaCalendarAlt,
 } from "react-icons/fa";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import ReceiptPDFDocument from "@/components/reusable/ReceiptPDFDocument";
-import { GoDownload } from "react-icons/go";
+import dynamic from "next/dynamic";
 
 interface SubscriptionRecord {
   _id: string;
@@ -85,6 +83,11 @@ const getGatewayIcon = (gateway: string) => {
 };
 
 const PAGE_SIZE = 10;
+
+const PDFDownloadButton = dynamic(
+  () => import("@/components/reusable/PDFDownloadButton"),
+  { ssr: false }
+);
 
 const SubscriptionHistory: React.FC = () => {
   const router = useRouter();
@@ -174,21 +177,7 @@ const SubscriptionHistory: React.FC = () => {
                     </span>
                   </td>
                   <td className="p-2 border">
-                    <PDFDownloadLink
-                      document={<ReceiptPDFDocument record={item} />}
-                      fileName={`PollSensei-Receipt-${item._id}.pdf`}
-                    >
-                      {({ loading }) => (
-                        <button
-                          className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-600 rounded hover:bg-purple-100 border border-purple-200 text-xs font-medium transition-colors"
-                          disabled={loading}
-                          title="Download receipt"
-                        >
-                          <GoDownload />
-                          {loading ? "Generating..." : "Download"}
-                        </button>
-                      )}
-                    </PDFDownloadLink>
+                    <PDFDownloadButton record={item} />
                   </td>
                 </tr>
               ))

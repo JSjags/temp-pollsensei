@@ -68,7 +68,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const ArticleDetails: React.FC = () => {
-  return <ArticleDetailsPage />;
+  return (
+    <div className="bg-white">
+      <ArticleDetailsPage />
+    </div>
+  );
 };
 
 export default ArticleDetails;

@@ -28,6 +28,7 @@ import {
   Settings,
   LogOut,
   User,
+  Ticket,
 } from "lucide-react";
 import { Button } from "../ui/button";
 
@@ -70,6 +71,11 @@ const SuperAdminSidebar: React.FC = () => {
       path: "/referrers",
       icon: <Users2 className="h-4 w-4" />,
     },
+    // {
+    //   label: "Coupons",
+    //   path: "/coupons",
+    //   icon: <Ticket className="h-4 w-4" />,
+    // },
   ];
 
   return (
