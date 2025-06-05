@@ -58,7 +58,7 @@ export const ControlledMultiSelect: React.FC<ControlledMultiSelectProps> = ({
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       <label htmlFor={name} className="text-[#333333] text-sm">
-        {label} {required && <span className="text-red-500">*</span>}
+        {label} {required && "(Required)"}
       </label>
       <Controller
         name={name}

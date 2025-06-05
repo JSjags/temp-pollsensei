@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FaArrowRightLong } from "react-icons/fa6";
 import ActivityCard from "@/components/earn/ActivityCard";
 import stethoscope from "@/assets/images/stethoscope.jpg";
 import walk from "@/assets/images/walk.jpg";
 import Image from "next/image";
-import stakedCoins from "@/assets/images/stacked-coins.png";
+import logoGold from "@/assets/images/logo-gold.png";
 import tiltCup from "@/assets/images/tilt-cup.png";
 import { MdInfo } from "react-icons/md";
 import DailyLoginCard from "@/components/earn/DailyLoginCard";
@@ -21,6 +21,8 @@ import {
   closeAdsDialog,
   openSurveyFormDialog,
   closeSurveyFormDialog,
+  openSuccessDialog,
+  closeSuccessDialog,
 } from "@/redux/slices/earnDialogSlice";
 import { PayoutDialog } from "@/components/payouts/components/dialogs";
 import { useRouter } from "next/navigation";
@@ -32,35 +34,39 @@ import { APP_KEYS } from "@/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchLoginStreak } from "@/services/api/apiRequest";
 import { formatLargeNumber } from "@/utils";
+import congrats from "@/assets/images/congrats.svg";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+} from "@/components/ui/dialog";
 
 const Earn = () => {
   const router = useRouter();
   const [activitiesCompleted, setActivitiesCompleted] = useState<number>(0);
-  const accessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
 
   const {
     data: balance,
     isLoading,
-    refetch,
+    refetch: refetchBalance,
   } = useQuery({
-    queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE], accessToken],
-    queryFn: () => fetchUnrestrictedBalance(accessToken),
-    enabled: !!accessToken,
+    queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
+    queryFn: () => fetchUnrestrictedBalance(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  const { data: streak } = useQuery({
-    queryKey: [...[APP_KEYS.LOGIN_STREAK], accessToken],
-    queryFn: () => fetchLoginStreak(accessToken),
-    enabled: !!accessToken,
+  const { data: streak, refetch: refetchStreak } = useQuery({
+    queryKey: [...[APP_KEYS.LOGIN_STREAK]],
+    queryFn: () => fetchLoginStreak(),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  const currentStreak = streak?.data?.currentStreak;
+  const currentStreak = streak?.current_streak || 0;
 
   const activities = [
     {
@@ -98,9 +104,8 @@ const Earn = () => {
   ];
 
   const dispatch = useDispatch();
-  const { isAdsDialogOpen, isSurveyFormDialogOpen } = useSelector(
-    (state: RootState) => state.earnDialogSlice
-  );
+  const { isAdsDialogOpen, isSurveyFormDialogOpen, isSuccessDialogOpen } =
+    useSelector((state: RootState) => state.earnDialogSlice);
 
   const handleActivityClick = async (buttonText: string) => {
     if (buttonText === "Complete Survey") {
@@ -126,18 +131,16 @@ const Earn = () => {
         <div className="w-full h-auto rounded-xl bg-gradient-to-r from-[#260D3E] via-[#260D3E] to-[#EB06AB] px-4 py-2 flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1 items-center justify-start lg:justify-normal h-[120px] lg:h-auto">
             <div className="flex gap-1 items-center">
-              <Image src={stakedCoins} width={30} height={30} alt="Coins" />
               <h1 className="text-[32px] md:text-[42px] font-bold text-white">
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  formatLargeNumber(balance?.data?.unrestrictedBalance || 0)
+                  formatLargeNumber(balance?.unrestrictedBalance || 0)
                 )}
               </h1>
+              <Image src={logoGold} width={20} height={20} alt="pollcoin" />
             </div>
-            <p className="text-xs lg:text-sm text-white/80">
-              Pollcoins generated
-            </p>
+            <p className="text-xs lg:text-sm text-white/80">Pollcoins Earned</p>
           </div>
           <span className="w-[1px] h-16 bg-white/50">&nbsp;</span>
           <div className="flex flex-col lg:flex-row items-center gap-5 h-[120px] lg:h-auto">
@@ -156,7 +159,7 @@ const Earn = () => {
                 size="sm"
                 className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] flex items-center gap-2 text-white hover:scale-105 transition-all rounded-full text-sm lg:text-base"
                 type="button"
-                disabled={balance?.data?.unrestrictedBalance === 0}
+                disabled={balance?.unrestrictedBalance === 0}
               >
                 Redeem Coins
                 <FaArrowRightLong className="text-base text-white" />
@@ -223,7 +226,11 @@ const Earn = () => {
               </div>
             </div>
 
-            <DailyLoginCard onClaimSuccess={refetch} />
+            <DailyLoginCard
+              onClaimSuccess={refetchBalance}
+              streak={streak}
+              refetchStreak={refetchStreak}
+            />
           </div>
         </div>
         <div className="w-full h-auto flex flex-col gap-5">
@@ -245,6 +252,32 @@ const Earn = () => {
           }
         }}
       />
+
+      <Dialog
+        open={isSuccessDialogOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            dispatch(openSuccessDialog());
+          } else {
+            dispatch(closeSuccessDialog());
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogDescription className="h-[400px] flex flex-col gap-10 justify-center items-center">
+              <Image src={congrats} width={250} height={250} alt="congrats" />
+              <h1 className="text-2xl font-bold text-center">Successful!</h1>
+              <div className="flex items-center gap-1">
+                <p className="text-base text-center">
+                  You have successfully filled the survey and earned 3
+                </p>
+                <Image src={logoGold} width={15} height={15} alt="pollcoin" />
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -116,9 +116,6 @@ const markNotificationAsRead = async (notificationId: string) => {
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
   // const user2 = useSelector((state: RootState) => state.user);
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -136,13 +133,13 @@ const Navbar = () => {
     queryFn: fetchNotifications,
   });
 
-  const { data: isPaidRespondent } = useQuery({
-    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT], userAccessToken],
-    queryFn: () => fetchPaidRespondentStatus(userAccessToken),
-    enabled: !!userAccessToken,
+  const { data: isPaidRespondent, isSuccess } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
+    queryFn: () => fetchPaidRespondentStatus(),
+    enabled: true,
   });
 
-  const isPaidRespondentStatus = isPaidRespondent?.data?.isPaidRespondent;
+  const isPaidRespondentStatus = isPaidRespondent?.isPaidRespondent;
 
   const { mutate: markAsRead } = useMutation({
     mutationFn: markNotificationAsRead,
@@ -432,16 +429,18 @@ const Navbar = () => {
                       <p className="text-xs leading-none text-muted-foreground">
                         Admin
                       </p>
-                      <div className="flex items-center gap-1">
-                        <p className="text-xs leading-none text-muted-foreground">
-                          Paid Respondent
-                        </p>
-                        {isPaidRespondentStatus ? (
-                          <RxCheckCircled className="text-lg text-[green]" />
-                        ) : (
-                          <RxCrossCircled className="text-lg text-[red]" />
-                        )}
-                      </div>
+                      {isSuccess && (
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs leading-none text-muted-foreground">
+                            Paid Respondent
+                          </p>
+                          {isSuccess && !isPaidRespondentStatus ? (
+                            <RxCrossCircled className="text-lg text-[red]" />
+                          ) : (
+                            <RxCheckCircled className="text-lg text-[green]" />
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </DropdownMenuLabel>

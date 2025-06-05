@@ -120,6 +120,8 @@ const Edu_Employment: FC<Props> = ({
             label="Employment industry"
             error={errors.industry}
             disabled={isPending}
+            otherFieldName="otherIndustry"
+            register={register}
           />
 
           <ControlledSelect
@@ -130,7 +132,7 @@ const Edu_Employment: FC<Props> = ({
             label="What is your job role?"
             error={errors.jobRole}
             disabled={isPending}
-            // otherFieldName="otherJob"
+            otherFieldName="otherJob"
             register={register}
           />
 

@@ -20,21 +20,14 @@ import marker from "@/assets/images/marker.svg";
 import tech from "@/assets/images/tech.svg";
 import { getInitialValuesFromSchema } from "@/utils/respondentUtils";
 import { combinedSchema, CombinedFormData } from "@/utils/combinedSchema";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const RespondentForm = () => {
-  const router = useRouter();
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState("personalInfo");
   const initialFormData = getInitialValuesFromSchema(combinedSchema);
 
   const [formData, setFormData] = useState<CombinedFormData>(initialFormData);
-
-  useEffect(() => {
-    const currentPath = window.location.pathname;
-    if (currentPath === "/respondent-form") {
-      router.push("/respondent-form/verify-phone");
-    }
-  }, [router]);
 
   const tabs = [
     {

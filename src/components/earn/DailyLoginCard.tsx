@@ -5,32 +5,40 @@ import Image from "next/image";
 import Coin from "@/assets/images/Coin.png";
 import { GiPadlock } from "react-icons/gi";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import {
-  fetchDailyReward,
-  fetchUnrestrictedBalance,
-} from "@/services/api/apiRequest";
-import Cookies from "js-cookie";
+import { fetchDailyReward } from "@/services/api/apiRequest";
 import { queryClient } from "@/contexts/index";
 import { APP_KEYS } from "@/constants";
+import logoGold from "@/assets/images/logo-gold.png";
+
+interface MonthlyLogin {
+  count: number;
+  date: string;
+  streak: number;
+}
+
+interface StreakData {
+  current_streak: number;
+  has_logged_in_today: boolean;
+  longest_streak: number;
+  monthly_logins: MonthlyLogin[];
+  total_logins: number;
+}
 
 interface DailyLoginCardProps {
   onClaimSuccess?: () => void;
+  streak?: StreakData;
+  refetchStreak?: () => void;
 }
 
-const DailyLoginCard: FC<DailyLoginCardProps> = ({ onClaimSuccess }) => {
+const DailyLoginCard: FC<DailyLoginCardProps> = ({
+  onClaimSuccess,
+  streak,
+  refetchStreak,
+}) => {
   const [currentDay, setCurrentDay] = useState<number>(0);
   const [claimedDays, setClaimedDays] = useState<number[]>([]);
   const [daysInMonth, setDaysInMonth] = useState<number>(0);
   const [displayRange, setDisplayRange] = useState({ start: 1, end: 7 });
-
-  const accessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
-  const userId = useSelector((state: RootState) => state.user.user?._id);
-
-  const CLAIMED_DAYS_COOKIE_KEY = `claimedDays_${userId}`;
 
   useEffect(() => {
     const today = new Date();
@@ -46,30 +54,48 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({ onClaimSuccess }) => {
     const start = Math.max(1, Math.min(currentDate - 3, daysInMonth - 6));
     const end = Math.min(daysInMonth, start + 6);
     setDisplayRange({ start, end });
+  }, []);
 
-    const savedClaims = Cookies.get(CLAIMED_DAYS_COOKIE_KEY);
-    if (savedClaims) {
-      setClaimedDays(JSON.parse(savedClaims));
+  useEffect(() => {
+    // Extract claimed days from monthly_logins
+    if (streak?.monthly_logins) {
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+
+      const claimedDaysFromAPI = streak.monthly_logins
+        .map((login: MonthlyLogin) => {
+          const loginDate = new Date(login.date);
+          // Only include logins from current month and year
+          if (
+            loginDate.getMonth() === currentMonth &&
+            loginDate.getFullYear() === currentYear
+          ) {
+            return loginDate.getDate();
+          }
+          return null;
+        })
+        .filter((day: number | null) => day !== null) as number[];
+
+      // Remove duplicates in case there are multiple logins on the same day
+      const uniqueClaimedDays = Array.from(new Set(claimedDaysFromAPI));
+      setClaimedDays(uniqueClaimedDays);
     }
-  }, [
-    currentDay,
-    setCurrentDay,
-    setClaimedDays,
-    userId,
-    CLAIMED_DAYS_COOKIE_KEY,
-  ]);
+  }, [streak?.monthly_logins]);
 
   // Function to Handle claim day
   const handleClaimDay = async (day: number) => {
     if (!claimedDays.includes(day) && day === currentDay) {
-      const { success } = await fetchDailyReward(accessToken);
+      const { success } = await fetchDailyReward();
 
       if (success) {
-        const newClaimedDays = [...claimedDays, day];
-        setClaimedDays(newClaimedDays);
-        Cookies.set(CLAIMED_DAYS_COOKIE_KEY, JSON.stringify(newClaimedDays));
-
+        if (refetchStreak) {
+          await refetchStreak();
+        }
         onClaimSuccess?.();
+        queryClient.invalidateQueries({
+          queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
+        });
       }
     }
   };
@@ -134,8 +160,8 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({ onClaimSuccess }) => {
         >
           <p className="text-[#333333] text-xs">Day {login.day}</p>
           <div className="flex items-center gap-1">
-            <Image src={Coin} width={20} height={20} alt="Coin" />
             <p className="text-sm text-[#5B03B2] font-bold">+{login.price}</p>
+            <Image src={logoGold} width={15} height={15} alt="pollcoin" />
           </div>
           <Button
             variant="default"

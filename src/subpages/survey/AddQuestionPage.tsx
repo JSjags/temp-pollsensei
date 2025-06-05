@@ -462,6 +462,8 @@ const AddQuestionPage = () => {
 
       await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
+      dispatch(resetQuestion());
+      dispatch(resetSurvey());
       setReview(true);
     } catch (e) {
       console.error("Survey creation error:", e);
@@ -471,6 +473,7 @@ const AddQuestionPage = () => {
   useEffect(() => {
     if (isSuccess) {
       setReview((prev) => !prev);
+      dispatch(resetQuestion());
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);

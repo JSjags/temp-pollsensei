@@ -41,12 +41,7 @@ const CompletedVideoDialog: FC<CompletedVideoDialogProps> = ({
               Congratulations!
             </h1>
             <div className="flex items-center gap-1">
-              <Image
-                src={logoGold}
-                width={20}
-                height={20}
-                alt="Stacked Coins"
-              />
+              <Image src={logoGold} width={20} height={20} alt="pollcoin" />
               <p className="text-[40px] text-[#5B03B2] font-bold">+{reward}</p>
             </div>
             <p className="text-sm lg:text-base text-[#898989] text-center">

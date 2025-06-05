@@ -21,8 +21,6 @@ import tech from "@/assets/images/tech.svg";
 import { getInitialValuesFromSchema } from "@/utils/respondentUtils";
 import { combinedSchema, CombinedFormData } from "@/utils/combinedSchema";
 import { useQuery } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import { GetRespondentData } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
 
@@ -145,14 +143,10 @@ const EditRespondent = () => {
     },
   ];
 
-  const userAccessToken = useSelector(
-    (state: RootState) => state.user.access_token
-  );
-
   const { data: respondentData, isLoading } = useQuery({
-    queryKey: [...[APP_KEYS.RESPONDENT_DATA], userAccessToken, activeTab],
-    queryFn: () => GetRespondentData(userAccessToken, activeTab),
-    enabled: !!userAccessToken,
+    queryKey: [...[APP_KEYS.RESPONDENT_DATA], activeTab],
+    queryFn: () => GetRespondentData(activeTab),
+    enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

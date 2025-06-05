@@ -155,7 +155,7 @@ const Geo_Culture: FC<Props> = ({
 
           <div className="flex flex-col gap-2">
             <label htmlFor="nationality" className="text-[#333333] text-sm">
-              What is your nationality? <span className="text-red-500">*</span>
+              What is your nationality? (Required)
             </label>
             <Controller
               name="nationality"

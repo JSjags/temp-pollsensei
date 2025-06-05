@@ -8,6 +8,7 @@ export const petOptions = [
   { value: "rabbit", label: "Rabbit" },
   { value: "bird", label: "Bird" },
   { value: "snake", label: "Snake" },
+  { value: "none", label: "None" },
   { value: "other", label: "Other" },
 ];
 
@@ -150,6 +151,7 @@ export const industryOptions = [
   { value: "fintech", label: "Fin-Tech" },
   { value: "government", label: "Government" },
   { value: "oil_and_gas", label: "Oil and Gas" },
+  { value: "other", label: "Other (Please specify)" },
 ];
 
 export const jobRoleOptions = [
@@ -308,6 +310,7 @@ export const PcOperatingSystemOptions = [
   { value: "macos", label: "MacOS" },
   { value: "chromeos", label: "ChromeOS" },
   { value: "linux", label: "Linux" },
+  { value: "none", label: "N/A" },
   { value: "other", label: "Other" },
 ];
 
@@ -315,6 +318,7 @@ export const operatingSystemOptions = [
   { value: "windows", label: "Windows" },
   { value: "android", label: "Android" },
   { value: "ios", label: "iOS" },
+  { value: "none", label: "N/A" },
   { value: "other", label: "Other" },
 ];
 
