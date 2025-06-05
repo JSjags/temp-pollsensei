@@ -728,6 +728,10 @@ input[type="radio"].radio:checked:before {
 }
 
 /* Existing prose styles */
+.prose-clone {
+  max-width: w-full;
+  color: inherit;
+}
 .prose {
   max-width: 65ch;
   color: inherit;

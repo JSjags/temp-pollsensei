@@ -35,7 +35,7 @@ export function ResourceCard({
         // onClick={() =>
         //   router.push(learningHubRoutes.SINGLE_ARTICLE_PAGE(resource.slug))
         // }
-        className="bg-white rounded-xl scale-100 shadow-md overflow-hidden cursor-pointer border-2 hover:border-2 border-transparent hover:shadow-[#9D50BB50] hover:border-[#9D50BB] p-4 hover:!scale-105 hover:shadow-2xl transition-all"
+        className="bg-white rounded-xl scale-100 shadow-md overflow-hidden cursor-pointer border-2 hover:border-2 border-transparent hover:shadow-[#9D50BB50] hover:border-[#9D50BB] p-2 hover:!scale-105 hover:shadow-2xl transition-all"
       >
         <div
           className={`${
@@ -68,7 +68,10 @@ export function ResourceCard({
           )}
         </div>
         <div className="pt-4">
-          <h3 className="font-semibold mb-2">{resource.title}</h3>
+          <h3 className="font-semibold mb-2 line-clamp-2">
+            {resource.title}
+            <br />
+          </h3>
           <div className="flex items-center text-sm text-gray-600">
             {resource.type === "video" && (
               <PlayCircle className="mr-1 h-4 w-4" />

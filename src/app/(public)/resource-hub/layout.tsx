@@ -4,7 +4,7 @@ import Footer from "@/components/blocks/Footer";
 import NavBar from "@/components/blocks/NavBar";
 // import Navbar from "@/components/blocks/Navbar";
 
-export default function ResoureLayout({
+export default function ResourceLayout({
   children,
 }: {
   children: React.ReactNode;

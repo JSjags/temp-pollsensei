@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import { FadeLoader } from "react-spinners";
 import PageControl from "../common/PageControl";
 import { TUTORIAL_ENUM } from "@/services/api/constants.api";
-import { useGetTutorials } from "@/hooks/useGetRequests";
+import { useGetTutorials, usePublicGetTutorials } from "@/hooks/useGetRequests";
 
 type Article = {
   title: string;
@@ -20,7 +20,7 @@ type Article = {
 
 const ArticlesGrid: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error } = useGetTutorials({
+  const { data, isLoading, error } = usePublicGetTutorials({
     page: currentPage,
     filter: TUTORIAL_ENUM.web,
   });

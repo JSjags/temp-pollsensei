@@ -28,7 +28,7 @@ const ArticleDetailsPage = (): JSX.Element => {
   });
 
   return (
-    <div className="max-w-3xl w-full mx-auto p-6 bg-white text-gray-800">
+    <div className="max-w-4xl w-full mx-auto p-6 bg-white text-gray-800">
       {isLoading || isRefetching ? (
         <div className="flex flex-col gap-y-6">
           <div className="w-full">
@@ -85,7 +85,7 @@ const ArticleDetailsPage = (): JSX.Element => {
           </p>
 
           {!!data?.data?.content && (
-            <main className="py-10 prose w-full">
+            <main className="py-10 prose-clone w-full">
               {/* Render the article content as HTML, full width */}
               <div
                 className="w-full"
