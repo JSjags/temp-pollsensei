@@ -24,12 +24,13 @@ import StripeDialog from "./Stripe";
 import { useStripePayoutBanks } from "../../queries/useStripePayoutBanks";
 import { usePayoutConversionRate } from "../../queries/usePayoutConverionrate";
 import StripeConfirmDialog from "./StripeConfirmDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PaymentOptionsData = [
-  {
-    label: "Card",
-    src: VisaLogo,
-  },
+  // {
+  //   label: "Card",
+  //   src: VisaLogo,
+  // },
   {
     label: "Stripe",
     src: StripeLogo,
@@ -68,7 +69,8 @@ export function CheckoutDialog() {
   const { data: PayoutBanks } = useStripePayoutBanks();
 
   const { data, isLoading: conversionLoading } = usePayoutConversionRate();
-  const { data: previousBank } = usePreviousPayoutBank();
+  const { data: previousBank, isLoading: PreviousBankLoading } =
+    usePreviousPayoutBank();
   const hasPreviousBank = previousBank?.data?.length > 0;
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
@@ -209,15 +211,20 @@ export function CheckoutDialog() {
                 <div>
                   {selectedOption === "Paystack" && hasPreviousBank && (
                     <div className="flex justify-end">
-                      <button
-                        onClick={handleUsePreviousBank}
-                        type="button"
-                        className="text-tertiary underline"
-                      >
-                        Use previous payout bank
-                      </button>
+                      {PreviousBankLoading ? (
+                        <Skeleton className="h-6 w-1/2" />
+                      ) : (
+                        <button
+                          onClick={handleUsePreviousBank}
+                          type="button"
+                          className="text-tertiary underline"
+                        >
+                          Use previous payout bank
+                        </button>
+                      )}
                     </div>
                   )}
+
                   {selectedOption !== "Stripe" && (
                     <>
                       <label htmlFor="name" className="text-sm">
