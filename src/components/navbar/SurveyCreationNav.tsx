@@ -661,7 +661,7 @@ const SurveyCreationNav = () => {
                 }}
               >
                 <FiUpload className="w-5 h-5" />
-                Upload Results
+                Upload Response
               </Button>
             ) : null
           ) : (
@@ -1122,7 +1122,7 @@ const SurveyCreationNav = () => {
               }}
             >
               <FiUpload className="w-5 h-5" />
-              Upload Results
+              Upload Response
             </Button>
           ) : (
             <div className="flex justify-between items-center gap-3">

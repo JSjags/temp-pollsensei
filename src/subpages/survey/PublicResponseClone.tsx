@@ -1029,7 +1029,8 @@ const PublicResponse = () => {
                 return (
                   <Input
                     className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded"
-                    placeholder={`Enter a number between ${quest?.min} and ${quest?.max}`}
+                    // placeholder={`Enter a number between ${quest?.min} and ${quest?.max}`}
+                    placeholder={`Enter a number`}
                     type="number"
                     min={quest.min}
                     max={quest.max}

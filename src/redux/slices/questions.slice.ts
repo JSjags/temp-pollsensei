@@ -35,7 +35,7 @@ const questionSlice = createSlice({
       state.questions.push(action.payload as never);
     },
     deleteQuestion: (state, action) => {
-      state.questions.splice(action.payload, 1);
+      state.questions.splice(action?.payload?.editIndex ?? action.payload, 1);
     },
     updateQuestion: (
       state,

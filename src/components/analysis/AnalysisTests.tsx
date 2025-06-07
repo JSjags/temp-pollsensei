@@ -431,7 +431,7 @@ export default function DragAndDropPage() {
   return (
     <>
       <AnimatePresence>
-        <motion.div
+        {/* <motion.div
           key="senseiMaster"
           initial="hidden"
           animate="visible"
@@ -440,7 +440,7 @@ export default function DragAndDropPage() {
           className="bg-blue-500 z-[1000000] fixed top-0 left-0"
         >
           <SenseiMaster type={"analysis"} />
-        </motion.div>
+        </motion.div> */}
       </AnimatePresence>
       {!showReport ? (
         <Fragment>
