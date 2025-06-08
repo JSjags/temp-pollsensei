@@ -16,7 +16,7 @@ import {
   fetchApplySurveys,
   fetchApplicationSurveys,
 } from "@/services/api/apiRequest";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 
 const SurveyTabs = () => {
@@ -27,32 +27,65 @@ const SurveyTabs = () => {
 
   const [activeTab, setActiveTab] = useState<string>("available");
 
-  const { data: availableSurveys, isLoading: loadingAvailable } = useQuery({
-    queryKey: [...[APP_KEYS.AVAILABLE_SURVEYS]],
-    queryFn: () => fetchAvailableSurveys(),
-    enabled: true,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+  const {
+    data: availableSurveys,
+    isLoading: loadingAvailable,
+    fetchNextPage: fetchNextAvailable,
+    hasNextPage: hasNextAvailable,
+    isFetchingNextPage: isFetchingNextAvailable,
+  } = useInfiniteQuery({
+    queryKey: [APP_KEYS.AVAILABLE_SURVEYS],
+    queryFn: ({ pageParam = 1 }) => fetchAvailableSurveys(pageParam, 8),
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage?.data || lastPage.data.length < 8) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
+    enabled: activeTab === "available",
     staleTime: 30000,
     gcTime: 5 * 60 * 1000,
   });
 
-  const { data: applySurveys, isLoading: loadingApply } = useQuery({
-    queryKey: [...[APP_KEYS.APPLY_SURVEYS]],
-    queryFn: () => fetchApplySurveys(),
-    enabled: true,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+  const {
+    data: applySurveys,
+    isLoading: loadingApply,
+    fetchNextPage: fetchNextApply,
+    hasNextPage: hasNextApply,
+    isFetchingNextPage: isFetchingNextApply,
+  } = useInfiniteQuery({
+    queryKey: [APP_KEYS.APPLY_SURVEYS],
+    queryFn: ({ pageParam = 1 }) => fetchApplySurveys(pageParam, 8),
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage?.data || lastPage.data.length < 8) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
+    enabled: activeTab === "apply",
     staleTime: 30000,
     gcTime: 5 * 60 * 1000,
   });
 
-  const { data: applicationSurveys, isLoading: loadingApplication } = useQuery({
-    queryKey: [...[APP_KEYS.APPLICATION_SURVEYS]],
-    queryFn: () => fetchApplicationSurveys(),
-    enabled: true,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
+  const {
+    data: applicationSurveys,
+    isLoading: loadingApplication,
+    fetchNextPage: fetchNextApplication,
+    hasNextPage: hasNextApplication,
+    isFetchingNextPage: isFetchingNextApplication,
+  } = useInfiniteQuery({
+    queryKey: [APP_KEYS.APPLICATION_SURVEYS],
+    queryFn: ({ pageParam = 1 }) => fetchApplicationSurveys(pageParam, 8),
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage?.data || lastPage.data.length < 8) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
+    enabled: activeTab === "applications",
     staleTime: 30000,
     gcTime: 5 * 60 * 1000,
   });
@@ -67,6 +100,9 @@ const SurveyTabs = () => {
           availableSurveys={availableSurveys}
           isLoading={loadingAvailable}
           activeTab={activeTab}
+          fetchNextPage={fetchNextAvailable}
+          hasNextPage={hasNextAvailable}
+          isFetchingNextPage={isFetchingNextAvailable}
         />
       ),
     },
@@ -80,6 +116,9 @@ const SurveyTabs = () => {
           applicationSurveys={applicationSurveys}
           isLoading={loadingApply}
           activeTab={activeTab}
+          fetchNextPage={fetchNextApply}
+          hasNextPage={hasNextApply}
+          isFetchingNextPage={isFetchingNextApply}
         />
       ),
     },
@@ -92,6 +131,9 @@ const SurveyTabs = () => {
           applicationSurveys={applicationSurveys}
           isLoading={loadingApplication}
           activeTab={activeTab}
+          fetchNextPage={fetchNextApplication}
+          hasNextPage={hasNextApplication}
+          isFetchingNextPage={isFetchingNextApplication}
         />
       ),
     },

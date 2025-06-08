@@ -236,9 +236,17 @@ export const fetchUnrestrictedBalance = async () => {
   }
 };
 
-export const fetchAvailableSurveys = async () => {
+export const fetchAvailableSurveys = async (
+  page: number = 1,
+  limit: number = 8
+) => {
   try {
-    const response = await axiosInstance.get("/survey-apply/recommendations");
+    const response = await axiosInstance.get("/survey-apply/recommendations", {
+      params: {
+        page,
+        limit,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching available surveys:", error);
@@ -246,10 +254,19 @@ export const fetchAvailableSurveys = async () => {
   }
 };
 
-export const fetchApplySurveys = async () => {
+export const fetchApplySurveys = async (
+  page: number = 1,
+  limit: number = 8
+) => {
   try {
     const response = await axiosInstance.get(
-      "/screener-survey/screened-surveys"
+      "/screener-survey/screened-surveys",
+      {
+        params: {
+          page,
+          limit,
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -258,9 +275,17 @@ export const fetchApplySurveys = async () => {
   }
 };
 
-export const fetchApplicationSurveys = async () => {
+export const fetchApplicationSurveys = async (
+  page: number = 1,
+  limit: number = 8
+) => {
   try {
-    const response = await axiosInstance.get("/survey-apply/applications");
+    const response = await axiosInstance.get("/survey-apply/applications", {
+      params: {
+        page,
+        limit,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching application surveys:", error);
