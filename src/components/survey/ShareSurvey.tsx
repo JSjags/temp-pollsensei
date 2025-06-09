@@ -244,6 +244,7 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({ onClick, _id }) => {
               <DownloadPdfButton
                 surveyData={surveyData}
                 isSuccess={isSurveyDataSuccess}
+                surveyId={_id!}
               />
             </>
           )}

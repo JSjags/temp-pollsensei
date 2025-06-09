@@ -57,7 +57,7 @@ const ANALYSIS_STATES = [
 
 const VARIABLE_EXTRACTION_STATES = [
   {
-    title: "Scanning Document Structure",
+    title: "Scanning Response Structure",
     duration: 3500, // 3.5 seconds
   },
   {
