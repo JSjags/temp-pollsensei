@@ -25,10 +25,10 @@ const stripePromise = loadStripe(
 );
 
 const PaymentOptionsData = [
-  {
-    label: "Card",
-    src: VisaLogo,
-  },
+  // {
+  //   label: "Card",
+  //   src: VisaLogo,
+  // },
   {
     label: "Stripe",
     src: StripeLogo,
@@ -85,7 +85,7 @@ export function CheckoutDialogWrapper() {
 }
 
 function CheckoutDialog() {
-  const [selectedOption, setSelectedOption] = useState<string | null>("Card");
+  const [selectedOption, setSelectedOption] = useState<string | null>("Paystack");
   const [cardHolder, setCardHolder] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");

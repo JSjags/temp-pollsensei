@@ -62,7 +62,7 @@ export const usePayoutStore = create<PayoutState>()(
       nonRedeemableCoins: 0,
       coinsRedeemed: 0,
       threshold: 1000,
-      selectedOption: "Card",
+      selectedOption: "Paystack",
       wasRedirected: false,
       gateway: '',
 

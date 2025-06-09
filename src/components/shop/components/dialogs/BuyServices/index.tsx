@@ -12,6 +12,8 @@ import { LoadingSpinner } from "../BuyPollcoins/CheckoutDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "react-toastify";
 import { formatNumber } from "@/components/payouts/functions";
+import { Pollcoin } from "@/assets/images";
+import Image from "next/image";
 
 type BuyDialogProps = {
   children: ReactNode;
@@ -206,7 +208,7 @@ export function BuyServicesDialog(props: BuyDialogProps) {
 
         {analysisStep === "checkout" && (
           <CheckoutDialog
-            amount={credit} // Updated to use credit instead of analysisCredit
+            amount={credit}
             rate={pricePerCredit}
             setStep={setAnalysisStep}
             loading={loading}
@@ -291,13 +293,19 @@ function CheckoutDialog({
                 className="w-full flex items-center justify-between border-b border-dashed pb-[14px]"
               >
                 <p className="text-sm font-bold">{item.label}</p>
-                <p>{item.label === title ? item.value : `${item.value}pc`}</p>
+                <div className="flex items-center gap-1.5">
+                  <Image src={Pollcoin} alt="icons" className="size-4" />
+                  <p>{item.label === title ? item.value : `${item.value}`}</p>
+                </div>
               </div>
             ))}
           </div>
           <div className="w-full flex items-center justify-between pt-4 mt-6">
             <p className="text-base font-bold">Total</p>
-            <p className="text-base font-bold">{pollAmount}pc</p>
+            <div className="flex items-center gap-1.5">
+              <Image src={Pollcoin} alt="icons" className="size-4" />
+              <p className="text-base font-bold">{pollAmount}</p>
+            </div>
           </div>
         </div>
         <div className="mt-auto w-full flex items-end justify-end max-[440px]:hidden">
