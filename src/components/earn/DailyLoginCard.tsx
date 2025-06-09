@@ -57,16 +57,14 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
   }, []);
 
   useEffect(() => {
-    // Extract claimed days from monthly_logins
     if (streak?.monthly_logins) {
       const today = new Date();
       const currentMonth = today.getMonth();
       const currentYear = today.getFullYear();
 
-      const claimedDaysFromAPI = streak.monthly_logins
+      const claimedDays = streak.monthly_logins
         .map((login: MonthlyLogin) => {
           const loginDate = new Date(login.date);
-          // Only include logins from current month and year
           if (
             loginDate.getMonth() === currentMonth &&
             loginDate.getFullYear() === currentYear
@@ -77,25 +75,38 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
         })
         .filter((day: number | null) => day !== null) as number[];
 
-      // Remove duplicates in case there are multiple logins on the same day
-      const uniqueClaimedDays = Array.from(new Set(claimedDaysFromAPI));
+      const uniqueClaimedDays = Array.from(new Set(claimedDays));
       setClaimedDays(uniqueClaimedDays);
     }
   }, [streak?.monthly_logins]);
 
-  // Function to Handle claim day
   const handleClaimDay = async (day: number) => {
     if (!claimedDays.includes(day) && day === currentDay) {
-      const { success } = await fetchDailyReward();
+      try {
+        const response = await fetchDailyReward();
 
-      if (success) {
-        if (refetchStreak) {
-          await refetchStreak();
+        const { reward_granted } = response;
+
+        if (reward_granted) {
+          setClaimedDays((prev) => [...prev, day]);
+
+          if (refetchStreak) {
+            await refetchStreak();
+          }
+
+          // Optional callback
+          if (onClaimSuccess) {
+            onClaimSuccess();
+          }
+
+          queryClient.invalidateQueries({
+            queryKey: [APP_KEYS.UNRESTRICTED_BALANCE],
+          });
+        } else {
+          console.error("Reward not granted, not proceeding with updates");
         }
-        onClaimSuccess?.();
-        queryClient.invalidateQueries({
-          queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
-        });
+      } catch (error) {
+        console.error("Error in handleClaimDay:", error);
       }
     }
   };

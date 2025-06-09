@@ -88,7 +88,8 @@ const SocialMediaCard = () => {
               <Button
                 variant="default"
                 size="sm"
-                disabled={isClaimed}
+                // disabled={isClaimed}
+                disabled
                 onClick={() => handleClaim(index)}
                 className={`${
                   isClaimed
