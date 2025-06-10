@@ -9,7 +9,9 @@ export interface User {
   referral_reward?: {
     number_of_referred_users?: number;
     accrued_amount?: number;
-    has_requested_payout?: boolean;
+    payout_amount?: number;
+    date_requested?: string; // ISO string for Date
+    new_referred_users?: number;
   };
   roles: Array<{
     organization: string;

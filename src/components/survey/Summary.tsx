@@ -4,6 +4,14 @@ import HorizontalBarChart from "../charts/Horizontalbat";
 import BarChart from "../charts/BarChart";
 import { Card } from "../ui/card";
 import { AlertCircle } from "lucide-react";
+import dynamic from "next/dynamic";
+import html2canvas from "html2canvas";
+import { Button } from "../ui/button";
+import { Download } from "lucide-react";
+import WordCloudWithLegend from "./WordCloudWithLegend";
+
+// Dynamically import react-wordcloud to avoid SSR issues
+const WordCloud = dynamic(() => import("react-wordcloud"), { ssr: false });
 
 interface SummaryProps {
   result: any[]; // assuming 'result' is an array of survey results
@@ -21,6 +29,145 @@ const colorPalette = [
   "#E91E63",
   "#9E9E9E",
 ];
+
+const stopwords = [
+  "the",
+  "is",
+  "in",
+  "at",
+  "of",
+  "a",
+  "and",
+  "to",
+  "for",
+  "on",
+  "with",
+  "as",
+  "by",
+  "an",
+  "be",
+  "are",
+  "was",
+  "were",
+  "it",
+  "that",
+  "this",
+  "has",
+  "have",
+  "from",
+  "or",
+  "but",
+  "not",
+  "no",
+  "so",
+  "if",
+  "then",
+  "than",
+  "about",
+  "only",
+  "also",
+  "should",
+  "do",
+  "does",
+  "did",
+  "can",
+  "will",
+  "would",
+  "could",
+  "may",
+  "might",
+  "into",
+  "out",
+  "up",
+  "down",
+  "over",
+  "under",
+  "such",
+  "their",
+  "there",
+  "which",
+  "who",
+  "whom",
+  "whose",
+  "what",
+  "when",
+  "where",
+  "why",
+  "how",
+  "all",
+  "any",
+  "each",
+  "other",
+  "some",
+  "more",
+  "most",
+  "many",
+  "much",
+  "very",
+  "just",
+  "like",
+  "get",
+  "got",
+  "make",
+  "made",
+  "use",
+  "used",
+  "using",
+  "i",
+  "me",
+  "my",
+  "we",
+  "us",
+  "our",
+  "you",
+  "your",
+  "he",
+  "him",
+  "his",
+  "she",
+  "her",
+  "they",
+  "them",
+  "their",
+  "its",
+  "it's",
+  "don't",
+  "didn't",
+  "doesn't",
+  "can't",
+  "won't",
+  "shouldn't",
+  "couldn't",
+  "wouldn't",
+  "tbh",
+  "n/a",
+  "nil",
+  "nill",
+  "no idea",
+  "not sure",
+  "na",
+  "none",
+];
+
+function getTopWords(textResponses: string[], topN: number = 10) {
+  // Merge all responses into one string
+  const merged = textResponses.join(" ").toLowerCase();
+  // Remove punctuation and split into words
+  const words = merged.replace(/[^a-zA-Z0-9\s']/g, "").split(/\s+/);
+  // Count occurrences, ignoring stopwords and short words
+  const freq: Record<string, number> = {};
+  for (const word of words) {
+    const w = word.trim();
+    if (w.length < 3 || stopwords.includes(w)) continue;
+    freq[w] = (freq[w] || 0) + 1;
+  }
+  // Sort by frequency and take top N
+  const sorted = Object.entries(freq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, topN)
+    .map(([text, value]) => ({ text, value }));
+  return sorted;
+}
 
 const Summary: React.FC<SummaryProps> = ({ result }) => {
   console.log("result", result);
@@ -164,8 +311,8 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
 
         if (!chartData) {
           return (
-            <div key={index} className="mb-6">
-              <Card className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center">
+            <div key={index} className="my-6 rounded-lg">
+              <Card className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center shadow">
                 <AlertCircle className="h-8 w-8 text-muted-foreground mb-3" />
                 <h4 className="text-base font-medium mb-2">
                   Question {index + 1}
@@ -183,6 +330,23 @@ const Summary: React.FC<SummaryProps> = ({ result }) => {
           item.question_type === "single_choice" ||
           item.question_type === "multiple_choice" ||
           (chartData.labels.length > 2 && item.question_type !== "number");
+
+        if (
+          item.question_type === "long_text" &&
+          item.text_responses?.length > 1
+        ) {
+          const topWords = getTopWords(item.text_responses, 10);
+          return (
+            <WordCloudWithLegend
+              words={topWords}
+              question={item.question}
+              questionIndex={index}
+              responsesCount={item.text_responses.length}
+              title={`Question ${index + 1}`}
+              allowDownload
+            />
+          );
+        }
 
         return (
           <div key={index}>

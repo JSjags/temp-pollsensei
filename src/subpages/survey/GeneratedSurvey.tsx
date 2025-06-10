@@ -488,6 +488,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   questionType={item.question_type}
                                   index={index + 1}
                                   is_required={item.is_required}
+                                  item={item}
                                 />
                               ) : null}
                             </div>

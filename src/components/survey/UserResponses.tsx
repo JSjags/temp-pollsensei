@@ -286,6 +286,7 @@ const UserResponses: React.FC<UserResponseProps> = ({
                   max={item.max}
                   status={item?.validation_result?.status}
                   isResponse={true}
+                  item={item}
                 />
               ) : item.question_type === "checkbox" ? (
                 <CheckboxQuestion

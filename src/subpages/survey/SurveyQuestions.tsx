@@ -221,6 +221,9 @@ const SurveyQuestions = () => {
                         questionType={item.question_type}
                         index={index + 1}
                         is_required={item.is_required}
+                        max={item.max_value}
+                        min={item.min_value}
+                        item={item}
                       />
                     ) : item.question_type === "likert_scale" ? (
                       <LikertScaleQuestion

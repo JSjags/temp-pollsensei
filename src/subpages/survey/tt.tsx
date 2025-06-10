@@ -863,6 +863,7 @@ const AddQuestionPage = () => {
                                     index={index + 1}
                                     is_required={item.is_required}
                                     surveyData={surveyData}
+                                    item={item}
                                   />
                                 ) : null
                               }

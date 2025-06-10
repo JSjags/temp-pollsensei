@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import AnalysisErrorComponent from "@/components/loaders/page-loaders/AnalysisError";
 
 interface Props {
   children?: ReactNode;
@@ -25,11 +26,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <h1>Sorry.. there was an error</h1>
-        </div>
-      );
+      return <AnalysisErrorComponent />;
     }
 
     return this.props.children;

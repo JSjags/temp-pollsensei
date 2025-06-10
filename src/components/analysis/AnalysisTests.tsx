@@ -146,6 +146,173 @@ const toCamelCase = (str: string): string => {
     .replace(/^./, (chr) => chr.toLowerCase());
 };
 
+// Move useLocalStorageState hook outside the render
+function useLocalStorageState<T>(
+  key: string,
+  defaultValue: T
+): [T, (value: T) => void] {
+  const [state, setState] = React.useState<T>(() => {
+    try {
+      const stored =
+        typeof window !== "undefined" ? window.localStorage.getItem(key) : null;
+      return stored !== null ? (JSON.parse(stored) as T) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+
+  const setValue = (value: T) => {
+    setState(value);
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(key, JSON.stringify(value));
+      }
+    } catch {}
+  };
+
+  React.useEffect(() => {
+    // In case localStorage changes in another tab
+    const handler = () => {
+      try {
+        if (typeof window !== "undefined") {
+          const stored = window.localStorage.getItem(key);
+          if (stored !== null) {
+            setState(JSON.parse(stored));
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, [key]);
+
+  return [state, setValue];
+}
+
+// Extracted Welcome Message Component
+function AnalysisWelcomeMessage() {
+  const [hideWelcome, setHideWelcome] = useLocalStorageState(
+    "pollsensei_hide_analysis_welcome",
+    false
+  );
+
+  if (hideWelcome) return null;
+
+  return (
+    <div className="mb-8">
+      <div className="bg-gradient-to-r from-purple-50 to-white border border-purple-200 rounded-xl p-7 flex items-start gap-5 shadow-md relative">
+        <button
+          aria-label="Close welcome message"
+          className="absolute top-4 right-4 text-purple-400 hover:text-purple-700 transition-colors"
+          onClick={() => setHideWelcome(true)}
+          tabIndex={0}
+        >
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <div className="flex-shrink-0 mt-1">
+          <svg
+            className="h-10 w-10 text-purple-600"
+            fill="none"
+            viewBox="0 0 40 40"
+          >
+            <circle
+              cx="20"
+              cy="20"
+              r="18"
+              fill="#F5EDF8"
+              stroke="#A78BFA"
+              strokeWidth="2"
+            />
+            <path
+              d="M20 13v7m0 5h.01"
+              stroke="#7C3AED"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-purple-900 mb-2">
+            Welcome to Survey Analysis
+          </h2>
+          <p className="text-base text-gray-700 leading-relaxed">
+            Unlock insights from your survey with our intelligent analysis
+            tools. <br />
+            <span className="text-purple-800 font-medium">
+              Here's how it works:
+            </span>
+          </p>
+          <ul className="list-disc pl-6 mt-3 text-gray-700 text-sm space-y-1">
+            <li>
+              <span className="font-medium text-purple-800">
+                Variables Identified:
+              </span>{" "}
+              We've automatically extracted key variables from your survey
+              responses.
+            </li>
+            <li>
+              <span className="font-medium text-purple-800">
+                Smart Test Suggestions:
+              </span>{" "}
+              Based on your data, we recommend the most suitable statistical
+              tests and match them with relevant variables.
+            </li>
+            <li>
+              <span className="font-medium text-purple-800">Full Control:</span>{" "}
+              Add or remove tests and variables as you see fit—customize your
+              analysis to your needs.
+            </li>
+            <li>
+              <span className="font-medium text-purple-800">Ready to Go:</span>{" "}
+              When you're satisfied, simply click{" "}
+              <span className="font-semibold text-purple-900">
+                Start Analysis
+              </span>{" "}
+              to begin!
+            </li>
+          </ul>
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-100 text-purple-800 text-xs font-semibold">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20">
+                <path
+                  d="M10 2v16m8-8H2"
+                  stroke="#7C3AED"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+              Tip: You can drag and drop variables into your selected tests for
+              even more flexibility.
+            </span>
+            <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="accent-purple-600"
+                checked={hideWelcome}
+                onChange={(e) => setHideWelcome(e.target.checked)}
+              />
+              Don't show this again
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DragAndDropPage() {
   const router = useRouter();
   const path = usePathname();
@@ -294,7 +461,7 @@ export default function DragAndDropPage() {
           "Kruskal-Wallis Test",
           "Chi-Square Test",
           "ANOVA (Analysis of Variance)",
-          "Spearman’s Rank Correlation",
+          "Spearman's Rank Correlation",
           "Mann-Whitney U Test",
           "Sentiment Analysis",
           // "Thematic Analysis",
@@ -335,7 +502,7 @@ export default function DragAndDropPage() {
         "Kruskal-Wallis Test",
         "Chi-Square Test",
         "ANOVA (Analysis of Variance)",
-        "Spearman’s Rank Correlation",
+        "Spearman's Rank Correlation",
         "Mann-Whitney U Test",
         "Sentiment Analysis",
         // "Thematic Analysis",
@@ -431,7 +598,7 @@ export default function DragAndDropPage() {
   return (
     <>
       <AnimatePresence>
-        <motion.div
+        {/* <motion.div
           key="senseiMaster"
           initial="hidden"
           animate="visible"
@@ -440,7 +607,7 @@ export default function DragAndDropPage() {
           className="bg-blue-500 z-[1000000] fixed top-0 left-0"
         >
           <SenseiMaster type={"analysis"} />
-        </motion.div>
+        </motion.div> */}
       </AnimatePresence>
       {!showReport ? (
         <Fragment>
@@ -488,6 +655,54 @@ export default function DragAndDropPage() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="mb-8">
+                    <div className="bg-gradient-to-r from-purple-50 to-white border border-purple-100 rounded-lg p-6 flex items-start gap-4 shadow-sm">
+                      <div className="flex-shrink-0">
+                        <svg
+                          className="h-8 w-8 text-purple-700"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            fill="#F5EDF8"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 8v4m0 4h.01"
+                            className="text-purple-700"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-purple-900 mb-1">
+                          Welcome to the Survey Analysis section
+                        </h2>
+                        <p className="text-sm text-gray-700">
+                          Based on your survey's responses and the variables I
+                          have extracted, I have suggested some statistical
+                          tests that are appropriate, as well as the matching
+                          variables. Feel free to add or remove tests or
+                          variables as you desire. When you are ready, click on
+                          the{" "}
+                          <span className="font-semibold text-purple-800">
+                            Start Analysis
+                          </span>{" "}
+                          button to begin analysis!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* {typeof window !== "undefined" && <AnalysisWelcomeMessage />} */}
 
                   <div className="flex flex-col lg:flex-row gap-4">
                     {/* Main Content */}

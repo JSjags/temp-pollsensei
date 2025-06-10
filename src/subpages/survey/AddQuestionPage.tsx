@@ -274,7 +274,12 @@ const AddQuestionPage = () => {
     updatedQuestion: string,
     updatedOptions: string[],
     updatedQuestionType: string,
-    isRequired: boolean
+    isRequired: boolean,
+    minValue?: number,
+    maxValue?: number,
+    matrixRows?: string[],
+    matrixColumns?: string[],
+    canAcceptAudio?: boolean
   ) => {
     // Ensure `editIndex` is valid
     if (editIndex === null || editIndex < 0 || editIndex >= questions.length) {
@@ -289,6 +294,11 @@ const AddQuestionPage = () => {
         updatedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions,
       question_type: updatedQuestionType,
       is_required: isRequired,
+      minValue,
+      maxValue,
+      matrixRows,
+      matrixColumns,
+      canAcceptAudio,
     };
 
     console.log(updatedQuestionData);
@@ -411,7 +421,7 @@ const AddQuestionPage = () => {
             case "long_text":
               return {
                 ...baseQuestion,
-                can_accept_media: Boolean(question.can_accept_media),
+                can_accept_media: Boolean((question as any).canAcceptAudio),
               };
 
             case "media":
@@ -459,6 +469,7 @@ const AddQuestionPage = () => {
         logo_url:
           typeof logoUrl === "string" && logoUrl.startsWith("#") ? "" : logoUrl,
       };
+      console.log(processedSurvey);
 
       await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
@@ -610,8 +621,12 @@ const AddQuestionPage = () => {
     const questionIndex = questions?.findIndex(
       (_question: any, index: any) => index === id
     );
+    console.log(
+      questions?.findIndex((_question: any, index: any) => index === id)
+    );
+
     setEditIndex(questionIndex);
-    dispatch(deleteQuestion({ questions, editIndex }));
+    dispatch(deleteQuestion({ questions, editIndex: questionIndex }));
   };
 
   const renderQuestionActions = (index: number) => {
@@ -1010,6 +1025,7 @@ const AddQuestionPage = () => {
                                     onSave={handleSaveEdittedQuestion}
                                     onCancel={handleCancel}
                                     surveyData={surveyData}
+                                    can_accept_audio={item.canAcceptAudio}
                                   />
                                 ) : item.question_type === "multiple_choice" ? (
                                   <MultiChoiceQuestion
@@ -1172,6 +1188,7 @@ const AddQuestionPage = () => {
                                     index={index + 1}
                                     is_required={item.is_required}
                                     surveyData={surveyData}
+                                    item={item}
                                   />
                                 ) : null
                               }
