@@ -22,11 +22,15 @@ import {
 } from "@/components/ui/dialog";
 import { useMutation } from "@tanstack/react-query";
 import { postReferralPayout } from "@/services/api/referrals.api";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface UserData {
   referral_code: string;
   referral_link: string;
 }
+
+const REFERRAL_PROGRAM_PAUSED = true;
 
 const Page = () => {
   const referral_reward = useSelector(
@@ -132,6 +136,24 @@ const Page = () => {
   return (
     <div className="p-6 w-full">
       <h1 className="text-2xl font-bold mb-6">Referral Rewards</h1>
+      {REFERRAL_PROGRAM_PAUSED && (
+        <div className="mb-8 rounded-xl overflow-hidden shadow-lg border-2 border-[#9d50bb] bg-gradient-to-r from-[#5b03b2]/90 to-[#9d50bb]/90 flex items-center gap-4 p-6 animate-fade-in">
+          <div className="flex items-center justify-center bg-white/20 rounded-full p-3">
+            <AlertCircle className="h-10 w-10 text-white drop-shadow-lg" />
+          </div>
+          <div>
+            <h2 className="text-white text-xl font-bold mb-1 tracking-wide">
+              Referral Rewards Program Paused
+            </h2>
+            <p className="text-white/90 text-base font-medium max-w-2xl">
+              We're currently upgrading our referral rewards program to serve
+              you better. All actions are temporarily disabled. Please check
+              back soon for exciting updates and new opportunities to earn
+              rewards!
+            </p>
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <>
@@ -276,13 +298,14 @@ const Page = () => {
           <DialogTrigger asChild>
             <Button
               className={`px-6 py-2 rounded-md font-medium ${
-                payoutAmount >= minPayout
+                payoutAmount >= minPayout && !REFERRAL_PROGRAM_PAUSED
                   ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
-              disabled={payoutAmount < minPayout}
+              disabled={payoutAmount < minPayout || REFERRAL_PROGRAM_PAUSED}
               onClick={() => {
-                if (payoutAmount >= minPayout) setDialogOpen(true);
+                if (payoutAmount >= minPayout && !REFERRAL_PROGRAM_PAUSED)
+                  setDialogOpen(true);
               }}
             >
               Request Payout
@@ -305,7 +328,7 @@ const Page = () => {
                   value={form.account_name}
                   onChange={handleFormChange}
                   placeholder="e.g. Chinedu Emesue"
-                  disabled={payoutMutation.isPending}
+                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
                 />
                 {formErrors.account_name && (
                   <p className="text-xs text-red-600 mt-1">
@@ -323,7 +346,7 @@ const Page = () => {
                   onChange={handleFormChange}
                   placeholder="e.g. 0123456789"
                   maxLength={10}
-                  disabled={payoutMutation.isPending}
+                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
                 />
                 {formErrors.account_number && (
                   <p className="text-xs text-red-600 mt-1">
@@ -340,7 +363,7 @@ const Page = () => {
                   value={form.bank_name}
                   onChange={handleFormChange}
                   placeholder="e.g. First Bank"
-                  disabled={payoutMutation.isPending}
+                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
                 />
                 {formErrors.bank_name && (
                   <p className="text-xs text-red-600 mt-1">
@@ -351,13 +374,17 @@ const Page = () => {
               <DialogFooter>
                 <Button
                   type="submit"
-                  disabled={payoutMutation.isPending}
+                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
                   className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
                 >
                   {payoutMutation.isPending ? "Submitting..." : "Submit"}
                 </Button>
                 <DialogClose asChild>
-                  <Button type="button" variant="outline">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={REFERRAL_PROGRAM_PAUSED}
+                  >
                     Cancel
                   </Button>
                 </DialogClose>
@@ -403,7 +430,10 @@ const Page = () => {
           />
           <button
             onClick={() => handleCopy(userData.referral_link, "Referral link")}
-            className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white px-6 py-2 rounded-md font-medium flex items-center justify-center gap-2"
+            className={`bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white px-6 py-2 rounded-md font-medium flex items-center justify-center gap-2 ${
+              REFERRAL_PROGRAM_PAUSED ? "opacity-60 cursor-not-allowed" : ""
+            }`}
+            disabled={REFERRAL_PROGRAM_PAUSED}
           >
             <span>Copy Link</span>
             <ClipboardCopy size={16} />
@@ -427,7 +457,10 @@ const Page = () => {
               onClick={() =>
                 handleCopy(userData.referral_code, "Referral code")
               }
-              className="text-[#5B03B2] hover:text-[#4A029A] transition-all duration-200 hover:scale-110"
+              className={`text-[#5B03B2] hover:text-[#4A029A] transition-all duration-200 hover:scale-110 ${
+                REFERRAL_PROGRAM_PAUSED ? "opacity-60 cursor-not-allowed" : ""
+              }`}
+              disabled={REFERRAL_PROGRAM_PAUSED}
             >
               <ClipboardCopy size={16} />
             </button>
