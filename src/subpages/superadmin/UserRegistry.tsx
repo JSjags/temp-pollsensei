@@ -6,6 +6,7 @@ import {
   useResetUserPasswordMutation,
   useUpdateDisableStatusMutation,
   useUserRegistryQuery,
+  useRemoveFakeAccountsMutation,
 } from "@/services/superadmin.service";
 import PageControl from "@/components/common/PageControl";
 import DropdownFilter from "@/components/superAdmin/DropdownFilter";
@@ -110,6 +111,12 @@ const UserRegistry: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedUserDisabledStatus, setSelectedUserDisabledStatus] =
     useState<boolean>(false);
+  const [isRemoveFakeDialogOpen, setIsRemoveFakeDialogOpen] = useState(false);
+  const [removeFakeInput, setRemoveFakeInput] = useState("");
+  const [removeFakeUserId, setRemoveFakeUserId] = useState<string | null>(null);
+  const [removeFakeUserName, setRemoveFakeUserName] = useState<string | null>(
+    null
+  );
 
   const path_params: PathParamsProps = {};
   if (email) path_params.email = email;
@@ -166,6 +173,9 @@ const UserRegistry: React.FC = () => {
 
   const [resetUserPassword, { isLoading: isResetPassword }] =
     useResetUserPasswordMutation();
+
+  const [removeFakeAccounts, { isLoading: isRemovingFake }] =
+    useRemoveFakeAccountsMutation();
 
   console.log(data);
 
@@ -588,6 +598,19 @@ const UserRegistry: React.FC = () => {
                               <Lock className="h-4 w-4" />
                               Reset Password
                             </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setRemoveFakeUserId(user._id);
+                                setRemoveFakeUserName(user.name);
+                                setRemoveFakeInput("");
+                                setIsRemoveFakeDialogOpen(true);
+                              }}
+                              className="text-sm cursor-pointer text-gray-600 focus:text-gray-600 flex items-center gap-2"
+                            >
+                              <FaUserTimes className="h-4 w-4 text-red-500" />
+                              Remove Fake Accounts
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -668,6 +691,73 @@ const UserRegistry: React.FC = () => {
                 : selectedUserDisabledStatus
                 ? "Activate"
                 : "Deactivate"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Fake Accounts Dialog */}
+      <AlertDialog
+        open={isRemoveFakeDialogOpen}
+        onOpenChange={setIsRemoveFakeDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Fake Accounts</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will remove all fake accounts for{" "}
+              <span className="font-semibold">{removeFakeUserName}</span> (user
+              ID: {removeFakeUserId}).
+              <br />
+              <span className="text-red-600 font-semibold">
+                This cannot be undone.
+              </span>
+              <br />
+              <br />
+              Please type{" "}
+              <span className="font-mono bg-gray-100 px-1">
+                remove fake accounts
+              </span>{" "}
+              to confirm.
+            </AlertDialogDescription>
+            <input
+              type="text"
+              className="mt-4 w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              placeholder="Type here to confirm..."
+              value={removeFakeInput}
+              onChange={(e) => setRemoveFakeInput(e.target.value)}
+              disabled={isRemovingFake}
+            />
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={isRemovingFake}
+              onClick={() => setIsRemoveFakeDialogOpen(false)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                removeFakeInput !== "remove fake accounts" || isRemovingFake
+              }
+              className="bg-red-600 hover:bg-red-700"
+              onClick={async () => {
+                if (!removeFakeUserId) return;
+                try {
+                  await removeFakeAccounts({
+                    user_id: removeFakeUserId,
+                  }).unwrap();
+                  toast.success("Fake accounts removed successfully.");
+                  setIsRemoveFakeDialogOpen(false);
+                  refetch();
+                } catch (err: any) {
+                  toast.error(
+                    err?.message || "Failed to remove fake accounts."
+                  );
+                }
+              }}
+            >
+              {isRemovingFake ? "Processing..." : "Remove Fake Accounts"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

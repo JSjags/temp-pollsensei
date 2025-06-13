@@ -277,6 +277,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    removeFakeAccounts: builder.mutation({
+      query: (body) => ({
+        url: `superadmin/users/remove-fake-accounts`,
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -316,4 +323,5 @@ export const {
   useUpdateDisableStatusMutation,
   useGetSuperAdminSurveyQuery,
   useResetUserPasswordMutation,
+  useRemoveFakeAccountsMutation,
 } = surveyApiSlice;

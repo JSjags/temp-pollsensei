@@ -47,6 +47,16 @@ import { toast } from "react-toastify";
 import useDebounce from "@/hooks/useDebouncer";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
+import axiosInstance from "@/lib/axios-instance";
 
 const ReferralsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -265,11 +275,44 @@ interface ReferrerRowProps {
 }
 
 function ReferrerRow(props: ReferrerRowProps) {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { onEditClick, data, index, onDeleteClick } = props;
   const userLink = `/referrers/${data?._id}`;
 
   const handleView = () => router?.push(`${userLink}?name=${data?.name}`);
+
+  // Remove Fake Accounts Dialog State
+  const [showRemoveFakeDialog, setShowRemoveFakeDialog] = useState(false);
+  const [removeFakeInput, setRemoveFakeInput] = useState("");
+  const [removeFakeLoading, setRemoveFakeLoading] = useState(false);
+
+  // Tanstack mutation for remove fake accounts
+  const removeFakeMutation = useMutation({
+    mutationFn: async () => {
+      setRemoveFakeLoading(true);
+      try {
+        const res = await axiosInstance.post(
+          "/superadmin/users/remove-fake-accounts",
+          { user_id: data?._id }
+        );
+        toast.success(
+          res?.data?.message || "Fake accounts removed successfully"
+        );
+        setShowRemoveFakeDialog(false);
+        setRemoveFakeInput("");
+        queryClient.invalidateQueries({
+          type: "all",
+        });
+      } catch (err: any) {
+        toast.error(
+          err?.response?.data?.message || "Failed to remove fake accounts"
+        );
+      } finally {
+        setRemoveFakeLoading(false);
+      }
+    },
+  });
 
   return (
     <TableRow>
@@ -300,8 +343,50 @@ function ReferrerRow(props: ReferrerRowProps) {
             <DropdownMenuItem onClick={handleView}>
               <RiArrowRightUpLine className="mr-2" /> View Users
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowRemoveFakeDialog(true)}>
+              <RiDeleteBin5Line className="mr-2 text-red-500" /> Remove Fake
+              Accounts
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <Dialog
+          open={showRemoveFakeDialog}
+          onOpenChange={setShowRemoveFakeDialog}
+        >
+          <DialogContent className="z-[100000]" overlayClassName="z-[100000]">
+            <DialogHeader>
+              <DialogTitle>Remove Fake Accounts</DialogTitle>
+              <DialogDescription>
+                This action will remove all fake accounts for this user as well
+                as deactivate the user's account. To confirm, type{" "}
+                <b>remove fake accounts</b> below.
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              value={removeFakeInput}
+              onChange={(e) => setRemoveFakeInput(e.target.value)}
+              placeholder="Type 'remove fake accounts' to confirm"
+              disabled={removeFakeLoading}
+            />
+            <DialogFooter>
+              <Button
+                variant="destructive"
+                disabled={
+                  removeFakeInput !== "remove fake accounts" ||
+                  removeFakeLoading
+                }
+                onClick={() => removeFakeMutation.mutate()}
+              >
+                {removeFakeLoading ? "Removing..." : "Remove Fake Accounts"}
+              </Button>
+              <DialogClose asChild>
+                <Button variant="outline" disabled={removeFakeLoading}>
+                  Cancel
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </TableCell>
     </TableRow>
   );
