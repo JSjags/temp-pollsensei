@@ -42,6 +42,8 @@ const Login = (props: Props) => {
               ? "/surveys/edit-survey"
               : ed === "3"
               ? "/surveys/manual-survey-create"
+              : ed === "as"
+              ? "/settings/account-security"
               : "/dashboard"
             : "/dashboard"
         }`

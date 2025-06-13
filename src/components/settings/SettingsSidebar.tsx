@@ -20,14 +20,14 @@ const supportMenu: MenuItem[] = [
     icons: <FaRegUserCircle />,
   },
   {
-    label: "Account Security",
-    path: "/settings/account-security",
-    icons: <TbShieldHalf />,
-  },
-  {
     label: "Notifications",
     path: "/settings/notifications",
     icons: <FaRegBell />,
+  },
+  {
+    label: "Account Security",
+    path: "/settings/account-security",
+    icons: <TbShieldHalf />,
   },
   {
     label: "Referral Reward",
