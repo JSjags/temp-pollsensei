@@ -79,7 +79,7 @@ const WordCloudWithLegend: React.FC<WordCloudWithLegendProps> = ({
               <div key={word.text} className="flex items-center space-x-2">
                 <span className="inline-block w-3 h-3 rounded-full bg-gray-400"></span>
                 <span className="text-gray-700 font-bold">
-                  {word.text} : <span className="ml-5">{word.value}</span>
+                  {word.text} : <span className="">{word.value}</span>
                 </span>
               </div>
             ))}
