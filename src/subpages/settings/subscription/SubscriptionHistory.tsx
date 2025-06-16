@@ -12,6 +12,7 @@ import {
   FaCalendarAlt,
 } from "react-icons/fa";
 import dynamic from "next/dynamic";
+import InvoiceDownloadButton from "@/components/reusable/InvoiceDownloadButton";
 
 interface SubscriptionRecord {
   _id: string;
@@ -50,9 +51,9 @@ const gatewayIcons: Record<string, JSX.Element> = {
 
 const SkeletonRow = () => (
   <tr>
-    {[...Array(6)].map((_, i) => (
-      <td key={i} className="p-2 border animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto" />
+    {[...Array(7)].map((_, i) => (
+      <td key={i} className="p-3">
+        <div className="h-4 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse w-5/6 mx-auto" />
       </td>
     ))}
   </tr>
@@ -121,22 +122,25 @@ const SubscriptionHistory: React.FC = () => {
     <div className="p-6 mx-auto w-full">
       <button
         onClick={handleBack}
-        className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium"
+        className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium"
       >
         ← Back
       </button>
-      <h2 className="text-2xl font-bold mb-4">Subscription History</h2>
-      <div className="overflow-x-auto rounded shadow border">
-        <table className="min-w-full border text-sm">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold">Subscription History</h2>
+        <InvoiceDownloadButton />
+      </div>
+      <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-200 bg-white">
+        <table className="min-w-full text-sm rounded-xl overflow-hidden">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 border">Plan</th>
-              <th className="p-2 border">Amount</th>
-              <th className="p-2 border">Currency</th>
-              <th className="p-2 border">Status</th>
-              <th className="p-2 border">Gateway</th>
-              <th className="p-2 border">Date</th>
-              <th className="p-2 border">Receipt</th>
+            <tr className="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider">
+              <th className="p-3 font-semibold text-left">Plan</th>
+              <th className="p-3 font-semibold text-left">Amount</th>
+              <th className="p-3 font-semibold text-left">Currency</th>
+              <th className="p-3 font-semibold text-left">Status</th>
+              <th className="p-3 font-semibold text-left">Gateway</th>
+              <th className="p-3 font-semibold text-left">Date</th>
+              <th className="p-3 font-semibold text-left">Receipt</th>
             </tr>
           </thead>
           <tbody>
@@ -159,24 +163,24 @@ const SubscriptionHistory: React.FC = () => {
               history.map((item, idx) => (
                 <tr
                   key={item._id}
-                  className={`border-b transition-colors duration-150 ${
+                  className={`transition-colors duration-150 ${
                     idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-blue-50`}
+                  } hover:bg-purple-50 border-b border-gray-100 last:border-b-0`}
                 >
-                  <td className="p-2 border font-medium">
+                  <td className="p-3 font-medium text-gray-900">
                     {item.plan_id?.name}
                   </td>
-                  <td className="p-2 border">{item.amount.toLocaleString()}</td>
-                  <td className="p-2 border">{item.currency}</td>
-                  <td className="p-2 border">{getStatusBadge(item.status)}</td>
-                  <td className="p-2 border">{getGatewayIcon(item.gateway)}</td>
-                  <td className="p-2 border">
+                  <td className="p-3">{item.amount.toLocaleString()}</td>
+                  <td className="p-3">{item.currency}</td>
+                  <td className="p-3">{getStatusBadge(item.status)}</td>
+                  <td className="p-3">{getGatewayIcon(item.gateway)}</td>
+                  <td className="p-3">
                     <span className="inline-flex items-center">
                       <FaCalendarAlt className="mr-1 text-gray-400" />
                       {new Date(item.createdAt).toLocaleString()}
                     </span>
                   </td>
-                  <td className="p-2 border">
+                  <td className="p-3">
                     <PDFDownloadButton record={item} />
                   </td>
                 </tr>
@@ -262,6 +266,24 @@ const SubscriptionHistory: React.FC = () => {
           td:nth-of-type(6):before {
             content: "Date";
           }
+        }
+      `}</style>
+      <style jsx>{`
+        table {
+          border-collapse: separate;
+          border-spacing: 0;
+        }
+        th:first-child {
+          border-top-left-radius: 0.75rem;
+        }
+        th:last-child {
+          border-top-right-radius: 0.75rem;
+        }
+        tr:last-child td:first-child {
+          border-bottom-left-radius: 0.75rem;
+        }
+        tr:last-child td:last-child {
+          border-bottom-right-radius: 0.75rem;
         }
       `}</style>
     </div>

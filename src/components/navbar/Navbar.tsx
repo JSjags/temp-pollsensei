@@ -253,17 +253,6 @@ const Navbar = () => {
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
 
-  console.log(notifications?.data);
-
-  const [currentOrganization, setCurrentOrganization] = useState({
-    _id: "67d2dabd69479aeb5775b666",
-    name: "Jesse Nnamdi Abuaja's Organization",
-    designation: "owner",
-    roles: ["Admin"],
-    is_disabled: false,
-    status: "Active",
-  });
-
   return (
     <div
       className={cn(

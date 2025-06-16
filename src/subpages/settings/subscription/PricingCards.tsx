@@ -26,6 +26,7 @@ import PaymentPage from "@/subpages/payment/StripeRedirect";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { User } from "@/redux/slices/user.slice";
+import { toast } from "react-toastify";
 
 export interface TPricing {
   _id: string;
@@ -92,16 +93,22 @@ const PaymentGatewayButton = ({
   planId,
   organization_id,
   onClick,
+  selected,
 }: {
   name: string;
   logo: string;
   planId?: string;
   organization_id?: string;
   onClick: () => void;
+  selected?: boolean;
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center justify-center w-full p-4 mb-4 border rounded-lg hover:bg-gray-50 transition-colors gap-4"
+    className={cn(
+      "flex items-center justify-center w-full p-4 mb-4 border rounded-lg transition-colors gap-4",
+      selected ? "border-2 border-purple-600 bg-purple-50" : "hover:bg-gray-50"
+    )}
+    type="button"
   >
     <Image
       src={logo}
@@ -110,7 +117,10 @@ const PaymentGatewayButton = ({
       height={40}
       className="object-contain h-10 w-fit"
     />
-    <p>{name}</p>
+    <p className={selected ? "font-bold text-purple-700" : undefined}>{name}</p>
+    {/* {selected && (
+      <span className="ml-2 text-purple-600 font-semibold">Selected</span>
+    )} */}
   </button>
 );
 
@@ -119,6 +129,8 @@ export function PricingCards() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState<string>("");
+  const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
   const ref = useRef(null);
 
   const userData = useQuery<{ data: User }>({
@@ -157,7 +169,10 @@ export function PricingCards() {
     if (tier._id === currentPlanId) {
       return (
         <Button
-          className="w-full text-xs sm:text-sm bg-transparent border-0 hover:bg-transparent"
+          className={cn(
+            "w-full text-xs sm:text-sm bg-transparent border-0 hover:bg-transparent",
+            index === 1 && "text-white"
+          )}
           variant="secondary"
           disabled
         >
@@ -177,15 +192,16 @@ export function PricingCards() {
       );
     } else if (currentIndex > index) {
       // Downgrade
-      return (
-        <Button
-          onClick={() => handleUpgrade(index)}
-          className="w-full text-xs sm:text-sm border-0"
-          variant="outline"
-        >
-          Downgrade plan
-        </Button>
-      );
+      return null;
+      // (
+      //   <Button
+      //     onClick={() => handleUpgrade(index)}
+      //     className="w-full text-xs sm:text-sm border-0"
+      //     variant="outline"
+      //   >
+      //     Downgrade plan
+      //   </Button>
+      // );
     }
     return null;
   };
@@ -199,6 +215,7 @@ export function PricingCards() {
       redirect_url?: string;
       plan_type: string;
       country: string;
+      coupon_code?: string;
     }) => initPaymentQuery(payload),
     onSuccess: (data) => {
       if (data?.authorization_url) {
@@ -219,16 +236,31 @@ export function PricingCards() {
           );
         }
       }
+      setDialogOpen(false);
     },
     onError: (error) => {
       console.log(error);
+      // INSERT_YOUR_CODE
+      // Show a toast with the error message if available
+      if ((error as any)?.response?.data?.message) {
+        toast.error((error as any).response.data.message);
+      } else if ((error as any)?.message) {
+        toast.error((error as any).message);
+      } else {
+        toast.error("An error occurred during payment. Please try again.");
+      }
+      // Clear the form fields after an error
+      setCouponCode("");
+      setSelectedGateway(null);
+      setSelectedTier(null);
+      setDialogOpen(false);
     },
   });
 
   return (
     <>
       {tiersData.isLoading && (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3].map((index) => (
             <motion.div
               key={index}
@@ -267,7 +299,7 @@ export function PricingCards() {
 
       {tiersData.isSuccess && (
         <>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {tiersData.data.map((tier, index) => (
               <motion.div
                 key={tier._id}
@@ -370,82 +402,82 @@ export function PricingCards() {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="coupon-code"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Coupon Code (optional)
+                  </label>
+                  <input
+                    id="coupon-code"
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Enter coupon code"
+                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
                 {!locationLoading && !locationError && (
                   <>
-                    {!locationData?.isNigeria && (
-                      <PaymentGatewayButton
-                        name="Stripe"
-                        logo="/assets/payment/stripe.png"
-                        organization_id=""
-                        onClick={() => {
-                          if (
-                            typeof selectedTier === "number" &&
-                            tiersData.data &&
-                            tiersData.data[selectedTier]
-                          ) {
-                            paymentMutation.mutate({
-                              gateway: "stripe",
-                              plan_id: tiersData.data[selectedTier]._id,
-                              organization_id:
-                                userData.data?.data?.current_organization || "",
-                              plan_type: "monthly",
-                              country: locationData?.country || "",
-                            });
-                            setDialogOpen(false);
-                          }
-                        }}
-                      />
-                    )}
-                    {locationData?.isNigeria && (
-                      <>
+                    <div className="text-sm font-semibold mb-2">
+                      Select Payment Method
+                    </div>
+                    <div className="space-y-2">
+                      {!locationData?.isNigeria && (
                         <PaymentGatewayButton
-                          name="Flutterwave"
-                          logo="/assets/payment/flutterwave.jpeg"
-                          onClick={() => {
-                            if (
-                              typeof selectedTier === "number" &&
-                              tiersData.data &&
-                              tiersData.data[selectedTier]
-                            ) {
-                              paymentMutation.mutate({
-                                gateway: "flutterwave",
-                                plan_id: tiersData.data[selectedTier]._id,
-                                organization_id:
-                                  userData.data?.data?.current_organization ||
-                                  "",
-                                redirect_url: `${window.location.origin}/settings/subscription/success`,
-                                plan_type: "monthly",
-                                country: "Nigeria",
-                              });
-                              setDialogOpen(false);
-                            }
-                          }}
+                          name="Stripe"
+                          logo="/assets/payment/stripe.png"
+                          organization_id=""
+                          onClick={() => setSelectedGateway("stripe")}
+                          selected={selectedGateway === "stripe"}
                         />
+                      )}
+                      {locationData?.isNigeria && (
                         <PaymentGatewayButton
                           name="Paystack"
                           logo="/assets/payment/paystack.svg"
-                          onClick={() => {
-                            if (
-                              typeof selectedTier === "number" &&
-                              tiersData.data &&
-                              tiersData.data[selectedTier]
-                            ) {
-                              paymentMutation.mutate({
-                                gateway: "paystack",
-                                plan_id: tiersData.data[selectedTier]._id,
-                                organization_id:
-                                  userData.data?.data?.current_organization ||
-                                  "",
-                                redirect_url: `${window.location.origin}/settings/subscription/success`,
-                                plan_type: "monthly",
-                                country: "Nigeria",
-                              });
-                              setDialogOpen(false);
-                            }
-                          }}
+                          onClick={() => setSelectedGateway("paystack")}
+                          selected={selectedGateway === "paystack"}
                         />
-                      </>
-                    )}
+                      )}
+                    </div>
+                    <Button
+                      className="w-full mt-4 auth-btn"
+                      disabled={
+                        !selectedGateway ||
+                        selectedTier === null ||
+                        paymentMutation.isPending
+                      }
+                      onClick={() => {
+                        if (
+                          typeof selectedTier === "number" &&
+                          tiersData.data &&
+                          tiersData.data[selectedTier] &&
+                          selectedGateway
+                        ) {
+                          const payload: any = {
+                            gateway: selectedGateway,
+                            plan_id: tiersData.data[selectedTier]._id,
+                            organization_id:
+                              userData.data?.data?.current_organization || "",
+                            plan_type: "monthly",
+                            country: locationData?.isNigeria
+                              ? "Nigeria"
+                              : locationData?.country || "",
+                          };
+                          if (selectedGateway === "paystack") {
+                            payload.redirect_url = `${window.location.origin}/settings/subscription/success`;
+                          }
+                          if (couponCode) {
+                            payload.coupon_code = couponCode;
+                          }
+                          paymentMutation.mutate(payload);
+                        }
+                      }}
+                    >
+                      {paymentMutation.isPending ? "Processing..." : "Proceed"}
+                    </Button>
                   </>
                 )}
               </div>

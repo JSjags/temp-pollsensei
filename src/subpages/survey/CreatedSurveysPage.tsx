@@ -235,7 +235,7 @@ const CreatedSurveysPage = () => {
   if (isLoading || isFetching) {
     return (
       <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
-        <div className="md:flex my-10 items-center justify-between">
+        <div className="md:flex my-10 gap-2 items-center justify-between">
           <div className="flex gap-5 items-center">
             <h2 className="text-[#333333] font-[700] text-[24px]">
               Your Surveys
@@ -257,7 +257,7 @@ const CreatedSurveysPage = () => {
                 <SearchIcon className="text-[#9D50BB]" />
               </button>
             </div>
-            <div className="hidden md:flex">
+            <div className="hidden md:flex gap-2">
               <FilterButton
                 type="survey"
                 text="Add filter"
@@ -326,7 +326,7 @@ const CreatedSurveysPage = () => {
   if (!data?.data?.total || data.data.total === 0) {
     return (
       <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 mt-0 sm:mt-0 sm:my-10">
-        <div className="md:flex my-10 items-center justify-between">
+        <div className="md:flex my-10 gap-2 items-center justify-between">
           <div className="flex gap-5 items-center">
             <h2 className="text-[#333333] font-[700] text-xl">Your Surveys</h2>
             <div className="block md:hidden mt-2 md:mt-0">
@@ -426,7 +426,7 @@ const CreatedSurveysPage = () => {
     <div>
       {data?.data.total > 0 && (
         <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
-          <div className="md:flex gap-y-4 flex-wrap my-10 items-center justify-between">
+          <div className="md:flex gap-y-4 gap-x-2 flex-wrap my-10 gap-2 items-center justify-between">
             <div className="flex flex-wrap gap-y-1 gap-5 items-center">
               <h2 className="text-[#333333] font-[700] text-[24px]">
                 Your Surveys

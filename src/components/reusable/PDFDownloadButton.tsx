@@ -14,11 +14,12 @@ const PDFDownloadButton: React.FC<PDFDownloadButtonProps> = ({ record }) => (
   >
     {({ loading }) => (
       <button
-        className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-600 rounded hover:bg-purple-100 border border-purple-200 text-xs font-medium transition-colors"
+        className="flex items-center gap-2 px-4 py-1.5 bg-purple-600 text-white rounded-full shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm font-semibold transition-colors duration-150 disabled:opacity-60"
         disabled={loading}
-        title="Download receipt"
+        title="Download receipt as PDF"
+        aria-label="Download receipt as PDF"
       >
-        <GoDownload />
+        <GoDownload className="text-lg" />
         {loading ? "Generating..." : "Download"}
       </button>
     )}
