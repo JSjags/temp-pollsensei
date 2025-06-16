@@ -462,10 +462,11 @@ const ValidateResponse = () => {
         case "slider":
           return {
             ...baseAnswer,
-            scale_value:
+            scale_value: parseInt(
               typeof answer === "string" || typeof answer === "number"
                 ? answer
-                : answer.scale_value || "",
+                : answer.scale_value || ""
+            ),
           };
 
         case "drop_down":
