@@ -426,7 +426,16 @@ const BuyRespondent = () => {
                     </div>
                     <p className="text-[10px] lg:text-xs">
                       Average Respondent rate per Survey:{" "}
-                      <span className="font-semibold">5coins/Respondent</span>{" "}
+                      <div className="w-auto flex items-center gap-1">
+                        <span className="font-semibold">5</span>
+                        <Image
+                          src={logoGold}
+                          width={15}
+                          height={15}
+                          alt="logoGold"
+                        />
+                        <span className="font-semibold">/Respondent </span>
+                      </div>
                     </p>
                   </div>
                 </div>
@@ -459,9 +468,17 @@ const BuyRespondent = () => {
                       </p>
                       <p className="text-[10px]  lg:text-xs">
                         Cost:{" "}
-                        <span className="font-bold">
-                          {respondentsNumber * 5 || 0} coins
-                        </span>
+                        <div className="w-auto flex items-center gap-1">
+                          <p className="text-base lg:text-lg text-[#5F08B2]">
+                            {respondentsNumber * 5 || 0}
+                          </p>
+                          <Image
+                            src={logoGold}
+                            width={15}
+                            height={15}
+                            alt="logoGold"
+                          />
+                        </div>
                       </p>
                     </div>
                   </div>
@@ -553,7 +570,10 @@ const BuyRespondent = () => {
                 <p className="text-xs lg:text-sm font-bold">
                   Unit cost per Respondent
                 </p>
-                <p className="text-base lg:text-lg text-[#5F08B2]">5 coins</p>
+                <div className="w-auto flex items-center gap-1">
+                  <p className="text-base lg:text-lg text-[#5F08B2]">5</p>
+                  <Image src={logoGold} width={15} height={15} alt="logoGold" />
+                </div>
               </div>
               <div className="w-full flex justify-between items-center border-b border-dotted border-[#A9A9B1] pb-2">
                 <p className="text-xs lg:text-sm font-bold">

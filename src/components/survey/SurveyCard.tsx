@@ -17,7 +17,6 @@ import {
   MoreVertical,
   PlayCircle,
 } from "lucide-react";
-
 import { Switch } from "../ui/switch";
 import {
   DropdownMenu,
@@ -25,10 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import eyes from "../../assets/images/eyes.svg";
 import share from "../../assets/images/share.svg";
-
 import RenameSurvey from "./RenameSurvey";
 import DeleteSurvey from "./DeleteSurvey";
 import DuplicateSurvey from "./DuplicateSurvey";
@@ -46,20 +43,8 @@ import {
   useFetchSurveysQuery,
 } from "@/services/survey.service";
 import { VscOpenPreview } from "react-icons/vsc";
-import { FcSurvey } from "react-icons/fc";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import ReviewDialog from "@/components/survey/ReviewDialog";
-import { quickSurvey } from "@/services/api/apiRequest";
 
 interface SurveyCardProps {
   topic: string;
@@ -68,6 +53,7 @@ interface SurveyCardProps {
   number_of_responses: number;
   _id: string;
   index: number;
+  is_quick_survey?: boolean;
 }
 
 const SurveyCard: React.FC<SurveyCardProps> = ({
@@ -77,6 +63,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   number_of_responses,
   _id,
   index,
+  is_quick_survey,
 }) => {
   const [modalStates, setModalStates] = useState({
     delete: false,
@@ -89,7 +76,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
 
   const [surveyName, setSurveyName] = useState<string>("");
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState<boolean>(false);
-  const [isQuickSurveyOpen, setIsQuickSurveyOpen] = useState<boolean>(false);
   const [numberOfRespondents, setNumberOfRespondents] = useState<string>("");
   const [isCreateQuickSurveyLoading, setIsCreateQuickSurveyLoading] =
     useState<boolean>(false);
@@ -204,10 +190,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     setIsReviewDialogOpen(true);
   };
 
-  const handleQuickSurvey = () => {
-    setIsQuickSurveyOpen(true);
-  };
-
   const statusStyles = {
     Closed: {
       text: "Closed",
@@ -234,29 +216,14 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   );
   const isEditor = userRoles.includes("Editor");
 
-  const handleCreateQuickSurvey = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsCreateQuickSurveyLoading(true);
-    try {
-      const response = await quickSurvey(_id, numberOfRespondents);
-      if (response) {
-        setIsCreateQuickSurveyLoading(false);
-        toast.success("Quick Survey created successfully");
-        setIsQuickSurveyOpen(false);
-        refetch();
-      }
-    } catch (error) {
-      console.error("Error creating survey:", error);
-      setIsCreateQuickSurveyLoading(false);
-      setIsQuickSurveyOpen(false);
-      toast.error("Failed to create quick survey");
-      throw error;
-    }
-  };
-
   return (
     <>
       <div className="bg-white relative rounded-[12px] p-3 sm:p-4 border-[1px] w-full max-w-[413px] h-auto sm:h-[314px] transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-purple-400">
+        {is_quick_survey && (
+          <div className="text-white text-[10px] w-fit h-fit px-3 py-[2px] bg-green-400 rounded-tl-[12px] roundend-br-[12px] absolute top-0 left-0">
+            Quick Survey
+          </div>
+        )}
         <div>
           <div className="flex justify-between items-center mb-1 gap-2">
             <h3 className="text-[16px] sm:text-[20px] text-[#333333] truncate">
@@ -278,12 +245,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                       action: "review",
                       onReviewClick: handleReview,
                     },
-                    // {
-                    //   label: "Quick Survey",
-                    //   icon: FcSurvey,
-                    //   action: "survey",
-                    //   onReviewClick: handleQuickSurvey,
-                    // },
                     { label: "Share", icon: Share2, action: "share" },
                     { label: "Make a copy", icon: Copy, action: "copy" },
                     status === "On going"
@@ -445,48 +406,6 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         onClose={handleCloseAll}
         _id={_id}
       />
-
-      <AlertDialog open={isQuickSurveyOpen} onOpenChange={setIsQuickSurveyOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Create a quick survey</AlertDialogTitle>
-            <AlertDialogDescription>
-              Enter the number of respondents to create a quick survey
-              <p className="text-red-500 mt-2">
-                {numberOfRespondents === "0" &&
-                  "Number of respondents must be greater than 0"}
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <form onSubmit={handleCreateQuickSurvey}>
-            <input
-              type="number"
-              placeholder="Enter number of respondents"
-              className="w-full border border-gray-300 rounded-md py-2 px-3 mb-4"
-              value={numberOfRespondents}
-              onChange={(e) => setNumberOfRespondents(e.target.value)}
-            />
-
-            <AlertDialogFooter>
-              <AlertDialogCancel className="bg-red-500 border-0 outline-none text-white hover:bg-red-300 hover:text-white">
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                type="submit"
-                className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white"
-                disabled={
-                  !numberOfRespondents ||
-                  isCreateQuickSurveyLoading ||
-                  numberOfRespondents < "1"
-                }
-              >
-                {isCreateQuickSurveyLoading ? "Creating..." : "Create Survey"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </form>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
         <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[95vh] lg:max-h-[90vw] overflow-hidden">

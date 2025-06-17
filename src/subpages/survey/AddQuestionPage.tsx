@@ -52,7 +52,7 @@ import NumberQuestion from "@/components/survey/NumberQuestion";
 import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
-import ReviewModal from "@/components/modals/ReviewModal";
+// import ReviewModal from "@/components/modals/ReviewModal";
 import MediaQuestion from "@/components/survey/MediaQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import {
@@ -80,6 +80,8 @@ import {
 } from "@/components/ui/tooltip";
 import type { Question } from "@/types/survey";
 import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
+import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
+import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -129,9 +131,13 @@ const AddQuestionPage = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
-  const [review, setReview] = useState(false);
+  // const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const { showQuickSurveyFlow } = useSelector(
+    (state: RootState) => state.quickSurvey
+  );
 
   const [
     createSurvey,
@@ -277,7 +283,7 @@ const AddQuestionPage = () => {
     isRequired: boolean
   ) => {
     // Ensure `editIndex` is valid
-    if (editIndex === null || editIndex < 0 || editIndex >= questions.length) {
+    if (editIndex === null || editIndex < 0 || editIndex >= questions?.length) {
       console.error("Invalid edit index.");
       return;
     }
@@ -462,9 +468,10 @@ const AddQuestionPage = () => {
 
       await createSurvey(processedSurvey).unwrap();
       setSurvey_id(createdSurveyData.data._id);
-      dispatch(resetQuestion());
-      dispatch(resetSurvey());
-      setReview(true);
+      dispatch(startQuickSurveyFlow());
+      // dispatch(resetQuestion());
+      // dispatch(resetSurvey());
+      // setReview(true);
     } catch (e) {
       console.error("Survey creation error:", e);
     }
@@ -472,11 +479,12 @@ const AddQuestionPage = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      setReview((prev) => !prev);
-      dispatch(resetQuestion());
-      dispatch(resetSurvey());
+      // setReview((prev) => !prev);
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
+      dispatch(startQuickSurveyFlow());
+      // dispatch(resetQuestion());
+      // dispatch(resetSurvey());
+      // setReview(true);
       // router.push("/surveys/survey-list");
     }
 
@@ -1342,7 +1350,7 @@ const AddQuestionPage = () => {
                 isLoading ||
                 !Boolean(sectionTopic.trim().length) ||
                 !Boolean(sectionDescription?.trim().length) ||
-                !questions.length
+                !questions?.length
               }
               size="lg"
               className="w-full md:w-auto md:self-end bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl"
@@ -1423,7 +1431,7 @@ const AddQuestionPage = () => {
       </Dialog>
 
       {/* ... rest of your existing modals ... */}
-      {review && (
+      {/* {review && (
         <ReviewModal
           survey_id={survey_id}
           openModal={review}
@@ -1431,8 +1439,13 @@ const AddQuestionPage = () => {
             setReview((prev) => !prev);
             router.push("/surveys/survey-list");
           }}
-        />
+        /> 
+        )} */}
+
+      {showQuickSurveyFlow && survey_id && (
+        <BuyQuickSurveyRespondent surveyId={survey_id} />
       )}
+
       <Dialog
         open={(!userToken || !user) && showAuthModal}
         onOpenChange={() => setShowAuthModal(false)}
@@ -1478,6 +1491,7 @@ const AddQuestionPage = () => {
           </p>
         </DialogContent>
       </Dialog>
+
       <ExitSurveyDialog
         isLoading={isLoading}
         isOpen={showExitDialog}

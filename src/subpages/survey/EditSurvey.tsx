@@ -61,6 +61,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
+import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
+import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -138,13 +140,17 @@ const EditSurvey = () => {
   const [question_count, setQuestionCount] = useState<number>(0);
   const [addMoreQuestion, setAddMoreQuestion] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [review, setReview] = useState(false);
+  // const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<
     (() => void) | null
   >(null);
+
+  const { showQuickSurveyFlow } = useSelector(
+    (state: RootState) => state.quickSurvey
+  );
 
   const [surveyData, setSurveyData] = useState<SurveyData>({
     topic: "",
@@ -160,7 +166,8 @@ const EditSurvey = () => {
   });
 
   const handleClearSurvey = () => {
-    dispatch(resetSurvey());
+    // dispatch(resetSurvey());
+    dispatch(startQuickSurveyFlow());
     setShowClearDialog(false);
     setShowExitDialog(false);
     toast.success("Survey cleared successfully", {
@@ -517,9 +524,11 @@ const EditSurvey = () => {
       };
 
       await createSurvey(processedSurvey).unwrap();
-      handleClearSurvey();
+      dispatch(startQuickSurveyFlow());
+      // handleClearSurvey();
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
+
+      // setReview(true);
     } catch (e) {
       console.error(e);
     }
@@ -527,11 +536,12 @@ const EditSurvey = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      setReview((prev) => !prev);
+      // setReview((prev) => !prev);
       toast.success("Survey created successfully");
-      dispatch(resetSurvey());
+      // dispatch(resetSurvey());
+      dispatch(startQuickSurveyFlow());
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
+      // setReview(true);
       // router.push("/surveys/survey-list");
     }
 
@@ -551,9 +561,9 @@ const EditSurvey = () => {
   }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
 
   useEffect(() => {
-    if (progressSuccess) {
-      router.push("/surveys/survey-list");
-    }
+    // if (progressSuccess) {
+    //   router.push("/surveys/survey-list");
+    // }
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
@@ -990,7 +1000,7 @@ const EditSurvey = () => {
           />
         </motion.div>
       </AnimatePresence>
-      {review && (
+      {/* {review && (
         <ReviewModal
           survey_id={survey_id}
           openModal={review}
@@ -999,7 +1009,12 @@ const EditSurvey = () => {
             router.push("/surveys/survey-list");
           }}
         />
+      )} */}
+
+      {showQuickSurveyFlow && survey_id && (
+        <BuyQuickSurveyRespondent surveyId={survey_id} />
       )}
+
       <Dialog
         open={(!userToken || !user) && showAuthModal}
         onOpenChange={() => setShowAuthModal(false)}

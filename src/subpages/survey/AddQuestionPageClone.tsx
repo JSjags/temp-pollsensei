@@ -54,7 +54,7 @@ import NumberQuestion from "@/components/survey/NumberQuestion";
 import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
-import ReviewModal from "@/components/modals/ReviewModal";
+// import ReviewModal from "@/components/modals/ReviewModal";
 import MediaQuestion from "@/components/survey/MediaQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import {
@@ -1565,7 +1565,7 @@ const AddQuestionPageClone: FC<Props> = ({ previewSurvey }) => {
       </Dialog>
 
       {/* ... rest of your existing modals ... */}
-      {review && (
+      {/* {review && (
         <ReviewModal
           survey_id={survey_id}
           openModal={review}
@@ -1574,7 +1574,7 @@ const AddQuestionPageClone: FC<Props> = ({ previewSurvey }) => {
             router.push("/surveys/survey-list");
           }}
         />
-      )}
+      )} */}
       <Dialog
         open={(!userToken || !user) && showAuthModal}
         onOpenChange={() => setShowAuthModal(false)}
