@@ -20,6 +20,12 @@ import BuyRespondent from "@/components/shop/components/dialogs/BuyRespondent/Bu
 import { FilterPaidRespondent } from "@/services/api/apiRequest";
 import { toast } from "react-toastify";
 import { createScreenerSurvey } from "@/redux/slices/questions.slice";
+import {
+  proceedToPurchase,
+  setQuickSurveyQualifyingTemplateId,
+  setQuickSurveyScreenerId,
+} from "@/redux/slices/quickSurveySlice";
+import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
 
 const FilterRespondents = () => {
   const dispatch = useDispatch();
@@ -44,6 +50,14 @@ const FilterRespondents = () => {
   const sectionDescription = useSelector(
     (state: RootState) => state?.survey?.description
   );
+
+  const {
+    quickSurveyId,
+    surveyId,
+    showQuickSurveyFlow,
+    quickSurveyScreenerId,
+    quickSurveyQualifyingTemplateId,
+  } = useSelector((state: RootState) => state.quickSurvey);
 
   const handleSaveAndContinue = useCallback(async () => {
     setIsLoading(true);
@@ -134,19 +148,121 @@ const FilterRespondents = () => {
     }
   }, [dispatch, questions, survey, sectionDescription, sectionTopic]);
 
-  const handleCloseTab = useCallback(() => {
-    // dispatch(setSurveyDialog(false));
+  const handleQuickSurveyQualifyingTemplate = useCallback(async () => {
+    setIsLoading(true);
 
-    router.push("/shop");
-  }, [router]);
+    const payload = {
+      qualifyingCriteria: Object.entries(selectedCriteria).map(
+        ([section, fields]) => ({
+          section,
+          fields: Object.entries(fields).map(([fieldName, values]) => ({
+            fieldName,
+            required: values.required || true,
+            values: values.values || [],
+          })),
+        })
+      ),
+    };
+
+    try {
+      const response = await FilterPaidRespondent(payload);
+      dispatch(setFilterBy("qualifyingCriteria"));
+      dispatch(setQuickSurveyQualifyingTemplateId(response?._id));
+      dispatch(proceedToPurchase());
+    } catch (e: any) {
+      toast.error(
+        e?.message ??
+          "Error encountered while saving criteria, please try again."
+      );
+      console.error("Error saving criteria:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedCriteria, dispatch]);
+
+  const handleCreateQuickSurveyScreener = useCallback(async () => {
+    setIsLoading(true);
+
+    const payload = {
+      title: survey.topic.length ? survey.topic : "Untitled Survey",
+      description: sectionDescription.length ? sectionDescription : "",
+      sections: [
+        {
+          sectionTitle: sectionTopic.length ? sectionTopic : "Untitled Section",
+          sectionDescription: sectionDescription.length
+            ? sectionDescription
+            : "",
+          questions: questions.map((question: any) => ({
+            question: question.question,
+            description: question.description || question.question,
+            question_type: question.question_type,
+            is_required: question.is_required || false,
+            options: question.options || [],
+          })),
+        },
+      ],
+      theme: "default",
+      headerText: {
+        name: "Helvetica",
+        size: 24,
+      },
+      questionText: {
+        name: "Helvetica",
+        size: 18,
+      },
+      bodyText: {
+        name: "Helvetica",
+        size: 16,
+      },
+      colorTheme: "blue",
+      logoUrl: "",
+    };
+
+    try {
+      const response = await dispatch(
+        createScreenerSurvey({ payload }) as any
+      ).unwrap();
+      dispatch(setFilterBy("screenerSurvey"));
+      dispatch(setQuickSurveyScreenerId(response?._id));
+      dispatch(proceedToPurchase());
+    } catch (e: any) {
+      console.error("Failed to save and continue:", e);
+      toast.error(e ?? "Error encountered while creating survey screener.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dispatch, questions, survey, sectionDescription, sectionTopic]);
+
+  const handleCloseTab = useCallback(() => {
+    if (quickSurveyId) {
+      router.push("/surveys/survey-list");
+    } else {
+      router.push("/shop");
+    }
+  }, [router, quickSurveyId]);
 
   const handleMainButtonClick = useCallback(() => {
-    if (activeTab === "selectCriteria") {
-      handleSaveAndContinue();
+    if (quickSurveyId) {
+      if (activeTab === "selectCriteria") {
+        handleQuickSurveyQualifyingTemplate();
+      } else {
+        handleCreateQuickSurveyScreener();
+      }
     } else {
-      handleCreateScreenerSurvey();
+      if (activeTab === "selectCriteria") {
+        handleSaveAndContinue();
+      } else {
+        handleCreateScreenerSurvey();
+      }
     }
-  }, [activeTab, handleSaveAndContinue, handleCreateScreenerSurvey]);
+  }, [
+    activeTab,
+    quickSurveyId,
+    handleSaveAndContinue,
+    handleCreateScreenerSurvey,
+    handleQuickSurveyQualifyingTemplate,
+    handleCreateQuickSurveyScreener,
+  ]);
 
   useEffect(() => {
     const access =
@@ -156,8 +272,11 @@ const FilterRespondents = () => {
       router.push("/shop");
       return;
     }
+    if (!quickSurveyId) {
+      router.push("/surveys/survey-list");
+    }
     setIsInitialized(true);
-  }, [router]);
+  }, [router, quickSurveyId]);
 
   useEffect(() => {
     setIsInitialized(true);
@@ -207,6 +326,9 @@ const FilterRespondents = () => {
       </Tabs>
 
       <BuyRespondent />
+      {(quickSurveyScreenerId || quickSurveyQualifyingTemplateId) && (
+        <BuyQuickSurveyRespondent surveyId={surveyId} />
+      )}
 
       <div className="w-full flex items-center justify-center gap-5 bg-white py-3 px-10 lg:px-0 fixed bottom-0 z-[10000]">
         <Button

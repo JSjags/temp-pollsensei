@@ -177,3 +177,20 @@ export const surveySchema = z.object({
   survey: z.string().min(1, "Select a survey type"),
   respondentsNumber: z.number().min(1, "Specify the number of respondents"),
 });
+
+export const quickSurveySchema = z.object({
+  survey: z.string().min(1, "Please select a survey"),
+  respondentsNumber: z
+    .number()
+    .min(1, "Number of respondents must be at least 1"),
+  duration: z.string().min(1, "Please select a duration"),
+  conditions: z
+    .object({
+      durationElapsed: z.boolean(),
+      respondentsNumberMet: z.boolean(),
+    })
+    .refine((data) => data.durationElapsed || data.respondentsNumberMet, {
+      message: "At least one condition must be selected",
+      path: ["conditions"],
+    }),
+});

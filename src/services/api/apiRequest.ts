@@ -426,15 +426,87 @@ export const submitReviewedParticipant = async (
   }
 };
 
-export const quickSurvey = async (
-  surveyId: string,
-  numberOfRespondents: string
-) => {
+export const CreateQuickSurvey = async (surveyId: string | null) => {
   try {
     const response = await axiosInstance.post("/quick-survey", {
       survey_id: surveyId,
-      target_responses: Number(numberOfRespondents),
     });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating survey:", error);
+    throw error;
+  }
+};
+
+export const DirectQuickSurvey = async (
+  quickSurveyId: string | null,
+  numberOfRespondents: number,
+  duration: number,
+  targetReached: boolean,
+  durationReached: boolean
+) => {
+  try {
+    const response = await axiosInstance.post("/quick-survey/purchase", {
+      quick_survey_id: quickSurveyId,
+      numberOfRespondents,
+      duration,
+      close_on_targetReached: targetReached,
+      close_on_duration_reached: durationReached,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating survey:", error);
+    throw error;
+  }
+};
+
+export const QuickSurveyQualifyingPurchase = async (
+  quickSurveyId: string | null,
+  numberOfRespondents: number,
+  duration: number,
+  targetReached: boolean,
+  durationReached: boolean,
+  qualifyingTemplateId: string | null
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/quick-survey/purchase/${quickSurveyId}/qualifying`,
+      {
+        quick_survey_id: quickSurveyId,
+        numberOfRespondents,
+        duration,
+        close_on_targetReached: targetReached,
+        close_on_duration_reached: durationReached,
+        qualifying_template_id: qualifyingTemplateId,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating survey:", error);
+    throw error;
+  }
+};
+
+export const QuickSurveyScreenerPurchase = async (
+  quickSurveyId: string | null,
+  numberOfRespondents: number,
+  duration: number,
+  targetReached: boolean,
+  durationReached: boolean,
+  screenerId: string | null
+) => {
+  try {
+    const response = await axiosInstance.post(
+      `/quick-survey/purchase/screener`,
+      {
+        quick_survey_id: quickSurveyId,
+        numberOfRespondents,
+        duration,
+        close_on_targetReached: targetReached,
+        close_on_duration_reached: durationReached,
+        screener_id: screenerId,
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error creating survey:", error);
