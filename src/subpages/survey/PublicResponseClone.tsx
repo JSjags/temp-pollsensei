@@ -36,6 +36,7 @@ import { Switch } from "@/components/ui/switch";
 import PublicResponseFile from "@/components/ui/PublicVoiceRecorder";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import PaginationBtn from "@/components/common/PaginationBtn";
 
 interface Question {
   question: string;
@@ -88,6 +89,14 @@ const PublicResponse = () => {
   const [formErrors, setFormErrors] = useState<FormErrors>({
     questions: {},
   });
+
+  const question =
+    typeof params?.id === "string" && params.id.startsWith("ps-")
+      ? psId
+      : psShortUrl;
+
+  // Use sections from question?.data?.sections
+  const sections = question?.data?.sections || [];
 
   // Validate single question
   const validateQuestion = (question: any, value: any) => {
@@ -262,11 +271,6 @@ const PublicResponse = () => {
     });
   };
 
-  const question =
-    typeof params?.id === "string" && params.id.startsWith("ps-")
-      ? psId
-      : psShortUrl;
-
   console.log(question?.data?.settings);
 
   useEffect(() => {
@@ -275,6 +279,31 @@ const PublicResponse = () => {
       setTextResponses(new Array(question.data.sections.length).fill(""));
     }
   }, [question]);
+
+  // Validate all required questions in all sections
+  const isAllRequiredAnswered = React.useMemo(() => {
+    if (!sections.length) return false;
+    for (const section of sections) {
+      for (const quest of section.questions || []) {
+        if (quest.is_required) {
+          const error = validateQuestionResponse(
+            quest,
+            answers[quest.question]
+          );
+          if (error) return false;
+        }
+      }
+    }
+    // Check respondent info if required
+    if (question?.data?.settings?.collect_email_addresses && !respondent_email)
+      return false;
+    if (
+      question?.data?.settings?.collect_name_of_respondents &&
+      !respondent_name
+    )
+      return false;
+    return true;
+  }, [sections, answers, respondent_email, respondent_name, question]);
 
   // Enhanced submit handler with full validation
   const handleSubmitResponse = async (e: { preventDefault: () => void }) => {
@@ -287,22 +316,23 @@ const PublicResponse = () => {
       return;
     }
 
-    // Format answers for current section
-    const formattedAnswers = currentQuestions.map((question: any) => {
-      const answer = answers[question.question];
-      const formattedAnswer = {
-        question: question.question,
-        question_type: question.question_type,
-        ...answer,
-      };
-
-      // Add duration field for long text with media URL
-      if (question.question_type === "long_text" && answer?.media_url) {
-        formattedAnswer.duration = answer.duration || 0;
-      }
-
-      return formattedAnswer;
-    });
+    // Format answers for all sections
+    const allSections = question?.data?.sections || [];
+    const formattedAnswers = allSections.flatMap((section: any) =>
+      (section.questions || []).map((question: any) => {
+        const answer = answers[question.question];
+        const formattedAnswer = {
+          question: question.question,
+          question_type: question.question_type,
+          ...answer,
+        };
+        // Add duration field for long text with media URL
+        if (question.question_type === "long_text" && answer?.media_url) {
+          formattedAnswer.duration = answer.duration || 0;
+        }
+        return formattedAnswer;
+      })
+    );
 
     // Validate required fields
     const newFormErrors: FormErrors = {
@@ -364,6 +394,8 @@ const PublicResponse = () => {
     }
 
     try {
+      // console.log(responsePayload);
+
       await submitPublicResponse(responsePayload).unwrap();
       toast.success("Your response was saved successfully");
       setSubmitSurveySuccess(true);
@@ -373,10 +405,11 @@ const PublicResponse = () => {
     }
   };
 
-  const navigatePage = (direction: any) => {
+  // Update navigatePage to use sections
+  const navigatePage = (direction: "next" | "prev") => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < OCRresponses.length - 1 ? prevIndex + 1 : prevIndex;
+        return prevIndex < sections.length - 1 ? prevIndex + 1 : prevIndex;
       } else {
         return prevIndex > 0 ? prevIndex - 1 : prevIndex;
       }
@@ -1100,6 +1133,13 @@ const PublicResponse = () => {
     );
   };
 
+  console.log(question);
+
+  // Scroll to top on section change
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentSection]);
+
   return (
     <div className={`flex flex-col gap-5 w-full`}>
       {(psIdLoading || psShUrLoading) && (
@@ -1240,7 +1280,7 @@ const PublicResponse = () => {
             >
               <form
                 onSubmit={handleSubmitResponse}
-                className={`flex flex-col overflow-y-auto custom-scrollbar w-full max-w-screen-lg`}
+                className={`flex flex-col relative custom-scrollbar w-full max-w-screen-lg pb-20`}
               >
                 {question?.data?.logo_url && (
                   <div className="bg-gray-100 w-16 sm:w-20 md:w-24 rounded my-3 sm:my-4 md:my-5 text-white flex items-center flex-col">
@@ -1271,24 +1311,46 @@ const PublicResponse = () => {
                   <h2
                     className={cn(
                       "font-normal bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent",
-                      getFontClass(question?.data?.header_text?.name)
+                      getFontClass(
+                        (
+                          sections[currentSection]?.header_text ||
+                          question?.data?.header_text
+                        )?.name
+                      )
                     )}
                     style={{
-                      fontSize: `clamp(1.25rem, ${question?.data?.header_text?.size}px, 2rem)`,
+                      fontSize: `clamp(1.25rem, ${
+                        (
+                          sections[currentSection]?.header_text ||
+                          question?.data?.header_text
+                        )?.size
+                      }px, 2rem)`,
                     }}
                   >
-                    {question?.data?.topic}
+                    {sections[currentSection]?.section_topic ||
+                      question?.data?.topic}
                   </h2>
                   <p
                     className={cn(
                       "text-gray-600",
-                      getFontClass(question?.data?.body_text?.name)
+                      getFontClass(
+                        (
+                          sections[currentSection]?.body_text ||
+                          question?.data?.body_text
+                        )?.name
+                      )
                     )}
                     style={{
-                      fontSize: `clamp(0.875rem, ${question?.data?.body_text?.size}px, 1.125rem)`,
+                      fontSize: `clamp(0.875rem, ${
+                        (
+                          sections[currentSection]?.body_text ||
+                          question?.data?.body_text
+                        )?.size
+                      }px, 1.125rem)`,
                     }}
                   >
-                    {question?.data?.description}
+                    {sections[currentSection]?.section_description ||
+                      question?.data?.description}
                   </p>
                 </div>
 
@@ -1350,41 +1412,40 @@ const PublicResponse = () => {
                 )}
                 <AnimatePresence mode="wait">
                   <motion.div className="flex flex-col gap-4">
-                    {question?.data?.sections[currentSection]?.questions?.map(
-                      renderQuestion
-                    )}
+                    {sections[currentSection]?.questions?.map(renderQuestion)}
                   </motion.div>
                 </AnimatePresence>
 
-                <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
-                  <div className="flex gap-2 items-center"></div>
-                  {/* {question?.data?.sections?.length > 1 && (
-                    <div className="flex w-full md:w-auto md:justify-end items-center">
-                      <PaginationBtn
-                        currentSection={currentSection}
-                        totalSections={question?.data?.sections?.length}
-                        onNavigate={navigatePage}
-                      />
-                    </div>
-                  )} */}
-                </div>
+                {/* Sticky PaginationBtn */}
+                {sections.length > 1 && (
+                  <div className="flex w-full md:w-auto md:justify-end items-center mb-6 mt-10 sticky bottom-10 z-30">
+                    <PaginationBtn
+                      currentSection={currentSection}
+                      totalSections={sections.length}
+                      onNavigate={navigatePage}
+                    />
+                  </div>
+                )}
 
-                <div className=" rounded-md flex flex-col justify-center w-full md:w-[16rem] py-5 text-center">
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium"
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      "Submit"
-                    )}
-                  </Button>
-                </div>
+                {/* Only show submit on last section */}
+                {currentSection === sections.length - 1 && (
+                  <div className="rounded-md flex flex-col justify-center w-full py-5 text-center">
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-[#5b03b2] h-12 to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium"
+                      disabled={submitting || !isAllRequiredAnswered}
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit"
+                      )}
+                    </Button>
+                  </div>
+                )}
                 {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
                   <div className="flex flex-col">
                     <p>Form created by</p>

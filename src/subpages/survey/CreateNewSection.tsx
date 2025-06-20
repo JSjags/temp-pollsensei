@@ -41,10 +41,10 @@ const CreateNewSection = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const newSectionTopic = useSelector(
-    (state: RootState) => state.question.sectionTopic
+    (state: RootState) => state.question[0]?.sectionTopic
   );
   const newSectionDesc = useSelector(
-    (state: RootState) => state.question.sectionDescription
+    (state: RootState) => state.question[0]?.sectionDescription
   );
   const [sectionTitle, setSectionTitle] = useState("");
   const [sDescription, setsDescription] = useState("");
@@ -52,7 +52,7 @@ const CreateNewSection = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const questions = useSelector(
-    (state: RootState) => state?.question?.questions
+    (state: RootState) => state.question[0]?.questions || []
   );
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const [createSurvey, { isLoading, isSuccess, isError, error }] =

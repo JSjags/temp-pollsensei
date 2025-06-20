@@ -556,6 +556,10 @@ input[type="radio"].radio:checked:before {
   font-family: var(--font-lora);
 }
 
+.font-dm-sans {
+  font-family: var(--font-sans);
+}
+
 .font-merriweather {
   font-family: var(--font-merriweather);
 }

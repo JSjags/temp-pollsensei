@@ -297,7 +297,7 @@ const CreatedSurveysPage = () => {
             <FilterButton text="Add filter" />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6">
+        <div className="grid gap-4 sm:gap-5 mt-6 grid-cols-1 sm:[grid-template-columns:repeat(auto-fit,minmax(350px,1fr))]">
           {Array(6)
             .fill(0)
             .map((_, index) => (

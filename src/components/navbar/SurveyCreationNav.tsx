@@ -647,7 +647,7 @@ const SurveyCreationNav = () => {
           </nav>
 
           {path.includes("survey-response-upload") ? (
-            userData.plan?.name === "Pro Plan" ? (
+            userData.plan?.name !== "Basic Plan" ? (
               <Button
                 className={cn(
                   "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
