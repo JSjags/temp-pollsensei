@@ -1,7 +1,7 @@
 "use client";
 
 import { ImFilter } from "react-icons/im";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useResetUserPasswordMutation,
   useUpdateDisableStatusMutation,
@@ -51,6 +51,7 @@ import TableSkeleton from "@/components/common/TableSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
 import { Button } from "@/components/ui/button";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 interface SubmitData {
   email: string;
@@ -99,7 +100,13 @@ const statusColorMap = [
 ];
 
 const UserRegistry: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Get current page from URL or default to 1
+  const pageFromUrl = parseInt(searchParams.get("page") || "1", 10);
+  const [currentPage, setCurrentPage] = useState(pageFromUrl);
   const [email, setEmail] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<PathParamsProps>({});
   const [selectedUserEmail, setSelectedUserEmail] = useState<string>("");
@@ -182,6 +189,29 @@ const UserRegistry: React.FC = () => {
   const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
 
+  // Keep currentPage in sync with URL
+  useEffect(() => {
+    const urlPage = parseInt(searchParams.get("page") || "1", 10);
+    if (urlPage !== currentPage) {
+      setCurrentPage(urlPage);
+    }
+    // No return value here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Update URL when currentPage changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (currentPage > 1) {
+      params.set("page", currentPage.toString());
+    } else {
+      params.delete("page");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+    // No return value here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
+
   const handleFilterApply = (filterType: string, selected: string[]) => {
     setSelectedFilters((prev) => ({
       ...prev,
@@ -195,7 +225,10 @@ const UserRegistry: React.FC = () => {
   const resetFilters = () => {
     setSelectedFilters({});
     setEmail("");
-    setCurrentPage(1);
+    // Instead of setCurrentPage(1), update the URL param
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
   };
 
   const handleSubmit = async (email: string) => {

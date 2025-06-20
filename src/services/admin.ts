@@ -122,3 +122,8 @@ export const getSubscriptionHistory = async (page = 1, page_size = 10) => {
   );
   return data;
 };
+
+export const getOrganizationInvoice = async () => {
+  const { data } = await axiosInstance.get(`/organization/invoice`);
+  return data;
+};

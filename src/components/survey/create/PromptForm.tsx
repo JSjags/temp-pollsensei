@@ -14,7 +14,7 @@ import { debounce } from "lodash";
 interface PromptFormProps {
   surveyPrompt: string;
   handlePromptChange: (value: string) => void;
-  handleGenerateTopics: () => Promise<void>;
+  handleGenerateTopics: () => Promise<void> | any;
   manualTopic: string;
   setManualTopic: (value: string) => void;
 }

@@ -146,7 +146,9 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
     );
   };
 
-  console.log(survey);
+  const qs = useSelector((state: RootState) => state?.survey?.sections);
+
+  console.log(qs);
 
   return (
     <div className="w-full">

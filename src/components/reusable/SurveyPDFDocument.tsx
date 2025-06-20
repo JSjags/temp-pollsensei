@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     margin: 0,
     backgroundColor: "#FFFFFF", // Subtle background
     fontFamily: "Helvetica-custom",
-    paddingVertical: "4rem",
+    paddingVertical: 32, // Added vertical padding
   },
   sidebar: {
     width: 12,
@@ -270,8 +270,7 @@ const SurveyPDFDocument = ({
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Sidebar */}
+      <Page wrap={true} size="A4" style={styles.page}>
         <View style={dynamicStyles.sidebar} />
         <View style={dynamicStyles.content}>
           {/* Logo */}
@@ -294,7 +293,6 @@ const SurveyPDFDocument = ({
             <Text style={styles.description as any}>{description}</Text>
           </View>
 
-          {/* {console.log(nameAndEmail)} */}
           {/* Name and Email Section */}
           {nameAndEmail && (
             <View style={styles.section}>
@@ -326,135 +324,177 @@ const SurveyPDFDocument = ({
                   />
                 </View>
               )}
-              {/* {nameAndEmail.email && (
-                <View style={dynamicStyles.card}>
-                  
-                </View>
-              )} */}
             </View>
           )}
 
-          {/* Questions */}
-          {sections[0]?.questions?.map((item, index) => (
-            <View key={index} style={dynamicStyles.card} wrap={false}>
-              <Text style={dynamicStyles.question as any}>
-                <Text style={{ color: "#111", fontWeight: "normal" }}>
-                  {index + 1}.
-                </Text>{" "}
-                {item.question}
-              </Text>
-              {item.question_type === "checkbox" ? (
-                <CheckboxQuestion
-                  question={item.question}
-                  options={item.options}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "multiple_choice" ? (
-                <MultipleChoiceQuestion
-                  question={item.question}
-                  options={item.options}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "single_choice" ? (
-                <SingleChoiceQuestion
-                  question={item.question}
-                  options={item.options}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "drop_down" ? (
-                <DropdownQuestion
-                  question={item.question}
-                  options={item.options}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "boolean" ? (
-                <BooleanQuestion
-                  question={item.question}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "short_text" ? (
-                <ShortTextQuestion
-                  question={item.question}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "long_text" ? (
-                <LongTextQuestion
-                  question={item.question}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "slider" ? (
-                <SliderQuestion
-                  question={item.question}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                  min={(item as any).min}
-                  max={(item as any).max}
-                />
-              ) : item.question_type === "likert_scale" ? (
-                <LikertScaleQuestion
-                  question={item.question}
-                  options={item.options}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "rating_scale" ? (
-                <RatingScaleQuestion
-                  question={item.question}
-                  options={item.options}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "star_rating" ? (
-                <StarRatingQuestion
-                  question={item.question}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                  useCircles={true}
-                />
-              ) : item.question_type === "matrix_multiple_choice" ? (
-                <MatrixMultipleChoiceQuestion
-                  question={item.question}
-                  rows={item.rows}
-                  columns={item.columns}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "matrix_checkbox" ? (
-                <MatrixCheckboxQuestion
-                  question={item.question}
-                  rows={item.rows}
-                  columns={item.columns}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : item.question_type === "number" ? (
-                <NumberQuestion
-                  question={item.question}
-                  index={index + 1}
-                  colorTheme="#111"
-                  questionStyle={dynamicStyles.question}
-                />
-              ) : null}
+          {/* All sections and questions */}
+          {sections.map((section, sectionIndex) => (
+            <View key={sectionIndex} style={styles.section}>
+              {/* Divider before all but the first section */}
+              {sectionIndex > 0 && <View style={dynamicStyles.divider} />}
+              {/* Section header: topic/description or generic */}
+              {(section as any)?.section_topic ||
+              (section as any)?.section_description ? (
+                <View style={{ marginBottom: 12 }}>
+                  {(section as any)?.section_topic && (
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "bold",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {(section as any)?.section_topic}
+                    </Text>
+                  )}
+                  {(section as any)?.section_description && (
+                    <Text
+                      style={{ fontSize: 14, color: "#666", marginBottom: 4 }}
+                    >
+                      {(section as any)?.section_description}
+                    </Text>
+                  )}
+                </View>
+              ) : sectionIndex !== 0 ? (
+                <View style={{ marginBottom: 12 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      color: "#5B03B2",
+                    }}
+                  >
+                    Section {sectionIndex + 1}
+                  </Text>
+                </View>
+              ) : (
+                <View></View>
+              )}
+              {section.questions.map((item, index) => (
+                <View
+                  key={`${sectionIndex}-${index}`}
+                  style={dynamicStyles.card}
+                >
+                  <Text style={dynamicStyles.question as any}>
+                    <Text style={{ color: "#111", fontWeight: "normal" }}>
+                      {index + 1}.
+                    </Text>{" "}
+                    {item.question}
+                  </Text>
+                  {item.question_type === "checkbox" ? (
+                    <CheckboxQuestion
+                      question={item.question}
+                      options={item.options}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "multiple_choice" ? (
+                    <MultipleChoiceQuestion
+                      question={item.question}
+                      options={item.options}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "single_choice" ? (
+                    <SingleChoiceQuestion
+                      question={item.question}
+                      options={item.options}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "drop_down" ? (
+                    <DropdownQuestion
+                      question={item.question}
+                      options={item.options}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "boolean" ? (
+                    <BooleanQuestion
+                      question={item.question}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "short_text" ? (
+                    <ShortTextQuestion
+                      question={item.question}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "long_text" ? (
+                    <LongTextQuestion
+                      question={item.question}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "slider" ? (
+                    <SliderQuestion
+                      question={item.question}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                      min={(item as any).min}
+                      max={(item as any).max}
+                    />
+                  ) : item.question_type === "likert_scale" ? (
+                    <LikertScaleQuestion
+                      question={item.question}
+                      options={item.options}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "rating_scale" ? (
+                    <RatingScaleQuestion
+                      question={item.question}
+                      options={item.options}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "star_rating" ? (
+                    <StarRatingQuestion
+                      question={item.question}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                      useCircles={true}
+                    />
+                  ) : item.question_type === "matrix_multiple_choice" ? (
+                    <MatrixMultipleChoiceQuestion
+                      question={item.question}
+                      rows={item.rows}
+                      columns={item.columns}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "matrix_checkbox" ? (
+                    <MatrixCheckboxQuestion
+                      question={item.question}
+                      rows={item.rows}
+                      columns={item.columns}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : item.question_type === "number" ? (
+                    <NumberQuestion
+                      question={item.question}
+                      index={index + 1}
+                      colorTheme="#111"
+                      questionStyle={dynamicStyles.question}
+                    />
+                  ) : null}
+                </View>
+              ))}
             </View>
           ))}
         </View>

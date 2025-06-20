@@ -5,8 +5,15 @@ import {
   View,
   StyleSheet,
   Image,
+  Font,
 } from "@react-pdf/renderer";
 import React from "react";
+
+// Register the local font just like InvoicePDFDocument
+Font.register({
+  family: "Helvetica-custom",
+  src: "/fonts/DMSans-Variable.ttf",
+});
 
 const styles = StyleSheet.create({
   page: {
@@ -16,23 +23,51 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
     paddingHorizontal: 0,
     minHeight: "100vh",
+    position: "relative",
+    fontFamily: "Helvetica-custom",
+  },
+  watermark: {
+    position: "absolute",
+    top: 180,
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    color: "#e9d5ff",
+    fontSize: 60,
+    fontWeight: 700,
+    opacity: 0.12,
+    transform: "rotate(-20deg)",
+    zIndex: 0,
+    fontFamily: "Helvetica-custom",
   },
   receiptPaper: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    width: 340,
-    minHeight: 500,
-    padding: 24,
+    borderRadius: 16,
+    width: 370,
+    minHeight: 540,
+    padding: 28,
     boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
     border: "1.5px dashed #d1d5db",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    position: "relative",
+    zIndex: 1,
+    fontFamily: "Helvetica-custom",
+  },
+  accentBar: {
+    width: "100%",
+    height: 8,
+    borderRadius: 8,
+    background: "linear-gradient(90deg, #a78bfa 0%, #5B03B2 100%)",
+    marginBottom: 16,
+    fontFamily: "Helvetica-custom",
   },
   logo: {
     width: 110,
     height: 24,
     marginBottom: 8,
+    fontFamily: "Helvetica-custom",
   },
   brand: {
     fontSize: 10,
@@ -41,67 +76,104 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     textTransform: "uppercase",
     fontWeight: "bold",
+    fontFamily: "Helvetica-custom",
   },
   bigTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: 700,
     letterSpacing: 4,
-    color: "#222",
+    color: "#5B03B2",
     marginBottom: 8,
     textAlign: "center",
+    fontFamily: "Helvetica-custom",
   },
   dottedLine: {
     borderBottom: "1.5px dotted #d1d5db",
     width: "100%",
-    marginVertical: 12,
+    marginVertical: 14,
+    fontFamily: "Helvetica-custom",
   },
   section: {
     width: "100%",
-    marginBottom: 10,
+    marginBottom: 12,
+    fontFamily: "Helvetica-custom",
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 6,
+    marginBottom: 7,
+    fontFamily: "Helvetica-custom",
   },
   label: {
     color: "#888",
     fontSize: 11,
-    fontWeight: "bold",
+    fontWeight: 700,
     letterSpacing: 1,
+    fontFamily: "Helvetica-custom",
   },
   value: {
     color: "#222",
     fontSize: 12,
-    fontFamily: "Courier",
+    fontFamily: "Helvetica-custom",
+  },
+  summaryBox: {
+    backgroundColor: "#f3e8ff",
+    border: "1.5px solid #a78bfa",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 0,
+    marginVertical: 10,
+    width: "100%",
+    alignItems: "center",
+    display: "flex",
+    fontFamily: "Helvetica-custom",
+  },
+  summaryLabel: {
+    fontSize: 11,
+    color: "#5B03B2",
+    fontWeight: 700,
+    letterSpacing: 1,
+    fontFamily: "Helvetica-custom",
+  },
+  summaryAmount: {
+    fontSize: 22,
+    color: "#5B03B2",
+    fontWeight: 700,
+    fontFamily: "Helvetica-custom",
+    marginTop: 2,
   },
   statusPaid: {
     color: "#22c55e",
-    fontWeight: "bold",
+    fontWeight: 700,
     fontSize: 12,
+    fontFamily: "Helvetica-custom",
   },
   statusFailed: {
     color: "#ef4444",
-    fontWeight: "bold",
+    fontWeight: 700,
     fontSize: 12,
+    fontFamily: "Helvetica-custom",
   },
   statusPending: {
     color: "#eab308",
-    fontWeight: "bold",
+    fontWeight: 700,
     fontSize: 12,
+    fontFamily: "Helvetica-custom",
   },
   thankYou: {
     marginTop: 18,
     fontSize: 13,
     color: "#5B03B2",
     textAlign: "center",
-    fontWeight: "bold",
+    fontWeight: 700,
     letterSpacing: 1,
+    fontFamily: "Helvetica-custom",
   },
   barcode: {
     marginTop: 24,
     width: "100%",
     alignItems: "center",
+    fontFamily: "Helvetica-custom",
   },
   barcodeText: {
     fontFamily: "Courier",
@@ -116,6 +188,7 @@ const styles = StyleSheet.create({
     color: "#888",
     textAlign: "center",
     width: "100%",
+    fontFamily: "Helvetica-custom",
   },
   receiptId: {
     fontSize: 9,
@@ -123,6 +196,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: "center",
     letterSpacing: 1,
+    fontFamily: "Courier",
   },
 });
 
@@ -159,23 +233,28 @@ const ReceiptPDFDocument: React.FC<ReceiptPDFDocumentProps> = ({ record }) => {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+        {/* Watermark */}
+        <Text style={styles.watermark}>PollSensei</Text>
         <View style={styles.receiptPaper}>
+          {/* Accent Bar */}
+          <View style={styles.accentBar} />
           {/* Logo & Brand */}
           <Image src={"/assets/pollsensei-logo.png"} style={styles.logo} />
-          {/* <Text style={styles.brand}>PollSensei.ai</Text> */}
+          <Text style={styles.brand}>PollSensei.ai</Text>
           <Text style={styles.bigTitle}>RECEIPT</Text>
           <View style={styles.dottedLine} />
+          {/* Amount Summary Box */}
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>Total Paid</Text>
+            <Text style={styles.summaryAmount}>
+              {record.amount} {record.currency}
+            </Text>
+          </View>
           {/* Details */}
           <View style={styles.section}>
             <View style={styles.row}>
               <Text style={styles.label}>Plan</Text>
               <Text style={styles.value}>{record.plan_id?.name}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Amount</Text>
-              <Text style={styles.value}>
-                {record.amount} {record.currency}
-              </Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.label}>Status</Text>

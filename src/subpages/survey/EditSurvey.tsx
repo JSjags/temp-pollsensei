@@ -22,6 +22,8 @@ import {
   resetSurvey,
   updateSection,
   updateSurvey,
+  addSection,
+  deleteSection,
 } from "@/redux/slices/survey.slice";
 import store from "@/redux/store";
 import PaginationBtn from "@/components/common/PaginationBtn";
@@ -48,7 +50,9 @@ import {
   ArrowRight,
   Loader2,
   PencilIcon,
+  Sheet,
   Sparkles,
+  TableRowsSplit,
   Trash2,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -87,6 +91,15 @@ const mascotVariants = {
     },
   },
 };
+
+// Define Section type locally since it's not exported from the slice
+interface Section {
+  section_topic?: string;
+  section_description?: string;
+  questions: any[];
+  header_text?: { name: string; size: number };
+  body_text?: { name: string; size: number };
+}
 
 const EditSurvey = () => {
   // const question = useSelector((state: RootState) => state.question);
@@ -161,6 +174,24 @@ const EditSurvey = () => {
     header_url: "",
   });
 
+  // Add state to store the current edit values
+  const [editQuestionValue, setEditQuestionValue] = useState<string>("");
+  const [editOptionsValue, setEditOptionsValue] = useState<string[]>([]);
+  const [editQuestionTypeValue, setEditQuestionTypeValue] =
+    useState<string>("");
+  const [editIsRequiredValue, setEditIsRequiredValue] =
+    useState<boolean>(false);
+
+  // Add state to track header edit mode and values
+  const [isHeaderEditing, setIsHeaderEditing] = useState(false);
+  const [headerEditValue, setHeaderEditValue] = useState<any>(null);
+  const [bodyEditValue, setBodyEditValue] = useState<any>(null);
+
+  // Add this state near other useState declarations
+  const [aiTargetSectionIndex, setAiTargetSectionIndex] = useState<
+    number | null
+  >(null);
+
   const handleClearSurvey = () => {
     dispatch(resetSurvey());
     setShowClearDialog(false);
@@ -179,11 +210,28 @@ const EditSurvey = () => {
     setIsEdit(true);
     setIsSidebarOpen(false);
     setAiChatbot(true);
-    console.log(index);
     setSelectIndex(index);
+    // Set current edit values
+    const currentQ = questions[currentSection]?.questions[index];
+    if (currentQ) {
+      setEditQuestionValue(currentQ.question);
+      setEditOptionsValue(currentQ.options || []);
+      setEditQuestionTypeValue(currentQ.question_type);
+      setEditIsRequiredValue(currentQ.is_required);
+    }
   };
 
   const navigatePage = (direction: any) => {
+    if (isEdit && editIndex !== null) {
+      handleSave(
+        editQuestionValue,
+        editOptionsValue,
+        editQuestionTypeValue,
+        editIsRequiredValue,
+        editIndex
+      );
+    }
+    saveHeaderIfEditing();
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
         return prevIndex < questions.length - 1 ? prevIndex + 1 : prevIndex;
@@ -252,6 +300,11 @@ const EditSurvey = () => {
 
     setIsSidebarOpen((prev) => !prev);
     setAiChatbot((prev) => !prev);
+    // Reset edit values
+    setEditQuestionValue("");
+    setEditOptionsValue([]);
+    setEditQuestionTypeValue("");
+    setEditIsRequiredValue(false);
   };
 
   const handleAISave = (
@@ -332,6 +385,7 @@ const EditSurvey = () => {
 
   const handleGenerateSingleQuestion = async () => {
     try {
+      // aiTargetSectionIndex should already be set when opening the dialog
       await generateSingleSurvey({
         conversation_id: survey.conversation_id,
         question_count: question_count,
@@ -348,31 +402,47 @@ const EditSurvey = () => {
   useEffect(() => {
     if (
       newQuestionGenerate &&
-      Array.isArray((newSingleSurvey as any)?.data?.response)
+      Array.isArray((newSingleSurvey as any)?.data?.response) &&
+      aiTargetSectionIndex !== null
     ) {
       const newQuestions = processNewSurveyQuestions(
         (newSingleSurvey as any).data.response
       );
 
       const updatedSections = [...questions];
-      const currentSectionData = updatedSections[currentSection];
+      const targetSectionData = updatedSections[aiTargetSectionIndex];
 
       const updatedQuestions = [
-        ...currentSectionData.questions,
+        ...targetSectionData.questions,
         ...newQuestions,
       ];
       const updatedSection = {
-        ...currentSectionData,
+        ...targetSectionData,
         questions: updatedQuestions,
       };
 
       dispatch(
-        updateSection({ index: currentSection, newSection: updatedSection })
+        updateSection({
+          index: aiTargetSectionIndex,
+          newSection: updatedSection,
+        })
       );
+      setAiTargetSectionIndex(null); // Reset after use
     }
-  }, [dispatch, newQuestionGenerate, newSingleSurvey, currentSection]);
+  }, [dispatch, newQuestionGenerate, newSingleSurvey]);
 
   const handleSurveyCreation = async () => {
+    // Check if all sections have at least one question
+    const hasEmptySection = questions.some(
+      (section: Section) => !section.questions || section.questions.length === 0
+    );
+    if (hasEmptySection) {
+      toast.error(
+        "All sections must have at least one question before submitting."
+      );
+      return;
+    }
+
     if (!userToken || !user) {
       setShowAuthModal(true);
       return;
@@ -407,124 +477,126 @@ const EditSurvey = () => {
           surveyData.logo_url.startsWith("#")
             ? ""
             : surveyData.logo_url,
-        sections: [updatedSurvey.sections[0]].map((section) => ({
-          ...section,
-          questions: section.questions.map((question: Question) => {
-            // Check if empty question type but has matrix structure
-            if (
-              !question.question_type &&
-              question.rows?.length &&
-              question.columns?.length
-            ) {
-              return {
-                ...question,
-                question_type: "matrix_multiple_choice", // Set default matrix type
-                description: question.description || "Matrix Question",
-              } as Question;
-            }
-
-            const baseQuestion = {
-              question: question.question,
-              description: question?.description || question.question,
-              question_type: question.question_type,
-              is_required: question.is_required,
-            } as Question;
-
-            switch (question.question_type) {
-              case "slider":
-                const extractRange = (questionText: string) => {
-                  const numberWords: { [key: string]: number } = {
-                    one: 1,
-                    two: 2,
-                    three: 3,
-                    four: 4,
-                    five: 5,
-                    six: 6,
-                    seven: 7,
-                    eight: 8,
-                    nine: 9,
-                    ten: 10,
-                  };
-
-                  let processedText = questionText.toLowerCase();
-                  Object.entries(numberWords).forEach(([word, num]) => {
-                    processedText = processedText.replace(
-                      new RegExp(word, "g"),
-                      num.toString()
-                    );
-                  });
-
-                  const match = processedText.match(
-                    /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
-                  );
-                  return match
-                    ? {
-                        min: parseInt(match[1]),
-                        max: parseInt(match[2]),
-                      }
-                    : { min: 0, max: 10 };
-                };
-
-                const range = extractRange(question.question);
+        sections: updatedSurvey.sections.map((section, idx) => {
+          // For the first section, do not include section_topic/section_description
+          const baseSection = {
+            questions: section.questions.map((question: Question) => {
+              // Check if empty question type but has matrix structure
+              if (
+                !question.question_type &&
+                question.rows?.length &&
+                question.columns?.length
+              ) {
                 return {
-                  ...baseQuestion,
-                  min: range.min,
-                  max: range.max,
-                  step: 1,
-                } as Question;
-
-              case "checkbox":
-              case "multiple_choice":
-              case "single_choice":
-              case "drop_down":
-              case "likert_scale":
-
-              case "rating_scale":
-              case "star_rating":
-              case "boolean":
-                return {
-                  ...baseQuestion,
-                  options: question.options,
-                } as Question;
-
-              case "matrix_multiple_choice":
-              case "matrix_checkbox":
-                return {
-                  ...baseQuestion,
+                  ...question,
+                  question_type: "matrix_multiple_choice",
                   description: question.description || "Matrix Question",
-                  rows:
-                    question.rows ||
-                    (question as any)?.Rows ||
-                    (question?.options as any)?.Rows,
-                  columns:
-                    question.columns ||
-                    (question as any)?.Columns ||
-                    (question?.options as any)?.Columns,
                 } as Question;
-
-              case "number":
-                return {
-                  ...baseQuestion,
-                  min: (question as Question).min,
-                  max: question.max,
-                } as Question;
-
-              case "long_text":
-                return {
-                  ...baseQuestion,
-                  can_accept_media:
-                    (question as Question).can_accept_media || false,
-                } as Question;
-
-              case "short_text":
-              case "media":
-              default:
-                return baseQuestion;
-            }
-          }),
-        })),
+              }
+              const baseQuestion = {
+                question: question.question,
+                description: question?.description || question.question,
+                question_type: question.question_type,
+                is_required: question.is_required,
+              } as Question;
+              switch (question.question_type) {
+                case "slider":
+                  const extractRange = (questionText: string) => {
+                    const numberWords: { [key: string]: number } = {
+                      one: 1,
+                      two: 2,
+                      three: 3,
+                      four: 4,
+                      five: 5,
+                      six: 6,
+                      seven: 7,
+                      eight: 8,
+                      nine: 9,
+                      ten: 10,
+                    };
+                    let processedText = questionText.toLowerCase();
+                    Object.entries(numberWords).forEach(([word, num]) => {
+                      processedText = processedText.replace(
+                        new RegExp(word, "g"),
+                        num.toString()
+                      );
+                    });
+                    const match = processedText.match(
+                      /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
+                    );
+                    return match
+                      ? {
+                          min: parseInt(match[1]),
+                          max: parseInt(match[2]),
+                        }
+                      : { min: 0, max: 10 };
+                  };
+                  const range = extractRange(question.question);
+                  return {
+                    ...baseQuestion,
+                    min: range.min,
+                    max: range.max,
+                    step: 1,
+                  } as Question;
+                case "checkbox":
+                case "multiple_choice":
+                case "single_choice":
+                case "drop_down":
+                case "likert_scale":
+                case "rating_scale":
+                case "star_rating":
+                case "boolean":
+                  return {
+                    ...baseQuestion,
+                    options: question.options,
+                  } as Question;
+                case "matrix_multiple_choice":
+                case "matrix_checkbox":
+                  return {
+                    ...baseQuestion,
+                    description: question.description || "Matrix Question",
+                    rows:
+                      question.rows ||
+                      (question as any)?.Rows ||
+                      (question?.options as any)?.Rows,
+                    columns:
+                      question.columns ||
+                      (question as any)?.Columns ||
+                      (question?.options as any)?.Columns,
+                  } as Question;
+                case "number":
+                  return {
+                    ...baseQuestion,
+                    min: (question as Question).min,
+                    max: question.max,
+                  } as Question;
+                case "long_text":
+                  return {
+                    ...baseQuestion,
+                    can_accept_media:
+                      (question as Question).can_accept_media || false,
+                  } as Question;
+                case "short_text":
+                case "media":
+                default:
+                  return baseQuestion;
+              }
+            }),
+          };
+          if (idx === 0) {
+            // First section: do not include section_topic/section_description
+            return baseSection;
+          } else {
+            // Other sections: include section_topic/section_description
+            return {
+              section_topic: section.section_topic,
+              section_description: section.section_description,
+              ...baseSection,
+            };
+          }
+        }),
       };
-
+      console.log(processedSurvey);
       await createSurvey(processedSurvey).unwrap();
       handleClearSurvey();
       setSurvey_id(createdSurveyData.data._id);
@@ -653,20 +725,230 @@ const EditSurvey = () => {
     router.push(url);
   };
 
+  const handleRemoveSection = () => {
+    if (questions.length > 1) {
+      dispatch(deleteSection(currentSection));
+      // Move to previous section if not first, else stay at 0
+      setCurrentSection((prev) => (prev > 0 ? prev - 1 : 0));
+    }
+  };
+
+  // Add a function to save the header if editing
+  const saveHeaderIfEditing = () => {
+    if (isHeaderEditing) {
+      if (currentSection === 0) {
+        setSurveyData((prev) => ({
+          ...prev,
+          header_text: headerEditValue || prev.header_text,
+          body_text: bodyEditValue || prev.body_text,
+        }));
+      } else {
+        const section = questions[currentSection];
+        dispatch(
+          updateSection({
+            index: currentSection,
+            newSection: {
+              ...section,
+              ...{
+                header_text: headerEditValue || (section as any).header_text,
+                body_text: bodyEditValue || (section as any).body_text,
+              },
+            },
+          })
+        );
+      }
+      setIsHeaderEditing(false);
+    }
+  };
+
+  // In safeSetCurrentSection and navigatePage, call saveHeaderIfEditing before switching
+  const safeSetCurrentSection = (newSection: number) => {
+    if (isEdit && editIndex !== null) {
+      handleSave(
+        editQuestionValue,
+        editOptionsValue,
+        editQuestionTypeValue,
+        editIsRequiredValue,
+        editIndex
+      );
+    }
+    saveHeaderIfEditing();
+    setCurrentSection(newSection);
+  };
+
+  console.log(questions);
+
   return (
     <div className={`${theme} flex flex-col gap-5 w-full relative`}>
-      <div className={`${theme} flex justify-between gap-10 w-full`}>
-        <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-4 sm:px-0 lg:pl-10">
-          {isNewSection ? (
-            <div>
-              <SurveyHeader
-                logoUrl={surveyData.logo_url}
-                headerUrl={surveyData.header_url}
-                survey={survey}
-                headerText={survey.header_text}
-                bodyText={survey.body_text}
-              />
-              {questions[currentSection]?.questions.map(
+      <div className={`${theme} flex justify-between gap-6 w-full`}>
+        <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-4 sm:px- lg:pl-6">
+          {/* {isNewSection ? ( */}
+          <div className="w-full">
+            {(() => {
+              if (currentSection === 0) {
+                return (
+                  <div className="flex items-center justify-between">
+                    <SurveyHeader
+                      logoUrl={surveyData.logo_url}
+                      headerUrl={surveyData.header_url}
+                      survey={survey}
+                      headerText={survey.header_text}
+                      bodyText={survey.body_text}
+                      canEdit={true}
+                      onSave={(localHeaderText, localBodyText) => {
+                        setSurveyData((prev) => ({
+                          ...prev,
+                          header_text: localHeaderText,
+                          body_text: localBodyText,
+                        }));
+                      }}
+                      isEdit={isHeaderEditing}
+                    />
+                  </div>
+                );
+              } else {
+                const section = questions[currentSection];
+                return (
+                  <div className="flex items-center justify-between">
+                    <SurveyHeader
+                      logoUrl={surveyData.logo_url}
+                      headerUrl={surveyData.header_url}
+                      survey={{
+                        ...survey,
+                        topic: section?.section_topic,
+                        description: section?.section_description,
+                      }}
+                      headerText={
+                        (section as any)?.header_text || survey?.header_text
+                      }
+                      bodyText={
+                        (section as any)?.body_text || survey?.body_text
+                      }
+                      canEdit={true}
+                      onSave={(_localHeaderText, _localBodyText) => {
+                        dispatch(
+                          updateSection({
+                            index: currentSection,
+                            newSection: {
+                              ...section,
+                              section_topic:
+                                _localHeaderText?.value ||
+                                section.section_topic,
+                              section_description:
+                                _localBodyText?.value ||
+                                section.section_description,
+                              ...({
+                                header_text: _localHeaderText,
+                                body_text: _localBodyText,
+                              } as any),
+                            },
+                          })
+                        );
+                      }}
+                      isEdit={isHeaderEditing}
+                    />
+                  </div>
+                );
+              }
+            })()}
+            {questions[currentSection]?.questions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200 my-6">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 mb-4">
+                  <HiOutlinePlus className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800">
+                  No questions yet
+                </h3>
+                <p className="text-gray-500 mb-6 max-w-xs mx-auto">
+                  Click the{" "}
+                  <span className="font-semibold text-purple-700">
+                    Add Question
+                  </span>{" "}
+                  button below to start building your survey section.
+                </p>
+                <Button
+                  variant="outline"
+                  className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                  // onClick={() => setAddMoreQuestion((prev) => !prev)}
+                  disabled={generatingSingleSurvey}
+                >
+                  {generatingSingleSurvey ? (
+                    <ClipLoader size={24} />
+                  ) : (
+                    <div className="flex gap-2 items-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            id="add-question-btn"
+                            variant="outline"
+                            className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                          >
+                            <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                            <span className="group-hover:tracking-wide transition-all duration-200">
+                              Add Question
+                            </span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          collisionPadding={{ bottom: 40 }}
+                          className="w-56"
+                        >
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const newQuestion = {
+                                question: "New Question",
+                                description: "Question description",
+                                question_type: "short_text",
+                                is_required: false,
+                                options: [],
+                              };
+
+                              const updatedSections = [...questions];
+                              const currentSectionData =
+                                updatedSections[currentSection];
+
+                              const updatedSection = {
+                                ...currentSectionData,
+                                questions: [
+                                  ...currentSectionData.questions,
+                                  newQuestion,
+                                ],
+                              };
+
+                              dispatch(
+                                updateSection({
+                                  index: currentSection,
+                                  newSection: updatedSection,
+                                })
+                              );
+                              setEditIndex(currentSectionData.questions.length);
+                              setIsEdit(true);
+                            }}
+                            className="gap-2"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                            <span>Add Manually</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setAiTargetSectionIndex(currentSection);
+                              setAddMoreQuestion(true);
+                            }}
+                            className="gap-2"
+                          >
+                            <Sparkles className="h-4 w-4" />
+                            <span>Generate with AI</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              questions[currentSection]?.questions.map(
                 (item: any, index: number) => (
                   <div key={index} className="mb-4">
                     <QuestionRenderer
@@ -691,176 +973,223 @@ const EditSurvey = () => {
                     />
                   </div>
                 )
-              )}
+              )
+            )}
 
-              <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
-                <div className="flex gap-2 items-center">
-                  <Button
-                    variant="outline"
-                    className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                    // onClick={() => setAddMoreQuestion((prev) => !prev)}
-                    disabled={generatingSingleSurvey}
-                  >
-                    {generatingSingleSurvey ? (
-                      <ClipLoader size={24} />
-                    ) : (
-                      <div className="flex gap-2 items-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                            >
-                              <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
-                              <span className="group-hover:tracking-wide transition-all duration-200">
-                                Add Question
-                              </span>
-                              <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="start"
-                            collisionPadding={{ bottom: 40 }}
-                            className="w-56"
-                          >
-                            <DropdownMenuItem
-                              onClick={() => {
-                                const newQuestion = {
-                                  question: "New Question",
-                                  description: "Question description",
-                                  question_type: "short_text",
-                                  is_required: false,
-                                  options: [],
-                                };
-
-                                const updatedSections = [...questions];
-                                const currentSectionData =
-                                  updatedSections[currentSection];
-
-                                const updatedSection = {
-                                  ...currentSectionData,
-                                  questions: [
-                                    ...currentSectionData.questions,
-                                    newQuestion,
-                                  ],
-                                };
-
-                                dispatch(
-                                  updateSection({
-                                    index: currentSection,
-                                    newSection: updatedSection,
-                                  })
-                                );
-                                setEditIndex(
-                                  currentSectionData.questions.length
-                                );
-                                setIsEdit(true);
-                              }}
-                              className="gap-2"
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                              <span>Add Manually</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setAddMoreQuestion(true)}
-                              className="gap-2"
-                            >
-                              <Sparkles className="h-4 w-4" />
-                              <span>Generate with AI</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    )}
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="group relative rounded-full transition-all duration-200 border-red-200 text-red-500 hover:!text-red-600 overflow-hidden"
-                    onClick={() => setShowClearDialog(true)}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
-                    <span className="group-hover:tracking-wide group-hover:text-red-600 transition-all duration-200">
-                      Clear Survey
-                    </span>
-                    <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
-                  </Button>
-                </div>
-                {/* {questions?.length > 1 && (
-                  <div className="flex w-full md:w-auto md:justify-end items-center">
-                    <PaginationBtn
-                      currentSection={currentSection}
-                      totalSections={questions.length}
-                      onNavigate={navigatePage}
-                    />
-                  </div>
-                )} */}
+            {questions?.length > 1 && (
+              <div className="flex w-full md:w-auto md:justify-end items-center mb-6 sticky bottom-10">
+                <PaginationBtn
+                  currentSection={currentSection}
+                  totalSections={questions.length}
+                  onNavigate={navigatePage}
+                />
               </div>
-              <WaitingMessagesModal
-                otherPossibleCondition={generatingSingleSurvey}
-                openModal={openModal}
-                setOpenModal={
-                  generatingSingleSurvey === false
-                    ? () => setOpenModal(false)
-                    : () => setOpenModal(true)
-                }
-              />
+            )}
 
-              <div className="rounded-md flex flex-col justify-center w-full md:w-[16rem] overflow-visible py-5 text-center">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
+            <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
+              <div className="flex flex-wrap gap-2 items-center">
+                <Button
+                  variant="outline"
+                  className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                  // onClick={() => setAddMoreQuestion((prev) => !prev)}
+                  disabled={generatingSingleSurvey}
                 >
-                  <Button
-                    onClick={handleSurveyCreation}
-                    className="group relative py-3 px-8 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 w-full"
-                    disabled={isLoading}
-                  >
-                    <span className="group-hover:tracking-wider transition-all duration-200">
-                      {isLoading ? "Submitting" : "Continue"}
-                    </span>
-                    {!isLoading && (
-                      <motion.div
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                        className="flex items-center"
-                      >
-                        <ArrowRight className="h-4 w-4" />
-                      </motion.div>
-                    )}
-                    {isLoading && (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="flex items-center"
-                      >
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      </motion.div>
-                    )}
-                    <motion.div
-                      className="absolute inset-0 bg-white"
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileHover={{ scale: 1, opacity: 0.1 }}
-                      transition={{ duration: 0.2 }}
-                    />
-                  </Button>
-                </motion.div>
+                  {generatingSingleSurvey ? (
+                    <ClipLoader size={24} />
+                  ) : (
+                    <div className="flex gap-2 items-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            id="add-question-btn"
+                            variant="outline"
+                            className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                          >
+                            <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                            <span className="group-hover:tracking-wide transition-all duration-200">
+                              Add Question
+                            </span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          collisionPadding={{ bottom: 40 }}
+                          className="w-56"
+                        >
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const newQuestion = {
+                                question: "New Question",
+                                description: "Question description",
+                                question_type: "short_text",
+                                is_required: false,
+                                options: [],
+                              };
+
+                              const updatedSections = [...questions];
+                              const currentSectionData =
+                                updatedSections[currentSection];
+
+                              const updatedSection = {
+                                ...currentSectionData,
+                                questions: [
+                                  ...currentSectionData.questions,
+                                  newQuestion,
+                                ],
+                              };
+
+                              dispatch(
+                                updateSection({
+                                  index: currentSection,
+                                  newSection: updatedSection,
+                                })
+                              );
+                              setEditIndex(currentSectionData.questions.length);
+                              setIsEdit(true);
+                            }}
+                            className="gap-2"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                            <span>Add Manually</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setAiTargetSectionIndex(currentSection);
+                              setAddMoreQuestion(true);
+                            }}
+                            className="gap-2"
+                          >
+                            <Sparkles className="h-4 w-4" />
+                            <span>Generate with AI</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="group relative rounded-full transition-all duration-200 border-red-200 text-red-500 hover:!text-red-600 overflow-hidden"
+                  onClick={() => setShowClearDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
+                  <span className="group-hover:tracking-wide group-hover:text-red-600 transition-all duration-200">
+                    Clear Survey
+                  </span>
+                  <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                </Button>
               </div>
-              <WatermarkBanner className="mb-10" />
-              {/* <CreateNewSection /> */}
+              <div className="flex gap-4 flex-wrap">
+                <Button
+                  variant="outline"
+                  className="group relative rounded-full transition-all duration-200 border-green-200 text-green-600 hover:!text-green-700 overflow-hidden"
+                  onClick={() => {
+                    let prevSection = questions[questions.length - 1];
+                    const newSection: Section = {
+                      section_topic:
+                        prevSection?.section_topic ||
+                        survey.topic ||
+                        `Section ${questions.length + 1}`,
+                      section_description:
+                        prevSection?.section_description ||
+                        survey.description ||
+                        "",
+                      questions: [],
+                      header_text:
+                        (prevSection as any)?.header_text || survey.header_text,
+                      body_text:
+                        (prevSection as any)?.body_text || survey.body_text,
+                    };
+                    dispatch(addSection(newSection));
+                    safeSetCurrentSection(questions.length); // Go to the new section
+                  }}
+                >
+                  <Sheet className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                  <span className="group-hover:tracking-wide transition-all duration-200">
+                    Add New Section
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-200 to-green-400 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                </Button>
+                {questions.length > 1 && (
+                  <Button
+                    variant="destructive"
+                    onClick={handleRemoveSection}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-200 text-red-600 hover:text-white rounded-full shadow-sm hover:bg-red-500"
+                    title="Remove Current Section"
+                  >
+                    <TableRowsSplit className="w-5 h-5" />
+                    Remove Current Section
+                  </Button>
+                )}
+              </div>
             </div>
-          ) : (
+
+            <WaitingMessagesModal
+              otherPossibleCondition={generatingSingleSurvey}
+              openModal={openModal}
+              setOpenModal={
+                generatingSingleSurvey === false
+                  ? () => setOpenModal(false)
+                  : () => setOpenModal(true)
+              }
+            />
+
+            <div className="rounded-md flex flex-col justify-center w-full overflow-visible py-5 text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Button
+                  onClick={handleSurveyCreation}
+                  className="group relative h-12 mt-10 !w-full py-3 px-8 rounded-xl flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90"
+                  disabled={isLoading}
+                >
+                  <span className="group-hover:tracking-wider transition-all duration-200">
+                    {isLoading ? "Submitting" : "Continue"}
+                  </span>
+                  {!isLoading && (
+                    <motion.div
+                      animate={{ x: [0, 5, 0] }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className="flex items-center"
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </motion.div>
+                  )}
+                  {isLoading && (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className="flex items-center"
+                    >
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    </motion.div>
+                  )}
+                  <motion.div
+                    className="absolute inset-0 bg-white"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 0.1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </Button>
+              </motion.div>
+            </div>
+            <WatermarkBanner className="mb-10" />
+          </div>
+          {/* ) : (
             <CreateNewSection />
-          )}
+          )} */}
         </div>
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}

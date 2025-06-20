@@ -125,6 +125,8 @@ const DownloadPdfButton = ({ surveyData, isSuccess, surveyId }: Props) => {
   //   return <div>Loading images...</div>;
   // }
 
+  console.log(surveyData);
+
   return (
     <>
       {isSurveySettingsSuccess && (

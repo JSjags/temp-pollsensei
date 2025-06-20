@@ -81,7 +81,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     share: false,
   });
 
-  const [surveyName, setSurveyName] = useState<string>("");
+  const [surveyName, setSurveyName] = useState<string>(topic);
 
   const router = useRouter();
   const userRoles = useSelector(

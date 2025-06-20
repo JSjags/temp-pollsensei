@@ -419,6 +419,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           undefined,
           canAcceptAudioLocal
         );
+      } else if (editedQuestionType === "boolean") {
+        onSave(editedQuestion, ["Yes", "No"], editedQuestionType, isRequired);
       } else {
         onSave(
           editedQuestion,
