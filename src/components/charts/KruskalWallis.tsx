@@ -41,17 +41,26 @@ interface TestData {
 interface TestProps {
   test_name: string;
   test_results: {
-    results: Record<string, TestData>;
+    results: Record<string, TestData> | TestData[];
     description: string;
   };
 }
 
 const KruskalWallisComponent: React.FC<TestProps> = (props) => {
+  // Patch for array/object mismatch
+  let results = props.test_results.results;
+  if (Array.isArray(results)) {
+    // Merge all objects in the array into one object
+    results = Object.assign({}, ...results);
+  }
+  // Ensure results is Record<string, TestData>
+  const typedResults = results as Record<string, TestData>;
+
   const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(props.test_results.results)[0]
+    Object.keys(typedResults)[0]
   );
 
-  const currentResult = props.test_results.results[selectedResult];
+  const currentResult = typedResults[selectedResult];
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -88,7 +97,7 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
                 <SelectValue placeholder="Select variable" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(props.test_results.results).map((key) => (
+                {Object.keys(typedResults).map((key) => (
                   <SelectItem key={key} value={key}>
                     {key.split("-").map(formatKey).join(" vs ")}
                   </SelectItem>
@@ -115,7 +124,7 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
                   </thead>
                   <tbody>
                     {currentResult.table_data?.statistics.map(
-                      (statistic, index) => (
+                      (statistic: string, index: number) => (
                         <tr key={statistic} className="border-b">
                           <td className="py-2">{statistic}</td>
                           <td className="text-right py-2">
@@ -143,16 +152,18 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {currentResult.plot_data.rank_means.map((rankMean) => (
-                        <tr key={rankMean.category} className="border-b">
-                          <td className="py-2">
-                            {formatKey(rankMean.category)}
-                          </td>
-                          <td className="text-right py-2">
-                            {rankMean.rank.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
+                      {currentResult.plot_data.rank_means.map(
+                        (rankMean: { category: string; rank: number }) => (
+                          <tr key={rankMean.category} className="border-b">
+                            <td className="py-2">
+                              {formatKey(rankMean.category)}
+                            </td>
+                            <td className="text-right py-2">
+                              {rankMean.rank.toFixed(2)}
+                            </td>
+                          </tr>
+                        )
+                      )}
                     </tbody>
                   </table>
                 </div>

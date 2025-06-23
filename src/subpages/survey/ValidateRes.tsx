@@ -24,6 +24,23 @@ import { Dialog } from "@/components/ui/dialog";
 import { Spinner } from "@/components/loaders/page-loaders/AnalysisPageLoader";
 import { useQuery } from "@tanstack/react-query";
 import { getSurveySettings } from "@/services/survey";
+import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
+import { Input } from "@/components/ui/shadcn-input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/shadcn-textarea";
+import { Checkbox } from "@/components/ui/shadcn-checkbox";
+import { Switch } from "@/components/ui/switch";
+import PublicResponseFile from "@/components/ui/PublicVoiceRecorder";
+import ResponseFile from "@/components/ui/VoiceRecorder";
+import StarRating from "@/components/survey/StarRating";
 
 const ValidateResponse = () => {
   const params = useParams();
@@ -45,6 +62,7 @@ const ValidateResponse = () => {
   const [progress, setProgress] = useState(0);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showAudio, setShowAudio] = useState<Record<string, boolean>>({});
 
   const {
     data: surveySettings,
@@ -76,21 +94,43 @@ const ValidateResponse = () => {
   });
 
   // console.log(surveySettings);
+  console.log(OCRresponses);
 
   useEffect(() => {
-    if (OCRresponses) {
+    if (OCRresponses && Object.keys(answers).length === 0) {
       setOcrRes({
         survey: OCRresponses.survey || [],
         extracted_answers: OCRresponses.extracted_answers || [],
         uploaded_files: OCRresponses.uploaded_files || [],
       });
 
-      // Pre-fill answers with existing responses
       const existingAnswers: Record<string, any> = {};
       OCRresponses.extracted_answers.forEach((item: any) => {
+        let scale_value = item?.scale_value || "";
+        if (item.question_type === "star_rating") {
+          // Use the first value if it's an array
+          let val = Array.isArray(scale_value) ? scale_value[0] : scale_value;
+          // If it's a number or numeric string, find the matching option
+          if (
+            typeof val === "number" ||
+            (typeof val === "string" && !isNaN(Number(val)))
+          ) {
+            const num = Number(val);
+            if (Array.isArray(item.options)) {
+              const match = item.options.find(
+                (opt: string) => opt.replace(/[^0-9]/g, "") === String(num)
+              );
+              scale_value = match || "";
+            } else {
+              scale_value = "";
+            }
+          } else if (typeof val === "string") {
+            scale_value = val;
+          }
+        }
         existingAnswers[item.question] = {
           selected_options: item?.selected_options || [],
-          scale_value: item?.scale_value || "",
+          scale_value,
           drop_down_value: Array.isArray(item?.drop_down_value)
             ? item.drop_down_value[0] || ""
             : item?.drop_down_value || "",
@@ -431,98 +471,125 @@ const ValidateResponse = () => {
       return;
     }
 
+    console.log(ocrRes);
+
     const formattedAnswers = OCRresponses.extracted_answers.map((item: any) => {
       const rawAnswer = answers[item.question];
       const baseAnswer = {
         question: item.question,
         question_type: item.question_type,
       };
-
-      // Handle case where answer might be a direct value
       const answer =
         typeof rawAnswer === "object" ? rawAnswer : { value: rawAnswer };
 
-      // Format answer based on question type
       switch (item.question_type) {
         case "checkbox":
         case "multiple_choice":
         case "single_choice":
           return {
             ...baseAnswer,
-            selected_options: Array.isArray(answer)
-              ? answer
-              : Array.isArray(answer.selected_options)
+            selected_options: Array.isArray(answer.selected_options)
               ? answer.selected_options
+              : answer.selected_options
+              ? [answer.selected_options]
               : [],
           };
-
-        case "likert_scale":
-        case "rating_scale":
-        case "star_rating":
-        case "slider":
-          return {
-            ...baseAnswer,
-            scale_value: parseInt(
-              typeof answer === "string" || typeof answer === "number"
-                ? answer
-                : answer.scale_value || ""
-            ),
-          };
-
         case "drop_down":
           return {
             ...baseAnswer,
             drop_down_value:
-              typeof answer === "string"
-                ? answer
+              typeof answer.drop_down_value === "string"
+                ? answer.drop_down_value
+                : Array.isArray(answer.drop_down_value)
+                ? answer.drop_down_value[0] || ""
                 : answer.drop_down_value || "",
           };
-
-        case "boolean":
+        case "likert_scale":
           return {
             ...baseAnswer,
-            boolean_value:
-              typeof answer === "boolean" ? answer : answer.boolean_value,
+            scale_value:
+              typeof answer.scale_value === "string"
+                ? answer.scale_value
+                : Array.isArray(answer.scale_value)
+                ? answer.scale_value[0] || ""
+                : answer.scale_value || "",
           };
-
-        case "long_text":
-        case "short_text":
+        case "rating_scale":
           return {
             ...baseAnswer,
-            text: typeof answer === "string" ? answer : answer.text || "",
+            scale_value:
+              typeof answer.scale_value === "string"
+                ? answer.scale_value
+                : Array.isArray(answer.scale_value)
+                ? answer.scale_value[0] || ""
+                : answer.scale_value || "",
           };
-
-        case "number":
+        case "star_rating": {
+          let checkedValue = answers[item.question]?.scale_value;
+          if (Array.isArray(checkedValue)) checkedValue = checkedValue[0];
           return {
             ...baseAnswer,
-            num:
-              typeof answer === "number"
-                ? answer
-                : typeof answer.num === "number"
-                ? answer.num
-                : typeof answer.value === "number"
-                ? answer.value
-                : parseFloat(answer.num) || 0,
+            scale_value: checkedValue || "",
           };
-
+        }
+        case "slider":
+          return {
+            ...baseAnswer,
+            scale_value:
+              typeof answer.scale_value === "number"
+                ? answer.scale_value
+                : Number(answer.scale_value) || 0,
+          };
         case "matrix_multiple_choice":
         case "matrix_checkbox":
           return {
             ...baseAnswer,
-            matrix_answers: Array.isArray(answer)
-              ? answer
-              : Array.isArray(answer.matrix_answers)
+            matrix_answers: Array.isArray(answer.matrix_answers)
               ? answer.matrix_answers
               : [],
           };
-
+        case "number":
+          return {
+            ...baseAnswer,
+            num:
+              typeof answer.num === "number"
+                ? answer.num
+                : Number(answer.num) || 0,
+          };
+        case "long_text": {
+          if (answer.media_url) {
+            return {
+              ...baseAnswer,
+              media_url: answer.media_url,
+            };
+          }
+          return {
+            ...baseAnswer,
+            text: typeof answer.text === "string" ? answer.text : "",
+          };
+        }
+        case "short_text":
+          return {
+            ...baseAnswer,
+            text: typeof answer.text === "string" ? answer.text : "",
+          };
         case "media":
           return {
             ...baseAnswer,
-            media_url:
-              typeof answer === "string" ? answer : answer.media_url || "",
+            media_url: answer.media_url || "",
           };
-
+        case "boolean":
+          return {
+            ...baseAnswer,
+            boolean_value:
+              typeof answer.boolean_value === "boolean"
+                ? answer.boolean_value
+                : answer.boolean_value === "true"
+                ? true
+                : answer.boolean_value === "false"
+                ? false
+                : Boolean(answer.boolean_value),
+          };
         default:
           return baseAnswer;
       }
@@ -563,6 +630,692 @@ const ValidateResponse = () => {
 
   const handleBack = () => {
     router.push(`/surveys/${params.id}/survey-response-upload`);
+  };
+
+  const isOtherOption = (option: string) => {
+    const otherOptions = [
+      "Others (please specify)",
+      "Other (please specify)",
+      "Others",
+      "Other",
+      "other",
+      "others",
+      "Other...",
+      "Others...",
+      "Other option",
+      "Other options",
+      "Other choice",
+      "Other choices",
+      "Something else",
+      "Something else...",
+      "Specify other",
+      "Please specify",
+      "Please specify other",
+      "Please specify others",
+      "Custom option",
+      "Custom choice",
+      "Please specify here",
+      "Please specify below",
+      "Please provide details",
+      "Please explain",
+      "Please describe",
+      "Please elaborate",
+      "Please write here",
+      "Please enter details",
+      "Please tell us more",
+      "Specify here",
+      "Enter other option",
+      "Write your answer",
+      "Other option (please specify)",
+      "Other options (please specify)",
+      "Other choice (please specify)",
+      "Other choices (please specify)",
+      "Specify other option",
+      "Specify other options",
+    ];
+    if (typeof option !== "string") return false;
+    return otherOptions.some(
+      (otherOption) =>
+        typeof otherOption === "string" &&
+        otherOption.toLowerCase() === option.toLowerCase().trim()
+    );
+  };
+
+  const isMatrixOptionSelected = (
+    question: string,
+    row: string,
+    column: string
+  ) => {
+    return answers[question]?.matrix_answers?.some(
+      (ans: any) => ans.row === row && ans.column === column
+    );
+  };
+
+  const handleAudioToggle = (question: string) => {
+    setShowAudio((prev) => {
+      const newState = { ...prev, [question]: !prev[question] };
+      setAnswers((prevAnswers) => ({
+        ...prevAnswers,
+        [question]: {},
+      }));
+      return newState;
+    });
+  };
+
+  const getFontClass = (fontName?: string | null) => {
+    if (!fontName || typeof fontName !== "string") return "";
+    try {
+      return `font-${fontName.split(" ").join("-").toLowerCase()}`;
+    } catch (error) {
+      console.error("Error processing font name:", error);
+      return "";
+    }
+  };
+
+  const renderQuestion = (quest: any, index: number, theme: string) => {
+    return (
+      <motion.div
+        key={index}
+        variants={questionVariants}
+        className={cn(
+          "space-y-4 py-6 bg-white rounded-lg shadow-sm",
+          getFontClass(ocrRes?.survey?.question_text?.name)
+        )}
+        style={{
+          fontSize: `16px`,
+        }}
+      >
+        <motion.div
+          variants={questionVariants}
+          className={cn(
+            "flex items-start gap-3 px-4 lg:px-10",
+            getFontClass(ocrRes?.survey?.question_text?.name)
+          )}
+          style={{
+            fontSize: `16px`,
+          }}
+        >
+          <span className="bg-gradient-to-r font-medium text-lg rounded-full flex items-center justify-center">
+            {index + 1}.
+          </span>
+          <div className="flex-1">
+            <p className="font-medium text-lg">
+              {quest.question}
+              {quest.is_required && (
+                <span className="text-red-500 font-extrabold text-base ml-1">
+                  *
+                </span>
+              )}
+            </p>
+          </div>
+        </motion.div>
+        <motion.div
+          variants={questionVariants}
+          className="mt-4 px-4 lg:px-10"
+          style={{ fontSize: `16px` }}
+        >
+          {(() => {
+            switch (quest.question_type) {
+              case "checkbox":
+              case "multiple_choice":
+                return (
+                  <div className="space-y-3">
+                    {quest.options?.map((option: string, idx: number) => (
+                      <motion.div
+                        key={option}
+                        variants={questionVariants}
+                        custom={idx}
+                        className="flex items-center font-normal p-3 gap-3 rounded-lg hover:bg-gray-50 transition-colors"
+                        style={{ fontSize: `16px` }}
+                      >
+                        <Checkbox
+                          id={`${quest.question}-${option}`}
+                          value={option}
+                          checked={answers[
+                            quest.question
+                          ]?.selected_options?.includes(option)}
+                          onCheckedChange={(checked) =>
+                            handleAnswerChange(quest.question, {
+                              selected_options: checked
+                                ? [
+                                    ...(answers[quest.question]
+                                      ?.selected_options || []),
+                                    option,
+                                  ]
+                                : (
+                                    answers[quest.question]?.selected_options ||
+                                    []
+                                  ).filter((opt: string) => opt !== option),
+                            })
+                          }
+                          className="size-4 sm:size-5"
+                        />
+                        <Label
+                          htmlFor={`${quest.question}-${option}`}
+                          className="flex-1 cursor-pointer font-normal"
+                          style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                        >
+                          {option}
+                        </Label>
+                      </motion.div>
+                    ))}
+                    {answers[quest.question]?.selected_options?.some(
+                      isOtherOption
+                    ) && (
+                      <Input
+                        type="text"
+                        placeholder="Please specify"
+                        className="mt-2"
+                        value={answers[quest.question]?.other_value || ""}
+                        onChange={(e) =>
+                          handleAnswerChange(quest.question, {
+                            ...answers[quest.question],
+                            other_value: e.target.value,
+                          })
+                        }
+                      />
+                    )}
+                  </div>
+                );
+              case "single_choice":
+                return (
+                  <RadioGroup
+                    className="space-y-3"
+                    value={answers[quest.question]?.selected_options?.[0]}
+                    onValueChange={(value) =>
+                      handleAnswerChange(quest.question, {
+                        selected_options: [value],
+                      })
+                    }
+                  >
+                    {quest.options?.map((option: string, idx: number) => (
+                      <motion.div
+                        key={option}
+                        variants={questionVariants}
+                        custom={idx}
+                        className="flex items-center p-3 gap-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <RadioGroupItem
+                          value={option}
+                          id={`${quest.question}-${option}`}
+                          className="size-4 sm:size-5"
+                        />
+                        <Label
+                          htmlFor={`${quest.question}-${option}`}
+                          className="flex-1 cursor-pointer font-normal"
+                          style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                        >
+                          {option}
+                        </Label>
+                      </motion.div>
+                    ))}
+                    {answers[quest.question]?.selected_options?.some(
+                      isOtherOption
+                    ) && (
+                      <Input
+                        type="text"
+                        placeholder="Please specify"
+                        className="mt-2"
+                        value={answers[quest.question]?.other_value || ""}
+                        onChange={(e) =>
+                          handleAnswerChange(quest.question, {
+                            ...answers[quest.question],
+                            other_value: e.target.value,
+                          })
+                        }
+                      />
+                    )}
+                  </RadioGroup>
+                );
+              case "likert_scale": {
+                // Support scale_value as string, number, or array
+                let checkedValue = answers[quest.question]?.scale_value;
+                if (Array.isArray(checkedValue)) checkedValue = checkedValue[0];
+                return (
+                  <RadioGroup
+                    className="mb-4 bg-white w-full p-4 sm:p-6 px-0 sm:px-0 rounded-lg transition-all duration-300"
+                    value={checkedValue ?? ""}
+                    onValueChange={(value) =>
+                      handleAnswerChange(quest.question, {
+                        scale_value: value,
+                      })
+                    }
+                    required={quest.is_required}
+                  >
+                    <div className="flex flex-col md:flex-row justify-between items-stretch gap-2">
+                      {quest.options?.map((option: any, idx: number) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.1 }}
+                          className="flex-1 min-w-[100px] flex items-center md:flex-col md:items-center gap-2 p-3 rounded-lg bg-gray-50 sm:bg-transparent hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <RadioGroupItem
+                            value={option}
+                            id={`${quest.question}-${idx}`}
+                            className="size-4 sm:size-5 md:mb-1 transition-all duration-200"
+                          />
+                          <Label
+                            htmlFor={`${quest.question}-${idx}`}
+                            className="text-sm md:text-center flex-1 font-normal cursor-pointer transition-colors duration-200 hover:text-[#9D50BB]"
+                            style={{
+                              fontSize: `clamp(0.75rem, 16px, 0.875rem)`,
+                            }}
+                          >
+                            {option}
+                          </Label>
+                        </motion.div>
+                      ))}
+                    </div>
+                    {checkedValue && isOtherOption(checkedValue) && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Input
+                          type="text"
+                          placeholder="Please specify"
+                          className="mt-4 transition-all duration-200 focus:ring-[#9D50BB] focus:border-[#9D50BB]"
+                          value={answers[quest.question]?.other_value || ""}
+                          onChange={(e) =>
+                            handleAnswerChange(quest.question, {
+                              ...answers[quest.question],
+                              other_value: e.target.value,
+                            })
+                          }
+                        />
+                      </motion.div>
+                    )}
+                  </RadioGroup>
+                );
+              }
+              case "drop_down":
+                return (
+                  <>
+                    <Select
+                      onValueChange={(value) =>
+                        handleAnswerChange(quest.question, {
+                          drop_down_value: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger
+                        className="mb-4 bg-[#FAFAFA] w-full"
+                        style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                      >
+                        <SelectValue
+                          placeholder="Select an option"
+                          style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {quest.options?.map((option: any) => (
+                          <SelectItem
+                            key={option}
+                            value={option}
+                            style={{
+                              fontSize: `clamp(0.75rem, 16px, 0.875rem)`,
+                            }}
+                          >
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {answers[quest.question]?.drop_down_value &&
+                      isOtherOption(
+                        answers[quest.question]?.drop_down_value
+                      ) && (
+                        <Input
+                          type="text"
+                          placeholder="Please specify"
+                          className="mt-2"
+                          value={answers[quest.question]?.other_value || ""}
+                          onChange={(e) =>
+                            handleAnswerChange(quest.question, {
+                              ...answers[quest.question],
+                              other_value: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                  </>
+                );
+              case "boolean":
+                return (
+                  <RadioGroup
+                    className="mb-4 flex flex-col w-full p-3 gap-4 sm:gap-5 rounded-lg transition-all duration-300"
+                    onValueChange={(value) =>
+                      handleAnswerChange(quest.question, {
+                        boolean_value: value === "true",
+                      })
+                    }
+                    required={quest.is_required}
+                  >
+                    <div className="flex items-center space-x-3 sm:space-x-4 p-2 sm:p-3 rounded-md transition-colors duration-200 hover:bg-gray-50">
+                      <RadioGroupItem
+                        value="true"
+                        id={`${quest.question}-yes`}
+                        className="size-4 sm:size-5"
+                      />
+                      <Label
+                        htmlFor={`${quest.question}-yes`}
+                        className="font-normal cursor-pointer select-none transition-colors duration-200 hover:text-[#5B03B2]"
+                        style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                      >
+                        Yes
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3 sm:space-x-4 p-2 sm:p-3 rounded-md transition-colors duration-200">
+                      <RadioGroupItem
+                        value="false"
+                        id={`${quest.question}-no`}
+                        className="size-4 sm:size-5"
+                      />
+                      <Label
+                        htmlFor={`${quest.question}-no`}
+                        className="font-normal cursor-pointer select-none transition-colors duration-200 hover:text-[#5B03B2]"
+                        style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                      >
+                        No
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                );
+              case "long_text":
+                return (
+                  <div className="flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label>Response Type</Label>
+                      <div className="flex items-center space-x-2">
+                        <Label>Text</Label>
+                        <Switch
+                          checked={showAudio[quest.question]}
+                          onCheckedChange={() =>
+                            handleAudioToggle(quest.question)
+                          }
+                        />
+                        <Label>Audio</Label>
+                      </div>
+                    </div>
+                    {!showAudio[quest.question] ? (
+                      <Textarea
+                        rows={4}
+                        className="mb-4 bg-[#FAFAFA]"
+                        value={answers[quest.question]?.text || ""}
+                        onChange={(e) =>
+                          handleAnswerChange(quest.question, {
+                            text: e.target.value,
+                          })
+                        }
+                        style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                      />
+                    ) : (
+                      <PublicResponseFile
+                        question={quest.question}
+                        handleAnswerChange={handleAnswerChange}
+                        selectedValue={answers[quest.question]?.media_url || ""}
+                        required={quest.is_required}
+                      />
+                    )}
+                  </div>
+                );
+              case "short_text":
+                return (
+                  <div className="flex flex-col">
+                    <Input
+                      placeholder="Your response here..."
+                      className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                      onChange={(e) =>
+                        handleAnswerChange(quest.question, {
+                          text: e.target.value,
+                        })
+                      }
+                      style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                    />
+                  </div>
+                );
+              case "star_rating": {
+                // Use the value directly as set by StarRating
+                let checkedValue = answers[quest.question]?.scale_value;
+                if (Array.isArray(checkedValue)) checkedValue = checkedValue[0];
+                return (
+                  <div className="px-4">
+                    <StarRating
+                      question={quest.question}
+                      options={quest.options}
+                      handleAnswerChange={handleAnswerChange}
+                      selectedValue={checkedValue || ""}
+                      required={quest.is_required}
+                    />
+                  </div>
+                );
+              }
+              case "rating_scale":
+                return (
+                  <RadioGroup
+                    className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded"
+                    onValueChange={(value) =>
+                      handleAnswerChange(quest.question, {
+                        scale_value: value,
+                      })
+                    }
+                    required={quest.is_required}
+                  >
+                    <div className="flex justify-between w-full">
+                      {quest.options?.map((option: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="flex flex-col items-center gap-2"
+                        >
+                          <RadioGroupItem
+                            value={option}
+                            id={`${quest.question}-${idx}`}
+                            className="size-4 sm:size-5 md:mb-1 transition-all duration-200"
+                          />
+                          <Label
+                            htmlFor={`${quest.question}-${idx}`}
+                            className="font-normal"
+                            style={{
+                              fontSize: `clamp(0.75rem, 16px, 0.875rem)`,
+                            }}
+                          >
+                            {option}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                    {answers[quest.question]?.scale_value &&
+                      isOtherOption(answers[quest.question]?.scale_value) && (
+                        <Input
+                          type="text"
+                          placeholder="Please specify"
+                          className="mt-2"
+                          value={answers[quest.question]?.other_value || ""}
+                          onChange={(e) =>
+                            handleAnswerChange(quest.question, {
+                              ...answers[quest.question],
+                              other_value: e.target.value,
+                            })
+                          }
+                        />
+                      )}
+                  </RadioGroup>
+                );
+              case "matrix_multiple_choice":
+              case "matrix_checkbox":
+                return (
+                  <div className="w-full mb-4 bg-[#FAFAFA] p-6 rounded">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="p-3 text-left font-medium text-gray-600"></th>
+                          {quest.columns?.map((col: any) => (
+                            <th
+                              key={col}
+                              className="p-3 text-center font-medium text-gray-600"
+                              style={{
+                                fontSize: `clamp(0.75rem, 16px, 0.875rem)`,
+                              }}
+                            >
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {quest.rows?.map((row: any) => (
+                          <tr key={row} className="border-b border-gray-100">
+                            <td
+                              className="p-3 text-gray-700"
+                              style={{
+                                fontSize: `clamp(0.75rem, 16px, 0.875rem)`,
+                              }}
+                            >
+                              {row}
+                            </td>
+                            {quest.columns?.map((col: any) => (
+                              <td key={col} className="p-3">
+                                <div className="flex justify-center">
+                                  {quest.question_type === "matrix_checkbox" ? (
+                                    <Checkbox
+                                      id={`${quest.question}-${row}-${col}`}
+                                      checked={isMatrixOptionSelected(
+                                        quest.question,
+                                        row,
+                                        col
+                                      )}
+                                      onCheckedChange={() =>
+                                        handleMatrixAnswerChange(
+                                          quest.question,
+                                          row,
+                                          col,
+                                          "checkbox"
+                                        )
+                                      }
+                                      className="size-4 sm:size-5"
+                                    />
+                                  ) : (
+                                    <Checkbox
+                                      id={`${quest.question}-${row}-${col}`}
+                                      checked={isMatrixOptionSelected(
+                                        quest.question,
+                                        row,
+                                        col
+                                      )}
+                                      onCheckedChange={() =>
+                                        handleMatrixAnswerChange(
+                                          quest.question,
+                                          row,
+                                          col,
+                                          "radio"
+                                        )
+                                      }
+                                      className="size-4 sm:size-5"
+                                    />
+                                  )}
+                                </div>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              case "slider": {
+                const generateSmartLabels = (min: number, max: number) => {
+                  const range = (max ?? 10) - (min ?? 0);
+                  let step;
+                  if (range <= 10) {
+                    step = 1;
+                  } else if (range <= 100) {
+                    step = Math.ceil(range / 5) * 5;
+                  } else if (range <= 1000) {
+                    step = Math.ceil(range / 5) * 50;
+                  } else if (range <= 10000) {
+                    step = Math.ceil(range / 5) * 500;
+                  } else {
+                    step = Math.ceil(range / 5) * 5000;
+                  }
+                  const labels = [];
+                  labels.push(min ?? 0);
+                  for (let i = (min ?? 0) + step; i < (max ?? 10); i += step) {
+                    labels.push(Math.round(i));
+                  }
+                  if (labels[labels.length - 1] !== (max ?? 10)) {
+                    labels.push(max ?? 10);
+                  }
+                  return labels;
+                };
+                const sliderValue =
+                  answers[quest.question]?.scale_value || quest.min || 0;
+                const sliderLabels = generateSmartLabels(
+                  quest.min || 0,
+                  quest.max || 10
+                );
+                return (
+                  <div className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3">
+                    <Slider
+                      value={[Number(sliderValue)]}
+                      max={quest.max || 10}
+                      min={quest.min || 0}
+                      step={1}
+                      onValueChange={(newValue) =>
+                        handleAnswerChange(quest.question, {
+                          scale_value: newValue[0],
+                        })
+                      }
+                      className="w-full"
+                    />
+                    <div className="w-full mt-4 flex justify-between text-sm text-gray-600">
+                      {sliderLabels.map((label, i) => (
+                        <span key={i} className="text-center">
+                          {label.toLocaleString("en-US")}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              case "number":
+                return (
+                  <Input
+                    className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded"
+                    placeholder={`Enter a number`}
+                    type="number"
+                    min={quest.min}
+                    max={quest.max}
+                    value={answers[quest.question]?.num || ""}
+                    onChange={(e) =>
+                      handleAnswerChange(quest.question, {
+                        num: Number(e.target.value),
+                      })
+                    }
+                    style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
+                  />
+                );
+              case "media":
+                return (
+                  <div className="flex flex-col">
+                    <ResponseFile
+                      question={quest.question}
+                      handleAnswerChange={handleAnswerChange}
+                      selectedValue={answers[quest.question]?.media_url || ""}
+                      required={quest.is_required}
+                    />
+                  </div>
+                );
+              default:
+                return <p>Unsupported question type</p>;
+            }
+          })()}
+        </motion.div>
+      </motion.div>
+    );
   };
 
   // Early return for loading
@@ -723,354 +1476,9 @@ const ValidateResponse = () => {
           {/* {console.log(ocrRes?.extracted_answers)} */}
 
           {/* Questions */}
-          {ocrRes?.extracted_answers?.map((item: any, index: number) => (
-            <motion.div
-              key={index}
-              variants={questionVariants}
-              className="bg-white rounded-lg shadow-sm p-6 mb-6"
-            >
-              <div className="flex items-start gap-4 mb-4">
-                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                  Question {index + 1}
-                </span>
-                <h3 className="text-lg font-medium flex-1">{item.question}</h3>
-              </div>
-
-              {(() => {
-                switch (item.question_type) {
-                  case "checkbox":
-                  case "multiple_choice":
-                  case "single_choice":
-                    return (
-                      <div className=" flex-col mb-4 bg-[#FAFAFA] flex w-full p-3 gap-3 rounded">
-                        {item.options?.map((option: any) => (
-                          <label
-                            key={option}
-                            className="flex relative  cursor-pointer items-center"
-                          >
-                            <input
-                              type="checkbox"
-                              value={option}
-                              checked={
-                                answers[
-                                  item.question
-                                ]?.selected_options?.includes(option) || false
-                              }
-                              onChange={(e) => {
-                                const updatedOptions = e.target.checked
-                                  ? [
-                                      ...answers[item.question]
-                                        ?.selected_options,
-                                      option,
-                                    ]
-                                  : answers[
-                                      item.question
-                                    ]?.selected_options.filter(
-                                      (opt: any) => opt !== option
-                                    );
-                                handleAnswerChange(item.question, {
-                                  selected_options: updatedOptions,
-                                });
-                              }}
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ))}
-                      </div>
-                    );
-
-                  case "likert_scale":
-                    return (
-                      <div className="flex flex-col mb-4 bg-[#FAFAFA] w-full p-3 gap-3">
-                        {item.options?.map((option: any) => (
-                          <label key={option} className="flex items-center">
-                            <input
-                              type="radio"
-                              name={item.question}
-                              value={option}
-                              checked={
-                                answers[item.question]?.scale_value === option
-                              }
-                              onChange={(e) =>
-                                handleAnswerChange(item.question, {
-                                  scale_value: e.target.value,
-                                })
-                              }
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ))}
-                      </div>
-                    );
-
-                  case "boolean":
-                    return (
-                      <div className=" flex-col mb-4 bg-[#FAFAFA] flex w-full p-3 gap-3 rounded">
-                        {["Yes", "No"].map((option) => (
-                          <label key={option} className="flex items-center">
-                            <input
-                              type="radio"
-                              name={item.question}
-                              value={option}
-                              checked={
-                                (answers[item.question]?.boolean_value ===
-                                  true &&
-                                  option === "Yes") ||
-                                (answers[item.question]?.boolean_value ===
-                                  false &&
-                                  option === "No")
-                              }
-                              onChange={(e) =>
-                                handleAnswerChange(item.question, {
-                                  boolean_value:
-                                    e.target.value === "Yes" ? true : false,
-                                })
-                              }
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ))}
-                      </div>
-                    );
-
-                  case "drop_down":
-                    return (
-                      <select
-                        className="w-full p-2 border rounded"
-                        value={answers[item.question]?.drop_down_value || ""}
-                        onChange={(e) =>
-                          handleAnswerChange(item.question, {
-                            drop_down_value: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Select an option</option>
-                        {item.options?.map((option: any) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    );
-
-                  case "long_text":
-                  case "short_text":
-                    return (
-                      <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded ">
-                        <textarea
-                          rows={4}
-                          className="w-full p-2 border rounded"
-                          value={answers[item.question]?.text || ""}
-                          onChange={(e) =>
-                            handleAnswerChange(item.question, {
-                              text: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    );
-
-                  case "rating_scale":
-                    return (
-                      <div className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded">
-                        {item.options?.map((option: any, idx: number) => (
-                          <label
-                            key={idx}
-                            className="flex items-center space-x-2"
-                          >
-                            <input
-                              type="radio"
-                              name={item.question}
-                              value={option}
-                              checked={
-                                answers[item.question]?.scale_value === option
-                              }
-                              onChange={(e) =>
-                                handleAnswerChange(item.question, {
-                                  scale_value: e.target.value,
-                                })
-                              }
-                              required={item.is_required}
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ))}
-                      </div>
-                    );
-                  case "star_rating":
-                    return (
-                      <div className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded">
-                        {item.options?.map((option: any, idx: number) => (
-                          <label
-                            key={idx}
-                            className="flex items-center space-x-2"
-                          >
-                            <input
-                              type="radio"
-                              name={item.question}
-                              value={option}
-                              checked={
-                                answers[item.question]?.scale_value === option
-                              }
-                              onChange={(e) =>
-                                handleAnswerChange(item.question, {
-                                  scale_value: e.target.value || "1 Star",
-                                })
-                              }
-                              required={item.is_required}
-                            />
-                            <span>{option}</span>
-                          </label>
-                        ))}
-                      </div>
-                    );
-
-                  case "matrix_multiple_choice":
-                  case "matrix_checkbox":
-                    return (
-                      <table className="w-full border-collapse mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded">
-                        <thead>
-                          <tr>
-                            <th></th>
-                            {item.columns?.map((col: any) => (
-                              <th key={col}>{col}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {item.rows?.map((row: any) => (
-                            <tr key={row}>
-                              <td>{row}</td>
-                              {item.columns?.map((col: any) => (
-                                <td key={col}>
-                                  <input
-                                    type={
-                                      item.question_type === "matrix_checkbox"
-                                        ? "checkbox"
-                                        : "radio"
-                                    }
-                                    name={item.question + row}
-                                    checked={
-                                      answers[
-                                        item.question
-                                      ]?.matrix_answers?.some(
-                                        (ans: any) =>
-                                          ans.row === row && ans.column === col
-                                      ) || false
-                                    }
-                                    onChange={() =>
-                                      handleMatrixAnswerChange(
-                                        item.question,
-                                        row,
-                                        col,
-                                        item.question_type === "matrix_checkbox"
-                                          ? "checkbox"
-                                          : "radio"
-                                      )
-                                    }
-                                  />
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    );
-
-                  case "slider":
-                    const generateSmartLabels = (min: number, max: number) => {
-                      const range = (max ?? 10) - (min ?? 0);
-                      let step;
-
-                      if (range <= 10) {
-                        step = 1;
-                      } else if (range <= 100) {
-                        step = Math.ceil(range / 5) * 5; // Round to nearest 5
-                      } else if (range <= 1000) {
-                        step = Math.ceil(range / 5) * 50; // Round to nearest 50
-                      } else if (range <= 10000) {
-                        step = Math.ceil(range / 5) * 500; // Round to nearest 500
-                      } else {
-                        step = Math.ceil(range / 5) * 5000; // Round to nearest 5000
-                      }
-
-                      const labels = [];
-                      // Always include min
-                      labels.push(min ?? 0);
-
-                      // Add intermediate points
-                      for (
-                        let i = (min ?? 0) + step;
-                        i < (max ?? 10);
-                        i += step
-                      ) {
-                        labels.push(Math.round(i)); // Round to ensure clean numbers
-                      }
-
-                      // Add max if not already included
-                      if (labels[labels.length - 1] !== (max ?? 10)) {
-                        labels.push(max ?? 10);
-                      }
-
-                      return labels;
-                    };
-
-                    const sliderValue =
-                      answers[item.question]?.scale_value || item.min || 0;
-                    const sliderLabels = generateSmartLabels(
-                      item.min || 0,
-                      item.max || 10
-                    );
-
-                    return (
-                      <div className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3">
-                        <Slider
-                          value={[Number(sliderValue)]}
-                          max={item.max || 10}
-                          min={item.min || 0}
-                          step={1}
-                          onValueChange={(newValue) =>
-                            handleAnswerChange(item.question, {
-                              scale_value: newValue[0],
-                            })
-                          }
-                          className="w-full"
-                        />
-                        <div className="w-full mt-4 flex justify-between text-sm text-gray-600">
-                          {sliderLabels.map((label, i) => (
-                            <span key={i} className="text-center">
-                              {label.toLocaleString("en-US")}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    );
-
-                  case "number":
-                    return (
-                      <div className="mb-4 bg-[#FAFAFA] flex items-center gap-3 p-3 rounded ">
-                        <input
-                          className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded"
-                          placeholder={`Enter a number between ${item?.min} and ${item?.max}`}
-                          type="number"
-                          min={item.min}
-                          max={item.max}
-                          value={answers[item.question]?.num || ""}
-                          onChange={(e) =>
-                            handleAnswerChange(item.question, {
-                              num: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-                    );
-
-                  default:
-                    return <p>Unsupported question type</p>;
-                }
-              })()}
-            </motion.div>
-          ))}
+          {ocrRes?.extracted_answers?.map((item: any, index: number) =>
+            renderQuestion(item, index, ocrRes?.survey?.theme)
+          )}
 
           {/* Submit Button */}
           <motion.div
