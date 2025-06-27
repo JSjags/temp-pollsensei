@@ -57,7 +57,9 @@ interface FormErrors {
 }
 
 const PublicResponse = () => {
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<Record<number, Record<string, any>>>(
+    {}
+  );
   const params = useParams();
   const { data: psId, isLoading: psIdLoading } = useGetPublicSurveyByIdQuery(
     params.id
@@ -165,11 +167,16 @@ const PublicResponse = () => {
   const isTextareaDisabled = (question: string) =>
     activeInput[question] === "audio";
   const isAudioDisabled = (question: string) =>
-    activeInput[question] === "textarea" || !!answers[question]?.text;
+    activeInput[question] === "textarea" ||
+    !!answers[currentSection]?.[question]?.text;
 
   // Enhanced answer change handler with validation
   const handleAnswerChange = (key: string, value: any, question?: any) => {
-    setAnswers((prev) => ({ ...prev, [key]: value }));
+    setAnswers((prev) => {
+      const sectionAnswers = prev[currentSection] || {};
+      const updatedSection = { ...sectionAnswers, [key]: value };
+      return { ...prev, [currentSection]: updatedSection };
+    });
     if (question) {
       validateQuestion(question, value);
     }
@@ -182,70 +189,43 @@ const PublicResponse = () => {
     type: "checkbox" | "radio"
   ) => {
     setAnswers((prev) => {
-      const matrixAnswers = prev[key]?.matrix_answers || [];
-
+      const sectionAnswers = prev[currentSection] || {};
+      const matrixAnswers = sectionAnswers[key]?.matrix_answers || [];
+      let newAnswers;
       if (type === "radio") {
         // For matrix_multiple_choice, allow multiple selections per row
         const existingAnswer = matrixAnswers.find(
           (ans: any) => ans.row === row && ans.column === column
         );
-
         if (existingAnswer) {
-          const newAnswers = {
-            ...prev,
-            [key]: {
-              matrix_answers: matrixAnswers.filter(
-                (ans: any) => !(ans.row === row && ans.column === column)
-              ),
-            },
-          };
-          validateQuestion(
-            {
-              question: key,
-              question_type: "matrix_multiple_choice",
-              rows: prev[key]?.rows,
-            },
-            newAnswers[key]
+          newAnswers = matrixAnswers.filter(
+            (ans: any) => !(ans.row === row && ans.column === column)
           );
-          return newAnswers;
         } else {
-          const newAnswers = {
-            ...prev,
-            [key]: {
-              matrix_answers: [...matrixAnswers, { row, column }],
-            },
-          };
-          validateQuestion(
-            {
-              question: key,
-              question_type: "matrix_multiple_choice",
-              rows: prev[key]?.rows,
-            },
-            newAnswers[key]
-          );
-          return newAnswers;
+          newAnswers = [...matrixAnswers, { row, column }];
         }
       } else {
         // For matrix_checkbox, ensure only one selection per row
         const newMatrixAnswers = matrixAnswers.filter(
           (ans: any) => ans.row !== row
         );
-        const newAnswers = {
-          ...prev,
-          [key]: {
-            matrix_answers: [...newMatrixAnswers, { row, column }],
-          },
-        };
-        validateQuestion(
-          {
-            question: key,
-            question_type: "matrix_checkbox",
-            rows: prev[key]?.rows,
-          },
-          newAnswers[key]
-        );
-        return newAnswers;
+        newAnswers = [...newMatrixAnswers, { row, column }];
       }
+      const updatedSection = {
+        ...sectionAnswers,
+        [key]: { matrix_answers: newAnswers },
+      };
+      // Validate
+      validateQuestion(
+        {
+          question: key,
+          question_type:
+            type === "radio" ? "matrix_multiple_choice" : "matrix_checkbox",
+          rows: sectionAnswers[key]?.rows,
+        },
+        updatedSection[key]
+      );
+      return { ...prev, [currentSection]: updatedSection };
     });
   };
 
@@ -254,7 +234,7 @@ const PublicResponse = () => {
     row: string,
     column: string
   ) => {
-    return answers[question]?.matrix_answers?.some(
+    return answers[currentSection]?.[question]?.matrix_answers?.some(
       (ans: any) => ans.row === row && ans.column === column
     );
   };
@@ -265,7 +245,10 @@ const PublicResponse = () => {
       // Reset answers for this question when toggling
       setAnswers((prevAnswers) => ({
         ...prevAnswers,
-        [question]: {},
+        [currentSection]: {
+          ...prevAnswers[currentSection],
+          [question]: {},
+        },
       }));
       return newState;
     });
@@ -283,12 +266,13 @@ const PublicResponse = () => {
   // Validate all required questions in all sections
   const isAllRequiredAnswered = React.useMemo(() => {
     if (!sections.length) return false;
-    for (const section of sections) {
+    for (let s = 0; s < sections.length; s++) {
+      const section = sections[s];
       for (const quest of section.questions || []) {
         if (quest.is_required) {
           const error = validateQuestionResponse(
             quest,
-            answers[quest.question]
+            answers[s]?.[quest.question]
           );
           if (error) return false;
         }
@@ -318,9 +302,9 @@ const PublicResponse = () => {
 
     // Format answers for all sections
     const allSections = question?.data?.sections || [];
-    const formattedAnswers = allSections.flatMap((section: any) =>
+    const formattedAnswers = allSections.flatMap((section: any, sIdx: number) =>
       (section.questions || []).map((question: any) => {
-        const answer = answers[question.question];
+        const answer = answers[sIdx]?.[question.question];
         const formattedAnswer = {
           question: question.question,
           question_type: question.question_type,
@@ -355,9 +339,11 @@ const PublicResponse = () => {
 
     // Validate all questions in current section
     currentQuestions.forEach((quest: any) => {
-      // Only validate if question is required
       if (quest.is_required) {
-        const error = validateQuestionResponse(quest, answers[quest.question]);
+        const error = validateQuestionResponse(
+          quest,
+          answers[currentSection]?.[quest.question]
+        );
         if (error) {
           newFormErrors.questions[quest.question] = error;
         }
@@ -531,7 +517,7 @@ const PublicResponse = () => {
                         <Checkbox
                           id={`${quest.question}-${option}`}
                           value={option}
-                          checked={answers[
+                          checked={answers[currentSection]?.[
                             quest.question
                           ]?.selected_options?.includes(option)}
                           onCheckedChange={(checked) =>
@@ -540,12 +526,13 @@ const PublicResponse = () => {
                               {
                                 selected_options: checked
                                   ? [
-                                      ...(answers[quest.question]
-                                        ?.selected_options || []),
+                                      ...(answers[currentSection]?.[
+                                        quest.question
+                                      ]?.selected_options || []),
                                       option,
                                     ]
                                   : (
-                                      answers[quest.question]
+                                      answers[currentSection]?.[quest.question]
                                         ?.selected_options || []
                                     ).filter((opt: string) => opt !== option),
                               },
@@ -565,17 +552,20 @@ const PublicResponse = () => {
                         </Label>
                       </motion.div>
                     ))}
-                    {answers[quest.question]?.selected_options?.some(
-                      isOtherOption
-                    ) && (
+                    {answers[currentSection]?.[
+                      quest.question
+                    ]?.selected_options?.some(isOtherOption) && (
                       <Input
                         type="text"
                         placeholder="Please specify"
                         className="mt-2"
-                        value={answers[quest.question]?.other_value || ""}
+                        value={
+                          answers[currentSection]?.[quest.question]
+                            ?.other_value || ""
+                        }
                         onChange={(e) =>
                           handleAnswerChange(quest.question, {
-                            ...answers[quest.question],
+                            ...answers[currentSection]?.[quest.question],
                             other_value: e.target.value,
                           })
                         }
@@ -588,7 +578,10 @@ const PublicResponse = () => {
                 return (
                   <RadioGroup
                     className="space-y-3"
-                    value={answers[quest.question]?.selected_options?.[0]}
+                    value={
+                      answers[currentSection]?.[quest.question]
+                        ?.selected_options?.[0]
+                    }
                     onValueChange={(value) =>
                       handleAnswerChange(
                         quest.question,
@@ -620,17 +613,20 @@ const PublicResponse = () => {
                         </Label>
                       </motion.div>
                     ))}
-                    {answers[quest.question]?.selected_options?.some(
-                      isOtherOption
-                    ) && (
+                    {answers[currentSection]?.[
+                      quest.question
+                    ]?.selected_options?.some(isOtherOption) && (
                       <Input
                         type="text"
                         placeholder="Please specify"
                         className="mt-2"
-                        value={answers[quest.question]?.other_value || ""}
+                        value={
+                          answers[currentSection]?.[quest.question]
+                            ?.other_value || ""
+                        }
                         onChange={(e) =>
                           handleAnswerChange(quest.question, {
-                            ...answers[quest.question],
+                            ...answers[currentSection]?.[quest.question],
                             other_value: e.target.value,
                           })
                         }
@@ -643,6 +639,10 @@ const PublicResponse = () => {
                 return (
                   <RadioGroup
                     className="mb-4 bg-white w-full p-4 sm:p-6 px-0 sm:px-0 rounded-lg transition-all duration-300"
+                    value={
+                      answers[currentSection]?.[quest.question]?.scale_value ||
+                      ""
+                    }
                     onValueChange={(value) =>
                       handleAnswerChange(quest.question, {
                         scale_value: value,
@@ -676,8 +676,10 @@ const PublicResponse = () => {
                         </motion.div>
                       ))}
                     </div>
-                    {answers[quest.question]?.scale_value &&
-                      isOtherOption(answers[quest.question]?.scale_value) && (
+                    {answers[currentSection]?.[quest.question]?.scale_value &&
+                      isOtherOption(
+                        answers[currentSection]?.[quest.question]?.scale_value
+                      ) && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
@@ -688,10 +690,13 @@ const PublicResponse = () => {
                             type="text"
                             placeholder="Please specify"
                             className="mt-4 transition-all duration-200 focus:ring-[#9D50BB] focus:border-[#9D50BB]"
-                            value={answers[quest.question]?.other_value || ""}
+                            value={
+                              answers[currentSection]?.[quest.question]
+                                ?.other_value || ""
+                            }
                             onChange={(e) =>
                               handleAnswerChange(quest.question, {
-                                ...answers[quest.question],
+                                ...answers[currentSection]?.[quest.question],
                                 other_value: e.target.value,
                               })
                             }
@@ -705,6 +710,10 @@ const PublicResponse = () => {
                 return (
                   <>
                     <Select
+                      value={
+                        answers[currentSection]?.[quest.question]
+                          ?.drop_down_value || ""
+                      }
                       onValueChange={(value) =>
                         handleAnswerChange(quest.question, {
                           drop_down_value: value,
@@ -738,18 +747,23 @@ const PublicResponse = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    {answers[quest.question]?.drop_down_value &&
+                    {answers[currentSection]?.[quest.question]
+                      ?.drop_down_value &&
                       isOtherOption(
-                        answers[quest.question]?.drop_down_value
+                        answers[currentSection]?.[quest.question]
+                          ?.drop_down_value
                       ) && (
                         <Input
                           type="text"
                           placeholder="Please specify"
                           className="mt-2"
-                          value={answers[quest.question]?.other_value || ""}
+                          value={
+                            answers[currentSection]?.[quest.question]
+                              ?.other_value || ""
+                          }
                           onChange={(e) =>
                             handleAnswerChange(quest.question, {
-                              ...answers[quest.question],
+                              ...answers[currentSection]?.[quest.question],
                               other_value: e.target.value,
                             })
                           }
@@ -762,6 +776,15 @@ const PublicResponse = () => {
                 return (
                   <RadioGroup
                     className="mb-4 flex flex-col w-full p-3 gap-4 sm:gap-5 rounded-lg transition-all duration-300"
+                    value={
+                      answers[currentSection]?.[quest.question]
+                        ?.boolean_value === true
+                        ? "true"
+                        : answers[currentSection]?.[quest.question]
+                            ?.boolean_value === false
+                        ? "false"
+                        : ""
+                    }
                     onValueChange={(value) =>
                       handleAnswerChange(quest.question, {
                         boolean_value: value === "true",
@@ -825,7 +848,9 @@ const PublicResponse = () => {
                       <Textarea
                         rows={4}
                         className="mb-4 bg-[#FAFAFA]"
-                        value={answers[quest.question]?.text || ""}
+                        value={
+                          answers[currentSection]?.[quest.question]?.text || ""
+                        }
                         onChange={(e) =>
                           handleAnswerChange(quest.question, {
                             text: e.target.value,
@@ -839,7 +864,10 @@ const PublicResponse = () => {
                       <PublicResponseFile
                         question={quest.question}
                         handleAnswerChange={handleAnswerChange}
-                        selectedValue={answers[quest.question]?.media_url || ""}
+                        selectedValue={
+                          answers[currentSection]?.[quest.question]
+                            ?.media_url || ""
+                        }
                         required={quest.is_required}
                       />
                     )}
@@ -852,6 +880,9 @@ const PublicResponse = () => {
                     <Input
                       placeholder="Your response here..."
                       className="w-full border  mb-4 bg-[#FAFAFA] flex flex-col p-3 gap-3 rounded"
+                      value={
+                        answers[currentSection]?.[quest.question]?.text || ""
+                      }
                       onChange={(e) =>
                         handleAnswerChange(quest.question, {
                           text: e.target.value,
@@ -871,7 +902,10 @@ const PublicResponse = () => {
                       question={quest.question}
                       options={quest.options}
                       handleAnswerChange={handleAnswerChange}
-                      selectedValue={answers[quest.question]?.scale_value || ""}
+                      selectedValue={
+                        answers[currentSection]?.[quest.question]
+                          ?.scale_value || ""
+                      }
                       required={quest.is_required}
                     />
                   </div>
@@ -881,6 +915,10 @@ const PublicResponse = () => {
                 return (
                   <RadioGroup
                     className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded"
+                    value={
+                      answers[currentSection]?.[quest.question]?.scale_value ||
+                      ""
+                    }
                     onValueChange={(value) =>
                       handleAnswerChange(quest.question, {
                         scale_value: value,
@@ -911,16 +949,21 @@ const PublicResponse = () => {
                         </div>
                       ))}
                     </div>
-                    {answers[quest.question]?.scale_value &&
-                      isOtherOption(answers[quest.question]?.scale_value) && (
+                    {answers[currentSection]?.[quest.question]?.scale_value &&
+                      isOtherOption(
+                        answers[currentSection]?.[quest.question]?.scale_value
+                      ) && (
                         <Input
                           type="text"
                           placeholder="Please specify"
                           className="mt-2"
-                          value={answers[quest.question]?.other_value || ""}
+                          value={
+                            answers[currentSection]?.[quest.question]
+                              ?.other_value || ""
+                          }
                           onChange={(e) =>
                             handleAnswerChange(quest.question, {
-                              ...answers[quest.question],
+                              ...answers[currentSection]?.[quest.question],
                               other_value: e.target.value,
                             })
                           }
@@ -1015,7 +1058,17 @@ const PublicResponse = () => {
                 return (
                   <div className="w-full px-4">
                     <Slider
-                      defaultValue={[0]}
+                      value={
+                        answers[currentSection]?.[quest.question]
+                          ?.scale_value !== undefined
+                          ? [
+                              Number(
+                                answers[currentSection][quest.question]
+                                  .scale_value
+                              ),
+                            ]
+                          : [quest.min ?? 0]
+                      }
                       min={quest.min}
                       max={quest.max}
                       step={quest.step}
@@ -1027,33 +1080,45 @@ const PublicResponse = () => {
                       className="w-full"
                     />
                     <div className="flex justify-between mt-2 text-sm text-gray-600">
-                      {/* Generate markers at meaningful intervals */}
-                      {[...Array(11)].map((_, i) => {
-                        const value =
-                          quest.min + ((quest.max - quest.min) / 10) * i;
-                        return (
+                      {(() => {
+                        const step = quest.step || 1;
+                        const min = quest.min ?? 0;
+                        const max = quest.max ?? 10;
+                        const values = [];
+                        for (let v = min; v <= max; v += step) {
+                          // Avoid floating point issues
+                          values.push(Number(v.toFixed(5)));
+                        }
+                        let markers;
+                        if (values.length <= 20) {
+                          markers = values;
+                        } else {
+                          markers = [
+                            min,
+                            ...[0.25, 0.5, 0.75].map((f) =>
+                              Number((min + (max - min) * f).toFixed(2))
+                            ),
+                            max,
+                          ];
+                        }
+                        return markers.map((value, i) => (
                           <div
                             key={i}
                             className="flex flex-col items-center"
-                            style={{
-                              width: "2px",
-                              position: "relative",
-                            }}
+                            style={{ width: "2px", position: "relative" }}
                           >
                             <div className="h-2 w-[2px] bg-gray-300"></div>
-                            {i % 2 === 0 && ( // Show numbers at every other marker
-                              <span
-                                style={{
-                                  fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
-                                  marginTop: "4px",
-                                }}
-                              >
-                                {Math.round(value)}
-                              </span>
-                            )}
+                            <span
+                              style={{
+                                fontSize: `clamp(0.75rem, ${question?.data?.question_text?.size}px, 0.875rem)`,
+                                marginTop: "4px",
+                              }}
+                            >
+                              {value}
+                            </span>
                           </div>
-                        );
-                      })}
+                        ));
+                      })()}
                     </div>
                   </div>
                 );
@@ -1062,11 +1127,16 @@ const PublicResponse = () => {
                 return (
                   <Input
                     className="mb-4 bg-[#FAFAFA] flex flex-col w-full p-3 gap-3 rounded"
-                    // placeholder={`Enter a number between ${quest?.min} and ${quest?.max}`}
                     placeholder={`Enter a number`}
                     type="number"
                     min={quest.min}
                     max={quest.max}
+                    value={
+                      answers[currentSection]?.[quest.question]?.num !==
+                      undefined
+                        ? answers[currentSection][quest.question].num
+                        : ""
+                    }
                     onChange={(e) =>
                       handleAnswerChange(quest.question, {
                         num: Number(e.target.value),
@@ -1084,7 +1154,10 @@ const PublicResponse = () => {
                     <ResponseFile
                       question={quest.question}
                       handleAnswerChange={handleAnswerChange}
-                      selectedValue={answers[quest.question]?.media_url || ""}
+                      selectedValue={
+                        answers[currentSection]?.[quest.question]?.media_url ||
+                        ""
+                      }
                       required={quest.is_required}
                     />
                   </div>
@@ -1429,11 +1502,11 @@ const PublicResponse = () => {
 
                 {/* Only show submit on last section */}
                 {currentSection === sections.length - 1 && (
-                  <div className="rounded-md flex flex-col justify-center w-full py-5 text-center">
+                  <div className="rounded-full flex flex-col justify-center w-full py-5 text-center">
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-[#5b03b2] h-12 to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium"
-                      disabled={submitting || !isAllRequiredAnswered}
+                      className="w-full bg-gradient-to-r rounded-full from-[#5b03b2] h-12 to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium"
+                      disabled={submitting}
                     >
                       {submitting ? (
                         <>
