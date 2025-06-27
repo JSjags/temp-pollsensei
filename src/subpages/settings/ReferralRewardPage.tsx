@@ -302,7 +302,7 @@ const Page = () => {
                   ? "bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
                   : "bg-gray-200 text-gray-500 cursor-not-allowed"
               }`}
-              disabled={payoutAmount < minPayout || REFERRAL_PROGRAM_PAUSED}
+              disabled={payoutAmount < minPayout}
               onClick={() => {
                 if (payoutAmount >= minPayout && !REFERRAL_PROGRAM_PAUSED)
                   setDialogOpen(true);
@@ -363,7 +363,7 @@ const Page = () => {
                   value={form.bank_name}
                   onChange={handleFormChange}
                   placeholder="e.g. First Bank"
-                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
+                  disabled={payoutMutation.isPending}
                 />
                 {formErrors.bank_name && (
                   <p className="text-xs text-red-600 mt-1">
@@ -374,7 +374,7 @@ const Page = () => {
               <DialogFooter>
                 <Button
                   type="submit"
-                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
+                  disabled={payoutMutation.isPending}
                   className="bg-gradient-to-r from-[#5b03b2] to-[#9d50bb] text-white"
                 >
                   {payoutMutation.isPending ? "Submitting..." : "Submit"}
