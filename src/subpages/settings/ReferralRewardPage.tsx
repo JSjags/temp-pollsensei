@@ -383,7 +383,7 @@ const Page = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={REFERRAL_PROGRAM_PAUSED}
+                    // disabled={REFERRAL_PROGRAM_PAUSED}
                   >
                     Cancel
                   </Button>
