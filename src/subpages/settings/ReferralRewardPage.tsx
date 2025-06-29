@@ -328,7 +328,7 @@ const Page = () => {
                   value={form.account_name}
                   onChange={handleFormChange}
                   placeholder="e.g. Chinedu Emesue"
-                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
+                  disabled={payoutMutation.isPending}
                 />
                 {formErrors.account_name && (
                   <p className="text-xs text-red-600 mt-1">
@@ -346,7 +346,7 @@ const Page = () => {
                   onChange={handleFormChange}
                   placeholder="e.g. 0123456789"
                   maxLength={10}
-                  disabled={payoutMutation.isPending || REFERRAL_PROGRAM_PAUSED}
+                  disabled={payoutMutation.isPending}
                 />
                 {formErrors.account_number && (
                   <p className="text-xs text-red-600 mt-1">
@@ -383,7 +383,7 @@ const Page = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={REFERRAL_PROGRAM_PAUSED}
+                    // disabled={REFERRAL_PROGRAM_PAUSED}
                   >
                     Cancel
                   </Button>
