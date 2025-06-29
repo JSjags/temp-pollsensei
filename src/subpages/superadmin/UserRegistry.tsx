@@ -553,12 +553,12 @@ const UserRegistry: React.FC = () => {
                       <td className="py-3 px-4 text-sm">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            user?.status
-                              ? "bg-red-100 text-red-800"
-                              : "bg-green-100 text-green-800"
+                            user?.status.toLowerCase() === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {user?.status ? "Disabled" : "Active"}
+                          {user?.status}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-sm hidden lg:table-cell">
@@ -598,24 +598,24 @@ const UserRegistry: React.FC = () => {
                                 handleOpenConfirmation(
                                   user?.email,
                                   "status",
-                                  user?.status
+                                  user?.status.toLowerCase() !== "active"
                                 );
                               }}
                               className={cn(
                                 `text-sm cursor-pointer flex items-center gap-2`,
-                                user?.status
-                                  ? "text-green-600 focus:text-green-600"
-                                  : "text-red-600 focus:text-red-600"
+                                user?.status.toLowerCase() === "active"
+                                  ? "text-red-600 focus:text-red-600"
+                                  : "text-green-600 focus:text-green-600"
                               )}
                             >
-                              {user?.status ? (
+                              {user?.status.toLowerCase() === "active" ? (
                                 <UserCheck2 className="h-4 w-4" />
                               ) : (
                                 <UserRoundMinusIcon className="h-4 w-4" />
                               )}
-                              {user?.status
-                                ? "Activate Account"
-                                : "Deactivate Account"}
+                              {user?.status.toLowerCase() === "active"
+                                ? "Deactivate Account"
+                                : "Activate Account"}
                             </DropdownMenuItem>
 
                             <DropdownMenuItem
@@ -623,7 +623,7 @@ const UserRegistry: React.FC = () => {
                                 handleOpenConfirmation(
                                   user?.email,
                                   "reset",
-                                  user?.status
+                                  user?.status.toLowerCase() !== "active"
                                 );
                               }}
                               className="text-sm cursor-pointer text-gray-600 focus:text-gray-600 flex items-center gap-2"
