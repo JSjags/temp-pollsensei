@@ -569,7 +569,7 @@ const UserRegistry: React.FC = () => {
                     </td> */}
                       <td className="py-3 px-4 text-sm hidden md:table-cell">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center whitespace-nowrap px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             user?.plan?.name === "Team Plan"
                               ? "bg-purple-100 text-purple-800"
                               : user?.plan?.name === "Pro Plan"
