@@ -61,12 +61,12 @@ const Modals: React.FC<ModalsProps> = ({
         borderRadius: "5.489px",
         // background: "rgba(0, 0, 0, 0.2)",
         padding: "0",
-        zIndex: "10000",
+        zIndex: "1000000",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}
-      className="backdrop-blur-sm"
+      className="backdrop-blur-sm bg-black/50"
       onClick={(e) => {
         e.stopPropagation();
       }}
@@ -89,14 +89,16 @@ const Modals: React.FC<ModalsProps> = ({
                   </p>
                 </Fade>
               </Slide>
-            {
-              onClose ?   <button
-              className="hover:bg-[#f9f9f9] rounded-full ring-0"
-              onClick={onClose}
-            >
-              <X />
-            </button> : ''
-            }
+              {onClose ? (
+                <button
+                  className="hover:bg-[#f9f9f9] rounded-full ring-0"
+                  onClick={onClose}
+                >
+                  <X />
+                </button>
+              ) : (
+                ""
+              )}
             </div>
             <>{children}</>
           </div>

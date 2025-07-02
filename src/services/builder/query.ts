@@ -68,8 +68,8 @@ const customBaseQuery: BaseQueryFn<
         api.dispatch(setMessage(errorMessage));
         break;
       case 403:
-        api.dispatch(setIsLimited(true));
-        api.dispatch(setMessage(errorMessage));
+        // api.dispatch(setIsLimited(true));
+        // api.dispatch(setMessage(errorMessage));
         break;
       case 401:
         toastMessage =

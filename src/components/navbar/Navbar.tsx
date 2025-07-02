@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutUser } from "../../redux/slices/user.slice";
+import { logoutUser, updateUser } from "../../redux/slices/user.slice";
 import store, { RootState } from "@/redux/store";
 import logo from "../../assets/images/pollsensei-logo.png";
 import hamburger from "../../assets/images/hamburger-menu.png";
@@ -69,6 +69,7 @@ import {
 } from "../ui/tooltip";
 import { UserData } from "@/subpages/settings/ProfilePage";
 import { useUserProfileQuery } from "@/services/user.service";
+import { toast } from "@/hooks/use-main-toast";
 
 interface Notification {
   _id: string;
@@ -143,6 +144,11 @@ const fetchCurrentOrganization = async () => {
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const user2 = useSelector((state: RootState) => state.user);
+  const organizations = user?.roles || [];
+  const currentOrganizationId =
+    typeof user?.current_organization === "string"
+      ? user.current_organization
+      : user?.current_organization?.organization_name ?? "";
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -153,6 +159,9 @@ const Navbar = () => {
   const [organizationDropdownOpen, setOrganizationDropdownOpen] =
     useState(false);
 
+  console.log("--------------------------------");
+  console.log(user);
+
   const persistor = persistStore(store);
 
   const queryClient = useQueryClient();
@@ -162,12 +171,13 @@ const Navbar = () => {
     queryFn: fetchNotifications,
   });
 
-  const { data: organizations, isLoading: isLoadingOrganizations } = useQuery({
-    queryKey: ["organizations"],
-    queryFn: fetchOrganizations,
-  });
+  const { data: organizationsData, isLoading: isLoadingOrganizations } =
+    useQuery({
+      queryKey: ["organizations"],
+      queryFn: fetchOrganizations,
+    });
 
-  console.log(organizations);
+  console.log(organizationsData);
 
   const { mutate: markAsRead } = useMutation({
     mutationFn: markNotificationAsRead,
@@ -212,10 +222,24 @@ const Navbar = () => {
       });
       return response.data;
     },
-    onSuccess: () => {
-      // Invalidate all queries to refetch fresh data
-      queryClient.invalidateQueries();
-      // Close the dropdown
+    onSuccess: async () => {
+      // Refetch user profile and update redux state
+      try {
+        const userProfileResponse = await axiosInstance.get("/user/me");
+        const userData = userProfileResponse.data;
+        dispatch(updateUser({ user: userData }));
+        toast({
+          title: "Organization switched!",
+          description: "You have successfully switched your organization.",
+        });
+      } catch (error) {
+        toast({
+          title: "Failed to update user data",
+          description:
+            "Could not refresh user profile after switching organization.",
+          variant: "destructive",
+        });
+      }
       setOrganizationDropdownOpen(false);
     },
   });
@@ -328,15 +352,15 @@ const Navbar = () => {
 
           <div className="flex gap-4 items-center">
             {/* Organization Switcher */}
-            {/* <DropdownMenu
+            <DropdownMenu
               open={organizationDropdownOpen}
               onOpenChange={setOrganizationDropdownOpen}
             >
               <DropdownMenuTrigger asChild>
-                <div className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
+                <div className="hidden lg:flex items-center bg-border/50 gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
                   <Building2 className="size-4 text-primary" />
                   <span className="text-sm font-medium max-w-[200px] truncate">
-                    {currentOrganization.name}
+                    {currentOrganizationId}
                   </span>
                   <ChevronDown className="size-4 text-muted-foreground" />
                 </div>
@@ -348,58 +372,51 @@ const Navbar = () => {
                 <DropdownMenuLabel>Switch Organization</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <div className="max-h-[300px] overflow-auto">
-                  {isLoadingOrganizations ? (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader2 className="size-5 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (organizations as any)?.length === 0 ? (
+                  {organizations.length === 0 ? (
                     <div className="p-4 text-center text-sm text-muted-foreground">
                       No organizations found
                     </div>
                   ) : (
-                    <>
-                      {(organizations as any)?.map((org: Organization) => (
-                        <DropdownMenuItem
-                          key={org._id}
-                          className={`flex items-center justify-between cursor-pointer ${
-                            org._id === currentOrganization._id
-                              ? "bg-gray-100 text-gray-800"
-                              : ""
-                          }`}
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            switchAccount(org._id);
-                            setCurrentOrganization({
-                              _id: org._id,
-                              name: org.name,
-                              designation: org.designation,
-                              roles: org.roles,
-                              is_disabled: org.is_disabled,
-                              status: org.status,
-                            });
-                          }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Building2 className="size-4 text-gray-600 shrink-0" />
-                            <span className="font-medium text-gray-600">
-                              {org.name}
+                    organizations.map((org: any) => (
+                      <DropdownMenuItem
+                        key={org.organization}
+                        className={`flex items-center justify-between cursor-pointer ${
+                          org.organization === currentOrganizationId
+                            ? "bg-gray-100 text-gray-800"
+                            : ""
+                        }`}
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          if (org.organization !== currentOrganizationId) {
+                            switchAccount(org.organization);
+                          }
+                        }}
+                        disabled={isSwitchingAccount}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Building2 className="size-4 text-gray-600 shrink-0" />
+                          <span className="font-medium text-gray-600">
+                            {org.organization}
+                          </span>
+                          {org.organization === currentOrganizationId && (
+                            <Check className="size-4 text-green-500 ml-4" />
+                          )}
+                          {org.organization === currentOrganizationId && (
+                            <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-blue-600 rounded-full shadow-md capitalize">
+                              {org.designation}
                             </span>
-                            {org._id === currentOrganization._id && (
-                              <Check className="size-4 text-green-500 ml-4" />
-                            )}
-                            {org._id === currentOrganization._id && (
-                              <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-blue-600 rounded-full shadow-md capitalize">
-                                {org.designation}
-                              </span>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
-                    </>
+                          )}
+                        </div>
+                        {isSwitchingAccount &&
+                          org.organization !== currentOrganizationId && (
+                            <Loader2 className="size-4 animate-spin ml-2 text-muted-foreground" />
+                          )}
+                      </DropdownMenuItem>
+                    ))
                   )}
                 </div>
               </DropdownMenuContent>
-            </DropdownMenu> */}
+            </DropdownMenu>
 
             <DropdownMenu
               open={notificationOpen}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Image from "next/image";
 import { teamIcon } from "../../assets/images";
@@ -19,6 +19,8 @@ import InviteSuccess from "./InviteSuccess";
 import { closeForm, openForm } from "../../redux/slices/form.slice";
 import Input from "./Input";
 import { RootState } from "../../redux/store";
+import { multiSelectCustomStyles } from "@/constants/multi-select";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FormValues {
   name: string;
@@ -51,6 +53,7 @@ const customStyles = {
 };
 
 const NoTeam: React.FC = () => {
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState<string>("");
   const [inviteSucc, setInviteSucc] = useState<boolean>(false);
   const [invite, { isSuccess, isError, error, isLoading }] =
@@ -83,6 +86,12 @@ const NoTeam: React.FC = () => {
   const validateForm = (values: FormValues) => {
     return validate(values, constraints) || {};
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      refetch();
+    }
+  }, [isSuccess]);
 
   return (
     <div className="flex items-center justify-center h-[]">
@@ -126,6 +135,7 @@ const NoTeam: React.FC = () => {
                           label="Name"
                           type="text"
                           placeholder="Enter your Name"
+                          className="h-12 z-10"
                           form={form}
                           {...input}
                         />
@@ -138,6 +148,7 @@ const NoTeam: React.FC = () => {
                           label="Email"
                           type="text"
                           placeholder="Enter your Email"
+                          className="h-12 z-10"
                           form={form}
                           {...input}
                         />
@@ -157,6 +168,7 @@ const NoTeam: React.FC = () => {
                           className="basic-multi-select rounded-full"
                           classNamePrefix="role"
                           label="Role"
+                          customStyles={multiSelectCustomStyles}
                         />
                       )}
                     </Field>

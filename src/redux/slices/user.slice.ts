@@ -12,11 +12,13 @@ export interface User {
     payout_amount?: number;
     date_requested?: string; // ISO string for Date
     new_referred_users?: number;
+    // Updated: Add more fields here if needed
   };
   roles: Array<{
     organization: string;
     role: string[];
     _id: string;
+    // Updated: Add more fields here if needed
   }>;
   organization_ids: string[];
   isEmailVerified: boolean;
@@ -24,16 +26,19 @@ export interface User {
     organization: string;
     status: boolean;
     _id: string;
+    // Updated: Add more fields here if needed
   }>;
   status: Array<{
     organization: string;
     status: string;
     _id: string;
+    // Updated: Add more fields here if needed
   }>;
   bios: Array<{
     organization: string;
     bio: string;
     _id: string;
+    // Updated: Add more fields here if needed
   }>;
   is_collaborator: any[];
   plan: {
@@ -44,20 +49,24 @@ export interface User {
     number_of_monthly_responses: number;
     number_of_accounts: number;
     features: string[];
+    // Updated: Add more fields here if needed
   };
   notifications: Array<{
     email_notification: {
       news_and_updates: boolean;
       tips_and_tutorials: boolean;
       offers_and_promotions: boolean;
+      // Updated: Add more fields here if needed
     };
     more_activity: {
       all_reminders_and_activities: boolean;
       activities_only: boolean;
       important_reminder_only: boolean;
+      // Updated: Add more fields here if needed
     };
     organization: string;
     _id: string;
+    // Updated: Add more fields here if needed
   }>;
   invited_by: any[];
   joinedDate: any[];
@@ -66,7 +75,13 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   __v: number;
-  current_organization: string;
+  current_organization:
+    | string
+    | {
+        _id: string;
+        organization_name: string;
+      };
+  // Updated: Add more fields here if needed
 }
 
 interface UserState {
@@ -85,6 +100,8 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     updateUser(state: UserState, action: PayloadAction<Partial<UserState>>) {
+      console.log(action.payload);
+
       return { ...state, ...action.payload };
     },
     logoutUser(state: UserState) {
