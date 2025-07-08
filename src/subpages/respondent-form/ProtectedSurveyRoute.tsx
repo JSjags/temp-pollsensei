@@ -48,8 +48,8 @@ const ProtectedSurveyRoute: React.FC<ProtectedSurveyRouteProps> = ({
     }
   }, [isPhoneVerified, isPaidRespondentStatus, router, pathname, isLoading]);
 
-  console.log("isPhoneVerified", isPhoneVerified);
-  console.log("isPaidRespondentStatus", isPaidRespondentStatus);
+  // console.log("isPhoneVerified", isPhoneVerified);
+  // console.log("isPaidRespondentStatus", isPaidRespondentStatus);
 
   return <>{children}</>;
 };

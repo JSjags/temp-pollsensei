@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { IoClose } from "react-icons/io5";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import {
-  getNationality,
-  fetchOTP,
-  confirmOTP,
-} from "@/services/api/apiRequest";
+import { fetchOTP, confirmOTP } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,6 +27,7 @@ import { FaChevronLeft } from "react-icons/fa6";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import { formatTime } from "@/utils";
+import { getCountries } from "@yusifaliyevpro/countries";
 
 const PhoneVerification = () => {
   const [dialCode, setDialCode] = useState<string>("+234");
@@ -45,11 +42,18 @@ const PhoneVerification = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { data: nationalities } = useQuery({
-    queryKey: [...[APP_KEYS.COUNTRY_FLAG]],
-    queryFn: async () => getNationality(),
+  const { data: nationalities, isLoading: isLoadingCountries } = useQuery({
+    queryKey: [APP_KEYS.COUNTRY_FLAG],
+    queryFn: async () => {
+      const countries = await getCountries({
+        fields: ["name", "flags", "idd"],
+      });
+      return countries;
+    },
     enabled: true,
   });
+
+  // console.log({ nationalities });
 
   const sortedNationalities = nationalities
     ? [...nationalities].sort((a, b) =>
@@ -64,7 +68,7 @@ const PhoneVerification = () => {
   useEffect(() => {
     const phoneRegex = /^\d{10}$/;
     setIsPhoneValid(phoneRegex.test(phone));
-  }, [phone, nationalities]);
+  }, [phone]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -146,7 +150,7 @@ const PhoneVerification = () => {
                 Phone number
               </label>
               <div className="w-full flex items-center justify-between border border-[#E0E0E0] rounded-md px-2 gap-2">
-                {nationalities && (
+                {nationalities && !isLoadingCountries && (
                   <Select
                     value={dialCode}
                     onValueChange={(value) => setDialCode(value)}
@@ -157,14 +161,24 @@ const PhoneVerification = () => {
                     <SelectContent className="w-[50px] h-[300px] overflow-auto scrollbar-hide">
                       <SelectGroup className="pr-2">
                         {filteredNationalities?.map((nationality: any) => {
-                          if (!nationality.flags || !nationality.name)
+                          if (
+                            !nationality.flags ||
+                            !nationality.name ||
+                            !nationality.idd
+                          )
                             return null;
+
+                          // Handle the idd suffixes properly (it's an array)
+                          const dialCodeValue =
+                            nationality.idd.root +
+                            (nationality.idd.suffixes
+                              ? nationality.idd.suffixes[0]
+                              : "");
+
                           return (
                             <SelectItem
                               key={nationality.name.common}
-                              value={
-                                nationality.idd.root + nationality.idd.suffixes
-                              }
+                              value={dialCodeValue}
                             >
                               <div className="w-full flex items-center gap-2">
                                 <Image
@@ -174,8 +188,7 @@ const PhoneVerification = () => {
                                   height={15}
                                 />
                                 <div className="flex items-center text-center">
-                                  {nationality?.idd?.root}
-                                  {nationality?.idd?.suffixes}
+                                  {dialCodeValue}
                                 </div>
                               </div>
                             </SelectItem>
@@ -184,6 +197,11 @@ const PhoneVerification = () => {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                )}
+                {isLoadingCountries && (
+                  <div className="w-[100px] h-auto border-0 text-black text-sm rounded-md p-2">
+                    ...
+                  </div>
                 )}
                 <div className="flex-1 flex items-center">
                   <input
@@ -211,7 +229,12 @@ const PhoneVerification = () => {
               size="default"
               className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 text-white hover:text-white rounded-md text-xs md:text-sm p-4 hover:scale-x-105 transition-all lg:mb-10 mt-5"
               type="submit"
-              disabled={phone.length !== 10 || !isPhoneValid || isLoading}
+              disabled={
+                phone.length !== 10 ||
+                !isPhoneValid ||
+                isLoading ||
+                isLoadingCountries
+              }
             >
               Send OTP
             </Button>
@@ -317,7 +340,7 @@ const PhoneVerification = () => {
                 {formatTime(timeLeft)}
               </p>
               <p className="text-xs text-[#333333]">
-                Didn’t receive any code?{" "}
+                Didn&apos;t receive any code?{" "}
                 <span
                   className="text-[#5B03B2] font-bold cursor-pointer"
                   onClick={handleResendCode}
