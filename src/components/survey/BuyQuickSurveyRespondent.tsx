@@ -1,23 +1,15 @@
 "use client";
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useMemo } from "react";
 import { Arrow, Purchases1 } from "@/assets/images";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ArrowRight, Loader2, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/shadcn-checkbox";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { surveySchema } from "@/utils/shema";
+import { TimePicker } from "@/components/ui/time-picker";
 import confirm from "@/assets/images/confirm.svg";
 import congrats from "@/assets/images/congrats.svg";
 import logoGold from "@/assets/images/logo-gold.png";
@@ -58,19 +50,35 @@ interface Props {
   surveyId: string | null;
 }
 
-// Generate duration options from 1 to 12 hours
-const surveyDurations = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  value: String(i + 1),
-  label: `${i + 1} hour${i === 0 ? "" : "s"}`,
-}));
+// Utility functions for time validation and conversion
+const getTotalMinutes = (date: Date): number => {
+  return date.getHours() * 60 + date.getMinutes();
+};
 
-// Extended schema for QuickSurvey
+const createDateFromMinutes = (totalMinutes: number): Date => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  date.setHours(hours, minutes);
+  return date;
+};
+
+// Updated schema for QuickSurvey with Date validation
 const quickSurveySchema = z.object({
   respondentsNumber: z
     .number()
     .min(1, "Number of respondents must be at least 1"),
-  duration: z.string().min(1, "Please select a duration"),
+  duration: z
+    .date()
+    .refine((date) => {
+      const totalMinutes = getTotalMinutes(date);
+      return totalMinutes >= 1;
+    }, "Duration must be at least 1 minute")
+    .refine((date) => {
+      const totalMinutes = getTotalMinutes(date);
+      return totalMinutes <= 720;
+    }, "Duration cannot exceed 12 hours"),
   conditions: z
     .object({
       durationElapsed: z.boolean(),
@@ -109,6 +117,13 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       state?.quickSurvey?.formData?.surveyTopic || state?.survey?.topic
   );
 
+  // Initialize default duration (1 hour)
+  const defaultDuration = React.useMemo(() => {
+    const date = new Date();
+    date.setHours(1, 0, 0, 0);
+    return date;
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -121,7 +136,9 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     resolver: zodResolver(quickSurveySchema),
     defaultValues: {
       respondentsNumber: formData.respondentsNumber || 0,
-      duration: formData.duration || "",
+      duration: formData.duration
+        ? createDateFromMinutes(parseInt(formData.duration) * 60)
+        : defaultDuration,
       conditions: {
         durationElapsed: formData.conditions?.durationElapsed || false,
         respondentsNumberMet:
@@ -174,7 +191,9 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       setValue("respondentsNumber", formData.respondentsNumber);
     }
     if (formData.duration) {
-      setValue("duration", formData.duration);
+      // FIXED: formData.duration is now stored as total minutes, not hours
+      const durationInMinutes = parseInt(formData.duration); // Direct minutes value
+      setValue("duration", createDateFromMinutes(durationInMinutes));
     }
     if (formData.conditions) {
       setValue("conditions", formData.conditions);
@@ -182,20 +201,23 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
   }, [formData, setValue]);
 
   const handleNext = (data: QuickSurveyFormData) => {
+    const totalMinutes = getTotalMinutes(data.duration); // This will be 5, 60, 120, etc.
+
     dispatch(setSelectedRespondentsNumber(data.respondentsNumber));
     sessionStorage.setItem(
       "selectedRespondentsNumber",
       data.respondentsNumber.toString()
     );
 
-    dispatch(setDuration(data.duration));
+    // FIXED: Store total minutes instead of hours
+    dispatch(setDuration(totalMinutes.toString()));
     dispatch(setConditions(data.conditions));
 
     dispatch(
       setFormData({
         surveyTopic: surveyTopic,
         respondentsNumber: data.respondentsNumber,
-        duration: data.duration,
+        duration: totalMinutes.toString(), // Send minutes: 5, 60, 120, etc.
         conditions: data.conditions,
       })
     );
@@ -229,10 +251,12 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
 
   const handleDirectQuickSurvey = async () => {
     try {
+      const totalMinutes = getTotalMinutes(duration);
+
       const response = await DirectQuickSurvey(
         quickSurveyId,
         selectedRespondentsNumber,
-        Number(duration),
+        totalMinutes,
         conditions.respondentsNumberMet,
         conditions.durationElapsed
       );
@@ -257,10 +281,12 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     quickSurveyQualifyingTemplateId: string
   ) => {
     try {
+      const totalMinutes = getTotalMinutes(duration);
+
       const response = await QuickSurveyQualifyingPurchase(
         quickSurveyId,
         selectedRespondentsNumber,
-        Number(duration),
+        totalMinutes,
         conditions.respondentsNumberMet,
         conditions.durationElapsed,
         quickSurveyQualifyingTemplateId
@@ -286,10 +312,12 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     quickSurveyScreenerId: string
   ) => {
     try {
+      const totalMinutes = getTotalMinutes(duration);
+
       const response = await QuickSurveyScreenerPurchase(
         quickSurveyId,
         selectedRespondentsNumber,
-        Number(duration),
+        totalMinutes,
         conditions.respondentsNumberMet,
         conditions.durationElapsed,
         quickSurveyScreenerId
@@ -340,12 +368,11 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       conditions: watch("conditions"),
     };
     handleFilterRespondentsRedirect(data);
-    // Remove these from here
-    // dispatch(resetQuestion());
-    // dispatch(resetSurvey());
   };
 
   const handleFilterRespondentsRedirect = (data: QuickSurveyFormData) => {
+    const totalMinutes = getTotalMinutes(data.duration);
+
     dispatch(setSelectedRespondentsNumber(data.respondentsNumber));
     sessionStorage.setItem("allowFilterRespondentsAccess", "true");
 
@@ -357,7 +384,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       setFormData({
         surveyTopic: surveyTopic,
         respondentsNumber: data.respondentsNumber,
-        duration: data.duration,
+        duration: totalMinutes.toString(), // FIXED: Send total minutes
         conditions: data.conditions,
       })
     );
@@ -368,8 +395,32 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     dispatch(resetSurvey());
   };
 
-  const selectedDurationLabel =
-    surveyDurations.find((d) => d.value === duration)?.label || "";
+  const totalMinutesValue = useMemo(() => {
+    if (!duration) return 0;
+    return getTotalMinutes(duration);
+  }, [duration]);
+
+  // Get formatted duration for display
+  const selectedDurationLabel = useMemo(() => {
+    if (!duration) return "";
+
+    const hours = duration.getHours();
+    const minutes = duration.getMinutes();
+
+    // console.log("Duration debug:", {
+    //   hours,
+    //   minutes,
+    //   totalMinutes: totalMinutesValue,
+    // });
+
+    if (hours === 0) {
+      return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+    } else if (minutes === 0) {
+      return `${hours} hour${hours === 1 ? "" : "s"}`;
+    } else {
+      return `${hours}h ${minutes}m`;
+    }
+  }, [duration, totalMinutesValue]); // Correct dependencies
 
   if (!showQuickSurveyFlow) {
     return null;
@@ -444,7 +495,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       {/* FORM DIALOG - Buy Respondents Form */}
       <Dialog open={currentDialog === "form"} onOpenChange={undefined}>
         <DialogContent
-          className="min-w-[90%] lg:min-w-[300px] min-h-auto bg-white border-0 outline-none flex flex-col justify-center items-center gap-5 relative"
+          className="min-w-[90%] lg:min-w-[400px] min-h-auto bg-white border-0 outline-none flex flex-col justify-center items-center gap-5 relative"
           style={{
             zIndex: 100000000,
             position: "fixed",
@@ -464,54 +515,38 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
             <X size={20} />
           </button>
           <form
-            className="w-full flex flex-col justify-center items-center gap-7"
+            className="w-full flex flex-col justify-center items-center gap-7 p-5"
             onSubmit={handleSubmit(handleNext)}
           >
             <h1 className="text-lg lg:text-2xl font-bold text-center">
               Buy Respondents
             </h1>
+
+            {/* Duration Section */}
             <div className="w-full flex flex-col gap-3">
               <div className="flex flex-col gap-2">
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="duration" className="text-[#333333] text-sm">
-                    Duration
-                  </label>
-                  <Controller
-                    name="duration"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          dispatch(setDuration(value));
+                <label htmlFor="duration" className="text-[#333333] text-sm">
+                  Duration
+                </label>
+                <Controller
+                  name="duration"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex flex-col gap-2">
+                      <TimePicker
+                        date={field.value}
+                        setDate={(date) => {
+                          field.onChange(date);
                         }}
-                      >
-                        <SelectTrigger className="w-full h-auto border-2 border-[#E0E0E0] text-black text-xs rounded-md py-2 px-3 active:outline-none">
-                          <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full h-auto p-2 overflow-auto scrollbar-hide z-[100000000]">
-                          <SelectGroup className="w-full h-full flex flex-col gap-2">
-                            {surveyDurations.map((duration) => (
-                              <SelectItem
-                                key={duration.id}
-                                value={duration.value}
-                                className="text-xs text-center"
-                              >
-                                {duration.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                  {errors.duration && (
-                    <p className="text-red-500 text-sm">
-                      {errors.duration.message}
-                    </p>
+                      />
+                    </div>
                   )}
-                </div>
+                />
+                {errors.duration && (
+                  <p className="text-red-500 text-sm">
+                    {errors.duration.message}
+                  </p>
+                )}
                 <div className="flex items-center justify-between w-full">
                   <span className="text-[10px] lg:text-xs">Maximum hours</span>
                   <span className="text-[10px] lg:text-xs font-semibold">
@@ -521,6 +556,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
               </div>
             </div>
 
+            {/* Respondents Number Section */}
             <div className="w-full flex flex-col gap-3">
               <div className="flex flex-col gap-2">
                 <label htmlFor="respondentsNumber" className="text-xs">
@@ -548,21 +584,22 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                   <p className="text-[10px] lg:text-xs">
                     Cost:{" "}
                     <div className="w-auto flex items-center gap-1">
-                      <p className="text-base lg:text-lg text-[#5F08B2]">
-                        {respondentsNumber * 5 || 0}
-                      </p>
                       <Image
                         src={logoGold}
                         width={15}
                         height={15}
                         alt="logoGold"
                       />
+                      <p className="text-base lg:text-lg text-[#5F08B2]">
+                        {respondentsNumber * 5 || 0}
+                      </p>
                     </div>
                   </p>
                 </div>
               </div>
             </div>
 
+            {/* Conditions Section */}
             <div className="w-full flex flex-col gap-3">
               <div className="flex flex-col gap-2">
                 <label htmlFor="conditions" className="text-xs">
@@ -716,8 +753,8 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                   Unit cost per Respondent
                 </p>
                 <div className="w-auto flex items-center gap-1">
-                  <p className="text-base lg:text-lg text-[#5F08B2]">5</p>
                   <Image src={logoGold} width={15} height={15} alt="logoGold" />
+                  <p className="text-base lg:text-lg text-[#5F08B2]">5</p>
                 </div>
               </div>
               <div className="w-full flex justify-between items-center border-b border-dotted border-[#A9A9B1] pb-2">
@@ -725,10 +762,10 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                   Number of PollCoins
                 </p>
                 <div className="w-auto flex items-center gap-1">
+                  <Image src={logoGold} width={15} height={15} alt="logoGold" />
                   <p className="text-base lg:text-lg text-[#5F08B2]">
                     {selectedRespondentsNumber * 5}
                   </p>
-                  <Image src={logoGold} width={15} height={15} alt="logoGold" />
                 </div>
               </div>
             </div>

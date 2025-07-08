@@ -18,7 +18,7 @@ const environment: EnvironmentConfig = {
   },
   // For v2-main branch
   development: {
-    API_BASE_URL: "https://api-staging.pollsensei.ai/api/v1",
+    API_BASE_URL: "https://api-staging-v2.pollsensei.ai/api/v1",
   },
   // For staging-v2 branch
   staging: {
