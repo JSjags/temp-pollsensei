@@ -9,7 +9,6 @@ import { z } from "zod";
 import { geographyAndCultureSchema } from "@/utils/shema";
 import { CombinedFormData } from "@/utils/combinedSchema";
 import { useQuery } from "@tanstack/react-query";
-import { getNationality } from "@/services/api/apiRequest";
 import Image from "next/image";
 import {
   languagesOptions,
@@ -32,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Controller } from "react-hook-form";
 import { APP_KEYS } from "@/constants";
+import { getCountries } from "@yusifaliyevpro/countries";
 
 interface Props {
   onContinue: () => void;
@@ -85,11 +85,18 @@ const Geo_Culture: FC<Props> = ({
     onPrevious();
   };
 
-  const { data: nationalities } = useQuery({
-    queryKey: [...[APP_KEYS.COUNTRY_FLAG]],
-    queryFn: async () => getNationality(),
+  const { data: nationalities, isLoading: isLoadingCountries } = useQuery({
+    queryKey: [APP_KEYS.COUNTRY_FLAG],
+    queryFn: async () => {
+      const countries = await getCountries({
+        fields: ["name", "flags", "idd"],
+      });
+      return countries;
+    },
     enabled: true,
   });
+
+  // console.log({ nationalities });
 
   const sortedNationalities = nationalities
     ? [...nationalities].sort((a, b) =>
@@ -98,9 +105,7 @@ const Geo_Culture: FC<Props> = ({
     : [];
 
   const filteredNationalities = sortedNationalities.filter((nationality) =>
-    nationality.name.common
-      .toLowerCase()
-      .includes(searchNationality.toLowerCase())
+    nationality.name.common.toLowerCase()
   );
 
   useEffect(() => {
