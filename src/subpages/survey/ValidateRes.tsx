@@ -235,13 +235,25 @@ const ValidateResponse = () => {
     const errors: string[] = [];
 
     // Validate respondent info
-    if (!respondent_name && !ocrRes?.respondent_name) {
+    // Check survey settings to determine if respondent name is required
+    if (
+      surveySettings?.collect_name_of_respondents &&
+      !respondent_name &&
+      !ocrRes?.respondent_name
+    ) {
       errors.push("Please provide respondent name");
     }
 
-    if (!respondent_email && !userEmail && !ocrRes?.respondent_email) {
+    // Check survey settings to determine if respondent email is required
+    if (
+      surveySettings?.collect_email_addresses &&
+      !respondent_email &&
+      !userEmail &&
+      !ocrRes?.respondent_email
+    ) {
       errors.push("Please provide respondent email");
     } else if (
+      surveySettings?.collect_email_addresses &&
       respondent_email &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(respondent_email)
     ) {
