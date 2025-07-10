@@ -348,7 +348,7 @@ const Navbar = () => {
 
           <div className="flex gap-0 sm:gap-4 items-center">
             {/* Organization Switcher */}
-            <DropdownMenu
+            {/* <DropdownMenu
               open={organizationDropdownOpen}
               onOpenChange={setOrganizationDropdownOpen}
             >
@@ -421,7 +421,7 @@ const Navbar = () => {
                   )}
                 </div>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
 
             <DropdownMenu
               open={notificationOpen}
