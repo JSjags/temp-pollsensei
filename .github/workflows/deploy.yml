@@ -9,10 +9,10 @@ on:
       - release
 
 env:
-  AZURE_CONTAINER_REGISTRY: oaksacr.azurecr.io
-  ACR_RESOURCE_GROUP: OAKS_SERVICES_RG
+  AZURE_CONTAINER_REGISTRY: oaksdevacr.azurecr.io
+  ACR_RESOURCE_GROUP: OAKS-SERVICES-RG
   AKS_RESOURCE_GROUP: Pollsensei-RG
-  CLUSTER_NAME: pollsenseiCluster
+  CLUSTER_NAME: oaksPollsenseiCluster
 
 jobs:
   build-and-deploy:
