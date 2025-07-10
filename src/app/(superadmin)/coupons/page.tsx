@@ -571,6 +571,10 @@ const page = (props: Props) => {
             }
             isLoading={couponsLoading}
             onNavigate={navigatePage}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              refetchCoupons();
+            }}
           />
         </div>
       </div>
