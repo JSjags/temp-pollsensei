@@ -60,7 +60,7 @@ axiosInstance.interceptors.response.use(
         : error?.response?.data?.msg ??
             error?.response?.data?.message ??
             error?.message ??
-            "You are not Authorized. Log in to continue";
+            "You need to be logged in to continue. Please log in.";
     };
 
     const status = error.response?.status;

@@ -476,6 +476,7 @@ const RegisterPage = () => {
                                   <Link
                                     className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent hover:from-[#5B03B2] hover:to-[#9D50BB] font-semibold"
                                     href={"/terms-of-service"}
+                                    target="__blank"
                                   >
                                     terms and conditions
                                   </Link>

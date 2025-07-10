@@ -24,6 +24,7 @@ import {
   updateSurvey,
   addSection,
   deleteSection,
+  setSkipLogic,
 } from "@/redux/slices/survey.slice";
 import store from "@/redux/store";
 import PaginationBtn from "@/components/common/PaginationBtn";
@@ -60,6 +61,8 @@ import {
   MoreVertical,
   SquareMenu,
   BringToFront,
+  Paintbrush,
+  AlignVerticalSpaceAround,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/shadcn-input";
@@ -79,6 +82,8 @@ import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SkipLogicEditor, { SkipLogicRule } from "./SkipLogicEditor";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -301,6 +306,8 @@ const EditSurvey = () => {
   const [slideDirection, setSlideDirection] = useState<"left" | "right">(
     "right"
   );
+
+  const skipLogic = useSelector((state: RootState) => state.survey.skipLogic);
 
   const handleClearSurvey = () => {
     dispatch(resetSurvey());
@@ -899,6 +906,36 @@ const EditSurvey = () => {
       updateSection({ index: currentSection, newSection: updatedSection })
     );
   };
+
+  // Utility: validate skipLogic rules against current questions
+  useEffect(() => {
+    if (!Array.isArray(skipLogic) || skipLogic.length === 0) return;
+    const isValid = skipLogic.every((rule) => {
+      // Check from section/question
+      const fromSection = questions[rule.from.sectionIndex];
+      if (!fromSection) return false;
+      const fromQuestion = fromSection.questions[rule.from.questionIndex];
+      if (!fromQuestion) return false;
+      // Check answer
+      const options =
+        Array.isArray(fromQuestion.options) && fromQuestion.options.length > 0
+          ? fromQuestion.options
+          : fromQuestion.question_type === "boolean"
+          ? ["Yes", "No"]
+          : ["Any answer"];
+      if (!options.includes(rule.from.answer)) return false;
+      // Check target
+      if ("end" in rule.to) return true;
+      const toSection = questions[rule.to.sectionIndex];
+      if (!toSection) return false;
+      const toQuestion = toSection.questions[rule.to.questionIndex ?? 0];
+      if (!toQuestion) return false;
+      return true;
+    });
+    if (!isValid) {
+      dispatch(setSkipLogic([]));
+    }
+  }, [questions, skipLogic, dispatch]);
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full relative`}>
@@ -1605,11 +1642,81 @@ const EditSurvey = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
-          <StyleEditor
-            surveyData={survey as SurveyData}
-            setSurveyData={setSurveyData}
-          />
+          <Tabs defaultValue="style" className="w-full">
+            <TabsList className="w-full flex bg-gray-50 border-b p-0 sticky top-0 z-[100000] !pb-0">
+              <TabsTrigger
+                value="style"
+                className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Paintbrush size={16} />
+                  Style Editor
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="skip"
+                className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <AlignVerticalSpaceAround size={16} />
+                  Logic
+                </span>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="style" className="w-full">
+              <StyleEditor
+                surveyData={survey as SurveyData}
+                setSurveyData={setSurveyData}
+              />
+            </TabsContent>
+            <TabsContent value="skip" className="w-full">
+              <Tabs defaultValue="skip-logic" className="w-full">
+                <TabsList className="w-full flex bg-gray-50 border-b p-0 sticky top-0 z-[100000] !pb-0">
+                  <TabsTrigger
+                    value="skip-logic"
+                    className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                  >
+                    Skip Logic
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="display-logic"
+                    className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                  >
+                    Display Logic
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="display-options"
+                    className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                  >
+                    Display Options
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="skip-logic" className="w-full">
+                  <SkipLogicEditor
+                    sections={questions}
+                    skipLogic={skipLogic}
+                    onChange={(rules) => dispatch(setSkipLogic(rules))}
+                  />
+                </TabsContent>
+                <TabsContent value="display-logic" className="w-full">
+                  <div className="p-8 text-center text-gray-500">
+                    <h2 className="text-lg font-semibold mb-2">
+                      Display Logic
+                    </h2>
+                    <p>Display Logic configuration coming soon.</p>
+                  </div>
+                </TabsContent>
+                <TabsContent value="display-options" className="w-full">
+                  <div className="p-8 text-center text-gray-500">
+                    <h2 className="text-lg font-semibold mb-2">
+                      Display Options Logic
+                    </h2>
+                    <p>Display Options Logic configuration coming soon.</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 

@@ -340,6 +340,9 @@ const AdminReviews: React.FC = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onNavigate={navigatePage}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+          }}
         />
       </div>
     </div>

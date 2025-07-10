@@ -69,7 +69,8 @@ import {
 } from "../ui/tooltip";
 import { UserData } from "@/subpages/settings/ProfilePage";
 import { useUserProfileQuery } from "@/services/user.service";
-import { toast } from "@/hooks/use-main-toast";
+import { toast } from "react-toastify";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface Notification {
   _id: string;
@@ -144,11 +145,9 @@ const fetchCurrentOrganization = async () => {
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const user2 = useSelector((state: RootState) => state.user);
-  const organizations = user?.roles || [];
+  const organizations = user?.my_organizations_data || [];
   const currentOrganizationId =
-    typeof user?.current_organization === "string"
-      ? user.current_organization
-      : user?.current_organization?.organization_name ?? "";
+    user?.current_organization_data?.organization_name;
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -228,17 +227,12 @@ const Navbar = () => {
         const userProfileResponse = await axiosInstance.get("/user/me");
         const userData = userProfileResponse.data;
         dispatch(updateUser({ user: userData }));
-        toast({
-          title: "Organization switched!",
-          description: "You have successfully switched your organization.",
-        });
+        // toast.success("You have successfully switched your organization.");
+        window.location.reload();
       } catch (error) {
-        toast({
-          title: "Failed to update user data",
-          description:
-            "Could not refresh user profile after switching organization.",
-          variant: "destructive",
-        });
+        toast.error(
+          "Could not refresh user profile after switching organization."
+        );
       }
       setOrganizationDropdownOpen(false);
     },
@@ -276,6 +270,8 @@ const Navbar = () => {
   };
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
+
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
   return (
     <div
@@ -350,20 +346,27 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-0 sm:gap-4 items-center">
             {/* Organization Switcher */}
             <DropdownMenu
               open={organizationDropdownOpen}
               onOpenChange={setOrganizationDropdownOpen}
             >
               <DropdownMenuTrigger asChild>
-                <div className="hidden lg:flex items-center bg-border/50 gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
-                  <Building2 className="size-4 text-primary" />
-                  <span className="text-sm font-medium max-w-[200px] truncate">
-                    {currentOrganizationId}
-                  </span>
-                  <ChevronDown className="size-4 text-muted-foreground" />
-                </div>
+                {isLargeScreen ? (
+                  <div className="flex items-center bg-border/50 gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
+                    <Building2 className="size-4 text-primary" />
+                    <span className="text-sm font-medium max-w-[200px] truncate">
+                      {currentOrganizationId}
+                    </span>
+                    <ChevronDown className="size-4 text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="flex items-center bg-border/50 gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
+                    <Building2 className="size-4 text-primary" />
+                    <ChevronDown className="size-4 text-muted-foreground" />
+                  </div>
+                )}
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="max-w-80 w-max sm:max-w-[540px] z-[10000000000]"
@@ -377,18 +380,20 @@ const Navbar = () => {
                       No organizations found
                     </div>
                   ) : (
-                    organizations.map((org: any) => (
+                    organizations.map((org) => (
                       <DropdownMenuItem
-                        key={org.organization}
+                        key={org._id}
                         className={`flex items-center justify-between cursor-pointer ${
-                          org.organization === currentOrganizationId
+                          org._id === user?.current_organization_data?._id
                             ? "bg-gray-100 text-gray-800"
                             : ""
                         }`}
                         onSelect={(e) => {
                           e.preventDefault();
-                          if (org.organization !== currentOrganizationId) {
-                            switchAccount(org.organization);
+                          if (
+                            org._id !== user?.current_organization_data?._id
+                          ) {
+                            switchAccount(org._id);
                           }
                         }}
                         disabled={isSwitchingAccount}
@@ -396,19 +401,19 @@ const Navbar = () => {
                         <div className="flex items-center gap-2">
                           <Building2 className="size-4 text-gray-600 shrink-0" />
                           <span className="font-medium text-gray-600">
-                            {org.organization}
+                            {org.name}
                           </span>
-                          {org.organization === currentOrganizationId && (
+                          {org._id === user?.current_organization_data?._id && (
                             <Check className="size-4 text-green-500 ml-4" />
                           )}
-                          {org.organization === currentOrganizationId && (
+                          {org._id === user?.current_organization_data?._id && (
                             <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-blue-600 rounded-full shadow-md capitalize">
                               {org.designation}
                             </span>
                           )}
                         </div>
                         {isSwitchingAccount &&
-                          org.organization !== currentOrganizationId && (
+                          org._id !== user?.current_organization_data?._id && (
                             <Loader2 className="size-4 animate-spin ml-2 text-muted-foreground" />
                           )}
                       </DropdownMenuItem>
@@ -423,7 +428,7 @@ const Navbar = () => {
               onOpenChange={setNotificationOpen}
             >
               <DropdownMenuTrigger asChild className="z-[1000000] relative">
-                <div className="size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px] relative">
+                <div className="size-10 sm:size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-2.5 sm:p-[12px] relative">
                   <Image
                     className="object-contain size-8"
                     width={24}
@@ -556,7 +561,7 @@ const Navbar = () => {
 
             <DropdownMenu open={open} onOpenChange={setOpen}>
               <DropdownMenuTrigger asChild>
-                <div className="cursor-pointer flex justify-center items-center size-12">
+                <div className="cursor-pointer flex justify-center items-center size-10 sm:size-12">
                   <Avatar className="size-8">
                     <AvatarImage
                       src={(user as any)?.photo_url ?? ""}

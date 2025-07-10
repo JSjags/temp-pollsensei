@@ -52,7 +52,6 @@ const ValidateResponse = () => {
     (state: RootState) => state.user?.user?.name
   );
 
-  const [currentSection, setCurrentSection] = useState(0);
   const [respondent_name, setRespondent_name] = useState<string>("");
   const [respondent_email, setRespondent_email] = useState<string>("");
   const [ocrRes, setOcrRes] = useState<any | null>(null);
@@ -102,7 +101,11 @@ const ValidateResponse = () => {
         survey: OCRresponses.survey || [],
         extracted_answers: OCRresponses.extracted_answers || [],
         uploaded_files: OCRresponses.uploaded_files || [],
+        respondent_details: OCRresponses.respondent_details || [],
       });
+
+      setRespondent_name(OCRresponses?.respondent_details?.name);
+      setRespondent_email(OCRresponses?.respondent_details?.email);
 
       const existingAnswers: Record<string, any> = {};
       OCRresponses.extracted_answers.forEach((item: any) => {
@@ -1368,6 +1371,8 @@ const ValidateResponse = () => {
     );
   }
 
+  console.log(ocrRes);
+
   return (
     <motion.div
       initial="hidden"
@@ -1449,7 +1454,7 @@ const ValidateResponse = () => {
                       type="text"
                       placeholder="Enter respondent's name"
                       className="w-full p-2 border-0 border-b border-gray-300 focus:border-b-2 focus:border-purple-500 focus:outline-none transition-all"
-                      value={ocrRes?.respondent_name || respondent_name}
+                      value={respondent_name}
                       onChange={(e) => setRespondent_name(e.target.value)}
                     />
                   </div>
@@ -1464,7 +1469,7 @@ const ValidateResponse = () => {
                       type="email"
                       placeholder="Enter respondent's email"
                       className="w-full p-2 border-0 border-b border-gray-300 focus:border-b-2 focus:border-purple-500 focus:outline-none transition-all"
-                      value={ocrRes?.respondent_email || respondent_email}
+                      value={respondent_email}
                       onChange={(e) => setRespondent_email(e.target.value)}
                     />
                   </div>

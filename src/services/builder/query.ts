@@ -73,12 +73,14 @@ const customBaseQuery: BaseQueryFn<
         break;
       case 401:
         toastMessage =
-          errorMessage || "Unauthorized access. Please login again.";
+          errorMessage ||
+          "You need to be logged in to continue. Please log in.";
         api.dispatch(logoutUser());
         break;
       case 503:
         toastMessage =
-          errorMessage || "Unauthorized access. Please login again.";
+          errorMessage ||
+          "The service is temporarily unavailable. Please try again later.";
         api.dispatch(logoutUser());
         break;
       case 400:
@@ -94,7 +96,7 @@ const customBaseQuery: BaseQueryFn<
 
     if (toastMessage) {
       toast.dismiss();
-      toast.error(toastMessage, { toastId: "api-error" });
+      toast.error(toastMessage, { toastId: "error" });
     }
   }
   return result;

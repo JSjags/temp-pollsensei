@@ -40,6 +40,27 @@ export interface User {
     _id: string;
     // Updated: Add more fields here if needed
   }>;
+  current_organization_data?: {
+    _id: string;
+    organization_name: string;
+    admin_name: string;
+    admin_email: string;
+    isSubscribed: boolean;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+    // Updated: Add more fields here if needed
+  };
+  my_organizations_data?: Array<{
+    _id: string;
+    name: string;
+    designation: string;
+    roles: string[];
+    is_disabled: boolean;
+    status: string;
+    joined_date?: string;
+    // Updated: Add more fields here if needed
+  }>;
   is_collaborator: any[];
   plan: {
     _id: string;
