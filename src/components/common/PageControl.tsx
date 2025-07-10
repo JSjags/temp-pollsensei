@@ -6,7 +6,7 @@ interface PaginationProps {
   totalPages: number;
   isLoading?: boolean;
   onNavigate: (direction: "next" | "prev") => void;
-  onPageChange: (page: number) => void;
+  onPageChange?: (page: number) => void;
 }
 
 const PageControl: React.FC<PaginationProps> = ({
