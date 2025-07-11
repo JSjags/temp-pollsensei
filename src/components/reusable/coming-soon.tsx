@@ -85,6 +85,36 @@ export function ComingSoon({
   );
 }
 
+// Example usage for PlaceholderRightSide with image slides that prevent layout shift:
+//
+// const slides = [
+//   <div className="relative w-full aspect-square max-w-lg mx-auto">
+//     <Image
+//       src="/assets/coming-soon.svg"
+//       alt="Coming Soon Illustration"
+//       fill
+//       className="object-contain scale-90 hover:scale-95 transition-transform duration-300 drop-shadow-xl"
+//       placeholder="blur"
+//       blurDataURL="/assets/coming-soon-blur.jpg" // Optional: LQIP
+//       priority // Only for the first slide
+//     />
+//   </div>,
+//   <div className="relative w-full aspect-square max-w-lg mx-auto">
+//     <Image
+//       src="/assets/another-image.svg"
+//       alt="Another Illustration"
+//       fill
+//       className="object-contain"
+//       placeholder="blur"
+//       blurDataURL="/assets/another-image-blur.jpg"
+//     />
+//   </div>,
+// ];
+//
+// <PlaceholderRightSide slides={slides} autoPlayInterval={10000} />
+//
+// Ensure all slides use a similar container to reserve space and prevent layout shift.
+
 export function PlaceholderRightSide({
   slides,
   autoPlayInterval = 10000,
@@ -182,7 +212,7 @@ export function PlaceholderRightSide({
   return (
     <div className="relative w-full h-full min-h-[calc(100vh-4rem)] rounded-3xl bg-[url('/auth/auth-bg.svg')] bg-cover bg-center flex items-center justify-center bg-gray-50 overflow-hidden">
       <div className="w-full h-full flex items-center justify-center relative">
-        <AnimatePresence custom={direction} initial={false} mode="wait">
+        <AnimatePresence custom={direction} initial={false} mode="popLayout">
           <motion.div
             key={current}
             custom={direction}
@@ -193,6 +223,7 @@ export function PlaceholderRightSide({
             className="w-full h-full flex items-center justify-center"
             style={{ minHeight: "calc(100vh - 4rem)" }}
           >
+            {/* Ensure each slide reserves space for images to prevent layout shift */}
             {slides[current]}
           </motion.div>
         </AnimatePresence>
@@ -218,7 +249,6 @@ export function PlaceholderRightSide({
               aria-label={paused ? "Play carousel" : "Pause carousel"}
               onClick={handlePausePlay}
               className="relative bg-[#977BA5]/80 size-10 hover:bg-[#977BA5] shadow-lg rounded-full p-2 transition-all flex items-center justify-center"
-              // style={{ width: 56, height: 56 }}
             >
               {/* Animated border */}
               <svg className="absolute top-0 left-0" width="40" height="40">

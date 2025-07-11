@@ -166,8 +166,97 @@ const LoginPage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br"
+        className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-[#F5F7FB] to-[#E3E6F3] relative"
       >
+        {/* Left side: login form or content, with spinner at the top */}
+        <div className="flex-1 flex flex-col justify-center items-center relative px-4 py-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0"
+            >
+              <StateLoader2
+                defaultGoto="/login"
+                directRoute={
+                  ed
+                    ? ed === "2"
+                      ? "/surveys/edit-survey"
+                      : ed === "3"
+                      ? "/surveys/manual-survey-create"
+                      : undefined
+                    : undefined
+                }
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Right side: PlaceholderRightSide for slides/new design */}
+        <div className="hidden md:block md:w-1/2 h-full">
+          <PlaceholderRightSide
+            slides={[
+              <div
+                key="slide1"
+                className="flex flex-col items-center justify-center h-full px-8"
+              >
+                <Image
+                  src={steps}
+                  alt="Steps"
+                  className="w-full max-w-[400px] h-auto mb-6"
+                  width={300}
+                />
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+                  Create Surveys Effortlessly
+                </h2>
+                <p className="text-gray-600 text-center">
+                  Design, distribute, and analyze surveys with ease using
+                  PollSensei's intuitive platform.
+                </p>
+              </div>,
+              <div
+                key="slide2"
+                className="flex flex-col items-center justify-center h-full px-8"
+              >
+                <Image
+                  src={pollsensei_new_logo}
+                  alt="Logo"
+                  className="w-24 h-24 mb-6"
+                  width={96}
+                  height={96}
+                />
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+                  Powerful Analytics
+                </h2>
+                <p className="text-gray-600 text-center">
+                  Gain insights from your responses with real-time analytics and
+                  beautiful visualizations.
+                </p>
+              </div>,
+              <div
+                key="slide3"
+                className="flex flex-col items-center justify-center h-full px-8"
+              >
+                <Image
+                  src={dark_theme_logo}
+                  alt="Dark Theme Logo"
+                  className="w-32 h-auto mb-6"
+                  width={128}
+                  height={32}
+                />
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+                  Secure & Reliable
+                </h2>
+                <p className="text-gray-600 text-center">
+                  Your data is protected with industry-leading security and
+                  privacy standards.
+                </p>
+              </div>,
+            ]}
+          />
+        </div>
         <AnimatePresence mode="wait">
           <div className="md:hidden flex items-center justify-center p-4 bg-white shadow">
             <motion.div
@@ -272,7 +361,7 @@ const LoginPage = () => {
   }
 
   return (
-    <section className="min-h-screen flex flex-col md:flex-row max-h-screen">
+    <section className="min-h-screen max-w-[1440px] mx-auto flex flex-col md:flex-row max-h-screen">
       <div className="w-full md:w-1/2 flex flex-col items-center px-4 md:px-8 py-6 overflow-y-scroll">
         <div className="flex flex-col w-full max-w-md mx-auto">
           <div className="flex flex-col items-start mb-8">
