@@ -1653,7 +1653,7 @@ const EditSurvey = () => {
                   Style Editor
                 </span>
               </TabsTrigger>
-              {/* <TabsTrigger
+              <TabsTrigger
                 value="skip"
                 className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
               >
@@ -1661,7 +1661,7 @@ const EditSurvey = () => {
                   <AlignVerticalSpaceAround size={16} />
                   Logic
                 </span>
-              </TabsTrigger> */}
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="style" className="w-full">
               <StyleEditor
@@ -1678,7 +1678,7 @@ const EditSurvey = () => {
                   >
                     Skip Logic
                   </TabsTrigger>
-                  <TabsTrigger
+                  {/* <TabsTrigger
                     value="display-logic"
                     className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
                   >
@@ -1689,7 +1689,7 @@ const EditSurvey = () => {
                     className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
                   >
                     Display Options
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                 </TabsList>
                 <TabsContent value="skip-logic" className="w-full">
                   <SkipLogicEditor
