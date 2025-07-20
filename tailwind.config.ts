@@ -34,6 +34,7 @@ const config = {
         "new-tertiary": "hsl(var(--new-tertiary))",
         "new-elements": "hsl(var(--new-elements))",
         "new-elements-border": "hsl(var(--new-elements-border))",
+        "new-muted": "hsl(var(--new-muted))",
         // "new-elements": "hsl(var(--new-elements))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
