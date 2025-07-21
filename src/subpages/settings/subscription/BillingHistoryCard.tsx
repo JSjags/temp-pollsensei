@@ -4,14 +4,16 @@ import { motion } from "framer-motion";
 import { DollarSign, Percent } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function BillingHistoryCard() {
+  const router = useRouter();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="rounded-lg border-none bg-[#FAF8FB] shadow-sm h-full lg:col-span-2 opacity-0 grayscale"
+      className="rounded-lg border-none bg-[#FAF8FB] shadow-sm h-full lg:col-span-2 opacity-0"
     >
       <div className="flex items-center h-full">
         <div className="relative h-full flex-[0.9]">
@@ -38,12 +40,15 @@ export function BillingHistoryCard() {
                 </p>
               </div>
             </div>
-            <Link
-              href="#"
-              className="text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors"
+            <button
+              onClick={() => {
+                router.push("?viewAllSubs=true");
+              }}
+              className="text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors bg-transparent border-none p-0 cursor-pointer"
+              type="button"
             >
               View all
-            </Link>
+            </button>
           </div>
         </div>
       </div>

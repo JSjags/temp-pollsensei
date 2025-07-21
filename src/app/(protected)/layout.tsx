@@ -3,6 +3,7 @@ import PrivateRoute from "@/components/protected/PrivateRoute";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/nav/app-sidebar";
 import { NavigationWrapper } from "@/components/navbar/NavigationWrapper";
+import FeatureLimitation from "@/components/feature-limitation/feature-limitation";
 
 
 export default function ProtectedLayout({
@@ -12,6 +13,7 @@ export default function ProtectedLayout({
 }) {
   return (
     <PrivateRoute>
+      <FeatureLimitation />
       <div className="w-full pb-16 md:pb-0 bg-[#F7F8FB]">
         <SidebarProvider>
           <div className="flex flex-1 gap-0 md:pr-2">

@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils";
 import { SurveyState } from "@/redux/slices/survey.slice";
 import SurveyPDFDocument from "./SurveyPDFDocument";
 import dynamic from "next/dynamic";
+import { useQuery } from "@tanstack/react-query";
+import { getSurveySettings } from "@/services/survey";
+import { useParams } from "next/navigation";
 
 const PDFDownloadLink = dynamic(
   () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
@@ -40,12 +43,45 @@ interface Props {
     data?: SurveyState;
   };
   isSuccess?: boolean;
+  surveyId: string;
 }
 
-const DownloadPdfButton = ({ surveyData, isSuccess }: Props) => {
+const DownloadPdfButton = ({ surveyData, isSuccess, surveyId }: Props) => {
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
   const [headerBase64, setHeaderBase64] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [formState, setFormState] = useState({
+    collect_email_addresses: false,
+    collect_name_of_respondents: false,
+  });
+
+  const {
+    data: surveySettings,
+    isLoading: isSurveySettingsLoading,
+    isSuccess: isSurveySettingsSuccess,
+    isError: isSurveySettingsError,
+    refetch: refetchSettings,
+  } = useQuery<{
+    regional_availability: {
+      status: boolean;
+      regions: string[];
+    };
+    survey_id: {
+      _id: string;
+      topic: string;
+    };
+    _id: string;
+    language: string;
+    collect_email_addresses: boolean;
+    collect_name_of_respondents: boolean;
+    allow_survey_edit: boolean;
+    receive_email_notification: boolean;
+    response_threshold: number;
+    voice_response_duration_in_seconds: number;
+  }>({
+    queryKey: ["survey-settings", surveyId],
+    queryFn: () => getSurveySettings({ surveyId }),
+  });
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -72,42 +108,68 @@ const DownloadPdfButton = ({ surveyData, isSuccess }: Props) => {
     fetchImages();
   }, [surveyData?.data?.logo_url, surveyData?.data?.header_url]);
 
-  if (!surveyData || !isSuccess) {
+  useEffect(() => {
+    if (surveySettings) {
+      setFormState({
+        collect_email_addresses: surveySettings.collect_email_addresses,
+        collect_name_of_respondents: surveySettings.collect_name_of_respondents,
+      });
+    }
+  }, [surveySettings]);
+
+  if (!surveyData || !isSuccess || isSurveySettingsLoading) {
     return <Skeleton className="h-12 w-full" />;
   }
 
-  if (isLoading) {
-    return <div>Loading images...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Loading images...</div>;
+  // }
+
+  console.log(surveyData);
 
   return (
-    <PDFDownloadLink
-      document={
-        <SurveyPDFDocument
-          surveyData={
-            {
-              ...surveyData.data,
-              logo_url: logoBase64,
-              header_url: headerBase64,
-            } as any
+    <>
+      {isSurveySettingsSuccess && (
+        <PDFDownloadLink
+          document={
+            <SurveyPDFDocument
+              nameAndEmail={{
+                email: formState.collect_email_addresses,
+                name: formState.collect_name_of_respondents,
+              }}
+              surveyData={
+                {
+                  ...surveyData.data,
+                  logo_url: logoBase64,
+                  header_url: headerBase64,
+                } as any
+              }
+            />
           }
-        />
-      }
-      fileName={`${surveyData.data?.topic}.pdf`}
-    >
-      {/* @ts-ignore */}
-      {({ loading }) =>
-        (
-          <Button
-            className="w-full flex items-center justify-center p-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium text-lg gap-2"
-            disabled={loading}
-          >
-            <GoDownload size={20} />
-            {loading ? "Generating PDF..." : "Download as PDF"}
-          </Button>
-        ) as any
-      }
-    </PDFDownloadLink>
+          fileName={`${surveyData.data?.topic}.pdf`}
+        >
+          {/* @ts-ignore */}
+          {({ loading }) =>
+            (
+              <Button
+                className="w-full flex items-center justify-center p-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium text-lg gap-2"
+                disabled={loading}
+              >
+                <GoDownload size={20} />
+                {loading ? (
+                  <Skeleton className="h-12 w-full" />
+                ) : (
+                  "Download as PDF"
+                )}
+              </Button>
+            ) as any
+          }
+        </PDFDownloadLink>
+      )}
+      {isSurveySettingsError && (
+        <div>PDF couldn't be generated, please try again later.</div>
+      )}
+    </>
   );
 };
 

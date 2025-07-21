@@ -13,21 +13,26 @@ import Image from "next/image";
 import { extractDescription } from "@/utils/analysis";
 
 interface TestData {
-  table_data: {
-    statistics: string[];
-    value: number[];
+  category?: string[];
+  count?: number[];
+  plot_urls?: string[];
+  plot_names?: string[];
+  description?: string;
+}
+
+interface TestResults {
+  results: Record<string, TestData>;
+  graph: {
+    type: string;
+    x: string[];
+    y: number[][];
   };
-  plot_names: string[];
-  plot_urls: string[];
   description?: string;
 }
 
 interface TestProps {
   test_name: string;
-  test_results: {
-    results: Record<string, TestData>;
-    description: string;
-  };
+  test_results: TestResults;
 }
 
 const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
@@ -61,7 +66,7 @@ const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
           <CardTitle className="flex items-center justify-between">
             <span>{props.test_name}</span>
             <Select value={selectedResult} onValueChange={setSelectedResult}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
                 <SelectValue placeholder="Select variable" />
               </SelectTrigger>
               <SelectContent>
@@ -77,7 +82,7 @@ const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {!currentResult || !currentResult.table_data ? (
+          {!currentResult ? (
             <div className="p-4">
               <p>No data available for this selection.</p>
             </div>
@@ -88,80 +93,95 @@ const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2">Statistic</th>
-                      <th className="text-right py-2">Value</th>
+                      <th className="text-left py-2">Category</th>
+                      <th className="text-right py-2">Count</th>
+                      <th className="text-right py-2">Percentage</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentResult.table_data.statistics?.map(
-                      (stat: string, index: number) => (
-                        <tr key={stat} className="border-b">
-                          <td className="py-2">{stat}</td>
-                          <td className="text-right py-2">
-                            {currentResult.table_data.value[index]?.toFixed(
-                              3
-                            ) ?? "N/A"}
-                          </td>
-                        </tr>
-                      )
+                    {currentResult.category?.map(
+                      (cat: string, index: number) => {
+                        const total =
+                          currentResult.count?.reduce((a, b) => a + b, 0) || 1;
+                        const percentage =
+                          ((currentResult.count?.[index] || 0) / total) * 100;
+
+                        return (
+                          <tr key={cat} className="border-b">
+                            <td className="py-2">{cat}</td>
+                            <td className="text-right py-2">
+                              {currentResult.count?.[index] ?? "N/A"}
+                            </td>
+                            <td className="text-right py-2">
+                              {percentage.toFixed(1)}%
+                            </td>
+                          </tr>
+                        );
+                      }
                     )}
                   </tbody>
                 </table>
               </div>
 
-              {/* Plot Images */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentResult.plot_urls?.map((url: string, index: number) => (
-                  <div key={url} className="relative">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="text-center font-medium">
-                        {currentResult.plot_names[index]
-                          .replace(/_/g, " ")
-                          .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+              {/* Plot Images - Keeping this section unchanged for future compatibility */}
+              {currentResult.plot_urls && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentResult.plot_urls?.map(
+                    (url: string, index: number) => (
+                      <div key={url} className="relative">
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="text-center font-medium">
+                            {currentResult.plot_names?.[index]
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleImageDownload(
+                                url,
+                                currentResult.plot_names?.[index] ?? ""
+                              )
+                            }
+                            className="flex items-center gap-2"
+                          >
+                            <Download className="h-4 w-4" />
+                            <span>Download</span>
+                          </Button>
+                        </div>
+                        <div className="relative aspect-video mt-2">
+                          <Image
+                            src={url}
+                            alt={currentResult.plot_names?.[index] ?? ""}
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleImageDownload(
-                            url,
-                            currentResult.plot_names[index]
-                          )
-                        }
-                        className="flex items-center gap-2"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>Download</span>
-                      </Button>
-                    </div>
-                    <div className="relative aspect-video mt-2">
-                      <Image
-                        src={url}
-                        alt={currentResult.plot_names[index]}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    )
+                  )}
+                </div>
+              )}
             </>
           )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Analysis Description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-700">
-            {currentResult?.description
-              ? extractDescription(currentResult?.description)
-              : props.test_results.description}
-          </p>
-        </CardContent>
-      </Card>
+      {(currentResult?.description || props.test_results.description) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Analysis Description</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700">
+              {currentResult?.description
+                ? extractDescription(currentResult.description)
+                : props.test_results.description}
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

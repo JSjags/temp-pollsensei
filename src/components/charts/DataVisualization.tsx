@@ -157,6 +157,11 @@ interface BoxPlotData extends Quartiles {
   group: string;
 }
 
+interface SuccessDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
 const chartAnimation = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
@@ -257,7 +262,7 @@ const TestChartRenderer = ({ testData }: { testData: any }) => {
         </div>
       );
 
-    case "Spearman's Rank Correlation":
+    case "Spearman’s Rank Correlation":
       return (
         <div {...chartProps}>
           <SpearmanCorrelation
@@ -326,6 +331,63 @@ interface ReportPayload {
   }>;
 }
 
+const SuccessDialog: React.FC<SuccessDialogProps> = ({ open, onClose }) => {
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent
+        className="sm:max-w-md z-[100000]"
+        overlayClassName="z-[100000]"
+      >
+        <DialogHeader>
+          <DialogTitle className="text-center">
+            Report Generation Initiated!
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col items-center py-6 space-y-4">
+          <div className="rounded-full bg-green-100 p-3">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 20,
+              }}
+            >
+              <svg
+                className="w-10 h-10 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </motion.div>
+          </div>
+          <DialogDescription className="text-center max-w-sm">
+            Your report is being generated. You will receive an email
+            notification when it's ready for download.
+          </DialogDescription>
+        </div>
+        <DialogFooter className="sm:justify-center">
+          <Button
+            type="button"
+            onClick={onClose}
+            className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white"
+          >
+            Got it, thanks!
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const DataVisualizationComponent = ({
   data,
   survey,
@@ -342,6 +404,7 @@ const DataVisualizationComponent = ({
       test_variables: string[];
     }>
   >(selectedTestsData);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   useEffect(() => {
     setSelectedTests(selectedTestsData);
@@ -369,14 +432,14 @@ const DataVisualizationComponent = ({
       );
       return response.data;
     },
-    onSuccess: async (data) => {
-      router.push((data as any).report_url);
+    onSuccess: async () => {
       setShowReportDialog(false);
-      toast.success("Report downloaded successfully!");
+      setShowSuccessDialog(true);
+      toast.success("Report generation started!");
     },
     onError: (error) => {
-      console.error("Error downloading report:", error);
-      toast.error("Failed to download report");
+      console.error("Error initiating report generation:", error);
+      toast.error("Failed to initiate report generation");
     },
     retry: 5,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -400,9 +463,6 @@ const DataVisualizationComponent = ({
       )
     );
   };
-
-  // console.log(survey);
-  // console.log(data);
 
   return (
     <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 pt-10 max-w-">
@@ -485,6 +545,11 @@ const DataVisualizationComponent = ({
           isAnalysing
         />
       )}
+
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+      />
 
       <Dialog open={showReportDialog} onOpenChange={handleDialogChange}>
         <DialogContent

@@ -8,7 +8,10 @@ import { pollsensei_new_logo } from "@/assets/images";
 import PaginationBtn from "@/components/common/PaginationBtn";
 import PreviewFile from "@/components/survey/PreviewFile";
 import { toast } from "react-toastify";
-import { useSubmitResponseMutation } from "@/services/survey.service";
+import {
+  useGetPublicSurveyByShortUrlQuery,
+  useSubmitResponseMutation,
+} from "@/services/survey.service";
 import { motion } from "framer-motion";
 import { FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
@@ -18,6 +21,9 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { DialogContent } from "@/components/ui/dialog";
 import { Dialog } from "@/components/ui/dialog";
+import { Spinner } from "@/components/loaders/page-loaders/AnalysisPageLoader";
+import { useQuery } from "@tanstack/react-query";
+import { getSurveySettings } from "@/services/survey";
 
 const ValidateResponse = () => {
   const params = useParams();
@@ -39,6 +45,37 @@ const ValidateResponse = () => {
   const [progress, setProgress] = useState(0);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  const {
+    data: surveySettings,
+    isLoading: isSurveySettingsLoading,
+    isSuccess: isSurveySettingsSuccess,
+    isError: isSurveySettingsError,
+    refetch: refetchSettings,
+    error: surveyError,
+  } = useQuery<{
+    regional_availability: {
+      status: boolean;
+      regions: string[];
+    };
+    survey_id: {
+      _id: string;
+      topic: string;
+    };
+    _id: string;
+    language: string;
+    collect_email_addresses: boolean;
+    collect_name_of_respondents: boolean;
+    allow_survey_edit: boolean;
+    receive_email_notification: boolean;
+    response_threshold: number;
+    voice_response_duration_in_seconds: number;
+  }>({
+    queryKey: ["survey-settings", params.id],
+    queryFn: () => getSurveySettings({ surveyId: params?.id as string }),
+  });
+
+  // console.log(surveySettings);
 
   useEffect(() => {
     if (OCRresponses) {
@@ -425,10 +462,11 @@ const ValidateResponse = () => {
         case "slider":
           return {
             ...baseAnswer,
-            scale_value:
+            scale_value: parseInt(
               typeof answer === "string" || typeof answer === "number"
                 ? answer
-                : answer.scale_value || "",
+                : answer.scale_value || ""
+            ),
           };
 
         case "drop_down":
@@ -502,6 +540,7 @@ const ValidateResponse = () => {
       respondent_name: respondent_name || "Not provided",
       respondent_email: respondent_email || userEmail,
       answers: formattedAnswers,
+      uploaded_files: OCRresponses.uploaded_files || [],
     };
 
     try {
@@ -525,6 +564,56 @@ const ValidateResponse = () => {
   const handleBack = () => {
     router.push(`/surveys/${params.id}/survey-response-upload`);
   };
+
+  // Early return for loading
+  if (isSurveySettingsLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        {/* <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mb-6" /> */}
+        <Spinner />
+        <h2 className="text-xl font-semibold text-gray-700 mt-4">
+          Loading survey data...
+        </h2>
+      </div>
+    );
+  }
+
+  // Early return for error
+  if (isSurveySettingsError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
+          <svg
+            className="w-16 h-16 text-red-500 mb-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
+            />
+          </svg>
+          <h2 className="text-2xl font-bold text-red-600 mb-2">
+            Something went wrong
+          </h2>
+          <p className="text-gray-600 mb-4 text-center">
+            {(surveyError as any)?.data?.message ??
+              "We couldn't load the survey. It may have been deleted, moved, or the link is incorrect."}
+          </p>
+          <button
+            className="mt-2 px-6 py-2 bg-purple-600 text-white flex justify-center gap-2 items-center rounded-lg shadow hover:bg-purple-700 transition"
+            onClick={() => router.back()}
+          >
+            <IoArrowBack />
+            Go back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -588,39 +677,48 @@ const ValidateResponse = () => {
           </motion.div>
 
           {/* Respondent Info */}
-          <motion.div
-            variants={questionVariants}
-            className="bg-white rounded-lg shadow-sm p-6 mb-8"
-          >
-            <h3 className="text-lg font-medium mb-4">Respondent Information</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter respondent's name"
-                  className="w-full p-2 border-0 border-b border-gray-300 focus:border-b-2 focus:border-purple-500 focus:outline-none transition-all"
-                  value={ocrRes?.respondent_name || respondent_name}
-                  onChange={(e) => setRespondent_name(e.target.value)}
-                />
-              </div>
+          {(surveySettings?.collect_name_of_respondents ||
+            surveySettings?.collect_email_addresses) && (
+            <motion.div
+              variants={questionVariants}
+              className="bg-white rounded-lg shadow-sm p-6 mb-8"
+            >
+              <h3 className="text-lg font-medium mb-4">
+                Respondent Information
+              </h3>
+              <div className="space-y-4">
+                {surveySettings?.collect_name_of_respondents && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter respondent's name"
+                      className="w-full p-2 border-0 border-b border-gray-300 focus:border-b-2 focus:border-purple-500 focus:outline-none transition-all"
+                      value={ocrRes?.respondent_name || respondent_name}
+                      onChange={(e) => setRespondent_name(e.target.value)}
+                    />
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  placeholder="Enter respondent's email"
-                  className="w-full p-2 border-0 border-b border-gray-300 focus:border-b-2 focus:border-purple-500 focus:outline-none transition-all"
-                  value={ocrRes?.respondent_email || respondent_email}
-                  onChange={(e) => setRespondent_email(e.target.value)}
-                />
+                {surveySettings?.collect_email_addresses && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="Enter respondent's email"
+                      className="w-full p-2 border-0 border-b border-gray-300 focus:border-b-2 focus:border-purple-500 focus:outline-none transition-all"
+                      value={ocrRes?.respondent_email || respondent_email}
+                      onChange={(e) => setRespondent_email(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
 
           {/* {console.log(ocrRes?.extracted_answers)} */}
 

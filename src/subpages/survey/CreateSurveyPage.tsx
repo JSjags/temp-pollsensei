@@ -150,9 +150,22 @@ const CreateSurveyPage: React.FC = () => {
 
   const handleGenerateTopics = async () => {
     try {
-      await generateTopics({
+      const response = await generateTopics({
         user_query: surveyPrompt,
       });
+
+      // Check if topics are empty and show a user-friendly warning
+      if (
+        response &&
+        response.data &&
+        Array.isArray((response.data as any)?.data?.topics) &&
+        (response.data as any)?.data.topics.length === 0
+      ) {
+        return toast.warning(
+          "We're currently unable to generate topics for your survey. Please try again later."
+        );
+      }
+
       updateURLParams({ isTopicModal: "true", promptForm: "false" });
     } catch (e) {
       toast.error("Failed to create survey");
@@ -191,7 +204,7 @@ const CreateSurveyPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isTopicSuccess) {
+    if (isTopicSuccess && (topics as any)?.data.topics.length > 0) {
       toast.success("Survey topic created successfully");
       updateURLParams({
         isTopicModal: "true",
@@ -205,7 +218,8 @@ const CreateSurveyPage: React.FC = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      const refactoredQuestions = (data as any)?.data?.response?.map(
+      // Only add section if it hasn't already been added (avoid duplicates)
+      const newQuestions = (data as any)?.data?.response?.map(
         (question: any) => {
           const optionType = question["Option type"]?.trim();
           if (optionType === "matrix_multiple_choice") {
@@ -269,18 +283,33 @@ const CreateSurveyPage: React.FC = () => {
         }
       );
 
-      dispatch(addSection({ questions: refactoredQuestions }));
-      dispatch(updateConversationId((data as any)?.data?.conversation_id));
-      dispatch(
-        updateDescription((data as any)?.data?.description || surveyPrompt)
-      );
-      toast.success("Survey created successfully");
-      updateURLParams({
-        generated: "true",
-        promptForm: "false",
-      });
+      // Check if the current survey already has these questions to avoid duplicates
+      const existingQuestions =
+        (survey.sections && survey.sections[0]?.questions) || [];
+      const isDuplicate =
+        existingQuestions.length === newQuestions.length &&
+        existingQuestions.every((q: any, idx: number) => {
+          // Compare by question text and type for uniqueness
+          return (
+            q.question === newQuestions[idx].question &&
+            q.question_type === newQuestions[idx].question_type
+          );
+        });
+
+      if (!isDuplicate) {
+        dispatch(addSection({ questions: newQuestions }));
+        dispatch(updateConversationId((data as any)?.data?.conversation_id));
+        dispatch(
+          updateDescription((data as any)?.data?.description || surveyPrompt)
+        );
+        toast.success("Survey created successfully");
+        updateURLParams({
+          generated: "true",
+          promptForm: "false",
+        });
+      }
     }
-  }, [data, isSuccess, surveyPrompt, dispatch]);
+  }, [data, isSuccess, surveyPrompt, dispatch, survey.sections]);
 
   useEffect(() => {
     dispatch(resetQuestion());

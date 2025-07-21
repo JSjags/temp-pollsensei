@@ -14,7 +14,7 @@ import { debounce } from "lodash";
 interface PromptFormProps {
   surveyPrompt: string;
   handlePromptChange: (value: string) => void;
-  handleGenerateTopics: () => Promise<void>;
+  handleGenerateTopics: () => Promise<void> | any;
   manualTopic: string;
   setManualTopic: (value: string) => void;
 }
@@ -113,7 +113,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
       >
         <motion.div variants={itemVariants} className="text-center">
           <h1 className="text-3xl md:text-4xl mt-10 md:mt-10 font-bold bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent">
-            Write a prompt. we&apos;ll do the rest for you
+            Write a prompt. We'll do the rest for you
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mt-4">
             Tell us the survey you want to make? We will create it for you

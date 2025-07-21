@@ -38,6 +38,7 @@ interface LeaderboardEntry {
   referrerName: string;
   totalReferrals: number;
   totalSurveysByReferrals: number;
+  totalResponsesToReferralSurveys: number;
 }
 
 interface LeaderboardResponse {
@@ -130,6 +131,9 @@ const LeaderboardPage = () => {
                       Total Referrals
                     </TableHead>
                     <TableHead className="text-right">Total Surveys</TableHead>
+                    <TableHead className="text-right">
+                      Total Responses
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -140,6 +144,9 @@ const LeaderboardPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
@@ -196,22 +203,48 @@ const LeaderboardPage = () => {
                       Total number of surveys created by referred users
                     </p>
                   </div>
-                  <div className="flex items-start sm:items-center gap-2">
-                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
-                    <p className="text-sm">
-                      <span className="font-semibold text-[#5B03B2]">
-                        Top 3 Qualification:
-                      </span>{" "}
-                      Minimum of 150 referrals required to win Top 3 positions
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB] flex-shrink-0" />
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        <span className="font-semibold text-[#5B03B2]">
+                          Top 3 Qualification Requirements:
+                        </span>
+                      </p>
+                      <div className="space-y-1 text-sm">
+                        <p>
+                          🥇 1st Place: 500 referrals • 200 surveys • 150
+                          responses
+                        </p>
+                        <p>
+                          🥈 2nd Place: 300 referrals • 120 surveys • 100
+                          responses
+                        </p>
+                        <p>
+                          🥉 3rd Place: 200 referrals • 80 surveys • 60
+                          responses
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-start sm:items-center gap-2">
                     <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
                     <p className="text-sm">
                       <span className="font-semibold text-[#5B03B2]">
+                        Total Responses:
+                      </span>{" "}
+                      Total number of responses to surveys created by referred
+                      users
+                    </p>
+                  </div>
+                  <div className="flex items-start sm:items-center gap-2">
+                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                    <p className="text-sm">
+                      <span className="font-semibold text-[#5B03B2]">
                         Points Calculation:
                       </span>{" "}
-                      Points = Total Referrals + (2 × Total Surveys)
+                      Points = Total Referrals + (2 × Total Surveys) + (2 ×
+                      Total Responses)
                     </p>
                   </div>
                 </div>
@@ -336,6 +369,7 @@ const LeaderboardPage = () => {
                   <TableHead>Username</TableHead>
                   <TableHead className="text-right">Total Referrals</TableHead>
                   <TableHead className="text-right">Total Surveys</TableHead>
+                  <TableHead className="text-right">Total Responses</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -362,6 +396,9 @@ const LeaderboardPage = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       {row.totalSurveysByReferrals}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {row.totalResponsesToReferralSurveys}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -406,15 +443,23 @@ const LeaderboardPage = () => {
           </div>
         </Card>
 
-        <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
-          <AlertCircle className="h-4 w-4" />
-          <p className="text-sm italic">
-            Fake and duplicate accounts are being purged from our database on an
-            ongoing basis
-          </p>
+        <div className="flex flex-col sm:flex-row items-start justify-start gap-3 text-muted-foreground py-4 px-3 bg-amber-50 rounded-lg border border-amber-200 mt-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-amber-800">
+                Important Notice:
+              </p>
+              <p className="text-sm">
+                Fake and duplicate accounts are being purged from our database
+                on an ongoing basis. Fake/bot-generated referral emails will
+                lead to the referrer's account being banned.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        {/* <div className="grid sm:grid-cols-2 gap-4">
           <Card className="border-[#5B03B2]/20">
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl sm:text-2xl text-[#5B03B2]">
@@ -444,22 +489,47 @@ const LeaderboardPage = () => {
                     Total number of surveys created by referred users
                   </p>
                 </div>
-                <div className="flex items-start sm:items-center gap-2">
-                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
-                  <p className="text-sm">
-                    <span className="font-semibold text-[#5B03B2]">
-                      Top 3 Qualification:
-                    </span>{" "}
-                    Minimum of 150 referrals required to win Top 3 positions
-                  </p>
+                <div className="flex items-start gap-2">
+                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB] flex-shrink-0" />
+                  <div className="space-y-2">
+                    <p className="text-sm">
+                      <span className="font-semibold text-[#5B03B2]">
+                        Top 3 Qualification Requirements:
+                      </span>
+                    </p>
+                    <div className="space-y-1 text-sm">
+                      <p>
+                        🥇 1st Place: 500 referrals • 200 surveys • 150
+                        responses
+                      </p>
+                      <p>
+                        🥈 2nd Place: 300 referrals • 120 surveys • 100
+                        responses
+                      </p>
+                      <p>
+                        🥉 3rd Place: 200 referrals • 80 surveys • 60 responses
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
                   <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
                   <p className="text-sm">
                     <span className="font-semibold text-[#5B03B2]">
+                      Total Responses:
+                    </span>{" "}
+                    Total number of responses to surveys created by referred
+                    users
+                  </p>
+                </div>
+                <div className="flex items-start sm:items-center gap-2">
+                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                  <p className="text-sm">
+                    <span className="font-semibold text-[#5B03B2]">
                       Points Calculation:
                     </span>{" "}
-                    Points = Total Referrals + (2 × Total Surveys)
+                    Points = Total Referrals + (2 × Total Surveys) + (2 × Total
+                    Responses)
                   </p>
                 </div>
               </div>
@@ -483,7 +553,7 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       1st Position:
                     </span>{" "}
-                    ₦250,000
+                    ₦500,000
                   </p>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
@@ -492,7 +562,7 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       2nd Position:
                     </span>{" "}
-                    ₦150,000
+                    ₦300,000
                   </p>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
@@ -501,7 +571,7 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       3rd Position:
                     </span>{" "}
-                    ₦50,000
+                    ₦200,000
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground mt-4 italic">
@@ -510,7 +580,7 @@ const LeaderboardPage = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -128,7 +128,7 @@ const LandingPage: React.FC = () => {
         <BenefitsSection benefitsRef={benefitsRef} />
 
         {/* Features Section */}
-        <FeaturesSection />
+        <FeaturesSection featuresRef={featuresRef} />
 
         {/* FAQs Section */}
         <FAQSection faqs={faqs} />

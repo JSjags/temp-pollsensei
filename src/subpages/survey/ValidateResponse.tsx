@@ -187,6 +187,12 @@ const ValidateResponse = () => {
       respondent_country: respondent_country,
       respondent_email: respondent_email,
       answers: answers,
+      ...(Boolean((ocrRes as any)?.uploaded_files) &&
+      Boolean((ocrRes as any)?.uploaded_files.length)
+        ? {
+            uploaded_files: (ocrRes as any)?.uploaded_files,
+          }
+        : {}),
     };
     // console.log(responsePayload);
     try {

@@ -26,20 +26,7 @@ import PaymentPage from "@/subpages/payment/StripeRedirect";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { User } from "@/redux/slices/user.slice";
-
-interface PricingTier {
-  name: string;
-  price: string;
-  period: string;
-  bgColor: string;
-  textColor: string;
-  features: string[];
-  cta: {
-    text: "Current plan" | "Downgrade plan" | "Upgrade plan";
-    variant: "default" | "outline" | "secondary";
-  };
-  popular?: boolean;
-}
+import { toast } from "react-toastify";
 
 export interface TPricing {
   _id: string;
@@ -74,6 +61,17 @@ export interface TPricing {
   __v: number;
 }
 
+export interface TCurrentPlan {
+  name: string;
+  description: string;
+  currency: string;
+  monthly_cost: number;
+  yearly_cost: number;
+  next_billing_date: string;
+  next_billing_amount: number;
+  auto_renewal: boolean;
+}
+
 export const useGeoLocation = () => {
   return useQuery({
     queryKey: ["geolocation"],
@@ -89,90 +87,28 @@ export const useGeoLocation = () => {
   });
 };
 
-const tiers: PricingTier[] = [
-  {
-    name: "Basic",
-    price: "FREE",
-    period: "",
-    bgColor: "bg-[#ffffff]",
-    textColor: "",
-    features: [
-      "Unlimited access",
-      "1 Account",
-      "200 monthly responses",
-      "AI survey/Poll generation",
-      "Data Export (pdf)",
-    ],
-    cta: {
-      text: "Downgrade plan",
-      variant: "outline",
-    },
-  },
-  {
-    name: "Pro",
-    price: "£20",
-    period: "per month",
-    bgColor: "bg-[#5B03B2]",
-    textColor: "text-white",
-    features: [
-      "Everything in Basic",
-      "Add Contributors (Up to 4)",
-      "Unlimited Polls and Surveys",
-      "10,000 monthly responses",
-      "Account Customization",
-      "Offline data collection and analytics",
-      "AI survey assistant",
-      "Automatic AI survey reporting",
-      "Speech to text feature",
-      "Data Export (xls, pdf, ppt)",
-      "Priority Email support",
-    ],
-    cta: {
-      text: "Upgrade plan",
-      variant: "secondary",
-    },
-    popular: true,
-  },
-  {
-    name: "Business",
-    price: "£99.99",
-    period: "per month",
-    bgColor: "bg-[#ffffff]",
-    textColor: "",
-    features: [
-      "Everything in Pro",
-      "Multiple accounts",
-      "Unlimited contributors",
-      "Unlimited responses",
-      "A/B testing & randomization",
-      "Skip Logic",
-      "Multilingual Survey",
-      "Advanced Data Export (xls, pdf, ppt, Power BI)",
-      "Dedicated customer success manager",
-    ],
-    cta: {
-      text: "Upgrade plan",
-      variant: "default",
-    },
-  },
-];
-
 const PaymentGatewayButton = ({
   name,
   logo,
   planId,
   organization_id,
   onClick,
+  selected,
 }: {
   name: string;
   logo: string;
   planId?: string;
   organization_id?: string;
   onClick: () => void;
+  selected?: boolean;
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center justify-center w-full p-4 mb-4 border rounded-lg hover:bg-gray-50 transition-colors gap-4"
+    className={cn(
+      "flex items-center justify-center w-full p-4 mb-4 border rounded-lg transition-colors gap-4",
+      selected ? "border-2 border-purple-600 bg-purple-50" : "hover:bg-gray-50"
+    )}
+    type="button"
   >
     <Image
       src={logo}
@@ -181,7 +117,10 @@ const PaymentGatewayButton = ({
       height={40}
       className="object-contain h-10 w-fit"
     />
-    <p>{name}</p>
+    <p className={selected ? "font-bold text-purple-700" : undefined}>{name}</p>
+    {/* {selected && (
+      <span className="ml-2 text-purple-600 font-semibold">Selected</span>
+    )} */}
   </button>
 );
 
@@ -190,6 +129,8 @@ export function PricingCards() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState<string>("");
+  const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
   const ref = useRef(null);
 
   const userData = useQuery<{ data: User }>({
@@ -215,76 +156,53 @@ export function PricingCards() {
     setDialogOpen(true);
   };
 
-  // console.log("Helele");
-  // console.log(userData.data?.data);
+  // Helper to determine plan order for upgrade/downgrade logic
+  const getPlanOrder = (plans: TPricing[]) => {
+    // You can sort by price or use the order from the API
+    return plans.map((plan) => plan._id);
+  };
 
-  const renderButton = (tier: TPricing, index: number) => {
-    if (index === 0) {
+  const renderButton = (tier: TPricing, index: number, plans: TPricing[]) => {
+    const currentPlanId = userData.data?.data?.plan?._id;
+    const planOrder = getPlanOrder(plans);
+    const currentIndex = planOrder.indexOf(currentPlanId!);
+    if (tier._id === currentPlanId) {
+      return (
+        <Button
+          className={cn(
+            "w-full text-xs sm:text-sm bg-transparent border-0 hover:bg-transparent",
+            index === 1 && "text-white"
+          )}
+          variant="secondary"
+          disabled
+        >
+          Current plan
+        </Button>
+      );
+    } else if (currentIndex < index) {
+      // Upgrade
+      return (
+        <Button
+          onClick={() => handleUpgrade(index)}
+          className="w-full text-xs sm:text-sm border-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] hover:from-[#5B03B2]/90 hover:to-[#9D50BB]/90 text-white"
+          variant="secondary"
+        >
+          Upgrade plan
+        </Button>
+      );
+    } else if (currentIndex > index) {
+      // Downgrade
       return null;
+      // (
+      //   <Button
+      //     onClick={() => handleUpgrade(index)}
+      //     className="w-full text-xs sm:text-sm border-0"
+      //     variant="outline"
+      //   >
+      //     Downgrade plan
+      //   </Button>
+      // );
     }
-    if (index === 1) {
-      if (tier._id === userData.data?.data?.plan._id) {
-        return (
-          <Button
-            className={cn(
-              "w-full text-xs sm:text-sm bg-transparent border-0 hover:bg-transparent",
-              index === 1 ? "text-white" : ""
-            )}
-            variant={"secondary"}
-            disabled
-          >
-            Current plan
-          </Button>
-        );
-      } else if (tiersData.data?.[0]._id === userData.data?.data?.plan._id) {
-        return (
-          <Button
-            onClick={() => handleUpgrade(index)}
-            className={cn(
-              "w-full text-xs sm:text-sm border-0",
-              index === 1
-                ? "bg-gradient-to-r from-[#5B03B2] to-black hover:from-[#5B03B2]/90 hover:to-black/90 text-white"
-                : "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] hover:from-[#5B03B2]/90 hover:to-[#9D50BB]/90"
-            )}
-            variant={"secondary"}
-          >
-            Upgrade plan
-          </Button>
-        );
-      } else {
-        return null;
-      }
-    }
-    if (index === 2) {
-      if (tier._id === userData.data?.data?.plan._id) {
-        return (
-          <Button
-            className={cn(
-              "w-full text-xs sm:text-sm bg-transparent border-0 hover:bg-transparent text-black border-black"
-            )}
-            variant={"default"}
-            disabled
-          >
-            Current plan
-          </Button>
-        );
-      } else if (tiersData.data?.[0]._id === userData.data?.data?.plan._id) {
-        return (
-          <Button
-            onClick={() => handleUpgrade(index)}
-            className={cn(
-              "w-full text-xs sm:text-sm border-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] hover:from-[#5B03B2]/90 hover:to-[#9D50BB]/90"
-            )}
-            variant={"default"}
-          >
-            Upgrade plan
-          </Button>
-        );
-      } else {
-        return null;
-      }
-    }
-
     return null;
   };
 
@@ -297,6 +215,7 @@ export function PricingCards() {
       redirect_url?: string;
       plan_type: string;
       country: string;
+      coupon_code?: string;
     }) => initPaymentQuery(payload),
     onSuccess: (data) => {
       if (data?.authorization_url) {
@@ -306,22 +225,42 @@ export function PricingCards() {
         router.push(data?.data?.link);
       }
       if (data?.client_secret) {
-        router.push(
-          `/settings/subscription/checkout?cs=${data.client_secret}&p_id=${
-            tiersData.data![selectedTier!]._id
-          }`
-        );
+        if (
+          typeof selectedTier === "number" &&
+          tiersData.data &&
+          tiersData.data[selectedTier]
+        ) {
+          const planId = tiersData.data?.[selectedTier]?._id ?? "";
+          router.push(
+            `/settings/subscription/checkout?cs=${data.client_secret}&p_id=${planId}`
+          );
+        }
       }
+      setDialogOpen(false);
     },
     onError: (error) => {
-      console.error(error);
+      console.log(error);
+      // INSERT_YOUR_CODE
+      // Show a toast with the error message if available
+      if ((error as any)?.response?.data?.message) {
+        toast.error((error as any).response.data.message);
+      } else if ((error as any)?.message) {
+        toast.error((error as any).message);
+      } else {
+        toast.error("An error occurred during payment. Please try again.");
+      }
+      // Clear the form fields after an error
+      setCouponCode("");
+      setSelectedGateway(null);
+      setSelectedTier(null);
+      setDialogOpen(false);
     },
   });
 
   return (
     <>
       {tiersData.isLoading && (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3].map((index) => (
             <motion.div
               key={index}
@@ -360,21 +299,22 @@ export function PricingCards() {
 
       {tiersData.isSuccess && (
         <>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {tiersData.data.map((tier, index) => (
               <motion.div
-                key={tier.name}
+                key={tier._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 + 0.2 }}
                 className={cn(
                   "relative rounded-lg sm:rounded-xl bg-card p-4 sm:p-6 overflow-hidden border flex flex-col flex-1",
-                  index === 1 ? "border-[#EDEDED]" : "border-[#9D50BB21]",
-                  tiers[index].bgColor && tiers[index].bgColor,
-                  tiers[index].textColor && tiers[index].textColor
+                  tier.name === "Pro Plan"
+                    ? "border-[#EDEDED] bg-[#5B03B2] text-white"
+                    : "border-[#9D50BB21] bg-[#ffffff]"
                 )}
               >
-                {tiers[index].popular && (
+                {/* Highlight Pro Plan as Most Popular */}
+                {tier.name === "Pro Plan" && (
                   <div className="absolute top-0 right-0 rounded-bl-xl bg-gradient-to-r from-[#F7AC0A] to-[#BE6C07] px-3 py-2 text-xs sm:text-sm font-medium text-white">
                     Most Popular
                   </div>
@@ -388,23 +328,29 @@ export function PricingCards() {
                       <span
                         className={cn(
                           "text-2xl sm:text-3xl font-bold tracking-tight text-purple-600",
-                          tiers[index].textColor && tiers[index].textColor
+                          tier.name === "Pro Plan"
+                            ? "text-white"
+                            : "text-purple-600"
                         )}
                       >
-                        {!locationData?.isNigeria
-                          ? `$${tier.monthly_price_dollar}`
-                          : `₦${tier.monthly_price_naira}`}
+                        {tier.monthly_price_naira === 0 &&
+                        tier.monthly_price_dollar === 0
+                          ? "FREE"
+                          : !locationData?.isNigeria
+                          ? `$${tier.monthly_price_dollar.toLocaleString()}`
+                          : `₦${tier.monthly_price_naira.toLocaleString()}`}
                       </span>
-                      {tiers[index].period && (
-                        <span
-                          className={cn(
-                            "ml-1 text-xs sm:text-sm text-muted-foreground",
-                            tiers[index].textColor && tiers[index].textColor
-                          )}
-                        >
-                          {tiers[index].period}
-                        </span>
-                      )}
+                      <span
+                        className={cn(
+                          "ml-1 text-xs sm:text-sm text-muted-foreground",
+                          tier.name === "Pro Plan" ? "text-white/80" : ""
+                        )}
+                      >
+                        {tier.monthly_price_naira === 0 &&
+                        tier.monthly_price_dollar === 0
+                          ? ""
+                          : "per month"}
+                      </span>
                     </div>
                   </div>
                   <div className="my-6 h-[1px] bg-gray-500/30" />
@@ -412,7 +358,12 @@ export function PricingCards() {
                     <h4 className="text-xs sm:text-sm font-medium">
                       What you will get
                     </h4>
-                    <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
+                    <ul
+                      className={cn(
+                        "space-y-2 text-xs sm:text-sm text-muted-foreground",
+                        tier.name === "Pro Plan" ? "text-white/80" : ""
+                      )}
+                    >
                       {tier.features.map((feature) => (
                         <li
                           key={feature._id}
@@ -421,15 +372,12 @@ export function PricingCards() {
                           <CheckCircle2Icon
                             className={cn(
                               "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-purple-600 shrink-0",
-                              tiers[index].textColor && tiers[index].textColor
+                              tier.name === "Pro Plan"
+                                ? "text-white"
+                                : "text-purple-600"
                             )}
                           />
-                          <span
-                            className={cn(
-                              "text-left",
-                              tiers[index].textColor && tiers[index].textColor
-                            )}
-                          >
+                          <span className="text-left">
                             {feature.feature_name}
                           </span>
                         </li>
@@ -438,75 +386,98 @@ export function PricingCards() {
                   </div>
                   <div className="py-3"></div>
                 </div>
-                {renderButton(tiersData.data[index], index)}
+                {renderButton(tier, index, tiersData.data)}
               </motion.div>
             ))}
           </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent
+              className="sm:max-w-md z-[100000]"
+              overlayClassName="z-[100000] backdrop-blur-md"
+            >
               <DialogHeader>
                 <DialogTitle className="text-center mb-4">
                   Choose Payment Method
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="coupon-code"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Coupon Code (optional)
+                  </label>
+                  <input
+                    id="coupon-code"
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Enter coupon code"
+                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
                 {!locationLoading && !locationError && (
                   <>
-                    {!locationData?.isNigeria && (
-                      <PaymentGatewayButton
-                        name="Stripe"
-                        logo="/assets/payment/stripe.png"
-                        organization_id=""
-                        onClick={() => {
-                          paymentMutation.mutate({
-                            gateway: "stripe",
-                            plan_id: tiersData.data[selectedTier!]._id,
-                            organization_id:
-                              userData.data?.data?.current_organization!,
-                            plan_type: "monthly",
-                            country: locationData?.country || "",
-                          });
-                          setDialogOpen(false);
-                        }}
-                      />
-                    )}
-                    {locationData?.isNigeria && (
-                      <>
+                    <div className="text-sm font-semibold mb-2">
+                      Select Payment Method
+                    </div>
+                    <div className="space-y-2">
+                      {!locationData?.isNigeria && (
                         <PaymentGatewayButton
-                          name="Flutterwave"
-                          logo="/assets/payment/flutterwave.jpeg"
-                          onClick={() => {
-                            paymentMutation.mutate({
-                              gateway: "flutterwave",
-                              plan_id: tiersData.data[selectedTier!]._id,
-                              organization_id:
-                                userData.data?.data?.current_organization!,
-                              redirect_url: `${window.location.origin}/settings/subscription/success`,
-                              plan_type: "monthly",
-                              country: "Nigeria",
-                            });
-                            setDialogOpen(false);
-                          }}
+                          name="Stripe"
+                          logo="/assets/payment/stripe.png"
+                          organization_id=""
+                          onClick={() => setSelectedGateway("stripe")}
+                          selected={selectedGateway === "stripe"}
                         />
+                      )}
+                      {locationData?.isNigeria && (
                         <PaymentGatewayButton
                           name="Paystack"
                           logo="/assets/payment/paystack.svg"
-                          onClick={() => {
-                            paymentMutation.mutate({
-                              gateway: "paystack",
-                              plan_id: tiersData.data[selectedTier!]._id,
-                              organization_id:
-                                userData.data?.data?.current_organization!,
-                              redirect_url: `${window.location.origin}/settings/subscription/success`,
-                              plan_type: "monthly",
-                              country: "Nigeria",
-                            });
-                            setDialogOpen(false);
-                          }}
+                          onClick={() => setSelectedGateway("paystack")}
+                          selected={selectedGateway === "paystack"}
                         />
-                      </>
-                    )}
+                      )}
+                    </div>
+                    <Button
+                      className="w-full mt-4 auth-btn"
+                      disabled={
+                        !selectedGateway ||
+                        selectedTier === null ||
+                        paymentMutation.isPending
+                      }
+                      onClick={() => {
+                        if (
+                          typeof selectedTier === "number" &&
+                          tiersData.data &&
+                          tiersData.data[selectedTier] &&
+                          selectedGateway
+                        ) {
+                          const payload: any = {
+                            gateway: selectedGateway,
+                            plan_id: tiersData.data[selectedTier]._id,
+                            organization_id:
+                              userData.data?.data?.current_organization || "",
+                            plan_type: "monthly",
+                            country: locationData?.isNigeria
+                              ? "Nigeria"
+                              : locationData?.country || "",
+                          };
+                          if (selectedGateway === "paystack") {
+                            payload.redirect_url = `${window.location.origin}/settings/subscription/success`;
+                          }
+                          if (couponCode) {
+                            payload.coupon_code = couponCode;
+                          }
+                          paymentMutation.mutate(payload);
+                        }
+                      }}
+                    >
+                      {paymentMutation.isPending ? "Processing..." : "Proceed"}
+                    </Button>
                   </>
                 )}
               </div>

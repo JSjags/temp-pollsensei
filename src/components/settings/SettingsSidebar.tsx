@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 import { FaRegBell, FaRegUserCircle } from "react-icons/fa";
-import { TbShieldHalf, TbStack } from "react-icons/tb";
+import { TbChartBar, TbShieldHalf, TbStack } from "react-icons/tb";
 // import { LuCreditCard } from "react-icons/lu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,6 +9,7 @@ import { FaRegEdit } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/router";
+import { LuCreditCard } from "react-icons/lu";
 
 interface MenuItem {
   label: string;
@@ -23,14 +24,19 @@ const supportMenu: MenuItem[] = [
     icons: <FaRegUserCircle />,
   },
   {
+    label: "Notifications",
+    path: "/settings/notifications",
+    icons: <FaRegBell />,
+  },
+  {
     label: "Account Security",
     path: "/settings/account-security",
     icons: <TbShieldHalf />,
   },
   {
-    label: "Notifications",
-    path: "/settings/notifications",
-    icons: <FaRegBell />,
+    label: "Referral Reward",
+    path: "/settings/referral-reward",
+    icons: <LuCreditCard />,
   },
   // {
   //   label: "Payment",
@@ -41,6 +47,11 @@ const supportMenu: MenuItem[] = [
     label: "Subscription",
     path: "/settings/subscription",
     icons: <TbStack />,
+  },
+  {
+    label: "Resource Monitor",
+    path: "/settings/resource-monitor",
+    icons: <TbChartBar />,
   },
 ];
 
@@ -78,7 +89,7 @@ const SettingsSidebar = () => {
       <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#F4F4F4] to-transparent pointer-events-none z-10 lg:hidden"></div>
       <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#F4F4F4] to-transparent pointer-events-none z-10 lg:hidden"></div>
       <nav className="flex overflow-x-auto lg:block lg:w-[13rem] lg:overflow-x-visible hide-scrollbar px-4">
-        <div className="flex lg:flex-col w-max lg:w-full">
+        <div className="flex lg:flex-col w-max min-[767px]:w-[calc(100vw-18rem)] lg:w-full">
           {supportMenu.map((menu) => (
             <div
               key={menu.label}

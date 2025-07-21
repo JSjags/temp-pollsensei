@@ -18,6 +18,8 @@ import settings from "@/assets/images/settings.svg";
 import settingsActive from "@/assets/images/settingsActive.svg";
 import help from "@/assets/images/help.svg";
 import helpActive from "@/assets/images/helpActive.svg";
+import { useUserProfileQuery } from "@/services/user.service";
+import { UserData } from "@/subpages/settings/ProfilePage";
 
 export default function SurveyLayout({
   children,
@@ -114,6 +116,37 @@ export default function SurveyLayout({
     }
   }, [path]);
 
+  const [isClient, setIsClient] = useState(false);
+  const [userData, setUserData] = useState<UserData>({
+    name: "",
+    lastName: "",
+    email: "",
+    username: "",
+    bio: "",
+    file: "",
+    referral_code: "",
+    referral_link: "",
+    plan: null,
+  });
+
+  const {
+    data: userdata,
+    refetch,
+    isLoading: userLoading,
+  } = useUserProfileQuery({
+    skip: !isClient,
+  });
+
+  useEffect(() => {
+    if (userdata) {
+      setUserData(userdata.data);
+    }
+  }, [userdata]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <div className="w-full">
       <nav className="bg-white py-4 md:w-full w-screen relative border-b border-border">
@@ -129,38 +162,44 @@ export default function SurveyLayout({
                   width: indicatorStyle.width,
                 }}
               />
-              {navigationItems.map((item, index) => (
-                <li key={item.name} className="flex-shrink-1">
-                  <Link href={item.href}>
-                    <div
-                      ref={(el: HTMLDivElement | null) => {
-                        tabRefs.current[index] = el;
-                      }}
-                      onClick={() =>
-                        handleSetActiveTab(item.name.toLowerCase(), index)
-                      }
-                      className={`flex items-center justify-center px-4 md:px-2 lg:px-4 py-2 text-xs sm:text-sm ${
-                        item.href.toLowerCase() === activeTab ||
-                        (item.href.toLowerCase() === "/surveys" &&
-                          activeTab === "surveys") ||
-                        (activeTab !== "surveys" &&
-                          item.href.toLowerCase().includes(activeTab))
-                          ? "text-[#9D50BB]"
-                          : "text-[#4F5B67]"
-                      }`}
-                    >
-                      <Image
-                        src={item.icon}
-                        alt={`${item.name} Icon`}
-                        className="mr-2 size-4 sm:size-5 md:size-4 lg:size-5 flex-shrink-0"
-                      />
-                      <span className="text-center md:text-xs lg:text-sm lg:inline">
-                        {item.name}
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              ))}
+              {navigationItems
+                .filter(
+                  (item) =>
+                    item.name !== "Team Members" ||
+                    userData.plan?.name !== "Basic Plan"
+                )
+                .map((item, index) => (
+                  <li key={item.name} className="flex-shrink-1">
+                    <Link href={item.href}>
+                      <div
+                        ref={(el: HTMLDivElement | null) => {
+                          tabRefs.current[index] = el;
+                        }}
+                        onClick={() =>
+                          handleSetActiveTab(item.name.toLowerCase(), index)
+                        }
+                        className={`flex items-center justify-center px-4 md:px-2 lg:px-4 py-2 text-xs sm:text-sm ${
+                          item.href.toLowerCase() === activeTab ||
+                          (item.href.toLowerCase() === "/surveys" &&
+                            activeTab === "surveys") ||
+                          (activeTab !== "surveys" &&
+                            item.href.toLowerCase().includes(activeTab))
+                            ? "text-[#9D50BB]"
+                            : "text-[#4F5B67]"
+                        }`}
+                      >
+                        <Image
+                          src={item.icon}
+                          alt={`${item.name} Icon`}
+                          className="mr-2 size-4 sm:size-5 md:size-4 lg:size-5 flex-shrink-0"
+                        />
+                        <span className="text-center md:text-xs lg:text-sm lg:inline">
+                          {item.name}
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
         </div>

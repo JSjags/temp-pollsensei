@@ -23,13 +23,14 @@ import MediaQuestion from "@/components/survey/MediaQuestion";
 import { cn } from "@/lib/utils";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
 import SurveyHeader from "@/components/survey/SurveyHeader";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
 
 const SurveyQuestions = () => {
   const params = useParams();
   const [currentSection, setCurrentSection] = useState(0);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
   const isSettings = useSelector(
     (state: RootState) => state.survey_settings.isSettings
   );
@@ -41,9 +42,12 @@ const SurveyQuestions = () => {
     },
   });
 
-  const navigatePage = (direction: any) => {
+  console.log(data);
+
+  const navigatePage = (directionParam: "next" | "prev") => {
+    setDirection(directionParam);
     setCurrentSection((prevIndex) => {
-      if (direction === "next") {
+      if (directionParam === "next") {
         return prevIndex < data?.data?.sections?.length - 1
           ? prevIndex + 1
           : prevIndex;
@@ -98,6 +102,16 @@ const SurveyQuestions = () => {
   }
 
   // console.log(data?.data?.sections[currentSection]?.questions);
+
+  const getFontClass = (fontName?: string | null) => {
+    if (!fontName || typeof fontName !== "string") return "";
+    try {
+      return `font-${fontName.split(" ").join("-").toLowerCase()}`;
+    } catch (error) {
+      console.error("Error processing font name:", error);
+      return "";
+    }
+  };
 
   return (
     <div
@@ -179,163 +193,177 @@ const SurveyQuestions = () => {
                 </motion.p>
               </motion.div>
             </div>
-            {data?.data &&
-              data?.data?.sections[currentSection]?.questions?.map(
-                (item: any, index: number) => (
-                  <div
-                    key={index}
-                    className="mb-4"
-                    style={{
-                      fontFamily: `${data?.data?.question_text?.name}`,
-                      fontSize: `${data?.data?.question_text?.size}px`,
-                    }}
-                  >
-                    {item.question_type &&
-                    item.question_type === "multiple_choice" ? (
-                      <MultiChoiceQuestion
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        index={index + 1}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "long_text" ? (
-                      <CommentQuestion
-                        key={index}
-                        index={index + 1}
-                        questionType={item.question_type}
-                        question={item.question}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "media" ? (
-                      <MediaQuestion
-                        key={index}
-                        index={index + 1}
-                        questionType={item.question_type}
-                        question={item.question}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "slider" ? (
-                      <SliderQuestion
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        index={index + 1}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "likert_scale" ? (
-                      <LikertScaleQuestion
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        key={index}
-                        index={index + 1}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "star_rating" ? (
-                      <StarRatingQuestion
-                        question={item.question}
-                        index={index + 1}
-                        questionType={item.question_type}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "matrix_multiple_choice" ? (
-                      <MatrixQuestion
-                        key={index}
-                        index={index + 1}
-                        rows={item.rows}
-                        columns={item.columns}
-                        questionType={item.question_type}
-                        question={item.question}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "matrix_checkbox" ? (
-                      <MatrixQuestion
-                        key={index}
-                        index={index + 1}
-                        rows={item.rows}
-                        columns={item.columns}
-                        questionType={item.question_type}
-                        question={item.question}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "short_text" ? (
-                      <ShortTextQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        questionType={item.question_type}
-                        is_required={item.is_required}
-                      />
-                    ) : item.question_type === "boolean" ? (
-                      <BooleanQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                      />
-                    ) : item.question_type === "single_choice" ? (
-                      <SingleChoiceQuestion
-                        index={index + 1}
-                        key={index}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                      />
-                    ) : item.question_type === "number" ? (
-                      <NumberQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        questionType={item.question_type}
-                      />
-                    ) : item.question_type === "checkbox" ? (
-                      <CheckboxQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                      />
-                    ) : item.question_type === "rating_scale" ? (
-                      <RatingScaleQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                      />
-                    ) : item.question_type === "drop_down" ? (
-                      <DropdownQuestion
-                        index={index + 1}
-                        key={index}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                      />
-                    ) : item.question_type === "number" ? (
-                      <NumberQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        questionType={item.question_type}
-                      />
-                    ) : null}
-                  </div>
-                )
-              )}
-
-            {/* {data?.data?.sections?.length > 1 && (
-              <div className="flex justify-end items-center pb-10">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div
+                key={currentSection}
+                initial={{ x: direction === "next" ? 300 : -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: direction === "next" ? -300 : 300, opacity: 0 }}
+                transition={{ type: "tween", duration: 0.5 }}
+                className="pb-20"
+              >
+                {data?.data?.sections[currentSection]?.questions?.map(
+                  (item: any, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        zIndex: index,
+                        fontFamily: `${data?.data?.question_text?.name}`,
+                        fontSize: `${data?.data?.question_text?.size}px`,
+                      }}
+                      className={`!${cn(
+                        getFontClass(data?.data?.question_text?.name)
+                      )}`}
+                    >
+                      {item.question_type &&
+                      item.question_type === "multiple_choice" ? (
+                        <MultiChoiceQuestion
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                          index={index + 1}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "long_text" ? (
+                        <CommentQuestion
+                          key={index}
+                          index={index + 1}
+                          questionType={item.question_type}
+                          question={item.question}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "media" ? (
+                        <MediaQuestion
+                          key={index}
+                          index={index + 1}
+                          questionType={item.question_type}
+                          question={item.question}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "slider" ? (
+                        <SliderQuestion
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                          index={index + 1}
+                          is_required={item.is_required}
+                          max={item.max_value}
+                          min={item.min_value}
+                          item={item}
+                        />
+                      ) : item.question_type === "likert_scale" ? (
+                        <LikertScaleQuestion
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                          key={index}
+                          index={index + 1}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "star_rating" ? (
+                        <StarRatingQuestion
+                          question={item.question}
+                          index={index + 1}
+                          questionType={item.question_type}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "matrix_multiple_choice" ? (
+                        <MatrixQuestion
+                          key={index}
+                          index={index + 1}
+                          rows={item.rows}
+                          columns={item.columns}
+                          questionType={item.question_type}
+                          question={item.question}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "matrix_checkbox" ? (
+                        <MatrixQuestion
+                          key={index}
+                          index={index + 1}
+                          rows={item.rows}
+                          columns={item.columns}
+                          questionType={item.question_type}
+                          question={item.question}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "short_text" ? (
+                        <ShortTextQuestion
+                          key={index}
+                          index={index + 1}
+                          question={item.question}
+                          questionType={item.question_type}
+                          is_required={item.is_required}
+                        />
+                      ) : item.question_type === "boolean" ? (
+                        <BooleanQuestion
+                          key={index}
+                          index={index + 1}
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                        />
+                      ) : item.question_type === "single_choice" ? (
+                        <SingleChoiceQuestion
+                          index={index + 1}
+                          key={index}
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                        />
+                      ) : item.question_type === "number" ? (
+                        <NumberQuestion
+                          key={index}
+                          index={index + 1}
+                          question={item.question}
+                          questionType={item.question_type}
+                        />
+                      ) : item.question_type === "checkbox" ? (
+                        <CheckboxQuestion
+                          key={index}
+                          index={index + 1}
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                        />
+                      ) : item.question_type === "rating_scale" ? (
+                        <RatingScaleQuestion
+                          key={index}
+                          index={index + 1}
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                        />
+                      ) : item.question_type === "drop_down" ? (
+                        <DropdownQuestion
+                          index={index + 1}
+                          key={index}
+                          question={item.question}
+                          options={item.options}
+                          questionType={item.question_type}
+                        />
+                      ) : item.question_type === "number" ? (
+                        <NumberQuestion
+                          key={index}
+                          index={index + 1}
+                          question={item.question}
+                          questionType={item.question_type}
+                        />
+                      ) : null}
+                    </div>
+                  )
+                )}
+              </motion.div>
+            </AnimatePresence>
+            {data?.data?.sections?.length > 1 && (
+              <div className="flex justify-end items-center pb-10 sticky bottom-10">
                 <PaginationBtn
                   currentSection={currentSection}
                   totalSections={data?.data?.sections?.length}
                   onNavigate={navigatePage}
                 />
               </div>
-            )} */}
-
+            )}
             <WatermarkBanner className="mb-10" />
           </div>
         </div>

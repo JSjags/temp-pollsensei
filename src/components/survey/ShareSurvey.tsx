@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -48,6 +47,7 @@ type SocialMediaKey =
 const ShareSurvey: React.FC<ShareSurveyProps> = ({ onClick, _id }) => {
   const [linkCopied, setLinkCopied] = useState(false);
   const [embedCopied, setEmbedCopied] = useState(false);
+  const [whatsappCopied, setWhatsappCopied] = useState(false);
   const pathname = usePathname();
   const params = useParams();
   const {
@@ -206,6 +206,35 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({ onClick, _id }) => {
             </div>
           )}
         </div>
+        <div className="flex flex-col gap-2 mt-4">
+          <p className="text-gray-500 text-sm font-medium">Whatsapp bot link</p>
+          {shareLoading ? (
+            <Skeleton className="h-11 w-full" />
+          ) : (
+            <div className="w-full flex border rounded-lg overflow-hidden hover:border-purple-300 transition-colors">
+              <input
+                type="text"
+                value={share?.data?.whatsapp_link}
+                readOnly
+                className="p-3 border-0 ring-0 w-3/4 bg-gray-50"
+              />
+              <CopyToClipboard
+                text={share?.data?.whatsapp_link}
+                onCopy={() => setWhatsappCopied(true)}
+              >
+                <button
+                  className={`w-1/4 font-medium text-sm transition-colors ${
+                    whatsappCopied
+                      ? "bg-green-50 text-green-600"
+                      : "bg-purple-50 text-purple-600 hover:bg-purple-100"
+                  }`}
+                >
+                  {whatsappCopied ? "Copied!" : "Copy"}
+                </button>
+              </CopyToClipboard>
+            </div>
+          )}
+        </div>
 
         <div>
           {pdfLoading ? (
@@ -215,6 +244,7 @@ const ShareSurvey: React.FC<ShareSurveyProps> = ({ onClick, _id }) => {
               <DownloadPdfButton
                 surveyData={surveyData}
                 isSuccess={isSurveyDataSuccess}
+                surveyId={_id!}
               />
             </>
           )}

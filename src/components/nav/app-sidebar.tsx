@@ -67,7 +67,7 @@ const items = [
   // },
   {
     title: "Settings",
-    url: "/settings/account-security",
+    url: "/settings/notifications",
     icon: "/assets/sidebar/settings.svg",
   },
 ];

@@ -1,15 +1,16 @@
 "use client";
 
 import { ImFilter } from "react-icons/im";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useResetUserPasswordMutation,
   useUpdateDisableStatusMutation,
   useUserRegistryQuery,
+  useRemoveFakeAccountsMutation,
 } from "@/services/superadmin.service";
 import PageControl from "@/components/common/PageControl";
 import DropdownFilter from "@/components/superAdmin/DropdownFilter";
-import { generateInitials } from "@/lib/utils";
+import { cn, generateInitials } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FadeLoader } from "react-spinners";
 import { formatDateOption } from "@/lib/helpers";
@@ -50,6 +51,7 @@ import TableSkeleton from "@/components/common/TableSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
 import { Button } from "@/components/ui/button";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 interface SubmitData {
   email: string;
@@ -98,7 +100,13 @@ const statusColorMap = [
 ];
 
 const UserRegistry: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Get current page from URL or default to 1
+  const pageFromUrl = parseInt(searchParams.get("page") || "1", 10);
+  const [currentPage, setCurrentPage] = useState(pageFromUrl);
   const [email, setEmail] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<PathParamsProps>({});
   const [selectedUserEmail, setSelectedUserEmail] = useState<string>("");
@@ -108,6 +116,14 @@ const UserRegistry: React.FC = () => {
   );
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedUserDisabledStatus, setSelectedUserDisabledStatus] =
+    useState<boolean>(false);
+  const [isRemoveFakeDialogOpen, setIsRemoveFakeDialogOpen] = useState(false);
+  const [removeFakeInput, setRemoveFakeInput] = useState("");
+  const [removeFakeUserId, setRemoveFakeUserId] = useState<string | null>(null);
+  const [removeFakeUserName, setRemoveFakeUserName] = useState<string | null>(
+    null
+  );
 
   const path_params: PathParamsProps = {};
   if (email) path_params.email = email;
@@ -165,8 +181,36 @@ const UserRegistry: React.FC = () => {
   const [resetUserPassword, { isLoading: isResetPassword }] =
     useResetUserPasswordMutation();
 
-  const totalItems = data?.data?.total || 0;
+  const [removeFakeAccounts, { isLoading: isRemovingFake }] =
+    useRemoveFakeAccountsMutation();
+
+  console.log(data);
+
+  const totalItems = data?.total || 0;
   const totalPages = Math.ceil(totalItems / 20);
+
+  // Keep currentPage in sync with URL
+  useEffect(() => {
+    const urlPage = parseInt(searchParams.get("page") || "1", 10);
+    if (urlPage !== currentPage) {
+      setCurrentPage(urlPage);
+    }
+    // No return value here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Update URL when currentPage changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (currentPage > 1) {
+      params.set("page", currentPage.toString());
+    } else {
+      params.delete("page");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+    // No return value here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   const handleFilterApply = (filterType: string, selected: string[]) => {
     setSelectedFilters((prev) => ({
@@ -181,7 +225,10 @@ const UserRegistry: React.FC = () => {
   const resetFilters = () => {
     setSelectedFilters({});
     setEmail("");
-    setCurrentPage(1);
+    // Instead of setCurrentPage(1), update the URL param
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
   };
 
   const handleSubmit = async (email: string) => {
@@ -215,7 +262,7 @@ const UserRegistry: React.FC = () => {
   const navigatePage = (direction: "next" | "prev") => {
     setCurrentPage((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < (data?.total_pages || 1) ? prevIndex + 1 : prevIndex;
+        return prevIndex < (totalPages || 1) ? prevIndex + 1 : prevIndex;
       } else {
         return prevIndex > 1 ? prevIndex - 1 : prevIndex;
       }
@@ -224,6 +271,17 @@ const UserRegistry: React.FC = () => {
 
   const getRandomColor = () => {
     return statusColorMap[Math.floor(Math.random() * statusColorMap.length)];
+  };
+
+  const handleOpenConfirmation = (
+    email: string,
+    type: "reset" | "status",
+    disabledStatus: boolean
+  ) => {
+    setSelectedUserEmail(email);
+    setConfirmationType(type);
+    setSelectedUserDisabledStatus(disabledStatus);
+    setIsConfirmationOpen(true);
   };
 
   return (
@@ -495,12 +553,12 @@ const UserRegistry: React.FC = () => {
                       <td className="py-3 px-4 text-sm">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            user.disabled[0].status
-                              ? "bg-red-100 text-red-800"
-                              : "bg-green-100 text-green-800"
+                            user?.status.toLowerCase() === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {user.disabled[0].status ? "Disabled" : "Active"}
+                          {user?.status}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-sm hidden lg:table-cell">
@@ -511,7 +569,7 @@ const UserRegistry: React.FC = () => {
                     </td> */}
                       <td className="py-3 px-4 text-sm hidden md:table-cell">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center whitespace-nowrap px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             user?.plan?.name === "Team Plan"
                               ? "bg-purple-100 text-purple-800"
                               : user?.plan?.name === "Pro Plan"
@@ -535,104 +593,56 @@ const UserRegistry: React.FC = () => {
                             </div>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-fit">
-                            <AlertDialog
-                              open={isConfirmationOpen}
-                              onOpenChange={setIsConfirmationOpen}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                handleOpenConfirmation(
+                                  user?.email,
+                                  "status",
+                                  user?.status.toLowerCase() !== "active"
+                                );
+                              }}
+                              className={cn(
+                                `text-sm cursor-pointer flex items-center gap-2`,
+                                user?.status.toLowerCase() === "active"
+                                  ? "text-red-600 focus:text-red-600"
+                                  : "text-green-600 focus:text-green-600"
+                              )}
                             >
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedUserEmail(user?.email);
-                                    setConfirmationType("status");
-                                    setIsConfirmationOpen(true);
-                                  }}
-                                  className={`text-sm cursor-pointer flex items-center gap-2 ${
-                                    user.disabled[0].status
-                                      ? "text-green-600 focus:text-green-600"
-                                      : "text-red-600 focus:text-red-600"
-                                  }`}
-                                >
-                                  {user.disabled[0].status ? (
-                                    <UserCheck2 className="h-4 w-4" />
-                                  ) : (
-                                    <UserRoundMinusIcon className="h-4 w-4" />
-                                  )}
-                                  {user.disabled[0].status
-                                    ? "Activate Account"
-                                    : "Deactivate Account"}
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedUserEmail(user?.email);
-                                    setConfirmationType("reset");
-                                    setIsConfirmationOpen(true);
-                                  }}
-                                  className="text-sm cursor-pointer text-gray-600 focus:text-gray-600 flex items-center gap-2"
-                                >
-                                  <Lock className="h-4 w-4" />
-                                  Reset Password
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    {confirmationType === "reset"
-                                      ? "Reset Password"
-                                      : user.disabled[0].status
-                                      ? "Activate Account"
-                                      : "Deactivate Account"}
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    {confirmationType === "reset"
-                                      ? "Are you sure you want to reset this user's password? They will receive an email with instructions to set a new password."
-                                      : user.disabled[0].status
-                                      ? "Are you sure you want to activate this account? The user will regain access to their account."
-                                      : "Are you sure you want to deactivate this account? The user will lose access to their account."}
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => {
-                                      if (confirmationType === "reset") {
-                                        ResetPassword(selectedUserEmail);
-                                      } else {
-                                        handleSubmit(selectedUserEmail);
-                                      }
-                                    }}
-                                    className={`${
-                                      confirmationType === "reset"
-                                        ? "bg-blue-600 hover:bg-blue-700"
-                                        : user.disabled[0].status
-                                        ? "bg-green-600 hover:bg-green-700"
-                                        : "bg-red-600 hover:bg-red-700"
-                                    }`}
-                                  >
-                                    {isDisabling || isResetPassword
-                                      ? "Processing..."
-                                      : confirmationType === "reset"
-                                      ? "Reset Password"
-                                      : user.disabled[0].status
-                                      ? "Activate"
-                                      : "Deactivate"}
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                              {user?.status.toLowerCase() === "active" ? (
+                                <UserCheck2 className="h-4 w-4" />
+                              ) : (
+                                <UserRoundMinusIcon className="h-4 w-4" />
+                              )}
+                              {user?.status.toLowerCase() === "active"
+                                ? "Deactivate Account"
+                                : "Activate Account"}
+                            </DropdownMenuItem>
 
                             <DropdownMenuItem
                               onClick={() => {
-                                setSelectedUser(user);
-                                setIsDetailsOpen(true);
+                                handleOpenConfirmation(
+                                  user?.email,
+                                  "reset",
+                                  user?.status.toLowerCase() !== "active"
+                                );
                               }}
                               className="text-sm cursor-pointer text-gray-600 focus:text-gray-600 flex items-center gap-2"
                             >
-                              <Eye className="h-4 w-4" />
-                              View Details
+                              <Lock className="h-4 w-4" />
+                              Reset Password
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setRemoveFakeUserId(user._id);
+                                setRemoveFakeUserName(user.name);
+                                setRemoveFakeInput("");
+                                setIsRemoveFakeDialogOpen(true);
+                              }}
+                              className="text-sm cursor-pointer text-gray-600 focus:text-gray-600 flex items-center gap-2"
+                            >
+                              <FaUserTimes className="h-4 w-4 text-red-500" />
+                              Remove Fake Accounts
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -666,6 +676,125 @@ const UserRegistry: React.FC = () => {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <UserDetailsDialog user={selectedUser} isOpen={isDetailsOpen} />
       </Dialog>
+
+      {/* Single AlertDialog outside DropdownMenu */}
+      <AlertDialog
+        open={isConfirmationOpen}
+        onOpenChange={setIsConfirmationOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmationType === "reset"
+                ? "Reset Password"
+                : selectedUserDisabledStatus
+                ? "Activate Account"
+                : "Deactivate Account"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmationType === "reset"
+                ? "Are you sure you want to reset this user's password? They will receive an email with instructions to set a new password."
+                : selectedUserDisabledStatus
+                ? "Are you sure you want to activate this account? The user will regain access to their account."
+                : "Are you sure you want to deactivate this account? The user will lose access to their account."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmationType === "reset") {
+                  ResetPassword(selectedUserEmail);
+                } else {
+                  handleSubmit(selectedUserEmail);
+                }
+              }}
+              className={`${
+                confirmationType === "reset"
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : selectedUserDisabledStatus
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
+            >
+              {isDisabling || isResetPassword
+                ? "Processing..."
+                : confirmationType === "reset"
+                ? "Reset Password"
+                : selectedUserDisabledStatus
+                ? "Activate"
+                : "Deactivate"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Fake Accounts Dialog */}
+      <AlertDialog
+        open={isRemoveFakeDialogOpen}
+        onOpenChange={setIsRemoveFakeDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Fake Accounts</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will remove all fake accounts for{" "}
+              <span className="font-semibold">{removeFakeUserName}</span> (user
+              ID: {removeFakeUserId}).
+              <br />
+              <span className="text-red-600 font-semibold">
+                This cannot be undone.
+              </span>
+              <br />
+              <br />
+              Please type{" "}
+              <span className="font-mono bg-gray-100 px-1">
+                remove fake accounts
+              </span>{" "}
+              to confirm.
+            </AlertDialogDescription>
+            <input
+              type="text"
+              className="mt-4 w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              placeholder="Type here to confirm..."
+              value={removeFakeInput}
+              onChange={(e) => setRemoveFakeInput(e.target.value)}
+              disabled={isRemovingFake}
+            />
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={isRemovingFake}
+              onClick={() => setIsRemoveFakeDialogOpen(false)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                removeFakeInput !== "remove fake accounts" || isRemovingFake
+              }
+              className="bg-red-600 hover:bg-red-700"
+              onClick={async () => {
+                if (!removeFakeUserId) return;
+                try {
+                  await removeFakeAccounts({
+                    user_id: removeFakeUserId,
+                  }).unwrap();
+                  toast.success("Fake accounts removed successfully.");
+                  setIsRemoveFakeDialogOpen(false);
+                  refetch();
+                } catch (err: any) {
+                  toast.error(
+                    err?.message || "Failed to remove fake accounts."
+                  );
+                }
+              }}
+            >
+              {isRemovingFake ? "Processing..." : "Remove Fake Accounts"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

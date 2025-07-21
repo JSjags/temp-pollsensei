@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "../ui/skeleton";
+import { useMutation } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios-instance";
 
 interface ResponseHeaderProps {
   data: any;
@@ -74,29 +76,68 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
   const [triggerDownloadSingle, { data: singleDownloadData }] =
     useLazyDownloadSingleResponseQuery();
 
+  const downloadMutation = useMutation({
+    mutationKey: ["download-responses"],
+    mutationFn: async ({
+      type,
+      id,
+      format,
+    }: {
+      type: "all" | "single";
+      id: string;
+      format: "pdf" | "csv" | "xlsx";
+    }) => {
+      let response;
+      if (type === "all") {
+        response = await axiosInstance.get(
+          `/response/export?survey_id=${id}&format=${format}`
+        );
+      } else {
+        response = await axiosInstance.get(
+          `/response/export?response_id=${id}&format=${format}`
+        );
+      }
+
+      // The API returns { success, message, data: { url, format } }
+      const fileUrl = response?.data?.url;
+      if (fileUrl) {
+        window.open(fileUrl, "_blank");
+      } else {
+        throw new Error("File URL not found in response");
+      }
+      return response;
+    },
+  });
+
   const handleDownload = async (
+    e: any,
     type: "all" | "single",
-    format: "pdf" | "csv" | "xlsx"
+    format: "pdf" | "csv" | "xlsx",
+    id: string
   ) => {
+    e.preventDefault();
     if (
       user?.plan.name === "Basic Plan" &&
-      (format === "csv" || format === "xlsx")
+      (format === "csv" || format === "xlsx" || format === "pdf")
     ) {
       dispatch(showModal(format));
       return;
     }
 
-    const id =
-      type === "all"
-        ? { survey_id: params.id, format }
-        : { response_id: response_id, format };
+    // const id =
+    //   type === "all" ? { id: params.id, format } : { id: response_id, format };
 
     try {
-      if (type === "all") {
-        await triggerDownloadAll(id);
-      } else {
-        await triggerDownloadSingle(id);
-      }
+      // Fix: Ensure id is always a string, not an object, to match mutationFn signature
+      console.log(type);
+      console.log(id);
+      console.log(format);
+
+      downloadMutation.mutate({
+        type,
+        id,
+        format,
+      });
     } catch (error) {
       console.error("Download error:", error);
     }
@@ -190,7 +231,14 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                   {["pdf", "csv", "xlsx"].map((format) => (
                     <React.Fragment key={format}>
                       <DropdownMenuItem
-                        onClick={() => handleDownload("all", format as any)}
+                        onClick={(e) =>
+                          handleDownload(
+                            e,
+                            "all",
+                            format as any,
+                            params?.id! as string
+                          )
+                        }
                       >
                         <Link
                           href={allDownloadData?.data?.url || ""}
@@ -200,14 +248,22 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                           <span className="flex-1">
                             Download all as {format.toUpperCase()}
                           </span>
-                          {user?.plan.name === "Basic Plan" &&
-                            format !== "pdf" && (
-                              <Crown className="ml-2 h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0" />
-                            )}
+                          {user?.plan.name === "Basic Plan" && (
+                            // &&
+                            //   format !== "pdf"
+                            <Crown className="ml-2 h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0" />
+                          )}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDownload("single", format as any)}
+                        onClick={(e) =>
+                          handleDownload(
+                            e,
+                            "single",
+                            format as any,
+                            response_id!
+                          )
+                        }
                       >
                         <Link
                           href={singleDownloadData?.data?.url || ""}

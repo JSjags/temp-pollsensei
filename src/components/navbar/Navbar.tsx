@@ -36,6 +36,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import {
@@ -48,6 +51,9 @@ import {
   Mail,
   MailCheckIcon,
   BellOffIcon,
+  Building2,
+  Loader2,
+  ChevronDown,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { persistStore } from "redux-persist";
@@ -65,6 +71,8 @@ import { LuMenu } from "react-icons/lu";
 import { RxCheckCircled, RxCrossCircled } from "react-icons/rx";
 import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
+import { UserData } from "@/subpages/settings/ProfilePage";
+import { useUserProfileQuery } from "@/services/user.service";
 
 interface Notification {
   _id: string;
@@ -90,6 +98,15 @@ export interface NotificationResponse {
   page_size: number;
 }
 
+interface Organization {
+  _id: string;
+  name: string;
+  designation: string;
+  roles: string[];
+  is_disabled: boolean;
+  status: string;
+}
+
 const fetchNotifications = async () => {
   const response = await axiosInstance.get<NotificationResponse>(
     "/notification",
@@ -113,6 +130,20 @@ const markNotificationAsRead = async (notificationId: string) => {
   return response.data;
 };
 
+const fetchOrganizations = async () => {
+  const response = await axiosInstance.get<{ data: Organization[] }>(
+    "/organization/mine"
+  );
+  return response.data;
+};
+
+const fetchCurrentOrganization = async () => {
+  const response = await axiosInstance.get<{ data: Organization[] }>(
+    "/organization/current"
+  );
+  return response.data;
+};
+
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
   // const user2 = useSelector((state: RootState) => state.user);
@@ -123,6 +154,8 @@ const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [organizationDropdownOpen, setOrganizationDropdownOpen] =
+    useState(false);
 
   const persistor = persistStore(store);
 
@@ -132,6 +165,13 @@ const Navbar = () => {
     queryKey: ["notifications"],
     queryFn: fetchNotifications,
   });
+
+  const { data: organizations, isLoading: isLoadingOrganizations } = useQuery({
+    queryKey: ["organizations"],
+    queryFn: fetchOrganizations,
+  });
+
+  console.log(organizations);
 
   const { data: isPaidRespondent, isSuccess } = useQuery({
     queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
@@ -174,6 +214,21 @@ const Navbar = () => {
     onSettled: () => {
       // Refetch after error or success
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const { mutate: switchAccount, isPending: isSwitchingAccount } = useMutation({
+    mutationFn: async (organizationId: string) => {
+      const response = await axiosInstance.post("/user/switch-account", {
+        organizationId,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate all queries to refetch fresh data
+      queryClient.invalidateQueries();
+      // Close the dropdown
+      setOrganizationDropdownOpen(false);
     },
   });
 
@@ -259,8 +314,87 @@ const Navbar = () => {
               </div> */}
             </div>
           </div>
+          <div className="lg:hidden ml-2 flex items-center gap-2 cursor-pointer">
+            <Link href="/dashboard" className="w-full">
+              <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
+            </Link>
+          </div>
 
           <div className="flex gap-4 items-center">
+            {/* Organization Switcher */}
+            {/* <DropdownMenu
+              open={organizationDropdownOpen}
+              onOpenChange={setOrganizationDropdownOpen}
+            >
+              <DropdownMenuTrigger asChild>
+                <div className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
+                  <Building2 className="size-4 text-primary" />
+                  <span className="text-sm font-medium max-w-[200px] truncate">
+                    {currentOrganization.name}
+                  </span>
+                  <ChevronDown className="size-4 text-muted-foreground" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="max-w-80 w-max sm:max-w-[540px] z-[10000000000]"
+                align="end"
+              >
+                <DropdownMenuLabel>Switch Organization</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="max-h-[300px] overflow-auto">
+                  {isLoadingOrganizations ? (
+                    <div className="flex items-center justify-center p-4">
+                      <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (organizations as any)?.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      No organizations found
+                    </div>
+                  ) : (
+                    <>
+                      {(organizations as any)?.map((org: Organization) => (
+                        <DropdownMenuItem
+                          key={org._id}
+                          className={`flex items-center justify-between cursor-pointer ${
+                            org._id === currentOrganization._id
+                              ? "bg-gray-100 text-gray-800"
+                              : ""
+                          }`}
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            switchAccount(org._id);
+                            setCurrentOrganization({
+                              _id: org._id,
+                              name: org.name,
+                              designation: org.designation,
+                              roles: org.roles,
+                              is_disabled: org.is_disabled,
+                              status: org.status,
+                            });
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Building2 className="size-4 text-gray-600 shrink-0" />
+                            <span className="font-medium text-gray-600">
+                              {org.name}
+                            </span>
+                            {org._id === currentOrganization._id && (
+                              <Check className="size-4 text-green-500 ml-4" />
+                            )}
+                            {org._id === currentOrganization._id && (
+                              <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-blue-600 rounded-full shadow-md capitalize">
+                                {org.designation}
+                              </span>
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu> */}
+
             <DropdownMenu
               open={notificationOpen}
               onOpenChange={setNotificationOpen}
@@ -453,7 +587,6 @@ const Navbar = () => {
                   >
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
-                    {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
@@ -462,7 +595,6 @@ const Navbar = () => {
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
-                    {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
@@ -471,7 +603,6 @@ const Navbar = () => {
                   >
                     <HelpCircle className="mr-2 h-4 w-4" />
                     <span>Help</span>
-                    {/* <DropdownMenuShortcut>⌘H</DropdownMenuShortcut> */}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
@@ -486,7 +617,6 @@ const Navbar = () => {
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
-                  {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
