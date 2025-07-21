@@ -193,65 +193,68 @@ const LoginPage = () => {
             </motion.div>
           </AnimatePresence>
         </div>
-        {/* Right side: PlaceholderRightSide for slides/new design */}
-        <div className="hidden md:block md:w-1/2 h-full">
+        {/* Right Side: Placeholder */}
+        <div className="hidden md:flex md:w-1/2 h-screen py-4 pr-4">
           <PlaceholderRightSide
             slides={[
               <div
                 key="slide1"
-                className="flex flex-col items-center justify-center h-full px-8"
+                className="flex flex-col items-center justify-center h-full w-full"
               >
-                <Image
-                  src={steps}
-                  alt="Steps"
-                  className="w-full max-w-[400px] h-auto mb-6"
-                  width={300}
-                />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
-                  Create Surveys Effortlessly
-                </h2>
-                <p className="text-gray-600 text-center">
-                  Design, distribute, and analyze surveys with ease using
-                  PollSensei's intuitive platform.
+                <p className="text-3xl font-bold mb-2 text-white text-center">
+                  Create your Survey in Seconds
                 </p>
+                <p className="text-white text-center w-[80%] text-lg">
+                  Easily design surveys using our advanced tools. Say goodbye to
+                  time-consuming survey creation, and let PollSensei handle it
+                  for you.
+                </p>
+                <Image
+                  src="/auth/slide-1.svg"
+                  alt="Slide 1"
+                  width={320}
+                  height={320}
+                  className="w-[100%]"
+                />
               </div>,
               <div
                 key="slide2"
-                className="flex flex-col items-center justify-center h-full px-8"
+                className="flex flex-col items-center justify-center h-full w-full"
               >
-                <Image
-                  src={pollsensei_new_logo}
-                  alt="Logo"
-                  className="w-24 h-24 mb-6"
-                  width={96}
-                  height={96}
-                />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
-                  Powerful Analytics
-                </h2>
-                <p className="text-gray-600 text-center">
-                  Gain insights from your responses with real-time analytics and
-                  beautiful visualizations.
+                <p className="text-3xl font-bold mb-2 text-white text-center">
+                  Analyse your Survey in Seconds
                 </p>
+                <p className="text-white text-center w-[80%] text-lg mt-4">
+                  Imagine getting meaningful insights without endless hours of
+                  analysis. PollSensei offers this and more.
+                </p>
+                <Image
+                  src="/auth/slide-2.svg"
+                  alt="Slide 2"
+                  width={320}
+                  height={320}
+                  className="w-[100%] mt-12"
+                />
               </div>,
               <div
                 key="slide3"
-                className="flex flex-col items-center justify-center h-full px-8"
+                className="flex flex-col items-center justify-center h-full w-full"
               >
-                <Image
-                  src={dark_theme_logo}
-                  alt="Dark Theme Logo"
-                  className="w-32 h-auto mb-6"
-                  width={128}
-                  height={32}
-                />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
-                  Secure & Reliable
-                </h2>
-                <p className="text-gray-600 text-center">
-                  Your data is protected with industry-leading security and
-                  privacy standards.
+                <p className="text-3xl font-bold mb-2 text-white text-center">
+                  Receive survey report
                 </p>
+                <p className="text-white text-center w-[80%] text-lg mt-4">
+                  Our superpowered reporting tool takes the guesswork out of
+                  analysis, highlighting key trends and actionable insights so
+                  you can make smarter decisions.
+                </p>
+                <Image
+                  src="/auth/slide-3.svg"
+                  alt="Slide 3"
+                  width={320}
+                  height={320}
+                  className="w-[100%] mt-12"
+                />
               </div>,
             ]}
           />
