@@ -193,7 +193,6 @@ const LoginPage = () => {
             </motion.div>
           </AnimatePresence>
         </div>
-
         {/* Right side: PlaceholderRightSide for slides/new design */}
         <div className="hidden md:block md:w-1/2 h-full">
           <PlaceholderRightSide
@@ -257,105 +256,6 @@ const LoginPage = () => {
             ]}
           />
         </div>
-        <AnimatePresence mode="wait">
-          <div className="md:hidden flex items-center justify-center p-4 bg-white shadow">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="flex items-center justify-center gap-3"
-            >
-              <Link href="/">
-                <Image
-                  src={pollsensei_new_logo}
-                  alt="Logo"
-                  width={100}
-                  height={100}
-                />
-              </Link>
-              <h1 className="auth-head text-white font-bold">PollSensei</h1>
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.7 }}
-            className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8 bg-gradient-to-br from-blue-600 to-blue-400"
-          >
-            <div className="flex flex-col items-center max-w-md w-full">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="flex items-center justify-center gap-3 pb-10"
-              >
-                <Image
-                  src={dark_theme_logo}
-                  alt="Logo"
-                  width={200}
-                  height={32}
-                  className="drop-shadow-lg"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Image
-                  src={steps}
-                  alt="Steps"
-                  className="pb-4 w-full max-w-[400px] h-auto hover:scale-105 transition-transform duration-300"
-                  width={300}
-                  height={200}
-                />
-              </motion.div>
-
-              <motion.h3
-                variants={fadeIn}
-                initial="initial"
-                animate="animate"
-                className="auth-heading pb-5 text-center text-white text-3xl font-bold"
-              >
-                Create End-to-End <br /> Surveys with our AI tool
-              </motion.h3>
-
-              <motion.h5
-                variants={fadeIn}
-                initial="initial"
-                animate="animate"
-                transition={{ delay: 0.4 }}
-                className="auth-subtitle text-center text-white/90"
-              >
-                PollSensei helps you to Create suggest questions, <br />{" "}
-                formats, methodologies
-              </motion.h5>
-            </div>
-          </motion.div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key="loader"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0"
-            >
-              <StateLoader2
-                defaultGoto="/login"
-                directRoute={
-                  ed
-                    ? ed === "2"
-                      ? "/surveys/edit-survey"
-                      : ed === "3"
-                      ? "/surveys/manual-survey-create"
-                      : undefined
-                    : undefined
-                }
-              />
-            </motion.div>
-          </AnimatePresence>
-        </AnimatePresence>
       </motion.section>
     );
   }
