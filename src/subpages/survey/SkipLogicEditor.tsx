@@ -120,14 +120,14 @@ const operatorMap: Record<string, string[]> = {
 };
 
 // --- Types for advanced skip logic ---
-type SkipLogicCondition = {
+export type SkipLogicCondition = {
   sectionIndex: number;
   questionIndex: number;
   operator: string;
   value: any;
 };
 
-type SkipLogicRuleV2 = {
+export type SkipLogicRuleV2 = {
   id: string;
   conditions: SkipLogicCondition[];
   logicalOperator: string; // "and" | "or"
@@ -496,25 +496,12 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
             </Tooltip>
           </TooltipProvider>
         </h2>
-        {constantsLoading ? (
-          <div className="flex flex-col items-center justify-center py-10 text-center bg-purple-50 rounded-lg border border-dashed border-purple-200 my-4 animate-pulse">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 mb-3">
-              <GitBranch className="w-7 h-7 text-purple-300" />
-            </div>
-            <h3 className="text-lg font-semibold mb-1 text-gray-400">
-              Loading skip logic options...
-            </h3>
-            <div className="w-40 h-4 bg-purple-100 rounded mt-2 mb-1" />
-            <div className="w-32 h-4 bg-purple-100 rounded mb-1" />
-            <div className="w-24 h-4 bg-purple-100 rounded" />
-          </div>
-        ) : (
-          <>
-            <Button onClick={handleAdd} variant="outline" size={"sm"}>
-              + Add Rule
-            </Button>
-          </>
-        )}
+
+        <>
+          <Button onClick={handleAdd} variant="outline" size={"sm"}>
+            + Add Rule
+          </Button>
+        </>
       </div>
       <ul className="space-y-3 mb-4">
         {skipLogic.length === 0 && (
@@ -531,78 +518,183 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
             </p>
           </div>
         )}
-        {skipLogic.map((rule) => (
-          <li
-            key={rule.id}
-            className="bg-white border border-purple-100 rounded-lg shadow-sm px-4 py-3 flex flex-col gap-2 relative group hover:shadow-md transition"
-          >
-            {/* First line: If ... = ... */}
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <div className="flex gap-2 items-start">
-                <span className="text-purple-600 font-semibold flex items-center gap-1">
-                  <GitBranch className="w-4 h-4" />
-                  If
-                </span>
-                <p className="flex-1 flex pr-20 whitespace-normal">
-                  <span className="font-medium text-gray-800">
-                    {getQuestionLabel(
-                      rule.from.sectionIndex,
-                      rule.from.questionIndex
+        {skipLogic.map((rule) => {
+          // Type guard: old rule has 'from' and 'to', new rule has 'conditions'
+          if ("from" in rule && "to" in rule) {
+            return (
+              <li
+                key={rule.id}
+                className="bg-white border border-purple-100 rounded-lg shadow-sm px-4 py-3 flex flex-col gap-2 relative group hover:shadow-md transition"
+              >
+                {/* First line: If ... = ... */}
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <div className="flex gap-2 items-start">
+                    <span className="text-purple-600 font-semibold flex items-center gap-1">
+                      <GitBranch className="w-4 h-4" />
+                      If
+                    </span>
+                    <p className="flex-1 flex pr-20 whitespace-normal">
+                      <span className="font-medium text-gray-800">
+                        {getQuestionLabel(
+                          rule.from.sectionIndex,
+                          rule.from.questionIndex
+                        )}
+                      </span>
+                    </p>
+                  </div>
+                  <span className="mx-1 text-gray-500">=</span>
+                  <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-xs font-semibold">
+                    {rule.from.answer}
+                  </span>
+                </div>
+                {/* Second line: Then go to ... */}
+                <div className="flex flex-wrap items-center gap-2 text-sm mt-1">
+                  <span className="text-green-600 font-semibold flex items-center gap-1">
+                    <ArrowRight className="w-4 h-4" />
+                    Then
+                  </span>
+                  <span>
+                    go to{" "}
+                    {"end" in rule.to ? (
+                      <span className="bg-red-50 text-red-700 px-2 py-0.5 rounded text-xs font-semibold">
+                        End Survey
+                      </span>
+                    ) : (
+                      <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">
+                        {getQuestionLabel(
+                          rule.to.sectionIndex,
+                          rule.to.questionIndex ?? 0
+                        )}
+                      </span>
                     )}
                   </span>
-                </p>
-              </div>
-              <span className="mx-1 text-gray-500">=</span>
-              <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-xs font-semibold">
-                {rule.from.answer}
-              </span>
-            </div>
-            {/* Second line: Then go to ... */}
-            <div className="flex flex-wrap items-center gap-2 text-sm mt-1">
-              <span className="text-green-600 font-semibold flex items-center gap-1">
-                <ArrowRight className="w-4 h-4" />
-                Then
-              </span>
-              <span>
-                go to{" "}
-                {"end" in rule.to ? (
-                  <span className="bg-red-50 text-red-700 px-2 py-0.5 rounded text-xs font-semibold">
-                    End Survey
-                  </span>
-                ) : (
-                  <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">
-                    {getQuestionLabel(
-                      rule.to.sectionIndex,
-                      rule.to.questionIndex ?? 0
-                    )}
-                  </span>
+                </div>
+                {!readOnly && (
+                  <div className="absolute right-3 top-2 gap-1 flex bg-gray-50 rounded-md">
+                    <Button
+                      size="icon"
+                      className="!p-0 size-6"
+                      variant="ghost"
+                      onClick={() =>
+                        handleEdit(rule as unknown as SkipLogicRuleV2)
+                      }
+                      aria-label="Edit rule"
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      className="!p-0 size-6"
+                      variant="ghost"
+                      onClick={() => setDeleteDialog({ open: true, rule })}
+                      aria-label="Delete rule"
+                    >
+                      <Trash2 className="size-4 text-red-500" />
+                    </Button>
+                  </div>
                 )}
-              </span>
-            </div>
-            {!readOnly && (
-              <div className="absolute right-3 top-2 gap-1 flex bg-gray-50 rounded-md">
-                <Button
-                  size="icon"
-                  className="!p-0 size-6"
-                  variant="ghost"
-                  onClick={() => handleEdit(rule as unknown as SkipLogicRuleV2)}
-                  aria-label="Edit rule"
-                >
-                  <Pencil className="size-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  className="!p-0 size-6"
-                  variant="ghost"
-                  onClick={() => setDeleteDialog({ open: true, rule })}
-                  aria-label="Delete rule"
-                >
-                  <Trash2 className="size-4 text-red-500" />
-                </Button>
-              </div>
-            )}
-          </li>
-        ))}
+              </li>
+            );
+          } else if (
+            "conditions" in rule &&
+            "action" in rule &&
+            "target" in rule
+          ) {
+            // New advanced skip logic rule
+            const ruleV2 = rule as SkipLogicRuleV2;
+            return (
+              <li
+                key={ruleV2.id}
+                className="bg-white border border-purple-100 rounded-lg shadow-sm px-4 py-3 flex flex-col gap-2 relative group hover:shadow-md transition"
+              >
+                {/* First line: If ... */}
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-purple-600 font-semibold flex items-center gap-1">
+                    <GitBranch className="w-4 h-4" />
+                    If
+                  </span>
+                  <span className="font-medium text-gray-800">
+                    {ruleV2.conditions.map((cond, idx) => (
+                      <span key={idx}>
+                        {getQuestionLabel(
+                          cond.sectionIndex,
+                          cond.questionIndex
+                        )}
+                        <span className="mx-1 text-gray-500">
+                          {" "}
+                          {cond.operator}{" "}
+                        </span>
+                        <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-xs font-semibold">
+                          {Array.isArray(cond.value)
+                            ? cond.value.join(", ")
+                            : cond.value}
+                        </span>
+                        {idx < ruleV2.conditions.length - 1 ? (
+                          <span className="mx-1 text-gray-500 font-bold">
+                            {ruleV2.logicalOperator.toUpperCase()}
+                          </span>
+                        ) : null}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+                {/* Second line: Then ... */}
+                <div className="flex flex-wrap items-center gap-2 text-sm mt-1">
+                  <span className="text-green-600 font-semibold flex items-center gap-1">
+                    <ArrowRight className="w-4 h-4" />
+                    Then
+                  </span>
+                  <span>
+                    {ruleV2.action} {ruleV2.target.type}
+                    {ruleV2.target.type === "section" &&
+                    typeof ruleV2.target.sectionIndex === "number" ? (
+                      <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-semibold ml-1">
+                        Section {ruleV2.target.sectionIndex + 1}
+                      </span>
+                    ) : null}
+                    {ruleV2.target.type === "question" &&
+                    typeof ruleV2.target.sectionIndex === "number" &&
+                    typeof ruleV2.target.questionIndex === "number" ? (
+                      <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-semibold ml-1">
+                        {getQuestionLabel(
+                          ruleV2.target.sectionIndex,
+                          ruleV2.target.questionIndex
+                        )}
+                      </span>
+                    ) : null}
+                  </span>
+                </div>
+                {!readOnly && (
+                  <div className="absolute right-3 top-2 gap-1 flex bg-gray-50 rounded-md">
+                    <Button
+                      size="icon"
+                      className="!p-0 size-6"
+                      variant="ghost"
+                      onClick={() => handleEdit(ruleV2)}
+                      aria-label="Edit rule"
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      className="!p-0 size-6"
+                      variant="ghost"
+                      onClick={() =>
+                        setDeleteDialog({ open: true, rule: ruleV2 as any })
+                      }
+                      aria-label="Delete rule"
+                    >
+                      <Trash2 className="size-4 text-red-500" />
+                    </Button>
+                  </div>
+                )}
+              </li>
+            );
+          } else {
+            // Unknown rule type
+            return null;
+          }
+        })}
       </ul>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl">

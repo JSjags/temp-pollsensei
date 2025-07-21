@@ -83,7 +83,11 @@ import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import SkipLogicEditor, { SkipLogicRule } from "./SkipLogicEditor";
+import SkipLogicEditor, {
+  SkipLogicRule,
+  SkipLogicRuleV2,
+  SkipLogicCondition,
+} from "./SkipLogicEditor";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -910,27 +914,65 @@ const EditSurvey = () => {
   // Utility: validate skipLogic rules against current questions
   useEffect(() => {
     if (!Array.isArray(skipLogic) || skipLogic.length === 0) return;
-    const isValid = skipLogic.every((rule) => {
-      // Check from section/question
-      const fromSection = questions[rule.from.sectionIndex];
-      if (!fromSection) return false;
-      const fromQuestion = fromSection.questions[rule.from.questionIndex];
-      if (!fromQuestion) return false;
-      // Check answer
-      const options =
-        Array.isArray(fromQuestion.options) && fromQuestion.options.length > 0
-          ? fromQuestion.options
-          : fromQuestion.question_type === "boolean"
-          ? ["Yes", "No"]
-          : ["Any answer"];
-      if (!options.includes(rule.from.answer)) return false;
-      // Check target
-      if ("end" in rule.to) return true;
-      const toSection = questions[rule.to.sectionIndex];
-      if (!toSection) return false;
-      const toQuestion = toSection.questions[rule.to.questionIndex ?? 0];
-      if (!toQuestion) return false;
-      return true;
+    const isValid = skipLogic.every((rule: SkipLogicRule | SkipLogicRuleV2) => {
+      if ("from" in rule && "to" in rule) {
+        // Old rule type
+        const fromSection = questions[rule.from.sectionIndex];
+        if (!fromSection) return false;
+        const fromQuestion = fromSection.questions[rule.from.questionIndex];
+        if (!fromQuestion) return false;
+        // Check answer
+        const options =
+          Array.isArray(fromQuestion.options) && fromQuestion.options.length > 0
+            ? fromQuestion.options
+            : fromQuestion.question_type === "boolean"
+            ? ["Yes", "No"]
+            : ["Any answer"];
+        if (!options.includes(rule.from.answer)) return false;
+        // Check target
+        if ("end" in rule.to) return true;
+        const toSection = questions[rule.to.sectionIndex];
+        if (!toSection) return false;
+        const toQuestion = toSection.questions[rule.to.questionIndex ?? 0];
+        if (!toQuestion) return false;
+        return true;
+      } else if ("conditions" in rule && "action" in rule && "target" in rule) {
+        // New rule type
+        // Validate all conditions
+        const allCondsValid = (rule.conditions as SkipLogicCondition[]).every(
+          (cond: SkipLogicCondition) => {
+            const section = questions[cond.sectionIndex];
+            if (!section) return false;
+            const question = section.questions[cond.questionIndex];
+            if (!question) return false;
+            return true;
+          }
+        );
+        if (!allCondsValid) return false;
+        // Optionally validate target
+        if (rule.target.type === "section") {
+          if (
+            typeof rule.target.sectionIndex !== "number" ||
+            !questions[rule.target.sectionIndex]
+          ) {
+            return false;
+          }
+        } else if (rule.target.type === "question") {
+          if (
+            typeof rule.target.sectionIndex !== "number" ||
+            typeof rule.target.questionIndex !== "number" ||
+            !questions[rule.target.sectionIndex] ||
+            !questions[rule.target.sectionIndex].questions[
+              rule.target.questionIndex
+            ]
+          ) {
+            return false;
+          }
+        }
+        return true;
+      }
+      // Unknown rule type
+      return false;
     });
     if (!isValid) {
       dispatch(setSkipLogic([]));
