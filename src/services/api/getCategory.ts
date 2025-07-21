@@ -1,4 +1,4 @@
-import { OnboardingResponse, ReportCategory } from "@/components/reports/types";
+import { OnboardingData, OnboardingResponse, ReportCategory } from "@/components/reports/types";
 import axiosInstance from "@/lib/axios-instance";
 import { AxiosError } from "axios";
 
@@ -23,7 +23,7 @@ export const fetchReportInterests = async (): Promise<ReportCategory[]> => {
 };
 
 
-export const fetchOnboardState = async (): Promise<OnboardingResponse> => {
+export const fetchOnboardState = async (): Promise<OnboardingData> => {
   try {
     const response = await axiosInstance.get("/report/onboard");
     return response.data;
@@ -117,10 +117,6 @@ export const fetchAllReports = async (
 };
 
 
-/**
- * Delete a report by ID.
- * Returns whatever the backend responds with (often {message: string} or 204/empty).
- */
 export const deleteReport = async <T = unknown>(reportId: string): Promise<T> => {
   try {
     const response = await axiosInstance.delete<T>(`/report/${reportId}`);
@@ -145,5 +141,72 @@ export const deleteReport = async <T = unknown>(reportId: string): Promise<T> =>
 
     // Throw a real Error so React Query's onError receives a clean message
     throw new Error(message);
+  }
+};
+
+export const duplicateReport = async <T = unknown>(reportId: string): Promise<T> => {
+  try {
+    const payload = { report_id: reportId };
+    const res = await axiosInstance.post<T>(`/report/duplicate`, payload);
+    return res.data;
+  } catch (error: any) {
+    console.error(`Error duplicating report ${reportId}:`, error);
+    let message = "Failed to duplicate report.";
+    if (error?.response?.data) {
+      const data = error.response.data as any;
+      message =
+        data?.message ||
+        data?.error ||
+        (Array.isArray(data?.errors) && data.errors[0]?.message) ||
+        message;
+    } else if (error?.message) {
+      message = error.message;
+    }
+    throw new Error(message);
+  }
+};
+
+
+export const renameReport = async (report_id: string, newName: string): Promise<any> => {
+  try {
+    const res = await axiosInstance.patch(`/report`, { 
+      report_id: report_id,
+      name: newName 
+    });
+    return res.data;
+  } catch (error) {
+    console.error(`Error renaming report ${report_id}:`, error);
+    throw error;
+  }
+};
+
+export const fetchSearchReports = async (term: string, page: number,) => {
+  const { data } = await axiosInstance.get(`/report/search`, {
+    params: { search_term: term, page, page_size: 20 },
+  });
+  return data.data; 
+};
+
+
+export const fetchAiSummary = async (reportId: string) => {
+  try {
+    const response = await axiosInstance.get(`/report/ai-summary/${reportId}`);
+    return response.data;
+  } catch (err) {
+    const error = err as AxiosError;
+
+    if (error.response) {
+      console.error("Backend error:", error.response.data);
+      throw new Error(
+        (error.response.data as any)?.message ||
+          "Failed to generate AI summary"
+      );
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+      throw new Error("No response from server");
+    } else {
+      console.error("Unknown error:", error.message);
+      throw new Error("An unexpected error occurred");
+    }
   }
 };

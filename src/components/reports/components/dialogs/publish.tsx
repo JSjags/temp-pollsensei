@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useReportOnboardState } from "../../queries/useOnboardState";
 import Terms from "./terms";
+import { useAiSummary } from "../../queries/useAISummary";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 type SummaryValue = "ai" | "manual";
 
@@ -24,6 +27,7 @@ interface SummaryMethod {
 
 interface PublishDialogProps {
   /** Controlled value */
+  reportId: string;
   value?: SummaryValue;
   /** Initial selection when uncontrolled */
   defaultValue?: SummaryValue;
@@ -39,10 +43,13 @@ const summaryMethods: SummaryMethod[] = [
 export function PublishDialog({
   value,
   defaultValue,
+  reportId,
   onValueChange,
 }: PublishDialogProps) {
-  const { data:  onboardResp , isLoading, error } = useReportOnboardState();
-  const acceptedTerms = onboardResp?.data?.accepted_terms ?? false;
+  const { data: onboardResp } = useReportOnboardState();
+  const aiSummaryMutation = useAiSummary();
+  const router = useRouter();
+  const acceptedTerms = Boolean(onboardResp?.accepted_terms);
   const [internal, setInternal] = React.useState<SummaryValue | null>(
     defaultValue ?? null
   );
@@ -53,6 +60,23 @@ export function PublishDialog({
     if (value === undefined) setInternal(val);
   };
 
+  const handleProceed = () => {
+    if (!active) return;
+
+    if (active === "manual") {
+      router.push("/reports/drafts");
+    } else if (active === "ai") {
+      aiSummaryMutation.mutate(reportId, {
+        onSuccess: () => {
+          toast.success("AI summary generated successfully!");
+          router.push("/reports/drafts");
+        },
+        onError: (err: any) => {
+          toast.error(err.message || "Failed to generate AI summary");
+        },
+      });
+    }
+  };
   return (
     <DialogBody className="w-full">
       <div className="gap-10 flex items-center justify-center flex-col w-full">
@@ -101,24 +125,17 @@ export function PublishDialog({
             </Button>
           </DialogClose>
 
-          {!acceptedTerms && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  disabled={!active}
-                  variant={"gradient"}
-                  className="rounded"
-                >
-                  Proceed
-                </Button>
-              </DialogTrigger>
-              <DialogContent
-                className="min-w-[800px] max-h-[650px]"
-                showXBtn={false}
-              >
-                <Terms />
-              </DialogContent>
-            </Dialog>
+          {!acceptedTerms ? (
+            <Terms active={active} onAgree={() => handleProceed()} />
+          ) : (
+            <Button
+              variant="gradient"
+              className="rounded"
+              disabled={!active || aiSummaryMutation.isPending}
+              onClick={handleProceed}
+            >
+              {aiSummaryMutation.isPending ? "Processing..." : "Proceed"}
+            </Button>
           )}
         </div>
       </div>

@@ -35,10 +35,10 @@ export const useAllSurveys = (page: number, pageSize: number = 9) => {
   });
 };
 
-export const useReports = (surveyId: string, tab: string, page: number) => {
+export const useReports = (surveyId: string, tab: string, page: number, pageSize: number) => {
   return useQuery({
-    queryKey: ["reports", surveyId, tab, page],
-    queryFn: () => fetchAllReports(surveyId, tab, page),
-    placeholderData: keepPreviousData,
+    queryKey: ["reports", surveyId, tab, page, pageSize],
+    queryFn: () => fetchAllReports(surveyId, tab, page, pageSize),
+    // placeholderData: keepPreviousData,
   });
 };

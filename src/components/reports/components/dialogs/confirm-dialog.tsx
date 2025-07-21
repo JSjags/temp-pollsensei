@@ -1,41 +1,55 @@
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+"use client";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoins/CheckoutDialog";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void; 
   onConfirm: () => void;
   isLoading?: boolean;
+  title?: string;
+  description?: string;
 }
 
 export function DeleteConfirmDialog({
   open,
-  onClose,
+  onOpenChange,
   onConfirm,
   isLoading,
+  title = "Confirm Deletion",
+  description = "Are you sure you want to delete this report? This action cannot be undone.",
 }: DeleteConfirmDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-red-600">
-            Confirm Deletion
+            {title}
           </DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-gray-600">
-          Are you sure you want to delete this report? This action cannot be undone.
-        </p>
+        <p className="text-sm text-gray-600">{description}</p>
         <DialogFooter className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
           <Button
+            type="button"
             variant="destructive"
             onClick={onConfirm}
             disabled={isLoading}
           >
-            {isLoading && <LoadingSpinner/>}
             {isLoading ? "Deleting..." : "Confirm"}
           </Button>
         </DialogFooter>
