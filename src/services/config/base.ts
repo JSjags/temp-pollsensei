@@ -39,7 +39,7 @@ const environment: EnvironmentConfig = {
 
 console.log(process.env.NEXT_PUBLIC_APP_ENV);
 
-const currentEnvironment = "development" as keyof EnvironmentConfig;
+const currentEnvironment = "staging" as keyof EnvironmentConfig;
 
 console.log(currentEnvironment);
 
