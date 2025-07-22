@@ -568,6 +568,10 @@ input[type="radio"].radio:checked:before {
   font-family: var(--font-lora);
 }
 
+.font-dm-sans {
+  font-family: var(--font-sans);
+}
+
 .font-merriweather {
   font-family: var(--font-merriweather);
 }
@@ -697,8 +701,123 @@ input[type="radio"].radio:checked:before {
   height: 30px;
   background: rgba(91, 3, 178, 0.2);
   border-radius: 50%;
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #e5e7eb;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #d1d5db;
+  }
+}
+
+.prose {
+  max-width: none;
+}
+
+.prose p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .daily-login-slider .slick-arrow:hover {
   background: rgba(91, 3, 178, 0.4);
+}
+
+.prose ul,
+.prose ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose-sm {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+/* Add these styles for the Tiptap editor */
+.ProseMirror {
+  min-height: 150px;
+  height: 100%;
+  outline: none;
+  padding: 0.5rem;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Existing prose styles */
+.prose-clone {
+  max-width: w-full;
+  color: inherit;
+}
+.prose {
+  max-width: 65ch;
+  color: inherit;
+}
+
+.prose p {
+  margin: 0;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 8px 0 #9d50bb, 0 0 0px 0 #5b03b2;
+  }
+  50% {
+    box-shadow: 0 0 24px 4px #9d50bb, 0 0 12px 2px #5b03b2;
+  }
+  100% {
+    box-shadow: 0 0 8px 0 #9d50bb, 0 0 0px 0 #5b03b2;
+  }
+}
+
+.shadow-glow {
+  box-shadow: 0 0 8px 0 #9d50bb, 0 0 0px 0 #5b03b2;
+}
+
+.animate-glow {
+  animation: glow 1.5s infinite alternate;
 }

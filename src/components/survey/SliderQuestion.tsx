@@ -38,6 +38,7 @@ interface SliderQuestionProps {
   isEdit?: boolean;
   surveyData?: SurveyData;
   isResponse?: boolean;
+  item: any;
 }
 
 const SliderQuestion: React.FC<SliderQuestionProps> = ({
@@ -59,18 +60,32 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
   isEdit = false,
   surveyData,
   isResponse = false,
+  item,
 }) => {
   const pathname = usePathname();
   const questionText = useSelector(
     (state: RootState) => state?.survey?.question_text
   );
 
-  // console.log(value);
+  // console.log(item);
 
-  const [sliderValue, setSliderValue] = useState<number>(value ?? min ?? 0);
+  const [innerMin, innerMax] =
+    item && Array.isArray(item.options) && item.options.length > 0
+      ? item.options
+      : item && (item.options === undefined || item.options.length === 0)
+      ? [item.min ?? item.min_value, item.max ?? item.max_value]
+      : Array.isArray(options)
+      ? options
+      : [undefined, undefined];
+
+  console.log(item);
+
+  const [sliderValue, setSliderValue] = useState<number>(
+    value ?? item?.[0] ?? item?.min_value ?? min ?? 0
+  );
 
   useEffect(() => {
-    setSliderValue(value ?? min ?? 0);
+    setSliderValue(value ?? item?.[0] ?? item?.min_value ?? min ?? 0);
   }, [min, value]);
 
   const handleSliderChange = (newValue: number[]) => {
@@ -80,6 +95,8 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
       onChange(newValue[0]);
     }
   };
+
+  console.log(item);
 
   const getStatus = (status: string) => {
     switch (status) {
@@ -105,10 +122,15 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
     return num.toLocaleString("en-US");
   };
 
+  console.log(innerMin);
+  console.log(innerMax);
+
   // Generate smart labels based on range size
   const generateSmartLabels = () => {
-    const range = (max ?? 10) - (min ?? 0);
+    const range = (max ?? innerMax ?? 10) - (min ?? innerMin ?? 0);
     let step;
+
+    console.log(range);
 
     if (range <= 10) {
       step = 1;
@@ -124,22 +146,28 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
 
     const labels = [];
     // Always include min
-    labels.push(min ?? 0);
+    labels.push(min ?? innerMin ?? 0);
 
     // Add intermediate points
-    for (let i = (min ?? 0) + step; i < (max ?? 10); i += step) {
+    for (
+      let i = (min ?? innerMin ?? 0) + step;
+      i < (max ?? innerMax ?? 10);
+      i += step
+    ) {
       labels.push(Math.round(i)); // Round to ensure clean numbers
     }
 
     // Add max if not already included
-    if (labels[labels.length - 1] !== (max ?? 10)) {
-      labels.push(max ?? 10);
+    if (labels[labels.length - 1] !== (max ?? innerMax ?? 10)) {
+      labels.push(max ?? innerMax ?? 10);
     }
 
     return labels;
   };
 
   const sliderLabels = generateSmartLabels();
+
+  console.log(item);
 
   return (
     <div
@@ -188,7 +216,13 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
                       options={options}
                       setEditId={setEditId}
                       onSave={() =>
-                        onSave && onSave(question, min ?? 0, max ?? 10, index)
+                        onSave &&
+                        onSave(
+                          question,
+                          min ?? innerMin ?? 0,
+                          max ?? innerMax ?? 10,
+                          index
+                        )
                       }
                       index={index}
                     />
@@ -199,8 +233,8 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
               <div className="mt-8 px-0">
                 <Slider
                   value={[sliderValue]}
-                  max={max ?? 10}
-                  min={min ?? 0}
+                  max={max ?? innerMax ?? 10}
+                  min={min ?? innerMin ?? 0}
                   step={1}
                   onValueChange={handleSliderChange}
                   className={cn("w-full", {

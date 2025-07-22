@@ -17,6 +17,9 @@ import { Input } from "@/components/ui/shadcn-input";
 import { AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { useDispatch } from "react-redux";
+import axiosInstance from "@/lib/axios-instance";
+import { logoutUser } from "@/redux/slices/user.slice";
 
 interface PasswordChangeFormData {
   code: string;
@@ -35,6 +38,7 @@ const AccountSecurityPage = () => {
   const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
   const [getCode, setGetCode] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const resetCodeQuery = useQuery({
     queryKey: ["reset-code"],
@@ -66,15 +70,15 @@ const AccountSecurityPage = () => {
             unauthorized access and enhances overall security.
           </p>
         </div>
-        <button
-          className="shadow-md text-sm rounded text-[#898989] px-4 py-2 w-full lg:w-auto mt-4 lg:mt-0"
+        <Button
+          className="shadow-md border border-border/30 bg-white text-sm rounded text-[#898989] px-4 py-2 w-full lg:w-auto mt-4 lg:mt-0"
           onClick={() => handlePasswordReset()}
           disabled={resetCodeQuery.isLoading}
         >
           {resetCodeQuery.isLoading
             ? "Sending reset code ..."
             : "Change Password"}
-        </button>
+        </Button>
         <PasswordChangeModal
           onClose={() => setShowPasswordModal(false)}
           showPasswordModal={showPasswordModal}
@@ -95,6 +99,29 @@ const AccountSecurityPage = () => {
           onClick={() => setIsTwoFactorEnabled(!isTwoFactorEnabled)}
         />
       </div> */}
+      {/* Delete Account Section */}
+      <div className="mt-6 flex gap-3 items-start justify-between">
+        <div>
+          <h3 className="text-lg sm:text-xl font-bold text-red-600 mb-2">
+            Delete Account
+          </h3>
+          <p className="text-[#898989] text-sm sm:text-base mb-4 max-w-xl">
+            Deleting your account is irreversible. All your data will be
+            permanently removed. Please proceed with caution.
+          </p>
+        </div>
+        <Button
+          variant="destructive"
+          className="w-full sm:w-auto"
+          onClick={() => setShowDeleteModal(true)}
+        >
+          Delete Account
+        </Button>
+        <DeleteAccountModal
+          show={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+        />
+      </div>
     </div>
   );
 };
@@ -241,6 +268,100 @@ const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({
             disabled={!isValid || submitPasswordQuery.isPending}
           >
             {submitPasswordQuery.isPending ? "Hang on ..." : "Change Password"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const DeleteAccountModal = ({
+  show,
+  onClose,
+}: {
+  show: boolean;
+  onClose: () => void;
+}) => {
+  const [confirmation, setConfirmation] = useState("");
+  const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const deleteAccountMutation = useMutation({
+    mutationKey: ["delete-account"],
+    mutationFn: async () => {
+      return axiosInstance.delete("/user/me");
+    },
+    onSuccess: () => {
+      toast.success("Account deleted successfully.");
+      dispatch(logoutUser());
+      router.push("/login");
+    },
+    onError: (err: any) => {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to delete account."
+      );
+    },
+  });
+
+  const handleDelete = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (confirmation !== "Delete my account") {
+      setError('You must type "Delete my account" to confirm.');
+      return;
+    }
+    setError("");
+    deleteAccountMutation.mutate();
+  };
+
+  return (
+    <Dialog open={show} onOpenChange={onClose}>
+      <DialogContent
+        className="w-[95%] max-w-[425px] mx-auto p-4 sm:p-6 z-[100000]"
+        overlayClassName="z-[100000]"
+      >
+        <DialogHeader>
+          <DialogTitle className="text-lg sm:text-xl text-center text-red-600">
+            Confirm Account Deletion
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleDelete} className="space-y-4 mt-4">
+          <p className="text-sm sm:text-base text-center text-[#898989]">
+            This action is{" "}
+            <span className="font-bold text-red-600">irreversible</span>. To
+            confirm, type{" "}
+            <span className="font-mono bg-gray-100 px-1 rounded">
+              Delete my account
+            </span>{" "}
+            below.
+          </p>
+          <Input
+            id="delete-confirmation"
+            type="text"
+            className="w-full"
+            value={confirmation}
+            onChange={(e) => setConfirmation(e.target.value)}
+            placeholder="Type here..."
+            autoComplete="off"
+          />
+          {error && (
+            <p className="text-xs sm:text-sm text-red-500 flex items-center">
+              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              {error}
+            </p>
+          )}
+          <Button
+            type="submit"
+            variant="destructive"
+            className="w-full mt-6"
+            disabled={
+              confirmation !== "Delete my account" ||
+              deleteAccountMutation.isPending
+            }
+          >
+            {deleteAccountMutation.isPending ? "Deleting..." : "Delete Account"}
           </Button>
         </form>
       </DialogContent>

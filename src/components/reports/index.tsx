@@ -6,12 +6,20 @@ import { MyReports } from "./components/MyReports";
 export default function ReportsPage() {
   const { data, isLoading, error } = useReportOnboardState();
 
-  if (isLoading || data === undefined) {
+  // Show loading only when actively fetching data
+  if (isLoading) {
     return <LoadingSpinner size="lg" className="h-[70vh]" />;
   }
 
+  // If there's an error, you might want to handle it
+  if (error) {
+    return <div>Error loading onboard state</div>;
+  }
 
+  // If data is undefined/null/false, user is not onboarded
+  // If data has truthy value, user is onboarded
   const isOnboard = !!data;
+  
   return <div>{isOnboard ? <MyReports /> : <Onboarding />}</div>;
 }
 

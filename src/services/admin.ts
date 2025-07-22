@@ -87,6 +87,11 @@ export const getSubscriptionTier = async (id: string) => {
   return data;
 };
 
+export const currentPlan = async () => {
+  const { data } = await axiosInstance.get(`/subscription/current`);
+  return data;
+};
+
 export const initPaymentQuery = async (payload: {
   gateway: string;
   plan_id: string;
@@ -103,5 +108,22 @@ export const initPaymentQuery = async (payload: {
 
 export const cancelSubscription = async () => {
   const { data } = await axiosInstance.post(`/subscription/cancel`);
+  return data;
+};
+
+export const autoRenewalToggle = async () => {
+  const { data } = await axiosInstance.get(`/subscription/auto-renewal`);
+  return data;
+};
+
+export const getSubscriptionHistory = async (page = 1, page_size = 10) => {
+  const { data } = await axiosInstance.get(
+    `/subscription/history?page=${page}&page_size=${page_size}`
+  );
+  return data;
+};
+
+export const getOrganizationInvoice = async () => {
+  const { data } = await axiosInstance.get(`/organization/invoice`);
   return data;
 };

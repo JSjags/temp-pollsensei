@@ -1,18 +1,20 @@
-"use client"
+"use client";
 
+import ErrorBoundary from "@/components/ErrorBoundary";
+import Loading from "@/components/ui/Loading";
+import dynamic from "next/dynamic";
 
-import NavBar from "@/components/blocks/NavBar";
-import Tutorials from "@/components/resource-hub/tutorials";
-import React from "react";
+const Tutorials = dynamic(() => import("@/components/resource-hub/tutorials"), {
+  loading: () => <Loading />,
+  ssr: false,
+});
 
-type Props = {};
-
-const Page = (props: Props) => {
+export default function Page() {
   return (
-    <section className="mt-2 min-h-[50vh]">
-     <Tutorials />
-  </section>
-  )
-};
-
-export default Page;
+    <ErrorBoundary>
+      <section className="mt-2 min-h-[50vh]">
+        <Tutorials />
+      </section>
+    </ErrorBoundary>
+  );
+}

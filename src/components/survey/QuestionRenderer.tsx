@@ -92,6 +92,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     multi_choice: MultiChoiceQuestion,
     comment: CommentQuestion,
     long_text: CommentQuestion,
+    "Linear Scale": LinearScaleQuestion,
     linear_Scale: LinearScaleQuestion,
     likert_scale: LikertScaleQuestion,
     star_rating: StarRatingQuestion,

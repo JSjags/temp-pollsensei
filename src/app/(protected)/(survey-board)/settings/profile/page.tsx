@@ -1,12 +1,24 @@
 "use client";
 
-import ProfilePage from "@/subpages/settings/ProfilePage";
-import React from "react";
+import { Suspense } from "react";
+import { ProfileSkeleton } from "@/subpages/settings/ProfilePage";
+import dynamicImport from "next/dynamic";
 
-type Props = {};
+// Dynamically import the ProfilePage component with no SSR and no loading component
+const ProfilePage = dynamicImport(
+  () => import("@/subpages/settings/ProfilePage"),
+  {
+    loading: () => <ProfileSkeleton />,
+  }
+);
 
-const Page = (props: Props) => {
-  return <ProfilePage />;
-};
+// Page config for dynamic rendering
+export const dynamic = "force-dynamic";
 
-export default Page;
+export default function Page() {
+  return (
+    <Suspense fallback={<ProfileSkeleton />}>
+      <ProfilePage />
+    </Suspense>
+  );
+}

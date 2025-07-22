@@ -31,8 +31,10 @@ import { cancelSubscription } from "@/services/admin";
 import { useDispatch } from "react-redux";
 import { updateUser } from "@/redux/slices/user.slice";
 import { useUserProfileQuery } from "@/services/user.service";
+import { useSearchParams } from "next/navigation";
+import SubscriptionHistory from "./subscription/SubscriptionHistory";
 
-const SubscriptionPage: React.FC = () => {
+const MainSubscriptionPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { data, refetch } = useUserProfileQuery({});
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -43,7 +45,8 @@ const SubscriptionPage: React.FC = () => {
       toast.success("Your current subscription has been cancelled.");
       setShowCancelDialog(false);
       refetch();
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ type: "all" });
+      window.location.reload();
     },
     onError: (error: any) => {
       toast.error(
@@ -103,7 +106,10 @@ const SubscriptionPage: React.FC = () => {
       </Card>
 
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent className="sm:max-w-[425px]">
+        <AlertDialogContent
+          className="sm:max-w-[425px] z-[100000]"
+          overlayClassName="z-[100000]"
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg sm:text-xl">
               Cancel Subscription
@@ -137,4 +143,13 @@ const SubscriptionPage: React.FC = () => {
   );
 };
 
-export default SubscriptionPage;
+const SubscriptionPageWrapper: React.FC = () => {
+  const searchParams = useSearchParams();
+  const viewAllSubs = searchParams.get("viewAllSubs") === "true";
+  if (viewAllSubs) {
+    return <SubscriptionHistory />;
+  }
+  return <MainSubscriptionPage />;
+};
+
+export default SubscriptionPageWrapper;

@@ -27,12 +27,12 @@ const Page = (props: Props) => {
       <ResourceActions onClick={toggleChat} />
       <KnowledgeBase />
       <ContactUs />
-      <ChatWidget
+      {/* <ChatWidget
         isChatMinimized={isChatMinimized}
         isChatOpen={isChatOpen}
         minimizeChat={minimizeChat}
         closeChat={closeChat}
-      />
+      /> */}
     </section>
   );
 };

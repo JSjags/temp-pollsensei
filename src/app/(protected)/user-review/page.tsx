@@ -1,12 +1,18 @@
 "use client";
 
-import UserReview from "@/subpages/survey/UserReview";
-import React from "react";
+import dynamic from "next/dynamic";
+import Loading from "@/components/ui/Loading";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
-type Props = {};
+const UserReview = dynamic(() => import("@/subpages/survey/UserReview"), {
+  loading: () => <Loading />,
+  ssr: false,
+});
 
-const Page = (props: Props) => {
-  return <UserReview />;
-};
-
-export default Page;
+export default function Page() {
+  return (
+    <ErrorBoundary>
+      <UserReview />
+    </ErrorBoundary>
+  );
+}

@@ -7,10 +7,17 @@ import Image from "next/image";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useQuery } from "@tanstack/react-query";
-import { TPricing, useGeoLocation } from "./PricingCards";
-import { getMeQuery, getSubscriptionTier } from "@/services/admin";
+import { TCurrentPlan, TPricing, useGeoLocation } from "./PricingCards";
+import {
+  currentPlan,
+  getMeQuery,
+  getSubscriptionTier,
+  autoRenewalToggle,
+} from "@/services/admin";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/redux/slices/user.slice";
+import { toast } from "react-toastify";
+import React, { useEffect } from "react";
 
 export function CurrentPlanCard() {
   const user = useSelector((state: RootState) => state.user.user);
@@ -33,7 +40,39 @@ export function CurrentPlanCard() {
     enabled: userData.isSuccess,
   });
 
-  if (tierData.isLoading) {
+  const currentPlanData = useQuery<TCurrentPlan>({
+    queryKey: ["currentPlan"],
+    queryFn: () => currentPlan(),
+    enabled: userData.isSuccess,
+  });
+
+  const [autoRenewalLoading, setAutoRenewalLoading] = React.useState(false);
+  const [autoRenewalChecked, setAutoRenewalChecked] = React.useState(false);
+
+  useEffect(() => {
+    setAutoRenewalChecked(currentPlanData.data?.auto_renewal || false);
+  }, [currentPlanData.data]);
+
+  const handleAutoRenewalToggle = async () => {
+    setAutoRenewalLoading(true);
+    try {
+      const res = await autoRenewalToggle();
+      toast.success(res?.message || "Auto-renewal updated successfully");
+      setAutoRenewalChecked((prev) => !prev);
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || "Failed to update auto-renewal"
+      );
+    } finally {
+      setAutoRenewalLoading(false);
+    }
+  };
+
+  if (
+    tierData.isLoading ||
+    currentPlanData.isLoading ||
+    !currentPlanData.data
+  ) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -58,14 +97,14 @@ export function CurrentPlanCard() {
             </div>
           </div>
         </div>
-        {/* <motion.div
+        <motion.div
           className="absolute -bottom-2 right-0 z-10"
           initial={{ rotate: -10 }}
           animate={{ rotate: 0 }}
           transition={{ duration: 0.6, type: "spring" }}
         >
           <Skeleton className="size-40 rounded-full opacity-0" />
-        </motion.div> */}
+        </motion.div>
       </motion.div>
     );
   }
@@ -87,30 +126,60 @@ export function CurrentPlanCard() {
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground">
               {!locationData?.isNigeria
-                ? `$${tierData.data?.monthly_price_dollar ?? "__"}`
-                : `₦${tierData.data?.monthly_price_naira ?? "__"}`}{" "}
+                ? `$${
+                    tierData.data?.monthly_price_dollar.toLocaleString() ?? "__"
+                  }`
+                : `₦${
+                    tierData.data?.monthly_price_naira.toLocaleString() ?? "__"
+                  }`}{" "}
               / month
             </p>
           </div>
-          {/* <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Auto Renewal</span>
-            <Switch className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[#9D50BB] data-[state=checked]:to-[#9D50BB]" />
-          </div> */}
+            <Switch
+              className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[#9D50BB] data-[state=checked]:to-[#9D50BB]"
+              checked={autoRenewalChecked}
+              onCheckedChange={handleAutoRenewalToggle}
+              disabled={
+                autoRenewalLoading ||
+                currentPlanData.isLoading ||
+                currentPlanData.isError ||
+                tierData.isLoading ||
+                tierData.isError ||
+                userData.isLoading ||
+                userData.isError ||
+                locationLoading ||
+                locationError
+              }
+            />
+          </div>
         </div>
         <div className="flex gap-4 bg-[#5B03B2] text-white p-4 sm:px-6">
-          <div>
-            <p className="text-sm font-medium">Next Billing date</p>
-            <p className="text-base font-semibold">
-              {tierData.data?.monthly_price_dollar === 0 ? "Free" : "N/A"}
-              {/* : "10th December, 2025"} */}
-            </p>
-          </div>
+          {currentPlanData.data?.next_billing_date !== "N/A" && (
+            <div>
+              <p className="text-sm font-medium">Next Billing date</p>
+              <p className="text-base font-semibold">
+                {new Date(
+                  currentPlanData.data?.next_billing_date!
+                ).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+          )}
           <div>
             <p className="text-sm font-medium">Next Billing Amount</p>
             <p className="text-base font-semibold">
               {!locationData?.isNigeria
-                ? `$${tierData.data?.monthly_price_dollar ?? "__"}`
-                : `₦${tierData.data?.monthly_price_naira ?? "__"}`}
+                ? `$${
+                    tierData.data?.monthly_price_dollar.toLocaleString() ?? "__"
+                  }`
+                : `₦${
+                    tierData.data?.monthly_price_naira.toLocaleString() ?? "__"
+                  }`}
             </p>
           </div>
         </div>

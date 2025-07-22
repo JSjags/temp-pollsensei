@@ -416,6 +416,7 @@ const PublicResponse = () => {
                           //   handleOptionChange(index, value, item.question_type)
                           // }
                           is_required={item.is_required}
+                          item={item}
                         />
                       ) : item.question_type === "likert_scale" ? (
                         <LikertScaleQuestion

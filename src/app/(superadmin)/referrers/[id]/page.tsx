@@ -20,6 +20,26 @@ import React, { useState } from "react";
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { FadeLoader } from "react-spinners";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { useUpdateDisableStatusMutation } from "@/services/superadmin.service";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { UserCheck2, UserRoundMinusIcon } from "lucide-react";
 
 const TableSkeleton = () => {
   return (
@@ -60,8 +80,12 @@ const ReferrerUsersPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const searchParams = useSearchParams();
   const id = useParams()?.id?.toString() ?? "";
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [updateDisableStatus] = useUpdateDisableStatusMutation();
 
-  const { data, isLoading, error, isFetching } = useQuery({
+  const { data, isLoading, error, isFetching, refetch } = useQuery({
     queryKey: [queryKeys.REFERRERS, "users", currentPage],
     queryFn: async () => {
       const response = await getReferrerUsers({ pageNumber: currentPage, id });
@@ -151,6 +175,9 @@ const ReferrerUsersPage: React.FC = () => {
                 <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
                   Created Date
                 </th>
+                <th className="text-left py-4 px-4 font-semibold text-sm text-purple-900">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -158,7 +185,7 @@ const ReferrerUsersPage: React.FC = () => {
                 <TableSkeleton />
               ) : error ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8">
+                  <td colSpan={8} className="text-center py-8">
                     <span className="flex justify-center items-center text-sm text-red-500">
                       Something went wrong
                     </span>
@@ -166,7 +193,7 @@ const ReferrerUsersPage: React.FC = () => {
                 </tr>
               ) : data?.data?.data?.length === 0 || !data?.data?.data ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8">
+                  <td colSpan={8} className="text-center py-8">
                     <span className="flex justify-center items-center text-sm text-purple-500">
                       No record found
                     </span>
@@ -218,20 +245,51 @@ const ReferrerUsersPage: React.FC = () => {
                     <td className="py-4 px-4">
                       <span
                         className={`py-1.5 px-3 rounded-full text-xs font-medium ${
-                          user?.plan?.name === "Team Plan"
+                          user?.plan === "Team Plan"
                             ? "bg-purple-100 text-purple-700"
-                            : user?.plan?.name === "Pro Plan"
+                            : user?.plan === "Pro Plan"
                             ? "bg-blue-100 text-blue-700"
                             : "bg-gray-100 text-gray-700"
                         }`}
                       >
-                        {user?.plan ? user?.plan.name : "Free Plan"}
+                        {user?.plan ? user?.plan : "Free Plan"}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-gray-600">
                       {user?.createdAt
                         ? formatDateOption(user.createdAt)
                         : "Not Available"}
+                    </td>
+                    <td className="py-4 px-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="focus:outline-none">
+                          <div className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                            <BsThreeDotsVertical className="h-4 w-4 text-gray-600" />
+                          </div>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-fit">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setIsDialogOpen(true);
+                            }}
+                            className={`text-sm cursor-pointer flex items-center gap-2 ${
+                              user.disabled?.[0]?.status
+                                ? "text-green-600 focus:text-green-600"
+                                : "text-red-600 focus:text-red-600"
+                            }`}
+                          >
+                            {user.disabled?.[0]?.status ? (
+                              <UserCheck2 className="h-4 w-4" />
+                            ) : (
+                              <UserRoundMinusIcon className="h-4 w-4" />
+                            )}
+                            {user.disabled?.[0]?.status
+                              ? "Activate Account"
+                              : "Deactivate Account"}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))
@@ -255,8 +313,70 @@ const ReferrerUsersPage: React.FC = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onNavigate={navigatePage}
+          onPageChange={setCurrentPage}
         />
       </div>
+
+      {/* Render the AlertDialog outside the table, controlled by isDialogOpen and selectedUser */}
+      {isDialogOpen && selectedUser && (
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {selectedUser.disabled?.[0]?.status
+                  ? "Activate Account"
+                  : "Deactivate Account"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {selectedUser.disabled?.[0]?.status
+                  ? "Are you sure you want to activate this account? The user will regain access to their account."
+                  : "Are you sure you want to deactivate this account? The user will lose access to their account."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                disabled={isProcessing}
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  setIsProcessing(true);
+                  try {
+                    await updateDisableStatus({
+                      email: selectedUser.email,
+                      status: !selectedUser.disabled?.[0]?.status,
+                    }).unwrap();
+                    setIsDialogOpen(false);
+                    setSelectedUser(null);
+                    // Refetch users
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+                    refetch();
+                    // window.location.reload(); // Or trigger a refetch if using react-query
+                  } catch (e) {
+                    // Optionally show error toast
+                  } finally {
+                    setIsProcessing(false);
+                  }
+                }}
+                className={
+                  selectedUser.disabled?.[0]?.status
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-red-600 hover:bg-red-700"
+                }
+                disabled={isProcessing}
+              >
+                {isProcessing
+                  ? "Processing..."
+                  : selectedUser.disabled?.[0]?.status
+                  ? "Activate"
+                  : "Deactivate"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };

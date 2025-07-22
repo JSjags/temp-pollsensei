@@ -146,6 +146,10 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
     );
   };
 
+  const qs = useSelector((state: RootState) => state?.survey?.sections);
+
+  console.log(qs);
+
   return (
     <div className="w-full">
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -272,7 +276,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
         </div>
         <hr />
         <div className="py-10 w-full flex gap-10 ">
-          <div className="pb-10 w-2/3 flex flex-col">
+          <div className="pb-10 lg:w-2/3 flex flex-col">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -401,8 +405,10 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                 <MatrixQuestion
                                   key={index}
                                   index={index + 1}
-                                  rows={item.rows}
-                                  columns={item.columns}
+                                  rows={item?.rows || item?.options?.Rows}
+                                  columns={
+                                    item?.columns || item?.options?.Columns
+                                  }
                                   question={item.question}
                                   questionType={item.question_type}
                                 />
@@ -419,8 +425,10 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   key={index}
                                   index={index + 1}
                                   question={item.question}
-                                  rows={item.rows}
-                                  columns={item.columns}
+                                  rows={item?.rows || item?.options?.Rows}
+                                  columns={
+                                    item?.columns || item?.options?.Columns
+                                  }
                                   questionType={item.question_type}
                                 />
                               ) : item.question_type === "rating_scale" ? (
@@ -482,6 +490,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   questionType={item.question_type}
                                   index={index + 1}
                                   is_required={item.is_required}
+                                  item={item}
                                 />
                               ) : null}
                             </div>

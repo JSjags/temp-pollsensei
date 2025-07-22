@@ -6,6 +6,13 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+  referral_reward?: {
+    number_of_referred_users?: number;
+    accrued_amount?: number;
+    payout_amount?: number;
+    date_requested?: string; // ISO string for Date
+    new_referred_users?: number;
+  };
   roles: Array<{
     organization: string;
     role: string[];

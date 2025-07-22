@@ -1,12 +1,20 @@
 "use client";
 
-import ForgotPasswordPage from "@/subpages/auth/ForgotPasswordPage";
-import React from "react";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
-type Props = {};
+const ForgotPasswordPage = dynamic(
+  () => import("@/subpages/auth/ForgotPasswordPage"),
+  {
+    ssr: false,
+    loading: () => <div>Loading...</div>,
+  }
+);
 
-const ForgotPassword = (props: Props) => {
-  return <ForgotPasswordPage />;
-};
-
-export default ForgotPassword;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ForgotPasswordPage />
+    </Suspense>
+  );
+}

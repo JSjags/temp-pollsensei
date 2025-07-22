@@ -445,6 +445,8 @@ function ReportCard({
   popoverOpen,
   onPopoverOpenChange,
 }: ReportCardProps) {
+   const router = useRouter();
+
   const moreContent = [
     { label: "Rename", action: onRenameClick },
     {
@@ -462,7 +464,7 @@ function ReportCard({
 
   return (
     <div
-      onClick={() => {}}
+      //  onClick={handleCardClick}
       className="border bg-white hover:shadow transition py-8 px-4 rounded-[10.43px] cursor-pointer duration-300 ease-in-out"
     >
       <div className="flex items-center justify-between mb-2 w-full">
@@ -531,7 +533,7 @@ function ReportCard({
             </Button>
           </DialogTrigger>
           <DialogContent className="py-14 px-10 w-[100vw]" showXBtn={false}>
-            <PublishDialog reportId={report._id}/>
+            <PublishDialog reportId={report?._id} reportName={report?.name}/>
           </DialogContent>
         </Dialog>
 

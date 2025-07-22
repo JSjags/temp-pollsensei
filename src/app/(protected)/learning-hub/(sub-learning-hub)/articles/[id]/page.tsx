@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import ArticleDetailsPage from "./ArticleDetailsPage";
 import { ITutorial } from "@/types/api/tutorials.types";
+import environment from "@/services/config/base";
 
 const webAppBaseURL =
   process.env.VITE_NEXT_PUBLIC_DOMAIN || "https://pollsensei.ai";
@@ -11,8 +12,10 @@ interface Props {
 }
 
 async function fetchSingleTutorial(slug: string) {
+  // Use the base URL from the environment config
+
   const res = await fetch(
-    `https://pollsensei-api-a0e832048911.herokuapp.com/api/v1/tutorial/${slug}`
+    `${environment.API_BASE_URL}/tutorial/${slug}`
     // {
     //   cache: "no-cache",
     // }
@@ -65,7 +68,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const ArticleDetails: React.FC = () => {
-  return <ArticleDetailsPage />;
+  return (
+    <div className="bg-white">
+      <ArticleDetailsPage />
+    </div>
+  );
 };
 
 export default ArticleDetails;

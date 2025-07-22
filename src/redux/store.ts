@@ -126,7 +126,7 @@ import {
   REGISTER,
 } from "redux-persist";
 import { encryptTransform } from "redux-persist-transform-encrypt";
-import apiSlice from "../services/config/apiSlice";
+import { apiSlice } from "../services/config/apiSlice";
 import userReducer from "./slices/user.slice";
 import hardSet from "redux-persist/es/stateReconciler/hardSet";
 import toggleReducer from "./slices/invite.slice";
@@ -148,6 +148,7 @@ import quickSurveyReducer from "./slices/quickSurveySlice";
 import criteriaReducer from "./slices/criteriaSlice";
 import earnDialogReducer from "./slices/earnDialogSlice";
 import becomePaidRespondentReducer from "./slices/becomePaidRespondentSlice";
+import limitationReducer from "./slices/limitation.slice";
 // At the top of the file, after imports
 export type RootState = {
   user: ReturnType<typeof userReducer>;
@@ -163,6 +164,7 @@ export type RootState = {
   filter: ReturnType<typeof filterReducer>;
   upgradeModal: ReturnType<typeof upgradeModalReducer>;
   survey_settings: ReturnType<typeof surveySettingsReducer>;
+  limitation: ReturnType<typeof limitationReducer>;
   [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
   criteria: ReturnType<typeof criteriaReducer>;
   respondentDialog: ReturnType<typeof respondentDialogReducer>;
@@ -190,6 +192,7 @@ const rootReducer = combineReducers({
   quickSurvey: quickSurveyReducer,
   earnDialogSlice: earnDialogReducer,
   becomePaidRespondentSlice: becomePaidRespondentReducer,
+  limitation: limitationReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 
@@ -206,7 +209,7 @@ const persistConfig = {
     }),
   ],
   stateReconciler: hardSet,
-  blacklist: ["senseiMaster", apiSlice.reducerPath],
+  blacklist: [apiSlice.reducerPath, "senseiMaster", "limitation"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

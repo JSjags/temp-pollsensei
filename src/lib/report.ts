@@ -52,23 +52,3 @@ export const postOnboardData = async (
   const response = await axiosInstance.post("/report/onboard", payload);
   return response.data;
 };
-// export const ONBOARDING_QK = ["onboarding"] as const;
-// export function useUpdateOnboard() {
-//   const queryClient = useQueryClient();
-//   return useMutation<OnboardingResponse, Error, OnboardingPayload>({
-//     mutationFn: async (payload) => {
-//       const res = await axiosInstance.post<OnboardingResponse>(
-//         "/report/update-onboard",
-//         payload
-//       );
-//       if (!res.data) throw new Error("Failed to update onboard");
-//       return res.data;
-//     },
-//     onSuccess: (res) => {
-//       // Merge into cache
-//       queryClient.setQueryData<OnboardingData>(ONBOARDING_QK, (old) =>
-//         old ? { ...old, ...res.data } : res.data
-//       );
-//     },
-//   });
-// }

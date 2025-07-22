@@ -1,5 +1,3 @@
-"use client";
-
 import CreatedSurveysPage from "@/subpages/survey/CreatedSurveysPage";
 
 type Props = {};

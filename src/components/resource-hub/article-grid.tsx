@@ -8,7 +8,9 @@ import React, { useState } from "react";
 import { FadeLoader } from "react-spinners";
 import PageControl from "../common/PageControl";
 import { TUTORIAL_ENUM } from "@/services/api/constants.api";
-import { useGetTutorials } from "@/hooks/useGetRequests";
+import { useGetTutorials, usePublicGetTutorials } from "@/hooks/useGetRequests";
+import EmptyState from "../common/EmptyState";
+import { LibraryBigIcon } from "lucide-react";
 
 type Article = {
   title: string;
@@ -20,7 +22,7 @@ type Article = {
 
 const ArticlesGrid: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error } = useGetTutorials({
+  const { data, isLoading, error } = usePublicGetTutorials({
     page: currentPage,
     filter: TUTORIAL_ENUM.web,
   });
@@ -59,21 +61,61 @@ const ArticlesGrid: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {isLoading ? (
           <>
-            <div className="text-center ">
-              <span className="flex justify-center items-center">
-                <FadeLoader height={10} radius={1} className="mt-3" />
-              </span>
-            </div>
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="animate-pulse bg-white flex flex-col rounded-lg shadow-lg overflow-hidden border border-gray-200"
+              >
+                <div className="w-full aspect-video bg-gray-200" />
+                <div className="p-4 flex flex-col gap-2">
+                  <div className="h-5 bg-gray-200 rounded w-3/4 mx-auto" />
+                  <div className="h-3 bg-gray-200 rounded w-full mx-auto" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6 mx-auto" />
+                </div>
+              </div>
+            ))}
           </>
         ) : error ? (
           <>
-            <div className="text-center ">
-              <span className="flex justify-center items-center text-xs text-red-500">
-                Something went wrong
-              </span>
+            <div className="col-span-full flex flex-col items-center justify-center min-h-[40vh] w-full">
+              <div className="flex flex-col items-center bg-white rounded-lg shadow-md px-8 py-10 border border-red-200">
+                <div className="mb-4">
+                  <svg
+                    className="w-12 h-12 text-red-400"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="#fee2e2"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8v4m0 4h.01"
+                      className="text-red-600"
+                      stroke="currentColor"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-red-600 mb-2">
+                  Something went wrong
+                </h3>
+                <p className="text-gray-500 text-sm text-center max-w-xs">
+                  We couldn't load the tutorials at this time. Please try
+                  refreshing the page or check your internet connection.
+                </p>
+              </div>
             </div>
           </>
-        ) : (
+        ) : data?.data && data?.data?.length > 0 ? (
           data?.data?.map((article: ITutorial, index: any) => (
             <Link
               href={routes.SINGLE_ARTICLE_PAGE(article.slug)}
@@ -114,6 +156,16 @@ const ArticlesGrid: React.FC = () => {
               </div>
             </Link>
           ))
+        ) : (
+          <div className="col-span-full flex flex-col items-center justify-center min-h-[40vh] w-full">
+            <EmptyState
+              title="No videos found"
+              description="We couldn't find any videos matching your search or filters. Try adjusting your criteria or check back later for new content."
+              icon={
+                <LibraryBigIcon className="w-12 h-12 text-purple-400 mx-auto" />
+              }
+            />
+          </div>
         )}
       </div>
       <div className="mt-6 sm:mt-8 flex justify-between items-center">

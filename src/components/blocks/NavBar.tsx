@@ -43,7 +43,7 @@ const NavBar = ({
 
   const handleLinkClick = (item: string) => {
     const isLandingPage = pathname === "/";
-    if (item === "Features" || item === "FAQs" || item === "Benefits") {
+    if (item === "Features" || item === "Benefits") {
       const sectionId = item.toLowerCase();
       if (isLandingPage) {
         scrollToSection?.(sectionId);
@@ -52,6 +52,8 @@ const NavBar = ({
       }
     } else if (item === "Leaderboard") {
       router.push("/leaderboard");
+    } else if (item === "FAQs") {
+      router.push("/faq");
     } else {
       router.push(`/${item.toLowerCase().replace(" ", "-")}`);
     }
@@ -66,14 +68,14 @@ const NavBar = ({
         "sticky top-0 z-50 transition-all duration-300",
         isScrolled
           ? `bg-white/80 backdrop-blur-lg shadow-lg ${
-              isSidebarOpen ? "h-screen" : "md:h-auto"
+              isSidebarOpen ? "h-screen" : "lg:h-auto"
             }`
           : `bg-white ${isSidebarOpen && "h-screen"}`
       )}
     >
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 lg:gap-8">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link href="/" className="flex items-center gap-2">
                 <Image
@@ -85,7 +87,7 @@ const NavBar = ({
               </Link>
             </motion.div>
 
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden lg:flex items-center space-x-4 xl:space-x-8">
               {navItems.map((item) => (
                 <motion.span
                   key={item}
@@ -94,7 +96,7 @@ const NavBar = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <span className="text-gray-600 group-hover:text-[#5B03B2] transition-colors duration-300">
+                  <span className="text-gray-600 group-hover:text-[#5B03B2] transition-colors duration-300 text-sm xl:text-base">
                     {item}
                   </span>
                   <motion.span
@@ -116,6 +118,7 @@ const NavBar = ({
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                className="hidden lg:block"
               >
                 <Link
                   href="/login"
@@ -129,7 +132,7 @@ const NavBar = ({
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="hidden md:block"
+              className="hidden lg:block"
             >
               <Link
                 href={
@@ -154,7 +157,7 @@ const NavBar = ({
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="md:hidden"
+              className="lg:hidden"
               onClick={() => setIsSidebarOpen(true)}
             >
               <svg
@@ -181,7 +184,7 @@ const NavBar = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[2147483647] md:hidden"
+            className="fixed inset-0 z-[2147483647] lg:hidden"
           >
             <motion.div
               initial={{ opacity: 0 }}
@@ -238,7 +241,37 @@ const NavBar = ({
                   ))}
                 </div>
 
-                <div className="mt-auto">
+                <div className="mt-auto space-y-4">
+                  {(!isLoggedIn ||
+                    !state.user ||
+                    !state.access_token ||
+                    !state.token) && (
+                    <div className="flex gap-4">
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Link
+                          href="/login"
+                          className="block w-full text-gray-600 hover:text-[#5B03B2] text-center font-medium"
+                        >
+                          Login
+                        </Link>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Link
+                          href="/register"
+                          className="block w-full text-gray-600 hover:text-[#5B03B2] text-center font-medium"
+                        >
+                          Register
+                        </Link>
+                      </motion.div>
+                    </div>
+                  )}
+
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

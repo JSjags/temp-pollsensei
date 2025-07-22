@@ -118,6 +118,18 @@ const ThreeStepDropdown: React.FC<DropdownData> = ({
 
                   {selectedQuestion && !selectedAnswer && (
                     <motion.div {...dropdownAnimation} className="space-y-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedQuestion(null);
+                          dispatch(setQuestion(""));
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Back to questions
+                      </Button>
                       <Select
                         onValueChange={(value) => {
                           dispatch(setAnswersss(value));
@@ -144,23 +156,20 @@ const ThreeStepDropdown: React.FC<DropdownData> = ({
                             ))}
                         </SelectContent>
                       </Select>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedQuestion(null);
-                          dispatch(setQuestion(""));
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        Back to questions
-                      </Button>
                     </motion.div>
                   )}
 
                   {selectedAnswer && (
                     <motion.div {...dropdownAnimation} className="space-y-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleBackToQuestion}
+                        className="flex items-center gap-2"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Change answer
+                      </Button>
                       <div className="flex items-center gap-2">
                         <Badge
                           variant="secondary"
@@ -175,15 +184,6 @@ const ThreeStepDropdown: React.FC<DropdownData> = ({
                           </button>
                         </Badge>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleBackToQuestion}
-                        className="flex items-center gap-2"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                        Change answer
-                      </Button>
                     </motion.div>
                   )}
 

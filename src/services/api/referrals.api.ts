@@ -40,3 +40,9 @@ export const getReferrerUsers = ({ pageNumber, id }: GetReferrerUsersProps) =>
   axiosInstance.get<GetReferrerUsers>(
     `/superadmin/referrer/${id}/users?page=${pageNumber ?? 1}&page_size=${20}`
   );
+
+export const postReferralPayout = (data: {
+  account_name: string;
+  account_number: string;
+  bank_name: string;
+}) => axiosInstance.post<GenericApiResponse>("/user/referral-payout", data);
