@@ -28,6 +28,6 @@
     ".next/types/**/*.ts",
     "src/services/dashboard.service.js",
     "src/app/(protected)/(survey-board)/surveys/survey-list"
-  ],
+, ".next/types/app/(protected)/reports/drafts/page.ts"  ],
   "exclude": ["node_modules"]
 }

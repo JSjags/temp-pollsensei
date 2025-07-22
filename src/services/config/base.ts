@@ -14,7 +14,8 @@ interface EnvironmentConfig {
 const environment: EnvironmentConfig = {
   // For main branch
   production: {
-    API_BASE_URL: "https://api.pollsensei.ai/api/v1",
+    // API_BASE_URL: "https://api.pollsensei.ai/api/v1",
+    API_BASE_URL: "https://pollsensei-api-a0e832048911.herokuapp.com/api/v1",
   },
   // For v2-main branch
   development: {

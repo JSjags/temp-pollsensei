@@ -31,6 +31,11 @@ const items = [
     icon: "/assets/sidebar/earn.svg",
   },
   {
+    title: "Reports",
+    url: "/reports",
+    icon: "/assets/sidebar/reports.svg",
+  },
+  {
     title: "Shop",
     url: "/shop",
     icon: "/assets/sidebar/shop.svg",

@@ -124,14 +124,20 @@ import Analysis from './shop/MdQueryStats.svg'
 import AIReporting from './shop/BsClipboardData.svg'
 import Voice from './shop/MdOutlineKeyboardVoice.svg'
 import Pollcoin from './shop/pollcoin.svg'
+import More from './reports/more.svg'
+import ShareIcon from './reports/share.svg'
+import DownloadIcon from './reports/download.svg'
 
 export {
   teamIcon,
   Facebook,
   X,
+  More,
   Tiktok,
   Instagram,
   Pollcoin,
+  ShareIcon,
+  DownloadIcon,
   AIGeneration,
   OCR,
   Analysis,
