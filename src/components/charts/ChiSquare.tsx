@@ -63,7 +63,7 @@ const ChiSquare: React.FC<ChiSquareProps> = ({ data }) => {
           <CardTitle className="flex items-center justify-between">
             <span>{data.test_name}</span>
             <Select value={selectedResult} onValueChange={setSelectedResult}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
                 <SelectValue placeholder="Select variable" />
               </SelectTrigger>
               <SelectContent>

@@ -1,4 +1,4 @@
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import StyleEditor from "./StyleEditor";
 import QuestionType from "./QuestionType";
@@ -27,13 +27,32 @@ import BooleanQuestion from "@/components/survey/BooleanQuestion";
 import SliderQuestion from "@/components/survey/SliderQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import { toast } from "react-toastify";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import WatermarkBanner from "@/components/common/WatermarkBanner";
 import { BsExclamation } from "react-icons/bs";
-import { cn } from "@/lib/utils";
+import { cn, extractMongoId } from "@/lib/utils";
 import axiosInstance from "@/lib/axios-instance";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { getSurveyResponses } from "@/services/analysis";
+import { Plus, Sheet, TableRowsSplit } from "lucide-react";
+import PaginationBtn from "@/components/common/PaginationBtn";
+import { RxCardStack } from "react-icons/rx";
+import { Trash2 } from "lucide-react";
+import SurveyHeader from "@/components/survey/SurveyHeader";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
+import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
+import { MoveRight, BringToFront, Scissors } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
+import { HiOutlinePlus } from "react-icons/hi";
 
 interface Question {
   question: string;
@@ -45,7 +64,11 @@ interface Question {
 }
 
 interface Section {
+  section_topic?: string;
+  section_description?: string;
   questions: Question[];
+  header_text?: { name: string; size: number };
+  body_text?: { name: string; size: number };
 }
 
 export interface SurveyData {
@@ -61,7 +84,115 @@ export interface SurveyData {
   header_url: string;
 }
 
+// Animation variants for direction-aware slide
+const sectionVariants = {
+  enter: (direction: number) => ({
+    x: direction === 1 ? 100 : -100,
+    opacity: 0,
+  }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction: number) => ({
+    x: direction === 1 ? -100 : 100,
+    opacity: 0,
+  }),
+};
+
+// Animated divider component for cutting sections
+const CutSectionDivider = ({ onCut }: { onCut: () => void }) => {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <motion.div
+      className="relative flex items-center z-[1000] justify-center w-full"
+      initial={false}
+      animate={hovered ? "hovered" : "initial"}
+      variants={{
+        initial: { height: 24 },
+        hovered: {
+          height: 48,
+          transition: { type: "spring", stiffness: 200, damping: 18 },
+        },
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ minHeight: 12 }}
+    >
+      {/* Reveal divider only on hover */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            key="divider"
+            initial={{ scaleX: 0, opacity: 0, y: 10 }}
+            animate={{
+              scaleX: 1,
+              opacity: 1,
+              y: 0,
+              transition: { type: "spring", stiffness: 300, damping: 18 },
+            }}
+            exit={{
+              scaleX: 0,
+              opacity: 0,
+              y: -10,
+              transition: { duration: 0.3, ease: "easeInOut" },
+            }}
+            className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-pink-200 via-purple-400 to-pink-200 rounded-full shadow-lg z-0"
+            style={{ pointerEvents: "none" }}
+          />
+        )}
+      </AnimatePresence>
+      {/* Reveal button only on hover */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.button
+            key="scissors"
+            initial={{ scale: 0.5, opacity: 0, rotate: -30, y: 20 }}
+            animate={{
+              scale: 1,
+              opacity: 1,
+              rotate: 0,
+              y: 0,
+              transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 18,
+                delay: 0.08,
+              },
+            }}
+            exit={{
+              scale: 0.5,
+              opacity: 0,
+              rotate: 30,
+              y: -20,
+              transition: { duration: 0.25, ease: "circIn" },
+            }}
+            className="absolute -top-7 mx-auto bg-white border border-pink-300 shadow-lg rounded-full p-2 z-10 hover:bg-pink-100 active:scale-95 focus:outline-none focus:ring-2 focus:ring-pink-400"
+            onClick={onCut}
+            aria-label="Cut and create new section"
+            whileTap={{ scale: 0.85, rotate: -10 }}
+          >
+            <Scissors className="w-6 h-6 text-pink-600" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+      {/* Tooltip on hover */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            key="tooltip"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: 0.15 } }}
+            exit={{ opacity: 0, y: 10, transition: { duration: 0.18 } }}
+            className="absolute mx-auto w-fit top-10 bg-white px-3 py-1 rounded shadow text-xs text-pink-700 font-medium border border-pink-200"
+          >
+            Cut here & create new section
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
 const EditSubmittedSurvey = () => {
+  const path = usePathname();
   const params = useParams();
   const router = useRouter();
   const {
@@ -80,6 +211,8 @@ const EditSubmittedSurvey = () => {
     useEditSurveyMutation();
   const [isSidebar, setIsSidebarOpen] = useState(true);
   const [currentSection, setCurrentSection] = useState(0);
+  const [isHeaderEditing, setIsHeaderEditing] = useState(false);
+  const [direction, setDirection] = useState(0);
 
   console.log(data);
   console.log(params.id);
@@ -108,6 +241,17 @@ const EditSubmittedSurvey = () => {
     // setSelectIndex(index);
   };
 
+  const surveyId = extractMongoId(path);
+
+  // Initialize useQuery hook unconditionally
+  const surveyResponses = useQuery({
+    queryKey: [`get-survey-responses-${surveyId}`],
+    queryFn: () => getSurveyResponses({ surveyId: surveyId! }),
+    enabled: surveyId !== undefined,
+  });
+
+  console.log(surveyResponses.data);
+
   const handleDeleteQuestion = (questionIndex: number) => {
     setSurveyData((prevData) => {
       // Create deep copies to avoid mutating the state directly
@@ -131,6 +275,22 @@ const EditSubmittedSurvey = () => {
     setEditIndex(null);
     setIsEdit(false);
     setIsSidebarOpen((prev) => !prev);
+    setSurveyData((prevData) => {
+      // Create deep copies to avoid mutating the state directly
+      const updatedSections = prevData.sections.map((section, idx) => {
+        if (idx === currentSection) {
+          return {
+            ...section,
+            questions: section.questions.filter(
+              (_, qIdx) => qIdx !== section.questions.length - 1
+            ),
+          };
+        }
+        return section;
+      });
+
+      return { ...prevData, sections: updatedSections };
+    });
     // setAiChatbot(false);
   };
 
@@ -184,15 +344,20 @@ const EditSubmittedSurvey = () => {
     refetch();
   }, [refetch]);
 
-  const navigatePage = (direction: any) => {
+  const navigatePage = (directionParam: any) => {
     setCurrentSection((prevIndex) => {
-      if (direction === "next") {
-        return prevIndex < surveyData?.sections?.length - 1
-          ? prevIndex + 1
-          : prevIndex;
+      let newIndex = prevIndex;
+      if (directionParam === "next") {
+        setDirection(1);
+        newIndex =
+          prevIndex < surveyData?.sections?.length - 1
+            ? prevIndex + 1
+            : prevIndex;
       } else {
-        return prevIndex > 0 ? prevIndex - 1 : prevIndex;
+        setDirection(-1);
+        newIndex = prevIndex > 0 ? prevIndex - 1 : prevIndex;
       }
+      return newIndex;
     });
   };
 
@@ -268,6 +433,14 @@ const EditSubmittedSurvey = () => {
         updatedSections[currentSection] = {
           ...currentSectionData,
           questions: updatedQuestions,
+          ...{
+            min: minValue,
+            max: maxValue,
+            min_value: minValue,
+            max_value: maxValue,
+            minValue,
+            maxValue,
+          },
         };
       }
 
@@ -292,6 +465,10 @@ const EditSubmittedSurvey = () => {
       toast.error("Failed to update survey.");
     }
   };
+
+  console.log("---------------------------------------------");
+
+  console.log(surveyData?.sections[currentSection]?.questions);
   // Loading skeleton state
   if (isLoading) {
     return (
@@ -397,6 +574,86 @@ const EditSubmittedSurvey = () => {
   }
 
   if (data && isSurveySuccess) {
+    // Wait for survey responses to be fetched before rendering the form
+    if (surveyResponses.isLoading) {
+      return (
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <div className="flex gap-6">
+            <div className="flex flex-col gap-5 w-full px-0 lg:pl-6 animate-pulse">
+              {/* Logo skeleton */}
+              <div className="w-16 h-16 bg-gray-200 rounded my-5" />
+
+              {/* Header image skeleton */}
+              <div className="w-full h-24 bg-gray-200 rounded-lg" />
+
+              {/* Title skeleton */}
+              <div className="h-8 bg-gray-200 rounded w-1/2" />
+
+              {/* Description skeleton */}
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+
+              {/* Questions skeleton */}
+              <div className="space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      <div className="h-3 bg-gray-200 rounded w-2/3" />
+                      <div className="h-3 bg-gray-200 rounded w-1/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* StyleEditor skeleton */}
+            <div className="hidden lg:block w-1/3 animate-pulse h-screen">
+              <div className="bg-white h-full flex flex-col">
+                <div className="border-b py-4">
+                  <div className="h-6 bg-gray-200 rounded w-1/2 mx-10" />
+                </div>
+
+                <div className="px-10 border-b py-5">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+                  <div className="space-y-4">
+                    <div className="h-10 bg-gray-200 rounded" />
+                    <div className="h-10 bg-gray-200 rounded" />
+                  </div>
+                </div>
+
+                <div className="text-style px-10 border-b py-5">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+                  <div className="space-y-4">
+                    <div className="h-10 bg-gray-200 rounded" />
+                    <div className="h-10 bg-gray-200 rounded" />
+                    <div className="h-10 bg-gray-200 rounded" />
+                  </div>
+                </div>
+
+                <div className="px-10 border-b py-5">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+                  <div className="pt-5">
+                    <div className="h-10 bg-gray-200 rounded" />
+                  </div>
+                </div>
+
+                <div className="px-10 border-b py-5">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+                  <div className="h-24 bg-gray-200 rounded" />
+                </div>
+
+                <div className="px-10 py-5">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
+                  <div className="h-24 bg-gray-200 rounded" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         className={`${surveyData?.theme} flex flex-col gap-5 w-full px-0 lg:pl-6 relative`}
@@ -428,690 +685,1706 @@ const EditSubmittedSurvey = () => {
             )}
 
             <div className="flex flex-col">
-              {isEditHeader ? (
+              <AnimatePresence
+                mode="popLayout"
+                initial={false}
+                custom={direction as number}
+              >
                 <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="mb-6 bg-white rounded-lg w-full my-4 p-6 shadow-lg"
+                  key={currentSection}
+                  custom={direction as number}
+                  variants={sectionVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: "tween", duration: 0.4 }}
                 >
-                  <motion.div
-                    className="space-y-6"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <motion.div
-                      className="space-y-2"
-                      initial={{ x: -20 }}
-                      animate={{ x: 0 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <label className="text-sm font-medium text-gray-700">
-                        Survey Topic
-                      </label>
-                      <input
-                        type="text"
-                        value={surveyData.topic}
-                        onChange={(e) =>
-                          setSurveyData({
-                            ...surveyData,
-                            topic: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300"
-                      />
-                    </motion.div>
+                  {/* Section header, matching SurveyHeader usage in EditSurvey */}
+                  <div className="flex items-center justify-between">
+                    <SurveyHeader
+                      logoUrl={surveyData.logo_url}
+                      headerUrl={surveyData.header_url}
+                      survey={{
+                        ...surveyData,
+                        topic:
+                          currentSection === 0
+                            ? surveyData.topic
+                            : surveyData.sections[currentSection]
+                                ?.section_topic ?? surveyData.topic,
+                        description:
+                          currentSection === 0
+                            ? surveyData.description
+                            : surveyData.sections[currentSection]
+                                ?.section_description ?? surveyData.description,
+                      }}
+                      headerText={
+                        surveyData.sections[currentSection]?.header_text ||
+                        surveyData.header_text
+                      }
+                      bodyText={
+                        surveyData.sections[currentSection]?.body_text ||
+                        surveyData.body_text
+                      }
+                      canEdit={surveyResponses.data?.data?.length <= 0}
+                      isEdit={isHeaderEditing}
+                      onSave={(localHeaderText, localBodyText) => {
+                        setSurveyData((prev) => {
+                          const updatedSections = [...prev.sections];
+                          if (currentSection === 0) {
+                            // Update survey-level topic/description
+                            return {
+                              ...prev,
+                              topic: localHeaderText?.value ?? prev.topic,
+                              description:
+                                localBodyText?.value ?? prev.description,
+                              header_text: localHeaderText,
+                              body_text: localBodyText,
+                            };
+                          } else {
+                            updatedSections[currentSection] = {
+                              ...updatedSections[currentSection],
+                              section_topic:
+                                localHeaderText?.value ??
+                                prev.sections[currentSection]?.section_topic ??
+                                prev.topic,
+                              section_description:
+                                localBodyText?.value ??
+                                prev.sections[currentSection]
+                                  ?.section_description ??
+                                prev.description,
+                              header_text: localHeaderText,
+                              body_text: localBodyText,
+                            };
+                            return {
+                              ...prev,
+                              sections: updatedSections,
+                            };
+                          }
+                        });
+                        setIsHeaderEditing(false);
+                      }}
+                    />
+                  </div>
 
-                    <motion.div
-                      className="space-y-2"
-                      initial={{ x: -20 }}
-                      animate={{ x: 0 }}
-                      transition={{ delay: 0.4 }}
+                  {/* @ts-ignore */}
+                  {surveyResponses.data?.data?.length <= 0 ? (
+                    <DragDropContext
+                      onDragEnd={(result: any) => {
+                        if (!result.destination) return;
+                        setSurveyData((prevData) => {
+                          const updatedSections = [...prevData.sections];
+                          const section = updatedSections[currentSection];
+                          const items = Array.from(section.questions);
+                          const [reorderedItem] = items.splice(
+                            result.source.index,
+                            1
+                          );
+                          items.splice(
+                            result.destination.index,
+                            0,
+                            reorderedItem
+                          );
+                          updatedSections[currentSection] = {
+                            ...section,
+                            questions: items,
+                          };
+                          return { ...prevData, sections: updatedSections };
+                        });
+                      }}
                     >
-                      <label className="text-sm font-medium text-gray-700">
-                        Survey Description
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={surveyData.description}
-                        onChange={(e) =>
-                          setSurveyData({
-                            ...surveyData,
-                            description: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 resize-none"
-                      />
-                    </motion.div>
+                      <StrictModeDroppable droppableId="questions">
+                        {(provided: any) => (
+                          <div
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                          >
+                            {surveyData?.sections[currentSection]?.questions
+                              .length === 0 ? (
+                              <div className="flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200 my-6">
+                                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 mb-4">
+                                  <HiOutlinePlus className="w-8 h-8 text-purple-600" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2 text-gray-800">
+                                  No questions yet
+                                </h3>
+                                <p className="text-gray-500 mb-6 max-w-xs mx-auto">
+                                  Click the{" "}
+                                  <span className="font-semibold text-purple-700">
+                                    Add Question
+                                  </span>{" "}
+                                  button below to start building your survey
+                                  section.
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  className="px-4 relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                                  onClick={() => {
+                                    EditQuestion(0);
+                                    setSurveyData((prevData) => {
+                                      const updatedSections = [
+                                        ...prevData.sections,
+                                      ];
+                                      if (!updatedSections[currentSection])
+                                        return prevData;
+                                      updatedSections[currentSection] = {
+                                        ...updatedSections[currentSection],
+                                        questions: [
+                                          ...updatedSections[currentSection]
+                                            .questions,
+                                          {
+                                            question: "New Question",
+                                            question_type: "short_text",
+                                            is_required: false,
+                                            options: [],
+                                          },
+                                        ],
+                                      };
+                                      return {
+                                        ...prevData,
+                                        sections: updatedSections,
+                                      };
+                                    });
+                                  }}
+                                >
+                                  <div className="flex gap-2 items-center">
+                                    <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                                    <span className="group-hover:tracking-wide transition-all duration-200">
+                                      Add Question
+                                    </span>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                                  </div>
+                                </Button>
+                              </div>
+                            ) : (
+                              surveyData?.sections[
+                                currentSection
+                              ]?.questions?.map((item: any, index: number) => (
+                                <Draggable
+                                  key={index}
+                                  draggableId={index.toString()}
+                                  index={index}
+                                >
+                                  {(provided) => (
+                                    <div
+                                      className="flex items-start group"
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                    >
+                                      <div className="flex flex-col">
+                                        {/* Drag handle */}
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="mr-2 cursor-grab group-hover:scale-110 transition-transform duration-200"
+                                          title="Drag to reorder"
+                                        >
+                                          <svg
+                                            width="18"
+                                            height="18"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <circle
+                                              cx="5"
+                                              cy="6"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="5"
+                                              cy="12"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="5"
+                                              cy="18"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="12"
+                                              cy="6"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="12"
+                                              cy="12"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="12"
+                                              cy="18"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="19"
+                                              cy="6"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="19"
+                                              cy="12"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="19"
+                                              cy="18"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                          </svg>
+                                        </div>
+                                        {/* Actions button under drag handle */}
+                                        {surveyData.sections.length > 1 && (
+                                          <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                              <Button
+                                                className="mt-2 mr-2 h-6 bg-transparent p-1 rounded-full px-0 hover:bg-gray-100 text-gray-600 transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus:ring-transparent focus-visible:ring-transparent focus-within:outline-none focus-within:ring-0 focus-within:ring-transparent"
+                                                title="More actions"
+                                              >
+                                                <BringToFront
+                                                  strokeWidth={1.5}
+                                                  className="size-[18px] text-[#a78bfa]"
+                                                />
+                                              </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent
+                                              align="start"
+                                              className="z-[10000] min-w-[180px]"
+                                            >
+                                              <DropdownMenuSub>
+                                                <DropdownMenuSubTrigger className="flex items-center gap-2">
+                                                  <MoveRight className="w-4 h-4 text-[#a78bfa]" />
+                                                  <span>Move to section</span>
+                                                </DropdownMenuSubTrigger>
+                                                <DropdownMenuSubContent className="z-[10000] min-w-[180px]">
+                                                  {surveyData.sections.map(
+                                                    (section, secIdx) =>
+                                                      secIdx !==
+                                                      currentSection ? (
+                                                        <DropdownMenuItem
+                                                          key={secIdx}
+                                                          onClick={() => {
+                                                            setSurveyData(
+                                                              (prevData) => {
+                                                                const updatedSections =
+                                                                  [
+                                                                    ...prevData.sections,
+                                                                  ];
+                                                                const fromSection =
+                                                                  updatedSections[
+                                                                    currentSection
+                                                                  ];
+                                                                const toSection =
+                                                                  updatedSections[
+                                                                    secIdx
+                                                                  ];
+                                                                const movingQuestion =
+                                                                  fromSection
+                                                                    .questions[
+                                                                    index
+                                                                  ];
+                                                                // Remove from current
+                                                                const newFromQuestions =
+                                                                  fromSection.questions.filter(
+                                                                    (_, i) =>
+                                                                      i !==
+                                                                      index
+                                                                  );
+                                                                // Add to end of target
+                                                                const newToQuestions =
+                                                                  [
+                                                                    ...toSection.questions,
+                                                                    movingQuestion,
+                                                                  ];
+                                                                updatedSections[
+                                                                  currentSection
+                                                                ] = {
+                                                                  ...fromSection,
+                                                                  questions:
+                                                                    newFromQuestions,
+                                                                };
+                                                                updatedSections[
+                                                                  secIdx
+                                                                ] = {
+                                                                  ...toSection,
+                                                                  questions:
+                                                                    newToQuestions,
+                                                                };
+                                                                return {
+                                                                  ...prevData,
+                                                                  sections:
+                                                                    updatedSections,
+                                                                };
+                                                              }
+                                                            );
+                                                          }}
+                                                          className="flex items-center gap-2"
+                                                        >
+                                                          <span className="font-medium">
+                                                            Section {secIdx + 1}
+                                                          </span>
+                                                          {section.section_topic && (
+                                                            <span className="text-xs text-muted-foreground ml-2">
+                                                              {
+                                                                section.section_topic
+                                                              }
+                                                            </span>
+                                                          )}
+                                                        </DropdownMenuItem>
+                                                      ) : null
+                                                  )}
+                                                </DropdownMenuSubContent>
+                                              </DropdownMenuSub>
+                                            </DropdownMenuContent>
+                                          </DropdownMenu>
+                                        )}
+                                      </div>
+                                      <div
+                                        className={cn(
+                                          "flex-1"
+                                          // Optionally add drag feedback styling
+                                        )}
+                                      >
+                                        <div
+                                          className={cn(
+                                            "text-gray-600 mb-4",
+                                            surveyData?.question_text?.name &&
+                                              `!font-${surveyData.question_text.name
+                                                .split(" ")
+                                                .join("-")
+                                                .toLowerCase()
+                                                .replace(/\s+/g, "-")}`
+                                          )}
+                                          style={{
+                                            fontSize: `${surveyData?.question_text?.size}px !important`,
+                                          }}
+                                        >
+                                          {isEdit && editIndex === index ? (
+                                            <MultiChoiceQuestionEdit
+                                              question={item.question}
+                                              options={item.options}
+                                              questionType={item.question_type}
+                                              is_required={item.is_required}
+                                              onSave={handleSave}
+                                              onCancel={handleCancel}
+                                              minValue={item.min_value}
+                                              maxValue={item.max_value}
+                                              surveyData={surveyData}
+                                              item={item}
+                                              matrixColumns={item.columns}
+                                              matrixRows={item.rows}
+                                            />
+                                          ) : item.question_type ===
+                                              "multiple_choice" ||
+                                            item.question_type ===
+                                              "multi_choice" ? (
+                                            <MultiChoiceQuestion
+                                              question={item.question}
+                                              options={item.options}
+                                              is_required={item.is_required}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
 
-                    <motion.button
-                      whileHover={{
-                        scale: 1.02,
-                        boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="inline-flex items-center justify-center px-4 py-2 w-auto bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-md shadow-sm hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300"
-                      onClick={() => setIsEditHeader((prev) => !prev)}
-                    >
-                      Save Changes
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="bg-white rounded-lg w-full my-4 p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <motion.div
-                    className="space-y-4"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <motion.h2
-                      initial={{ x: -20 }}
-                      animate={{ x: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className={cn("font-normal", {
-                        [`font-${surveyData?.header_text?.name
-                          ?.split(" ")
-                          .join("-")
-                          .toLowerCase()
-                          .replace(/\s+/g, "-")}`]:
-                          surveyData?.header_text?.name,
-                      })}
-                      style={{
-                        fontSize: `${surveyData?.header_text?.size}px`,
-                      }}
-                    >
-                      {surveyData?.topic}
-                    </motion.h2>
-                    <motion.p
-                      initial={{ x: -20 }}
-                      animate={{ x: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className={cn("text-gray-600", {
-                        [`font-${surveyData?.body_text?.name
-                          ?.split(" ")
-                          .join("-")
-                          .toLowerCase()
-                          .replace(/\s+/g, "-")}`]: surveyData?.body_text?.name,
-                      })}
-                      style={{
-                        fontSize: `${surveyData?.body_text?.size}px`,
-                      }}
-                    >
-                      {surveyData?.description}
-                    </motion.p>
-                    <motion.div
-                      className="flex justify-end"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      <motion.button
-                        whileHover={{
-                          scale: 1.05,
-                          boxShadow: "0 3px 10px rgba(0,0,0,0.1)",
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                        className="inline-flex items-center px-4 h-10 border border-purple-300 text-sm font-medium rounded-full text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300"
-                        onClick={() => setIsEditHeader((prev) => !prev)}
-                      >
-                        <motion.svg
-                          whileHover={{ rotate: 180 }}
-                          transition={{ duration: 0.3 }}
-                          className="w-4 h-4 mr-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              index={index + 1}
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              setEditId={setEditIndex}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                              "comment" ||
+                                            item.question_type ===
+                                              "long_text" ? (
+                                            <CommentQuestion
+                                              key={index}
+                                              index={index + 1}
+                                              questionType={item.question_type}
+                                              question={item.question}
+                                              is_required={item.is_requied}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "linear_Scale" ? (
+                                            <LinearScaleQuestion
+                                              question={item.question}
+                                              scaleStart={item.scaleStart}
+                                              scaleEnd={item.scaleEnd}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              index={index + 1}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "likert_scale" ? (
+                                            <LikertScaleQuestion
+                                              question={item.question}
+                                              options={item.options}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              index={index + 1}
+                                              is_required={item.is_requied}
+                                              surveyData={surveyData}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                            />
+                                          ) : item.question_type ===
+                                            "star_rating" ? (
+                                            <StarRatingQuestion
+                                              question={item.question}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              index={index + 1}
+                                              is_required={item.is_requied}
+                                              surveyData={surveyData}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                            />
+                                          ) : item.question_type ===
+                                              "matrix_multiple_choice" ||
+                                            item.question_type ===
+                                              "matrix_checkbox" ? (
+                                            <MatrixQuestion
+                                              key={index}
+                                              index={index + 1}
+                                              rows={item.rows}
+                                              columns={item.columns}
+                                              questionType={item.question_type}
+                                              question={item.question}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "single_choice" ? (
+                                            <SingleChoiceQuestion
+                                              index={index + 1}
+                                              key={index}
+                                              question={item.question}
+                                              options={item.options}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              surveyData={surveyData}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                            />
+                                          ) : item.question_type ===
+                                            "checkbox" ? (
+                                            <CheckboxQuestion
+                                              key={index}
+                                              index={index + 1}
+                                              question={item.question}
+                                              options={item.options}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              surveyData={surveyData}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                            />
+                                          ) : item.question_type ===
+                                            "rating_scale" ? (
+                                            <RatingScaleQuestion
+                                              key={index}
+                                              index={index + 1}
+                                              question={item.question}
+                                              options={item.options}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "drop_down" ? (
+                                            <DropdownQuestion
+                                              index={index + 1}
+                                              key={index}
+                                              question={item.question}
+                                              options={item.options}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "number" ? (
+                                            <NumberQuestion
+                                              key={index}
+                                              index={index + 1}
+                                              question={item.question}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "short_text" ? (
+                                            <ShortTextQuestion
+                                              key={index}
+                                              index={index + 1}
+                                              question={item.question}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "boolean" ? (
+                                            <BooleanQuestion
+                                              key={index}
+                                              index={index + 1}
+                                              question={item.question}
+                                              options={item.options}
+                                              questionType={item.question_type}
+                                              EditQuestion={() =>
+                                                EditQuestion(index)
+                                              }
+                                              DeleteQuestion={() =>
+                                                handleDeleteQuestion(index)
+                                              }
+                                              is_required={item.is_requied}
+                                              setIsRequired={() => {
+                                                const updatedSections = [
+                                                  ...questions,
+                                                ];
+                                                const updatedSection = {
+                                                  ...updatedSections[
+                                                    currentSection
+                                                  ],
+                                                };
+                                                const updatedQuestions = [
+                                                  ...updatedSection.questions,
+                                                ];
+
+                                                updatedQuestions[index] = {
+                                                  ...updatedQuestions[index],
+                                                  is_required:
+                                                    !item.is_required,
+                                                };
+
+                                                updatedSection.questions =
+                                                  updatedQuestions;
+                                                updatedSections[
+                                                  currentSection
+                                                ] = updatedSection;
+                                              }}
+                                              surveyData={surveyData}
+                                            />
+                                          ) : item.question_type ===
+                                            "slider" ? (
+                                            <>
+                                              <SliderQuestion
+                                                question={item.question}
+                                                options={item.options}
+                                                questionType={
+                                                  item.question_type
+                                                }
+                                                index={index + 1}
+                                                min={
+                                                  item.min_value ||
+                                                  item.min_value
+                                                }
+                                                max={
+                                                  item.max_value ||
+                                                  item.max_value
+                                                }
+                                                is_required={item.is_required}
+                                                EditQuestion={() =>
+                                                  EditQuestion(index)
+                                                }
+                                                DeleteQuestion={() =>
+                                                  handleDeleteQuestion(index)
+                                                }
+                                                onSave={(
+                                                  updatedQuestion,
+                                                  updatedMin,
+                                                  updatedMax
+                                                ) =>
+                                                  handleSave(
+                                                    updatedQuestion,
+                                                    [],
+                                                    "slider",
+                                                    item.is_required,
+                                                    updatedMin,
+                                                    updatedMax
+                                                  )
+                                                }
+                                                setIsRequired={() => {
+                                                  const updatedSections = [
+                                                    ...questions,
+                                                  ];
+                                                  const updatedSection = {
+                                                    ...updatedSections[
+                                                      currentSection
+                                                    ],
+                                                  };
+                                                  const updatedQuestions = [
+                                                    ...updatedSection.questions,
+                                                  ];
+
+                                                  updatedQuestions[index] = {
+                                                    ...updatedQuestions[index],
+                                                    is_required:
+                                                      !item.is_required,
+                                                  };
+
+                                                  updatedSection.questions =
+                                                    updatedQuestions;
+                                                  updatedSections[
+                                                    currentSection
+                                                  ] = updatedSection;
+                                                }}
+                                                surveyData={surveyData}
+                                                item={item}
+                                              />
+                                            </>
+                                          ) : (
+                                            <>{item?.question_type}</>
+                                          )}
+                                        </div>
+                                        {/* Animated cut-to-section hover area (not after last question) */}
+                                        {index <
+                                          surveyData.sections[currentSection]
+                                            .questions.length -
+                                            1 && (
+                                          <CutSectionDivider
+                                            onCut={() => {
+                                              setSurveyData((prevData) => {
+                                                const updatedSections = [
+                                                  ...prevData.sections,
+                                                ];
+                                                const section =
+                                                  updatedSections[
+                                                    currentSection
+                                                  ];
+                                                const before =
+                                                  section.questions.slice(
+                                                    0,
+                                                    index + 1
+                                                  );
+                                                const after =
+                                                  section.questions.slice(
+                                                    index + 1
+                                                  );
+                                                if (after.length === 0)
+                                                  return prevData;
+                                                // Create new section with 'after' questions
+                                                const newSection = {
+                                                  ...section,
+                                                  questions: after,
+                                                };
+                                                updatedSections[
+                                                  currentSection
+                                                ] = {
+                                                  ...section,
+                                                  questions: before,
+                                                };
+                                                updatedSections.splice(
+                                                  currentSection + 1,
+                                                  0,
+                                                  newSection
+                                                );
+                                                return {
+                                                  ...prevData,
+                                                  sections: updatedSections,
+                                                };
+                                              });
+                                            }}
+                                          />
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))
+                            )}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </StrictModeDroppable>
+                    </DragDropContext>
+                  ) : (
+                    surveyData?.sections[currentSection]?.questions?.map(
+                      (item: any, index: number) => (
+                        <div
+                          key={index}
+                          className={cn(
+                            "text-gray-600 mb-4",
+                            surveyData?.question_text?.name &&
+                              `!font-${surveyData.question_text.name
+                                .split(" ")
+                                .join("-")
+                                .toLowerCase()
+                                .replace(/\s+/g, "-")}`
+                          )}
+                          style={{
+                            fontSize: `${surveyData?.question_text?.size}px !important`,
+                          }}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                          />
-                        </motion.svg>
-                        Edit
-                      </motion.button>
-                    </motion.div>
-                  </motion.div>
+                          {isEdit && editIndex === index ? (
+                            <MultiChoiceQuestionEdit
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              is_required={item.is_required}
+                              onSave={handleSave}
+                              onCancel={handleCancel}
+                              minValue={item.min_value}
+                              maxValue={item.max_value}
+                              surveyData={surveyData}
+                              item={item}
+                              matrixColumns={item.columns}
+                              matrixRows={item.rows}
+                            />
+                          ) : item.question_type === "multiple_choice" ||
+                            item.question_type === "multi_choice" ? (
+                            <MultiChoiceQuestion
+                              question={item.question}
+                              options={item.options}
+                              is_required={item.is_required}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              index={index + 1}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              setEditId={setEditIndex}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "comment" ||
+                            item.question_type === "long_text" ? (
+                            <CommentQuestion
+                              key={index}
+                              index={index + 1}
+                              questionType={item.question_type}
+                              question={item.question}
+                              is_required={item.is_requied}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "linear_Scale" ? (
+                            <LinearScaleQuestion
+                              question={item.question}
+                              scaleStart={item.scaleStart}
+                              scaleEnd={item.scaleEnd}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              index={index + 1}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "likert_scale" ? (
+                            <LikertScaleQuestion
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              index={index + 1}
+                              is_required={item.is_requied}
+                              surveyData={surveyData}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                            />
+                          ) : item.question_type === "star_rating" ? (
+                            <StarRatingQuestion
+                              question={item.question}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              index={index + 1}
+                              is_required={item.is_requied}
+                              surveyData={surveyData}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                            />
+                          ) : item.question_type === "matrix_multiple_choice" ||
+                            item.question_type === "matrix_checkbox" ? (
+                            <MatrixQuestion
+                              key={index}
+                              index={index + 1}
+                              rows={item.rows}
+                              columns={item.columns}
+                              questionType={item.question_type}
+                              question={item.question}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "single_choice" ? (
+                            <SingleChoiceQuestion
+                              index={index + 1}
+                              key={index}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              surveyData={surveyData}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                            />
+                          ) : item.question_type === "checkbox" ? (
+                            <CheckboxQuestion
+                              key={index}
+                              index={index + 1}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              surveyData={surveyData}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                            />
+                          ) : item.question_type === "rating_scale" ? (
+                            <RatingScaleQuestion
+                              key={index}
+                              index={index + 1}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "drop_down" ? (
+                            <DropdownQuestion
+                              index={index + 1}
+                              key={index}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "number" ? (
+                            <NumberQuestion
+                              key={index}
+                              index={index + 1}
+                              question={item.question}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "short_text" ? (
+                            <ShortTextQuestion
+                              key={index}
+                              index={index + 1}
+                              question={item.question}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "boolean" ? (
+                            <BooleanQuestion
+                              key={index}
+                              index={index + 1}
+                              question={item.question}
+                              options={item.options}
+                              questionType={item.question_type}
+                              EditQuestion={() => EditQuestion(index)}
+                              DeleteQuestion={() => handleDeleteQuestion(index)}
+                              is_required={item.is_requied}
+                              setIsRequired={() => {
+                                const updatedSections = [...questions];
+                                const updatedSection = {
+                                  ...updatedSections[currentSection],
+                                };
+                                const updatedQuestions = [
+                                  ...updatedSection.questions,
+                                ];
+
+                                updatedQuestions[index] = {
+                                  ...updatedQuestions[index],
+                                  is_required: !item.is_required,
+                                };
+
+                                updatedSection.questions = updatedQuestions;
+                                updatedSections[currentSection] =
+                                  updatedSection;
+                              }}
+                              surveyData={surveyData}
+                            />
+                          ) : item.question_type === "slider" ? (
+                            <>
+                              <SliderQuestion
+                                question={item.question}
+                                options={item.options}
+                                questionType={item.question_type}
+                                index={index + 1}
+                                min={item.min_value || item.min_value}
+                                max={item.max_value || item.max_value}
+                                is_required={item.is_required}
+                                EditQuestion={() => EditQuestion(index)}
+                                DeleteQuestion={() =>
+                                  handleDeleteQuestion(index)
+                                }
+                                onSave={(
+                                  updatedQuestion,
+                                  updatedMin,
+                                  updatedMax
+                                ) =>
+                                  handleSave(
+                                    updatedQuestion,
+                                    [],
+                                    "slider",
+                                    item.is_required,
+                                    updatedMin,
+                                    updatedMax
+                                  )
+                                }
+                                setIsRequired={() => {
+                                  const updatedSections = [...questions];
+                                  const updatedSection = {
+                                    ...updatedSections[currentSection],
+                                  };
+                                  const updatedQuestions = [
+                                    ...updatedSection.questions,
+                                  ];
+
+                                  updatedQuestions[index] = {
+                                    ...updatedQuestions[index],
+                                    is_required: !item.is_required,
+                                  };
+
+                                  updatedSection.questions = updatedQuestions;
+                                  updatedSections[currentSection] =
+                                    updatedSection;
+                                }}
+                                surveyData={surveyData}
+                                item={item}
+                              />
+                            </>
+                          ) : (
+                            <>{item?.question_type}</>
+                          )}
+                        </div>
+                      )
+                    )
+                  )}
                 </motion.div>
-              )}
+              </AnimatePresence>
             </div>
 
-            {/* {console.log(surveyData?.sections[currentSection]?.questions)} */}
-            {/* @ts-ignore */}
-            {surveyData?.sections[currentSection]?.questions?.map(
-              (item: any, index: number) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "text-gray-600 mb-4",
-                    surveyData?.question_text?.name &&
-                      `!font-${surveyData.question_text.name
-                        .split(" ")
-                        .join("-")
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`
-                  )}
-                  style={{
-                    fontSize: `${surveyData?.question_text?.size}px !important`,
+            {/* Section Paginator */}
+            {surveyData.sections.length > 1 && (
+              <div className="flex w-full md:w-auto md:justify-end items-center mb-6 sticky bottom-10 z-10">
+                <PaginationBtn
+                  currentSection={currentSection}
+                  totalSections={surveyData.sections.length}
+                  onNavigate={(direction) => {
+                    setCurrentSection((prev) => {
+                      if (direction === "next") {
+                        return prev < surveyData.sections.length - 1
+                          ? prev + 1
+                          : prev;
+                      } else {
+                        return prev > 0 ? prev - 1 : prev;
+                      }
+                    });
                   }}
-                >
-                  {
-                    // isEdit &&
-                    // editIndex === index &&
-                    // item.question_type === "matrix_checkbox" ? (
-                    //   <MatrixQuestionEdit
-                    //     question={item.question}
-                    //     options={item.options}
-                    //     is_required={item.is_required}
-                    //     questionType={item.question_type}
-                    //     onSave={handleSave}
-                    //     onCancel={handleCancel}
-                    //   />
-                    // ) :
-                    isEdit && editIndex === index ? (
-                      <MultiChoiceQuestionEdit
-                        // index={index + 1}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        is_required={item.is_required}
-                        onSave={handleSave}
-                        onCancel={handleCancel}
-                        minValue={item.min_value}
-                        maxValue={item.max_value}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "multiple_choice" ||
-                      item.question_type === "multi_choice" ? (
-                      <MultiChoiceQuestion
-                        question={item.question}
-                        options={item.options}
-                        is_required={item.is_required}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        index={index + 1}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        setEditId={setEditIndex}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "comment" ||
-                      item.question_type === "long_text" ? (
-                      <CommentQuestion
-                        key={index}
-                        index={index + 1}
-                        questionType={item.question_type}
-                        question={item.question}
-                        is_required={item.is_requied}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "linear_Scale" ? (
-                      <LinearScaleQuestion
-                        question={item.question}
-                        scaleStart={item.scaleStart}
-                        scaleEnd={item.scaleEnd}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        index={index + 1}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "likert_scale" ? (
-                      <LikertScaleQuestion
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        index={index + 1}
-                        is_required={item.is_requied}
-                        surveyData={surveyData}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                      />
-                    ) : item.question_type === "star_rating" ? (
-                      <StarRatingQuestion
-                        question={item.question}
-                        // maxRating={5}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        index={index + 1}
-                        is_required={item.is_requied}
-                        surveyData={surveyData}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                      />
-                    ) : item.question_type === "matrix_multiple_choice" ||
-                      item.question_type === "matrix_checkbox" ? (
-                      <MatrixQuestion
-                        key={index}
-                        index={index + 1}
-                        // options={item.options}
-                        rows={item.rows}
-                        columns={item.columns}
-                        questionType={item.question_type}
-                        question={item.question}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        is_required={item.is_requied}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "single_choice" ? (
-                      <SingleChoiceQuestion
-                        index={index + 1}
-                        key={index}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        is_required={item.is_requied}
-                        surveyData={surveyData}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                      />
-                    ) : item.question_type === "checkbox" ? (
-                      <CheckboxQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        is_required={item.is_requied}
-                        surveyData={surveyData}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                      />
-                    ) : item.question_type === "rating_scale" ? (
-                      <RatingScaleQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        // onSave={handleAISave}
-                        is_required={item.is_requied}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "drop_down" ? (
-                      <DropdownQuestion
-                        index={index + 1}
-                        key={index}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        // onSave={handleAISave}
-                        is_required={item.is_requied}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "number" ? (
-                      <NumberQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        // onSave={handleAISave}
-                        is_required={item.is_requied}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "short_text" ? (
-                      <ShortTextQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        // onSave={handleAISave}
-                        is_required={item.is_requied}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "boolean" ? (
-                      <BooleanQuestion
-                        key={index}
-                        index={index + 1}
-                        question={item.question}
-                        options={item.options}
-                        questionType={item.question_type}
-                        EditQuestion={() => EditQuestion(index)}
-                        DeleteQuestion={() => handleDeleteQuestion(index)}
-                        // onSave={handleAISave}
-                        is_required={item.is_requied}
-                        setIsRequired={() => {
-                          const updatedSections = [...questions];
-                          const updatedSection = {
-                            ...updatedSections[currentSection],
-                          };
-                          const updatedQuestions = [
-                            ...updatedSection.questions,
-                          ];
-
-                          updatedQuestions[index] = {
-                            ...updatedQuestions[index],
-                            is_required: !item.is_required,
-                          };
-
-                          updatedSection.questions = updatedQuestions;
-                          updatedSections[currentSection] = updatedSection;
-                        }}
-                        surveyData={surveyData}
-                      />
-                    ) : item.question_type === "slider" ? (
-                      <>
-                        <SliderQuestion
-                          question={item.question}
-                          options={item.options}
-                          // step={item.options.length}
-                          questionType={item.question_type}
-                          index={index + 1}
-                          min={item.min || item.min_value}
-                          max={item.max || item.max_value}
-                          is_required={item.is_required}
-                          EditQuestion={() => EditQuestion(index)}
-                          DeleteQuestion={() => handleDeleteQuestion(index)}
-                          // @ts-expect-error expect here
-                          onSave={handleSave}
-                          setIsRequired={() => {
-                            const updatedSections = [...questions];
-                            const updatedSection = {
-                              ...updatedSections[currentSection],
-                            };
-                            const updatedQuestions = [
-                              ...updatedSection.questions,
-                            ];
-
-                            updatedQuestions[index] = {
-                              ...updatedQuestions[index],
-                              is_required: !item.is_required,
-                            };
-
-                            updatedSection.questions = updatedQuestions;
-                            updatedSections[currentSection] = updatedSection;
-                          }}
-                          surveyData={surveyData}
-                        />
-                      </>
-                    ) : (
-                      <>{item?.question_type}</>
-                    )
-                  }
-                </div>
-              )
+                />
+              </div>
             )}
 
-            <div className="flex flex-col gap-4 md:flex-row justify-between items-center mb-10">
-              <Button
-                className="relative overflow-hidden bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white
-                  transform transition-all duration-300 ease-in-out
-                  hover:scale-100 hover:shadow-lg hover:shadow-purple-500/30
-                  active:scale-95
-                  before:absolute before:top-0 before:left-0 before:w-full before:h-full 
-                  before:bg-gradient-to-r before:from-purple-600 before:to-fuchsia-600
-                  before:opacity-0 before:transition-opacity before:duration-300
-                  hover:before:opacity-100
-                  disabled:opacity-70 disabled:cursor-not-allowed
-                  group"
-                onClick={saveSurvey}
-                disabled={isEditLoading}
-              >
-                <span className="relative flex items-center justify-center gap-2">
-                  {isEditLoading ? (
-                    <>
-                      {/* <svg
-                        className="animate-spin h-5 w-5"
-                        viewBox="0 0 24 24"
+            {/* Add Question Button or Info Message */}
+            {surveyResponses.data?.data?.length <= 0 ? (
+              <>
+                {/* Add Question Button */}
+                <div className="flex flex-col gap-4 md:flex-row justify-between items-center mb-6">
+                  <Button
+                    variant="outline"
+                    className="relative rounded-full transition-all duration-200 border-none overflow-hidden px-4"
+                    onClick={() => {
+                      EditQuestion(
+                        surveyData?.sections[currentSection]?.questions.length
+                      );
+                      setSurveyData((prevData) => {
+                        const updatedSections = [...prevData.sections];
+                        if (!updatedSections[currentSection]) return prevData;
+                        updatedSections[currentSection] = {
+                          ...updatedSections[currentSection],
+                          questions: [
+                            ...updatedSections[currentSection].questions,
+                            {
+                              question: "New Question",
+                              question_type: "short_text",
+                              is_required: false,
+                              options: [],
+                            },
+                          ],
+                        };
+                        return { ...prevData, sections: updatedSections };
+                      });
+                    }}
+                  >
+                    <div className="flex gap-2 items-center">
+                      <svg
+                        className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200"
                         fill="none"
+                        viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                          d="M12 4v16m8-8H4"
                         />
-                      </svg> */}
-                      <span className="flex items-center gap-2">
-                        <svg
-                          className="w-5 h-5 animate-bounce"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                          />
-                        </svg>
-                        Saving changes
+                      </svg>
+                      <span className="group-hover:tracking-wide transition-all duration-200">
+                        Add Question
                       </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="flex items-center gap-2">
-                        <svg
-                          className="w-5 h-5 animate-pulse"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                          />
-                        </svg>
-                        Save changes
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                    </div>
+                  </Button>
+                  <div className="flex gap-4 flex-wrap">
+                    <Button
+                      variant="outline"
+                      className="group relative rounded-full transition-all duration-200 border-green-200 text-green-600 hover:!text-green-700 overflow-hidden"
+                      onClick={() => {
+                        setSurveyData((prevData) => {
+                          const newSection = { questions: [] };
+                          return {
+                            ...prevData,
+                            sections: [
+                              ...prevData.sections.slice(0, currentSection + 1),
+                              newSection,
+                              ...prevData.sections.slice(currentSection + 1),
+                            ],
+                          };
+                        });
+                        setCurrentSection((prev) => prev + 1);
+                      }}
+                    >
+                      <Sheet className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                      <span className="group-hover:tracking-wide transition-all duration-200">
+                        Add New Section
                       </span>
-                    </>
-                  )}
-                </span>
-              </Button>
-            </div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-200 to-green-400 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                    </Button>
+                    {surveyData.sections.length > 1 && (
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setSurveyData((prevData) => {
+                            const updatedSections = prevData.sections.filter(
+                              (_, idx) => idx !== currentSection
+                            );
+                            let newCurrent = currentSection;
+                            if (currentSection >= updatedSections.length) {
+                              newCurrent = updatedSections.length - 1;
+                            }
+                            setCurrentSection(newCurrent);
+                            return {
+                              ...prevData,
+                              sections: updatedSections,
+                            };
+                          });
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-200 text-red-600 hover:text-white rounded-full shadow-sm hover:bg-red-500"
+                        title="Remove Current Section"
+                      >
+                        <TableRowsSplit className="w-5 h-5" />
+                        Remove Current Section
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex flex-col gap-4 md:flex-row justify-between items-center mb-10 mt-10">
+                  <Button
+                    className="w-full relative overflow-hidden bg-gradient-to-r h-12 rounded-full from-[#5B03B2] to-[#9D50BB] text-white
+                    transform transition-all duration-300 ease-in-out
+                    hover:scale-100 hover:shadow-lg hover:shadow-purple-500/30
+                    active:scale-95
+                    before:absolute before:top-0 before:left-0 before:w-full before:h-full 
+                    before:bg-gradient-to-r before:from-purple-600 before:to-fuchsia-600
+                    before:opacity-0 before:transition-opacity before:duration-300
+                    hover:before:opacity-100
+                    disabled:opacity-70 disabled:cursor-not-allowed
+                    group"
+                    onClick={saveSurvey}
+                    disabled={isEditLoading}
+                  >
+                    <span className="relative flex items-center justify-center gap-2">
+                      {isEditLoading ? (
+                        <>
+                          <svg
+                            className="w-5 h-5 animate-bounce"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                            />
+                          </svg>
+                          Saving changes
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-5 h-5 animate-pulse"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                            />
+                          </svg>
+                          Save changes
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="my-4 p-4 bg-yellow-100 text-yellow-800 rounded mb-20">
+                You can't edit or add new questions because this survey has
+                already started accepting responses.
+              </div>
+            )}
 
             <WatermarkBanner className="mb-10" />
           </div>

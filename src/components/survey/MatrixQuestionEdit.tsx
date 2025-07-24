@@ -249,7 +249,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="mb-4 bg-white shadow-lg rounded-xl p-6"
+      className="bg-white shadow-lg rounded-xl p-6"
     >
       <div className="flex items-start gap-4">
         <motion.div whileHover={{ scale: 1.1 }} className="mt-2">

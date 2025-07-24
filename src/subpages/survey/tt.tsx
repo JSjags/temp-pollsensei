@@ -106,7 +106,7 @@ const AddQuestionPage = () => {
   }, []);
 
   const questions = useSelector(
-    (state: RootState) => state?.question?.questions
+    (state: RootState) => state?.question?.[0]?.questions
   );
 
   const userToken = useSelector(
@@ -288,7 +288,11 @@ const AddQuestionPage = () => {
 
     // Dispatch the `updateQuestion` action
     dispatch(
-      updateQuestion({ index: editIndex, updatedQuestion: updatedQuestionData })
+      updateQuestion({
+        index: editIndex,
+        updatedQuestion: updatedQuestionData,
+        sectionIndex: 0,
+      })
     );
 
     // Reset editing state
@@ -863,6 +867,7 @@ const AddQuestionPage = () => {
                                     index={index + 1}
                                     is_required={item.is_required}
                                     surveyData={surveyData}
+                                    item={item}
                                   />
                                 ) : null
                               }

@@ -12,7 +12,10 @@ import BreadcrumbsIcon from "../ui/BreadcrumsIcon";
 import Image from "next/image";
 import { hyphen } from "@/assets/images";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import { useFetchASurveyQuery } from "@/services/survey.service";
+import {
+  useFetchASurveyQuery,
+  useGetPublicSurveyByShortUrlQuery,
+} from "@/services/survey.service";
 import { useDispatch } from "react-redux";
 import { openUpload } from "@/redux/slices/upload.slice";
 import { FiShare2, FiUpload } from "react-icons/fi";
@@ -20,7 +23,7 @@ import ShareSurvey from "../survey/ShareSurvey";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSurveyResponses } from "@/services/analysis";
-import { extractMongoId } from "@/lib/utils";
+import { cn, extractMongoId } from "@/lib/utils";
 import { openSurveySettings } from "@/redux/slices/survey_settings.slice";
 import {
   Dialog,
@@ -35,6 +38,11 @@ import { Button } from "../ui/button";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Skeleton } from "../ui/skeleton";
+import { UserData } from "@/subpages/settings/ProfilePage";
+import { useUserProfileQuery } from "@/services/user.service";
+import { toast } from "react-toastify";
+import { getSurveySettings } from "@/services/survey";
+import React from "react";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -52,6 +60,26 @@ const SurveyCreationNav = () => {
     isFetching: surveyFetching,
   } = useFetchASurveyQuery(params.id, {
     skip: !params.id || path.includes("edit-draft-survey"),
+  });
+  const [isClient, setIsClient] = useState(false);
+  const [userData, setUserData] = useState<UserData>({
+    name: "",
+    lastName: "",
+    email: "",
+    username: "",
+    bio: "",
+    file: "",
+    referral_code: "",
+    referral_link: "",
+    plan: null,
+  });
+
+  const {
+    data: userdata,
+    refetch,
+    isLoading: userLoading,
+  } = useUserProfileQuery({
+    skip: !isClient,
   });
 
   // Extract surveyId regardless of path
@@ -82,6 +110,15 @@ const SurveyCreationNav = () => {
       // Handle path-based logic here
     }
   }, [path]);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (userdata) {
+      setUserData(userdata.data);
+    }
+  }, [userdata]);
 
   const activeLink = path.includes("survey-response-upload")
     ? "Reponses"
@@ -106,6 +143,9 @@ const SurveyCreationNav = () => {
     );
   };
 
+  // Helper to check if a tab is active
+  const isTabActive = (label: string) => activeLink === label;
+
   // Update the NavItemSkeleton component to be more visually appealing
   const NavItemSkeleton = () => (
     <div className="flex items-center gap-3">
@@ -114,26 +154,74 @@ const SurveyCreationNav = () => {
     </div>
   );
 
-  // Update renderNavItem to use the new isLoading helper
+  // Update renderNavItem to use the new isLoading helper and active/hover gradient
   const renderNavItem = (
     icon: React.ReactNode,
     label: string,
     queryLoading?: boolean,
-    queryFetching?: boolean
+    queryFetching?: boolean,
+    isActive?: boolean
   ) => {
     if (isLoading(queryLoading, queryFetching)) {
       return <NavItemSkeleton />;
     }
 
     return (
-      <>
-        <BreadcrumbsIcon icon={icon} />
-        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-sm md:text-xs min-[1150px]:text-sm">
+      <div
+        className={cn(
+          "flex items-center px-3 py-1 rounded-lg transition-all duration-300 cursor-pointer",
+          isActive
+            ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white shadow"
+            : "hover:bg-gray-200"
+        )}
+      >
+        {/* Update icon color for active state if possible */}
+        {icon && React.isValidElement(icon)
+          ? React.cloneElement(
+              icon as React.ReactElement<{ className?: string }>,
+              {
+                className: cn(
+                  (icon.props as { className?: string }).className,
+                  isActive ? "text-white" : "text-[#5B03B2]"
+                ),
+              }
+            )
+          : icon}
+        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-xs md:text-xs min-[1150px]:text-sm">
           {label}
         </span>
-      </>
+      </div>
     );
   };
+
+  const {
+    data: surveySettings,
+    isLoading: isSurveySettingsLoading,
+    isSuccess: isSurveySettingsSuccess,
+    isError: isSurveySettingsError,
+    refetch: refetchSettings,
+    error: surveyError,
+  } = useQuery<{
+    regional_availability: {
+      status: boolean;
+      regions: string[];
+    };
+    survey_id: {
+      _id: string;
+      topic: string;
+    };
+    _id: string;
+    language: string;
+    collect_email_addresses: boolean;
+    collect_name_of_respondents: boolean;
+    allow_survey_edit: boolean;
+    receive_email_notification: boolean;
+    response_threshold: number;
+    voice_response_duration_in_seconds: number;
+  }>({
+    queryKey: ["survey-settings", params.id],
+    queryFn: () => getSurveySettings({ surveyId: params?.id as string }),
+  });
 
   // Conditional return after hooks
   if (isSurveySubpath) {
@@ -167,7 +255,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -189,15 +278,13 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
-                <Image
-                  src={hyphen}
-                  alt="hyphen"
-                  className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                <Link
+
+                {/* Validation link commented out */}
+                {/* <Link
                   href={
                     path.includes(
                       "survey-response-upload?tab=Individual+Responses"
@@ -216,46 +303,20 @@ const SurveyCreationNav = () => {
                     surveyLoading,
                     surveyFetching
                   )}
-                </Link>
-                <Image
+                </Link> */}
+                {/* <Image
                   src={hyphen}
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                {surveyResponses.data?.data?.length >= 10 ? (
-                  <button
-                    className="flex md:flex-col lg:flex-row items-center group relative"
-                    onClick={() => {
-                      if (surveyResponses.data?.data?.length >= 10) {
-                        router.push(`/surveys/${params.id}/analysis`);
-                      }
-                    }}
-                  >
-                    {renderNavItem(
-                      surveyResponses.isSuccess ? (
-                        surveyResponses.data?.data?.length >= 10 ? (
-                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                        ) : (
-                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                          </div>
-                        )
-                      ) : null,
-                      "Analysis",
-                      surveyLoading,
-                      surveyFetching
-                    )}
-                    {surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length < 10 && (
-                        <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
-                          {10 - (surveyResponses.data?.data?.length || 0)} more
-                          responses needed to unlock analysis
-                        </div>
-                      )}
-                  </button>
-                ) : (
-                  <Dialog>
-                    <DialogTrigger asChild>
+                /> */}
+                {userData.plan?.name !== "Basic Plan" && (
+                  <>
+                    <Image
+                      src={hyphen}
+                      alt="hyphen"
+                      className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
+                    />
+                    {surveyResponses.data?.data?.length >= 10 ? (
                       <button
                         className="flex md:flex-col lg:flex-row items-center group relative"
                         onClick={() => {
@@ -276,65 +337,106 @@ const SurveyCreationNav = () => {
                           ) : null,
                           "Analysis",
                           surveyLoading,
-                          surveyFetching
+                          surveyFetching,
+                          isTabActive("Analysis")
                         )}
+                        {surveyResponses.isSuccess &&
+                          surveyResponses.data?.data?.length < 10 && (
+                            <div className="absolute z-[10000] shadow-md border border-border invisible group-hover:visible bg-white text-black text-xs rounded py-1 px-2 -top-8 whitespace-nowrap">
+                              {10 - (surveyResponses.data?.data?.length || 0)}{" "}
+                              more responses needed to unlock analysis
+                            </div>
+                          )}
                       </button>
-                    </DialogTrigger>
-                    <DialogContent
-                      className="sm:max-w-[425px] z-[100000]"
-                      overlayClassName="z-[100000]"
+                    ) : (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button
+                            className="flex md:flex-col lg:flex-row items-center group relative"
+                            onClick={() => {
+                              if (surveyResponses.data?.data?.length >= 10) {
+                                router.push(`/surveys/${params.id}/analysis`);
+                              }
+                            }}
+                          >
+                            {renderNavItem(
+                              surveyResponses.isSuccess ? (
+                                surveyResponses.data?.data?.length >= 10 ? (
+                                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                                ) : (
+                                  <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                                    <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                                  </div>
+                                )
+                              ) : null,
+                              "Analysis",
+                              surveyLoading,
+                              surveyFetching,
+                              isTabActive("Analysis")
+                            )}
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent
+                          className="sm:max-w-[425px] z-[100000]"
+                          overlayClassName="z-[100000]"
+                        >
+                          <DialogHeader>
+                            <DialogTitle>Insufficient Responses</DialogTitle>
+                            <DialogDescription>
+                              You need at least 10 survey responses to access
+                              the analysis section. This ensures more meaningful
+                              and statistically relevant insights from your
+                              data.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex justify-center py-4">
+                            <Image
+                              src="/assets/analysis/no-data.svg"
+                              alt="Analysis Locked"
+                              width={200}
+                              height={200}
+                            />
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm text-muted-foreground">
+                              Current responses:{" "}
+                              {surveyResponses.data?.data?.length || 0}
+                              /10
+                            </p>
+                            <DialogClose asChild>
+                              <Button type="button" variant="secondary">
+                                Close
+                              </Button>
+                            </DialogClose>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                    <Image
+                      src={hyphen}
+                      alt="hyphen"
+                      className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
+                    />
+                    <Link
+                      href={
+                        data?.data?._id
+                          ? `/surveys/${data?.data?._id}/report`
+                          : ""
+                      }
+                      className="flex md:flex-col lg:flex-row items-center"
                     >
-                      <DialogHeader>
-                        <DialogTitle>Insufficient Responses</DialogTitle>
-                        <DialogDescription>
-                          You need at least 10 survey responses to access the
-                          analysis section. This ensures more meaningful and
-                          statistically relevant insights from your data.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex justify-center py-4">
-                        <Image
-                          src="/assets/analysis/no-data.svg"
-                          alt="Analysis Locked"
-                          width={200}
-                          height={200}
-                        />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-muted-foreground">
-                          Current responses:{" "}
-                          {surveyResponses.data?.data?.length || 0}
-                          /10
-                        </p>
-                        <DialogClose asChild>
-                          <Button type="button" variant="secondary">
-                            Close
-                          </Button>
-                        </DialogClose>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                      {renderNavItem(
+                        data?.data?.sections.length > 0 && (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                        ),
+                        "Report",
+                        surveyLoading,
+                        surveyFetching,
+                        isTabActive("Report")
+                      )}
+                    </Link>
+                  </>
                 )}
-                <Image
-                  src={hyphen}
-                  alt="hyphen"
-                  className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                <Link
-                  href={
-                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
-                  }
-                  className="flex md:flex-col lg:flex-row items-center"
-                >
-                  {renderNavItem(
-                    data?.data?.sections.length > 0 && (
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    ),
-                    "Report",
-                    surveyLoading,
-                    surveyFetching
-                  )}
-                </Link>
               </nav>
             </div>
           )}
@@ -347,7 +449,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -369,7 +472,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
               </>
@@ -381,7 +485,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -403,15 +508,17 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
-                <Image
+                {/* <Image
                   src={hyphen}
                   alt="hyphen"
                   className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                <Link
+                /> */}
+                {/* Validation link commented out */}
+                {/* <Link
                   href={
                     path.includes(
                       "survey-response-upload?tab=Individual+Responses"
@@ -430,7 +537,7 @@ const SurveyCreationNav = () => {
                     surveyLoading,
                     surveyFetching
                   )}
-                </Link>
+                </Link> */}
               </>
             )}
             {userRoles.includes("Data Editor") && (
@@ -440,7 +547,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
               </>
@@ -452,7 +560,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -481,7 +590,8 @@ const SurveyCreationNav = () => {
                       ) : null,
                       "Analysis",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Analysis")
                     )}
                   </button>
                 ) : (
@@ -507,7 +617,8 @@ const SurveyCreationNav = () => {
                           ) : null,
                           "Analysis",
                           surveyLoading,
-                          surveyFetching
+                          surveyFetching,
+                          isTabActive("Analysis")
                         )}
                       </button>
                     </DialogTrigger>
@@ -563,7 +674,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Report",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Report")
                   )}
                 </Link>
               </>
@@ -571,21 +683,30 @@ const SurveyCreationNav = () => {
           </nav>
 
           {path.includes("survey-response-upload") ? (
-            <Button
-              className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
-              onClick={() => {
-                dispatch(openUpload());
-              }}
-            >
-              <FiUpload className="w-5 h-5" />
-              Upload Results
-            </Button>
+            userData.plan?.name !== "Basic Plan" ? (
+              <Button
+                className={cn(
+                  "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
+                  (surveyError as any)?.data.message && "grayscale"
+                )}
+                onClick={() => {
+                  if ((surveyError as any)?.data.message) {
+                    return toast.error((surveyError as any)?.data.message);
+                  }
+                  dispatch(openUpload());
+                }}
+              >
+                <FiUpload className="w-5 h-5" />
+                Upload Response
+              </Button>
+            ) : null
           ) : (
             <div className="flex justify-between items-center gap-3">
               {path === "/surveys/create-survey" ||
               path === "/surveys/add-question-m" ||
               path === "/surveys/survey-list" ||
               path.includes("validate-response") ||
+              path.includes("validate-res") ||
               path.includes("/surveys/question")
                 ? " "
                 : " "}
@@ -638,7 +759,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
 
@@ -656,11 +778,13 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
 
-                <Link
+                {/* Validation link commented out */}
+                {/* <Link
                   href={
                     path.includes(
                       "survey-response-upload?tab=Individual+Responses"
@@ -679,36 +803,18 @@ const SurveyCreationNav = () => {
                     surveyLoading,
                     surveyFetching
                   )}
-                </Link>
-
-                {surveyResponses.data?.data?.length >= 10 ? (
-                  <button
-                    className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
-                    onClick={() => {
-                      if (surveyResponses.data?.data?.length >= 10) {
-                        router.push(`/surveys/${params.id}/analysis`);
-                      }
-                    }}
-                  >
-                    {renderNavItem(
-                      surveyResponses.isSuccess ? (
-                        surveyResponses.data?.data?.length >= 10 ? (
-                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
-                        ) : (
-                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3 group-hover:scale-110 transition-transform duration-200">
-                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                          </div>
-                        )
-                      ) : null,
-                      "Analysis",
-                      surveyLoading,
-                      surveyFetching
-                    )}
-                  </button>
-                ) : (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button className="flex flex-col items-center group hover:scale-110 transition-transform duration-200">
+                </Link> */}
+                {userData.plan?.name !== "Basic Plan" && (
+                  <>
+                    {surveyResponses.data?.data?.length >= 10 ? (
+                      <button
+                        className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
+                        onClick={() => {
+                          if (surveyResponses.data?.data?.length >= 10) {
+                            router.push(`/surveys/${params.id}/analysis`);
+                          }
+                        }}
+                      >
                         {renderNavItem(
                           surveyResponses.isSuccess ? (
                             surveyResponses.data?.data?.length >= 10 ? (
@@ -721,61 +827,88 @@ const SurveyCreationNav = () => {
                           ) : null,
                           "Analysis",
                           surveyLoading,
-                          surveyFetching
+                          surveyFetching,
+                          isTabActive("Analysis")
                         )}
                       </button>
-                    </DialogTrigger>
-                    <DialogContent
-                      className="w-[90%] rounded-lg sm:max-w-[280px] z-[100000]"
-                      overlayClassName="z-[100000]"
-                    >
-                      <DialogHeader>
-                        <DialogTitle>Insufficient Responses</DialogTitle>
-                        <DialogDescription className="text-sm mt-2">
-                          You need at least 10 survey responses to access the
-                          analysis section. This ensures more meaningful and
-                          statistically relevant insights from your data.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex justify-center py-4">
-                        <Image
-                          src="/assets/analysis/no-data.svg"
-                          alt="Analysis Locked"
-                          width={200}
-                          height={200}
-                        />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-muted-foreground">
-                          Current responses:{" "}
-                          {surveyResponses.data?.data?.length || 0}
-                          /10
-                        </p>
-                        <DialogClose asChild>
-                          <Button type="button" variant="secondary">
-                            Close
-                          </Button>
-                        </DialogClose>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                )}
+                    ) : (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="flex flex-col items-center group hover:scale-110 transition-transform duration-200">
+                            {renderNavItem(
+                              surveyResponses.isSuccess ? (
+                                surveyResponses.data?.data?.length >= 10 ? (
+                                  <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />
+                                ) : (
+                                  <div className="bg-amber-100 rounded-full flex justify-center items-center size-3 group-hover:scale-110 transition-transform duration-200">
+                                    <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                                  </div>
+                                )
+                              ) : null,
+                              "Analysis",
+                              surveyLoading,
+                              surveyFetching,
+                              isTabActive("Analysis")
+                            )}
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent
+                          className="w-[90%] rounded-lg sm:max-w-[280px] z-[100000]"
+                          overlayClassName="z-[100000]"
+                        >
+                          <DialogHeader>
+                            <DialogTitle>Insufficient Responses</DialogTitle>
+                            <DialogDescription className="text-sm mt-2">
+                              You need at least 10 survey responses to access
+                              the analysis section. This ensures more meaningful
+                              and statistically relevant insights from your
+                              data.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex justify-center py-4">
+                            <Image
+                              src="/assets/analysis/no-data.svg"
+                              alt="Analysis Locked"
+                              width={200}
+                              height={200}
+                            />
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm text-muted-foreground">
+                              Current responses:{" "}
+                              {surveyResponses.data?.data?.length || 0}
+                              /10
+                            </p>
+                            <DialogClose asChild>
+                              <Button type="button" variant="secondary">
+                                Close
+                              </Button>
+                            </DialogClose>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
 
-                <Link
-                  href={
-                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
-                  }
-                  className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
-                >
-                  {renderNavItem(
-                    data?.data?.sections.length > 0 && (
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    ),
-                    "Report",
-                    surveyLoading,
-                    surveyFetching
-                  )}
-                </Link>
+                    <Link
+                      href={
+                        data?.data?._id
+                          ? `/surveys/${data?.data?._id}/report`
+                          : ""
+                      }
+                      className="flex flex-col items-center group hover:scale-110 transition-transform duration-200"
+                    >
+                      {renderNavItem(
+                        data?.data?.sections.length > 0 && (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                        ),
+                        "Report",
+                        surveyLoading,
+                        surveyFetching,
+                        isTabActive("Report")
+                      )}
+                    </Link>
+                  </>
+                )}
               </nav>
             </div>
           )}
@@ -788,7 +921,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -810,70 +944,75 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
               </>
             )}
-            {userRoles.includes("Data Validator") && (
-              <>
-                <Link href={""} className="flex items-center">
-                  {renderNavItem(
-                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
-                    "Design",
-                    surveyLoading,
-                    surveyFetching
-                  )}
-                </Link>
-                <Image
-                  src={hyphen}
-                  alt="hyphen"
-                  className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                <Link
-                  href={
-                    data?.data.sections.length > 0
-                      ? `/surveys/${data?.data._id}/survey-response-upload`
-                      : ""
-                  }
-                  className="flex items-center"
-                >
-                  {renderNavItem(
-                    data?.data.sections.length > 0 && (
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    ),
-                    "Responses",
-                    surveyLoading,
-                    surveyFetching
-                  )}
-                </Link>
-                <Image
-                  src={hyphen}
-                  alt="hyphen"
-                  className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                <Link
-                  href={
-                    path.includes(
-                      "survey-response-upload?tab=Individual+Responses"
-                    )
-                      ? `/surveys/${data?.data._id}/survey-response-upload?tab=Individual+Responses`
-                      : ""
-                  }
-                  className="flex items-center"
-                >
-                  {renderNavItem(
-                    surveyResponses.isSuccess &&
-                      surveyResponses.data?.data?.length > 0 && (
+            {userRoles.includes("Data Validator") &&
+              userData.plan?.name !== "Basic Plan" && (
+                <>
+                  <Link href={""} className="flex items-center">
+                    {renderNavItem(
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                      "Design",
+                      surveyLoading,
+                      surveyFetching,
+                      isTabActive("Design")
+                    )}
+                  </Link>
+                  <Image
+                    src={hyphen}
+                    alt="hyphen"
+                    className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
+                  />
+                  <Link
+                    href={
+                      data?.data.sections.length > 0
+                        ? `/surveys/${data?.data._id}/survey-response-upload`
+                        : ""
+                    }
+                    className="flex items-center"
+                  >
+                    {renderNavItem(
+                      data?.data.sections.length > 0 && (
                         <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
                       ),
-                    "Validation",
-                    surveyLoading,
-                    surveyFetching
-                  )}
-                </Link>
-              </>
-            )}
+                      "Responses",
+                      surveyLoading,
+                      surveyFetching,
+                      isTabActive("Reponses")
+                    )}
+                  </Link>
+                  <Image
+                    src={hyphen}
+                    alt="hyphen"
+                    className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
+                  />
+                  <Link
+                    href={
+                      path.includes(
+                        "survey-response-upload?tab=Individual+Responses"
+                      )
+                        ? `/surveys/${data?.data._id}/survey-response-upload?tab=Individual+Responses`
+                        : ""
+                    }
+                    className="flex items-center"
+                  >
+                    {renderNavItem(
+                      surveyResponses.isSuccess &&
+                        surveyResponses.data?.data?.length > 0 && (
+                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                        ),
+                      "Validation",
+                      surveyLoading,
+                      surveyFetching,
+                      isTabActive("Validation")
+                    )}
+                  </Link>
+                </>
+              )}
             {userRoles.includes("Data Editor") && (
               <>
                 <Link href={""} className="flex items-center">
@@ -881,145 +1020,160 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
               </>
             )}
-            {userRoles.includes("Data Analyst") && (
-              <>
-                <Link href={""} className="flex items-center">
-                  {renderNavItem(
-                    <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
-                    "Design",
-                    surveyLoading,
-                    surveyFetching
+            {userRoles.includes("Data Analyst") &&
+              userData.plan?.name !== "Basic Plan" && (
+                <>
+                  <Link href={""} className="flex items-center">
+                    {renderNavItem(
+                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
+                      "Design",
+                      surveyLoading,
+                      surveyFetching,
+                      isTabActive("Design")
+                    )}
+                  </Link>
+                  <Image
+                    src={hyphen}
+                    alt="hyphen"
+                    className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
+                  />
+                  {surveyResponses.data?.data?.length >= 10 ? (
+                    <button
+                      className="flex items-center group relative"
+                      onClick={() => {
+                        if (surveyResponses.data?.data?.length >= 10) {
+                          router.push(`/surveys/${params.id}/analysis`);
+                        }
+                      }}
+                    >
+                      {renderNavItem(
+                        surveyResponses.isSuccess ? (
+                          surveyResponses.data?.data?.length >= 10 ? (
+                            <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                          ) : (
+                            <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                              <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                            </div>
+                          )
+                        ) : null,
+                        "Analysis",
+                        surveyLoading,
+                        surveyFetching,
+                        isTabActive("Analysis")
+                      )}
+                    </button>
+                  ) : (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button
+                          className="flex items-center group relative"
+                          onClick={() => {
+                            if (surveyResponses.data?.data?.length >= 10) {
+                              router.push(`/surveys/${params.id}/analysis`);
+                            }
+                          }}
+                        >
+                          {renderNavItem(
+                            surveyResponses.isSuccess ? (
+                              surveyResponses.data?.data?.length >= 10 ? (
+                                <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                              ) : (
+                                <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
+                                  <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
+                                </div>
+                              )
+                            ) : null,
+                            "Analysis",
+                            surveyLoading,
+                            surveyFetching,
+                            isTabActive("Analysis")
+                          )}
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent
+                        className="sm:max-w-[425px] z-[100000]"
+                        overlayClassName="z-[100000]"
+                      >
+                        <DialogHeader>
+                          <DialogTitle>Insufficient Responses</DialogTitle>
+                          <DialogDescription>
+                            You need at least 10 survey responses to access the
+                            analysis section. This ensures more meaningful and
+                            statistically relevant insights from your data.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex justify-center py-4">
+                          <Image
+                            src="/assets/analysis/no-data.svg"
+                            alt="Analysis Locked"
+                            width={200}
+                            height={200}
+                          />
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground">
+                            Current responses:{" "}
+                            {surveyResponses.data?.data?.length || 0}
+                            /10
+                          </p>
+                          <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                              Close
+                            </Button>
+                          </DialogClose>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   )}
-                </Link>
-                <Image
-                  src={hyphen}
-                  alt="hyphen"
-                  className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                {surveyResponses.data?.data?.length >= 10 ? (
-                  <button
-                    className="flex items-center group relative"
-                    onClick={() => {
-                      if (surveyResponses.data?.data?.length >= 10) {
-                        router.push(`/surveys/${params.id}/analysis`);
-                      }
-                    }}
+                  <Image
+                    src={hyphen}
+                    alt="hyphen"
+                    className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
+                  />
+                  <Link
+                    href={
+                      data?.data?._id
+                        ? `/surveys/${data?.data?._id}/report`
+                        : ""
+                    }
+                    className="flex md:flex-col lg:flex-row items-center"
                   >
                     {renderNavItem(
-                      surveyResponses.isSuccess ? (
-                        surveyResponses.data?.data?.length >= 10 ? (
-                          <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                        ) : (
-                          <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                            <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                          </div>
-                        )
-                      ) : null,
-                      "Analysis",
+                      data?.data?.sections.length > 0 && (
+                        <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
+                      ),
+                      "Report",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Report")
                     )}
-                  </button>
-                ) : (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button
-                        className="flex items-center group relative"
-                        onClick={() => {
-                          if (surveyResponses.data?.data?.length >= 10) {
-                            router.push(`/surveys/${params.id}/analysis`);
-                          }
-                        }}
-                      >
-                        {renderNavItem(
-                          surveyResponses.isSuccess ? (
-                            surveyResponses.data?.data?.length >= 10 ? (
-                              <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                            ) : (
-                              <div className="bg-amber-100 rounded-full flex justify-center items-center size-3">
-                                <IoWarningOutline className="text-amber-500 flex justify-center w-2 h-2" />
-                              </div>
-                            )
-                          ) : null,
-                          "Analysis",
-                          surveyLoading,
-                          surveyFetching
-                        )}
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent
-                      className="sm:max-w-[425px] z-[100000]"
-                      overlayClassName="z-[100000]"
-                    >
-                      <DialogHeader>
-                        <DialogTitle>Insufficient Responses</DialogTitle>
-                        <DialogDescription>
-                          You need at least 10 survey responses to access the
-                          analysis section. This ensures more meaningful and
-                          statistically relevant insights from your data.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex justify-center py-4">
-                        <Image
-                          src="/assets/analysis/no-data.svg"
-                          alt="Analysis Locked"
-                          width={200}
-                          height={200}
-                        />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-muted-foreground">
-                          Current responses:{" "}
-                          {surveyResponses.data?.data?.length || 0}
-                          /10
-                        </p>
-                        <DialogClose asChild>
-                          <Button type="button" variant="secondary">
-                            Close
-                          </Button>
-                        </DialogClose>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                )}
-                <Image
-                  src={hyphen}
-                  alt="hyphen"
-                  className="mx-3 md:mx-2 min-[1150px]:mx-3 hidden md:flex md:w-4 lg:w-auto"
-                />
-                <Link
-                  href={
-                    data?.data?._id ? `/surveys/${data?.data?._id}/report` : ""
-                  }
-                  className="flex md:flex-col lg:flex-row items-center"
-                >
-                  {renderNavItem(
-                    data?.data?.sections.length > 0 && (
-                      <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />
-                    ),
-                    "Report",
-                    surveyLoading,
-                    surveyFetching
-                  )}
-                </Link>
-              </>
-            )}
+                  </Link>
+                </>
+              )}
           </nav>
 
-          {path.includes("survey-response-upload") ? (
+          {path.includes("survey-response-upload") &&
+          userData.plan?.name !== "Basic Plan" ? (
             <Button
-              className="flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
+              className={cn(
+                "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
+                (surveyError as any)?.data.message && "grayscale"
+              )}
               onClick={() => {
+                if ((surveyError as any)?.data.message) {
+                  return toast.error((surveyError as any)?.data.message);
+                }
                 dispatch(openUpload());
               }}
             >
               <FiUpload className="w-5 h-5" />
-              Upload Results
+              Upload Response
             </Button>
           ) : (
             <div className="flex justify-between items-center gap-3">

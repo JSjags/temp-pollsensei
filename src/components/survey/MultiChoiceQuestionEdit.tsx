@@ -34,16 +34,17 @@ import { RootState } from "@/redux/store";
 interface MultiChoiceQuestionEditProps {
   question: string;
   questionType: string;
-  options: string[] | undefined;
+  options: any[] | undefined;
   onSave?: (
     updatedQuestion: string,
-    updatedOptions: string[],
+    updatedOptions: any[],
     editedQuestionType: string,
     is_required: boolean,
     minValue?: number,
     maxValue?: number,
     matrixRows?: string[],
-    matrixColumns?: string[]
+    matrixColumns?: string[],
+    canAcceptAudio?: boolean
   ) => void;
   onCancel?: () => void;
   setIsRequired?: (value: boolean) => void;
@@ -55,6 +56,8 @@ interface MultiChoiceQuestionEditProps {
   matrixColumns?: string[];
   surveyData?: SurveyData;
   can_accept_media?: boolean;
+  can_accept_audio?: boolean;
+  item?: any;
 }
 
 const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
@@ -71,6 +74,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   matrixRows: initialRows = [],
   matrixColumns: initialColumns = [],
   surveyData,
+  can_accept_media,
+  can_accept_audio,
+  item,
 }) => {
   const dispatch = useDispatch();
   const [editedQuestion, setEditedQuestion] = useState<string>(question);
@@ -82,6 +88,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   const [minValue, setMinValue] = useState<number>(initialMinValue);
   const [maxValue, setMaxValue] = useState<number>(initialMaxValue);
   const [isRequired, setIsRequiredLocal] = useState<boolean>(is_required);
+  const [canAcceptAudioLocal, setCanAcceptAudioLocal] = useState<boolean>(
+    can_accept_audio ?? false
+  );
   const [selectedMatrixItems, setSelectedMatrixItems] = useState<{
     [key: string]: boolean;
   }>({});
@@ -100,6 +109,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     "Agree",
     "Strongly Agree",
   ];
+
+  console.log(item);
 
   // Extract range from question text
   const extractRange = (question: string) => {
@@ -178,11 +189,18 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     return Array.from({ length: range }, (_, i) => (i + min).toString());
   };
 
+  console.log(options);
+
   // Initialize values only when component mounts or when dependencies change
   useEffect(() => {
     if (questionType === "slider") {
-      setMinValue(initialMinValue);
-      setMaxValue(initialMaxValue);
+      if (options && options.length >= 2) {
+        setMinValue(options[0]);
+        setMaxValue(options[1]);
+      } else {
+        setMinValue(minValue ?? 0);
+        setMaxValue(maxValue ?? 0);
+      }
     } else if (
       ["matrix_multiple_choice", "matrix_checkbox"].includes(questionType)
     ) {
@@ -206,6 +224,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       }
     }
   }, [questionType]);
+
+  console.log(item);
 
   const questionTypes = useMemo(
     () => [
@@ -288,8 +308,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
         setSelectedMatrixItems({});
         break;
       case "slider":
-        setMinValue(0);
-        setMaxValue(10);
+        setMinValue(options?.[0] ?? 0);
+        setMaxValue(options?.[1] ?? 10);
         break;
       case "likert_scale":
         setEditedOptions([...defaultLikertOptions]);
@@ -359,7 +379,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       if (editedQuestionType === "slider") {
         onSave(
           editedQuestion,
-          [],
+          [minValue, maxValue],
           editedQuestionType,
           isRequired,
           minValue,
@@ -387,6 +407,20 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           editedQuestionType,
           isRequired
         );
+      } else if (editedQuestionType === "long_text") {
+        onSave(
+          editedQuestion,
+          ratingLabels.filter((label) => label.trim()),
+          editedQuestionType,
+          isRequired,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          canAcceptAudioLocal
+        );
+      } else if (editedQuestionType === "boolean") {
+        onSave(editedQuestion, ["Yes", "No"], editedQuestionType, isRequired);
       } else {
         onSave(
           editedQuestion,
@@ -403,6 +437,13 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     if (setIsRequired) {
       setIsRequired(checked);
     }
+  };
+
+  const handleRequiredAudioChange = (checked: boolean) => {
+    setCanAcceptAudioLocal(checked);
+    // if (c) {
+    //   setIsRequired(checked);
+    // }
   };
 
   const renderPreview = () => {
@@ -648,7 +689,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       className={cn(
-        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        "bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
         {
           [`font-${questionText?.name
             ?.split(" ")
@@ -736,7 +777,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
               >
                 <div className="space-y-4">
                   <Label>Matrix Rows</Label>
-                  {rows.map((row, index) => (
+                  {(rows ?? item.rows).map((row, index) => (
                     <div key={`matrix-row-${index}`} className="flex gap-2">
                       <Input
                         value={row}
@@ -767,7 +808,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
 
                 <div className="space-y-4">
                   <Label>Matrix Columns</Label>
-                  {columns.map((col, index) => (
+                  {(columns ?? item.columns).map((col, index) => (
                     <div key={`matrix-col-${index}`} className="flex gap-2">
                       <Input
                         value={col}
@@ -864,12 +905,23 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           </AnimatePresence>
 
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Label>Required</Label>
-              <Switch
-                checked={isRequired}
-                onCheckedChange={handleRequiredChange}
-              />
+            <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <Label>Required</Label>
+                <Switch
+                  checked={isRequired}
+                  onCheckedChange={handleRequiredChange}
+                />
+              </div>
+              {questionType === "long_text" && (
+                <div className="flex items-center gap-2">
+                  <Label>Accept audio</Label>
+                  <Switch
+                    checked={canAcceptAudioLocal ?? false}
+                    onCheckedChange={handleRequiredAudioChange}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2">

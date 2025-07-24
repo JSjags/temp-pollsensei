@@ -13,11 +13,24 @@ import Image from "next/image";
 import { extractDescription } from "@/utils/analysis";
 
 interface TableData {
-  [key: string]: number | string[] | undefined;
+  statistics: string[];
+  value: number[];
+}
+
+interface PlotData {
+  type: string;
+  h_statistic: number;
+  p_value: number;
+  rank_means: Array<{
+    category: string;
+    rank: number;
+  }>;
+  [key: string]: any;
 }
 
 interface TestData {
-  table_data?: TableData;
+  table_data: TableData;
+  plot_data: PlotData;
   plot_names: string[];
   plot_urls: string[];
   description: string;
@@ -28,17 +41,26 @@ interface TestData {
 interface TestProps {
   test_name: string;
   test_results: {
-    results: Record<string, TestData>;
+    results: Record<string, TestData> | TestData[];
     description: string;
   };
 }
 
 const KruskalWallisComponent: React.FC<TestProps> = (props) => {
+  // Patch for array/object mismatch
+  let results = props.test_results.results;
+  if (Array.isArray(results)) {
+    // Merge all objects in the array into one object
+    results = Object.assign({}, ...results);
+  }
+  // Ensure results is Record<string, TestData>
+  const typedResults = results as Record<string, TestData>;
+
   const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(props.test_results.results)[0]
+    Object.keys(typedResults)[0]
   );
 
-  const currentResult = props.test_results.results[selectedResult];
+  const currentResult = typedResults[selectedResult];
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -71,11 +93,11 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
           <CardTitle className="flex items-center justify-between">
             <span>{props.test_name}</span>
             <Select value={selectedResult} onValueChange={setSelectedResult}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
                 <SelectValue placeholder="Select variable" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(props.test_results.results).map((key) => (
+                {Object.keys(typedResults).map((key) => (
                   <SelectItem key={key} value={key}>
                     {key.split("-").map(formatKey).join(" vs ")}
                   </SelectItem>
@@ -101,22 +123,51 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentResult.table_data &&
-                      Object.entries(currentResult.table_data)
-                        .filter(([_, value]) => typeof value === "number")
-                        .map(([key, value]) => (
-                          <tr key={key} className="border-b">
-                            <td className="py-2">{formatKey(key)}</td>
-                            <td className="text-right py-2">
-                              {typeof value === "number"
-                                ? value.toFixed(4)
-                                : "N/A"}
-                            </td>
-                          </tr>
-                        ))}
+                    {currentResult.table_data?.statistics.map(
+                      (statistic: string, index: number) => (
+                        <tr key={statistic} className="border-b">
+                          <td className="py-2">{statistic}</td>
+                          <td className="text-right py-2">
+                            {typeof currentResult.table_data.value[index] ===
+                            "number"
+                              ? currentResult.table_data.value[index].toFixed(4)
+                              : "N/A"}
+                          </td>
+                        </tr>
+                      )
+                    )}
                   </tbody>
                 </table>
               </div>
+
+              {/* Rank Means Table */}
+              {currentResult.plot_data?.rank_means && (
+                <div className="overflow-x-auto mt-4">
+                  <h3 className="text-lg font-medium mb-2">Rank Means</h3>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Category</th>
+                        <th className="text-right py-2">Rank</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentResult.plot_data.rank_means.map(
+                        (rankMean: { category: string; rank: number }) => (
+                          <tr key={rankMean.category} className="border-b">
+                            <td className="py-2">
+                              {formatKey(rankMean.category)}
+                            </td>
+                            <td className="text-right py-2">
+                              {rankMean.rank.toFixed(2)}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
 
               {/* Plot Images */}
               <div

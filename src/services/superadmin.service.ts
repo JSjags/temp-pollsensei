@@ -47,7 +47,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         return {
           url: `/superadmin/overview?${params.toString()}`, // filter_by
           method: "GET",
-        }
+        };
       },
     }),
     surveyCreationDistribution: builder.query({
@@ -78,7 +78,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         if (month) params.append("month", month);
         if (year) params.append("year", year);
         return {
-          url: `superadmin/user-subscription-distribution?${params.toString()}`, // superadmin/user-subscription-distribution?month=October&year=2024
+          url: `superadmin/user-subscription-distribution?${params.toString()}`,
           method: "GET",
         };
       },
@@ -194,7 +194,7 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     deleteTutorial: builder.mutation({
-      query: (id) => ({
+      query: ({ id }: { id: string }) => ({
         url: `/superadmin/tutorial/${id}`, // superadmin/tutorial/674cf336922a72e499678670
         method: "DELETE",
       }),
@@ -228,8 +228,8 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     subscriptionTrend: builder.query({
-      query: () => ({
-        url: `superadmin/subscription-trend?period=6 months`, // superadmin/subscription-trend?period=1 year
+      query: (period) => ({
+        url: `superadmin/subscription-trend?period=${period}`,
         method: "GET",
       }),
     }),
@@ -277,6 +277,13 @@ export const surveyApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    removeFakeAccounts: builder.mutation({
+      query: (body) => ({
+        url: `superadmin/users/remove-fake-accounts`,
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -316,4 +323,5 @@ export const {
   useUpdateDisableStatusMutation,
   useGetSuperAdminSurveyQuery,
   useResetUserPasswordMutation,
+  useRemoveFakeAccountsMutation,
 } = surveyApiSlice;

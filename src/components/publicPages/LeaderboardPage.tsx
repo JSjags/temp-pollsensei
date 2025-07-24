@@ -16,7 +16,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Trophy, Users, LineChart, ClipboardList } from "lucide-react";
+import {
+  Trophy,
+  Users,
+  LineChart,
+  ClipboardList,
+  AlertCircle,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -32,6 +38,7 @@ interface LeaderboardEntry {
   referrerName: string;
   totalReferrals: number;
   totalSurveysByReferrals: number;
+  totalResponsesToReferralSurveys: number;
 }
 
 interface LeaderboardResponse {
@@ -124,6 +131,9 @@ const LeaderboardPage = () => {
                       Total Referrals
                     </TableHead>
                     <TableHead className="text-right">Total Surveys</TableHead>
+                    <TableHead className="text-right">
+                      Total Responses
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -134,6 +144,9 @@ const LeaderboardPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto" />
@@ -190,22 +203,48 @@ const LeaderboardPage = () => {
                       Total number of surveys created by referred users
                     </p>
                   </div>
-                  <div className="flex items-start sm:items-center gap-2">
-                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
-                    <p className="text-sm">
-                      <span className="font-semibold text-[#5B03B2]">
-                        Top 3 Qualification:
-                      </span>{" "}
-                      Minimum of 150 referrals required to win Top 3 positions
-                    </p>
+                  <div className="flex items-start gap-2">
+                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB] flex-shrink-0" />
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        <span className="font-semibold text-[#5B03B2]">
+                          Top 3 Qualification Requirements:
+                        </span>
+                      </p>
+                      <div className="space-y-1 text-sm">
+                        <p>
+                          🥇 1st Place: 500 referrals • 200 surveys • 150
+                          responses
+                        </p>
+                        <p>
+                          🥈 2nd Place: 300 referrals • 120 surveys • 100
+                          responses
+                        </p>
+                        <p>
+                          🥉 3rd Place: 200 referrals • 80 surveys • 60
+                          responses
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-start sm:items-center gap-2">
                     <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
                     <p className="text-sm">
                       <span className="font-semibold text-[#5B03B2]">
+                        Total Responses:
+                      </span>{" "}
+                      Total number of responses to surveys created by referred
+                      users
+                    </p>
+                  </div>
+                  <div className="flex items-start sm:items-center gap-2">
+                    <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                    <p className="text-sm">
+                      <span className="font-semibold text-[#5B03B2]">
                         Points Calculation:
                       </span>{" "}
-                      Points = Total Referrals + (2 × Total Surveys)
+                      Points = Total Referrals + (2 × Total Surveys) + (2 ×
+                      Total Responses)
                     </p>
                   </div>
                 </div>
@@ -215,7 +254,7 @@ const LeaderboardPage = () => {
             <Card className="border-[#5B03B2]/20">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-xl sm:text-2xl text-[#5B03B2]">
-                  Prize Pool
+                  Prize Pool*
                 </CardTitle>
                 <CardDescription className="text-sm">
                   Exciting rewards for our top performers
@@ -250,6 +289,9 @@ const LeaderboardPage = () => {
                       ₦50,000
                     </p>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-4 italic">
+                    *Terms and Conditions apply
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -327,6 +369,7 @@ const LeaderboardPage = () => {
                   <TableHead>Username</TableHead>
                   <TableHead className="text-right">Total Referrals</TableHead>
                   <TableHead className="text-right">Total Surveys</TableHead>
+                  <TableHead className="text-right">Total Responses</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -354,48 +397,69 @@ const LeaderboardPage = () => {
                     <TableCell className="text-right">
                       {row.totalSurveysByReferrals}
                     </TableCell>
+                    <TableCell className="text-right">
+                      {row.totalResponsesToReferralSurveys}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 py-4 px-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((old) => Math.max(old - 1, 1))}
-              disabled={page === 1}
-              className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground whitespace-nowrap">
-              Page {leaderboardResponse?.page || 1} of{" "}
-              {Math.ceil((leaderboardResponse?.total || 0) / limit)}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setPage((old) =>
-                  Math.min(
-                    old + 1,
-                    Math.ceil((leaderboardResponse?.total || 0) / limit)
+          <div className="border-t border-[#5B03B2]/10">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 py-4 px-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((old) => Math.max(old - 1, 1))}
+                disabled={page === 1}
+                className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
+              >
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
+                Page {leaderboardResponse?.page || 1} of{" "}
+                {Math.ceil((leaderboardResponse?.total || 0) / limit)}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPage((old) =>
+                    Math.min(
+                      old + 1,
+                      Math.ceil((leaderboardResponse?.total || 0) / limit)
+                    )
                   )
-                )
-              }
-              disabled={
-                page === Math.ceil((leaderboardResponse?.total || 0) / limit)
-              }
-              className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
-            >
-              Next
-            </Button>
+                }
+                disabled={
+                  page === Math.ceil((leaderboardResponse?.total || 0) / limit)
+                }
+                className="w-full sm:w-auto hover:bg-[#5B03B2]/10 hover:text-[#5B03B2] border-[#5B03B2]/20"
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </Card>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="flex flex-col sm:flex-row items-start justify-start gap-3 text-muted-foreground py-4 px-3 bg-amber-50 rounded-lg border border-amber-200 mt-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-amber-800">
+                Important Notice:
+              </p>
+              <p className="text-sm">
+                Fake and duplicate accounts are being purged from our database
+                on an ongoing basis. Fake/bot-generated referral emails will
+                lead to the referrer's account being banned.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="grid sm:grid-cols-2 gap-4">
           <Card className="border-[#5B03B2]/20">
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl sm:text-2xl text-[#5B03B2]">
@@ -425,22 +489,47 @@ const LeaderboardPage = () => {
                     Total number of surveys created by referred users
                   </p>
                 </div>
-                <div className="flex items-start sm:items-center gap-2">
-                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
-                  <p className="text-sm">
-                    <span className="font-semibold text-[#5B03B2]">
-                      Top 3 Qualification:
-                    </span>{" "}
-                    Minimum of 150 referrals required to win Top 3 positions
-                  </p>
+                <div className="flex items-start gap-2">
+                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB] flex-shrink-0" />
+                  <div className="space-y-2">
+                    <p className="text-sm">
+                      <span className="font-semibold text-[#5B03B2]">
+                        Top 3 Qualification Requirements:
+                      </span>
+                    </p>
+                    <div className="space-y-1 text-sm">
+                      <p>
+                        🥇 1st Place: 500 referrals • 200 surveys • 150
+                        responses
+                      </p>
+                      <p>
+                        🥈 2nd Place: 300 referrals • 120 surveys • 100
+                        responses
+                      </p>
+                      <p>
+                        🥉 3rd Place: 200 referrals • 80 surveys • 60 responses
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
                   <LineChart className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
                   <p className="text-sm">
                     <span className="font-semibold text-[#5B03B2]">
+                      Total Responses:
+                    </span>{" "}
+                    Total number of responses to surveys created by referred
+                    users
+                  </p>
+                </div>
+                <div className="flex items-start sm:items-center gap-2">
+                  <Trophy className="h-5 w-5 mt-0.5 sm:mt-0 text-[#9D50BB]" />
+                  <p className="text-sm">
+                    <span className="font-semibold text-[#5B03B2]">
                       Points Calculation:
                     </span>{" "}
-                    Points = Total Referrals + (2 × Total Surveys)
+                    Points = Total Referrals + (2 × Total Surveys) + (2 × Total
+                    Responses)
                   </p>
                 </div>
               </div>
@@ -450,7 +539,7 @@ const LeaderboardPage = () => {
           <Card className="border-[#5B03B2]/20">
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl sm:text-2xl text-[#5B03B2]">
-                Prize Pool
+                Prize Pool*
               </CardTitle>
               <CardDescription className="text-sm">
                 Exciting rewards for our top performers
@@ -464,7 +553,7 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       1st Position:
                     </span>{" "}
-                    ₦250,000
+                    ₦500,000
                   </p>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
@@ -473,7 +562,7 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       2nd Position:
                     </span>{" "}
-                    ₦150,000
+                    ₦300,000
                   </p>
                 </div>
                 <div className="flex items-start sm:items-center gap-2">
@@ -482,13 +571,16 @@ const LeaderboardPage = () => {
                     <span className="font-semibold text-[#5B03B2]">
                       3rd Position:
                     </span>{" "}
-                    ₦50,000
+                    ₦200,000
                   </p>
                 </div>
+                <p className="text-xs text-muted-foreground mt-4 italic">
+                  *Terms and Conditions apply
+                </p>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </div>
   );

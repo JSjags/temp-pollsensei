@@ -10,12 +10,23 @@ export const getPopularTutorials = (type: "video" | "web") => {
   );
 };
 
+export const getAdminTutorials = (props: UseGetTutorialsProps) => {
+  const { filter, page: pageNumber } = props;
+  const page = pageNumber ?? 1;
+
+  return axiosInstance.get<GetTutorials>(
+    `/superadmin/tutorial?page=${page}&page_size=${20}${
+      filter ? `&filter_by=${filter}` : ""
+    }`
+  );
+};
+
 export const getTutorials = (props: UseGetTutorialsProps) => {
   const { filter, page: pageNumber } = props;
   const page = pageNumber ?? 1;
 
   return axiosInstance.get<GetTutorials>(
-    `/tutorial?page=${page}&page_size=${DEFAULT_API_PAGE_SIZE}${
+    `/tutorial?page=${page}&page_size=${20}${
       filter ? `&filter_by=${filter}` : ""
     }`
   );

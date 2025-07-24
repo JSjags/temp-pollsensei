@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "@react-pdf/renderer";
+import { View, Text, StyleSheet, Svg, Path } from "@react-pdf/renderer";
 
 // Define styles for the PDF
 const styles = StyleSheet.create({
@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   },
   question: {
     marginBottom: 5,
-    fontSize: 16,
+    fontSize: 14,
   },
   optionsContainer: {
     // marginLeft: 10,
@@ -55,16 +55,19 @@ const styles = StyleSheet.create({
   },
   matrixRowLabel: {
     width: 100,
+    justifyContent: "center",
+    alignItems: "flex-start",
   },
   matrixCell: {
     flex: 1,
     alignItems: "center",
+    justifyContent: "center",
   },
   sliderContainer: {
     marginTop: 10,
   },
   sliderLine: {
-    height: 2,
+    height: 1,
     backgroundColor: "#000",
     marginVertical: 5,
   },
@@ -77,8 +80,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   star: {
-    fontSize: 16,
-    color: "black",
+    fontSize: 20,
+    color: "#111",
     marginRight: 2,
   },
 });
@@ -106,11 +109,11 @@ export const CheckboxQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: CheckboxQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.checkbox, { borderColor: colorTheme }]} />
@@ -137,11 +140,11 @@ export const MultipleChoiceQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: MultipleChoiceQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.radio, { borderColor: colorTheme }]} />
@@ -168,11 +171,11 @@ export const SingleChoiceQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: SingleChoiceQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.radio, { borderColor: colorTheme }]} />
@@ -199,11 +202,11 @@ export const DropdownQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: DropdownQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       {options?.map((option, i) => (
         <View key={i} style={styles.row}>
           <View style={[styles.checkbox, { borderColor: colorTheme }]} />
@@ -228,15 +231,15 @@ export const BooleanQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: BooleanQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.row, questionStyle as Style]}>
+    <View style={[styles.row, questionStyle as any]}>
       <View style={[styles.radio, { borderColor: colorTheme }]} />
       <Text>True</Text>
     </View>
-    <View style={styles.row}>
+    <View style={[styles.row, questionStyle as any]}>
       <View style={[styles.radio, { borderColor: colorTheme }]} />
       <Text>False</Text>
     </View>
@@ -257,20 +260,22 @@ export const ShortTextQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: ShortTextQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
-    <View style={[styles.optionsContainer, questionStyle as Style]}>
+    <View style={[styles.optionsContainer, questionStyle as any]}>
       <View
         style={[
           {
-            borderBottomWidth: 1,
-            borderBottomColor: "#000",
+            borderWidth: 1,
+            borderColor: colorTheme,
             width: "100%",
-            marginTop: 5,
+            minHeight: 36,
+            marginTop: 8,
+            borderRadius: 4,
+            backgroundColor: "#fff",
           },
-          { borderColor: colorTheme },
         ]}
       />
     </View>
@@ -291,7 +296,7 @@ export const LongTextQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: LongTextQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
@@ -307,7 +312,7 @@ export const LongTextQuestion = ({
           borderRadius: 4,
         },
         { borderColor: colorTheme },
-        questionStyle as Style,
+        questionStyle as any,
       ]}
     ></View>
   </View>
@@ -319,6 +324,8 @@ interface SliderQuestionProps {
   index: number;
   colorTheme?: string;
   questionStyle?: Style;
+  min?: string;
+  max?: string;
 }
 
 export const SliderQuestion = ({
@@ -326,17 +333,41 @@ export const SliderQuestion = ({
   index,
   colorTheme,
   questionStyle,
+  min,
+  max,
 }: SliderQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
     <View style={styles.sliderContainer}>
-      <View style={[styles.sliderLine, { backgroundColor: colorTheme }]} />
-      <View style={[styles.sliderMarkers, questionStyle as Style]}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+      <View style={[styles.sliderMarkers, questionStyle as any]}>
+        {["Min value", "Max value"].map((num) => (
           <Text key={num}>{num}</Text>
         ))}
+      </View>
+      <View style={[styles.sliderLine, { backgroundColor: colorTheme }]} />
+      <View style={[styles.sliderMarkers, questionStyle as any]}>
+        {[min, max].map((num) => (
+          <Text key={num}>{num}</Text>
+        ))}
+      </View>
+    </View>
+    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 8 }}>
+      <Text style={{ marginRight: 8, fontSize: 14 }}>Enter value</Text>
+      <View
+        style={{
+          borderWidth: 1,
+          borderColor: colorTheme,
+          width: 60,
+          minHeight: 24,
+          borderRadius: 4,
+          backgroundColor: "#fff",
+          paddingLeft: 4,
+          justifyContent: "center",
+        }}
+      >
+        {/* Placeholder for user input */}
       </View>
     </View>
   </View>
@@ -358,7 +389,7 @@ export const LikertScaleQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: LikertScaleQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
@@ -366,7 +397,7 @@ export const LikertScaleQuestion = ({
       {options?.map((option, i) => (
         <View key={i} style={styles.likertOption}>
           <View style={[styles.radio, { borderColor: colorTheme }]} />
-          <Text style={[questionStyle as Style]}>{option}</Text>
+          <Text style={[questionStyle as any]}>{option}</Text>
         </View>
       ))}
     </View>
@@ -394,7 +425,7 @@ export const RatingScaleQuestion = ({
     : Array.from({ length: 5 }, (_, i) => (i + 1).toString());
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} wrap={false}>
       {/* <Text style={styles.question}>
         {index}. {question}
       </Text> */}
@@ -402,7 +433,7 @@ export const RatingScaleQuestion = ({
         {range.map((rating, i) => (
           <View key={i} style={styles.likertOption}>
             <View style={[styles.radio, { borderColor: colorTheme }]} />
-            <Text style={[questionStyle as Style]}>{rating}</Text>
+            <Text style={[questionStyle as any]}>{rating}</Text>
           </View>
         ))}
       </View>
@@ -416,6 +447,7 @@ interface StarRatingQuestionProps {
   index: number;
   colorTheme?: string;
   questionStyle?: Style;
+  useCircles?: boolean;
 }
 
 export const StarRatingQuestion = ({
@@ -423,21 +455,25 @@ export const StarRatingQuestion = ({
   index,
   colorTheme = "#000",
   questionStyle,
+  useCircles = false,
 }: StarRatingQuestionProps) => (
-  <View style={styles.container}>
-    {/* <Text style={styles.question}>
-      {index}. {question}
-    </Text> */}
-    <View style={styles.starContainer}>
-      {[1, 2, 3, 4, 5].map((_, i) => (
-        <Text
-          key={i}
-          style={[styles.star, { color: colorTheme }, questionStyle as Style]}
-        >
-          ★
-        </Text>
-      ))}
-    </View>
+  <View style={styles.starContainer}>
+    {[0, 1, 2, 3, 4].map((i) => (
+      <Svg
+        key={i}
+        width={20}
+        height={20}
+        viewBox="0 0 24 24"
+        style={{ marginRight: 4, marginBottom: 2 }}
+      >
+        <Path
+          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+          stroke={colorTheme}
+          strokeWidth={1}
+          fill="#fff"
+        />
+      </Svg>
+    ))}
   </View>
 );
 
@@ -459,7 +495,7 @@ export const MatrixMultipleChoiceQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: MatrixMultipleChoiceQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
@@ -468,14 +504,28 @@ export const MatrixMultipleChoiceQuestion = ({
         <View style={styles.matrixRowLabel} />
         {columns?.map((col, i) => (
           <View key={i} style={styles.matrixCell}>
-            <Text style={[questionStyle as Style]}>{col}</Text>
+            <Text
+              style={[
+                { fontWeight: "normal", textAlign: "center" },
+                questionStyle as any,
+              ]}
+            >
+              {col}
+            </Text>
           </View>
         ))}
       </View>
       {rows?.map((row, i) => (
         <View key={i} style={styles.matrixRow}>
           <View style={styles.matrixRowLabel}>
-            <Text style={[questionStyle as Style]}>{row}</Text>
+            <Text
+              style={[
+                { fontWeight: "normal", textAlign: "left" },
+                questionStyle as any,
+              ]}
+            >
+              {row}
+            </Text>
           </View>
           {columns?.map((_, j) => (
             <View key={j} style={styles.matrixCell}>
@@ -506,7 +556,7 @@ export const MatrixCheckboxQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: MatrixCheckboxQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
@@ -515,14 +565,28 @@ export const MatrixCheckboxQuestion = ({
         <View style={styles.matrixRowLabel} />
         {columns?.map((col, i) => (
           <View key={i} style={styles.matrixCell}>
-            <Text style={[questionStyle as Style]}>{col}</Text>
+            <Text
+              style={[
+                { fontWeight: "normal", textAlign: "center" },
+                questionStyle as any,
+              ]}
+            >
+              {col}
+            </Text>
           </View>
         ))}
       </View>
       {rows?.map((row, i) => (
         <View key={i} style={styles.matrixRow}>
           <View style={styles.matrixRowLabel}>
-            <Text style={[questionStyle as Style]}>{row}</Text>
+            <Text
+              style={[
+                { fontWeight: "normal", textAlign: "left" },
+                questionStyle as any,
+              ]}
+            >
+              {row}
+            </Text>
           </View>
           {columns?.map((_, j) => (
             <View key={j} style={styles.matrixCell}>
@@ -549,7 +613,7 @@ export const NumberQuestion = ({
   colorTheme = "#000",
   questionStyle,
 }: NumberQuestionProps) => (
-  <View style={styles.container}>
+  <View style={styles.container} wrap={false}>
     {/* <Text style={styles.question}>
       {index}. {question}
     </Text> */}
@@ -557,12 +621,14 @@ export const NumberQuestion = ({
       <View
         style={[
           {
-            borderBottomWidth: 1,
-            borderBottomColor: "#000",
+            borderWidth: 1,
+            borderColor: colorTheme,
             width: "100%",
-            marginTop: 5,
+            minHeight: 36,
+            marginTop: 8,
+            borderRadius: 4,
+            backgroundColor: "#fff",
           },
-          { borderColor: colorTheme },
         ]}
       />
     </View>

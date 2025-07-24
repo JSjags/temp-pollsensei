@@ -15,7 +15,6 @@ import PasswordField from "../../components/ui/PasswordField";
 import Input from "@/components/ui/Input";
 import StateLoader2 from "@/components/common/StateLoader2";
 import { useRouter, useSearchParams } from "next/navigation";
-import mixpanel from "mixpanel-browser";
 import { RootState } from "@/redux/store";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -27,6 +26,7 @@ import chat from "../../assets/auth/chat.svg";
 import { dark_theme_logo, pollsensei_new_logo } from "@/assets/images";
 import axiosInstance from "@/lib/axios-instance";
 import { useGoogleLoginMutation } from "@/services/user.service";
+import { PlaceholderRightSide } from "@/components/reusable/coming-soon";
 
 const constraints = {
   email: {
@@ -41,7 +41,7 @@ const constraints = {
   },
 };
 
-const fadeIn = {
+export const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 },
@@ -77,13 +77,21 @@ const LoginPage = () => {
         }
       }
     },
-    onError: (error: any) => {
-      // toast.error(
-      //   "Failed to login user " +
-      //     (error?.response?.data?.message || error.message)
-      // );
-      setLoginState(true);
+    onError: (err: any) => {
+      toast.error(
+        typeof err?.data?.message === "string"
+          ? err?.data?.message
+          : err?.data &&
+            typeof err?.data === "string" &&
+            err?.data.trim() !== ""
+          ? JSON.parse(err?.data)?.message
+          : err.message,
+        {
+          toastId: "api-error",
+        }
+      );
     },
+    retry: false,
   });
 
   const googleLoginMutation = useMutation({
@@ -124,7 +132,6 @@ const LoginPage = () => {
   }, [user, router, ed]);
 
   const onSubmit = (values: { email: string; password: string }) => {
-    setLoginState(true);
     loginMutation.mutate(values);
   };
 
@@ -159,84 +166,10 @@ const LoginPage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br"
+        className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-[#F5F7FB] to-[#E3E6F3] relative"
       >
-        <AnimatePresence mode="wait">
-          <div className="md:hidden flex items-center justify-center p-4 bg-white shadow">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="flex items-center justify-center gap-3"
-            >
-              <Link href="/">
-                <Image
-                  src={pollsensei_new_logo}
-                  alt="Logo"
-                  width={100}
-                  height={100}
-                />
-              </Link>
-              <h1 className="auth-head text-white font-bold">PollSensei</h1>
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.7 }}
-            className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8 bg-gradient-to-br from-blue-600 to-blue-400"
-          >
-            <div className="flex flex-col items-center max-w-md w-full">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="flex items-center justify-center gap-3 pb-10"
-              >
-                <Image
-                  src={dark_theme_logo}
-                  alt="Logo"
-                  width={200}
-                  height={32}
-                  className="drop-shadow-lg"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Image
-                  src={steps}
-                  alt="Steps"
-                  className="pb-4 w-full max-w-[400px] h-auto hover:scale-105 transition-transform duration-300"
-                  width={300}
-                  height={200}
-                />
-              </motion.div>
-
-              <motion.h3
-                variants={fadeIn}
-                initial="initial"
-                animate="animate"
-                className="auth-heading pb-5 text-center text-white text-3xl font-bold"
-              >
-                Create End-to-End <br /> Surveys with our AI tool
-              </motion.h3>
-
-              <motion.h5
-                variants={fadeIn}
-                initial="initial"
-                animate="animate"
-                transition={{ delay: 0.4 }}
-                className="auth-subtitle text-center text-white/90"
-              >
-                PollSensei helps you to Create suggest questions, <br />{" "}
-                formats, methodologies
-              </motion.h5>
-            </div>
-          </motion.div>
-
+        {/* Left side: login form or content, with spinner at the top */}
+        <div className="flex-1 flex flex-col justify-center items-center relative px-4 py-8">
           <AnimatePresence mode="wait">
             <motion.div
               key="loader"
@@ -259,291 +192,246 @@ const LoginPage = () => {
               />
             </motion.div>
           </AnimatePresence>
-        </AnimatePresence>
+        </div>
+        {/* Right Side: Placeholder */}
+        <div className="hidden md:flex md:w-1/2 h-screen py-4 pr-4">
+          <PlaceholderRightSide
+            slides={[
+              <div
+                key="slide1"
+                className="flex flex-col items-center justify-center h-full w-full"
+              >
+                <p className="text-3xl font-bold mb-2 text-white text-center">
+                  Create your Survey in Seconds
+                </p>
+                <p className="text-white text-center w-[80%] text-lg">
+                  Easily design surveys using our advanced tools. Say goodbye to
+                  time-consuming survey creation, and let PollSensei handle it
+                  for you.
+                </p>
+                <Image
+                  src="/auth/slide-1.svg"
+                  alt="Slide 1"
+                  width={320}
+                  height={320}
+                  className="w-[100%]"
+                />
+              </div>,
+              <div
+                key="slide2"
+                className="flex flex-col items-center justify-center h-full w-full"
+              >
+                <p className="text-3xl font-bold mb-2 text-white text-center">
+                  Analyse your Survey in Seconds
+                </p>
+                <p className="text-white text-center w-[80%] text-lg mt-4">
+                  Imagine getting meaningful insights without endless hours of
+                  analysis. PollSensei offers this and more.
+                </p>
+                <Image
+                  src="/auth/slide-2.svg"
+                  alt="Slide 2"
+                  width={320}
+                  height={320}
+                  className="w-[100%] mt-12"
+                />
+              </div>,
+              <div
+                key="slide3"
+                className="flex flex-col items-center justify-center h-full w-full"
+              >
+                <p className="text-3xl font-bold mb-2 text-white text-center">
+                  Receive survey report
+                </p>
+                <p className="text-white text-center w-[80%] text-lg mt-4">
+                  Our superpowered reporting tool takes the guesswork out of
+                  analysis, highlighting key trends and actionable insights so
+                  you can make smarter decisions.
+                </p>
+                <Image
+                  src="/auth/slide-3.svg"
+                  alt="Slide 3"
+                  width={320}
+                  height={320}
+                  className="w-[100%] mt-12"
+                />
+              </div>,
+            ]}
+          />
+        </div>
       </motion.section>
     );
   }
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br"
-    >
-      <AnimatePresence mode="wait">
-        <div className="md:hidden flex items-center justify-center p-4 bg-white shadow">
-          <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center justify-center gap-3"
-          >
+    <section className="min-h-screen max-w-[1440px] mx-auto flex flex-col md:flex-row max-h-screen">
+      <div className="w-full md:w-1/2 flex flex-col items-center px-4 md:px-8 py-6 overflow-y-scroll">
+        <div className="flex flex-col w-full max-w-md mx-auto">
+          <div className="flex flex-col items-start mb-8">
             <Link href="/">
               <Image
                 src={pollsensei_new_logo}
                 alt="Logo"
-                width={100}
-                height={100}
+                width={120}
+                height={32}
               />
             </Link>
-          </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.7 }}
-          className="auth-bg hidden md:flex md:w-1/2 flex-col justify-center items-center p-8 bg-gradient-to-br from-blue-600 to-blue-400"
-        >
-          <div className="flex flex-col items-center max-w-md w-full">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center justify-center gap-3 pb-10"
-            >
-              <Image
-                src={dark_theme_logo}
-                alt="Logo"
-                width={200}
-                height={32}
-                className="drop-shadow-lg"
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Image
-                src={steps}
-                alt="Steps"
-                className="pb-4 w-full max-w-[400px] h-auto hover:scale-105 transition-transform duration-300"
-                width={300}
-                height={200}
-              />
-            </motion.div>
-
-            <motion.h3
-              variants={fadeIn}
-              initial="initial"
-              animate="animate"
-              className="auth-heading pb-5 text-center text-white text-3xl font-bold"
-            >
-              Create End-to-End <br /> Surveys with our AI tool
-            </motion.h3>
-
-            <motion.h5
-              variants={fadeIn}
-              initial="initial"
-              animate="animate"
-              transition={{ delay: 0.4 }}
-              className="auth-subtitle text-center text-white/90"
-            >
-              PollSensei helps you to create suggest questions, <br /> formats,
-              methodologies
-            </motion.h5>
           </div>
-        </motion.div>
-
-        <AnimatePresence mode="wait">
-          {loginState && (
-            <motion.div
-              key="login"
-              initial={{ x: 100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -100, opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0"
-            >
-              <div className="flex justify-center flex-col max-w-[516px] w-full">
-                <motion.div
-                  variants={fadeIn}
-                  initial="initial"
-                  animate="animate"
-                  className="flex-col flex pb-6 md:pb-8 pt-6 md:pt-10"
-                >
-                  <h2 className="auth-header font-sans text-center md:text-left !text-2xl md:!text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                    Welcome back to PollSensei
-                  </h2>
-                  <p className="auth-title font-sans pt-3 text-center md:text-left text-gray-600">
-                    The Best tool for your End-to-End Survey Solution
-                  </p>
-                </motion.div>
-
-                <Form
-                  onSubmit={onSubmit}
-                  validate={validateForm}
-                  render={({ handleSubmit, form, submitting }) => (
-                    <motion.form
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      onSubmit={handleSubmit}
-                      className="w-full space-y-4"
-                    >
-                      <Field name="email">
-                        {({ input, meta }) => (
-                          <Input
-                            label="Email"
-                            type="email"
-                            placeholder="Enter your Email"
-                            form={form as any}
-                            {...input}
-                          />
-                        )}
-                      </Field>
-
-                      <Field name="password">
-                        {({ input, meta }) => (
-                          <PasswordField
-                            id="password"
-                            eyeState={eyeState}
-                            toggleEye={() => setEyeState((prev) => !prev)}
-                            placeholder="*******"
-                            label="Password"
-                            form={form as any}
-                            {...input}
-                          />
-                        )}
-                      </Field>
-
-                      <div className="py-3 font-bold text-right">
-                        <Link
-                          href="/forgot-password"
-                          className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent hover:from-[#5B03B2] hover:to-[#9D50BB] transition-colors"
-                        >
-                          Forgot Password?
-                        </Link>
-                      </div>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="auth-btn w-full justify-center bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                        type="submit"
-                      >
-                        {loginMutation.isPending ? (
-                          <ClipLoader size={20} color="white" />
-                        ) : (
-                          "Sign In"
-                        )}
-                      </motion.button>
-                    </motion.form>
+          <h2 className="text-3xl font-semibold text-start mb-2">
+            Welcome back to PollSensei
+          </h2>
+          <p className="text-start text-gray-500 mb-6">
+            The Best tool for your End-to-End Survey Solution
+          </p>
+          <button
+            type="button"
+            onClick={() => googleSignUp()}
+            className="flex items-center justify-center w-fit py-2 px-4 mb-4 bg-[#9344BA1A] rounded-full hover:bg-[#9344BA2A] transition"
+          >
+            <Image
+              src={google}
+              alt="Google"
+              width={32}
+              height={32}
+              className="mr-2"
+            />
+            <span className="text-gray-700 font-medium text-base">
+              Continue with Google
+            </span>
+          </button>
+          <div className="flex items-center my-4">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="mx-3 text-gray-400">Or</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+          <Form
+            onSubmit={onSubmit}
+            validate={validateForm}
+            render={({ handleSubmit, form, submitting }) => (
+              <form onSubmit={handleSubmit} className="w-full space-y-4">
+                <Field name="email">
+                  {({ input, meta }) => (
+                    <Input
+                      label="Email"
+                      type="email"
+                      placeholder="Enter your Email"
+                      form={form as any}
+                      {...input}
+                    />
                   )}
-                />
-
-                <motion.div
-                  variants={fadeIn}
-                  initial="initial"
-                  animate="animate"
-                  transition={{ delay: 0.4 }}
-                  className="flex justify-center pt-5"
-                >
-                  <p className="bg-white shadow-md rounded-[1rem] py-2 px-4 text-sm">
-                    Don&apos;t have an account?{" "}
-                    <Link
-                      href="/register"
-                      className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent hover:from-[#5B03B2] hover:to-[#9D50BB] font-semibold"
-                    >
-                      Sign up
-                    </Link>
-                  </p>
-                </motion.div>
-
-                <div className="flex gap-3 md:gap-5 items-center pt-5">
-                  <div className="border flex-grow border-[#E5EFFF]"></div>
-                  <div className="auth-divider whitespace-nowrap text-gray-500">
-                    or <span className="hidden md:inline">continue with</span>
-                  </div>
-                  <div className="border flex-grow border-[#E5EFFF]"></div>
+                </Field>
+                <Field name="password">
+                  {({ input, meta }) => (
+                    <PasswordField
+                      id="password"
+                      eyeState={eyeState}
+                      toggleEye={() => setEyeState((prev) => !prev)}
+                      placeholder="*******"
+                      label="Password"
+                      form={form as any}
+                      {...input}
+                    />
+                  )}
+                </Field>
+                <div className="py-3 font-bold text-right">
+                  <Link
+                    href="/forgot-password"
+                    className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] bg-clip-text text-transparent hover:from-[#5B03B2] hover:to-[#9D50BB] transition-colors"
+                  >
+                    Forgot Password?
+                  </Link>
                 </div>
-
-                <motion.div
-                  variants={fadeIn}
-                  initial="initial"
-                  animate="animate"
-                  transition={{ delay: 0.6 }}
-                  className="social-icons flex justify-center items-center gap-4 pt-5"
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white rounded-lg font-semibold hover:opacity-90 transition"
+                  disabled={submitting || loginMutation.isPending}
                 >
-                  <motion.span
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      try {
-                        googleSignUp();
-                        // mixpanel.track("Google Sign-In Clicked", {
-                        //   timestamp: new Date().toISOString(),
-                        // });
-                      } catch (err) {
-                        console.error("Error during Google sign up:", err);
-                        toast.error("Failed to sign in with Google");
-                      }
-                    }}
-                    className="flex justify-between items-center gap-2 border pr-4 rounded-full hover:shadow-lg transition-shadow duration-300 cursor-pointer bg-white"
-                  >
-                    <Image
-                      src={google}
-                      alt="Google"
-                      width={56}
-                      height={56}
-                      className="size-14"
-                    />
-                    <span className="text-gray-700">
-                      Sign in with your Google account
-                    </span>
-                  </motion.span>
-                </motion.div>
-
-                <motion.div
-                  variants={fadeIn}
-                  initial="initial"
-                  animate="animate"
-                  transition={{ delay: 0.8 }}
-                  className="flex justify-end items-center mt-4"
-                >
-                  <p className="mr-2 text-gray-600">Need Help?</p>
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Image
-                      src={chat}
-                      alt="Chat"
-                      className="object-cover size-20 cursor-pointer"
-                      width={24}
-                      height={24}
-                    />
-                  </motion.div>
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-          {!loginState && (
-            <motion.div
-              key="loader"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 py-6 md:py-0"
+                  {submitting || loginMutation.isPending ? (
+                    <ClipLoader size={20} color="white" />
+                  ) : (
+                    "Sign In"
+                  )}
+                </button>
+              </form>
+            )}
+          />
+          <div className="flex justify-center mt-6">
+            <Link
+              href="/register"
+              className="text-primary px-3 text-sm hover:underline bg-[#F7F7F7] rounded-full"
             >
-              <StateLoader2
-                defaultGoto="/login"
-                directRoute={
-                  ed
-                    ? ed === "2"
-                      ? "/surveys/edit-survey"
-                      : ed === "3"
-                      ? "/surveys/manual-survey-create"
-                      : undefined
-                    : undefined
-                }
+              Don&apos;t have an account? Sign up
+            </Link>
+          </div>
+        </div>
+      </div>
+      {/* Right Side: Placeholder */}
+      <div className="hidden md:flex md:w-1/2 h-screen py-4 pr-4">
+        <PlaceholderRightSide
+          slides={[
+            <div
+              key="slide1"
+              className="flex flex-col items-center justify-center h-full w-full"
+            >
+              <p className="text-3xl font-bold mb-2 text-white text-center">
+                Create your Survey in Seconds
+              </p>
+              <p className="text-white text-center w-[80%] text-lg">
+                Easily design surveys using our advanced tools. Say goodbye to
+                time-consuming survey creation, and let PollSensei handle it for
+                you.
+              </p>
+              <Image
+                src="/auth/slide-1.svg"
+                alt="Slide 1"
+                width={320}
+                height={320}
+                className="w-[100%]"
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </AnimatePresence>
-    </motion.section>
+            </div>,
+            <div
+              key="slide2"
+              className="flex flex-col items-center justify-center h-full w-full"
+            >
+              <p className="text-3xl font-bold mb-2 text-white text-center">
+                Analyse your Survey in Seconds
+              </p>
+              <p className="text-white text-center w-[80%] text-lg mt-4">
+                Imagine getting meaningful insights without endless hours of
+                analysis. PollSensei offers this and more.
+              </p>
+              <Image
+                src="/auth/slide-2.svg"
+                alt="Slide 2"
+                width={320}
+                height={320}
+                className="w-[100%] mt-12"
+              />
+            </div>,
+            <div
+              key="slide3"
+              className="flex flex-col items-center justify-center h-full w-full"
+            >
+              <p className="text-3xl font-bold mb-2 text-white text-center">
+                Receive survey report
+              </p>
+              <p className="text-white text-center w-[80%] text-lg mt-4">
+                Our superpowered reporting tool takes the guesswork out of
+                analysis, highlighting key trends and actionable insights so you
+                can make smarter decisions.
+              </p>
+              <Image
+                src="/auth/slide-3.svg"
+                alt="Slide 3"
+                width={320}
+                height={320}
+                className="w-[100%] mt-12"
+              />
+            </div>,
+          ]}
+        />
+      </div>
+    </section>
   );
 };
 

@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 
 import NavBar from "@/components/blocks/NavBar";
 import ArticlesGrid from "@/components/resource-hub/article-grid";
@@ -11,9 +10,9 @@ type Props = {};
 const Page = (props: Props) => {
   return (
     <section className="mt-2 min-h-[50vh]">
-    <ArticlesGrid />
-  </section>
-  )
+      <ArticlesGrid />
+    </section>
+  );
 };
 
 export default Page;

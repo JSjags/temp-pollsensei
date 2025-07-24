@@ -1,4 +1,5 @@
 name: Deploy Pollsensei to AKS
+name: Deploy Pollsensei to AKS
 
 on:
   push:

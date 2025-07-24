@@ -93,8 +93,7 @@ const Footer: React.FC<Props> = ({ onClick }) => {
                   href="https://x.com/pollsenseiAI?t=7fKJdJRHIPfnOLlzEd6oYw&s=09"
                   className="text-black hover:text-purple-600"
                 >
-                  {/* <FaTwitter /> */}
-                  Twitter
+                  {/* <FaTwitter /> */}X
                 </Link>
                 <Link
                   target="_blank"

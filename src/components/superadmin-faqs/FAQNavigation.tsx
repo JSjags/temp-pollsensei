@@ -1,175 +1,189 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
   SheetTrigger,
+  SheetFooter,
 } from "../ui/sheet";
-import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
-import { useCreateFAQsMutation } from "@/services/superadmin.service";
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
+import { Button } from "../ui/button";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  useAllFAQsQuery,
+  useCreateFAQsMutation,
+} from "@/services/superadmin.service";
 import { ClipLoader } from "react-spinners";
 import { Form, Field } from "react-final-form";
 import validate from "validate.js";
-import Input from "../ui/Input";
+import { Input } from "../ui/shadcn-input";
 import { toast } from "react-toastify";
-import TextArea from "../ui/TextArea";
+import { Textarea } from "../ui/shadcn-textarea";
+import { Menu, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import RichTextToolbar from "./RichTextToolbar";
+import { CreateFAQSheet } from "./CreateFAQSheet";
+import { useDispatch } from "react-redux";
+import apiSlice from "@/services/config/apiSlice";
 
 interface Tab {
   label: string;
   value: string;
 }
 
-const slugify = (tab: string) => {
-  return tab.toLowerCase().replace(/\s+/g, "-");
-};
+const tabs: Tab[] = [
+  { label: "All FAQs", value: "faqs" },
+  { label: "Live FAQs", value: "live-faqs" },
+  { label: "Draft FAQs", value: "drafts" },
+];
+
 const constraints = {
-  question: {
-    presence: true,
-  },
-  answer: {
-    presence: true,
-  },
+  question: { presence: true },
+  answer: { presence: true, length: { minimum: 1 } },
 };
+
+// Replace the editorStyles object with:
+const editorStyles = {
+  minHeight: "150px",
+  height: "100%",
+  outline: "none",
+  padding: "0.5rem",
+} as const;
 
 const FAQNavigation: React.FC = () => {
-  const tabs: Tab[] = useMemo(
-    () => [
-      { label: "All FAQs", value: "faqs" },
-      { label: "Live FAQs", value: "live-faqs" },
-      { label: "Draft FAQs", value: "drafts" },
-    ],
-    []
-  );
-  const [createFAQs, { isLoading, isSuccess, error }] = useCreateFAQsMutation();
+  const dispatch = useDispatch();
+  const router = useRouter();
   const pathname = usePathname();
+  const [createFAQs, { isLoading }] = useCreateFAQsMutation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { refetch } = useAllFAQsQuery({
+    pagesNumber: 1,
+  });
 
-  const getActiveTabFromPath = useCallback(
-    (path: string) => {
-      const matchedTab = tabs?.find((tab) => path.includes(slugify(tab.value)));
-      return matchedTab || "faqs";
-    },
-    [tabs]
-  );
+  const currentTab = useMemo(() => {
+    const path = pathname.split("/").pop() || "faqs";
+    return tabs.find((tab) => tab.value === path)?.value || "faqs";
+  }, [pathname]);
 
-  const [activeTab, setActiveTab] = useState(getActiveTabFromPath(pathname));
-
-  useEffect(() => {
-    setActiveTab(getActiveTabFromPath(pathname));
-  }, [getActiveTabFromPath, pathname]);
-
-  const RoutePath = (tab: string) => {
-    if (pathname.includes("faqs")) {
-      return tab === "faqs" ? `/faqs` : `/faqs/${slugify(tab)}`;
-    }
-    return "/";
+  const handleTabChange = (value: string) => {
+    const basePath = "/faqs";
+    const newPath = value === "faqs" ? basePath : `${basePath}/${value}`;
+    router.push(newPath);
+    setIsMobileMenuOpen(false);
   };
-  const onSubmit = async (values: { email: string; password: string }) => {
+
+  const onSubmit = async (values: { question: string; answer: string }) => {
     try {
       await createFAQs(values).unwrap();
-      toast.success("Faq created successfully");
+      setIsSheetOpen(false);
+      toast.success("FAQ created successfully");
     } catch (err: any) {
+      toast.dismiss();
       toast.error(
-        "Failed to create faq " + (err?.data?.message || err.message)
+        `Failed to create FAQ: ${JSON.parse(err?.data)?.message || err.message}`
       );
-      console.error("Failed to log in user", err);
+    } finally {
+      // Invalidate all queries to refresh data
+      refetch();
     }
   };
 
-  const validateForm = (values: any) => {
-    return validate(values, constraints) || {};
-  };
-  
-
   return (
-    <div className="flex items-center justify-between w-full  p-4">
-      {/* Tabs */}
-      <div className="flex space-x-8">
-        {tabs.map((tab) => (
-          <Link
-            href={RoutePath(tab.value)}
-            key={tab.value}
-            className={`text-sm font-medium pb-2 ${
-              activeTab === tab.value
-                ? "text-purple-600 border-b-2 border-purple-600"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab(tab.value)}
+    <div className="w-full bg-transparent">
+      {/* Desktop Navigation */}
+      <div className="hidden md:block w-full">
+        <div className="flex items-center justify-between px-0 py-4 border-b bg-transparent backdrop-blur-md">
+          <Tabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            className="w-full max-w-3xl"
           >
-            {tab.label}
-          </Link>
-        ))}
+            <TabsList className="grid grid-cols-3 w-[400px] bg-muted/50">
+              {tabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className={cn(
+                    "data-[state=active]:bg-white relative overflow-hidden",
+                    "after:content-[''] after:absolute after:bottom-0 after:left-0",
+                    "after:h-0.5 after:w-full after:bg-purple-600",
+                    "after:transform after:scale-x-0 after:transition-transform",
+                    "data-[state=active]:after:scale-x-100"
+                  )}
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          <CreateFAQSheet
+            isOpen={isSheetOpen}
+            onOpenChange={setIsSheetOpen}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
-      <Sheet>
-        <SheetTrigger>
-          <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-400 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg focus:outline-none">
-            Create FAQ
-          </button>
-        </SheetTrigger>
-        <SheetContent side="right" className="w-full md:w-1/3 bg-white flex flex-col gap-5">
-          <SheetHeader>
-            <SheetTitle>Create New FAQ</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-4">
-            <Form
-              onSubmit={onSubmit}
-              validate={validateForm}
-              render={({ handleSubmit, form, submitting }) => (
-                <form onSubmit={handleSubmit} className="w-full">
-                  <Field name="question">
-                    {({ input, meta }) => (
-                      <Input
-                        label="Question"
-                        type="text"
-                        placeholder="Enter Title"
-                        form={form as any}
-                        {...input}
-                      />
-                    )}
-                  </Field>
 
-                  <Field name="answer">
-                    {({ input, meta }) => (
-                      <TextArea
-                        placeholder="Type brief description"
-                        label="Answer"
-                        form={form as any}
-                        {...input}
-                        name="answer"
-                        type="text"
-                      />
-                    )}
-                  </Field>
+      {/* Mobile Navigation */}
+      <div className="md:hidden w-full bg-transparent backdrop-blur-md border-b">
+        <div className="flex items-center justify-between p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="hover:bg-purple-50"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
 
-                  <div className="flex items-center justify-end space-x-4 w-full">
-                    <SheetTrigger>
-                    <button className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100"
-                    type="reset"
-                    >
-                      Cancel
-                    </button>
-                    </SheetTrigger>
-                    <button
-                      className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg"
-                      type="submit"
-                    >
-                      {submitting || isLoading ? (
-                        <ClipLoader size={20} />
-                      ) : (
-                        " Save and Continue"
-                      )}
-                    </button>
-                  </div>
-                </form>
-              )}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+          <CreateFAQSheet
+            isOpen={isSheetOpen}
+            onOpenChange={setIsSheetOpen}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+            variant="small"
+          />
+        </div>
+
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-300 ease-in-out",
+            isMobileMenuOpen ? "max-h-[300px]" : "max-h-0"
+          )}
+        >
+          <Tabs
+            value={currentTab}
+            onValueChange={handleTabChange}
+            className="w-full p-4"
+          >
+            <TabsList className="flex flex-col w-full gap-2 bg-transparent">
+              {tabs.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="w-full data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 justify-start"
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

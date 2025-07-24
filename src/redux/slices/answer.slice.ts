@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // Define types for survey structure
 interface HeaderText {
@@ -39,6 +39,10 @@ interface OCRResponse {
   survey: Survey;
   extracted_answers: Answer[];
   uploaded_files?: string[];
+  respondent_details?: {
+    name?: string;
+    email?: string;
+  } | null;
 }
 
 // Define initial state
@@ -46,26 +50,32 @@ interface AnswerState {
   survey: Survey | null;
   extracted_answers: Answer[];
   uploaded_files: string[];
+  respondent_details?: {
+    name?: string;
+    email?: string;
+  } | null;
 }
 
 const initialState: AnswerState = {
-  survey: null, 
+  survey: null,
   extracted_answers: [],
   uploaded_files: [],
+  respondent_details: undefined,
 };
 
 const answerSlice = createSlice({
-  name: 'answers',
+  name: "answers",
   initialState,
   reducers: {
     setSurvey: (state, action: PayloadAction<OCRResponse>) => {
-      const { survey, extracted_answers, uploaded_files } = action.payload;
+      const { survey, extracted_answers, uploaded_files, respondent_details } =
+        action.payload;
+      state.respondent_details = respondent_details;
       state.survey = survey;
       state.extracted_answers = extracted_answers;
       state.uploaded_files = uploaded_files || [];
     },
 
-  
     addAnswer: (state, action: PayloadAction<Answer>) => {
       state.extracted_answers.push(action.payload);
     },
@@ -93,7 +103,12 @@ const answerSlice = createSlice({
   },
 });
 
-export const { setSurvey, addAnswer, replaceAnswers, updateAnswer, resetAnswers } =
-  answerSlice.actions;
+export const {
+  setSurvey,
+  addAnswer,
+  replaceAnswers,
+  updateAnswer,
+  resetAnswers,
+} = answerSlice.actions;
 
 export default answerSlice.reducer;

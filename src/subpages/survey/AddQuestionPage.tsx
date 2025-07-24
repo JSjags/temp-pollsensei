@@ -66,7 +66,7 @@ import { IoDocumentOutline } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/shadcn-textarea";
-import { Edit, Save, Trash2, Pencil } from "lucide-react";
+import { Edit, Save, Trash2, Pencil, Scissors } from "lucide-react";
 import { X } from "lucide-react";
 import { SurveyData } from "./EditSubmittedSurvey";
 import { cn } from "@/lib/utils";
@@ -80,6 +80,30 @@ import {
 } from "@/components/ui/tooltip";
 import type { Question } from "@/types/survey";
 import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
+import PaginationBtn from "@/components/common/PaginationBtn";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sparkles,
+  PencilIcon,
+  MoveRight,
+  MoreVertical,
+  BringToFront,
+} from "lucide-react";
+
+// Define Section type at the top (after imports)
+type Section = {
+  title: string;
+  description: string;
+  questions: any[]; // Replace 'any' with 'Question' if you have a type for questions
+};
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -94,7 +118,13 @@ const AddQuestionPage = () => {
     (state: RootState) => state?.survey?.survey_type
   );
   const qq = useSelector((state: RootState) => state?.question);
-  const [sections, setSections] = useState<any[][]>([[]]); // Initialize with one empty section
+  const [sections, setSections] = useState<Section[]>([
+    {
+      title: sectionTopic || "Untitled Section",
+      description: sectionDescription || "",
+      questions: [],
+    },
+  ]);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
@@ -113,9 +143,7 @@ const AddQuestionPage = () => {
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  const questions = useSelector(
-    (state: RootState) => state?.question?.questions
-  );
+  const questions = sections[currentSectionIndex]?.questions || [];
 
   const userToken = useSelector(
     (state: RootState) => state?.user?.access_token || state.user.token
@@ -123,8 +151,8 @@ const AddQuestionPage = () => {
   const user = useSelector((state: RootState) => state?.user?.user);
 
   const logoUrl = useSelector((state: RootState) => state?.survey?.logo_url);
-  const [sectionTitle, setSectionTitle] = useState(sectionTopic || "");
-  const [sDescription, setsDescription] = useState(sectionDescription || "");
+  const sectionTitle = sections[currentSectionIndex]?.title || "";
+  const sDescription = sections[currentSectionIndex]?.description || "";
   const [isEditing, setIsEditing] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -185,8 +213,17 @@ const AddQuestionPage = () => {
   };
 
   const handleAddSection = () => {
-    setSections([...sections, []]);
+    const prevSection = sections[sections.length - 1];
+    setSections([
+      ...sections,
+      {
+        title: prevSection?.title || "Untitled Section",
+        description: prevSection?.description || "",
+        questions: [],
+      },
+    ]);
     setCurrentSectionIndex(sections.length);
+    setIsEditing(false);
   };
 
   const handleDeleteSection = (index: number) => {
@@ -201,7 +238,6 @@ const AddQuestionPage = () => {
       if (currentSectionIndex >= newSections.length) {
         setCurrentSectionIndex(Math.max(0, newSections.length - 1));
       }
-      dispatch(deleteSection(sectionToDelete));
       setShowDeleteModal(false);
     }
   };
@@ -260,13 +296,21 @@ const AddQuestionPage = () => {
   });
 
   const handleSave = () => {
-    dispatch(updateSectionTopic(sectionTitle));
-    dispatch(updateSectionDescription(sDescription));
+    // dispatch(
+    //   updateSectionTopic({ index: currentSectionIndex, data: sectionTitle })
+    // );
+    // dispatch(
+    //   updateSectionDescription({
+    //     index: currentSectionIndex,
+    //     data: sDescription,
+    //   })
+    // );
     setSurveyData((prev) => ({
       ...prev,
       topic: sectionTitle,
       description: sDescription,
     }));
+    console.log("Exiting edit mode: setIsEditing(false) called in handleSave");
     setIsEditing(false);
   };
 
@@ -274,31 +318,41 @@ const AddQuestionPage = () => {
     updatedQuestion: string,
     updatedOptions: string[],
     updatedQuestionType: string,
-    isRequired: boolean
+    isRequired: boolean,
+    minValue?: number,
+    maxValue?: number,
+    matrixRows?: string[],
+    matrixColumns?: string[],
+    canAcceptAudio?: boolean
   ) => {
-    // Ensure `editIndex` is valid
     if (editIndex === null || editIndex < 0 || editIndex >= questions.length) {
       console.error("Invalid edit index.");
       return;
     }
-
-    // Create the updated question object with default options for boolean type
     const updatedQuestionData = {
       question: updatedQuestion,
       options:
         updatedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions,
       question_type: updatedQuestionType,
       is_required: isRequired,
+      minValue,
+      maxValue,
+      matrixRows,
+      matrixColumns,
+      canAcceptAudio,
     };
-
-    console.log(updatedQuestionData);
-
-    // Update the question in the store
-    dispatch(
-      updateQuestion({ index: editIndex, updatedQuestion: updatedQuestionData })
+    setSections((sections) =>
+      sections.map((section, idx) =>
+        idx === currentSectionIndex
+          ? {
+              ...section,
+              questions: section.questions.map((q, i) =>
+                i === editIndex ? updatedQuestionData : q
+              ),
+            }
+          : section
+      )
     );
-
-    // Reset editing state
     setEditIndex(null);
     setIsEdit(false);
   };
@@ -316,7 +370,11 @@ const AddQuestionPage = () => {
     items.splice(result.destination.index, 0, reorderedItem);
 
     // Update the questions array in the store with the new order
-    dispatch(updateQuestions(items));
+    setSections((sections) =>
+      sections.map((section, idx) =>
+        idx === currentSectionIndex ? { ...section, questions: items } : section
+      )
+    );
   };
 
   const EditQuestion = async (id: any) => {
@@ -330,127 +388,34 @@ const AddQuestionPage = () => {
   };
 
   const handleSurveyCreation = async () => {
+    // Check if all sections have at least one question
+    const hasEmptySection = sections.some(
+      (section) => !section.questions || section.questions.length === 0
+    );
+    if (hasEmptySection) {
+      toast.error(
+        "All sections must have at least one question before submitting."
+      );
+      return;
+    }
     if (!userToken || !user) {
       setShowAuthModal(true);
       return;
     }
-
     try {
-      // Get current survey state
-      const updatedSurvey = { ...survey }; // Create a copy to avoid direct mutation
-
-      // Create a section with current questions if no sections exist
-      // or if the current questions aren't already in a section
-      const currentSection = {
-        section_topic: sectionTitle,
-        section_description: sDescription,
-        questions: questions.map((question: Question) => {
-          // Base question structure with required fields
-          const baseQuestion = {
-            question: question.question,
-            description: question.description || question.question,
-            question_type: question.question_type,
-            is_required: question.is_required || false,
-          };
-
-          // Process question based on type with exact structure
-          switch (question.question_type) {
-            case "checkbox":
-            case "multiple_choice":
-            case "single_choice":
-            case "drop_down":
-            case "likert_scale":
-            case "rating_scale":
-              return {
-                ...baseQuestion,
-                options: question.options,
-              };
-
-            case "likert_scale":
-            case "rating_scale":
-            case "star_rating":
-              return {
-                ...baseQuestion,
-                options: ["1 Star", "2 Star", "3 Star", "4 Star", "5 Star"],
-              };
-
-            case "boolean":
-              return {
-                ...baseQuestion,
-                options: ["Yes", "No"],
-              };
-
-            case "matrix_multiple_choice":
-            case "matrix_checkbox":
-              return {
-                ...baseQuestion,
-                rows: Array.isArray(question.rows) ? question.rows : [],
-                columns: Array.isArray(question.columns)
-                  ? question.columns
-                  : [],
-              };
-
-            case "slider":
-              return {
-                ...baseQuestion,
-                min: typeof question.min === "number" ? question.min : 1,
-                max: typeof question.max === "number" ? question.max : 10,
-                step: 1,
-              };
-
-            case "number":
-              return {
-                ...baseQuestion,
-                min: typeof question.min === "number" ? question.min : 0,
-                max:
-                  typeof question.max === "number"
-                    ? question.max
-                    : Number.MAX_SAFE_INTEGER,
-              };
-
-            case "long_text":
-              return {
-                ...baseQuestion,
-                can_accept_media: Boolean(question.can_accept_media),
-              };
-
-            case "media":
-            case "short_text":
-              return baseQuestion;
-
-            default:
-              return baseQuestion;
-          }
-        }),
-      };
-
-      // If no sections exist or if current section is different from last section
-      if (
-        !updatedSurvey.sections.length ||
-        JSON.stringify(
-          updatedSurvey.sections[updatedSurvey.sections.length - 1]
-        ) !== JSON.stringify(currentSection)
-      ) {
-        // Create new array instead of pushing
-        updatedSurvey.sections = [currentSection];
-      }
-
-      console.log(updatedSurvey.sections.length);
-
-      // Process the final survey data
       const processedSurvey = {
-        ...updatedSurvey,
+        ...survey,
         header_text: {
-          ...updatedSurvey.header_text,
-          size: updatedSurvey.header_text?.size || 24,
+          ...survey.header_text,
+          size: survey.header_text?.size || 24,
         },
         body_text: {
-          ...updatedSurvey.body_text,
-          size: updatedSurvey.body_text?.size || 16,
+          ...survey.body_text,
+          size: survey.body_text?.size || 16,
         },
         question_text: {
-          ...updatedSurvey.question_text,
-          size: updatedSurvey.question_text?.size || 16,
+          ...survey.question_text,
+          size: survey.question_text?.size || 16,
         },
         header_url:
           typeof headerUrl === "string" && headerUrl.startsWith("#")
@@ -458,10 +423,67 @@ const AddQuestionPage = () => {
             : headerUrl,
         logo_url:
           typeof logoUrl === "string" && logoUrl.startsWith("#") ? "" : logoUrl,
+        sections: sections.map((section, idx) => {
+          return {
+            section_topic: section.title,
+            section_description: section.description,
+            questions: section.questions.map((question: any) => {
+              const baseQuestion = {
+                question: question.question,
+                description: question.description || question.question,
+                question_type: question.question_type,
+                is_required: question.is_required,
+              };
+              switch (question.question_type) {
+                case "slider":
+                  return {
+                    ...baseQuestion,
+                    min: question.min,
+                    max: question.max,
+                    step: question.step || 1,
+                  };
+                case "checkbox":
+                case "multiple_choice":
+                case "single_choice":
+                case "drop_down":
+                case "likert_scale":
+                case "rating_scale":
+                case "star_rating":
+                case "boolean":
+                  return {
+                    ...baseQuestion,
+                    options: question.options,
+                  };
+                case "matrix_multiple_choice":
+                case "matrix_checkbox":
+                  return {
+                    ...baseQuestion,
+                    description: question.description || "Matrix Question",
+                    rows: question.rows,
+                    columns: question.columns,
+                  };
+                case "number":
+                  return {
+                    ...baseQuestion,
+                    min: question.min,
+                    max: question.max,
+                  };
+                case "long_text":
+                  return {
+                    ...baseQuestion,
+                    can_accept_media: question.can_accept_media || false,
+                  };
+                case "short_text":
+                case "media":
+                default:
+                  return baseQuestion;
+              }
+            }),
+          };
+        }),
       };
-
       await createSurvey(processedSurvey).unwrap();
-      setSurvey_id(createdSurveyData.data._id);
+      setSurvey_id(createdSurveyData?.data?._id || "");
       setReview(true);
     } catch (e) {
       console.error("Survey creation error:", e);
@@ -482,83 +504,11 @@ const AddQuestionPage = () => {
         try {
           await saveprogress({
             ...survey,
-            sections: [
-              {
-                section_topic: sectionTitle,
-                section_description: sDescription,
-                questions: questions.map((question: Question) => {
-                  const baseQuestion = {
-                    question: question.question,
-                    description: question.description || question.question,
-                    question_type: question.question_type,
-                    is_required: question.is_required || false,
-                  };
-
-                  switch (question.question_type) {
-                    case "checkbox":
-                    case "multiple_choice":
-                    case "single_choice":
-                    case "drop_down":
-                    case "likert_scale":
-                    case "rating_scale":
-                    case "star_rating":
-                      return {
-                        ...baseQuestion,
-                        options: [
-                          "1 Star",
-                          "2 Star",
-                          "3 Star",
-                          "4 Star",
-                          "5 Star",
-                        ],
-                      };
-                    case "boolean":
-                      return {
-                        ...baseQuestion,
-                        options: ["Yes", "No"],
-                      };
-                    case "matrix_multiple_choice":
-                    case "matrix_checkbox":
-                      return {
-                        ...baseQuestion,
-                        rows: Array.isArray(question.rows) ? question.rows : [],
-                        columns: Array.isArray(question.columns)
-                          ? question.columns
-                          : [],
-                      };
-                    case "slider":
-                      return {
-                        ...baseQuestion,
-                        min:
-                          typeof question.min === "number" ? question.min : 1,
-                        max:
-                          typeof question.max === "number" ? question.max : 10,
-                        step: 1,
-                      };
-                    case "number":
-                      return {
-                        ...baseQuestion,
-                        min:
-                          typeof question.min === "number" ? question.min : 0,
-                        max:
-                          typeof question.max === "number"
-                            ? question.max
-                            : Number.MAX_SAFE_INTEGER,
-                      };
-                    case "long_text":
-                      return {
-                        ...baseQuestion,
-                        can_accept_media: Boolean(question.can_accept_media),
-                      };
-                    case "media":
-                    case "short_text":
-                      return baseQuestion;
-                    default:
-                      return baseQuestion;
-                  }
-                }),
-              },
-            ],
+            sections: sections.map((section) => ({
+              section_topic: section.title,
+              section_description: section.description,
+              questions: section.questions,
+            })),
             header_text: {
               ...survey.header_text,
               size: survey.header_text?.size || 24,
@@ -607,11 +557,18 @@ const AddQuestionPage = () => {
   };
 
   const handleDeleteQuestion = (id: number) => {
-    const questionIndex = questions?.findIndex(
-      (_question: any, index: any) => index === id
+    setSections((sections) =>
+      sections.map((section, idx) =>
+        idx === currentSectionIndex
+          ? {
+              ...section,
+              questions: section.questions.filter((_, i) => i !== id),
+            }
+          : section
+      )
     );
-    setEditIndex(questionIndex);
-    dispatch(deleteQuestion({ questions, editIndex }));
+    setEditIndex(null);
+    setIsEdit(false);
   };
 
   const renderQuestionActions = (index: number) => {
@@ -650,13 +607,11 @@ const AddQuestionPage = () => {
     try {
       await saveprogress({
         ...survey,
-        sections: [
-          {
-            section_topic: sectionTitle,
-            section_description: sDescription,
-            questions: questions,
-          },
-        ],
+        sections: sections.map((section) => ({
+          section_topic: section.title,
+          section_description: section.description,
+          questions: section.questions,
+        })),
       });
       toast.success("Survey saved as draft");
       if (pendingNavigation) {
@@ -727,6 +682,128 @@ const AddQuestionPage = () => {
     document.addEventListener("click", handleClick, true);
     return () => document.removeEventListener("click", handleClick, true);
   }, [handleRouterPush, pathname]);
+
+  const handleSectionTitleChange = (value: string) => {
+    setSections((sections) =>
+      sections.map((section, idx) =>
+        idx === currentSectionIndex ? { ...section, title: value } : section
+      )
+    );
+  };
+
+  const handleSectionDescriptionChange = (value: string) => {
+    setSections((sections) =>
+      sections.map((section, idx) =>
+        idx === currentSectionIndex
+          ? { ...section, description: value }
+          : section
+      )
+    );
+  };
+
+  const handleAddQuestion = (newQuestion: any) => {
+    setSections((sections) =>
+      sections.map((section, idx) =>
+        idx === currentSectionIndex
+          ? { ...section, questions: [...section.questions, newQuestion] }
+          : section
+      )
+    );
+  };
+
+  // Animated divider component for cutting sections
+  const CutSectionDivider = ({ onCut }: { onCut: () => void }) => {
+    const [hovered, setHovered] = useState(false);
+    return (
+      <motion.div
+        className="relative flex items-center z-[1000] justify-center w-full"
+        initial={false}
+        animate={hovered ? "hovered" : "initial"}
+        variants={{
+          initial: { height: 24 },
+          hovered: {
+            height: 48,
+            transition: { type: "spring", stiffness: 200, damping: 18 },
+          },
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{ minHeight: 12 }}
+      >
+        {/* Reveal divider only on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              key="divider"
+              initial={{ scaleX: 0, opacity: 0, y: 10 }}
+              animate={{
+                scaleX: 1,
+                opacity: 1,
+                y: 0,
+                transition: { type: "spring", stiffness: 300, damping: 18 },
+              }}
+              exit={{
+                scaleX: 0,
+                opacity: 0,
+                y: -10,
+                transition: { duration: 0.3, ease: "easeInOut" },
+              }}
+              className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-pink-200 via-purple-400 to-pink-200 rounded-full shadow-lg z-0"
+              style={{ pointerEvents: "none" }}
+            />
+          )}
+        </AnimatePresence>
+        {/* Reveal button only on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.button
+              key="scissors"
+              initial={{ scale: 0.5, opacity: 0, rotate: -30, y: 20 }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+                rotate: 0,
+                y: 0,
+                transition: {
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 18,
+                  delay: 0.08,
+                },
+              }}
+              exit={{
+                scale: 0.5,
+                opacity: 0,
+                rotate: 30,
+                y: -20,
+                transition: { duration: 0.25, ease: "circIn" },
+              }}
+              className="absolute -top-7 mx-auto bg-white border border-pink-300 shadow-lg rounded-full p-2 z-10 hover:bg-pink-100 active:scale-95 focus:outline-none focus:ring-2 focus:ring-pink-400"
+              onClick={onCut}
+              aria-label="Cut and create new section"
+              whileTap={{ scale: 0.85, rotate: -10 }}
+            >
+              <Scissors className="w-6 h-6 text-pink-600" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+        {/* Tooltip on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              key="tooltip"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0, transition: { delay: 0.15 } }}
+              exit={{ opacity: 0, y: 10, transition: { duration: 0.18 } }}
+              className="absolute mx-auto w-fit top-10 bg-white px-3 py-1 rounded shadow text-xs text-pink-700 font-medium border border-pink-200"
+            >
+              Cut here & create new section
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    );
+  };
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full`}>
@@ -810,8 +887,7 @@ const AddQuestionPage = () => {
                       <Textarea
                         value={sectionTitle}
                         onChange={(e) => {
-                          setSectionTitle(e.target.value);
-                          dispatch(updateSectionTopic(e.target.value));
+                          handleSectionTitleChange(e.target.value);
                         }}
                         placeholder="Untitled Section"
                         className={cn(
@@ -837,8 +913,7 @@ const AddQuestionPage = () => {
                       <Textarea
                         value={sDescription}
                         onChange={(e) => {
-                          setsDescription(e.target.value);
-                          dispatch(updateSectionDescription(e.target.value));
+                          handleSectionDescriptionChange(e.target.value);
                         }}
                         placeholder="Describe section (optional)"
                         className={cn(
@@ -964,221 +1039,510 @@ const AddQuestionPage = () => {
                 <StrictModeDroppable droppableId="questions">
                   {(provided) => (
                     <div {...provided.droppableProps} ref={provided.innerRef}>
-                      {questions?.map((item: any, index: any) => (
-                        <Draggable
-                          key={index}
-                          draggableId={index.toString()}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className="mb-4 relative"
-                              onMouseEnter={() =>
-                                !isTouchDevice && setHoveredQuestionIndex(index)
-                              }
-                              onMouseLeave={() =>
-                                !isTouchDevice && setHoveredQuestionIndex(null)
-                              }
-                              onTouchStart={() =>
-                                isTouchDevice && setHoveredQuestionIndex(index)
-                              }
-                            >
-                              {renderQuestionActions(index)}
-                              {
-                                // Conditionally render based on question type
-                                isEdit &&
-                                editIndex === index &&
-                                item.question_type === "matrix_checkbox" ? (
-                                  <MatrixQuestionEdit
-                                    question={item.question}
-                                    options={item.options}
-                                    is_required={item.is_required}
-                                    questionType={item.question_type}
-                                    onSave={handleSaveEdittedQuestion}
-                                    onCancel={handleCancel}
-                                  />
-                                ) : isEdit && editIndex === index ? (
-                                  <MultiChoiceQuestionEdit
-                                    // index={index + 1}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    is_required={item.is_required}
-                                    onSave={handleSaveEdittedQuestion}
-                                    onCancel={handleCancel}
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "multiple_choice" ? (
-                                  <MultiChoiceQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "single_choice" ? (
-                                  <SingleChoiceQuestion
-                                    index={index + 1}
-                                    key={index}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "checkbox" ? (
-                                  <CheckboxQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "rating_scale" ? (
-                                  <RatingScaleQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "drop_down" ? (
-                                  <DropdownQuestion
-                                    index={index + 1}
-                                    key={index}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "number" ? (
-                                  <NumberQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "long_text" ? (
-                                  <CommentQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "media" ? (
-                                  <MediaQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                  />
-                                ) : item.question_type === "short_text" ? (
-                                  <ShortTextQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "likert_scale" ? (
-                                  <LikertScaleQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "star_rating" ? (
-                                  <StarRatingQuestion
-                                    question={item.question}
-                                    // maxRating={5}
-                                    index={index + 1}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "matrix_checkbox" ||
-                                  item.question_type ===
-                                    "matrix_multiple_choice" ? (
-                                  <MatrixQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    // options={item.options}
-                                    rows={item.rows}
-                                    columns={item.columns}
-                                    question={item.question}
-                                    is_required={item.is_required}
-                                    questionType={item.question_type}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "boolean" ? (
-                                  <BooleanQuestion
-                                    key={index}
-                                    index={index + 1}
-                                    question={item.question}
-                                    options={item.options}
-                                    questionType={item.question_type}
-                                    EditQuestion={() => EditQuestion(index)}
-                                    DeleteQuestion={() =>
-                                      handleDeleteQuestion(index)
-                                    }
-                                    surveyData={surveyData}
-                                  />
-                                ) : item.question_type === "slider" ? (
-                                  <SliderQuestion
-                                    question={item.question}
-                                    options={item.options}
-                                    // step={item.options.length}
-                                    questionType={item.question_type}
-                                    index={index + 1}
-                                    is_required={item.is_required}
-                                    surveyData={surveyData}
-                                  />
-                                ) : null
-                              }
+                      {questions.length === 0 && !addQuestions ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200 my-6">
+                          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 mb-4">
+                            <HiOutlinePlus className="w-8 h-8 text-purple-600" />
+                          </div>
+                          <h3 className="text-xl font-semibold mb-2 text-gray-800">
+                            No questions yet
+                          </h3>
+                          <p className="text-gray-500 mb-6 max-w-xs mx-auto">
+                            Click the{" "}
+                            <span className="font-semibold text-purple-700">
+                              Add Question
+                            </span>{" "}
+                            button below to start building your survey section.
+                          </p>
+                          <Button
+                            variant="outline"
+                            className="relative rounded-full transition-all duration-200 border-none overflow-hidden px-4"
+                            onClick={() => setAddQuestions(true)}
+                          >
+                            <div className="flex gap-2 items-center">
+                              <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                              <span className="group-hover:tracking-wide transition-all duration-200">
+                                Add Question
+                              </span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
                             </div>
-                          )}
-                        </Draggable>
-                      ))}
+                          </Button>
+                        </div>
+                      ) : (
+                        questions?.map((item: any, index: any) => (
+                          <Draggable
+                            key={index}
+                            draggableId={index.toString()}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="relative"
+                                onMouseEnter={() =>
+                                  !isTouchDevice &&
+                                  setHoveredQuestionIndex(index)
+                                }
+                                onMouseLeave={() =>
+                                  !isTouchDevice &&
+                                  setHoveredQuestionIndex(null)
+                                }
+                                onTouchStart={() =>
+                                  isTouchDevice &&
+                                  setHoveredQuestionIndex(index)
+                                }
+                              >
+                                <div className="flex items-start group">
+                                  <div className="flex flex-col">
+                                    {/* Drag handle */}
+                                    <div
+                                      {...provided.draggableProps}
+                                      className="cursor-grab group-hover:scale-110 transition-transform duration-200 mr-2"
+                                      title="Drag to reorder"
+                                    >
+                                      <svg
+                                        width="18"
+                                        height="18"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <circle
+                                          cx="5"
+                                          cy="6"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="5"
+                                          cy="12"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="5"
+                                          cy="18"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="12"
+                                          cy="6"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="12"
+                                          cy="12"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="12"
+                                          cy="18"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="19"
+                                          cy="6"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="19"
+                                          cy="12"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="19"
+                                          cy="18"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                      </svg>
+                                    </div>
+                                    {/* Actions button under drag handle */}
+                                    {sections.length > 1 && (
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            className="mt-2 mr-2 h-6 bg-transparent p-1 rounded-full px-0 hover:bg-gray-100 text-gray-600 transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus:ring-transparent focus-visible:ring-transparent focus-within:outline-none focus-within:ring-0 focus-within:ring-transparent"
+                                            title="More actions"
+                                          >
+                                            <BringToFront
+                                              strokeWidth={1.5}
+                                              className="size-[18px] text-[#a78bfa]"
+                                            />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                          align="start"
+                                          className="z-[10000] min-w-[180px]"
+                                        >
+                                          <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger className="flex items-center gap-2">
+                                              <MoveRight className="w-4 h-4 text-[#a78bfa]" />
+                                              <span>Move to section</span>
+                                            </DropdownMenuSubTrigger>
+                                            <DropdownMenuSubContent className="z-[10000] min-w-[180px]">
+                                              {sections.map((section, secIdx) =>
+                                                secIdx !==
+                                                currentSectionIndex ? (
+                                                  <DropdownMenuItem
+                                                    key={secIdx}
+                                                    onClick={() => {
+                                                      // Remove from current section
+                                                      const sectionList = [
+                                                        ...sections,
+                                                      ];
+                                                      const fromSection =
+                                                        sectionList[
+                                                          currentSectionIndex
+                                                        ];
+                                                      const toSection =
+                                                        sectionList[secIdx];
+                                                      const movingQuestion =
+                                                        fromSection.questions[
+                                                          index
+                                                        ];
+                                                      // Remove from current
+                                                      const newFromQuestions =
+                                                        fromSection.questions.filter(
+                                                          (_, i) => i !== index
+                                                        );
+                                                      // Add to end of target
+                                                      const newToQuestions = [
+                                                        ...toSection.questions,
+                                                        movingQuestion,
+                                                      ];
+                                                      // Update sections
+                                                      setSections((sections) =>
+                                                        sections.map((s, i) =>
+                                                          i ===
+                                                          currentSectionIndex
+                                                            ? {
+                                                                ...fromSection,
+                                                                questions:
+                                                                  newFromQuestions,
+                                                              }
+                                                            : i === secIdx
+                                                            ? {
+                                                                ...toSection,
+                                                                questions:
+                                                                  newToQuestions,
+                                                              }
+                                                            : s
+                                                        )
+                                                      );
+                                                    }}
+                                                    className="flex items-center gap-2"
+                                                  >
+                                                    <span className="font-medium">
+                                                      Section {secIdx + 1}
+                                                    </span>
+                                                    {section.title && (
+                                                      <span className="text-xs text-muted-foreground ml-2">
+                                                        {section.title}
+                                                      </span>
+                                                    )}
+                                                  </DropdownMenuItem>
+                                                ) : null
+                                              )}
+                                            </DropdownMenuSubContent>
+                                          </DropdownMenuSub>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    )}
+                                  </div>
+                                  <div className="flex-1">
+                                    {/* ... existing question rendering ... */}
+                                    {renderQuestionActions(index)}
+                                    {
+                                      // Conditionally render based on question type
+                                      isEdit &&
+                                      editIndex === index &&
+                                      item.question_type ===
+                                        "matrix_checkbox" ? (
+                                        <MatrixQuestionEdit
+                                          question={item.question}
+                                          options={item.options}
+                                          is_required={item.is_required}
+                                          questionType={item.question_type}
+                                          onSave={handleSaveEdittedQuestion}
+                                          onCancel={handleCancel}
+                                        />
+                                      ) : isEdit && editIndex === index ? (
+                                        <MultiChoiceQuestionEdit
+                                          // index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          is_required={item.is_required}
+                                          onSave={handleSaveEdittedQuestion}
+                                          onCancel={handleCancel}
+                                          surveyData={surveyData}
+                                          can_accept_audio={item.canAcceptAudio}
+                                        />
+                                      ) : item.question_type ===
+                                        "multiple_choice" ? (
+                                        <MultiChoiceQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "single_choice" ? (
+                                        <SingleChoiceQuestion
+                                          index={index + 1}
+                                          key={index}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "checkbox" ? (
+                                        <CheckboxQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "rating_scale" ? (
+                                        <RatingScaleQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "drop_down" ? (
+                                        <DropdownQuestion
+                                          index={index + 1}
+                                          key={index}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "number" ? (
+                                        <NumberQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "long_text" ? (
+                                        <CommentQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "media" ? (
+                                        <MediaQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                        />
+                                      ) : item.question_type ===
+                                        "short_text" ? (
+                                        <ShortTextQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "likert_scale" ? (
+                                        <LikertScaleQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "star_rating" ? (
+                                        <StarRatingQuestion
+                                          question={item.question}
+                                          // maxRating={5}
+                                          index={index + 1}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                          "matrix_checkbox" ||
+                                        item.question_type ===
+                                          "matrix_multiple_choice" ? (
+                                        <MatrixQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          // options={item.options}
+                                          rows={item.rows}
+                                          columns={item.columns}
+                                          question={item.question}
+                                          is_required={item.is_required}
+                                          questionType={item.question_type}
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "boolean" ? (
+                                        <BooleanQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "slider" ? (
+                                        <SliderQuestion
+                                          question={item.question}
+                                          options={item.options}
+                                          // step={item.options.length}
+                                          questionType={item.question_type}
+                                          index={index + 1}
+                                          is_required={item.is_required}
+                                          surveyData={surveyData}
+                                          item={item}
+                                        />
+                                      ) : null
+                                    }
+                                    {/* Animated cut-to-section hover area (not after last question) */}
+                                    {index < questions.length - 1 && (
+                                      <CutSectionDivider
+                                        onCut={() => {
+                                          // Split section logic
+                                          const section =
+                                            sections[currentSectionIndex];
+                                          const before =
+                                            section.questions.slice(
+                                              0,
+                                              index + 1
+                                            );
+                                          const after = section.questions.slice(
+                                            index + 1
+                                          );
+                                          if (after.length === 0) return;
+                                          // Create new section with 'after' questions
+                                          setSections((sections) => {
+                                            const newSection = {
+                                              title:
+                                                section.title ||
+                                                `Section ${
+                                                  sections.length + 1
+                                                }`,
+                                              description:
+                                                section.description || "",
+                                              questions: after,
+                                            };
+                                            const updatedSections =
+                                              sections.map((s, i) =>
+                                                i === currentSectionIndex
+                                                  ? {
+                                                      ...section,
+                                                      questions: before,
+                                                    }
+                                                  : s
+                                              );
+                                            return [
+                                              ...updatedSections.slice(
+                                                0,
+                                                currentSectionIndex + 1
+                                              ),
+                                              newSection,
+                                              ...updatedSections.slice(
+                                                currentSectionIndex + 1
+                                              ),
+                                            ];
+                                          });
+                                          setCurrentSectionIndex(
+                                            currentSectionIndex + 1
+                                          );
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))
+                      )}
                       {provided.placeholder}
                     </div>
                   )}
@@ -1198,63 +1562,106 @@ const AddQuestionPage = () => {
                     columns,
                     can_accept_media
                   ) => {
-                    if (questionType === "number") {
-                      const newQuestion = {
-                        question: question,
-                        question_type: questionType,
-                        options: options,
-                        is_required: is_required,
-                        min: min,
-                        max: max,
-                      };
-                      console.log(newQuestion);
-                      dispatch(addQuestion(newQuestion));
-                      setAddQuestions((prev) => !prev);
-                    } else if (
-                      questionType === "matrix_checkbox" ||
-                      questionType === "matrix_multiple_choice"
-                    ) {
-                      const newQuestion = {
-                        question: question,
-                        question_type: questionType,
-                        options: options,
-                        is_required: is_required,
-                        rows: rows,
-                        columns: columns,
-                      };
-                      console.log(newQuestion);
-                      dispatch(addQuestion(newQuestion));
-                      setAddQuestions((prev) => !prev);
-                    } else if (questionType === "long_text") {
-                      const newQuestion = {
-                        question: question,
-                        question_type: questionType,
-                        options: options,
-                        is_required: is_required,
-                        can_accept_media: can_accept_media,
-                      };
-                      console.log(newQuestion);
-                      dispatch(addQuestion(newQuestion));
-                      setAddQuestions((prev) => !prev);
-                    } else {
-                      const newQuestion = {
-                        question: question,
-                        question_type: questionType,
-                        options: options,
-                        is_required: is_required,
-                      };
-                      console.log(newQuestion);
-                      dispatch(addQuestion(newQuestion));
-                      setAddQuestions((prev) => !prev);
-                    }
+                    handleAddQuestion({
+                      question,
+                      question_type: questionType,
+                      options,
+                      is_required,
+                      min,
+                      max,
+                      rows,
+                      columns,
+                      can_accept_media,
+                    });
+                    setAddQuestions(false);
                   }}
                 />
               )}
+
+              {/* New bottom section design from EditSurvey */}
+              {sections.length > 1 && (
+                <div className="flex w-full md:w-auto md:justify-end items-center mt-6 mb-6 sticky bottom-10 z-10">
+                  <PaginationBtn
+                    currentSection={currentSectionIndex}
+                    totalSections={sections.length}
+                    onNavigate={(direction) => {
+                      if (
+                        direction === "next" &&
+                        currentSectionIndex < sections.length - 1
+                      ) {
+                        setCurrentSectionIndex((i) => i + 1);
+                        setIsEditing(false);
+                      } else if (
+                        direction === "prev" &&
+                        currentSectionIndex > 0
+                      ) {
+                        setCurrentSectionIndex((i) => i - 1);
+                        setIsEditing(false);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col gap-4 md:flex-row justify-between items-center mt-6">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Button
+                    variant="outline"
+                    className="relative rounded-full transition-all duration-200 border-none overflow-hidden px-4"
+                    onClick={() => setAddQuestions((prev) => !prev)}
+                  >
+                    <div className="flex gap-2 items-center">
+                      <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                      <span className="group-hover:tracking-wide transition-all duration-200">
+                        Add Question
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="group relative rounded-full transition-all duration-200 border-red-200 text-red-500 hover:!text-red-600 overflow-hidden"
+                    onClick={handleDiscard}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
+                    <span className="group-hover:tracking-wide group-hover:text-red-600 transition-all duration-200">
+                      Clear Survey
+                    </span>
+                    <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                  </Button>
+                </div>
+                <div className="flex gap-4 flex-wrap">
+                  <Button
+                    variant="outline"
+                    className="group relative rounded-full transition-all duration-200 border-green-200 text-green-600 hover:!text-green-700 overflow-hidden"
+                    onClick={handleAddSection}
+                  >
+                    <RxCardStack className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                    <span className="group-hover:tracking-wide transition-all duration-200">
+                      Add New Section
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-200 to-green-400 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                  </Button>
+                  {sections.length > 1 && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDeleteSection(currentSectionIndex)}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-200 text-red-600 hover:text-white rounded-full shadow-sm hover:bg-red-500"
+                      title="Remove Current Section"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                      Remove Current Section
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {/* End new bottom section design */}
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex flex-col space-y-6 pb-10">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col space-y-6 pb-10 mt-10 px-0">
+            {/* <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="outline"
@@ -1266,12 +1673,12 @@ const AddQuestionPage = () => {
                   Add Question
                 </Button>
 
-                {/* <Tooltip>
+                <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={!questions || questions.length === 0}
+                      // disabled={!questions || questions.length === 0}
                       className="group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full"
                       onClick={handleAddSection}
                     >
@@ -1285,18 +1692,6 @@ const AddQuestionPage = () => {
                       : "Create a new section with your current questions"}
                   </TooltipContent>
                 </Tooltip>
-
-                {sections.length > 1 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="group transition-all duration-300 scale-95 hover:scale-100 hover:shadow rounded-full hover:bg-red-50 hover:text-red-500 "
-                    onClick={() => handleDeleteSection(currentSectionIndex)}
-                  >
-                    <RiDeleteBin6Line className="mr-2 h-4 w-4 group-hover:text-red-500" />
-                    Delete Section
-                  </Button>
-                )} */}
 
                 <Button
                   variant="outline"
@@ -1332,7 +1727,7 @@ const AddQuestionPage = () => {
                   </Fragment>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             <Button
               disabled={
@@ -1342,7 +1737,7 @@ const AddQuestionPage = () => {
                 !questions.length
               }
               size="lg"
-              className="w-full md:w-auto md:self-end bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl"
+              className="w-full h-12 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl"
               onClick={handleSurveyCreation}
             >
               {isLoading ? (

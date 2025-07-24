@@ -1,196 +1,9 @@
 "use client";
 
-// import * as React from "react";
-// import { Label, Pie, PieChart, Sector } from "recharts";
-// import { PieSectorDataItem } from "recharts/types/polar/Pie";
-
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import {
-//   ChartConfig,
-//   ChartContainer,
-//   ChartStyle,
-//   ChartTooltip,
-//   ChartTooltipContent,
-// } from "@/components/ui/chart";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-
-
-// interface SuperAdminPieChartProps {
-//   desktopData: { month: string; value: number; fill: string }[];
-//   chartConfig: ChartConfig;
-//   bottomLegend: string[];
-//   title:string;
-// }
-
-// export function SuperAdminPieChart({
-//   desktopData,
-//   chartConfig,
-//   bottomLegend,
-//   title,
-// }: SuperAdminPieChartProps) {
-//   const id = "pie-interactive";
-//   const [activeMonth, setActiveMonth] = React.useState(desktopData[0].month);
-
-//   const activeIndex = React.useMemo(
-//     () => desktopData.findIndex((item) => item.month === activeMonth),
-//     [activeMonth]
-//   );
-//   const plans = React.useMemo(() => desktopData.map((item) => item.month), [desktopData]);
-
-//   return (
-//     <Card data-chart={id} className="flex flex-col w-full">
-//       <ChartStyle id={id} config={chartConfig} />
-//       <CardHeader className="flex-row items-start space-y-0 pb-0">
-//         <div className="grid gap-1">
-//           <CardTitle className="text-sm font-medium text-gray-800">
-//             {title}
-//           </CardTitle>
-//         </div>
-//         <Select value={activeMonth} onValueChange={setActiveMonth}>
-//           <SelectTrigger
-//             className="ml-auto h-7 w-auto rounded-lg pl-2.5"
-//             aria-label="Select a value"
-//           >
-//             <SelectValue placeholder="Select month" />
-//           </SelectTrigger>
-//           <SelectContent align="end" className="rounded-xl">
-//             {plans.map((key) => {
-//               const config = chartConfig[key as keyof typeof chartConfig];
-
-//               if (!config) {
-//                 return null;
-//               }
-
-//               return (
-//                 <SelectItem
-//                   key={key}
-//                   value={key}
-//                   className="rounded-lg [&_span]:flex"
-//                 >
-//                   <div className="flex items-center gap-2 text-xs">
-//                     <span
-//                       className="flex h-3 w-3 shrink-0 rounded-sm"
-//                       style={{
-//                         backgroundColor: `var(--color-${key})`,
-//                       }}
-//                     />
-//                     {config?.label}
-//                   </div>
-//                 </SelectItem>
-//               );
-//             })}
-//           </SelectContent>
-//         </Select>
-//       </CardHeader>
-//       <CardContent className="flex flex-1 justify-center pb-0">
-//         <ChartContainer
-//           id={id}
-//           config={chartConfig}
-//           className="mx-auto aspect-square w-full max-w-[300px]"
-//         >
-//           <PieChart>
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent hideLabel />}
-//             />
-//             <Pie
-//               data={desktopData}
-//               dataKey="value"
-//               nameKey="month"
-//               innerRadius={60}
-//               strokeWidth={5}
-//               activeIndex={activeIndex}
-//               activeShape={({
-//                 outerRadius = 0,
-//                 ...props
-//               }: PieSectorDataItem) => (
-//                 <g>
-//                   <Sector {...props} outerRadius={outerRadius + 10} />
-//                   <Sector
-//                     {...props}
-//                     outerRadius={outerRadius + 25}
-//                     innerRadius={outerRadius + 12}
-//                   />
-//                 </g>
-//               )}
-//             >
-//               <Label
-//                 content={({ viewBox }) => {
-//                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-//                     return (
-//                       <text
-//                         x={viewBox.cx}
-//                         y={viewBox.cy}
-//                         textAnchor="middle"
-//                         dominantBaseline="middle"
-//                       >
-//                         <tspan
-//                           x={viewBox.cx}
-//                           y={viewBox.cy}
-//                           className="fill-foreground text-3xl font-bold"
-//                         >
-//                           {desktopData[activeIndex].value.toFixed(2).toLocaleString()}%
-//                         </tspan>
-//                         <tspan
-//                           x={viewBox.cx}
-//                           y={(viewBox.cy || 0) + 24}
-//                           className="fill-muted-foreground"
-//                         >
-//                           {/* Visitors */}
-//                         </tspan>
-//                       </text>
-//                     );
-//                   }
-//                 }}
-//               />
-//             </Pie>
-//           </PieChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <div className="mt-4 flex justify-center space-x-6">
-//         {bottomLegend?.map((label, idx) => (
-//           <div key={idx} className="flex items-center space-x-2">
-//             <div
-//               className={`w-2 h-2  ${
-//                 idx === 0
-//                   ? "bg-purple-800"
-//                   : idx === 1
-//                   ? "bg-purple-400"
-//                   : "bg-purple-200"
-//               }`}
-//             ></div>
-//             <span className="text-sm text-gray-600">{label}</span>
-//           </div>
-//         ))}
-//       </div>
-//     </Card>
-//   );
-// }
-
-
-"use client";
-
 import * as React from "react";
-import { Label, Pie, PieChart, Sector } from "recharts";
+import { Label, Pie, PieChart, Sector, ResponsiveContainer } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
@@ -205,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FadeLoader } from "react-spinners";
+import { Cell } from "recharts";
 
 interface SuperAdminPieChartProps {
   desktopData: { month: string; value: number; fill: string }[];
@@ -235,148 +48,198 @@ export function SuperAdminPieChart({
   onMonthChange,
 }: SuperAdminPieChartProps) {
   const id = "pie-interactive";
-  const activeIndex = React.useMemo(
-    () => desktopData.findIndex((item) => item.month === selectedMonth),
-    [desktopData, selectedMonth]
-  );
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>();
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
+  const renderActiveShape = (props: PieSectorDataItem) => {
+    const {
+      cx = 0,
+      cy = 0,
+      innerRadius = 0,
+      outerRadius = 0,
+      startAngle = 0,
+      endAngle = 0,
+      fill = "#000",
+      payload,
+      percent = 0,
+      value = 0,
+    } = props;
+
+    return (
+      <g>
+        <Sector
+          cx={cx}
+          cy={cy}
+          innerRadius={innerRadius}
+          outerRadius={outerRadius + 10}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          fill={fill}
+          cornerRadius={4}
+        />
+        <Sector
+          cx={cx}
+          cy={cy}
+          startAngle={startAngle}
+          endAngle={endAngle}
+          innerRadius={outerRadius + 15}
+          outerRadius={outerRadius + 15}
+          fill={fill}
+        />
+      </g>
+    );
+  };
+
+  const hasData = React.useMemo(() => {
+    return desktopData.length > 0 && desktopData.some((item) => item.value > 0);
+  }, [desktopData]);
 
   return (
-    <Card data-chart={id} className="flex flex-col w-full">
+    <Card
+      data-chart={id}
+      className="flex flex-col w-full p-0 border-none shadow-none rounded-xl"
+    >
       <ChartStyle id={id} config={chartConfig} />
-      <CardHeader className="flex-row items-start space-y-0 pb-0">
+      <CardHeader className="flex flex-col gap-2 items-start space-y-0 pb-0">
         <div className="grid gap-1">
-          <CardTitle className="text-sm font-medium text-gray-800">
+          <CardTitle className="text-base font-semibold text-gray-800">
             {title}
           </CardTitle>
         </div>
-        <Select value={selectedMonth} onValueChange={onMonthChange}>
-          <SelectTrigger
-            className="ml-auto h-7 w-auto rounded-lg pl-2.5"
-            aria-label="Select a value"
-          >
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent align="end" className="rounded-xl">
-            {months?.map((month) => (
-              <SelectItem
-                key={month}
-                value={month}
-                className="rounded-lg [&_span]:flex"
-              >
-                {month}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedYear} onValueChange={onYearChange}>
-          <SelectTrigger
-            className="ml-auto h-7 w-auto rounded-lg pl-2.5"
-            aria-label="Select a value"
-          >
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent align="end" className="rounded-xl">
-            {year?.map((yr) => (
-              <SelectItem
-                key={yr}
-                value={yr}
-                className="rounded-lg [&_span]:flex"
-              >
-                {yr}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardHeader>
-      {isLoading ?  (
-          <>
-          <div className="text-center ">
-            <span className="flex justify-center items-center">
-              <FadeLoader height={10} radius={1} className="mt-3" />
-            </span>
-          </div>
-        </>
-      ) : (
-      <CardContent className="flex flex-1 justify-center pb-0">
-        <ChartContainer
-          id={id}
-          config={chartConfig}
-          className="mx-auto aspect-square w-full max-w-[300px]"
-        >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={desktopData}
-              dataKey="value"
-              nameKey="month"
-              innerRadius={60}
-              strokeWidth={5}
-              activeIndex={activeIndex}
-              activeShape={({
-                outerRadius = 0,
-                ...props
-              }: PieSectorDataItem) => (
-                <g>
-                  <Sector {...props} outerRadius={outerRadius + 10} />
-                  <Sector
-                    {...props}
-                    outerRadius={outerRadius + 25}
-                    innerRadius={outerRadius + 12}
-                  />
-                </g>
-              )}
+        <div className="flex w-full gap-2 justify-end">
+          <Select value={selectedMonth} onValueChange={onMonthChange}>
+            <SelectTrigger
+              className="h-7 w-auto rounded-lg pl-2.5"
+              aria-label="Select month"
             >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          {/* {desktopData[activeIndex]?.value.toLocaleString() ??
-                            0}
-                           % */}
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+            <SelectContent align="end" className="rounded-xl">
+              {months?.map((month) => (
+                <SelectItem
+                  key={month}
+                  value={month}
+                  className="rounded-lg [&_span]:flex"
+                >
+                  {month}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedYear} onValueChange={onYearChange}>
+            <SelectTrigger
+              className="h-7 w-auto rounded-lg pl-2.5"
+              aria-label="Select year"
+            >
+              <SelectValue placeholder="Select year" />
+            </SelectTrigger>
+            <SelectContent align="end" className="rounded-xl">
+              {year?.map((yr) => (
+                <SelectItem
+                  key={yr}
+                  value={yr}
+                  className="rounded-lg [&_span]:flex"
+                >
+                  {yr}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+
+      <CardContent className="flex flex-1 justify-center min-h-[300px]">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full min-h-[300px]">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+          </div>
+        ) : !hasData ? (
+          <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-gray-500">
+            <svg
+              className="w-16 h-16 mb-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
               />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M12 2v4m0 16v-4m10-6h-4M2 12h4"
+              />
+            </svg>
+            <p className="text-base font-medium mb-1">No data available</p>
+            <p className="text-sm text-gray-400">
+              Try selecting a different time period
+            </p>
+          </div>
+        ) : (
+          <ChartContainer config={chartConfig} className="w-full">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={desktopData}
+                  dataKey="value"
+                  nameKey="month"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={1}
+                  cornerRadius={4}
+                  activeIndex={activeIndex}
+                  activeShape={renderActiveShape}
+                  onMouseEnter={onPieEnter}
+                  onMouseLeave={() => setActiveIndex(undefined)}
+                  label={({ name, value, percent }) =>
+                    `${Math.round(percent * 100)}%`
+                  }
+                  labelLine={false}
+                >
+                  {desktopData?.map((entry) => (
+                    <Cell
+                      key={`cell-${entry.month}`}
+                      fill={entry.fill}
+                      stroke="white"
+                      strokeWidth={2}
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        )}
       </CardContent>
 
-      )
-    }
-      
-      <div className="mt-4 flex justify-center space-x-6">
-        {bottomLegend?.map((label, idx) => (
-          <div key={idx} className="flex items-center space-x-2">
-            <div
-              className={`w-2 h-2  ${
-                idx === 0
-                  ? "bg-purple-800"
-                  : idx === 1
-                  ? "bg-purple-400"
-                  : "bg-purple-200"
-              }`}
-            ></div>
-            <span className="text-sm text-gray-600">{label}</span>
-          </div>
-        ))}
-      </div>
+      {hasData && (
+        <div className="mt-0 flex justify-center space-x-6">
+          {bottomLegend?.map((label, idx) => (
+            <div key={idx} className="flex items-center space-x-2">
+              <div
+                className={`w-4 h-4 rounded-full ${
+                  idx === 0
+                    ? "bg-purple-800"
+                    : idx === 1
+                    ? "bg-purple-400"
+                    : "bg-purple-200"
+                }`}
+              ></div>
+              <span className="text-sm font-medium text-gray-700">{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }

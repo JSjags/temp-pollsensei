@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutUser } from "../../redux/slices/user.slice";
+import { logoutUser, updateUser } from "../../redux/slices/user.slice";
 import store, { RootState } from "@/redux/store";
 import logo from "../../assets/images/pollsensei-logo.png";
 import hamburger from "../../assets/images/hamburger-menu.png";
@@ -36,25 +36,207 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { HelpCircle, LogOut, Search, Settings, User } from "lucide-react";
+import {
+  HelpCircle,
+  LogOut,
+  Search,
+  Settings,
+  User,
+  Check,
+  Mail,
+  MailCheckIcon,
+  BellOffIcon,
+  Building2,
+  Loader2,
+  ChevronDown,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { persistStore } from "redux-persist";
 import { useSidebar } from "../ui/sidebar";
 import { Input } from "../ui/shadcn-input";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axiosInstance from "@/lib/axios-instance";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { UserData } from "@/subpages/settings/ProfilePage";
+import { useUserProfileQuery } from "@/services/user.service";
+import { toast } from "react-toastify";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+interface Notification {
+  _id: string;
+  user_id: {
+    _id: string;
+    name: string;
+    email: string;
+    username: string;
+  };
+  organization_id: string;
+  content: string;
+  type: "Survey Response" | string;
+  read_status: "Read" | "Unread";
+  is_deleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NotificationResponse {
+  data: Notification[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+interface Organization {
+  _id: string;
+  name: string;
+  designation: string;
+  roles: string[];
+  is_disabled: boolean;
+  status: string;
+}
+
+const fetchNotifications = async () => {
+  const response = await axiosInstance.get<NotificationResponse>(
+    "/notification",
+    {
+      params: {
+        page: 1,
+        page_size: 10,
+      },
+    }
+  );
+  return response.data;
+};
+
+const markNotificationAsRead = async (notificationId: string) => {
+  const response = await axiosInstance.patch(
+    `/notification/${notificationId}`,
+    {
+      read_status: "Read",
+    }
+  );
+  return response.data;
+};
+
+const fetchOrganizations = async () => {
+  const response = await axiosInstance.get<{ data: Organization[] }>(
+    "/organization/mine"
+  );
+  return response.data;
+};
+
+const fetchCurrentOrganization = async () => {
+  const response = await axiosInstance.get<{ data: Organization[] }>(
+    "/organization/current"
+  );
+  return response.data;
+};
 
 const Navbar = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const user2 = useSelector((state: RootState) => state.user);
+  const organizations = user?.my_organizations_data || [];
+  const currentOrganizationId =
+    user?.current_organization_data?.organization_name;
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
   const path = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [organizationDropdownOpen, setOrganizationDropdownOpen] =
+    useState(false);
+
+  console.log("--------------------------------");
+  console.log(user);
 
   const persistor = persistStore(store);
+
+  const queryClient = useQueryClient();
+
+  const { data: notifications, isLoading: isLoadingNotifications } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: fetchNotifications,
+  });
+
+  const { data: organizationsData, isLoading: isLoadingOrganizations } =
+    useQuery({
+      queryKey: ["organizations"],
+      queryFn: fetchOrganizations,
+    });
+
+  console.log(organizationsData);
+
+  const { mutate: markAsRead } = useMutation({
+    mutationFn: markNotificationAsRead,
+    onMutate: async (notificationId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["notifications"] });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData<NotificationResponse>([
+        "notifications",
+      ]);
+
+      // Optimistically update the notifications
+      queryClient.setQueryData<NotificationResponse>(
+        ["notifications"],
+        (old) => ({
+          ...old!,
+          data: old!.data.map((notification) =>
+            notification._id === notificationId
+              ? { ...notification, read_status: "Read" }
+              : notification
+          ),
+        })
+      );
+
+      return { previousData };
+    },
+    onError: (_, __, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["notifications"], context?.previousData);
+    },
+    onSettled: () => {
+      // Refetch after error or success
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const { mutate: switchAccount, isPending: isSwitchingAccount } = useMutation({
+    mutationFn: async (organizationId: string) => {
+      const response = await axiosInstance.post("/user/switch-account", {
+        organizationId,
+      });
+      return response.data;
+    },
+    onSuccess: async () => {
+      // Refetch user profile and update redux state
+      try {
+        const userProfileResponse = await axiosInstance.get("/user/me");
+        const userData = userProfileResponse.data;
+        dispatch(updateUser({ user: userData }));
+        // toast.success("You have successfully switched your organization.");
+        window.location.reload();
+      } catch (error) {
+        toast.error(
+          "Could not refresh user profile after switching organization."
+        );
+      }
+      setOrganizationDropdownOpen(false);
+    },
+  });
 
   const handleSetActiveTab = (tab: string) => {
     setActiveTab(tab);
@@ -88,6 +270,8 @@ const Navbar = () => {
   };
 
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
+
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
   return (
     <div
@@ -156,31 +340,228 @@ const Navbar = () => {
               </div> */}
             </div>
           </div>
-          <div className="lg:hidden flex items-center gap-2 cursor-pointer">
+          <div className="lg:hidden ml-2 flex items-center gap-2 cursor-pointer">
             <Link href="/dashboard" className="w-full">
               <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
             </Link>
           </div>
 
-          <div className="flex gap-4 items-center">
-            <div
-              // onClick={() => {
-              //   alert("Clicked");
-              // }}
-              className="size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px]"
+          <div className="flex gap-0 sm:gap-4 items-center">
+            {/* Organization Switcher */}
+            {/* <DropdownMenu
+              open={organizationDropdownOpen}
+              onOpenChange={setOrganizationDropdownOpen}
             >
-              <Image
-                className="object-contain size-8"
-                width={24}
-                height={24}
-                src={notification}
-                alt="Notification"
-              />
-            </div>
+              <DropdownMenuTrigger asChild>
+                {isLargeScreen ? (
+                  <div className="flex items-center bg-border/50 gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
+                    <Building2 className="size-4 text-primary" />
+                    <span className="text-sm font-medium max-w-[200px] truncate">
+                      {currentOrganizationId}
+                    </span>
+                    <ChevronDown className="size-4 text-muted-foreground" />
+                  </div>
+                ) : (
+                  <div className="flex items-center bg-border/50 gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
+                    <Building2 className="size-4 text-primary" />
+                    <ChevronDown className="size-4 text-muted-foreground" />
+                  </div>
+                )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="max-w-80 w-max sm:max-w-[540px] z-[10000000000]"
+                align="end"
+              >
+                <DropdownMenuLabel>Switch Organization</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="max-h-[300px] overflow-auto">
+                  {organizations.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      No organizations found
+                    </div>
+                  ) : (
+                    organizations.map((org) => (
+                      <DropdownMenuItem
+                        key={org._id}
+                        className={`flex items-center justify-between cursor-pointer ${
+                          org._id === user?.current_organization_data?._id
+                            ? "bg-gray-100 text-gray-800"
+                            : ""
+                        }`}
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          if (
+                            org._id !== user?.current_organization_data?._id
+                          ) {
+                            switchAccount(org._id);
+                          }
+                        }}
+                        disabled={isSwitchingAccount}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Building2 className="size-4 text-gray-600 shrink-0" />
+                          <span className="font-medium text-gray-600">
+                            {org.name}
+                          </span>
+                          {org._id === user?.current_organization_data?._id && (
+                            <Check className="size-4 text-green-500 ml-4" />
+                          )}
+                          {org._id === user?.current_organization_data?._id && (
+                            <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-blue-600 rounded-full shadow-md capitalize">
+                              {org.designation}
+                            </span>
+                          )}
+                        </div>
+                        {isSwitchingAccount &&
+                          org._id !== user?.current_organization_data?._id && (
+                            <Loader2 className="size-4 animate-spin ml-2 text-muted-foreground" />
+                          )}
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu> */}
+
+            <DropdownMenu
+              open={notificationOpen}
+              onOpenChange={setNotificationOpen}
+            >
+              <DropdownMenuTrigger asChild className="z-[1000000] relative">
+                <div className="size-10 sm:size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-2.5 sm:p-[12px] relative">
+                  <Image
+                    className="object-contain size-8"
+                    width={24}
+                    height={24}
+                    src={notification}
+                    alt="Notification"
+                  />
+                  {notifications?.data.some(
+                    (n) => n.read_status === "Unread"
+                  ) && (
+                    <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full" />
+                  )}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-96 z-[1000000] relative"
+                align="end"
+                forceMount
+              >
+                <DropdownMenuLabel className="flex justify-between items-center">
+                  <span>Notifications</span>
+                  {notifications?.data.some(
+                    (n) => n.read_status === "Unread"
+                  ) && (
+                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+                      New
+                    </span>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup className="max-h-[400px] overflow-auto">
+                  {isLoadingNotifications ? (
+                    <DropdownMenuItem>
+                      Loading notifications...
+                    </DropdownMenuItem>
+                  ) : notifications?.data.length === 0 ? (
+                    <div className="p-4 text-center">
+                      <div className="mb-3">
+                        <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        You're all caught up! No new notifications.
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => router.push("/notifications")}
+                        className="w-full"
+                      >
+                        View notification history
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      {notifications?.data
+                        .filter(
+                          (notification) =>
+                            notification.read_status === "Unread"
+                        )
+                        .slice(0, 5)
+                        .map((notification) => (
+                          <DropdownMenuItem
+                            key={notification._id}
+                            className="cursor-pointer"
+                            onSelect={(e) => e.preventDefault()}
+                          >
+                            <div className="flex flex-col gap-1 py-2 w-full">
+                              <div className="flex items-start justify-between gap-2">
+                                <p className="text-sm flex-1 line-clamp-2">
+                                  {notification.content}
+                                </p>
+                                {notification.read_status === "Unread" && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <button
+                                          className="size-6 flex items-center justify-center text-red-500 hover:text-green-900 hover:bg-green-50 rounded-full group"
+                                          onClick={() =>
+                                            markAsRead(notification._id)
+                                          }
+                                        >
+                                          <Mail className="size-4 group-hover:hidden" />
+                                          <MailCheckIcon className="size-4 hidden group-hover:block" />
+                                        </button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>Mark as read</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">
+                                  {notification.type === "Survery Response"
+                                    ? "Survey Response"
+                                    : notification.type}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    notification.createdAt
+                                  ).toLocaleDateString()}{" "}
+                                  {new Date(
+                                    notification.createdAt
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="cursor-pointer flex justify-center items-center text-primary hover:text-primary"
+                          onSelect={(e) => {
+                            router.push("/notifications");
+                          }}
+                        >
+                          View all notifications
+                        </DropdownMenuItem>
+                      </>
+                    </>
+                  )}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <DropdownMenu open={open} onOpenChange={setOpen}>
               <DropdownMenuTrigger asChild>
-                <div className="cursor-pointer flex justify-center items-center size-12">
+                <div className="cursor-pointer flex justify-center items-center size-10 sm:size-12">
                   <Avatar className="size-8">
                     <AvatarImage
                       src={(user as any)?.photo_url ?? ""}
@@ -220,7 +601,6 @@ const Navbar = () => {
                   >
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
-                    {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
@@ -229,7 +609,6 @@ const Navbar = () => {
                   >
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
-                    {/* <DropdownMenuShortcut>⌘S</DropdownMenuShortcut> */}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
@@ -238,7 +617,6 @@ const Navbar = () => {
                   >
                     <HelpCircle className="mr-2 h-4 w-4" />
                     <span>Help</span>
-                    {/* <DropdownMenuShortcut>⌘H</DropdownMenuShortcut> */}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
@@ -253,7 +631,6 @@ const Navbar = () => {
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
-                  {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

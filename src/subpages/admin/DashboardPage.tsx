@@ -50,6 +50,8 @@ const DashboardPage = () => {
     useSurveyLeaderboardQuery("year");
   const { data: surveys, isLoading: isSurveysLoading } = useSurveyQuery("year");
 
+  console.log(user);
+
   function DashboardSkeleton() {
     return (
       <div className="p-4 md:p-6 w-full mx-auto">

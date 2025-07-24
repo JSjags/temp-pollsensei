@@ -64,6 +64,9 @@ interface ResponseActionsProps {
   surveyData?: any;
   isLoading: boolean;
   isDeletingResponse: boolean;
+  currentPage: number;
+  totalCount: number;
+  pageSize: number;
 }
 
 const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -78,6 +81,9 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   surveyData,
   isLoading,
   isDeletingResponse,
+  currentPage,
+  totalCount,
+  pageSize,
 }) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -94,6 +100,9 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
     dispatch(setName(""));
     setValue("");
   };
+
+  const startRange = (currentPage - 1) * pageSize + 1;
+  const endRange = Math.min(currentPage * pageSize, totalCount);
 
   return (
     <div className="grid gap-6 p-4 bg-white rounded-lg">
@@ -112,18 +121,30 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
         ) : (
           <div className="flex items-center text-gray-500 min-w-[200px]">
             <button
-              className="p-2 text-gray-500 hover:text-gray-700"
+              className={`p-2 ${
+                curerentSurvey === 1
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
               onClick={handlePrev}
+              disabled={curerentSurvey === 1}
             >
               &lt;
             </button>
-            <span className="font-semibold mx-2">Response</span>
-            <span>{curerentSurvey}</span>
-            <span className="mx-1">/</span>
-            <span>{totalSurveys}</span>
+            <span className="font-semibold mx-2">Responses</span>
+            <span>
+              {startRange}-{endRange}
+            </span>
+            <span className="mx-1">of</span>
+            <span>{totalCount}</span>
             <button
-              className="p-2 text-gray-500 hover:text-gray-700"
+              className={`p-2 ${
+                curerentSurvey === totalSurveys
+                  ? "text-gray-300 cursor-not-allowed"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
               onClick={handleNext}
+              disabled={curerentSurvey === totalSurveys}
             >
               &gt;
             </button>
@@ -226,7 +247,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
           )}
           <Button
             disabled={isLoading || isDeletingResponse}
-            className="bg-red-500 text-white px-6 py-2.5 rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-x-2 group"
+            className="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-x-2 group"
             onClick={() => setShowDeleteDialog(true)}
           >
             <span>Delete Response</span>

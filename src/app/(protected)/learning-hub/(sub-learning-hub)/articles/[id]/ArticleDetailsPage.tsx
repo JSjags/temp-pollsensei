@@ -28,7 +28,7 @@ const ArticleDetailsPage = (): JSX.Element => {
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white text-gray-800">
+    <div className="max-w-4xl w-full mx-auto p-6 bg-white text-gray-800">
       {isLoading || isRefetching ? (
         <div className="flex flex-col gap-y-6">
           <div className="w-full">
@@ -49,7 +49,7 @@ const ArticleDetailsPage = (): JSX.Element => {
       ) : !data?.data ? (
         <EmptyTableData onRefectch={refetch} />
       ) : (
-        <>
+        <div className="w-full">
           <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">
             {data?.data?.title}
           </h1>
@@ -85,12 +85,16 @@ const ArticleDetailsPage = (): JSX.Element => {
           </p>
 
           {!!data?.data?.content && (
-            <main
-              className="py-10 prose"
-              dangerouslySetInnerHTML={{ __html: data?.data?.content }}
-            ></main>
+            <main className="py-10 prose-clone w-full">
+              {/* Render the article content as HTML, full width */}
+              <div
+                className="w-full"
+                style={{ width: "100%" }}
+                dangerouslySetInnerHTML={{ __html: data?.data?.content }}
+              />
+            </main>
           )}
-        </>
+        </div>
       )}
       {/* <div className="mb-6">
           <h2 className="font-semibold text-lg">1. Keep it Simple</h2>

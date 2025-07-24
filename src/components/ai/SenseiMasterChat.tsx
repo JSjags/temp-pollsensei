@@ -23,7 +23,12 @@ import store, { RootState } from "@/redux/store";
 import { ActionCreatorWithoutPayload } from "@reduxjs/toolkit";
 import { useSensei } from "@/contexts/SenseiContext";
 import { usePathname } from "next/navigation";
-import { setActionMessage } from "@/redux/slices/sensei-master.slice";
+import {
+  setActionMessage,
+  addMessage,
+  updateMessage as updateMessageAction,
+  setMessages,
+} from "@/redux/slices/sensei-master.slice";
 
 // Add these constants at the top of the file, after imports
 const CHAT_WIDTH = 400; // Width of chat window
@@ -51,20 +56,7 @@ const getCurrentTimestamp = () =>
     minute: "2-digit",
   });
 
-const initialMessages: Message[] = [
-  {
-    id: 1,
-    text: "Hello there",
-    sender: "ai",
-    timestamp: getCurrentTimestamp(),
-  },
-  {
-    id: 2,
-    text: "I'm an automated chatbot here to answer your questions. Please feel free to ask me anything to get started.",
-    sender: "ai",
-    timestamp: getCurrentTimestamp(),
-  },
-];
+const initialMessages: Message[] = [];
 
 const suggestedQuestions = [
   "How do I create a survey?",
@@ -120,7 +112,9 @@ const SenseiMasterChat: React.FC<Props> = ({
   const path = usePathname();
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user.user);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const messages = useSelector(
+    (state: RootState) => state.senseiMaster.messages
+  );
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -174,14 +168,12 @@ const SenseiMasterChat: React.FC<Props> = ({
       sender: "user",
       timestamp: getCurrentTimestamp(),
     };
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    dispatch(addMessage(userMessage));
     setInput("");
   };
 
   const addAiMessage = (text: string, obj: any) => {
-    if (!text.trim()) return; // Filter out empty messages
-
-    console.log(obj);
+    if (!text.trim()) return;
 
     const aiMessageId = Date.now() + Math.floor(Math.random() * 1000000);
     const aiMessage: Message = {
@@ -197,17 +189,41 @@ const SenseiMasterChat: React.FC<Props> = ({
           }
         : {}),
     };
-    setMessages((prevMessages) => {
-      // Check if the message already exists
-      const messageExists = prevMessages.some(
+
+    // Get current messages from Redux
+    const currentMessages = store.getState().senseiMaster.messages;
+
+    // Find the last user message
+    const lastUserMessage = [...currentMessages]
+      .reverse()
+      .find((m) => m.sender === "user");
+
+    // If we found a user message, remove all AI messages after it
+    if (lastUserMessage) {
+      const lastUserIndex = currentMessages.findIndex(
+        (m) => m.id === lastUserMessage.id
+      );
+      const messagesCopy = currentMessages.slice(0, lastUserIndex + 1);
+
+      // Check if this exact AI response already exists after the last user message
+      const duplicateExists = currentMessages
+        .slice(lastUserIndex + 1)
+        .some((msg) => msg.text === text.trim());
+
+      if (!duplicateExists) {
+        dispatch(setMessages([...messagesCopy, aiMessage]));
+        simulateTyping(text.trim(), aiMessageId);
+      }
+    } else {
+      // No user messages yet, just check for duplicates at the start
+      const duplicateExists = currentMessages.some(
         (msg) => msg.text === text.trim()
       );
-      if (!messageExists) {
-        return [...prevMessages, aiMessage];
+      if (!duplicateExists) {
+        dispatch(addMessage(aiMessage));
+        simulateTyping(text.trim(), aiMessageId);
       }
-      return prevMessages;
-    });
-    simulateTyping(text.trim(), aiMessageId);
+    }
   };
 
   const simulateTyping = (text: string, messageId: number) => {
@@ -229,9 +245,7 @@ const SenseiMasterChat: React.FC<Props> = ({
   };
 
   const updateMessage = (messageId: number, text: string) => {
-    setMessages((prevMessages) =>
-      prevMessages.map((msg) => (msg.id === messageId ? { ...msg, text } : msg))
-    );
+    dispatch(updateMessageAction({ id: messageId, text }));
   };
 
   const handleSendMessage = () => {

@@ -40,7 +40,7 @@ export default function SurveyLayout({
   };
 
   return (
-    <div>
+    <div className="">
       <SurveyCreationNav />
       <div
         className={`px-0 ${

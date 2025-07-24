@@ -13,11 +13,31 @@ import Image from "next/image";
 import { extractDescription } from "@/utils/analysis";
 
 interface TableData {
-  [key: string]: number | string[] | undefined;
+  statistics: string[];
+  value: (number | string)[];
+}
+
+interface PlotData {
+  type: string;
+  u_statistic: number;
+  p_value: number;
+  [key: string]:
+    | {
+        min: number;
+        quartile_1: number;
+        quartile_3: number;
+        max: number;
+        mean: number;
+        median: number;
+        distribution: number[];
+      }
+    | string
+    | number;
 }
 
 interface TestData {
-  table_data?: TableData;
+  table_data: TableData;
+  plot_data: PlotData;
   plot_names: string[];
   plot_urls: string[];
   description: string;
@@ -71,7 +91,7 @@ const MannWhitneyUComponent: React.FC<TestProps> = (props) => {
           <CardTitle className="flex items-center justify-between">
             <span>{props.test_name}</span>
             <Select value={selectedResult} onValueChange={setSelectedResult}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] h-auto min-h-[40px]">
                 <SelectValue placeholder="Select variable" />
               </SelectTrigger>
               <SelectContent>
@@ -105,14 +125,19 @@ const MannWhitneyUComponent: React.FC<TestProps> = (props) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(currentResult.table_data).map(
-                      ([key, value]) => (
-                        <tr key={key} className="border-b">
-                          <td className="py-2">{formatKey(key)}</td>
+                    {currentResult.table_data.statistics.map(
+                      (statistic, index) => (
+                        <tr key={statistic} className="border-b">
+                          <td className="py-2">{formatKey(statistic)}</td>
                           <td className="text-right py-2">
-                            {typeof value === "number"
-                              ? value.toFixed(4)
-                              : "N/A"}
+                            {typeof currentResult.table_data.value[index] ===
+                            "number"
+                              ? (
+                                  currentResult.table_data.value[
+                                    index
+                                  ] as number
+                                ).toFixed(4)
+                              : currentResult.table_data.value[index]}
                           </td>
                         </tr>
                       )

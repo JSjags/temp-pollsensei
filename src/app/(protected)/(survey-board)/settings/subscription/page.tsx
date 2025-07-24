@@ -1,11 +1,15 @@
 "use client";
 
-import SubscriptionPage from "@/subpages/settings/SubscriptionPage";
+import dynamic from "next/dynamic";
 import React from "react";
 
-type Props = {};
+// Dynamically import SubscriptionPage with SSR disabled to avoid prerender errors
+const SubscriptionPage = dynamic(
+  () => import("@/subpages/settings/SubscriptionPage"),
+  { ssr: false }
+);
 
-const Page = (props: Props) => {
+const Page = () => {
   return <SubscriptionPage />;
 };
 

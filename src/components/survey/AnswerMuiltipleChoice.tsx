@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "../ui/shadcn-checkbox";
+import { Input } from "../ui/shadcn-input";
+import OtherValue, { OtherValueProps } from "../reusable/OtherValue";
 
 interface AnswerMultiChoiceQuestionProps {
   question: string;
@@ -23,6 +25,7 @@ interface AnswerMultiChoiceQuestionProps {
   EditQuestion?: () => void;
   DeleteQuestion?: () => void;
   index: number;
+  item?: OtherValueProps;
   status?: string;
 }
 
@@ -34,6 +37,7 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   onChange,
   EditQuestion,
   DeleteQuestion,
+  item,
   index,
   status,
 }) => {
@@ -98,7 +102,7 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
   return (
     <div
       className={cn(
-        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        "bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
         {
           [`font-${questionText?.name
             ?.split(" ")
@@ -148,6 +152,7 @@ const AnswerMultiChoiceQuestion: React.FC<AnswerMultiChoiceQuestionProps> = ({
             </label>
           </div>
         ))}
+        {item?.other_value && <OtherValue {...item} />}
         {pathname === "/surveys/edit-survey" && (
           <div className="flex justify-end gap-4">
             <button

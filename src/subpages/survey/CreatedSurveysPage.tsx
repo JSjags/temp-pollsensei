@@ -235,7 +235,7 @@ const CreatedSurveysPage = () => {
   if (isLoading || isFetching) {
     return (
       <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
-        <div className="md:flex my-10 items-center justify-between">
+        <div className="md:flex my-10 gap-2 items-center justify-between">
           <div className="flex gap-5 items-center">
             <h2 className="text-[#333333] font-[700] text-[24px]">
               Your Surveys
@@ -257,7 +257,7 @@ const CreatedSurveysPage = () => {
                 <SearchIcon className="text-[#9D50BB]" />
               </button>
             </div>
-            <div className="hidden md:flex">
+            <div className="hidden md:flex gap-2">
               <FilterButton
                 type="survey"
                 text="Add filter"
@@ -297,7 +297,7 @@ const CreatedSurveysPage = () => {
             <FilterButton text="Add filter" />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6">
+        <div className="grid gap-4 sm:gap-5 mt-6 grid-cols-1 sm:[grid-template-columns:repeat(auto-fit,minmax(350px,1fr))]">
           {Array(6)
             .fill(0)
             .map((_, index) => (
@@ -326,7 +326,7 @@ const CreatedSurveysPage = () => {
   if (!data?.data?.total || data.data.total === 0) {
     return (
       <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 mt-0 sm:mt-0 sm:my-10">
-        <div className="md:flex my-10 items-center justify-between">
+        <div className="md:flex my-10 gap-2 items-center justify-between">
           <div className="flex gap-5 items-center">
             <h2 className="text-[#333333] font-[700] text-xl">Your Surveys</h2>
             <div className="block md:hidden mt-2 md:mt-0">
@@ -426,13 +426,13 @@ const CreatedSurveysPage = () => {
     <div>
       {data?.data.total > 0 && (
         <div className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10">
-          <div className="md:flex my-10 items-center justify-between">
-            <div className="flex gap-5 items-center">
+          <div className="md:flex gap-y-4 gap-x-2 flex-wrap my-10 gap-2 items-center justify-between">
+            <div className="flex flex-wrap gap-y-1 gap-5 items-center">
               <h2 className="text-[#333333] font-[700] text-[24px]">
                 Your Surveys
               </h2>
-              <div className="block md:hidden mt-2 md:mt-0">
-                <div className="hidden md:flex gap-3">
+              {/* <div className="block mt-2 md:mt-0">
+                <div className="md:flex gap-3">
                   {userRoles.includes("Admin") && (
                     <>
                       <CreateSurveyButton />
@@ -446,8 +446,8 @@ const CreatedSurveysPage = () => {
                     </>
                   )}
                 </div>
-              </div>
-              <div className="hidden lg:flex items-center gap-2 rounded-[8px] border-[1px] bg-white border-[#d9d9d9] w-[292px] h-[40px]">
+              </div> */}
+              <div className="flex items-center gap-2 rounded-[8px] border-[1px] bg-white border-[#d9d9d9] w-[292px] h-[40px]">
                 <input
                   ref={searchInputRef}
                   className="ring-0 text-[#838383] flex-1 outline-none px-3"
@@ -464,7 +464,7 @@ const CreatedSurveysPage = () => {
                   <SearchIcon className="text-[#9D50BB]" />
                 </button>
               </div>
-              <div className="hidden md:flex">
+              <div className="flex gap-y-4  flex-wrap">
                 <FilterButton
                   type="survey"
                   text="Add filter"
@@ -484,8 +484,8 @@ const CreatedSurveysPage = () => {
                 )}
               </div>
             </div>
-            <div className="hidden md:block mt-2 md:mt-0">
-              <div className="hidden md:flex gap-3">
+            <div className="md:block mt-2 md:mt-0">
+              <div className="flex flex-wrap gap-y-4  gap-3">
                 {userRoles.includes("Admin") && (
                   <>
                     <CreateSurveyButton />
@@ -500,11 +500,11 @@ const CreatedSurveysPage = () => {
                 )}
               </div>
             </div>
-            <div className="block md:hidden">
+            {/* <div className="block md:hidden">
               <FilterButton text="Add filter" />
-            </div>
+            </div> */}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-6">
+          <div className="grid gap-4 sm:gap-5 mt-6 grid-cols-1 sm:[grid-template-columns:repeat(auto-fit,minmax(350px,1fr))]">
             {data?.data?.data?.map((item: any, index: number) => (
               <motion.div
                 key={item._id}
@@ -522,6 +522,15 @@ const CreatedSurveysPage = () => {
               totalPages={totalPages}
               onNavigate={navigatePage}
               isLoading={isLoading || isFetching}
+              onPageChange={(page) => {
+                const params = new URLSearchParams(window.location.search);
+                params.set("page", page.toString());
+                window.history.replaceState(
+                  {},
+                  "",
+                  `${window.location.pathname}?${params.toString()}`
+                );
+              }}
             />
           </div>
         </div>

@@ -16,8 +16,8 @@ spec:
       nodeSelector:
         kubernetes.io/arch: amd64
       containers:
-        - name:  pollsensei-web-app
-          image: oaksacr.azurecr.io/pollsensei-web:${IMAGE_TAG}
+        - name: pollsensei-web-app
+          image: oaksdevacr.azurecr.io/pollsensei-web:${IMAGE_TAG}
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

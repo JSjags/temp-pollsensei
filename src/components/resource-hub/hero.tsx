@@ -5,7 +5,7 @@ import { FaSearch } from "react-icons/fa";
 
 const Help = () => {
   return (
-    <div className="bg-[#F7E9FD] h-[90vh] flex justify-between w-full items-center flex-col  relative pt-24 pb-20 px-5 md:px-20 ">
+    <div className="bg-[#F7E9FD] h-[50vh] flex justify-between w-full items-center flex-col  relative pt-24 pb-20 px-5 md:px-20 ">
       <div className="flex justify-between items-center w-full">
         <div className="text">
           <div className="text-black py-10">
@@ -17,7 +17,7 @@ const Help = () => {
             </h1>
           </div>
 
-          <form
+          {/* <form
             action=""
             className="bg-white md:w-[27.5rem] px-10 rounded-full flex justify-between items-center"
           >
@@ -27,10 +27,14 @@ const Help = () => {
               className="border-none w-full ring-0 outline-none py-2"
             />
             <FaSearch />
-          </form>
+          </form> */}
         </div>
 
-        <Image src={question_mark} alt="question mark" className="hidden lg:flex" />
+        <Image
+          src={question_mark}
+          alt="question mark"
+          className="hidden lg:flex"
+        />
       </div>
     </div>
   );

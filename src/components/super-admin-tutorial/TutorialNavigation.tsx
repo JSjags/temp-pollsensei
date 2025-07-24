@@ -10,8 +10,17 @@ import validate from "validate.js";
 
 import { useCreateTutorialMutation } from "@/services/superadmin.service";
 import FileInput from "../ui/FileInput";
-import Input from "../ui/Input";
-import SelectTag from "../ui/SelectTag";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/shadcn-textarea";
+import { Input } from "../ui/shadcn-input";
 import {
   Sheet,
   SheetContent,
@@ -146,19 +155,19 @@ const TutorialNavigation: React.FC = () => {
 
   return (
     <div>
-      <div></div>
-      <div className="flex items-center justify-between w-full  p-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between w-full p-4 gap-4">
         {/* Tabs */}
-        <div className="flex space-x-8">
+        <div className="flex flex-wrap gap-4 sm:gap-8 w-full sm:w-auto border-b border-gray-200 w-full">
           {tabs.map((tab) => (
             <Link
               href={tab.value}
               key={tab.value}
-              className={`text-sm font-medium pb-2 ${
-                pathname === tab.value
-                  ? "text-purple-600 border-b-2 border-purple-600"
-                  : "text-gray-500"
-              }`}
+              className={`text-sm font-medium relative pb-2 whitespace-nowrap transition-colors duration-200
+                ${
+                  pathname === tab.value
+                    ? "text-purple-600 border-b-2 border-purple-600"
+                    : "text-gray-500"
+                }`}
             >
               {tab.label}
             </Link>
@@ -170,13 +179,13 @@ const TutorialNavigation: React.FC = () => {
           open={isSheetOpened}
         >
           <SheetTrigger>
-            <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-400 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg focus:outline-none">
+            <button className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg focus:outline-none">
               Add New Tutorial
             </button>
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="  sm:max-w-[80vw] md:max-w-[60vw] lg:max-w-[50vw] xl:max-w-[40vw] bg-white overflow-y-auto"
+            className="w-full sm:max-w-[80vw] md:max-w-[60vw] lg:max-w-[50vw] xl:max-w-[40vw] bg-white overflow-y-auto p-4"
           >
             <SheetHeader>
               <SheetTitle>Create New Tutorial</SheetTitle>
@@ -188,41 +197,59 @@ const TutorialNavigation: React.FC = () => {
               render={({ handleSubmit, form, values, submitting }) => (
                 <form
                   onSubmit={handleSubmit}
-                  className="w-full mt-6 flex flex-col gap-y-5"
+                  className="w-full mt-6 flex flex-col gap-y-5 pb-20"
                 >
                   <Field name="type">
                     {({ input, meta }) => (
-                      <SelectTag
-                        label="Type"
-                        options={apiConstantOptions?.TUTORIAL_TYPES}
-                        placeholder="Select a Tutorial type"
-                        form={form as any}
-                        {...input}
-                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="type">Type</Label>
+                        <Select
+                          onValueChange={input.onChange}
+                          defaultValue={input.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a Tutorial type" />
+                          </SelectTrigger>
+                          <SelectContent className="z-[10000000]">
+                            {apiConstantOptions?.TUTORIAL_TYPES.map(
+                              (option) => (
+                                <SelectItem
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     )}
                   </Field>
+
                   <Field name="title">
                     {({ input, meta }) => (
-                      <Input
-                        label="Title"
-                        type="text"
-                        placeholder="Enter Title"
-                        form={form as any}
-                        {...input}
-                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input
+                          id="title"
+                          placeholder="Enter Title"
+                          {...input}
+                        />
+                      </div>
                     )}
                   </Field>
 
                   <Field name="description">
                     {({ input, meta }) => (
-                      <TextArea
-                        placeholder="Type brief description"
-                        label="Description"
-                        form={form as any}
-                        {...input}
-                        name="description"
-                        type="text"
-                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                          id="description"
+                          placeholder="Type brief description"
+                          {...input}
+                        />
+                      </div>
                     )}
                   </Field>
 
@@ -230,11 +257,7 @@ const TutorialNavigation: React.FC = () => {
                     <div className="pt-2 pb-4">
                       <Field name="file">
                         {({ input, meta }) => (
-                          <FileInput
-                            // name="file"
-                            form={form as any}
-                            {...input}
-                          />
+                          <FileInput form={form as any} {...input} />
                         )}
                       </Field>
                     </div>
@@ -242,13 +265,10 @@ const TutorialNavigation: React.FC = () => {
 
                   <Field name="links">
                     {({ input, meta }) => (
-                      <Input
-                        label="Add Links to resources"
-                        type="text"
-                        placeholder="..."
-                        form={form as any}
-                        {...input}
-                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="links">Add Links to resources</Label>
+                        <Input id="links" placeholder="..." {...input} />
+                      </div>
                     )}
                   </Field>
 
@@ -259,34 +279,35 @@ const TutorialNavigation: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex items-center justify-end space-x-4 w-full">
-                    <SheetTrigger disabled={submitting || isLoading}>
-                      <button
+                  <div className="flex items-center justify-end space-x-4 w-full fixed bottom-0 right-0 p-4 bg-white border-t">
+                    <SheetTrigger asChild>
+                      <Button
+                        variant="outline"
                         disabled={submitting || isLoading}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100"
                         type="reset"
+                        className="w-full sm:w-auto"
                       >
                         Cancel
-                      </button>
+                      </Button>
                     </SheetTrigger>
-                    <button
+                    <Button
                       disabled={submitting || isLoading}
-                      className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-purple-400 rounded-md hover:shadow-lg"
                       type="submit"
+                      className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] w-full sm:w-auto"
                     >
                       {submitting || isLoading ? (
                         <ClipLoader size={20} />
                       ) : (
-                        " Save and Continue"
+                        "Save and Continue"
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}
             />
           </SheetContent>
         </Sheet>
-      </div>{" "}
+      </div>
     </div>
   );
 };
