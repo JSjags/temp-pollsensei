@@ -553,6 +553,180 @@ const EditSurvey = () => {
     }
   }, [dispatch, newQuestionGenerate, newSingleSurvey]);
 
+  // Helper function to transform skip logic to the required format
+  const transformSkipLogic = (skipLogic: any[], sections: any[]) => {
+    const questionSkipLogicMap = new Map();
+
+    skipLogic.forEach((rule) => {
+      if ("conditions" in rule && "action" in rule) {
+        // New rule format (SkipLogicRuleV2)
+        const {
+          conditions,
+          logicalOperator,
+          action,
+          target,
+          mainQuestionSection,
+          mainQuestionIndex,
+        } = rule;
+
+        // Determine which question this logic applies to
+        let targetQuestionId = null;
+
+        if (action === "end_survey") {
+          // For end_survey, we need to find which question has this logic
+          // We'll attach it to the first question that has conditions referencing it
+          if (conditions.length > 0) {
+            const firstCondition = conditions[0];
+            const questionIndex = firstCondition.questionIndex;
+            if (questionIndex !== null) {
+              targetQuestionId = `Question${questionIndex + 1}`;
+            }
+          }
+        } else {
+          // For hide/show/jump_to, use the main question
+          if (mainQuestionIndex !== null) {
+            targetQuestionId = `Question${mainQuestionIndex + 1}`;
+          }
+        }
+
+        if (targetQuestionId) {
+          // Transform conditions to rules format
+          const rules = conditions
+            .map((cond: any) => {
+              const sourceQuestionIndex = cond.questionIndex;
+              if (sourceQuestionIndex === null) return null;
+
+              return {
+                source_id: `Question${sourceQuestionIndex + 1}`,
+                operator: cond.operator,
+                value: cond.value,
+              };
+            })
+            .filter(Boolean);
+
+          // Transform action
+          let actionType = action;
+          let targetType = "question";
+          let targetId = "Question1"; // Default fallback
+
+          if (action === "end_survey") {
+            actionType = "end_survey";
+            targetType = "question";
+            targetId = "end_survey";
+          } else if (action === "jump_to") {
+            actionType = "jump_to";
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+            // Keep default targetId if conditions above fail
+          } else {
+            // hide/show actions
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+            // Keep default targetId if conditions above fail
+          }
+
+          // Determine logic_type based on action
+          let logicType = "skip_logic"; // default
+          if (action === "hide" || action === "show") {
+            logicType = "display_logic";
+          } else if (action === "jump_to") {
+            logicType = "skip_logic";
+          } else if (action === "end_survey") {
+            logicType = "skip_logic";
+          }
+
+          const skipLogicEntry = {
+            logic_type: logicType,
+            condition: {
+              logical_operator: logicalOperator,
+              rules: rules,
+              action: {
+                type: actionType,
+                target_type: targetType,
+                target_id: targetId,
+              },
+            },
+          };
+
+          console.log("Skip Logic Entry:", {
+            targetQuestionId,
+            action,
+            target,
+            actionType,
+            targetType,
+            targetId,
+            skipLogicEntry,
+          });
+
+          if (!questionSkipLogicMap.has(targetQuestionId)) {
+            questionSkipLogicMap.set(targetQuestionId, []);
+          }
+          questionSkipLogicMap.get(targetQuestionId).push(skipLogicEntry);
+        }
+      } else if ("from" in rule && "to" in rule) {
+        // Old rule format (SkipLogicRule)
+        const { from, to } = rule;
+        const sourceQuestionId = `Question${from.questionIndex + 1}`;
+        const targetQuestionId =
+          "end" in to ? "end_survey" : `Question${(to.questionIndex ?? 0) + 1}`;
+
+        const skipLogicEntry = {
+          logic_type: "skip_logic", // Old rules are typically skip_logic
+          condition: {
+            logical_operator: "and",
+            rules: [
+              {
+                source_id: sourceQuestionId,
+                operator: "equals",
+                value: from.answer,
+              },
+            ],
+            action: {
+              type: "end" in to ? "end_survey" : "jump_to",
+              target_type: "end" in to ? "question" : "question",
+              target_id: targetQuestionId,
+            },
+          },
+        };
+
+        // For old rules, we need to determine which question this applies to
+        // We'll use the source question as the target question for the skip logic
+        const targetQuestionIdForMap = `Question${from.questionIndex + 1}`;
+
+        if (!questionSkipLogicMap.has(targetQuestionIdForMap)) {
+          questionSkipLogicMap.set(targetQuestionIdForMap, []);
+        }
+        questionSkipLogicMap.get(targetQuestionIdForMap).push(skipLogicEntry);
+      }
+    });
+
+    return questionSkipLogicMap;
+  };
+
   const handleSurveyCreation = async () => {
     // Check if all sections have at least one question
     const hasEmptySection = questions.some(
@@ -573,6 +747,12 @@ const EditSurvey = () => {
     try {
       // Get base survey state
       const updatedSurvey = store.getState().survey;
+
+      // Transform skip logic to the required format
+      const questionSkipLogicMap = transformSkipLogic(
+        updatedSurvey.skipLogic || [],
+        updatedSurvey.sections
+      );
 
       // Process survey to ensure questions match their type structure
       const processedSurvey = {
@@ -602,108 +782,145 @@ const EditSurvey = () => {
         sections: updatedSurvey.sections.map((section, idx) => {
           // For the first section, do not include section_topic/section_description
           const baseSection = {
-            questions: section.questions.map((question: Question) => {
-              // Check if empty question type but has matrix structure
-              if (
-                !question.question_type &&
-                question.rows?.length &&
-                question.columns?.length
-              ) {
-                return {
-                  ...question,
-                  question_type: "matrix_multiple_choice",
-                  description: question.description || "Matrix Question",
+            questions: section.questions.map(
+              (question: Question, questionIdx: number) => {
+                // Get skip logic for this question
+                const questionId = `Question${questionIdx + 1}`;
+                const questionSkipLogic =
+                  questionSkipLogicMap.get(questionId) || [];
+
+                // Add skip_logic to the question if it exists
+                const questionWithSkipLogic =
+                  questionSkipLogic.length > 0
+                    ? { ...question, skip_logic: questionSkipLogic }
+                    : question;
+                // Check if empty question type but has matrix structure
+                if (
+                  !questionWithSkipLogic.question_type &&
+                  questionWithSkipLogic.rows?.length &&
+                  questionWithSkipLogic.columns?.length
+                ) {
+                  return {
+                    ...questionWithSkipLogic,
+                    question_type: "matrix_multiple_choice",
+                    description:
+                      questionWithSkipLogic.description || "Matrix Question",
+                  } as Question;
+                }
+                const baseQuestion = {
+                  question: questionWithSkipLogic.question,
+                  description:
+                    questionWithSkipLogic?.description ||
+                    questionWithSkipLogic.question,
+                  question_type: questionWithSkipLogic.question_type,
+                  is_required: questionWithSkipLogic.is_required,
                 } as Question;
-              }
-              const baseQuestion = {
-                question: question.question,
-                description: question?.description || question.question,
-                question_type: question.question_type,
-                is_required: question.is_required,
-              } as Question;
-              switch (question.question_type) {
-                case "slider":
-                  const extractRange = (questionText: string) => {
-                    const numberWords: { [key: string]: number } = {
-                      one: 1,
-                      two: 2,
-                      three: 3,
-                      four: 4,
-                      five: 5,
-                      six: 6,
-                      seven: 7,
-                      eight: 8,
-                      nine: 9,
-                      ten: 10,
-                    };
-                    let processedText = questionText.toLowerCase();
-                    Object.entries(numberWords).forEach(([word, num]) => {
-                      processedText = processedText.replace(
-                        new RegExp(word, "g"),
-                        num.toString()
+                switch (questionWithSkipLogic.question_type) {
+                  case "slider":
+                    const extractRange = (questionText: string) => {
+                      const numberWords: { [key: string]: number } = {
+                        one: 1,
+                        two: 2,
+                        three: 3,
+                        four: 4,
+                        five: 5,
+                        six: 6,
+                        seven: 7,
+                        eight: 8,
+                        nine: 9,
+                        ten: 10,
+                      };
+                      let processedText = questionText.toLowerCase();
+                      Object.entries(numberWords).forEach(([word, num]) => {
+                        processedText = processedText.replace(
+                          new RegExp(word, "g"),
+                          num.toString()
+                        );
+                      });
+                      const match = processedText.match(
+                        /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
                       );
-                    });
-                    const match = processedText.match(
-                      /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
-                    );
-                    return match
-                      ? {
-                          min: parseInt(match[1]),
-                          max: parseInt(match[2]),
-                        }
-                      : { min: 0, max: 10 };
-                  };
-                  const range = extractRange(question.question);
-                  return {
-                    ...baseQuestion,
-                    min: range.min,
-                    max: range.max,
-                    step: 1,
-                  } as Question;
-                case "checkbox":
-                case "multiple_choice":
-                case "single_choice":
-                case "drop_down":
-                case "likert_scale":
-                case "rating_scale":
-                case "star_rating":
-                case "boolean":
-                  return {
-                    ...baseQuestion,
-                    options: question.options,
-                  } as Question;
-                case "matrix_multiple_choice":
-                case "matrix_checkbox":
-                  return {
-                    ...baseQuestion,
-                    description: question.description || "Matrix Question",
-                    rows:
-                      question.rows ||
-                      (question as any)?.Rows ||
-                      (question?.options as any)?.Rows,
-                    columns:
-                      question.columns ||
-                      (question as any)?.Columns ||
-                      (question?.options as any)?.Columns,
-                  } as Question;
-                case "number":
-                  return {
-                    ...baseQuestion,
-                    min: (question as Question).min,
-                    max: question.max,
-                  } as Question;
-                case "long_text":
-                  return {
-                    ...baseQuestion,
-                    can_accept_media:
-                      (question as Question).can_accept_media || false,
-                  } as Question;
-                case "short_text":
-                case "media":
-                default:
-                  return baseQuestion;
+                      return match
+                        ? {
+                            min: parseInt(match[1]),
+                            max: parseInt(match[2]),
+                          }
+                        : { min: 0, max: 10 };
+                    };
+                    const range = extractRange(questionWithSkipLogic.question);
+                    return {
+                      ...baseQuestion,
+                      min: range.min,
+                      max: range.max,
+                      step: 1,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "checkbox":
+                  case "multiple_choice":
+                  case "single_choice":
+                  case "drop_down":
+                  case "likert_scale":
+                  case "rating_scale":
+                  case "star_rating":
+                  case "boolean":
+                    return {
+                      ...baseQuestion,
+                      options: questionWithSkipLogic.options,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "matrix_multiple_choice":
+                  case "matrix_checkbox":
+                    return {
+                      ...baseQuestion,
+                      description:
+                        questionWithSkipLogic.description || "Matrix Question",
+                      rows:
+                        questionWithSkipLogic.rows ||
+                        (questionWithSkipLogic as any)?.Rows ||
+                        (questionWithSkipLogic?.options as any)?.Rows,
+                      columns:
+                        questionWithSkipLogic.columns ||
+                        (questionWithSkipLogic as any)?.Columns ||
+                        (questionWithSkipLogic?.options as any)?.Columns,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "number":
+                    return {
+                      ...baseQuestion,
+                      min: (questionWithSkipLogic as Question).min,
+                      max: questionWithSkipLogic.max,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "long_text":
+                    return {
+                      ...baseQuestion,
+                      can_accept_media:
+                        (questionWithSkipLogic as Question).can_accept_media ||
+                        false,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "short_text":
+                  case "media":
+                  default:
+                    return {
+                      ...baseQuestion,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                }
               }
-            }),
+            ),
           };
           if (idx === 0) {
             // First section: do not include section_topic/section_description
@@ -718,7 +935,11 @@ const EditSurvey = () => {
           }
         }),
       };
-      console.log(processedSurvey);
+      if (Object.prototype.hasOwnProperty.call(processedSurvey, "skipLogic")) {
+        delete (processedSurvey as any).skipLogic;
+      }
+      console.log("Processed Survey:", processedSurvey);
+      console.log("Skip Logic Map:", questionSkipLogicMap);
       await createSurvey(processedSurvey).unwrap();
       handleClearSurvey();
       setSurvey_id(createdSurveyData.data._id);
@@ -943,6 +1164,7 @@ const EditSurvey = () => {
           (cond: SkipLogicCondition) => {
             const section = questions[cond.sectionIndex];
             if (!section) return false;
+            if (cond.questionIndex === null) return false;
             const question = section.questions[cond.questionIndex];
             if (!question) return false;
             return true;
@@ -1713,14 +1935,14 @@ const EditSurvey = () => {
             </TabsContent>
             <TabsContent value="skip" className="w-full">
               <Tabs defaultValue="skip-logic" className="w-full">
-                <TabsList className="w-full flex bg-gray-50 border-b p-0 sticky top-0 z-[100000] !pb-0">
+                {/* <TabsList className="w-full flex bg-gray-50 border-b p-0 sticky top-0 z-[100000] !pb-0">
                   <TabsTrigger
                     value="skip-logic"
                     className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
                   >
                     Skip Logic
                   </TabsTrigger>
-                  {/* <TabsTrigger
+                  <TabsTrigger
                     value="display-logic"
                     className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
                   >
@@ -1731,8 +1953,8 @@ const EditSurvey = () => {
                     className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
                   >
                     Display Options
-                  </TabsTrigger> */}
-                </TabsList>
+                  </TabsTrigger>
+                </TabsList> */}
                 <TabsContent value="skip-logic" className="w-full">
                   <SkipLogicEditor
                     sections={questions}

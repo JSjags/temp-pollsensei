@@ -17,7 +17,7 @@ const getToken = () => {
 console.log(environment.API_BASE_URL);
 
 const axiosInstancev3 = axios.create({
-  baseURL: "https://api-staging.pollsensei.ai/api/v1",
+  baseURL: "https://pollsensei-api-dev-2e52be17da18.herokuapp.com/api/v1",
 });
 
 // Interceptor to add the Bearer token to each request
