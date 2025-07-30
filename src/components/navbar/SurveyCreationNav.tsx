@@ -42,6 +42,7 @@ import { UserData } from "@/subpages/settings/ProfilePage";
 import { useUserProfileQuery } from "@/services/user.service";
 import { toast } from "react-toastify";
 import { getSurveySettings } from "@/services/survey";
+import React from "react";
 
 const SurveyCreationNav = () => {
   const path = usePathname();
@@ -142,6 +143,9 @@ const SurveyCreationNav = () => {
     );
   };
 
+  // Helper to check if a tab is active
+  const isTabActive = (label: string) => activeLink === label;
+
   // Update the NavItemSkeleton component to be more visually appealing
   const NavItemSkeleton = () => (
     <div className="flex items-center gap-3">
@@ -149,6 +153,47 @@ const SurveyCreationNav = () => {
       <Skeleton className="h-4 w-16" />
     </div>
   );
+
+  // Update renderNavItem to use the new isLoading helper and active/hover gradient
+  const renderNavItem = (
+    icon: React.ReactNode,
+    label: string,
+    queryLoading?: boolean,
+    queryFetching?: boolean,
+    isActive?: boolean
+  ) => {
+    if (isLoading(queryLoading, queryFetching)) {
+      return <NavItemSkeleton />;
+    }
+
+    return (
+      <div
+        className={cn(
+          "flex items-center px-3 py-1 rounded-lg transition-all duration-300 cursor-pointer",
+          isActive
+            ? "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white shadow"
+            : "hover:bg-gray-200"
+        )}
+      >
+        {/* Update icon color for active state if possible */}
+        {icon && React.isValidElement(icon)
+          ? React.cloneElement(
+              icon as React.ReactElement<{ className?: string }>,
+              {
+                className: cn(
+                  (icon.props as { className?: string }).className,
+                  isActive ? "text-white" : "text-[#5B03B2]"
+                ),
+              }
+            )
+          : icon}
+        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-xs md:text-xs min-[1150px]:text-sm">
+          {label}
+        </span>
+      </div>
+    );
+  };
+
   const {
     data: surveySettings,
     isLoading: isSurveySettingsLoading,
@@ -177,29 +222,6 @@ const SurveyCreationNav = () => {
     queryKey: ["survey-settings", params.id],
     queryFn: () => getSurveySettings({ surveyId: params?.id as string }),
   });
-
-  console.log(surveySettings);
-
-  // Update renderNavItem to use the new isLoading helper
-  const renderNavItem = (
-    icon: React.ReactNode,
-    label: string,
-    queryLoading?: boolean,
-    queryFetching?: boolean
-  ) => {
-    if (isLoading(queryLoading, queryFetching)) {
-      return <NavItemSkeleton />;
-    }
-
-    return (
-      <>
-        <BreadcrumbsIcon icon={icon} />
-        <span className="md:mt-1 lg:mt-0 lg:ml-3 text-xs md:text-xs min-[1150px]:text-sm">
-          {label}
-        </span>
-      </>
-    );
-  };
 
   // Conditional return after hooks
   if (isSurveySubpath) {
@@ -233,7 +255,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -255,7 +278,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
 
@@ -313,7 +337,8 @@ const SurveyCreationNav = () => {
                           ) : null,
                           "Analysis",
                           surveyLoading,
-                          surveyFetching
+                          surveyFetching,
+                          isTabActive("Analysis")
                         )}
                         {surveyResponses.isSuccess &&
                           surveyResponses.data?.data?.length < 10 && (
@@ -346,7 +371,8 @@ const SurveyCreationNav = () => {
                               ) : null,
                               "Analysis",
                               surveyLoading,
-                              surveyFetching
+                              surveyFetching,
+                              isTabActive("Analysis")
                             )}
                           </button>
                         </DialogTrigger>
@@ -405,7 +431,8 @@ const SurveyCreationNav = () => {
                         ),
                         "Report",
                         surveyLoading,
-                        surveyFetching
+                        surveyFetching,
+                        isTabActive("Report")
                       )}
                     </Link>
                   </>
@@ -422,7 +449,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -444,7 +472,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
               </>
@@ -456,7 +485,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -478,7 +508,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
                 {/* <Image
@@ -516,7 +547,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
               </>
@@ -528,7 +560,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -557,7 +590,8 @@ const SurveyCreationNav = () => {
                       ) : null,
                       "Analysis",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Analysis")
                     )}
                   </button>
                 ) : (
@@ -583,7 +617,8 @@ const SurveyCreationNav = () => {
                           ) : null,
                           "Analysis",
                           surveyLoading,
-                          surveyFetching
+                          surveyFetching,
+                          isTabActive("Analysis")
                         )}
                       </button>
                     </DialogTrigger>
@@ -639,7 +674,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Report",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Report")
                   )}
                 </Link>
               </>
@@ -723,7 +759,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3 group-hover:scale-110 transition-transform duration-200" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
 
@@ -741,7 +778,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
 
@@ -789,7 +827,8 @@ const SurveyCreationNav = () => {
                           ) : null,
                           "Analysis",
                           surveyLoading,
-                          surveyFetching
+                          surveyFetching,
+                          isTabActive("Analysis")
                         )}
                       </button>
                     ) : (
@@ -808,7 +847,8 @@ const SurveyCreationNav = () => {
                               ) : null,
                               "Analysis",
                               surveyLoading,
-                              surveyFetching
+                              surveyFetching,
+                              isTabActive("Analysis")
                             )}
                           </button>
                         </DialogTrigger>
@@ -863,7 +903,8 @@ const SurveyCreationNav = () => {
                         ),
                         "Report",
                         surveyLoading,
-                        surveyFetching
+                        surveyFetching,
+                        isTabActive("Report")
                       )}
                     </Link>
                   </>
@@ -880,7 +921,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
                 <Image
@@ -902,7 +944,8 @@ const SurveyCreationNav = () => {
                     ),
                     "Responses",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Reponses")
                   )}
                 </Link>
               </>
@@ -915,7 +958,8 @@ const SurveyCreationNav = () => {
                       <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                       "Design",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Design")
                     )}
                   </Link>
                   <Image
@@ -937,7 +981,8 @@ const SurveyCreationNav = () => {
                       ),
                       "Responses",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Reponses")
                     )}
                   </Link>
                   <Image
@@ -962,7 +1007,8 @@ const SurveyCreationNav = () => {
                         ),
                       "Validation",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Validation")
                     )}
                   </Link>
                 </>
@@ -974,7 +1020,8 @@ const SurveyCreationNav = () => {
                     <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                     "Design",
                     surveyLoading,
-                    surveyFetching
+                    surveyFetching,
+                    isTabActive("Design")
                   )}
                 </Link>
               </>
@@ -987,7 +1034,8 @@ const SurveyCreationNav = () => {
                       <IoCheckmarkDoneCircle className="text-[#5B03B2] flex justify-center w-3 h-3" />,
                       "Design",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Design")
                     )}
                   </Link>
                   <Image
@@ -1016,7 +1064,8 @@ const SurveyCreationNav = () => {
                         ) : null,
                         "Analysis",
                         surveyLoading,
-                        surveyFetching
+                        surveyFetching,
+                        isTabActive("Analysis")
                       )}
                     </button>
                   ) : (
@@ -1042,7 +1091,8 @@ const SurveyCreationNav = () => {
                             ) : null,
                             "Analysis",
                             surveyLoading,
-                            surveyFetching
+                            surveyFetching,
+                            isTabActive("Analysis")
                           )}
                         </button>
                       </DialogTrigger>
@@ -1100,7 +1150,8 @@ const SurveyCreationNav = () => {
                       ),
                       "Report",
                       surveyLoading,
-                      surveyFetching
+                      surveyFetching,
+                      isTabActive("Report")
                     )}
                   </Link>
                 </>
