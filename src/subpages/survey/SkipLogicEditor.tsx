@@ -57,8 +57,8 @@ interface Section {
 
 interface SkipLogicEditorProps {
   sections: Section[];
-  skipLogic: SkipLogicRule[];
-  onChange: (rules: SkipLogicRule[]) => void;
+  skipLogic: (SkipLogicRule | SkipLogicRuleV2)[];
+  onChange: (rules: (SkipLogicRule | SkipLogicRuleV2)[]) => void;
   readOnly?: boolean;
 }
 
@@ -219,7 +219,7 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
     ],
     logicalOperator: "and",
     action: "", // Start empty
-    targetType: "",
+    targetType: "question",
     targetSection: 0,
     targetQuestion: null,
     mainQuestionSection: 0,
@@ -284,29 +284,49 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
     return { maxSection, maxQuestion };
   };
 
-  // Validation for rule creation
-  const isValidRule =
-    form.conditions.length > 0 &&
-    form.conditions.every(
-      (cond) =>
-        cond.sectionIndex !== null &&
-        cond.questionIndex !== null &&
-        cond.operator &&
-        cond.value !== undefined &&
-        cond.value !== null &&
-        cond.value !== ""
-    ) &&
-    form.action &&
-    // Only check target fields for actions that need them
-    (form.action === "end_survey" ||
-      form.action === "hide" ||
-      form.action === "show" ||
-      (form.action === "jump_to" &&
-        form.targetType &&
-        (form.targetType === "section" || form.targetQuestion !== null)));
+  // Validation for rule creation - simplified
+  const isValidRule = (() => {
+    const conditionsValid =
+      form.conditions.length > 0 &&
+      form.conditions.every(
+        (cond) =>
+          cond.sectionIndex !== null &&
+          cond.questionIndex !== null &&
+          cond.operator &&
+          cond.value !== undefined &&
+          cond.value !== null &&
+          cond.value !== ""
+      );
+
+    const actionValid = form.action;
+
+    const mainQuestionValid =
+      form.action === "end_survey" ||
+      (form.mainQuestionSection !== null && form.mainQuestionIndex !== null);
+
+    const isValid = conditionsValid && actionValid && mainQuestionValid;
+
+    console.log("Validation check:", {
+      conditionsValid,
+      actionValid,
+      mainQuestionValid,
+      isValid,
+      form: {
+        conditionsLength: form.conditions.length,
+        action: form.action,
+        mainQuestionSection: form.mainQuestionSection,
+        mainQuestionIndex: form.mainQuestionIndex,
+      },
+    });
+
+    return isValid;
+  })();
 
   // Add or update rule
   const handleSave = () => {
+    console.log("handleSave called with form:", form);
+    console.log("Current skipLogic:", skipLogic);
+
     const rule: SkipLogicRuleV2 = {
       id: editRule?.id || uuidv4(),
       conditions: form.conditions,
@@ -316,21 +336,31 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
         form.action === "end_survey"
           ? { type: "end" } // For end_survey, target is just "end"
           : {
-              type: form.targetType,
+              type: form.targetType || "question", // Default to "question" if empty
               sectionIndex: form.targetSection,
-              ...(form.targetType === "question" && form.targetQuestion !== null
+              ...((form.targetType || "question") === "question" &&
+              form.targetQuestion !== null
                 ? { questionIndex: form.targetQuestion }
                 : {}),
             },
       mainQuestionSection: form.mainQuestionSection,
       mainQuestionIndex: form.mainQuestionIndex ?? 0,
     };
-    let newRules = [...(skipLogic as any[])];
+
+    console.log("Created rule:", rule);
+
+    let newRules = Array.isArray(skipLogic) ? [...skipLogic] : [];
+    console.log("Initial newRules:", newRules);
+
     if (editRule) {
       newRules = newRules.map((r) => (r.id === rule.id ? rule : r));
+      console.log("Updated existing rule, newRules:", newRules);
     } else {
       newRules.push(rule);
+      console.log("Added new rule, newRules:", newRules);
     }
+
+    console.log("Calling onChange with:", newRules);
     onChange(newRules);
     setOpen(false);
     setEditRule(null);
@@ -349,7 +379,7 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       ],
       logicalOperator: "and",
       action: "", // Start empty
-      targetType: "",
+      targetType: "question", // Default to "question" instead of empty string
       targetSection: 0,
       targetQuestion: null,
       mainQuestionSection: 0,
@@ -366,7 +396,8 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       conditions: rule.conditions,
       logicalOperator: rule.logicalOperator,
       action: rule.action,
-      targetType: rule.action === "end_survey" ? "" : rule.target.type,
+      targetType:
+        rule.action === "end_survey" ? "" : rule.target.type || "question",
       targetSection:
         rule.action === "end_survey" ? 0 : rule.target.sectionIndex ?? 0,
       targetQuestion:
@@ -777,6 +808,15 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
             </Button>
           </div>
         )}
+        {(() => {
+          console.log("Rendering skipLogic:", skipLogic);
+          return null;
+        })()}
+        {/* Debug display */}
+        <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
+          Debug: {skipLogic.length} rules found | Type: {typeof skipLogic} | Is
+          Array: {Array.isArray(skipLogic).toString()}
+        </div>
         {skipLogic.map((rule) => {
           // Type guard: old rule has 'from' and 'to', new rule has 'conditions'
           if ("from" in rule && "to" in rule) {
@@ -1649,7 +1689,7 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                 <Button
                   onClick={handleSave}
                   className="group flex-1 relative h-10 px-6 rounded-lg flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90"
-                  disabled={!isValidRule}
+                  // disabled={!isValidRule}
                 >
                   <span className="group-hover:tracking-wider transition-all duration-200">
                     {editRule ? "Save Changes" : "Add Rule"}
@@ -1658,6 +1698,8 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                 </Button>
               </DialogFooter>
             )}
+
+            {/* {console.log(form)} */}
           </div>
         </DialogContent>
       </Dialog>

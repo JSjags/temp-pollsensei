@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
-import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 import { validateQuestionResponse } from "@/utils/validation";
@@ -446,6 +445,124 @@ const PublicResponse = () => {
     ];
     return otherOptions.some(
       (otherOption) => otherOption.toLowerCase() === option.toLowerCase().trim()
+    );
+  };
+
+  // Helper: flatten all questions with section and index info
+  const flattenQuestions = (sections: any[]): any[] => {
+    const all: any[] = [];
+    let globalIndex = 0;
+    for (let s = 0; s < sections.length; s++) {
+      for (let q = 0; q < sections[s].questions.length; q++) {
+        all.push({
+          ...sections[s].questions[q],
+          sectionIndex: s,
+          questionIndex: q,
+          globalIndex,
+          sectionId: sections[s]._id,
+        });
+        globalIndex++;
+      }
+    }
+    return all;
+  };
+
+  // Logic engine: returns a Set of hidden question _ids
+  const evaluateSkipLogic = (
+    sections: any[],
+    answers: any
+  ): { hidden: Set<string>; endSurvey: boolean } => {
+    const allQuestions = flattenQuestions(sections);
+    const hidden = new Set<string>();
+    let endSurvey = false;
+
+    // Helper to get answer by question _id
+    const getAnswer = (qid: string): any => {
+      const q = allQuestions.find((q: any) => q._id === qid);
+      if (!q) return undefined;
+      return answers[q.sectionIndex]?.[q.question];
+    };
+
+    for (const q of allQuestions) {
+      for (const logic of q.skip_logic || []) {
+        const { logical_operator, rules, action } = logic.condition;
+        const ruleResults = (rules || []).map((rule: any) => {
+          const ans = getAnswer(rule.source_id);
+          if (ans === undefined) return false;
+          // Support for different answer shapes
+          let val =
+            ans.selected_options?.[0] ??
+            ans.scale_value ??
+            ans.boolean_value ??
+            ans.text ??
+            ans.drop_down_value ??
+            ans.num ??
+            ans;
+          if (Array.isArray(val)) val = val[0];
+          switch (rule.operator) {
+            case "equals":
+              return val === rule.value;
+            case "notEquals":
+              return val !== rule.value;
+            case "includes":
+              return Array.isArray(val) ? val.includes(rule.value) : false;
+            case "greaterThan":
+              return Number(val) > Number(rule.value);
+            case "lessThan":
+              return Number(val) < Number(rule.value);
+            case "greaterThanOrEqual":
+              return Number(val) >= Number(rule.value);
+            case "lessThanOrEqual":
+              return Number(val) <= Number(rule.value);
+            default:
+              return false;
+          }
+        });
+        const condMet =
+          logical_operator === "and"
+            ? ruleResults.every(Boolean)
+            : ruleResults.some(Boolean);
+        if (condMet) {
+          if (action.type === "hide") {
+            // Use the _id of the question that contains the skip logic
+            hidden.add(q._id);
+          } else if (action.type === "show") {
+            // Use the _id of the question that contains the skip logic
+            hidden.delete(q._id);
+          } else if (action.type === "end_survey") {
+            endSurvey = true;
+          } else if (action.type === "jump_to") {
+            // Hide all questions between source and target (across sections)
+            const sourceIdx = q.globalIndex;
+            const targetQ = allQuestions.find(
+              (qq: any) => qq._id === action.target_id
+            );
+            if (targetQ) {
+              const targetIdx = targetQ.globalIndex;
+              const [start, end] =
+                sourceIdx < targetIdx
+                  ? [sourceIdx + 1, targetIdx]
+                  : [targetIdx + 1, sourceIdx];
+              for (let i = start; i < end; i++) {
+                hidden.add(allQuestions[i]._id);
+              }
+            }
+          }
+        }
+      }
+    }
+    return { hidden, endSurvey };
+  };
+
+  // Returns visible questions for the current section
+  const getVisibleQuestions = (
+    sections: any[],
+    answers: any,
+    currentSection: number
+  ): any[] => {
+    const { hidden } = evaluateSkipLogic(sections, answers);
+    return sections[currentSection]?.questions.filter(
+      (q: any) => !hidden.has(q._id)
     );
   };
 
@@ -1485,7 +1602,10 @@ const PublicResponse = () => {
                 )}
                 <AnimatePresence mode="wait">
                   <motion.div className="flex flex-col gap-4">
-                    {sections[currentSection]?.questions?.map(renderQuestion)}
+                    {getVisibleQuestions(sections, answers, currentSection).map(
+                      (quest: any, index: number) =>
+                        renderQuestion(quest, index, question?.data?.theme)
+                    )}
                   </motion.div>
                 </AnimatePresence>
 

@@ -53,6 +53,12 @@ import {
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { HiOutlinePlus } from "react-icons/hi";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SkipLogicEditor, {
+  SkipLogicRule,
+  SkipLogicRuleV2,
+} from "./SkipLogicEditor";
+import { Paintbrush, AlignVerticalSpaceAround } from "lucide-react";
 
 interface Question {
   question: string;
@@ -214,6 +220,207 @@ const EditSubmittedSurvey = () => {
   const [isHeaderEditing, setIsHeaderEditing] = useState(false);
   const [direction, setDirection] = useState(0);
 
+  // Skip logic state
+  const [skipLogic, setSkipLogic] = useState<
+    (SkipLogicRule | SkipLogicRuleV2)[]
+  >([]);
+
+  // Helper function to transform skip logic from API format to editor format
+  const transformSkipLogicFromAPI = (
+    sections: any[]
+  ): (SkipLogicRule | SkipLogicRuleV2)[] => {
+    const rules: (SkipLogicRule | SkipLogicRuleV2)[] = [];
+
+    sections.forEach((section, sectionIndex) => {
+      section.questions.forEach((question: any, questionIndex: number) => {
+        if (question.skip_logic && Array.isArray(question.skip_logic)) {
+          question.skip_logic.forEach((logic: any) => {
+            // Transform API format to editor format
+            if (logic.condition && logic.condition.rules) {
+              const newRule: SkipLogicRuleV2 = {
+                id: `rule_${sectionIndex}_${questionIndex}_${Date.now()}`,
+                conditions: logic.condition.rules.map((rule: any) => ({
+                  sectionIndex: 0, // Will be determined by source_id
+                  questionIndex: 0, // Will be determined by source_id
+                  operator: rule.operator,
+                  value: rule.value,
+                })),
+                logicalOperator: logic.condition.logical_operator || "and",
+                action: logic.condition.action.type,
+                target: {
+                  type: logic.condition.action.target_type,
+                  sectionIndex: 0, // Will be determined by target_id
+                  questionIndex: 0, // Will be determined by target_id
+                },
+                mainQuestionSection: sectionIndex,
+                mainQuestionIndex: questionIndex,
+              };
+              rules.push(newRule);
+            }
+          });
+        }
+      });
+    });
+
+    return rules;
+  };
+
+  // Helper function to transform skip logic to API format
+  const transformSkipLogicToAPI = (
+    skipLogic: (SkipLogicRule | SkipLogicRuleV2)[],
+    sections: any[]
+  ) => {
+    const questionSkipLogicMap = new Map();
+
+    skipLogic.forEach((rule) => {
+      if ("conditions" in rule && "action" in rule) {
+        // New rule format (SkipLogicRuleV2)
+        const {
+          conditions,
+          logicalOperator,
+          action,
+          target,
+          mainQuestionSection,
+          mainQuestionIndex,
+        } = rule;
+
+        // Determine which question this logic applies to
+        let targetQuestionId = null;
+
+        if (action === "end_survey") {
+          if (conditions.length > 0) {
+            const firstCondition = conditions[0];
+            const questionIndex = firstCondition.questionIndex;
+            if (questionIndex !== null) {
+              targetQuestionId = `Question${questionIndex + 1}`;
+            }
+          }
+        } else {
+          if (mainQuestionIndex !== null) {
+            targetQuestionId = `Question${mainQuestionIndex + 1}`;
+          }
+        }
+
+        if (targetQuestionId) {
+          const rules = conditions
+            .map((cond: any) => {
+              const sourceQuestionIndex = cond.questionIndex;
+              if (sourceQuestionIndex === null) return null;
+
+              return {
+                source_id: `Question${sourceQuestionIndex + 1}`,
+                operator: cond.operator,
+                value: cond.value,
+              };
+            })
+            .filter(Boolean);
+
+          let actionType = action;
+          let targetType = "question";
+          let targetId = "Question1";
+
+          if (action === "end_survey") {
+            actionType = "end_survey";
+            targetType = "question";
+            targetId = "end_survey";
+          } else if (action === "jump_to") {
+            actionType = "jump_to";
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+          } else {
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+          }
+
+          let logicType = "skip_logic";
+          if (action === "hide" || action === "show") {
+            logicType = "display_logic";
+          } else if (action === "jump_to") {
+            logicType = "skip_logic";
+          } else if (action === "end_survey") {
+            logicType = "skip_logic";
+          }
+
+          const skipLogicEntry = {
+            logic_type: logicType,
+            condition: {
+              logical_operator: logicalOperator,
+              rules: rules,
+              action: {
+                type: actionType,
+                target_type: targetType,
+                target_id: targetId,
+              },
+            },
+          };
+
+          if (!questionSkipLogicMap.has(targetQuestionId)) {
+            questionSkipLogicMap.set(targetQuestionId, []);
+          }
+          questionSkipLogicMap.get(targetQuestionId).push(skipLogicEntry);
+        }
+      } else if ("from" in rule && "to" in rule) {
+        // Old rule format (SkipLogicRule)
+        const { from, to } = rule;
+        const sourceQuestionId = `Question${from.questionIndex + 1}`;
+        const targetQuestionId =
+          "end" in to ? "end_survey" : `Question${(to.questionIndex ?? 0) + 1}`;
+
+        const skipLogicEntry = {
+          logic_type: "skip_logic",
+          condition: {
+            logical_operator: "and",
+            rules: [
+              {
+                source_id: sourceQuestionId,
+                operator: "equals",
+                value: from.answer,
+              },
+            ],
+            action: {
+              type: "end" in to ? "end_survey" : "jump_to",
+              target_type: "end" in to ? "question" : "question",
+              target_id: targetQuestionId,
+            },
+          },
+        };
+
+        const targetQuestionIdForMap = `Question${from.questionIndex + 1}`;
+
+        if (!questionSkipLogicMap.has(targetQuestionIdForMap)) {
+          questionSkipLogicMap.set(targetQuestionIdForMap, []);
+        }
+        questionSkipLogicMap.get(targetQuestionIdForMap).push(skipLogicEntry);
+      }
+    });
+
+    return questionSkipLogicMap;
+  };
+
   console.log(data);
   console.log(params.id);
   const [surveyData, setSurveyData] = useState<SurveyData>({
@@ -332,6 +539,10 @@ const EditSubmittedSurvey = () => {
       logo_url: data?.data?.logo_url ?? "",
       header_url: data?.data?.header_url ?? "",
     });
+
+    // Transform and set skip logic from API data
+    const transformedSkipLogic = transformSkipLogicFromAPI(processedSections);
+    setSkipLogic(transformedSkipLogic);
   }, [data, isSurveySuccess]);
 
   console.log(data);
@@ -457,7 +668,35 @@ const EditSubmittedSurvey = () => {
   const saveSurvey = async () => {
     console.log({ id: params.id, surveyData });
     try {
-      await editSurvey({ id: params.id, body: surveyData }).unwrap();
+      // Transform skip logic to API format and add to survey data
+      const questionSkipLogicMap = transformSkipLogicToAPI(
+        skipLogic,
+        surveyData.sections
+      );
+
+      const surveyDataWithSkipLogic = {
+        ...surveyData,
+        sections: surveyData.sections.map((section, sectionIdx) => ({
+          ...section,
+          questions: section.questions.map((question, questionIdx) => {
+            const questionId = `Question${questionIdx + 1}`;
+            const questionSkipLogic =
+              questionSkipLogicMap.get(questionId) || [];
+
+            return {
+              ...question,
+              ...(questionSkipLogic.length > 0 && {
+                skip_logic: questionSkipLogic,
+              }),
+            };
+          }),
+        })),
+      };
+
+      await editSurvey({
+        id: params.id,
+        body: surveyDataWithSkipLogic,
+      }).unwrap();
       toast.success("Survey updated successfully!");
       router.push("/surveys/survey-list");
     } catch (error) {
@@ -2391,11 +2630,49 @@ const EditSubmittedSurvey = () => {
           <div
             className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
           >
-            {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
-            <StyleEditor
-              surveyData={surveyData}
-              setSurveyData={setSurveyData}
-            />
+            <Tabs defaultValue="style" className="w-full">
+              <TabsList className="w-full flex bg-gray-50 border-b p-0 sticky top-0 z-[100000] !pb-0">
+                <TabsTrigger
+                  value="style"
+                  className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Paintbrush size={16} />
+                    Style Editor
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="skip"
+                  className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <AlignVerticalSpaceAround size={16} />
+                    Logic
+                  </span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="style" className="w-full">
+                <StyleEditor
+                  surveyData={surveyData}
+                  setSurveyData={setSurveyData}
+                />
+              </TabsContent>
+              <TabsContent value="skip" className="w-full">
+                <Tabs defaultValue="skip-logic" className="w-full">
+                  <TabsContent value="skip-logic" className="w-full">
+                    <SkipLogicEditor
+                      sections={surveyData.sections}
+                      skipLogic={skipLogic as SkipLogicRule[]}
+                      onChange={(rules: SkipLogicRule[]) =>
+                        setSkipLogic(
+                          rules as (SkipLogicRule | SkipLogicRuleV2)[]
+                        )
+                      }
+                    />
+                  </TabsContent>
+                </Tabs>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>

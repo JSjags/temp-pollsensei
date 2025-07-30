@@ -313,6 +313,242 @@ const EditSurvey = () => {
 
   const skipLogic = useSelector((state: RootState) => state.survey.skipLogic);
 
+  // Skip logic state for existing surveys
+  const [existingSkipLogic, setExistingSkipLogic] = useState<
+    (SkipLogicRule | SkipLogicRuleV2)[]
+  >([]);
+  const [hasExistingSkipLogic, setHasExistingSkipLogic] = useState(false);
+
+  // Helper function to check if survey has existing skip logic
+  const checkForExistingSkipLogic = (sections: any[]): boolean => {
+    return sections.some((section) =>
+      section.questions.some(
+        (question: any) =>
+          question.skip_logic &&
+          Array.isArray(question.skip_logic) &&
+          question.skip_logic.length > 0
+      )
+    );
+  };
+
+  // Helper function to transform skip logic from API format to editor format
+  const transformSkipLogicFromAPI = (
+    sections: any[]
+  ): (SkipLogicRule | SkipLogicRuleV2)[] => {
+    const rules: (SkipLogicRule | SkipLogicRuleV2)[] = [];
+
+    sections.forEach((section, sectionIndex) => {
+      section.questions.forEach((question: any, questionIndex: number) => {
+        if (question.skip_logic && Array.isArray(question.skip_logic)) {
+          question.skip_logic.forEach((logic: any) => {
+            // Transform API format to editor format
+            if (logic.condition && logic.condition.rules) {
+              const newRule: SkipLogicRuleV2 = {
+                id: `rule_${sectionIndex}_${questionIndex}_${Date.now()}`,
+                conditions: logic.condition.rules.map((rule: any) => ({
+                  sectionIndex: 0, // Will be determined by source_id
+                  questionIndex: 0, // Will be determined by source_id
+                  operator: rule.operator,
+                  value: rule.value,
+                })),
+                logicalOperator: logic.condition.logical_operator || "and",
+                action: logic.condition.action.type,
+                target: {
+                  type: logic.condition.action.target_type,
+                  sectionIndex: 0, // Will be determined by target_id
+                  questionIndex: 0, // Will be determined by target_id
+                },
+                mainQuestionSection: sectionIndex,
+                mainQuestionIndex: questionIndex,
+              };
+              rules.push(newRule);
+            }
+          });
+        }
+      });
+    });
+
+    return rules;
+  };
+
+  // Helper function to transform skip logic to API format
+  const transformSkipLogicToAPI = (
+    skipLogic: (SkipLogicRule | SkipLogicRuleV2)[],
+    sections: any[]
+  ) => {
+    const questionSkipLogicMap = new Map();
+
+    skipLogic.forEach((rule) => {
+      if ("conditions" in rule && "action" in rule) {
+        // New rule format (SkipLogicRuleV2)
+        const {
+          conditions,
+          logicalOperator,
+          action,
+          target,
+          mainQuestionSection,
+          mainQuestionIndex,
+        } = rule;
+
+        // Determine which question this logic applies to
+        let targetQuestionId = null;
+
+        if (action === "end_survey") {
+          // For end_survey, we need to find which question has this logic
+          // We'll attach it to the first question that has conditions referencing it
+          if (conditions.length > 0) {
+            const firstCondition = conditions[0];
+            const questionIndex = firstCondition.questionIndex;
+            if (questionIndex !== null) {
+              targetQuestionId = `Question${questionIndex + 1}`;
+            }
+          }
+        } else {
+          // For hide/show/jump_to, use the main question that the user selected
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            // The target question is the main question the user selected
+            targetQuestionId = `Question${mainQuestionIndex + 1}`;
+          }
+        }
+
+        if (targetQuestionId) {
+          // Transform conditions to rules format
+          const rules = conditions
+            .map((cond: any) => {
+              const sourceQuestionIndex = cond.questionIndex;
+              if (sourceQuestionIndex === null) return null;
+
+              return {
+                source_id: `Question${sourceQuestionIndex + 1}`,
+                operator: cond.operator,
+                value: cond.value,
+              };
+            })
+            .filter(Boolean);
+
+          // Transform action
+          let actionType = action;
+          let targetType = "question";
+          let targetId = "Question1"; // Default fallback
+
+          if (action === "end_survey") {
+            actionType = "end_survey";
+            targetType = "question";
+            targetId = "end_survey";
+          } else if (action === "jump_to") {
+            actionType = "jump_to";
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+            // Keep default targetId if conditions above fail
+          } else {
+            // hide/show actions
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+            // Keep default targetId if conditions above fail
+          }
+
+          // Determine logic_type based on action
+          let logicType = "skip_logic"; // default
+          if (action === "hide" || action === "show") {
+            logicType = "display_logic";
+          } else if (action === "jump_to") {
+            logicType = "skip_logic";
+          } else if (action === "end_survey") {
+            logicType = "skip_logic";
+          }
+
+          const skipLogicEntry = {
+            logic_type: logicType,
+            condition: {
+              logical_operator: logicalOperator,
+              rules: rules,
+              action: {
+                type: actionType,
+                target_type: targetType,
+                target_id: targetId,
+              },
+            },
+          };
+
+          console.log("Skip Logic Entry:", {
+            targetQuestionId,
+            action,
+            target,
+            actionType,
+            targetType,
+            targetId,
+            skipLogicEntry,
+          });
+
+          if (!questionSkipLogicMap.has(targetQuestionId)) {
+            questionSkipLogicMap.set(targetQuestionId, []);
+          }
+          questionSkipLogicMap.get(targetQuestionId).push(skipLogicEntry);
+        }
+      } else if ("from" in rule && "to" in rule) {
+        // Old rule format (SkipLogicRule)
+        const { from, to } = rule;
+        const sourceQuestionId = `Question${from.questionIndex + 1}`;
+        const targetQuestionId =
+          "end" in to ? "end_survey" : `Question${(to.questionIndex ?? 0) + 1}`;
+
+        const skipLogicEntry = {
+          logic_type: "skip_logic", // Old rules are typically skip_logic
+          condition: {
+            logical_operator: "and",
+            rules: [
+              {
+                source_id: sourceQuestionId,
+                operator: "equals",
+                value: from.answer,
+              },
+            ],
+            action: {
+              type: "end" in to ? "end_survey" : "jump_to",
+              target_type: "end" in to ? "question" : "question",
+              target_id: targetQuestionId,
+            },
+          },
+        };
+
+        // For old rules, we need to determine which question this applies to
+        // We'll use the source question as the target question for the skip logic
+        const targetQuestionIdForMap = `Question${from.questionIndex + 1}`;
+
+        if (!questionSkipLogicMap.has(targetQuestionIdForMap)) {
+          questionSkipLogicMap.set(targetQuestionIdForMap, []);
+        }
+        questionSkipLogicMap.get(targetQuestionIdForMap).push(skipLogicEntry);
+      }
+    });
+
+    return questionSkipLogicMap;
+  };
+
   const handleClearSurvey = () => {
     dispatch(resetSurvey());
     setShowClearDialog(false);
@@ -583,8 +819,9 @@ const EditSurvey = () => {
             }
           }
         } else {
-          // For hide/show/jump_to, use the main question
-          if (mainQuestionIndex !== null) {
+          // For hide/show/jump_to, use the main question that the user selected
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            // The target question is the main question the user selected
             targetQuestionId = `Question${mainQuestionIndex + 1}`;
           }
         }
@@ -785,7 +1022,18 @@ const EditSurvey = () => {
             questions: section.questions.map(
               (question: Question, questionIdx: number) => {
                 // Get skip logic for this question
-                const questionId = `Question${questionIdx + 1}`;
+                // Calculate global question index to match the targetQuestionId from skip logic
+                let globalQuestionIndex = 0;
+                for (let s = 0; s < updatedSurvey.sections.length; s++) {
+                  if (s < idx) {
+                    globalQuestionIndex +=
+                      updatedSurvey.sections[s].questions.length;
+                  } else if (s === idx) {
+                    globalQuestionIndex += questionIdx;
+                    break;
+                  }
+                }
+                const questionId = `Question${globalQuestionIndex + 1}`;
                 const questionSkipLogic =
                   questionSkipLogicMap.get(questionId) || [];
 
@@ -1198,6 +1446,27 @@ const EditSurvey = () => {
     });
     if (!isValid) {
       dispatch(setSkipLogic([]));
+    }
+  }, [questions, skipLogic, dispatch]);
+
+  // Check for existing skip logic when sections change
+  useEffect(() => {
+    if (questions && questions.length > 0) {
+      const hasExisting = checkForExistingSkipLogic(questions);
+      setHasExistingSkipLogic(hasExisting);
+
+      if (hasExisting) {
+        const transformedSkipLogic = transformSkipLogicFromAPI(questions);
+        setExistingSkipLogic(transformedSkipLogic);
+
+        // If there's existing skip logic and no current skip logic in Redux, populate it
+        if (
+          transformedSkipLogic.length > 0 &&
+          (!skipLogic || skipLogic.length === 0)
+        ) {
+          dispatch(setSkipLogic(transformedSkipLogic));
+        }
+      }
     }
   }, [questions, skipLogic, dispatch]);
 
