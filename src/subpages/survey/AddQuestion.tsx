@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import Select from "react-select";
 import { MdDeleteOutline } from "react-icons/md";
