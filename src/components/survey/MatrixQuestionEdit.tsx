@@ -81,6 +81,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       { value: "star_rating", label: "Star Rating" },
       { value: "matrix_multiple_choice", label: "Matrix Multiple Choice" },
       { value: "matrix_checkbox", label: "Matrix Checkbox" },
+      { value: "matrix", label: "Matrix" },
       { value: "number", label: "Number" },
     ],
     []
@@ -103,6 +104,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
 
       case "matrix_multiple_choice":
       case "matrix_checkbox":
+      case "matrix":
         return (
           rows.length >= 1 &&
           columns.length >= 1 &&
@@ -151,7 +153,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       )
     ) {
       if (!editedOptions.length) setEditedOptions([""]);
-    } else if (["matrix_multiple_choice", "matrix_checkbox"].includes(value)) {
+    } else if (
+      ["matrix_multiple_choice", "matrix_checkbox", "matrix"].includes(value)
+    ) {
       setRows([""]);
       setColumns([""]);
       setEditedOptions([]);
@@ -217,7 +221,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           maxValue
         );
       } else if (
-        ["matrix_multiple_choice", "matrix_checkbox"].includes(
+        ["matrix_multiple_choice", "matrix_checkbox", "matrix"].includes(
           editedQuestionType
         )
       ) {
@@ -321,7 +325,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
               </motion.div>
             )}
 
-            {["matrix_multiple_choice", "matrix_checkbox"].includes(
+            {["matrix_multiple_choice", "matrix_checkbox", "matrix"].includes(
               editedQuestionType
             ) && (
               <motion.div

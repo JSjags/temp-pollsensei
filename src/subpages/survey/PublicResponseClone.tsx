@@ -78,6 +78,12 @@ const PublicResponse = () => {
   const [respondent_country, setRespondent_country] = useState("");
   const [respondent_email, setRespondent_email] = useState("");
   const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
+  const [shouldEndSurvey, setShouldEndSurvey] = useState(false);
+  const [showEndSurveyDialog, setShowEndSurveyDialog] = useState(false);
+  const [pendingEndSurveyAnswer, setPendingEndSurveyAnswer] = useState<{
+    key: string;
+    value: any;
+  } | null>(null);
   const router = useRouter();
 
   const [activeInput, setActiveInput] = useState<
@@ -98,6 +104,323 @@ const PublicResponse = () => {
 
   // Use sections from question?.data?.sections
   const sections = question?.data?.sections || [];
+
+  // Helper: flatten all questions with section and index info
+  const flattenQuestions = (sections: any[]): any[] => {
+    const all: any[] = [];
+    let globalIndex = 0;
+    for (let s = 0; s < sections.length; s++) {
+      for (let q = 0; q < sections[s].questions.length; q++) {
+        all.push({
+          ...sections[s].questions[q],
+          sectionIndex: s,
+          questionIndex: q,
+          globalIndex,
+          sectionId: sections[s]._id,
+        });
+        globalIndex++;
+      }
+    }
+    return all;
+  };
+
+  // Logic engine: returns a Set of hidden question _ids
+  const evaluateSkipLogic = (
+    sections: any[],
+    answers: any
+  ): {
+    hidden: Set<string>;
+    endSurvey: boolean;
+    jumpToSection?: number;
+    jumpToQuestion?: number;
+  } => {
+    const allQuestions = flattenQuestions(sections);
+    const hidden = new Set<string>();
+    let endSurvey = false;
+    let jumpToSection: number | undefined;
+    let jumpToQuestion: number | undefined;
+
+    // Initialize hidden set with questions that have "show" logic (they should be hidden by default)
+    allQuestions.forEach((q) => {
+      if (
+        q.skip_logic?.some(
+          (logic: any) => logic.condition.action.type === "show"
+        )
+      ) {
+        hidden.add(q._id);
+      }
+    });
+
+    // Helper to get answer by question _id
+    const getAnswer = (qid: string): any => {
+      const q = allQuestions.find((q: any) => q._id === qid);
+      if (!q) return undefined;
+      return answers[q.sectionIndex]?.[q.question];
+    };
+
+    // Helper to get question by _id
+    const getQuestion = (qid: string): any => {
+      return allQuestions.find((q: any) => q._id === qid);
+    };
+
+    // Helper to extract value from answer based on question type
+    const extractValue = (qid: string, ans: any): any => {
+      if (!ans) return undefined;
+
+      const question = getQuestion(qid);
+      if (!question) return undefined;
+
+      const questionType = question.question_type;
+
+      console.log(
+        `Extracting value for question ${qid} (${questionType}):`,
+        ans
+      );
+
+      switch (questionType) {
+        case "star_rating":
+          // Extract numeric value from "4 stars" -> 4
+          if (ans.scale_value) {
+            const match = ans.scale_value.match(/(\d+)/);
+            return match ? parseInt(match[1]) : undefined;
+          }
+          return undefined;
+
+        case "rating_scale":
+        case "likert_scale":
+        case "slider":
+        case "number":
+          // For likert_scale, the value might be the option text itself
+          if (ans.scale_value !== undefined) {
+            // If it's a string like "Very Unfamiliar", return it as is
+            if (typeof ans.scale_value === "string") {
+              return ans.scale_value;
+            }
+            // If it's a number, return as number
+            return Number(ans.scale_value);
+          }
+          return undefined;
+
+        case "multiple_choice":
+        case "single_choice":
+        case "drop_down":
+          return ans.selected_options?.[0];
+        case "boolean":
+          // For boolean questions, convert boolean_value to string representation
+          if (ans.boolean_value === true) return "Yes";
+          if (ans.boolean_value === false) return "No";
+          return undefined;
+
+        case "checkbox":
+          return ans.selected_options;
+        case "matrix_multiple_choice":
+        case "matrix_checkbox":
+          return ans.matrix_answers;
+
+        case "long_text":
+        case "short_text":
+          return ans.text;
+
+        default:
+          return (
+            ans.selected_options?.[0] ??
+            ans.scale_value ??
+            ans.boolean_value ??
+            ans.text ??
+            ans.drop_down_value ??
+            ans.num ??
+            ans
+          );
+      }
+    };
+
+    for (const q of allQuestions) {
+      for (const logic of q.skip_logic || []) {
+        const { logical_operator, rules, action } = logic.condition;
+        const ruleResults = (rules || []).map((rule: any) => {
+          const ans = getAnswer(rule.source_id);
+          const val = extractValue(rule.source_id, ans);
+
+          // Handle "Any answer" special case - this should trigger if there's any answer
+          if (rule.value === "Any answer") {
+            let hasAnswer = false;
+
+            if (val !== undefined && val !== null) {
+              if (Array.isArray(val)) {
+                // For arrays (multiple choice, matrix answers), check if array has any elements
+                hasAnswer = val.length > 0;
+              } else if (typeof val === "string") {
+                // For strings, check if not empty after trimming
+                hasAnswer = val.trim() !== "";
+              } else {
+                // For other types (numbers, objects), any truthy value is considered an answer
+                hasAnswer = Boolean(val);
+              }
+            }
+
+            console.log(`"Any answer" rule: hasAnswer=${hasAnswer}, val=`, val);
+            return hasAnswer;
+          }
+
+          if (val === undefined) return false;
+
+          // Handle array values
+          const compareVal = Array.isArray(val) ? val[0] : val;
+
+          // Get the source question to determine comparison type
+          const sourceQuestion = getQuestion(rule.source_id);
+          const isNumericComparison =
+            sourceQuestion &&
+            ["star_rating", "rating_scale", "slider", "number"].includes(
+              sourceQuestion.question_type
+            );
+
+          const isLikertScale =
+            sourceQuestion && sourceQuestion.question_type === "likert_scale";
+
+          // Extract numeric value from rule.value for numeric comparisons
+          let ruleValue = rule.value;
+          if (isNumericComparison && typeof rule.value === "string") {
+            // Extract number from "3 stars" -> 3
+            const match = rule.value.match(/(\d+)/);
+            ruleValue = match ? parseInt(match[1]) : rule.value;
+          }
+
+          // For likert_scale, use string comparison
+          if (isLikertScale) {
+            ruleValue = rule.value; // Keep as string for "Very Unfamiliar"
+          }
+
+          console.log(`Rule evaluation:`, {
+            sourceId: rule.source_id,
+            sourceQuestion: sourceQuestion?.question,
+            questionType: sourceQuestion?.question_type,
+            compareVal,
+            compareValType: typeof compareVal,
+            ruleValue,
+            ruleValueType: typeof ruleValue,
+            operator: rule.operator,
+            isNumericComparison,
+            isLikertScale,
+          });
+
+          let result;
+          switch (rule.operator) {
+            case "equals":
+              // Handle both string and number comparisons
+              result = compareVal == ruleValue; // Use loose equality for type coercion
+              break;
+            case "notEquals":
+              result = compareVal != ruleValue; // Use loose equality for type coercion
+              break;
+            case "includes":
+              result = Array.isArray(val) ? val.includes(ruleValue) : false;
+              break;
+            case "greaterThan":
+              result = Number(compareVal) > Number(ruleValue);
+              break;
+            case "lessThan":
+              result = Number(compareVal) < Number(ruleValue);
+              break;
+            case "greaterThanOrEqual":
+              result = Number(compareVal) >= Number(ruleValue);
+              break;
+            case "lessThanOrEqual":
+              result = Number(compareVal) <= Number(ruleValue);
+              break;
+            default:
+              result = false;
+          }
+
+          console.log(`Rule result: ${result} for ${rule.operator} comparison`);
+          return result;
+        });
+
+        const condMet =
+          logical_operator === "and"
+            ? ruleResults.every(Boolean)
+            : ruleResults.some(Boolean);
+
+        console.log(`Condition evaluation for question ${q.question}:`, {
+          ruleResults,
+          logical_operator,
+          condMet,
+          action: action.type,
+        });
+
+        if (condMet) {
+          console.log(`Skip logic triggered for question ${q.question}:`, {
+            action,
+            logic,
+          });
+
+          if (action.type === "hide") {
+            // Hide the question that contains the skip logic (source question)
+            hidden.add(q._id);
+          } else if (action.type === "show") {
+            // Show the question that contains the skip logic (source question)
+            hidden.delete(q._id);
+          } else if (action.type === "end_survey") {
+            endSurvey = true;
+          } else if (action.type === "jump_to") {
+            // Find the target question and set jump coordinates
+            const targetQ = allQuestions.find(
+              (qq: any) => qq._id === action.target_id
+            );
+            if (targetQ) {
+              jumpToSection = targetQ.sectionIndex;
+              jumpToQuestion = targetQ.questionIndex;
+
+              console.log(`Jump logic triggered:`, {
+                sourceQuestion: q.question,
+                sourceIndex: q.globalIndex,
+                targetQuestion: targetQ.question,
+                targetIndex: targetQ.globalIndex,
+                action: action,
+              });
+
+              // For jump_to logic, we need to hide:
+              // 1. All questions between source and target (excluding both source and target)
+              // Note: We DON'T hide the source question - it should remain visible until answered
+              // Note: We DON'T hide questions after the target - the survey should continue normally
+
+              const sourceIdx = q.globalIndex;
+              const targetIdx = targetQ.globalIndex;
+
+              console.log(
+                `Jump logic: source=${sourceIdx}, target=${targetIdx}`
+              );
+
+              // Hide all questions between source and target (excluding both source and target)
+              if (sourceIdx < targetIdx) {
+                // Forward jump: hide questions from source+1 to target-1
+                for (let i = sourceIdx + 1; i < targetIdx; i++) {
+                  hidden.add(allQuestions[i]._id);
+                  console.log(
+                    `Hiding question between: ${allQuestions[i].question} (${allQuestions[i]._id})`
+                  );
+                }
+              } else {
+                // Backward jump: hide questions from target+1 to source-1
+                for (let i = targetIdx + 1; i < sourceIdx; i++) {
+                  hidden.add(allQuestions[i]._id);
+                  console.log(
+                    `Hiding question between: ${allQuestions[i].question} (${allQuestions[i]._id})`
+                  );
+                }
+              }
+
+              // DO NOT hide questions after the target - the survey should continue normally
+              console.log(
+                `Jump logic: Questions after target will remain visible`
+              );
+            }
+          }
+        }
+      }
+    }
+    return { hidden, endSurvey, jumpToSection, jumpToQuestion };
+  };
 
   // Validate single question
   const validateQuestion = (question: any, value: any) => {
@@ -169,13 +492,35 @@ const PublicResponse = () => {
     activeInput[question] === "textarea" ||
     !!answers[currentSection]?.[question]?.text;
 
-  // Enhanced answer change handler with validation
+  // Enhanced answer change handler with validation and skip logic
   const handleAnswerChange = (key: string, value: any, question?: any) => {
     setAnswers((prev) => {
       const sectionAnswers = prev[currentSection] || {};
       const updatedSection = { ...sectionAnswers, [key]: value };
-      return { ...prev, [currentSection]: updatedSection };
+      const newAnswers = { ...prev, [currentSection]: updatedSection };
+
+      // Evaluate skip logic after updating answers
+      const { endSurvey, jumpToSection, jumpToQuestion } = evaluateSkipLogic(
+        sections,
+        newAnswers
+      );
+
+      // Handle end survey action with confirmation dialog
+      if (endSurvey) {
+        setPendingEndSurveyAnswer({ key, value });
+        setShowEndSurveyDialog(true);
+        // Revert the answer change until user confirms
+        return prev;
+      }
+
+      // Handle jump to action
+      if (jumpToSection !== undefined && jumpToSection !== currentSection) {
+        setCurrentSection(jumpToSection);
+      }
+
+      return newAnswers;
     });
+
     if (question) {
       validateQuestion(question, value);
     }
@@ -214,6 +559,31 @@ const PublicResponse = () => {
         ...sectionAnswers,
         [key]: { matrix_answers: newAnswers },
       };
+
+      const newAnswersState = { ...prev, [currentSection]: updatedSection };
+
+      // Evaluate skip logic after updating answers
+      const { endSurvey, jumpToSection } = evaluateSkipLogic(
+        sections,
+        newAnswersState
+      );
+
+      // Handle end survey action with confirmation dialog
+      if (endSurvey) {
+        setPendingEndSurveyAnswer({
+          key,
+          value: { matrix_answers: newAnswers },
+        });
+        setShowEndSurveyDialog(true);
+        // Revert the answer change until user confirms
+        return prev;
+      }
+
+      // Handle jump to action
+      if (jumpToSection !== undefined && jumpToSection !== currentSection) {
+        setCurrentSection(jumpToSection);
+      }
+
       // Validate
       validateQuestion(
         {
@@ -224,7 +594,7 @@ const PublicResponse = () => {
         },
         updatedSection[key]
       );
-      return { ...prev, [currentSection]: updatedSection };
+      return newAnswersState;
     });
   };
 
@@ -236,6 +606,36 @@ const PublicResponse = () => {
     return answers[currentSection]?.[question]?.matrix_answers?.some(
       (ans: any) => ans.row === row && ans.column === column
     );
+  };
+
+  // Handle end survey confirmation
+  const handleConfirmEndSurvey = () => {
+    if (pendingEndSurveyAnswer) {
+      // Apply the pending answer change
+      setAnswers((prev) => {
+        const sectionAnswers = prev[currentSection] || {};
+        const updatedSection = {
+          ...sectionAnswers,
+          [pendingEndSurveyAnswer.key]: pendingEndSurveyAnswer.value,
+        };
+        const newAnswers = { ...prev, [currentSection]: updatedSection };
+        return newAnswers;
+      });
+
+      // End the survey
+      setShouldEndSurvey(true);
+      setSubmitSurveySuccess(true);
+    }
+
+    // Close the dialog
+    setShowEndSurveyDialog(false);
+    setPendingEndSurveyAnswer(null);
+  };
+
+  // Handle cancel end survey
+  const handleCancelEndSurvey = () => {
+    setShowEndSurveyDialog(false);
+    setPendingEndSurveyAnswer(null);
   };
 
   const handleAudioToggle = (question: string) => {
@@ -262,12 +662,50 @@ const PublicResponse = () => {
     }
   }, [question]);
 
-  // Validate all required questions in all sections
+  // Evaluate skip logic when sections or answers change (only for jump logic, not end survey)
+  useEffect(() => {
+    if (sections.length > 0 && !shouldEndSurvey && !showEndSurveyDialog) {
+      const { jumpToSection } = evaluateSkipLogic(sections, answers);
+
+      // Handle jump to action
+      if (jumpToSection !== undefined && jumpToSection !== currentSection) {
+        setCurrentSection(jumpToSection);
+      }
+    }
+  }, [sections, answers, currentSection, shouldEndSurvey, showEndSurveyDialog]);
+
+  // Returns visible questions for the current section
+  const getVisibleQuestions = (
+    sections: any[],
+    answers: any,
+    currentSection: number
+  ): any[] => {
+    const { hidden } = evaluateSkipLogic(sections, answers);
+    const visibleQuestions = sections[currentSection]?.questions.filter(
+      (q: any) => !hidden.has(q._id)
+    );
+
+    console.log(`Section ${currentSection} - Visible questions:`, {
+      total: sections[currentSection]?.questions.length,
+      visible: visibleQuestions.length,
+      hidden:
+        sections[currentSection]?.questions.length - visibleQuestions.length,
+      hiddenIds: Array.from(hidden),
+    });
+
+    return visibleQuestions;
+  };
+
+  // Auto submit function for skip logic end survey
+
+  // Validate all required questions in all sections (only visible questions)
   const isAllRequiredAnswered = React.useMemo(() => {
     if (!sections.length) return false;
+
+    // Check all sections for visible required questions
     for (let s = 0; s < sections.length; s++) {
-      const section = sections[s];
-      for (const quest of section.questions || []) {
+      const visibleQuestions = getVisibleQuestions(sections, answers, s);
+      for (const quest of visibleQuestions) {
         if (quest.is_required) {
           const error = validateQuestionResponse(
             quest,
@@ -277,6 +715,7 @@ const PublicResponse = () => {
         }
       }
     }
+
     // Check respondent info if required
     if (question?.data?.settings?.collect_email_addresses && !respondent_email)
       return false;
@@ -292,6 +731,12 @@ const PublicResponse = () => {
   const handleSubmitResponse = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
+    // Check if survey should end due to skip logic
+    if (shouldEndSurvey) {
+      setSubmitSurveySuccess(true);
+      return;
+    }
+
     const currentQuestions =
       question?.data?.sections[currentSection]?.questions;
     if (!currentQuestions) {
@@ -299,22 +744,25 @@ const PublicResponse = () => {
       return;
     }
 
-    // Format answers for all sections
+    // Format answers for all sections (only visible questions)
     const allSections = question?.data?.sections || [];
-    const formattedAnswers = allSections.flatMap((section: any, sIdx: number) =>
-      (section.questions || []).map((question: any) => {
-        const answer = answers[sIdx]?.[question.question];
-        const formattedAnswer = {
-          question: question.question,
-          question_type: question.question_type,
-          ...answer,
-        };
-        // Add duration field for long text with media URL
-        if (question.question_type === "long_text" && answer?.media_url) {
-          formattedAnswer.duration = answer.duration || 0;
-        }
-        return formattedAnswer;
-      })
+    const formattedAnswers = allSections.flatMap(
+      (section: any, sIdx: number) => {
+        const visibleQuestions = getVisibleQuestions(sections, answers, sIdx);
+        return visibleQuestions.map((question: any) => {
+          const answer = answers[sIdx]?.[question.question];
+          const formattedAnswer = {
+            question: question.question,
+            question_type: question.question_type,
+            ...answer,
+          };
+          // Add duration field for long text with media URL
+          if (question.question_type === "long_text" && answer?.media_url) {
+            formattedAnswer.duration = answer.duration || 0;
+          }
+          return formattedAnswer;
+        });
+      }
     );
 
     // Validate required fields
@@ -336,8 +784,13 @@ const PublicResponse = () => {
       newFormErrors.respondent_name = "Name is required";
     }
 
-    // Validate all questions in current section
-    currentQuestions.forEach((quest: any) => {
+    // Validate all visible questions in current section
+    const visibleQuestions = getVisibleQuestions(
+      sections,
+      answers,
+      currentSection
+    );
+    visibleQuestions.forEach((quest: any) => {
       if (quest.is_required) {
         const error = validateQuestionResponse(
           quest,
@@ -445,124 +898,6 @@ const PublicResponse = () => {
     ];
     return otherOptions.some(
       (otherOption) => otherOption.toLowerCase() === option.toLowerCase().trim()
-    );
-  };
-
-  // Helper: flatten all questions with section and index info
-  const flattenQuestions = (sections: any[]): any[] => {
-    const all: any[] = [];
-    let globalIndex = 0;
-    for (let s = 0; s < sections.length; s++) {
-      for (let q = 0; q < sections[s].questions.length; q++) {
-        all.push({
-          ...sections[s].questions[q],
-          sectionIndex: s,
-          questionIndex: q,
-          globalIndex,
-          sectionId: sections[s]._id,
-        });
-        globalIndex++;
-      }
-    }
-    return all;
-  };
-
-  // Logic engine: returns a Set of hidden question _ids
-  const evaluateSkipLogic = (
-    sections: any[],
-    answers: any
-  ): { hidden: Set<string>; endSurvey: boolean } => {
-    const allQuestions = flattenQuestions(sections);
-    const hidden = new Set<string>();
-    let endSurvey = false;
-
-    // Helper to get answer by question _id
-    const getAnswer = (qid: string): any => {
-      const q = allQuestions.find((q: any) => q._id === qid);
-      if (!q) return undefined;
-      return answers[q.sectionIndex]?.[q.question];
-    };
-
-    for (const q of allQuestions) {
-      for (const logic of q.skip_logic || []) {
-        const { logical_operator, rules, action } = logic.condition;
-        const ruleResults = (rules || []).map((rule: any) => {
-          const ans = getAnswer(rule.source_id);
-          if (ans === undefined) return false;
-          // Support for different answer shapes
-          let val =
-            ans.selected_options?.[0] ??
-            ans.scale_value ??
-            ans.boolean_value ??
-            ans.text ??
-            ans.drop_down_value ??
-            ans.num ??
-            ans;
-          if (Array.isArray(val)) val = val[0];
-          switch (rule.operator) {
-            case "equals":
-              return val === rule.value;
-            case "notEquals":
-              return val !== rule.value;
-            case "includes":
-              return Array.isArray(val) ? val.includes(rule.value) : false;
-            case "greaterThan":
-              return Number(val) > Number(rule.value);
-            case "lessThan":
-              return Number(val) < Number(rule.value);
-            case "greaterThanOrEqual":
-              return Number(val) >= Number(rule.value);
-            case "lessThanOrEqual":
-              return Number(val) <= Number(rule.value);
-            default:
-              return false;
-          }
-        });
-        const condMet =
-          logical_operator === "and"
-            ? ruleResults.every(Boolean)
-            : ruleResults.some(Boolean);
-        if (condMet) {
-          if (action.type === "hide") {
-            // Use the _id of the question that contains the skip logic
-            hidden.add(q._id);
-          } else if (action.type === "show") {
-            // Use the _id of the question that contains the skip logic
-            hidden.delete(q._id);
-          } else if (action.type === "end_survey") {
-            endSurvey = true;
-          } else if (action.type === "jump_to") {
-            // Hide all questions between source and target (across sections)
-            const sourceIdx = q.globalIndex;
-            const targetQ = allQuestions.find(
-              (qq: any) => qq._id === action.target_id
-            );
-            if (targetQ) {
-              const targetIdx = targetQ.globalIndex;
-              const [start, end] =
-                sourceIdx < targetIdx
-                  ? [sourceIdx + 1, targetIdx]
-                  : [targetIdx + 1, sourceIdx];
-              for (let i = start; i < end; i++) {
-                hidden.add(allQuestions[i]._id);
-              }
-            }
-          }
-        }
-      }
-    }
-    return { hidden, endSurvey };
-  };
-
-  // Returns visible questions for the current section
-  const getVisibleQuestions = (
-    sections: any[],
-    answers: any,
-    currentSection: number
-  ): any[] => {
-    const { hidden } = evaluateSkipLogic(sections, answers);
-    return sections[currentSection]?.questions.filter(
-      (q: any) => !hidden.has(q._id)
     );
   };
 
@@ -1347,7 +1682,91 @@ const PublicResponse = () => {
           </div>
         </div>
       )}
-      {submitSurveySuccess && (
+      {showEndSurveyDialog && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 max-w-md w-full mx-4 shadow-[0_0_50px_rgba(157,80,187,0.25)] border border-purple-100"
+          >
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="flex flex-col items-center"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 20,
+                  delay: 0.2,
+                }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-xl animate-pulse" />
+                <div className="text-orange-500 text-7xl mb-6 relative z-10 drop-shadow-lg">
+                  ⚠️
+                </div>
+              </motion.div>
+
+              <motion.h1
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-2xl font-bold mb-3 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+              >
+                Survey Will End
+              </motion.h1>
+
+              <motion.p
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-gray-600 text-lg mb-8 text-center"
+              >
+                Based on your answer, this survey will end immediately. Are you
+                sure you want to continue?
+              </motion.p>
+
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="flex gap-4 w-full"
+              >
+                <Button
+                  onClick={handleCancelEndSurvey}
+                  variant="outline"
+                  className="flex-1 relative inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 hover:bg-gray-100 h-10 px-4 py-2"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmEndSurvey}
+                  className="flex-1 relative inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-orange-500 to-red-500 text-white h-10 px-4 py-2 hover:opacity-90"
+                >
+                  End Survey
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+      {submitSurveySuccess && !shouldEndSurvey && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1456,6 +1875,129 @@ const PublicResponse = () => {
                     Take survey again
                   </span>
                   <span className="absolute inset-0 translate-y-[102%] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Unique dialog for survey ending due to skip logic */}
+      {submitSurveySuccess && shouldEndSurvey && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
+            className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 max-w-lg w-full mx-4 shadow-[0_0_50px_rgba(255,165,0,0.25)] border border-orange-100"
+          >
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="flex flex-col items-center"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 20,
+                  delay: 0.2,
+                }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-xl animate-pulse" />
+                <div className="text-orange-500 text-7xl mb-6 relative z-10 drop-shadow-lg">
+                  🚧
+                </div>
+              </motion.div>
+
+              <motion.h1
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-3xl font-bold mb-3 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent text-center"
+              >
+                Survey Ended!
+              </motion.h1>
+
+              <motion.p
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-gray-600 text-lg mb-6 text-center"
+              >
+                Based on your answer, this survey has been completed early.
+                <br />
+                <span className="font-medium text-orange-600">
+                  Thank you for your participation!
+                </span>
+              </motion.p>
+
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="flex flex-col sm:flex-row gap-4 w-full"
+              >
+                <Link
+                  href="/"
+                  className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-orange-500 to-red-500 text-white h-12 px-6 py-3 hover:opacity-90 group relative"
+                >
+                  <span className="absolute inset-0 rounded-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="relative flex items-center gap-2">
+                    <motion.span
+                      initial={{ x: 0 }}
+                      whileHover={{ x: -4 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                    >
+                      Go to Home Page
+                    </motion.span>
+                    <motion.span
+                      initial={{ x: 0, opacity: 0.5 }}
+                      whileHover={{ x: 4, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                      className="transition-transform duration-200"
+                    >
+                      →
+                    </motion.span>
+                  </span>
+                </Link>
+
+                <Button
+                  onClick={() => {
+                    location.reload();
+                  }}
+                  variant="outline"
+                  className="flex-1 relative inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-orange-500 hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white h-12 px-6 py-3 group overflow-hidden"
+                >
+                  <span className="relative flex items-center gap-2 z-20">
+                    <motion.span
+                      animate={{ rotate: [0, 360] }}
+                      transition={{
+                        duration: 0.5,
+                        delay: 0.1,
+                        ease: "easeInOut",
+                      }}
+                      className="text-lg"
+                    >
+                      ↺
+                    </motion.span>
+                    Take Survey Again
+                  </span>
+                  <span className="absolute inset-0 translate-y-[102%] bg-gradient-to-r from-orange-500 to-red-500 group-hover:translate-y-0 transition-transform duration-300 ease-out" />
                 </Button>
               </motion.div>
             </motion.div>

@@ -58,6 +58,7 @@ interface MultiChoiceQuestionEditProps {
   can_accept_media?: boolean;
   can_accept_audio?: boolean;
   item?: any;
+  step?: number;
 }
 
 const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
@@ -71,6 +72,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   index,
   minValue: initialMinValue = 0,
   maxValue: initialMaxValue = 10,
+  step: initialStep = 1,
   matrixRows: initialRows = [],
   matrixColumns: initialColumns = [],
   surveyData,
@@ -559,8 +561,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           <div className="space-y-4">
             <Slider
               value={[minValue, maxValue]}
-              min={Math.min(minValue, maxValue)}
-              max={Math.max(minValue, maxValue)}
+              min={Math.min(minValue, 45)}
+              max={Math.max(minValue, 45)}
               step={1}
               className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
               onValueChange={([min, max]) => {

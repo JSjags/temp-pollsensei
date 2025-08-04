@@ -87,6 +87,7 @@ import SkipLogicEditor, {
   SkipLogicRule,
   SkipLogicRuleV2,
   SkipLogicCondition,
+  transformSurveySkipLogic,
 } from "./SkipLogicEditor";
 
 // Springy Animation Variants for the mascot
@@ -335,222 +336,17 @@ const EditSurvey = () => {
   const transformSkipLogicFromAPI = (
     sections: any[]
   ): (SkipLogicRule | SkipLogicRuleV2)[] => {
-    const rules: (SkipLogicRule | SkipLogicRuleV2)[] = [];
+    // Create a mock survey data structure to use with the new transformation function
+    const mockSurveyData = {
+      sections: sections,
+    };
 
-    sections.forEach((section, sectionIndex) => {
-      section.questions.forEach((question: any, questionIndex: number) => {
-        if (question.skip_logic && Array.isArray(question.skip_logic)) {
-          question.skip_logic.forEach((logic: any) => {
-            // Transform API format to editor format
-            if (logic.condition && logic.condition.rules) {
-              const newRule: SkipLogicRuleV2 = {
-                id: `rule_${sectionIndex}_${questionIndex}_${Date.now()}`,
-                conditions: logic.condition.rules.map((rule: any) => ({
-                  sectionIndex: 0, // Will be determined by source_id
-                  questionIndex: 0, // Will be determined by source_id
-                  operator: rule.operator,
-                  value: rule.value,
-                })),
-                logicalOperator: logic.condition.logical_operator || "and",
-                action: logic.condition.action.type,
-                target: {
-                  type: logic.condition.action.target_type,
-                  sectionIndex: 0, // Will be determined by target_id
-                  questionIndex: 0, // Will be determined by target_id
-                },
-                mainQuestionSection: sectionIndex,
-                mainQuestionIndex: questionIndex,
-              };
-              rules.push(newRule);
-            }
-          });
-        }
-      });
-    });
-
-    return rules;
-  };
-
-  // Helper function to transform skip logic to API format
-  const transformSkipLogicToAPI = (
-    skipLogic: (SkipLogicRule | SkipLogicRuleV2)[],
-    sections: any[]
-  ) => {
-    const questionSkipLogicMap = new Map();
-
-    skipLogic.forEach((rule) => {
-      if ("conditions" in rule && "action" in rule) {
-        // New rule format (SkipLogicRuleV2)
-        const {
-          conditions,
-          logicalOperator,
-          action,
-          target,
-          mainQuestionSection,
-          mainQuestionIndex,
-        } = rule;
-
-        // Determine which question this logic applies to
-        let targetQuestionId = null;
-
-        if (action === "end_survey") {
-          // For end_survey, we need to find which question has this logic
-          // We'll attach it to the first question that has conditions referencing it
-          if (conditions.length > 0) {
-            const firstCondition = conditions[0];
-            const questionIndex = firstCondition.questionIndex;
-            if (questionIndex !== null) {
-              targetQuestionId = `Question${questionIndex + 1}`;
-            }
-          }
-        } else {
-          // For hide/show/jump_to, use the main question that the user selected
-          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
-            // The target question is the main question the user selected
-            targetQuestionId = `Question${mainQuestionIndex + 1}`;
-          }
-        }
-
-        if (targetQuestionId) {
-          // Transform conditions to rules format
-          const rules = conditions
-            .map((cond: any) => {
-              const sourceQuestionIndex = cond.questionIndex;
-              if (sourceQuestionIndex === null) return null;
-
-              return {
-                source_id: `Question${sourceQuestionIndex + 1}`,
-                operator: cond.operator,
-                value: cond.value,
-              };
-            })
-            .filter(Boolean);
-
-          // Transform action
-          let actionType = action;
-          let targetType = "question";
-          let targetId = "Question1"; // Default fallback
-
-          if (action === "end_survey") {
-            actionType = "end_survey";
-            targetType = "question";
-            targetId = "end_survey";
-          } else if (action === "jump_to") {
-            actionType = "jump_to";
-            if (
-              target.type === "question" &&
-              target.questionIndex !== undefined &&
-              target.questionIndex !== null
-            ) {
-              targetId = `Question${target.questionIndex + 1}`;
-            } else if (
-              target.type === "section" &&
-              target.sectionIndex !== undefined &&
-              target.sectionIndex !== null
-            ) {
-              targetType = "section";
-              targetId = `Section${target.sectionIndex + 1}`;
-            }
-            // Keep default targetId if conditions above fail
-          } else {
-            // hide/show actions
-            if (
-              target.type === "question" &&
-              target.questionIndex !== undefined &&
-              target.questionIndex !== null
-            ) {
-              targetId = `Question${target.questionIndex + 1}`;
-            } else if (
-              target.type === "section" &&
-              target.sectionIndex !== undefined &&
-              target.sectionIndex !== null
-            ) {
-              targetType = "section";
-              targetId = `Section${target.sectionIndex + 1}`;
-            }
-            // Keep default targetId if conditions above fail
-          }
-
-          // Determine logic_type based on action
-          let logicType = "skip_logic"; // default
-          if (action === "hide" || action === "show") {
-            logicType = "display_logic";
-          } else if (action === "jump_to") {
-            logicType = "skip_logic";
-          } else if (action === "end_survey") {
-            logicType = "skip_logic";
-          }
-
-          const skipLogicEntry = {
-            logic_type: logicType,
-            condition: {
-              logical_operator: logicalOperator,
-              rules: rules,
-              action: {
-                type: actionType,
-                target_type: targetType,
-                target_id: targetId,
-              },
-            },
-          };
-
-          console.log("Skip Logic Entry:", {
-            targetQuestionId,
-            action,
-            target,
-            actionType,
-            targetType,
-            targetId,
-            skipLogicEntry,
-          });
-
-          if (!questionSkipLogicMap.has(targetQuestionId)) {
-            questionSkipLogicMap.set(targetQuestionId, []);
-          }
-          questionSkipLogicMap.get(targetQuestionId).push(skipLogicEntry);
-        }
-      } else if ("from" in rule && "to" in rule) {
-        // Old rule format (SkipLogicRule)
-        const { from, to } = rule;
-        const sourceQuestionId = `Question${from.questionIndex + 1}`;
-        const targetQuestionId =
-          "end" in to ? "end_survey" : `Question${(to.questionIndex ?? 0) + 1}`;
-
-        const skipLogicEntry = {
-          logic_type: "skip_logic", // Old rules are typically skip_logic
-          condition: {
-            logical_operator: "and",
-            rules: [
-              {
-                source_id: sourceQuestionId,
-                operator: "equals",
-                value: from.answer,
-              },
-            ],
-            action: {
-              type: "end" in to ? "end_survey" : "jump_to",
-              target_type: "end" in to ? "question" : "question",
-              target_id: targetQuestionId,
-            },
-          },
-        };
-
-        // For old rules, we need to determine which question this applies to
-        // We'll use the source question as the target question for the skip logic
-        const targetQuestionIdForMap = `Question${from.questionIndex + 1}`;
-
-        if (!questionSkipLogicMap.has(targetQuestionIdForMap)) {
-          questionSkipLogicMap.set(targetQuestionIdForMap, []);
-        }
-        questionSkipLogicMap.get(targetQuestionIdForMap).push(skipLogicEntry);
-      }
-    });
-
-    return questionSkipLogicMap;
+    return transformSurveySkipLogic(mockSurveyData);
   };
 
   const handleClearSurvey = () => {
     dispatch(resetSurvey());
+    hasPopulatedSkipLogic.current = false; // Reset the ref when clearing survey
     setShowClearDialog(false);
     setShowExitDialog(false);
     toast.success("Survey cleared successfully", {
@@ -794,7 +590,17 @@ const EditSurvey = () => {
     const questionSkipLogicMap = new Map();
 
     skipLogic.forEach((rule) => {
+      console.log("🔄 Processing skip logic rule:", rule);
       if ("conditions" in rule && "action" in rule) {
+        // Skip rules with empty conditions (except for end_survey and jump_to which can have no conditions)
+        if (
+          rule.conditions.length === 0 &&
+          rule.action !== "end_survey" &&
+          rule.action !== "jump_to"
+        ) {
+          console.log("Skipping rule with empty conditions:", rule);
+          return;
+        }
         // New rule format (SkipLogicRuleV2)
         const {
           conditions,
@@ -817,9 +623,51 @@ const EditSurvey = () => {
             if (questionIndex !== null) {
               targetQuestionId = `Question${questionIndex + 1}`;
             }
+          } else {
+            // For end_survey with no conditions, use the main question
+            if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+              targetQuestionId = `Question${mainQuestionIndex + 1}`;
+            }
           }
+
+          // Debug logging for end_survey
+          console.log("🔍 END_SURVEY DEBUG:", {
+            action,
+            conditions,
+            mainQuestionSection,
+            mainQuestionIndex,
+            targetQuestionId,
+          });
+        } else if (action === "jump_to") {
+          // For jump_to, attach the logic to the main question that the user selected
+          // This is the question that will trigger the jump when conditions are met
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            targetQuestionId = `Question${mainQuestionIndex + 1}`;
+          }
+
+          // Debug logging for jump_to
+          console.log("🔍 JUMP_TO DEBUG:", {
+            action,
+            conditions,
+            conditionsLength: conditions.length,
+            mainQuestionSection,
+            mainQuestionIndex,
+            targetQuestionId,
+            target,
+          });
+
+          // Debug each condition for jump_to
+          conditions.forEach((cond: any, idx: number) => {
+            console.log(`🔍 JUMP_TO Condition ${idx}:`, {
+              sectionIndex: cond.sectionIndex,
+              questionIndex: cond.questionIndex,
+              operator: cond.operator,
+              value: cond.value,
+              isQuestionIndexNull: cond.questionIndex === null,
+            });
+          });
         } else {
-          // For hide/show/jump_to, use the main question that the user selected
+          // For hide/show, use the main question that the user selected
           if (mainQuestionIndex !== null && mainQuestionSection !== null) {
             // The target question is the main question the user selected
             targetQuestionId = `Question${mainQuestionIndex + 1}`;
@@ -827,19 +675,54 @@ const EditSurvey = () => {
         }
 
         if (targetQuestionId) {
+          // Debug conditions transformation
+          console.log("🔍 CONDITIONS DEBUG:", {
+            conditions,
+            conditionsLength: conditions.length,
+          });
+
           // Transform conditions to rules format
           const rules = conditions
-            .map((cond: any) => {
+            .map((cond: any, index: number) => {
+              console.log(`🔍 Condition ${index}:`, cond);
               const sourceQuestionIndex = cond.questionIndex;
-              if (sourceQuestionIndex === null) return null;
+              console.log(`🔍 Source question index:`, sourceQuestionIndex);
 
-              return {
+              if (sourceQuestionIndex === null) {
+                console.log(
+                  `❌ Skipping condition ${index} - questionIndex is null`
+                );
+                // For jump_to, if questionIndex is null, try to use mainQuestionIndex
+                if (action === "jump_to" && mainQuestionIndex !== null) {
+                  console.log(
+                    `🔄 Using mainQuestionIndex for jump_to condition ${index}:`,
+                    mainQuestionIndex
+                  );
+                  const rule = {
+                    source_id: `Question${mainQuestionIndex + 1}`,
+                    operator: cond.operator,
+                    value: cond.value,
+                  };
+                  console.log(
+                    `✅ Created rule for jump_to condition ${index} using mainQuestionIndex:`,
+                    rule
+                  );
+                  return rule;
+                }
+                return null;
+              }
+
+              const rule = {
                 source_id: `Question${sourceQuestionIndex + 1}`,
                 operator: cond.operator,
                 value: cond.value,
               };
+              console.log(`✅ Created rule for condition ${index}:`, rule);
+              return rule;
             })
             .filter(Boolean);
+
+          console.log("📋 Final rules array:", rules);
 
           // Transform action
           let actionType = action;
@@ -849,15 +732,42 @@ const EditSurvey = () => {
           if (action === "end_survey") {
             actionType = "end_survey";
             targetType = "question";
-            targetId = "end_survey";
+            // For end_survey, use the question that has the logic (from conditions or main question)
+            if (conditions.length > 0) {
+              const firstCondition = conditions[0];
+              const questionIndex = firstCondition.questionIndex;
+              if (questionIndex !== null) {
+                targetId = `Question${questionIndex + 1}`;
+              } else {
+                targetId = `Question${mainQuestionIndex + 1}`;
+              }
+            } else {
+              targetId = `Question${mainQuestionIndex + 1}`;
+            }
+            console.log(
+              "✅ Set targetId for end_survey:",
+              targetId,
+              "mainQuestionIndex:",
+              mainQuestionIndex,
+              "conditions:",
+              conditions
+            );
           } else if (action === "jump_to") {
             actionType = "jump_to";
+            console.log("🎯 JUMP_TO TARGET DEBUG:", {
+              target,
+              targetType: target.type,
+              targetQuestionIndex: target.questionIndex,
+              targetSectionIndex: target.sectionIndex,
+            });
+
             if (
               target.type === "question" &&
               target.questionIndex !== undefined &&
               target.questionIndex !== null
             ) {
               targetId = `Question${target.questionIndex + 1}`;
+              console.log("✅ Set targetId for question:", targetId);
             } else if (
               target.type === "section" &&
               target.sectionIndex !== undefined &&
@@ -865,8 +775,12 @@ const EditSurvey = () => {
             ) {
               targetType = "section";
               targetId = `Section${target.sectionIndex + 1}`;
+              console.log("✅ Set targetId for section:", targetId);
+            } else {
+              console.log("❌ Invalid target for jump_to:", target);
+              // Don't add this rule if target is invalid
+              return;
             }
-            // Keep default targetId if conditions above fail
           } else {
             // hide/show actions
             if (
@@ -909,6 +823,15 @@ const EditSurvey = () => {
             },
           };
 
+          console.log("🎯 FINAL TARGET DEBUG:", {
+            action,
+            targetId,
+            targetType,
+            actionType,
+            skipLogicEntry,
+            rulesLength: rules.length,
+          });
+
           console.log("Skip Logic Entry:", {
             targetQuestionId,
             action,
@@ -923,6 +846,14 @@ const EditSurvey = () => {
             questionSkipLogicMap.set(targetQuestionId, []);
           }
           questionSkipLogicMap.get(targetQuestionId).push(skipLogicEntry);
+
+          // Debug logging for skip logic entry
+          console.log("📝 Skip Logic Entry Added:", {
+            targetQuestionId,
+            skipLogicEntry,
+            action,
+            targetId,
+          });
         }
       } else if ("from" in rule && "to" in rule) {
         // Old rule format (SkipLogicRule)
@@ -1042,6 +973,18 @@ const EditSurvey = () => {
                   questionSkipLogic.length > 0
                     ? { ...question, skip_logic: questionSkipLogic }
                     : question;
+
+                // Log questions that have skip logic added
+                if (questionSkipLogic.length > 0) {
+                  console.log(`🔗 Skip Logic Added to ${questionId}:`, {
+                    question: questionWithSkipLogic.question,
+                    questionId,
+                    sectionIndex: idx,
+                    questionIndex: questionIdx,
+                    skipLogicCount: questionSkipLogic.length,
+                    skipLogic: questionSkipLogic,
+                  });
+                }
                 // Check if empty question type but has matrix structure
                 if (
                   !questionWithSkipLogic.question_type &&
@@ -1138,6 +1081,24 @@ const EditSurvey = () => {
                         skip_logic: questionSkipLogic,
                       }),
                     } as Question;
+
+                  // case "matrix":
+                  //   return {
+                  //     ...baseQuestion,
+                  //     description:
+                  //       questionWithSkipLogic.description || "Matrix Question",
+                  //     rows:
+                  //       questionWithSkipLogic.rows ||
+                  //       (questionWithSkipLogic as any)?.Rows ||
+                  //       (questionWithSkipLogic?.options as any)?.Rows,
+                  //     columns:
+                  //       questionWithSkipLogic.columns ||
+                  //       (questionWithSkipLogic as any)?.Columns ||
+                  //       (questionWithSkipLogic?.options as any)?.Columns,
+                  //     ...(questionSkipLogic.length > 0 && {
+                  //       skip_logic: questionSkipLogic,
+                  //     }),
+                  //   } as Question;
                   case "number":
                     return {
                       ...baseQuestion,
@@ -1188,6 +1149,34 @@ const EditSurvey = () => {
       }
       console.log("Processed Survey:", processedSurvey);
       console.log("Skip Logic Map:", questionSkipLogicMap);
+
+      // Log summary of all questions with skip logic
+      console.log("📊 SKIP LOGIC SUMMARY:");
+      console.log("=".repeat(50));
+      let totalSkipLogicRules = 0;
+      processedSurvey.sections.forEach((section, sectionIdx) => {
+        section.questions.forEach((question: any, questionIdx) => {
+          if (question.skip_logic && question.skip_logic.length > 0) {
+            totalSkipLogicRules += question.skip_logic.length;
+            console.log(
+              `📋 Section ${sectionIdx + 1}, Question ${questionIdx + 1}: "${
+                question.question
+              }"`
+            );
+            console.log(
+              `   └─ ${question.skip_logic.length} skip logic rule(s)`
+            );
+            question.skip_logic.forEach((logic: any, logicIdx: number) => {
+              console.log(
+                `      ${logicIdx + 1}. ${logic.condition.action.type} → ${
+                  logic.condition.action.target_id
+                }`
+              );
+            });
+          }
+        });
+      });
+
       await createSurvey(processedSurvey).unwrap();
       handleClearSurvey();
       setSurvey_id(createdSurveyData.data._id);
@@ -1199,9 +1188,9 @@ const EditSurvey = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      setReview((prev) => !prev);
       toast.success("Survey created successfully");
       dispatch(resetSurvey());
+      hasPopulatedSkipLogic.current = false; // Reset the ref when survey is created successfully
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
       // router.push("/surveys/survey-list");
@@ -1380,78 +1369,111 @@ const EditSurvey = () => {
     );
   };
 
-  // Utility: validate skipLogic rules against current questions
-  useEffect(() => {
-    if (!Array.isArray(skipLogic) || skipLogic.length === 0) return;
-    const isValid = skipLogic.every((rule: SkipLogicRule | SkipLogicRuleV2) => {
-      if ("from" in rule && "to" in rule) {
-        // Old rule type
-        const fromSection = questions[rule.from.sectionIndex];
-        if (!fromSection) return false;
-        const fromQuestion = fromSection.questions[rule.from.questionIndex];
-        if (!fromQuestion) return false;
-        // Check answer
-        const options =
-          Array.isArray(fromQuestion.options) && fromQuestion.options.length > 0
-            ? fromQuestion.options
-            : fromQuestion.question_type === "boolean"
-            ? ["Yes", "No"]
-            : ["Any answer"];
-        if (!options.includes(rule.from.answer)) return false;
-        // Check target
-        if ("end" in rule.to) return true;
-        const toSection = questions[rule.to.sectionIndex];
-        if (!toSection) return false;
-        const toQuestion = toSection.questions[rule.to.questionIndex ?? 0];
-        if (!toQuestion) return false;
-        return true;
-      } else if ("conditions" in rule && "action" in rule && "target" in rule) {
-        // New rule type
-        // Validate all conditions
-        const allCondsValid = (rule.conditions as SkipLogicCondition[]).every(
-          (cond: SkipLogicCondition) => {
-            const section = questions[cond.sectionIndex];
-            if (!section) return false;
-            if (cond.questionIndex === null) return false;
-            const question = section.questions[cond.questionIndex];
-            if (!question) return false;
-            return true;
-          }
-        );
-        if (!allCondsValid) return false;
-        // Optionally validate target
-        if (rule.target.type === "section") {
-          if (
-            typeof rule.target.sectionIndex !== "number" ||
-            !questions[rule.target.sectionIndex]
-          ) {
-            return false;
-          }
-        } else if (rule.target.type === "question") {
-          if (
-            typeof rule.target.sectionIndex !== "number" ||
-            typeof rule.target.questionIndex !== "number" ||
-            !questions[rule.target.sectionIndex] ||
-            !questions[rule.target.sectionIndex].questions[
-              rule.target.questionIndex
-            ]
-          ) {
-            return false;
-          }
-        }
-        return true;
-      }
-      // Unknown rule type
-      return false;
-    });
-    if (!isValid) {
-      dispatch(setSkipLogic([]));
-    }
-  }, [questions, skipLogic, dispatch]);
+  // Utility: validate skipLogic rules against current questions - DISABLED for now
+  // This validation was too strict and was clearing valid rules
+  // useEffect(() => {
+  //   if (!Array.isArray(skipLogic) || skipLogic.length === 0) return;
+  //
+  //   console.log("Validating skipLogic rules:", skipLogic);
+  //   console.log("Current questions:", questions);
+  //
+  //   const isValid = skipLogic.every((rule: SkipLogicRule | SkipLogicRuleV2) => {
+  //     console.log("Validating rule:", rule);
+  //
+  //     if ("from" in rule && "to" in rule) {
+  //       // Old rule type
+  //       const fromSection = questions[rule.from.sectionIndex];
+  //       if (!fromSection) {
+  //         console.log("Invalid: fromSection not found");
+  //         return false;
+  //       }
+  //       const fromQuestion = fromSection.questions[rule.from.questionIndex];
+  //       if (!fromQuestion) {
+  //         console.log("Invalid: fromQuestion not found");
+  //         return false;
+  //       }
+  //       // Check answer
+  //       const options =
+  //         Array.isArray(fromQuestion.options) && fromQuestion.options.length > 0
+  //           ? fromQuestion.options
+  //           : fromQuestion.question_type === "boolean"
+  //           ? ["Yes", "No"]
+  //           : ["Any answer"];
+  //       if (!options.includes(rule.from.answer)) {
+  //         console.log("Invalid: answer not found in options");
+  //         return false;
+  //       }
+  //       // Check target
+  //       if ("end" in rule.to) return true;
+  //       const toSection = questions[rule.to.sectionIndex];
+  //       if (!toSection) {
+  //         console.log("Invalid: toSection not found");
+  //         return false;
+  //       }
+  //       const toQuestion = toSection.questions[rule.to.questionIndex ?? 0];
+  //       if (!toQuestion) {
+  //         console.log("Invalid: toQuestion not found");
+  //         return false;
+  //       }
+  //       return true;
+  //     } else if ("conditions" in rule && "action" in rule && "target" in rule) {
+  //       // New rule type
+  //       console.log("Validating new rule type");
+  //
+  //       // Validate all conditions
+  //       const allCondsValid = (rule.conditions as SkipLogicCondition[]).every(
+  //         (cond: SkipLogicCondition) => {
+  //           console.log("Validating condition:", cond);
+  //           const section = questions[cond.sectionIndex];
+  //           if (!section) {
+  //             console.log("Invalid: section not found for condition");
+  //             return false;
+  //           }
+  //           if (cond.questionIndex === null) {
+  //             console.log("Invalid: questionIndex is null for condition");
+  //             return false;
+  //           }
+  //           const question = section.questions[cond.questionIndex];
+  //           if (!question) {
+  //             console.log("Invalid: question not found for condition");
+  //             return false;
+  //           }
+  //           return true;
+  //         }
+  //       );
+  //       if (!allCondsValid) {
+  //         console.log("Invalid: conditions validation failed");
+  //         return false;
+  //       }
+  //
+  //       // For new rules, we don't need to validate target as strictly
+  //       // since the target is often the main question itself
+  //       console.log("New rule validation passed");
+  //       return true;
+  //     }
+  //     // Unknown rule type
+  //     console.log("Invalid: unknown rule type");
+  //     return false;
+  //   });
+  //
+  //   console.log("Overall validation result:", isValid);
+  //
+  //   if (!isValid) {
+  //     console.log("Clearing skipLogic due to validation failure");
+  //     dispatch(setSkipLogic([]));
+  //   }
+  // }, [questions, skipLogic, dispatch]);
 
   // Check for existing skip logic when sections change
+  const hasPopulatedSkipLogic = React.useRef(false);
+
+  // Reset the ref when questions change significantly (like loading a new survey)
   useEffect(() => {
-    if (questions && questions.length > 0) {
+    hasPopulatedSkipLogic.current = false;
+  }, [questions?.length]); // Reset when the number of sections changes
+
+  useEffect(() => {
+    if (questions && questions.length > 0 && !hasPopulatedSkipLogic.current) {
       const hasExisting = checkForExistingSkipLogic(questions);
       setHasExistingSkipLogic(hasExisting);
 
@@ -1460,15 +1482,17 @@ const EditSurvey = () => {
         setExistingSkipLogic(transformedSkipLogic);
 
         // If there's existing skip logic and no current skip logic in Redux, populate it
+        // Only populate if skipLogic is empty to prevent infinite loops
         if (
           transformedSkipLogic.length > 0 &&
           (!skipLogic || skipLogic.length === 0)
         ) {
           dispatch(setSkipLogic(transformedSkipLogic));
+          hasPopulatedSkipLogic.current = true; // Mark as populated to prevent re-running
         }
       }
     }
-  }, [questions, skipLogic, dispatch]);
+  }, [questions, dispatch, skipLogic]); // Removed skipLogic from dependencies to prevent infinite loop
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full relative`}>

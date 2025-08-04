@@ -57,6 +57,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SkipLogicEditor, {
   SkipLogicRule,
   SkipLogicRuleV2,
+  transformSurveySkipLogic,
 } from "./SkipLogicEditor";
 import { Paintbrush, AlignVerticalSpaceAround } from "lucide-react";
 
@@ -229,40 +230,12 @@ const EditSubmittedSurvey = () => {
   const transformSkipLogicFromAPI = (
     sections: any[]
   ): (SkipLogicRule | SkipLogicRuleV2)[] => {
-    const rules: (SkipLogicRule | SkipLogicRuleV2)[] = [];
+    // Create a mock survey data structure to use with the new transformation function
+    const mockSurveyData = {
+      sections: sections,
+    };
 
-    sections.forEach((section, sectionIndex) => {
-      section.questions.forEach((question: any, questionIndex: number) => {
-        if (question.skip_logic && Array.isArray(question.skip_logic)) {
-          question.skip_logic.forEach((logic: any) => {
-            // Transform API format to editor format
-            if (logic.condition && logic.condition.rules) {
-              const newRule: SkipLogicRuleV2 = {
-                id: `rule_${sectionIndex}_${questionIndex}_${Date.now()}`,
-                conditions: logic.condition.rules.map((rule: any) => ({
-                  sectionIndex: 0, // Will be determined by source_id
-                  questionIndex: 0, // Will be determined by source_id
-                  operator: rule.operator,
-                  value: rule.value,
-                })),
-                logicalOperator: logic.condition.logical_operator || "and",
-                action: logic.condition.action.type,
-                target: {
-                  type: logic.condition.action.target_type,
-                  sectionIndex: 0, // Will be determined by target_id
-                  questionIndex: 0, // Will be determined by target_id
-                },
-                mainQuestionSection: sectionIndex,
-                mainQuestionIndex: questionIndex,
-              };
-              rules.push(newRule);
-            }
-          });
-        }
-      });
-    });
-
-    return rules;
+    return transformSurveySkipLogic(mockSurveyData);
   };
 
   // Helper function to transform skip logic to API format
@@ -2662,11 +2635,11 @@ const EditSubmittedSurvey = () => {
                   <TabsContent value="skip-logic" className="w-full">
                     <SkipLogicEditor
                       sections={surveyData.sections}
-                      skipLogic={skipLogic as SkipLogicRule[]}
-                      onChange={(rules: SkipLogicRule[]) =>
-                        setSkipLogic(
-                          rules as (SkipLogicRule | SkipLogicRuleV2)[]
-                        )
+                      skipLogic={
+                        skipLogic as (SkipLogicRule | SkipLogicRuleV2)[]
+                      }
+                      onChange={(rules: (SkipLogicRule | SkipLogicRuleV2)[]) =>
+                        setSkipLogic(rules)
                       }
                     />
                   </TabsContent>

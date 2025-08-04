@@ -360,6 +360,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6 }}
                   >
+                    {/* {console.log(questions)} */}
                     <AnimatePresence>
                       {questions[0]?.questions.map((item: any, index: any) => (
                         <Draggable
@@ -420,7 +421,8 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   options={item.options}
                                   questionType={item.question_type}
                                 />
-                              ) : item.question_type === "matrix_checkbox" ? (
+                              ) : item.question_type === "matrix_checkbox" ||
+                                item.question_type === "matrix" ? (
                                 <MatrixQuestion
                                   key={index}
                                   index={index + 1}
@@ -492,7 +494,11 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   is_required={item.is_required}
                                   item={item}
                                 />
-                              ) : null}
+                              ) : (
+                                <div className="text-red-500">
+                                  {item.question_type}
+                                </div>
+                              )}
                             </div>
                           )}
                         </Draggable>
