@@ -106,7 +106,7 @@ const AddQuestionPage = () => {
   }, []);
 
   const questions = useSelector(
-    (state: RootState) => state?.question?.[0]?.questions
+    (state: RootState) => state?.question.questions
   );
 
   const userToken = useSelector(
@@ -291,7 +291,7 @@ const AddQuestionPage = () => {
       updateQuestion({
         index: editIndex,
         updatedQuestion: updatedQuestionData,
-        sectionIndex: 0,
+        // sectionIndex: 0,
       })
     );
 
@@ -386,7 +386,16 @@ const AddQuestionPage = () => {
         "Failed to create survey, Don't panic, your progress was saved"
       );
     }
-  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
+  }, [
+    isSuccess,
+    isError,
+    error,
+    dispatch,
+    router,
+    saveprogress,
+    survey,
+    createdSurveyData.data._id,
+  ]);
 
   useEffect(() => {
     if (progressSuccess) {
@@ -395,7 +404,7 @@ const AddQuestionPage = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError, progressSuccess]);
+  }, [progressError, progressIsError, progressSuccess, router]);
 
   const handleCancel = () => {
     // setEditIndex(null);

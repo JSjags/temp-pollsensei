@@ -1,8 +1,9 @@
+"use client";
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { VscLayersActive } from "react-icons/vsc";
-import { Fragment, useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -136,7 +137,10 @@ const AddQuestionPage = () => {
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  const questions = sections[currentSectionIndex]?.questions || [];
+  const questions = useMemo(
+    () => sections[currentSectionIndex]?.questions || [],
+    [sections, currentSectionIndex]
+  );
 
   const userToken = useSelector(
     (state: RootState) => state?.user?.access_token || state.user.token
@@ -541,7 +545,19 @@ const AddQuestionPage = () => {
         "Failed to create survey, Don't panic, your progress was saved"
       );
     }
-  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
+  }, [
+    isSuccess,
+    isError,
+    error,
+    dispatch,
+    router,
+    saveprogress,
+    survey,
+    createdSurveyData.data._id,
+    sections,
+    headerUrl,
+    logoUrl,
+  ]);
 
   useEffect(() => {
     if (progressSuccess) {
@@ -550,7 +566,7 @@ const AddQuestionPage = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError, progressSuccess]);
+  }, [progressError, progressIsError, progressSuccess, router]);
 
   const handleCancel = () => {
     // setEditIndex(null);
