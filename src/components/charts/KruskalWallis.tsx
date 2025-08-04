@@ -12,24 +12,46 @@ import { Download } from "lucide-react";
 import Image from "next/image";
 import { extractDescription } from "@/utils/analysis";
 
+interface DescriptiveStats {
+  Group: string;
+  Count: number;
+  Median: number;
+  Mean: number;
+  Min: number;
+  Max: number;
+  IQR: number;
+  "Median Rank": number;
+}
+
 interface TableData {
   statistics: string[];
   value: number[];
+  interpretation?: Record<string, string>;
+}
+
+interface PostHocTest {
+  Comparison: string;
+  "Adjusted p-value": number;
+  Significant: boolean;
 }
 
 interface PlotData {
   type: string;
   h_statistic: number;
   p_value: number;
-  rank_means: Array<{
-    category: string;
-    rank: number;
+  groups: string[];
+  data: number[][];
+  median_ranks: Array<{
+    group: string;
+    median_rank: number;
   }>;
   [key: string]: any;
 }
 
 interface TestData {
+  descriptive_stats: DescriptiveStats[];
   table_data: TableData;
+  post_hoc: PostHocTest[];
   plot_data: PlotData;
   plot_names: string[];
   plot_urls: string[];
@@ -41,17 +63,18 @@ interface TestData {
 interface TestProps {
   test_name: string;
   test_results: {
-    results: Record<string, TestData>;
+    results: Array<Record<string, TestData>>;
     description: string;
   };
+  ft_explanation?: string;
 }
 
 const KruskalWallisComponent: React.FC<TestProps> = (props) => {
   const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(props.test_results.results)[0]
+    Object.keys(props.test_results.results[0])[0]
   );
 
-  const currentResult = props.test_results.results[selectedResult];
+  const currentResult = props.test_results.results[0][selectedResult];
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -77,6 +100,10 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
       .join(" ");
   };
 
+  const getAvailableResults = () => {
+    return props.test_results.results.flatMap((result) => Object.keys(result));
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -88,7 +115,7 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
                 <SelectValue placeholder="Select variable" />
               </SelectTrigger>
               <SelectContent>
-                {Object.keys(props.test_results.results).map((key) => (
+                {getAvailableResults().map((key) => (
                   <SelectItem key={key} value={key}>
                     {key.split("-").map(formatKey).join(" vs ")}
                   </SelectItem>
@@ -104,8 +131,50 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
             </div>
           ) : (
             <>
+              {/* Descriptive Statistics Table */}
+              {currentResult.descriptive_stats && (
+                <div className="overflow-x-auto">
+                  <h3 className="text-lg font-medium mb-2">
+                    Descriptive Statistics
+                  </h3>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Group</th>
+                        <th className="text-right py-2">Count</th>
+                        <th className="text-right py-2">Median</th>
+                        <th className="text-right py-2">Mean</th>
+                        <th className="text-right py-2">Min</th>
+                        <th className="text-right py-2">Max</th>
+                        <th className="text-right py-2">IQR</th>
+                        <th className="text-right py-2">Median Rank</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentResult.descriptive_stats.map((stat) => (
+                        <tr key={stat.Group} className="border-b">
+                          <td className="py-2">{formatKey(stat.Group)}</td>
+                          <td className="text-right py-2">{stat.Count}</td>
+                          <td className="text-right py-2">{stat.Median}</td>
+                          <td className="text-right py-2">
+                            {stat.Mean.toFixed(2)}
+                          </td>
+                          <td className="text-right py-2">{stat.Min}</td>
+                          <td className="text-right py-2">{stat.Max}</td>
+                          <td className="text-right py-2">{stat.IQR}</td>
+                          <td className="text-right py-2">
+                            {stat["Median Rank"]}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
               {/* Statistical Values Table */}
               <div className="overflow-x-auto">
+                <h3 className="text-lg font-medium mb-2">Test Statistics</h3>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
@@ -131,25 +200,64 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
                 </table>
               </div>
 
-              {/* Rank Means Table */}
-              {currentResult.plot_data?.rank_means && (
+              {/* Post Hoc Tests Table */}
+              {currentResult.post_hoc && currentResult.post_hoc.length > 0 && (
                 <div className="overflow-x-auto mt-4">
-                  <h3 className="text-lg font-medium mb-2">Rank Means</h3>
+                  <h3 className="text-lg font-medium mb-2">Post Hoc Tests</h3>
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-2">Category</th>
-                        <th className="text-right py-2">Rank</th>
+                        <th className="text-left py-2">Comparison</th>
+                        <th className="text-right py-2">Adjusted p-value</th>
+                        <th className="text-center py-2">Significant</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {currentResult.plot_data.rank_means.map((rankMean) => (
-                        <tr key={rankMean.category} className="border-b">
+                      {currentResult.post_hoc.map((test, index) => (
+                        <tr key={index} className="border-b">
                           <td className="py-2">
-                            {formatKey(rankMean.category)}
+                            {test.Comparison.split(" vs ")
+                              .map(formatKey)
+                              .join(" vs ")}
                           </td>
                           <td className="text-right py-2">
-                            {rankMean.rank.toFixed(2)}
+                            {test["Adjusted p-value"].toFixed(4)}
+                          </td>
+                          <td className="text-center py-2">
+                            <span
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                test.Significant
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {test.Significant ? "Yes" : "No"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Median Ranks Table */}
+              {currentResult.plot_data?.median_ranks && (
+                <div className="overflow-x-auto mt-4">
+                  <h3 className="text-lg font-medium mb-2">Median Ranks</h3>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Group</th>
+                        <th className="text-right py-2">Median Rank</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentResult.plot_data.median_ranks.map((rankData) => (
+                        <tr key={rankData.group} className="border-b">
+                          <td className="py-2">{formatKey(rankData.group)}</td>
+                          <td className="text-right py-2">
+                            {rankData.median_rank.toFixed(2)}
                           </td>
                         </tr>
                       ))}
