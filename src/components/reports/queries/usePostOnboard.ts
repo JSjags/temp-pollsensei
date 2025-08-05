@@ -130,8 +130,8 @@ export interface ReportMediaUploadResponse {
 }
 
 export interface ReportMediaUploadVariables {
-  reportId: string;
-  files: File[];
+  // reportId: string;
+  file: File[];
   extraFields?: Record<
     string,
     string | Blob | number | boolean | null | undefined
@@ -157,18 +157,18 @@ export const useReportMediaUpload = () => {
     ReportMediaUploadVariables
   >({
     mutationFn: async ({
-      reportId,
-      files,
+      // reportId,
+      file,
       extraFields,
     }: ReportMediaUploadVariables): Promise<ReportMediaUploadResponse> => {
       const formData = new FormData();
 
       // REQUIRED: backend expects report_id
-      formData.append("report_id", reportId);
+      // formData.append("report_id", reportId);
 
       // BACKEND MAY EXPECT 'files' EVEN FOR SINGLE UPLOAD
-      files.forEach((file) => {
-        formData.append("files", file);
+      file.forEach((file) => {
+        formData.append("file", file);
       });
 
       // Extra fields
@@ -186,8 +186,8 @@ export const useReportMediaUpload = () => {
 
       if (ENABLE_UPLOAD_DEBUG) {
         console.log("[useReportMediaUpload] sending FormData:", {
-          report_id: reportId,
-          fileCount: files.length,
+          // report_id: reportId,
+          fileCount: file.length,
           extraFields,
         });
       }
@@ -222,10 +222,10 @@ export const useReportMediaUpload = () => {
     onSuccess: (data, variables) => {
       // Invalidate caches for this report
       queryClient.invalidateQueries({
-        queryKey: ["report", variables.reportId],
+        queryKey: ["report", variables],
       });
       queryClient.invalidateQueries({
-        queryKey: ["report", variables.reportId, "media"],
+        queryKey: ["report", variables, "media"],
       });
       setProgress(0);
     },
@@ -254,7 +254,7 @@ export const useReportMediaUpload = () => {
   };
 };
 
-interface PublishReportPayload {
+export interface PublishReportPayload {
   report_id: string;
   title: string;
   description: string;

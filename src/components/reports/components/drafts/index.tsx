@@ -94,7 +94,7 @@ interface ReportDraftPageProps {
   className?: string;
 }
 
-interface ReportFormState {
+export interface ReportFormState {
   title: string;
   description: string;
   category: string; // ID
@@ -122,13 +122,13 @@ interface PublishReportPayload {
 // ---------------------------------------------------------------------------
 // Breadcrumbs
 // ---------------------------------------------------------------------------
-interface Crumb {
+export interface Crumb {
   label: string;
   href?: string;
   onClick?: () => void;
 }
 
-function Breadcrumbs({ items }: { items: Crumb[] }) {
+export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
     <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
       <ol className="flex items-center gap-1 flex-wrap">
@@ -269,7 +269,7 @@ function ThumbnailDropzone({
 }
 
 interface ReportThumbnailUploaderProps {
-  reportId?: string;
+  // reportId?: string;
   thumbnailUrl?: string | null;
   onChange: (partial: Partial<ReportFormState>) => void;
   className?: string;
@@ -277,7 +277,7 @@ interface ReportThumbnailUploaderProps {
 }
 
 function ReportThumbnailUploader({
-  reportId,
+  // reportId,
   thumbnailUrl,
   onChange,
   className,
@@ -295,11 +295,11 @@ function ReportThumbnailUploader({
   const handleFile = React.useCallback(
     (file: File | null) => {
       onChange({ thumbnailFile: file });
-      if (!file || !reportId) return;
+      if (!file ) return;
       uploadMedia(
         {
-          reportId,
-          files: [file],
+          // reportId,
+          file: [file],
           extraFields: { is_thumbnail: "true", ...extraFields },
         },
         {
@@ -323,7 +323,7 @@ function ReportThumbnailUploader({
         }
       );
     },
-    [onChange, reportId, uploadMedia, extraFields]
+    [onChange, uploadMedia, extraFields]
   );
 
   return (
@@ -333,7 +333,7 @@ function ReportThumbnailUploader({
         onChangeFile={handleFile}
         className="w-full"
       />
-      {reportId && (
+      {/* {reportId && ( */}
         <>
           {uploading && (
             <div className="mt-2 text-[11px] text-muted-foreground">
@@ -357,7 +357,7 @@ function ReportThumbnailUploader({
             </div>
           )}
         </>
-      )}
+      {/* // )} */}
     </div>
   );
 }
@@ -714,7 +714,7 @@ interface EditorPanelProps {
   reportId?: string;
 }
 
-function EditorPanel({
+export function EditorPanel({
   state,
   onChange,
   categories = [],
@@ -729,7 +729,7 @@ function EditorPanel({
   return (
     <div
       className={cn(
-        "sticky top-20 flex h-fit w-full flex-col gap-6 rounded-lg border bg-background p-6 shadow-sm",
+        "sticky top-20 flex h-fit w-full flex-col gap-6 pb-48 rounded-lg border bg-background p-6 shadow-sm",
         className
       )}
     >
@@ -739,7 +739,7 @@ function EditorPanel({
         <div className="space-y-2">
           <Label className="text-xs font-medium">Thumbnail</Label>
           <ReportThumbnailUploader
-            reportId={reportId}
+            // reportId={reportId}
             thumbnailUrl={state.thumbnailUrl}
             onChange={onChange}
           />

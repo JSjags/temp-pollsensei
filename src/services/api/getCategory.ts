@@ -96,6 +96,7 @@ export const fetchAllReports = async (
       params,
     });
 
+  console.log(params, "Params for fetching reports");
   
     return response.data;
   } catch (err) {
@@ -184,6 +185,7 @@ export const fetchSearchReports = async (term: string, page: number,) => {
   const { data } = await axiosInstance.get(`/report/search`, {
     params: { search_term: term, page, page_size: 20 },
   });
+  console.log("Search results:", data);
   return data.data; 
 };
 
@@ -200,6 +202,28 @@ export const fetchAiSummary = async (reportId: string) => {
       throw new Error(
         (error.response.data as any)?.message ||
           "Failed to generate AI summary"
+      );
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+      throw new Error("No response from server");
+    } else {
+      console.error("Unknown error:", error.message);
+      throw new Error("An unexpected error occurred");
+    }
+  }
+};
+
+export const fetchPreviewReportById = async (reportId: string) => {
+  try {
+    const response = await axiosInstance.get(`/report/${reportId}`);
+    return response.data;
+  } catch (err) {
+    const error = err as AxiosError;
+
+    if (error.response) {
+      console.error("Backend error:", error.response.data);
+      throw new Error(
+        (error.response.data as any)?.message || "Failed to fetch report"
       );
     } else if (error.request) {
       console.error("No response received:", error.request);
