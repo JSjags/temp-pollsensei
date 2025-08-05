@@ -1,6 +1,7 @@
 import {
   fetchAllReports,
   fetchAllSurveys,
+  fetchPreviewReportById,
   fetchReportCategory,
   fetchReportInterests,
 } from "@/services/api/getCategory";
@@ -30,7 +31,6 @@ export const useAllSurveys = (page: number, pageSize: number = 9) => {
   return useQuery({
     queryKey: ["surveys", page, pageSize],
     queryFn: () => fetchAllSurveys(page, pageSize),
-    // placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 1, // 5 minutes
   });
 };
@@ -39,6 +39,13 @@ export const useReports = (surveyId: string, tab: string, page: number, pageSize
   return useQuery({
     queryKey: ["reports", surveyId, tab, page, pageSize],
     queryFn: () => fetchAllReports(surveyId, tab, page, pageSize),
-    // placeholderData: keepPreviousData,
+  });
+};
+
+export const usePreviewReportById = (reportId: string) => {
+  return useQuery({
+    queryKey: ["get-report-by-id", reportId],
+    queryFn: () => fetchPreviewReportById(reportId),
+    enabled: !!reportId,
   });
 };

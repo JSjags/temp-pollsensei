@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useReports } from "@/components/reports/queries/useCategories";
+import { usePreviewReportById, useReports } from "@/components/reports/queries/useCategories";
 import * as Tabs from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, SearchIcon } from "lucide-react";
@@ -13,17 +13,8 @@ import {
   PublishedIcon,
 } from "@/components/reports/assets";
 import Image from "next/image";
-import { DownloadIcon, More, ShareIcon } from "@/assets/images";
 import { SurveyCardSkeleton } from "@/components/reports/components/MyReports";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
-import { PublishDialog } from "@/components/reports/components/dialogs/publish";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useDeleteReport } from "@/components/reports/queries/useDeleteReports";
 import { DeleteConfirmDialog } from "@/components/reports/components/dialogs/confirm-dialog";
 import { useDuplicateReport } from "@/components/reports/queries/useDuplicateReport";
@@ -32,7 +23,8 @@ import { useRenameReport } from "@/components/reports/queries/useRenameReports";
 import { useSearchReports } from "@/components/reports/queries/useSearchReports";
 import { Button as ShadButton } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ShareDialog } from "@/components/reports/components/dialogs/share-dialog";
+import { ReportCard } from "@/components/reports/components/report-card";
 
 export default function ReportsPage() {
   const params = useParams();
@@ -55,6 +47,7 @@ export default function ReportsPage() {
     pageSize
   );
   const { refetch } = useReports(surveyId, tab, page, pageSize);
+ 
 
   const deleteMutation = useDeleteReport();
   const duplicateMutation = useDuplicateReport();
@@ -67,6 +60,14 @@ export default function ReportsPage() {
     name: string;
   } | null>(null);
 
+  // share dialog state
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareTarget, setShareTarget] = useState<{
+    id: string;
+    name: string;
+    shareLink: string;
+  } | null>(null);
+
   const { data: searchData, isLoading: searchLoading } = useSearchReports(
     debouncedSearch,
     page,
@@ -75,6 +76,17 @@ export default function ReportsPage() {
   const [openPopoverMap, setOpenPopoverMap] = useState<Record<string, boolean>>(
     {}
   );
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+
+    // Only set debounced search if there's actual input
+    if (value.trim()) {
+      setDebouncedSearch(value.trim());
+    } else {
+      setDebouncedSearch("");
+    }
+  };
 
   const setPopoverOpen = (reportId: string, open: boolean) => {
     setOpenPopoverMap((prev) => ({ ...prev, [reportId]: open }));
@@ -86,6 +98,47 @@ export default function ReportsPage() {
     // close the menu immediately
     setPopoverOpen(report._id, false);
   };
+
+  const handleShareClick = (report: any) => {
+    // Generate or get the share link for the report
+    const shareLink = `${window.location.origin}/reports/shared/${report._id}`;
+    setShareTarget({
+      id: report._id,
+      name: report.name,
+      shareLink,
+    });
+    setShareDialogOpen(true);
+    // close the menu immediately
+    setPopoverOpen(report._id, false);
+  };
+
+  const handleShareInvite = (emails: string) => {
+    // Implement your invite logic here
+    console.log("Inviting emails:", emails);
+
+    // Split emails and filter out empty strings
+    const emailArray = emails
+      .split(",")
+      .map((email) => email.trim())
+      .filter((email) => email);
+    const emailCount = emailArray.length;
+
+    if (emailCount === 0) {
+      toast.error("Please enter at least one email address");
+      return;
+    }
+
+    // Show appropriate success message based on email count
+    const message =
+      emailCount === 1
+        ? "Invitation sent successfully!"
+        : "Invitations sent successfully!";
+    toast.success(message);
+
+    // You can add API call here to send invitations
+    // Example: await sendInvitations(shareTarget?.id, emailArray);
+  };
+
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch(searchInput.trim());
@@ -168,10 +221,32 @@ export default function ReportsPage() {
     }
   }, [isLoading, isError, data, page]);
 
-  const currentReports = debouncedSearch
-    ? searchData?.data ?? []
-    : data?.data ?? [];
+  const currentReports = (
+    debouncedSearch ? searchData?.data ?? [] : data?.data ?? []
+  ).sort((a: any, b: any) => {
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
 
+    // Extract base name (without "-copy" suffix)
+    const baseNameA = nameA.replace(/ -copy$/, "");
+    const baseNameB = nameB.replace(/ -copy$/, "");
+
+    // If base names are different, sort alphabetically
+    if (baseNameA !== baseNameB) {
+      return baseNameA.localeCompare(baseNameB);
+    }
+
+    // If base names are the same, original comes before copy
+    if (nameA.includes("-copy") && !nameB.includes("-copy")) {
+      return 1;
+    }
+    if (!nameA.includes("-copy") && nameB.includes("-copy")) {
+      return -1;
+    }
+
+    // If both are copies or both are originals, sort by creation time or ID
+    return (b.createdAt || b._id).localeCompare(a.createdAt || a._id);
+  });
   const isLoadingReports = debouncedSearch ? searchLoading : isLoading;
 
   return (
@@ -182,38 +257,37 @@ export default function ReportsPage() {
         className="mb-6 w-full"
       >
         <div className="sticky top-0 w-fu">
-        <Tabs.List className="bg-white w-full flex items-center justify-center">
-          {[
-            { value: "all", label: "All Reports", Icon: AllResearchIcon },
-            { value: "published", label: "Published", Icon: PublishedIcon },
-            { value: "draft", label: "Drafts", Icon: DraftIcon },
-          ].map(({ value, label, Icon }) => (
-            <Tabs.Trigger
-              key={value}
-              value={value}
-              className={cn(
-                "relative px-6 py-3 text-sm font-medium flex items-center gap-2 transition-colors",
-                "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px]",
-                "after:bg-transparent after:transition-all after:duration-300",
-                "data-[state=active]:after:bg-tertiary data-[state=active]:text-tertiary"
-              )}
-            >
-              <Icon
+          <Tabs.List className="bg-white w-full flex items-center justify-center">
+            {[
+              { value: "all", label: "All Reports", Icon: AllResearchIcon },
+              { value: "published", label: "Published", Icon: PublishedIcon },
+              { value: "draft", label: "Drafts", Icon: DraftIcon },
+            ].map(({ value, label, Icon }) => (
+              <Tabs.Trigger
+                key={value}
+                value={value}
                 className={cn(
-                  "w-5 h-5 transition-colors",
-                  tab === value ? "text-tertiary" : "text-[#4F5B67]"
+                  "relative px-6 py-3 text-sm font-medium flex items-center gap-2 transition-colors",
+                  "after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px]",
+                  "after:bg-transparent after:transition-all after:duration-300",
+                  "data-[state=active]:after:bg-tertiary data-[state=active]:text-tertiary"
                 )}
-              />
-              <span
-                className={tab === value ? "text-tertiary" : "text-[#4F5B67]"}
               >
-                {label}
-              </span>
-            </Tabs.Trigger>
-          ))}
-        </Tabs.List>
+                <Icon
+                  className={cn(
+                    "w-5 h-5 transition-colors",
+                    tab === value ? "text-tertiary" : "text-[#4F5B67]"
+                  )}
+                />
+                <span
+                  className={tab === value ? "text-tertiary" : "text-[#4F5B67]"}
+                >
+                  {label}
+                </span>
+              </Tabs.Trigger>
+            ))}
+          </Tabs.List>
         </div>
-
 
         <div className="flex justify-between items-center my-6">
           <h3
@@ -230,7 +304,7 @@ export default function ReportsPage() {
                 placeholder="Search reports"
                 className="w-full bg-transparent outline-none"
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={handleSearchChange}
               />
             </div>
             <FilterButton />
@@ -238,114 +312,110 @@ export default function ReportsPage() {
         </div>
 
         {/* <ScrollArea> */}
-          <Tabs.Content value={tab} className="">
-            {isLoadingReports ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <SurveyCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : isError ? (
-              <p className="text-red-500">Failed to load reports.</p>
-            ) : currentReports.length === 0 ? (
-              <Card className="w-full max-w-3xl mx-auto mt-[10vh] border-none shadow-none bg-transparent">
+        <Tabs.Content value={tab} className="">
+          {isLoadingReports ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <SurveyCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : isError ? (
+            <p className="text-red-500">Failed to load reports.</p>
+          ) : currentReports.length === 0 ? (
+            <Card className="w-full max-w-3xl mx-auto mt-[10vh] border-none shadow-none bg-transparent">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col items-center justify-center p-6 text-center space-y-8"
+              >
+                {/* Image */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-col items-center justify-center p-6 text-center space-y-8"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="relative w-full max-w-[320px] aspect-square"
                 >
-                  {/* Image */}
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="relative w-full max-w-[320px] aspect-square"
-                  >
-                    <Image
-                      src="/assets/survey-list/no-survey.svg"
-                      alt="No surveys created"
-                      fill
-                      className="object-contain"
-                    />
-                  </motion.div>
+                  <Image
+                    src="/assets/survey-list/no-survey.svg"
+                    alt="No surveys created"
+                    fill
+                    className="object-contain"
+                  />
+                </motion.div>
 
-                  {/* Text */}
+                {/* Text */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="space-y-4 max-w-[600px]"
+                >
+                  {debouncedSearch ? (
+                    <p className="text-base text-muted-foreground">
+                      No reports found for &quot;
+                      <span className="font-semibold">{debouncedSearch}</span>
+                      &quot;. Try a different search term.
+                    </p>
+                  ) : (
+                    <p className="text-base text-muted-foreground">
+                      You have not created any report yet. Think on how to
+                      start? We can help you do the difficult part using our
+                      generative-AI capabilities to create your dream survey.
+                    </p>
+                  )}
+                </motion.div>
+                {/* Button */}
+                {!debouncedSearch && (
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.4, duration: 0.5 }}
-                    className="space-y-4 max-w-[600px]"
+                    transition={{ delay: 0.6, duration: 0.5 }}
                   >
-                    {debouncedSearch ? (
-                      <p className="text-base text-muted-foreground">
-                        No reports found for &quot;
-                        <span className="font-semibold">{debouncedSearch}</span>
-                        &quot;. Try a different search term.
-                      </p>
-                    ) : (
-                      <p className="text-base text-muted-foreground">
-                        You have not created any report yet. Think on how to
-                        start? We can help you do the difficult part using our
-                        generative-AI capabilities to create your dream survey.
-                      </p>
-                    )}
-                  </motion.div>
-                  {/* Button */}
-                  {!debouncedSearch && (
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.6, duration: 0.5 }}
+                    <ShadButton
+                      className="auth-btn text-white px-8 !h-12 text-lg rounded-lg hover:scale-105 transition-transform"
+                      onClick={() => router.push("/surveys/survey-list")}
                     >
-                      <ShadButton
-                        className="auth-btn text-white px-8 !h-12 text-lg rounded-lg hover:scale-105 transition-transform"
-                        onClick={() => router.push("/surveys/survey-list")}
-                      >
-                        Generate Report
-                      </ShadButton>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {currentReports.map((report: any) => (
-                  <ReportCard
-                    key={report._id}
-                    report={report}
-                    onDownloadClick={() =>
-                      handleDownload(
-                        report.url,
-                        `${report.name}.docx`,
-                        report._id
-                      )
-                    }
-                    onShareClick={() => {
-                      // share handler; close popover after click
-                      console.log("Share clicked");
-                      setPopoverOpen(report._id, false);
-                    }}
-                    onDeleteClick={() => handleDeleteClick(report._id)}
-                    onDuplicateClick={() => handleDuplicateClick(report._id)}
-                    onRenameClick={() => handleRenameClick(report)}
-                    isDeleting={
-                      deleteMutation.isPending &&
-                      deleteMutation.variables === report._id
-                    }
-                    isDuplicating={
-                      duplicateMutation.isPending &&
-                      duplicateMutation.variables === report._id
-                    }
-                    popoverOpen={!!openPopoverMap[report._id]}
-                    onPopoverOpenChange={(open) =>
-                      setPopoverOpen(report._id, open)
-                    }
-                  />
-                ))}
-              </div>
-            )}
-          </Tabs.Content>
+                      Generate Report
+                    </ShadButton>
+                  </motion.div>
+                )}
+              </motion.div>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {currentReports.map((report: any) => (
+                <ReportCard
+                  key={report._id}
+                  report={report}
+                  onDownloadClick={() =>
+                    handleDownload(
+                      report.url,
+                      `${report.name}.docx`,
+                      report._id
+                    )
+                  }
+                  onShareClick={() => handleShareClick(report)}
+                  onDeleteClick={() => handleDeleteClick(report._id)}
+                  onDuplicateClick={() => handleDuplicateClick(report._id)}
+                  onRenameClick={() => handleRenameClick(report)}
+                  isDeleting={
+                    deleteMutation.isPending &&
+                    deleteMutation.variables === report._id
+                  }
+                  isDuplicating={
+                    duplicateMutation.isPending &&
+                    duplicateMutation.variables === report._id
+                  }
+                  popoverOpen={!!openPopoverMap[report._id]}
+                  onPopoverOpenChange={(open) =>
+                    setPopoverOpen(report._id, open)
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </Tabs.Content>
         {/* </ScrollArea> */}
       </Tabs.Root>
 
@@ -364,6 +434,7 @@ export default function ReportsPage() {
         isLoading={deleteMutation.isPending}
       />
 
+      {/* Rename Dialog */}
       <RenameDialog
         open={renameDialogOpen}
         onOpenChange={(open) => {
@@ -375,6 +446,20 @@ export default function ReportsPage() {
         currentName={renameTarget?.name || ""}
         onConfirm={handleRenameConfirm}
         isLoading={renameMutation.isPending}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={(open) => {
+          setShareDialogOpen(open);
+          if (!open) {
+            setShareTarget(null);
+          }
+        }}
+        reportName={shareTarget?.name || ""}
+        shareLink={shareTarget?.shareLink || ""}
+        onInvite={handleShareInvite}
       />
 
       {/* Pagination */}
@@ -417,147 +502,3 @@ export default function ReportsPage() {
   );
 }
 
-// -----------------------------------------------------------------------------
-// ReportCard (controlled popover)
-// -----------------------------------------------------------------------------
-type ReportCardProps = {
-  report: any; // TODO: replace with a proper Report type
-  onShareClick: () => void;
-  onDownloadClick: () => void;
-  onDeleteClick: () => void;
-  onDuplicateClick: () => void;
-  onRenameClick: () => void;
-  isDeleting?: boolean;
-  isDuplicating?: boolean;
-  popoverOpen: boolean;
-  onPopoverOpenChange: (open: boolean) => void;
-};
-
-function ReportCard({
-  report,
-  onShareClick,
-  onDownloadClick,
-  onDeleteClick,
-  onDuplicateClick,
-  onRenameClick,
-  isDeleting,
-  isDuplicating,
-  popoverOpen,
-  onPopoverOpenChange,
-}: ReportCardProps) {
-   const router = useRouter();
-
-  const moreContent = [
-    { label: "Rename", action: onRenameClick },
-    {
-      label: isDuplicating ? "Duplicating..." : "Duplicate",
-      action: onDuplicateClick,
-      duplicating: true, // used to defer closing until success
-    },
-    { label: "Share", action: onShareClick },
-    {
-      label: isDeleting ? "Deleting..." : "Delete",
-      action: onDeleteClick,
-      destructive: true,
-    },
-  ];
-
-  return (
-    <div
-      //  onClick={handleCardClick}
-      className="border bg-white hover:shadow transition py-8 px-4 rounded-[10.43px] cursor-pointer duration-300 ease-in-out"
-    >
-      <div className="flex items-center justify-between mb-2 w-full">
-        <h4
-          className="text-xl truncate whitespace-nowrap overflow-hidden max-w-[90%]"
-          title={report.name}
-        >
-          {report.name}
-        </h4>
-        <Popover open={popoverOpen} onOpenChange={onPopoverOpenChange}>
-          <PopoverTrigger asChild>
-            <button type="button">
-              <Image src={More} alt="More options" width={24} height={24} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="!w-fit">
-            <div className="flex flex-col gap-4">
-              {moreContent.map((item, idx) => {
-                const disabled =
-                  (item.duplicating && isDuplicating) ||
-                  (item.destructive && isDeleting);
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    disabled={disabled}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      item.action();
-                      if (!item.duplicating) {
-                        onPopoverOpenChange(false);
-                      }
-                    }}
-                    className={cn(
-                      "text-left text-sm cursor-pointer bg-transparent hover:bg-secondary hover:text-tertiary p-2 px-3 rounded transition-all duration-300 ease-in-out",
-                      item.destructive &&
-                        "text-[#FF3E3E] hover:bg-[#FF3E3E]/20 hover:text-[#FF3E3E]/85 disabled:opacity-50",
-                      item.duplicating && "disabled:opacity-50"
-                    )}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <p className="text-xs text-new-muted mb-3">
-        Created: {new Date(report.createdAt).toLocaleDateString()}
-      </p>
-
-      <p
-        className="text-sm text-new-muted mb-3 line-clamp-2"
-        title={report.survey?.description}
-      >
-        {report.survey?.description}
-      </p>
-
-      <div className="mt-10 flex items-center justify-between">
-        <Dialog>
-          <DialogTrigger>
-            <Button variant="gradient" className="rounded-md">
-              Publish
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="py-14 px-10 w-[100vw]" showXBtn={false}>
-            <PublishDialog reportId={report?._id} reportName={report?.name}/>
-          </DialogContent>
-        </Dialog>
-
-        <div className="flex items-center gap-6">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onShareClick();
-            }}
-            className="hover:opacity-80 transition-opacity duration-300 ease-in-out"
-          >
-            <Image src={ShareIcon} alt="Share" width={24} height={24} />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDownloadClick();
-            }}
-            className="hover:opacity-80 transition-opacity duration-300 ease-in-out"
-          >
-            <Image src={DownloadIcon} alt="Download" width={24} height={24} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

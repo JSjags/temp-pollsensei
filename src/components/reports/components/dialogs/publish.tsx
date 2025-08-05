@@ -10,6 +10,7 @@ import { useAiSummary } from "../../queries/useAISummary";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useReportDraftStore } from "../../stores";
+import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoins/CheckoutDialog";
 
 type SummaryValue = "ai" | "manual";
 
@@ -20,6 +21,7 @@ type SummaryMethod = {
 }
 
 interface PublishDialogProps {
+  report: any; // Assuming 'report' is passed as a prop, adjust type as needed
   reportId: string;
   reportName: string;
   value?: SummaryValue;
@@ -33,13 +35,14 @@ const summaryMethods: SummaryMethod[] = [
 ];
 
 export function PublishDialog({
+  report,
   value,
   defaultValue,
   reportId,
   onValueChange,
   reportName,
 }: PublishDialogProps) {
-  const { data: onboardResp } = useReportOnboardState();
+  const { data: onboardResp, isLoading: isOnboardingLoading } = useReportOnboardState();
   const aiSummaryMutation = useAiSummary();
   const setSummaryMethod = useReportDraftStore((s) => s.setSummaryMethod);
   const setSummaryContent = useReportDraftStore((s) => s.setSummaryContent);
@@ -64,15 +67,14 @@ export function PublishDialog({
     return active === "ai" ? "Proceed with AI" : "Proceed (Manual)";
   }, [aiSummaryMutation.isPending, isRouting, active]);
 
-  const pushToDraft = React.useCallback(() => {
-    if (isRouting) return; // guard
-    setIsRouting(true);
-    router.push(
-      `/reports/drafts/${reportId}?title=${encodeURIComponent(reportName)}`
-    );
-    // we don't reset isRouting; page unmounts on nav
-  }, [isRouting, router, reportId, reportName]);
 
+  const pushToDraft = React.useCallback(() => {
+  if (isRouting) return;
+  setIsRouting(true);
+  router.push(
+    `/reports/drafts/${reportId}?title=${encodeURIComponent(reportName)}&url=${encodeURIComponent(report.url)}`
+  );
+}, [isRouting, router, reportId, reportName, report.url]);
   const handleSelect = (val: SummaryValue) => {
     if (!value) {
       setInternal(val);
@@ -178,9 +180,10 @@ export function PublishDialog({
             <Button
               variant="gradient"
               className="rounded"
-              disabled={!active || aiSummaryMutation.isPending || isRouting}
+              disabled={!active || aiSummaryMutation.isPending || isRouting ||isOnboardingLoading}
               onClick={handleProceed}
             >
+              {aiSummaryMutation.isPending || isRouting ||isOnboardingLoading && <LoadingSpinner/>}
               {proceedLabel}
             </Button>
           )}
