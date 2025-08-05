@@ -31,6 +31,7 @@ type ShopState = {
   ocrDialogOpen: boolean;
   aiRepotingDialogOpen: boolean;
   orderSummary: PollcoinOrderSummaryResponse["data"]["orderSummary"] | null;
+  orderBreakdown: PollcoinOrderSummaryResponse["data"]["breakdown"] | null;
   ocrAmount: string;
   aiReportingAmount: string
   setOCRAmount: (value: string) => void;
@@ -51,6 +52,7 @@ type ShopState = {
   setAIReportingCredits: (value: string) => void;
   setPollcoins: (value: string) => void;
   setOrderSummary: (summary: PollcoinOrderSummaryResponse["data"]["orderSummary"]) => void;
+  setOrderBreakdown: (summary: PollcoinOrderSummaryResponse["data"]["breakdown"]) => void;
   setTotalPollcoins: (value: string) => void;
   addPollcoinsToTotal: (amount: string) => void;
   setAiErrors: (errors: { amount?: string; quantity?: string }) => void;
@@ -97,6 +99,7 @@ export const useShopStore = create<ShopState>()(
       ocrDialogOpen: false,
       aiRepotingDialogOpen: false,
       orderSummary: null,
+      orderBreakdown: null,
       servicesStep: "buy",
       ocrAmount: "",
       aiReportingAmount: "",
@@ -121,6 +124,7 @@ export const useShopStore = create<ShopState>()(
       setAIReportingCredits: (value) => set({ aiReportingCredit: value }),
       setPollcoins: (value) => set({ pollcoins: value }),
       setOrderSummary: (summary) => set({ orderSummary: summary }),
+      setOrderBreakdown: (breakdown) => set({ orderBreakdown: breakdown }),
       setTotalPollcoins: (value) => set({ totalPollcoins: value }),
 
 

@@ -85,7 +85,9 @@ export function CheckoutDialogWrapper() {
 }
 
 function CheckoutDialog() {
-  const [selectedOption, setSelectedOption] = useState<string | null>("Paystack");
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    "Paystack"
+  );
   const [cardHolder, setCardHolder] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -113,13 +115,6 @@ function CheckoutDialog() {
       return opt.label === "Card" || opt.label === "Stripe";
     }
   });
-  
-
-  useEffect(() => {
-    if (isNigeria && selectedOption === "Stripe") {
-      setSelectedOption("Card");
-    }
-  }, [isNigeria, selectedOption]);
 
   const {
     pollAmount,
@@ -128,8 +123,22 @@ function CheckoutDialog() {
     setLoading,
     setPollStep,
     orderSummary,
+    orderBreakdown,
   } = useShopStore();
-  const description = `You have purchased ${pollcoins} Pollcoins`;
+  const gatewayToUse =
+    orderBreakdown?.paymentDetails?.gateway_to_use?.toLowerCase();
+  useEffect(() => {
+    if (gatewayToUse) {
+      setSelectedOption(
+        gatewayToUse === "paystack"
+          ? "Paystack"
+          : gatewayToUse === "stripe"
+          ? "Stripe"
+          : null
+      );
+    }
+  }, [gatewayToUse]);
+
   const txnOverview = [
     {
       label: "Amount of Pollcoins",
@@ -306,7 +315,7 @@ function CheckoutDialog() {
     }
 
     // For Stripe payment, check if card details are complete
-    if (selectedOption === "Stripe" && !isStripeCardComplete) {
+    if (gatewayToUse === "stripe" && !isStripeCardComplete) {
       toast.error("Please complete your card details");
       setLoading(false);
       return;
@@ -331,17 +340,14 @@ function CheckoutDialog() {
       localStorage.setItem("purchasedPollcoins", pollcoinsInt.toString());
 
       // Ensure paymentGateway is properly typed
-      const paymentGateway =
-        selectedOption?.toLowerCase() === "stripe"
-          ? ("stripe" as const)
-          : ("paystack" as const);
+      const paymentGateway = gatewayToUse;
 
       const redirectUrl = `${window.location.origin}/shop?success=true`;
 
       // Create payload based on payment gateway type
       let paymentPayload: PurchasePayload;
-      const currency = isNigeria ? "NGN" : "USD";
-      if (paymentGateway === "stripe") {
+      const currency = orderBreakdown?.paymentDetails?.currency;
+      if (gatewayToUse === "stripe") {
         paymentPayload = {
           paymentGateway,
           currency: currency,
@@ -352,21 +358,18 @@ function CheckoutDialog() {
       } else {
         paymentPayload = {
           paymentGateway,
-          currency: "NGN",
+          currency: currency,
           orderReferenceId: orderSummary.referenceId,
           redirect_url: redirectUrl,
-          amount: orderSummary.totalAmount,
-          pollcoins: pollcoinsInt,
+          // amount: orderSummary.totalAmount,
+          // pollcoins: pollcoinsInt,
         };
       }
 
       purchasePollcoins(paymentPayload, {
         onSuccess: (res) => {
           if (res.success) {
-            if (
-              paymentGateway === "stripe" &&
-              res.data?.payment?.client_secret
-            ) {
+            if (gatewayToUse === "stripe" && res.data?.payment?.client_secret) {
               // Handle Stripe payment confirmation
               localStorage.setItem(
                 "purchasedPollcoins",
@@ -387,10 +390,15 @@ function CheckoutDialog() {
             setLoading(false);
           }
         },
+        // onError: (err) => {
+        //   localStorage.removeItem("purchasedPollcoins");
+        //   const errorMessage = err.message || "Payment failed";
+        //   toast.error(errorMessage);
+        //   setLoading(false);
+        // },
         onError: (err) => {
-          localStorage.removeItem("purchasedPollcoins");
-          const errorMessage = err.message || "Payment failed";
-          toast.error(errorMessage);
+          console.error("Error initializing payment:", err);
+          toast.error(err.message || "Payment failed");
           setLoading(false);
         },
       });
@@ -429,102 +437,31 @@ function CheckoutDialog() {
             ))}
           </div>
 
-          {selectedOption !== "Paystack" ? (
-            selectedOption === "Stripe" ? (
-              <>
-                <div>
-                  <label htmlFor="name" className="text-sm">
-                    Card Holder Name
-                  </label>
-                  <Input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Enter card holder name"
-                    className="mt-2 h-[54px]"
-                    value={cardHolder}
-                    onChange={(e) => {
-                      setCardHolder(e.target.value);
-                    }}
-                  />
-                </div>
-                <StripeCardForm
-                  onCardChange={(complete) => setIsStripeCardComplete(complete)}
+          {gatewayToUse === "stripe" ? (
+            <>
+              <div>
+                <label htmlFor="name" className="text-sm">
+                  Card Holder Name
+                </label>
+                <Input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Enter card holder name"
+                  className="mt-2 h-[54px]"
+                  value={cardHolder}
+                  onChange={(e) => {
+                    setCardHolder(e.target.value);
+                  }}
                 />
-              </>
-            ) : (
-              <>
-                <div>
-                  <label htmlFor="name" className="text-sm">
-                    Card Holder Name
-                  </label>
-                  <Input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Enter card holder name"
-                    className="mt-2 h-[54px]"
-                    value={cardHolder}
-                    onChange={(e) => {
-                      setCardHolder(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="number" className="text-sm">
-                    Card Number
-                  </label>
-                  <Input
-                    type="text"
-                    id="number"
-                    name="number"
-                    placeholder="XXXX XXXX XXXX XXXX"
-                    className="mt-2 h-[54px]"
-                    value={cardNumber}
-                    onChange={handleCardNumberChange}
-                    inputMode="numeric"
-                    maxLength={19}
-                  />
-                </div>
-                <div className="flex w-full items-center gap-2.5">
-                  <div className="w-1/2">
-                    <label htmlFor="expiry" className="text-sm">
-                      Card Expiry Date
-                    </label>
-                    <Input
-                      type="text"
-                      id="expiry"
-                      name="expiry"
-                      placeholder="MM/YY"
-                      className="mt-2 h-[54px]"
-                      value={cardExpiry}
-                      onChange={handleExpiryChange}
-                      inputMode="numeric"
-                      maxLength={5}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label htmlFor="cvv" className="text-sm">
-                      CVV
-                    </label>
-                    <Input
-                      type="text"
-                      id="cvv"
-                      name="cvv"
-                      placeholder="XXX"
-                      className="mt-2 h-[54px]"
-                      value={cardCVV}
-                      onChange={handleCVVChange}
-                      inputMode="numeric"
-                      maxLength={4}
-                    />
-                  </div>
-                </div>
-              </>
-            )
-          ) : (
+              </div>
+              <StripeCardForm
+                onCardChange={(complete) => setIsStripeCardComplete(complete)}
+              />
+            </>
+          ) : gatewayToUse === "paystack" ? (
             <div className="h-[290px] w-full" />
-          )}
+          ) : null}
 
           <div className="mt-auto w-full flex items-end justify-end md:hidden">
             <Button
@@ -576,7 +513,7 @@ function CheckoutDialog() {
               <p className="text-base font-bold">Total</p>
               <p className="text-base font-bold">
                 {isNigeria ? "₦" : "$"}
-                {orderSummary?.totalAmount}
+                {orderSummary?.totalAmount.toFixed(2)}
               </p>
             </div>
           </div>
@@ -586,9 +523,7 @@ function CheckoutDialog() {
               disabled={
                 loading ||
                 isProcessingStripe ||
-                (selectedOption === "Card" &&
-                  (!cardNumber || !cardHolder || !cardExpiry || !cardCVV)) ||
-                (selectedOption === "Stripe" &&
+                (gatewayToUse === "stripe" &&
                   (!cardHolder || !isStripeCardComplete))
               }
               variant="gradient"

@@ -62,7 +62,7 @@ export type PollcoinOrderSummaryResponse = {
       vat: string;
       transactionFee: string;
       total: string;
-      paymentDetails?: {
+      paymentDetails: {
         currency: string;
         gateway_to_use: string;
       };

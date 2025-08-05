@@ -25,6 +25,7 @@ export function BuyFirstStep() {
     setLoading,
     loading,
     setOrderSummary,
+    setOrderBreakdown
   } = useShopStore();
   const { data: dailyRate, isLoading } = useDailyRate();
   const {
@@ -107,10 +108,11 @@ export function BuyFirstStep() {
 
       const res = await pollcoinSummaryMutation.mutateAsync(payload);
       const summary = res?.data?.orderSummary;
-      const breakdown=res?.data.breakdown;
+      const breakdown = res?.data.breakdown
 
       if (summary) {
         setOrderSummary(summary);
+        setOrderBreakdown(breakdown);
         setPollStep("checkout");
       }
     } catch (error) {
