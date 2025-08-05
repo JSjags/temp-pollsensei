@@ -248,7 +248,6 @@ export default function ReportsPage() {
     return (b.createdAt || b._id).localeCompare(a.createdAt || a._id);
   });
   const isLoadingReports = debouncedSearch ? searchLoading : isLoading;
-console.log(currentReports, 'current reports');
 
   return (
     <div className="mx-auto mt-6 px-4 relative flex flex-col h-screen">
@@ -388,9 +387,6 @@ console.log(currentReports, 'current reports');
               {currentReports.map((report: any) => (
                 <ReportCard
                   key={report._id}
-                  onCardClick={() =>
-                    router.push(`/reports/preview/${report._id}`)
-                  }
                   report={report}
                   onDownloadClick={() =>
                     handleDownload(

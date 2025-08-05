@@ -128,7 +128,7 @@ function SurveyCard({
     <div
       onClick={onClick}
       className={cn(
-        "group border max-w-[400px] rounded-[10.43px] py-8 px-4 bg-white cursor-pointer hover:shadow-lg transition-shadow duration-300 ease-in-out",
+        "group border rounded-[10.43px] py-8 px-4 bg-white cursor-pointer hover:shadow-lg transition-shadow duration-300 ease-in-out",
         className
       )}
     >
@@ -163,7 +163,7 @@ function SurveyCard({
 
 export function SurveyCardSkeleton() {
   return (
-    <div className="border max-w-[400px] rounded-[10.43px] py-8 px-4 bg-white">
+    <div className="border rounded-[10.43px] py-8 px-4 bg-white">
       <Skeleton className="h-7 w-full mb-2" />
       <Skeleton className="h-5 w-1/2 mb-3" />
       <Skeleton className="h-5 w-2/4 mb-4" />

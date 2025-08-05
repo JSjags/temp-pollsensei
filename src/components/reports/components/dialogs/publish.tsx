@@ -10,6 +10,7 @@ import { useAiSummary } from "../../queries/useAISummary";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useReportDraftStore } from "../../stores";
+import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoins/CheckoutDialog";
 
 type SummaryValue = "ai" | "manual";
 
@@ -66,14 +67,6 @@ export function PublishDialog({
     return active === "ai" ? "Proceed with AI" : "Proceed (Manual)";
   }, [aiSummaryMutation.isPending, isRouting, active]);
 
-  // const pushToDraft = React.useCallback(() => {
-  //   if (isRouting) return; // guard
-  //   setIsRouting(true);
-  //   router.push(
-  //     `/reports/drafts/${reportId}?title=${encodeURIComponent(reportName)}`
-  //   );
-  
-  // }, [isRouting, router, reportId, reportName]);
 
   const pushToDraft = React.useCallback(() => {
   if (isRouting) return;
@@ -190,6 +183,7 @@ export function PublishDialog({
               disabled={!active || aiSummaryMutation.isPending || isRouting ||isOnboardingLoading}
               onClick={handleProceed}
             >
+              {aiSummaryMutation.isPending || isRouting ||isOnboardingLoading && <LoadingSpinner/>}
               {proceedLabel}
             </Button>
           )}

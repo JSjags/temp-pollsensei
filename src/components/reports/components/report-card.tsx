@@ -9,14 +9,18 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { PublishDialog } from "./dialogs/publish";
-import { usePreviewReportById } from "../queries/useCategories";
+import { usePreviewReportById, useReports } from "../queries/useCategories";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "react-toastify";
+import { usePublishReports } from "../queries/usePublishReports";
+import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoins/CheckoutDialog";
+import { useState } from "react";
 // -----------------------------------------------------------------------------
 // ReportCard (controlled popover)
 // -----------------------------------------------------------------------------
 export type ReportCardProps = {
   report: any; // TODO: replace with a proper Report type
-  onCardClick: () => void;
   onShareClick: () => void;
   onDownloadClick: () => void;
   onDeleteClick: () => void;
@@ -38,25 +42,34 @@ export function ReportCard({
   isDeleting,
   isDuplicating,
   popoverOpen,
-  onCardClick,
   onPopoverOpenChange,
 }: ReportCardProps) {
-  const router = useRouter()
-  const {data} = usePreviewReportById(report._id)
-console.log(data, "report data in ReportCard");
+  const router = useRouter();
+  const { data, isLoading } = usePreviewReportById(report._id);
+
+  const [tab, setTab] = useState("all");
+  const [page, setPage] = useState(6);
+  const [pageSize, setPageSize] = useState(6);
+  const { refetch } = useReports(data?.report?.survey_id, tab, page, pageSize);
+  const publishMutation = usePublishReports();
   const moreContent = [
     { label: "Rename", action: onRenameClick },
-    { label: "View Report", action: onCardClick },
-   ...(data?.post
-    ? [
-        {
-          label: "View Published Post",
-          action: () => {
-            router.push(`/preview/${report._id}?view=post`);
+    {
+      label: "View Report",
+      action: () => {
+        router.push(`/reports/preview/${report._id}`);
+      },
+    },
+    ...(data?.post
+      ? [
+          {
+            label: "View Published Post",
+            action: () => {
+              router.push(`/reports/published/${report._id}`);
+            },
           },
-        },
-      ]
-    : []),
+        ]
+      : []),
     {
       label: isDuplicating ? "Duplicating..." : "Duplicate",
       action: onDuplicateClick,
@@ -70,6 +83,27 @@ console.log(data, "report data in ReportCard");
     },
   ];
 
+  const handlePublish = () => {
+    if (!data?.post._id) return;
+
+    publishMutation.mutate(data?.post._id, {
+      onSuccess: (updatedPost: any) => {
+        if (updatedPost.status === "published") {
+          toast.success("Report published successfully!");
+        } else if (updatedPost.status === "draft") {
+          toast.success("Report unpublished successfully!");
+        } else {
+          toast.success("Report status updated.");
+        }
+        refetch();
+      },
+      onError: (error: any) => {
+        toast.error(
+          error?.response?.data?.message || "Failed to update report status"
+        );
+      },
+    });
+  };
   return (
     <div
       // onClick={onCardClick}
@@ -135,20 +169,34 @@ console.log(data, "report data in ReportCard");
       </p>
 
       <div className="mt-10 flex items-center justify-between">
-        <Dialog>
-          <DialogTrigger>
-            <Button variant={report.status === 'draft'?"gradient":'destructive'} className="rounded-md">
-             {report.status === 'draft'?"Publish":"Unpublish"}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="py-14 px-10 w-[100vw]" showXBtn={false}>
-            <PublishDialog
-              reportId={report?._id}
-              reportName={report?.name}
-              report={report}
-            />
-          </DialogContent>
-        </Dialog>
+        {isLoading ? (
+          <Skeleton className="h-10 w-20" />
+        ) : data?.post === null || data?.post?.status === "draft" ? (
+          <Dialog>
+            <DialogTrigger>
+              <Button variant="gradient" className="rounded-md">
+                Publish
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="py-14 px-10 w-[100vw]" showXBtn={false}>
+              <PublishDialog
+                reportId={report?._id}
+                reportName={report?.name}
+                report={report}
+              />
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <Button
+            onClick={handlePublish}
+            variant={"destructive"}
+            className="rounded-md"
+            disabled={publishMutation.isPending}
+          >
+            {publishMutation.isPending && <LoadingSpinner />}
+            {publishMutation.isPending ? "Unpublishing" : "Unpublish"}
+          </Button>
+        )}
 
         <div className="flex items-center gap-6">
           <button
