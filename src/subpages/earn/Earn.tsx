@@ -28,7 +28,7 @@ import { PayoutDialog } from "@/components/payouts/components/dialogs";
 import { useRouter } from "next/navigation";
 import SurveyFormDialog from "@/subpages/earn/SurveyFormDialog";
 import BannerNote from "@/components/earn/BannerNote";
-import { fetchUnrestrictedBalance } from "@/services/api/apiRequest";
+import { fetchUserBalance } from "@/services/api/getUserBalance";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -52,7 +52,7 @@ const Earn = () => {
     refetch: refetchBalance,
   } = useQuery({
     queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
-    queryFn: () => fetchUnrestrictedBalance(),
+    queryFn: () => fetchUserBalance(),
     enabled: true,
     refetchOnWindowFocus: false,
     refetchOnMount: false,

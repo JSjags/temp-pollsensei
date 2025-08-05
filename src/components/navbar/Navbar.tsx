@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -36,11 +36,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   HelpCircle,
   LogOut,
@@ -51,14 +48,11 @@ import {
   Mail,
   MailCheckIcon,
   BellOffIcon,
-  Building2,
-  Loader2,
-  ChevronDown,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { persistStore } from "redux-persist";
 import { useSidebar } from "../ui/sidebar";
-import { Input } from "../ui/shadcn-input";
+import { Input } from "@/components/ui/shadcn-input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios-instance";
 import {
@@ -66,13 +60,18 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../ui/tooltip";
+} from "@/components/ui/tooltip";
 import { LuMenu } from "react-icons/lu";
 import { RxCheckCircled, RxCrossCircled } from "react-icons/rx";
 import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
-import { UserData } from "@/subpages/settings/ProfilePage";
-import { useUserProfileQuery } from "@/services/user.service";
+import { FiUser } from "react-icons/fi";
+import ReportHighlight from "@/components/blog/ReportHighlight";
+import CategoryNav from "@/components/blog/CategoryNav";
+import { FaSearch, FaPlus, FaFileAlt, FaRegEdit } from "react-icons/fa";
+import { MdMail, MdMailOutline, MdNotificationsOff } from "react-icons/md";
+import BlogSearchBar from "@/components/navbar/BlogSearchBar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Notification {
   _id: string;
@@ -98,13 +97,12 @@ export interface NotificationResponse {
   page_size: number;
 }
 
-interface Organization {
-  _id: string;
-  name: string;
-  designation: string;
-  roles: string[];
-  is_disabled: boolean;
-  status: string;
+interface NavbarProps {
+  searchTerm?: string;
+  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  selectedCategory?: string;
+  onCategorySelect?: (category: string) => void;
+  showReportsHeader?: boolean;
 }
 
 const fetchNotifications = async () => {
@@ -130,23 +128,16 @@ const markNotificationAsRead = async (notificationId: string) => {
   return response.data;
 };
 
-const fetchOrganizations = async () => {
-  const response = await axiosInstance.get<{ data: Organization[] }>(
-    "/organization/mine"
-  );
-  return response.data;
-};
+const categories = ["Explore All", "Categories", "Interests"];
 
-const fetchCurrentOrganization = async () => {
-  const response = await axiosInstance.get<{ data: Organization[] }>(
-    "/organization/current"
-  );
-  return response.data;
-};
-
-const Navbar = () => {
-  const user = useSelector((state: RootState) => state.user.user);
-  // const user2 = useSelector((state: RootState) => state.user);
+const Navbar: FC<NavbarProps> = ({
+  searchTerm = "",
+  onSearchChange,
+  selectedCategory = "Explore All",
+  onCategorySelect,
+  showReportsHeader = false,
+}) => {
+  const user = useSelector((state: RootState) => state.user?.user);
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -154,29 +145,20 @@ const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [organizationDropdownOpen, setOrganizationDropdownOpen] =
-    useState(false);
 
   const persistor = persistStore(store);
-
   const queryClient = useQueryClient();
 
   const { data: notifications, isLoading: isLoadingNotifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: fetchNotifications,
+    enabled: !!user,
   });
-
-  const { data: organizations, isLoading: isLoadingOrganizations } = useQuery({
-    queryKey: ["organizations"],
-    queryFn: fetchOrganizations,
-  });
-
-  console.log(organizations);
 
   const { data: isPaidRespondent, isSuccess } = useQuery({
     queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
     queryFn: () => fetchPaidRespondentStatus(),
-    enabled: true,
+    enabled: !!user,
   });
 
   const isPaidRespondentStatus = isPaidRespondent?.isPaidRespondent;
@@ -217,21 +199,6 @@ const Navbar = () => {
     },
   });
 
-  const { mutate: switchAccount, isPending: isSwitchingAccount } = useMutation({
-    mutationFn: async (organizationId: string) => {
-      const response = await axiosInstance.post("/user/switch-account", {
-        organizationId,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      // Invalidate all queries to refetch fresh data
-      queryClient.invalidateQueries();
-      // Close the dropdown
-      setOrganizationDropdownOpen(false);
-    },
-  });
-
   const handleSetActiveTab = (tab: string) => {
     setActiveTab(tab);
     setIsSidebarOpen(false);
@@ -241,9 +208,6 @@ const Navbar = () => {
   const clearPersistedState = () => {
     persistor.purge(); // Clear persisted storage
   };
-
-  // console.log(user);
-  // console.log(user2);
 
   useEffect(() => {
     if (path && path.includes("/surveys")) {
@@ -267,462 +231,333 @@ const Navbar = () => {
 
   // console.log(notifications?.data);
 
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    clearPersistedState();
+    localStorage.removeItem("persist:root");
+    router.push("/login");
+  };
+
   return (
     <div
-      className={cn(
-        "w-full bg-transparent",
-        isSidebarOpen && "h-screen lg:h-auto"
-        // path.includes("survey") ? "" : "shadow-md shadow-black/5"
-      )}
+      className={cn("w-full bg-white", isSidebarOpen && "h-screen lg:h-auto")}
     >
-      <div className="sticky top-0 z-50 bg-[#F7F8FB]">
-        <header className="container flex items-center justify-between py-2 pt-2 px-2 sm:px-5 sticky top-0 bg-[#F7F8FB99] backdrop-blur-md">
-          <div className="hidden lg:flex items-center gap-2 cursor-pointer"></div>
-          {/* mobile */}
-          <div className="lg:hidden flex items-center gap-2 cursor-pointer">
-            <div className="flex gap-4 items-center h-10">
-              {isOpen ? (
+      {/* Main Header */}
+      <header className="w-full px-6 py-4 flex flex-col gap-3 overflow-x-auto">
+        <div
+          className={`flex items-center mx-auto w-full
+            ${path.includes("/blog") ? "justify-between" : "justify-end"}`}
+        >
+          {/* Left Section - Stats or Back Button */}
+          {path.includes("/blog/") && (
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
+              className="text-gray-600"
+            >
+              ← Back
+            </Button>
+          )}
+          {/* Right Section */}
+          <div
+            className={`flex items-center gap-4 w-full justify-end ${
+              path.includes("/blog") && "justify-between"
+            }`}
+          >
+            {/* Search Bar */}
+            {path.includes("/blog") && <BlogSearchBar />}
+
+            <div className="flex items-center ">
+              {path.includes("/blog") && (
+                <>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => router.push("/reports")}
+                    className="text-[#3D3D3D] text-sm text-center bg-[#CB85FD1A] hover:bg-[#CB85FD1A] border-none px-4 py-2"
+                  >
+                    My Reports
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push("/blog")}
+                    className="bg-transparent hover:bg-[#CB85FD1A] border-none outline-none text-[#3D3D3D] hover:text-[#3D3D3D] text-sm flex items-center gap-2"
+                  >
+                    {path.includes("/blog") && (
+                      <FaRegEdit className="text-base text-[#5B03B2]" />
+                    )}
+                    <span className="">Publish</span>
+                  </Button>
+                </>
+              )}
+              {/* Notifications Dropdown */}
+              <DropdownMenu
+                open={notificationOpen}
+                onOpenChange={setNotificationOpen}
+              >
+                <DropdownMenuTrigger asChild className="z-[1000000] relative">
+                  <div className="size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px] relative">
+                    <Image
+                      className="object-contain size-8"
+                      width={24}
+                      height={24}
+                      src={notification}
+                      alt="Notification"
+                    />
+                    {notifications?.data.some(
+                      (n) => n.read_status === "Unread"
+                    ) && (
+                      <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full" />
+                    )}
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-96 z-[10000000] relative"
+                  align="end"
+                  forceMount
+                >
+                  <DropdownMenuLabel className="flex justify-between items-center">
+                    <span>Notifications</span>
+                    {notifications?.data.some(
+                      (n) => n.read_status === "Unread"
+                    ) && (
+                      <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+                        New
+                      </span>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup className="max-h-[400px] overflow-auto">
+                    {isLoadingNotifications ? (
+                      <DropdownMenuItem>
+                        Loading notifications...
+                      </DropdownMenuItem>
+                    ) : notifications?.data.length === 0 ? (
+                      <div className="p-4 text-center">
+                        <div className="mb-3">
+                          <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          You&apos;re all caught up! No new notifications.
+                        </p>
+                        <Button
+                          variant="outline"
+                          onClick={() => router.push("/notifications")}
+                          className="w-full"
+                        >
+                          View notification history
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        {notifications?.data
+                          .filter(
+                            (notification) =>
+                              notification.read_status === "Unread"
+                          )
+                          .slice(0, 5)
+                          .map((notification) => (
+                            <DropdownMenuItem
+                              key={notification._id}
+                              className="cursor-pointer"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <div className="flex flex-col gap-1 py-2 w-full">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-sm flex-1 line-clamp-2">
+                                    {notification.content}
+                                  </p>
+                                  {notification.read_status === "Unread" && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <button
+                                            className="size-6 flex items-center justify-center text-red-500 hover:text-green-900 hover:bg-green-50 rounded-full group"
+                                            onClick={() =>
+                                              markAsRead(notification._id)
+                                            }
+                                          >
+                                            <Mail className="size-4 group-hover:hidden" />
+                                            <MailCheckIcon className="size-4 hidden group-hover:block" />
+                                          </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Mark as read</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground">
+                                    {notification.type === "Survery Response"
+                                      ? "Survey Response"
+                                      : notification.type}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(
+                                      notification.createdAt
+                                    ).toLocaleDateString()}{" "}
+                                    {new Date(
+                                      notification.createdAt
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                            </DropdownMenuItem>
+                          ))}
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="cursor-pointer flex justify-center items-center text-primary hover:text-primary"
+                            onSelect={(e) => {
+                              router.push("/notifications");
+                            }}
+                          >
+                            View all notifications
+                          </DropdownMenuItem>
+                        </>
+                      </>
+                    )}
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* User Avatar Dropdown */}
+              <DropdownMenu open={open} onOpenChange={setOpen}>
+                <DropdownMenuTrigger asChild>
+                  <div className="cursor-pointer flex justify-center items-center size-12">
+                    <Avatar className="size-8">
+                      <AvatarImage
+                        src={(user as any)?.photo_url ?? ""}
+                        alt="@johndoe"
+                        className="size-8"
+                      />
+                      <AvatarFallback className="font-semibold">
+                        {generateInitials((user as any)?.name ?? "")}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 z-[10000000]"
+                  align="end"
+                  forceMount
+                >
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {(user as any)?.name}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {(user as any)?.email}
+                      </p>
+                      <div className="w-full flex items-center justify-between">
+                        <p className="text-xs leading-none text-muted-foreground">
+                          Admin
+                        </p>
+                        {isSuccess && (
+                          <div className="flex items-center gap-1">
+                            <p className="text-xs leading-none text-muted-foreground">
+                              Paid Respondent
+                            </p>
+                            {isSuccess && !isPaidRespondentStatus ? (
+                              <RxCrossCircled className="text-lg text-[red]" />
+                            ) : (
+                              <RxCheckCircled className="text-lg text-[green]" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push("/settings/profile");
+                      }}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push("/settings/account-security");
+                      }}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push("/help-centre");
+                      }}
+                    >
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      <span>Help</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+
+        {path.includes("/blog") && <ReportHighlight />}
+
+        {path.includes("/blog") && (
+          <ScrollArea className="h-auto max-w-[90%] rounded-md border-none p-0">
+            <CategoryNav
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={onCategorySelect ?? (() => {})}
+            />
+          </ScrollArea>
+        )}
+
+        <div className="lg:hidden flex items-center gap-2 cursor-pointer">
+          <div className="flex gap-4 items-center h-10">
+            {isOpen ? (
+              <Image
+                src={"/assets/sidebar/open.svg"}
+                alt="Close sidebar"
+                width={24}
+                height={24}
+                onClick={toogleMainSidebar}
+              />
+            ) : (
+              <>
                 <Image
-                  src={"/assets/sidebar/open.svg"}
-                  alt="Close sidebar"
+                  src={"/assets/sidebar/close.svg"}
+                  alt="Open sidebar"
                   width={24}
                   height={24}
                   onClick={toogleMainSidebar}
+                  className="hidden lg:inline-block"
                 />
-              ) : (
-                <>
-                  <Image
-                    src={"/assets/sidebar/close.svg"}
-                    alt="Open sidebar"
-                    width={24}
-                    height={24}
-                    onClick={toogleMainSidebar}
-                    className="hidden lg:inline-block"
-                  />
-                  <LuMenu
-                    onClick={toogleMainSidebar}
-                    className="text-black text-xl inline-block lg:hidden"
-                  />
-                </>
-              )}
-              {/* <div className="h-10 bg-white relative rounded-lg w-52">
-                <Search className="size-4 text-gray-500 absolute top-1/2 -translate-y-1/2 left-2" />
-                <Input
-                  className="border-none h-10 pl-8 rounded-lg"
-                  placeholder="Search anything"
+                <LuMenu
+                  onClick={toogleMainSidebar}
+                  className="text-black text-xl inline-block lg:hidden"
                 />
-              </div> */}
-            </div>
+              </>
+            )}
           </div>
-          <div className="lg:hidden ml-2 flex items-center gap-2 cursor-pointer">
-            <Link href="/dashboard" className="w-full">
-              <Image src={pollsensei_new_logo} alt="Logo" className="w-[60%]" />
-            </Link>
-          </div>
-
-          <div className="flex gap-4 items-center">
-            {/* Organization Switcher */}
-            {/* <DropdownMenu
-              open={organizationDropdownOpen}
-              onOpenChange={setOrganizationDropdownOpen}
-            >
-              <DropdownMenuTrigger asChild>
-                <div className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted cursor-pointer">
-                  <Building2 className="size-4 text-primary" />
-                  <span className="text-sm font-medium max-w-[200px] truncate">
-                    {currentOrganization.name}
-                  </span>
-                  <ChevronDown className="size-4 text-muted-foreground" />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="max-w-80 w-max sm:max-w-[540px] z-[10000000000]"
-                align="end"
-              >
-                <DropdownMenuLabel>Switch Organization</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <div className="max-h-[300px] overflow-auto">
-                  {isLoadingOrganizations ? (
-                    <div className="flex items-center justify-center p-4">
-                      <Loader2 className="size-5 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (organizations as any)?.length === 0 ? (
-                    <div className="p-4 text-center text-sm text-muted-foreground">
-                      No organizations found
-                    </div>
-                  ) : (
-                    <>
-                      {(organizations as any)?.map((org: Organization) => (
-                        <DropdownMenuItem
-                          key={org._id}
-                          className={`flex items-center justify-between cursor-pointer ${
-                            org._id === currentOrganization._id
-                              ? "bg-gray-100 text-gray-800"
-                              : ""
-                          }`}
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            switchAccount(org._id);
-                            setCurrentOrganization({
-                              _id: org._id,
-                              name: org.name,
-                              designation: org.designation,
-                              roles: org.roles,
-                              is_disabled: org.is_disabled,
-                              status: org.status,
-                            });
-                          }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <Building2 className="size-4 text-gray-600 shrink-0" />
-                            <span className="font-medium text-gray-600">
-                              {org.name}
-                            </span>
-                            {org._id === currentOrganization._id && (
-                              <Check className="size-4 text-green-500 ml-4" />
-                            )}
-                            {org._id === currentOrganization._id && (
-                              <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-blue-600 rounded-full shadow-md capitalize">
-                                {org.designation}
-                              </span>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
-                    </>
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
-
-            <DropdownMenu
-              open={notificationOpen}
-              onOpenChange={setNotificationOpen}
-            >
-              <DropdownMenuTrigger asChild className="z-[1000000] relative">
-                <div className="size-12 rounded-full hover:bg-muted flex items-center justify-center cursor-pointer p-[12px] relative">
-                  <Image
-                    className="object-contain size-8"
-                    width={24}
-                    height={24}
-                    src={notification}
-                    alt="Notification"
-                  />
-                  {notifications?.data.some(
-                    (n) => n.read_status === "Unread"
-                  ) && (
-                    <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full" />
-                  )}
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-96 z-[1000000] relative"
-                align="end"
-                forceMount
-              >
-                <DropdownMenuLabel className="flex justify-between items-center">
-                  <span>Notifications</span>
-                  {notifications?.data.some(
-                    (n) => n.read_status === "Unread"
-                  ) && (
-                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
-                      New
-                    </span>
-                  )}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup className="max-h-[400px] overflow-auto">
-                  {isLoadingNotifications ? (
-                    <DropdownMenuItem>
-                      Loading notifications...
-                    </DropdownMenuItem>
-                  ) : notifications?.data.length === 0 ? (
-                    <div className="p-4 text-center">
-                      <div className="mb-3">
-                        <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        You&apos;re all caught up! No new notifications.
-                      </p>
-                      <Button
-                        variant="outline"
-                        onClick={() => router.push("/notifications")}
-                        className="w-full"
-                      >
-                        View notification history
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      {notifications?.data
-                        .filter(
-                          (notification) =>
-                            notification.read_status === "Unread"
-                        )
-                        .slice(0, 5)
-                        .map((notification) => (
-                          <DropdownMenuItem
-                            key={notification._id}
-                            className="cursor-pointer"
-                            onSelect={(e) => e.preventDefault()}
-                          >
-                            <div className="flex flex-col gap-1 py-2 w-full">
-                              <div className="flex items-start justify-between gap-2">
-                                <p className="text-sm flex-1 line-clamp-2">
-                                  {notification.content}
-                                </p>
-                                {notification.read_status === "Unread" && (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <button
-                                          className="size-6 flex items-center justify-center text-red-500 hover:text-green-900 hover:bg-green-50 rounded-full group"
-                                          onClick={() =>
-                                            markAsRead(notification._id)
-                                          }
-                                        >
-                                          <Mail className="size-4 group-hover:hidden" />
-                                          <MailCheckIcon className="size-4 hidden group-hover:block" />
-                                        </button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Mark as read</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                )}
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-muted-foreground">
-                                  {notification.type === "Survery Response"
-                                    ? "Survey Response"
-                                    : notification.type}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(
-                                    notification.createdAt
-                                  ).toLocaleDateString()}{" "}
-                                  {new Date(
-                                    notification.createdAt
-                                  ).toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </span>
-                              </div>
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
-
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="cursor-pointer flex justify-center items-center text-primary hover:text-primary"
-                          onSelect={(e) => {
-                            router.push("/notifications");
-                          }}
-                        >
-                          View all notifications
-                        </DropdownMenuItem>
-                      </>
-                    </>
-                  )}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu open={open} onOpenChange={setOpen}>
-              <DropdownMenuTrigger asChild>
-                <div className="cursor-pointer flex justify-center items-center size-12">
-                  <Avatar className="size-8">
-                    <AvatarImage
-                      src={(user as any)?.photo_url ?? ""}
-                      alt="@johndoe"
-                      className="size-8"
-                    />
-                    <AvatarFallback className="font-semibold">
-                      {generateInitials((user as any)?.name ?? "")}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-56 z-[10000000]"
-                align="end"
-                forceMount
-              >
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {(user as any)?.name}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {(user as any)?.email}
-                    </p>
-                    <div className="w-full flex items-center justify-between">
-                      <p className="text-xs leading-none text-muted-foreground">
-                        Admin
-                      </p>
-                      {isSuccess && (
-                        <div className="flex items-center gap-1">
-                          <p className="text-xs leading-none text-muted-foreground">
-                            Paid Respondent
-                          </p>
-                          {isSuccess && !isPaidRespondentStatus ? (
-                            <RxCrossCircled className="text-lg text-[red]" />
-                          ) : (
-                            <RxCheckCircled className="text-lg text-[green]" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      router.push("/settings/profile");
-                    }}
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      router.push("/settings/account-security");
-                    }}
-                  >
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      router.push("/help-centre");
-                    }}
-                  >
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    <span>Help</span>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    dispatch(logoutUser());
-                    clearPersistedState();
-                    localStorage.removeItem("persist:root");
-                    router.push("/login");
-                  }}
-                  className="text-red-600"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
-      </div>
-
-      {/* Backdrop */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 backdrop-blur-sm lg:hidden"
-          onClick={toggleSidebar}
-        ></div>
-      )}
-
-      {/* Sidebar for mobile */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out lg:hidden`}
-      >
-        <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-2">
-            <Image src={logo} alt="Logo" />
-            <h2 className="text-xl text-[#5B03B2]">PollSensei</h2>
-          </div>
-          <button
-            onClick={toggleSidebar}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
         </div>
-        <nav className="mt-4 bg-white">
-          <ul className="space-y-2">
-            {[
-              {
-                name: "Dashboard",
-                href: "/dashboard",
-                icon: activeTab === "dashboard" ? homeActive : homeIcon,
-              },
-              {
-                name: "Surveys",
-                href: "/surveys",
-                icon: activeTab === "surveys" ? pieChartActive : pieChartLogo,
-              },
-              {
-                name: "Team members",
-                href: "/team-members",
-                icon: activeTab === "team-members" ? usersActive : users,
-              },
-              {
-                name: "Settings",
-                href: "/settings/profile",
-                icon: activeTab === "settings" ? settingsActive : settings,
-              },
-              {
-                name: "Help Centre",
-                href: "/help-centre",
-                icon: activeTab === "help-centre" ? helpActive : help,
-              },
-            ].map((item) => (
-              <li key={item.name}>
-                <Link href={item.href}>
-                  <div
-                    onClick={() => handleSetActiveTab(item.name.toLowerCase())}
-                    className={`flex items-center px-4 py-2 text-sm ${
-                      activeTab === item.name.toLowerCase()
-                        ? "text-[#9D50BB] bg-purple-100"
-                        : "text-[#4F5B67]"
-                    }`}
-                  >
-                    <Image
-                      src={item.icon}
-                      alt={`${item.name} Icon`}
-                      className="mr-3 w-5 h-5"
-                    />
-                    {item.name}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-
-      {/* Desktop navigation */}
-      <div className="hidden lg:block shadow-md shadow-black/0">
-        {/* <DesktopNavigation /> */}
-        <div className="flex justify-end items-center px-5">
-          <MilestoneCTA />
-        </div>
-      </div>
+      </header>
     </div>
   );
 };

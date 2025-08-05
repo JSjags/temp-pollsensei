@@ -27,6 +27,8 @@ import { AOSInit } from "@/components/ui/Aos";
 import MetaPixel from "@/components/MetaPixel";
 import FeatureLimitation from "@/components/feature-limitation/feature-limitation";
 import ContextProvider from "@/contexts/index";
+import Image from "next/image";
+import { GlobalSidebarProvider } from "@/components/blog/GlobalSidebarProvider";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -128,7 +130,7 @@ export default function RootLayout({
           />
         )}
         <noscript>
-          <img
+          <Image
             height="1"
             width="1"
             style={{ display: "none" }}
@@ -162,10 +164,12 @@ export default function RootLayout({
             <TanstackProvider>
               <ToastContainer className={"z-[1000000]"} limit={1} />
               <ReduxContext>
-                <SenseiProvider>
-                  <UpgradeModal />
-                  <MixPanelProvider>{children}</MixPanelProvider>
-                </SenseiProvider>
+                <GlobalSidebarProvider>
+                  <SenseiProvider>
+                    <UpgradeModal />
+                    <MixPanelProvider>{children}</MixPanelProvider>
+                  </SenseiProvider>
+                </GlobalSidebarProvider>
               </ReduxContext>
             </TanstackProvider>
           </ContextProvider>
