@@ -520,14 +520,6 @@ function CheckoutDialog() {
           <div className="mt-auto w-full flex items-end justify-end max-md:hidden">
             <Button
               onClick={handleCheckout}
-              // disabled={
-              //   loading ||
-              //   isProcessingStripe ||
-              //   (selectedOption === "Card" &&
-              //     (!cardNumber || !cardHolder || !cardExpiry || !cardCVV)) ||
-              //   (selectedOption === "Stripe" &&
-              //     (!cardHolder || !isStripeCardComplete))
-              // }
               disabled={
                 loading ||
                 isProcessingStripe ||
