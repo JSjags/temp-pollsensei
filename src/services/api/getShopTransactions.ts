@@ -5,6 +5,7 @@ export const fetchShopTransactions = async ({ page = 1 }) => {
     const response = await axiosInstance.get("/audit/shop-transactions/history", {
       params: { page },
     });
+console.log(response);
 
     return response.data;
   } catch (error) {

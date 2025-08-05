@@ -1,10 +1,11 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import rawAxiosInstance from "./rawAxiosInstance";
+import axiosInstance from "./axios-instance";
 
 export type PurchasePayload = {
-  paymentGateway: "paystack" | "stripe";
-  currency: "NGN" | "USD";
+  paymentGateway: string | undefined;
+  currency: string | undefined;
   orderReferenceId: string;
   redirect_url?: string;
   // Optional fields
