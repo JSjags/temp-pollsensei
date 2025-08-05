@@ -8,15 +8,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { usePublishReports } from "@/components/reports/queries/usePublishReports";
 import Image from "next/image";
-import mammoth from "mammoth";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoins/CheckoutDialog";
 import { ScrollArea } from "@/components/ui/scrollarea";
 
 // Define interfaces for the content structure (based on Editor.js format)
 interface BlockData {
   text?: string; // For paragraph blocks
-  // Add other data properties for different block types if needed (e.g., url for images)
+
 }
 
 interface Block {
@@ -36,11 +35,8 @@ export default function Published() {
   const reportId = id as string;
   const publishMutation = usePublishReports();
   const { data, isLoading, isError, error } = usePreviewReportById(reportId);
-  const [docxHtml, setDocxHtml] = useState<string | null>(null);
-  const [docxError, setDocxError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const view = searchParams?.get("view");
 
   const post = data?.post;
   const reportMeta = data?.report;

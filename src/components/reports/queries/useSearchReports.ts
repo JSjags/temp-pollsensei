@@ -1,20 +1,6 @@
 import axiosInstance from "@/lib/axios-instance";
-import { fetchSearchReports } from "@/services/api/getCategory";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-// export const useSearchReports = (searchTerm: string, page: number, pageSize: number) => {
-
-//   return useQuery({
-//     queryKey: ["searchReports", searchTerm, page, pageSize],
-//     queryFn: () => fetchSearchReports(searchTerm, page,),
-//     enabled: searchTerm !== undefined,
-
-//     placeholderData: keepPreviousData
-//   });
-// };
-
-
-// In your useSearchReports hook implementation:
 export const useSearchReports = (
   searchTerm: string,
   page: number,
