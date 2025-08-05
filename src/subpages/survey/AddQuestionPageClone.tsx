@@ -553,6 +553,7 @@ const AddQuestionPageClone: FC<Props> = ({ previewSurvey }) => {
     headerUrl,
     logoUrl,
     createSurvey,
+    dispatch,
   ]);
 
   const handleSaveDraft = useCallback(async () => {
@@ -1301,6 +1302,7 @@ const AddQuestionPageClone: FC<Props> = ({ previewSurvey }) => {
                                     index={index + 1}
                                     is_required={item.is_required}
                                     surveyData={surveyData}
+                                    item={item}
                                   />
                                 ) : null
                               }

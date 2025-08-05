@@ -154,8 +154,11 @@ const RegisterPage = () => {
           code: accessToken,
           referral_code: refCode,
         }).unwrap();
-        toast.success("Register success");
-        router.push("/verify-email");
+        toast.success(
+          "Registration successful, please continue with same Google account"
+        );
+        // router.push("/verify-email");
+        router.push("/login");
       } catch (err: any) {
         toast.error(
           typeof err?.data?.message === "string"

@@ -41,18 +41,19 @@ const CreateNewSection = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const newSectionTopic = useSelector(
-    (state: RootState) => state.question[0]?.sectionTopic
+    (state: RootState) => state.question.sectionTopic
   );
   const newSectionDesc = useSelector(
-    (state: RootState) => state.question[0]?.sectionDescription
+    (state: RootState) => state.question.sectionDescription
   );
+
   const [sectionTitle, setSectionTitle] = useState("");
   const [sDescription, setsDescription] = useState("");
   const [isEditing, setIsEditing] = useState(true);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const questions = useSelector(
-    (state: RootState) => state.question[0]?.questions || []
+    (state: RootState) => state.question?.questions || []
   );
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const [createSurvey, { isLoading, isSuccess, isError, error }] =
@@ -173,7 +174,7 @@ const CreateNewSection = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError]);
+  }, [progressError, progressIsError, progressSuccess, router]);
 
   // console.log(questions);
   // console.log(survey);

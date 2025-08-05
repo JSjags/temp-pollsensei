@@ -268,14 +268,17 @@ const FilterRespondents = () => {
     const access =
       sessionStorage.getItem("allowFilterRespondentsAccess") === "true";
     setHasAccess(access);
-    if (!access) {
-      router.push("/shop");
+
+    if (access || quickSurveyId) {
+      setIsInitialized(true);
       return;
     }
-    if (!quickSurveyId) {
+
+    if (location.pathname.includes("/shop")) {
+      router.push("/shop");
+    } else {
       router.push("/surveys/survey-list");
     }
-    setIsInitialized(true);
   }, [router, quickSurveyId]);
 
   useEffect(() => {
