@@ -274,6 +274,7 @@ const FilterRespondents = () => {
       return;
     }
 
+    // Otherwise redirect based on context
     if (location.pathname.includes("/shop")) {
       router.push("/shop");
     } else {
@@ -281,9 +282,9 @@ const FilterRespondents = () => {
     }
   }, [router, quickSurveyId]);
 
-  useEffect(() => {
-    setIsInitialized(true);
-  }, []);
+  // useEffect(() => {
+  //   setIsInitialized(true);
+  // }, []);
 
   const totalCriteria = Object.values(selectedCriteria).reduce((acc, tab) => {
     return (
