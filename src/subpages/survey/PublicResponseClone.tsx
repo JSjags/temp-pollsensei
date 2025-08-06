@@ -84,6 +84,7 @@ const PublicResponse = () => {
     key: string;
     value: any;
   } | null>(null);
+  const [endSurveyTriggered, setEndSurveyTriggered] = useState(false);
   const router = useRouter();
 
   const [activeInput, setActiveInput] = useState<
@@ -104,6 +105,12 @@ const PublicResponse = () => {
 
   // Use sections from question?.data?.sections
   const sections = question?.data?.sections || [];
+
+  // Configuration variable for end survey behavior
+  // "dialog" - shows confirmation dialog (current behavior)
+  // "hide_questions" - hides remaining questions and shows submit button (new behavior)
+  const end_survey_type =
+    question?.data?.settings?.end_survey_type || "hide_questions";
 
   // Helper: flatten all questions with section and index info
   const flattenQuestions = (sections: any[]): any[] => {
@@ -362,6 +369,24 @@ const PublicResponse = () => {
             hidden.delete(q._id);
           } else if (action.type === "end_survey") {
             endSurvey = true;
+
+            // If end_survey_type is "hide_questions", hide all remaining questions after the current one
+            if (end_survey_type === "hide_questions") {
+              // Find the current question's global index
+              const currentQuestionIndex = q.globalIndex;
+
+              // Hide all questions that come after the current question
+              for (
+                let i = currentQuestionIndex + 1;
+                i < allQuestions.length;
+                i++
+              ) {
+                hidden.add(allQuestions[i]._id);
+                console.log(
+                  `Hiding question after end survey trigger: ${allQuestions[i].question} (${allQuestions[i]._id})`
+                );
+              }
+            }
           } else if (action.type === "jump_to") {
             // Find the target question and set jump coordinates
             const targetQ = allQuestions.find(
@@ -505,12 +530,20 @@ const PublicResponse = () => {
         newAnswers
       );
 
-      // Handle end survey action with confirmation dialog
+      // Handle end survey action based on end_survey_type
       if (endSurvey) {
-        setPendingEndSurveyAnswer({ key, value });
-        setShowEndSurveyDialog(true);
-        // Revert the answer change until user confirms
-        return prev;
+        if (end_survey_type === "dialog") {
+          // Original behavior: show confirmation dialog
+          setPendingEndSurveyAnswer({ key, value });
+          setShowEndSurveyDialog(true);
+          // Revert the answer change until user confirms
+          return prev;
+        } else if (end_survey_type === "hide_questions") {
+          // New behavior: hide remaining questions and allow submit
+          setEndSurveyTriggered(true);
+          // Apply the answer change immediately
+          return newAnswers;
+        }
       }
 
       // Handle jump to action
@@ -568,15 +601,23 @@ const PublicResponse = () => {
         newAnswersState
       );
 
-      // Handle end survey action with confirmation dialog
+      // Handle end survey action based on end_survey_type
       if (endSurvey) {
-        setPendingEndSurveyAnswer({
-          key,
-          value: { matrix_answers: newAnswers },
-        });
-        setShowEndSurveyDialog(true);
-        // Revert the answer change until user confirms
-        return prev;
+        if (end_survey_type === "dialog") {
+          // Original behavior: show confirmation dialog
+          setPendingEndSurveyAnswer({
+            key,
+            value: { matrix_answers: newAnswers },
+          });
+          setShowEndSurveyDialog(true);
+          // Revert the answer change until user confirms
+          return prev;
+        } else if (end_survey_type === "hide_questions") {
+          // New behavior: hide remaining questions and allow submit
+          setEndSurveyTriggered(true);
+          // Apply the answer change immediately
+          return newAnswersState;
+        }
       }
 
       // Handle jump to action
@@ -664,7 +705,12 @@ const PublicResponse = () => {
 
   // Evaluate skip logic when sections or answers change (only for jump logic, not end survey)
   useEffect(() => {
-    if (sections.length > 0 && !shouldEndSurvey && !showEndSurveyDialog) {
+    if (
+      sections.length > 0 &&
+      !shouldEndSurvey &&
+      !showEndSurveyDialog &&
+      !endSurveyTriggered
+    ) {
       const { jumpToSection } = evaluateSkipLogic(sections, answers);
 
       // Handle jump to action
@@ -672,7 +718,14 @@ const PublicResponse = () => {
         setCurrentSection(jumpToSection);
       }
     }
-  }, [sections, answers, currentSection, shouldEndSurvey, showEndSurveyDialog]);
+  }, [
+    sections,
+    answers,
+    currentSection,
+    shouldEndSurvey,
+    showEndSurveyDialog,
+    endSurveyTriggered,
+  ]);
 
   // Returns visible questions for the current section
   const getVisibleQuestions = (
@@ -725,14 +778,21 @@ const PublicResponse = () => {
     )
       return false;
     return true;
-  }, [sections, answers, respondent_email, respondent_name, question]);
+  }, [
+    sections,
+    answers,
+    respondent_email,
+    respondent_name,
+    question,
+    endSurveyTriggered,
+  ]);
 
   // Enhanced submit handler with full validation
   const handleSubmitResponse = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     // Check if survey should end due to skip logic
-    if (shouldEndSurvey) {
+    if (shouldEndSurvey || endSurveyTriggered) {
       setSubmitSurveySuccess(true);
       return;
     }
@@ -1766,7 +1826,7 @@ const PublicResponse = () => {
           </motion.div>
         </motion.div>
       )}
-      {submitSurveySuccess && !shouldEndSurvey && (
+      {submitSurveySuccess && !shouldEndSurvey && !endSurveyTriggered && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1883,7 +1943,7 @@ const PublicResponse = () => {
       )}
 
       {/* Unique dialog for survey ending due to skip logic */}
-      {submitSurveySuccess && shouldEndSurvey && (
+      {submitSurveySuccess && (shouldEndSurvey || endSurveyTriggered) && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1930,7 +1990,7 @@ const PublicResponse = () => {
                 transition={{ delay: 0.3 }}
                 className="text-3xl font-bold mb-3 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent text-center"
               >
-                Survey Ended!
+                {endSurveyTriggered ? "Survey Completed!" : "Survey Ended!"}
               </motion.h1>
 
               <motion.p
@@ -1939,7 +1999,9 @@ const PublicResponse = () => {
                 transition={{ delay: 0.4 }}
                 className="text-gray-600 text-lg mb-6 text-center"
               >
-                Based on your answer, this survey has been completed early.
+                {endSurveyTriggered
+                  ? "Your response has been submitted successfully."
+                  : "Based on your answer, this survey has been completed early."}
                 <br />
                 <span className="font-medium text-orange-600">
                   Thank you for your participation!
@@ -2162,8 +2224,9 @@ const PublicResponse = () => {
                   </div>
                 )}
 
-                {/* Only show submit on last section */}
-                {currentSection === sections.length - 1 && (
+                {/* Show submit button on last section or when end survey is triggered */}
+                {(currentSection === sections.length - 1 ||
+                  endSurveyTriggered) && (
                   <div className="rounded-full flex flex-col justify-center w-full py-5 text-center">
                     <Button
                       type="submit"
