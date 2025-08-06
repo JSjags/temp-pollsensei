@@ -70,11 +70,18 @@ interface TestProps {
 }
 
 const KruskalWallisComponent: React.FC<TestProps> = (props) => {
+  // Check if there are any results
+  const hasResults =
+    props.test_results.results.length > 0 &&
+    props.test_results.results.some((result) => Object.keys(result).length > 0);
+
   const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(props.test_results.results[0])[0]
+    hasResults ? Object.keys(props.test_results.results[0])[0] : ""
   );
 
-  const currentResult = props.test_results.results[0][selectedResult];
+  const currentResult = hasResults
+    ? props.test_results.results[0][selectedResult]
+    : null;
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -104,6 +111,37 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
     return props.test_results.results.flatMap((result) => Object.keys(result));
   };
 
+  // If no results, show a message
+  if (!hasResults) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{props.test_name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">
+                No test results available. The test could not be performed due
+                to insufficient data.
+              </p>
+              {props.test_results.description && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-700 mb-2">
+                    Test Information:
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    {extractDescription(props.test_results.description)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -128,6 +166,10 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
           {currentResult?.status === "error" ? (
             <div className="p-4 text-red-500">
               Error: {currentResult.reason}
+            </div>
+          ) : !currentResult ? (
+            <div className="p-4">
+              <p>No data available for this selection.</p>
             </div>
           ) : (
             <>
@@ -267,48 +309,53 @@ const KruskalWallisComponent: React.FC<TestProps> = (props) => {
               )}
 
               {/* Plot Images */}
-              <div
-                className={`grid ${
-                  currentResult.plot_urls.length === 1
-                    ? "grid-cols-1"
-                    : "grid-cols-1 md:grid-cols-2"
-                } gap-4`}
-              >
-                {currentResult.plot_urls?.map((url: string, index: number) => (
-                  <div key={url} className="relative">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="text-center font-medium">
-                        {currentResult.plot_names[index]
-                          .split("_")
-                          .map(formatKey)
-                          .join(" ")}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleImageDownload(
-                            url,
-                            currentResult.plot_names[index]
-                          )
-                        }
-                        className="flex items-center gap-2"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>Download</span>
-                      </Button>
-                    </div>
-                    <div className="relative aspect-video mt-2">
-                      <Image
-                        src={url}
-                        alt={currentResult.plot_names[index]}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
+              {currentResult.plot_urls &&
+                currentResult.plot_urls.length > 0 && (
+                  <div
+                    className={`grid ${
+                      currentResult.plot_urls.length === 1
+                        ? "grid-cols-1"
+                        : "grid-cols-1 md:grid-cols-2"
+                    } gap-4`}
+                  >
+                    {currentResult.plot_urls.map(
+                      (url: string, index: number) => (
+                        <div key={url} className="relative">
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="text-center font-medium">
+                              {currentResult.plot_names[index]
+                                .split("_")
+                                .map(formatKey)
+                                .join(" ")}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleImageDownload(
+                                  url,
+                                  currentResult.plot_names[index]
+                                )
+                              }
+                              className="flex items-center gap-2"
+                            >
+                              <Download className="h-4 w-4" />
+                              <span>Download</span>
+                            </Button>
+                          </div>
+                          <div className="relative aspect-video mt-2">
+                            <Image
+                              src={url}
+                              alt={currentResult.plot_names[index]}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        </div>
+                      )
+                    )}
                   </div>
-                ))}
-              </div>
+                )}
             </>
           )}
         </CardContent>

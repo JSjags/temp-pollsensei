@@ -47,15 +47,20 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
     (result) => Object.keys(result).length > 0
   );
 
+  // Check if there are any valid results
+  const hasResults = validResults.length > 0;
+
   // Set initial selectedResult to the first valid result key, if any
   const [selectedResult, setSelectedResult] = useState<string>(
-    validResults.length > 0 ? Object.keys(validResults[0])[0] : ""
+    hasResults ? Object.keys(validResults[0])[0] : ""
   );
 
   // Find the current result from validResults
-  const currentResult = validResults.find(
-    (result) => Object.keys(result)[0] === selectedResult
-  )?.[selectedResult];
+  const currentResult = hasResults
+    ? validResults.find(
+        (result) => Object.keys(result)[0] === selectedResult
+      )?.[selectedResult]
+    : null;
 
   const formatKey = (key: string) => {
     return key
@@ -93,6 +98,37 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
       </tr>
     ));
   };
+
+  // If no results, show a message
+  if (!hasResults) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{props.test_name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">
+                No test results available. The test could not be performed due
+                to insufficient data.
+              </p>
+              {props.test_results.description && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-700 mb-2">
+                    Test Information:
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    {extractDescription(props.test_results.description)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -144,39 +180,44 @@ const AnovaAnalysisComponent: React.FC<TestProps> = (props) => {
               </div>
 
               {/* Plot Images */}
-              <div className="w-full">
-                {currentResult.plot_urls?.map((url: string, index: number) => (
-                  <div key={url} className="relative w-full">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="text-center font-medium">
-                        {formatKey(currentResult.plot_names[index])}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleImageDownload(
-                            url,
-                            currentResult.plot_names[index]
-                          )
-                        }
-                        className="flex items-center gap-2"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>Download</span>
-                      </Button>
-                    </div>
-                    <div className="relative aspect-video mt-2">
-                      <Image
-                        src={url}
-                        alt={currentResult.plot_names[index]}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
+              {currentResult.plot_urls &&
+                currentResult.plot_urls.length > 0 && (
+                  <div className="w-full">
+                    {currentResult.plot_urls.map(
+                      (url: string, index: number) => (
+                        <div key={url} className="relative w-full">
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="text-center font-medium">
+                              {formatKey(currentResult.plot_names[index])}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleImageDownload(
+                                  url,
+                                  currentResult.plot_names[index]
+                                )
+                              }
+                              className="flex items-center gap-2"
+                            >
+                              <Download className="h-4 w-4" />
+                              <span>Download</span>
+                            </Button>
+                          </div>
+                          <div className="relative aspect-video mt-2">
+                            <Image
+                              src={url}
+                              alt={currentResult.plot_names[index]}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        </div>
+                      )
+                    )}
                   </div>
-                ))}
-              </div>
+                )}
             </>
           )}
         </CardContent>
