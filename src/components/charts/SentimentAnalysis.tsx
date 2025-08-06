@@ -36,11 +36,16 @@ interface TestProps {
 }
 
 const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
+  // Check if there are any results
+  const hasResults = Object.keys(props.test_results.results).length > 0;
+
   const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(props.test_results.results)[0]
+    hasResults ? Object.keys(props.test_results.results)[0] : ""
   );
 
-  const currentResult = props.test_results.results[selectedResult];
+  const currentResult = hasResults
+    ? props.test_results.results[selectedResult]
+    : null;
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -58,6 +63,37 @@ const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
       console.error("Error downloading image:", error);
     }
   };
+
+  // If no results, show a message
+  if (!hasResults) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{props.test_name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">
+                No test results available. The test could not be performed due
+                to insufficient data.
+              </p>
+              {props.test_results.description && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-700 mb-2">
+                    Test Information:
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    {extractDescription(props.test_results.description)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -124,45 +160,48 @@ const SentimentAnalysisComponent: React.FC<TestProps> = (props) => {
               </div>
 
               {/* Plot Images - Keeping this section unchanged for future compatibility */}
-              {currentResult.plot_urls && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {currentResult.plot_urls?.map(
-                    (url: string, index: number) => (
-                      <div key={url} className="relative">
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="text-center font-medium">
-                            {currentResult.plot_names?.[index]
-                              .replace(/_/g, " ")
-                              .replace(/\b\w/g, (l: string) => l.toUpperCase())}
+              {currentResult.plot_urls &&
+                currentResult.plot_urls.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {currentResult.plot_urls.map(
+                      (url: string, index: number) => (
+                        <div key={url} className="relative">
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="text-center font-medium">
+                              {currentResult.plot_names?.[index]
+                                .replace(/_/g, " ")
+                                .replace(/\b\w/g, (l: string) =>
+                                  l.toUpperCase()
+                                )}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleImageDownload(
+                                  url,
+                                  currentResult.plot_names?.[index] ?? ""
+                                )
+                              }
+                              className="flex items-center gap-2"
+                            >
+                              <Download className="h-4 w-4" />
+                              <span>Download</span>
+                            </Button>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleImageDownload(
-                                url,
-                                currentResult.plot_names?.[index] ?? ""
-                              )
-                            }
-                            className="flex items-center gap-2"
-                          >
-                            <Download className="h-4 w-4" />
-                            <span>Download</span>
-                          </Button>
+                          <div className="relative aspect-video mt-2">
+                            <Image
+                              src={url}
+                              alt={currentResult.plot_names?.[index] ?? ""}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
                         </div>
-                        <div className="relative aspect-video mt-2">
-                          <Image
-                            src={url}
-                            alt={currentResult.plot_names?.[index] ?? ""}
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
+                      )
+                    )}
+                  </div>
+                )}
             </>
           )}
         </CardContent>
