@@ -61,7 +61,7 @@ export default function AnalysisErrorComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-black/10 p-8 backdrop-blur-sm">
       <div className="space-y-6 max-w-7xl mx-auto">
         <ContentBlock className="h-24" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
