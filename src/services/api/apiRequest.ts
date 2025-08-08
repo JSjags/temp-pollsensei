@@ -207,16 +207,6 @@ export const fetchLoginStreak = async () => {
   }
 };
 
-export const fetchUnrestrictedBalance = async () => {
-  try {
-    const response = await axiosInstance.get("/wallet/user-balance");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching unrestricted balance:", error);
-    throw error;
-  }
-};
-
 export const fetchAvailableSurveys = async (
   page: number = 1,
   limit: number = 8
@@ -407,6 +397,8 @@ export const submitReviewedParticipant = async (
   }
 };
 
+/************** QUICK SURVEY ***********/
+
 export const CreateQuickSurvey = async (surveyId: string | null) => {
   try {
     const response = await axiosInstance.post("/quick-survey", {
@@ -491,6 +483,304 @@ export const QuickSurveyScreenerPurchase = async (
     return response.data;
   } catch (error) {
     console.error("Error creating survey:", error);
+    throw error;
+  }
+};
+
+/************** REPORTS ***********/
+
+export const GetUserReportsCategories = async () => {
+  try {
+    const response = await axiosInstance.get(`/report/categories`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetUserReportsInterest = async () => {
+  try {
+    const response = await axiosInstance.get(`/report/interests`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const ReportOnboarding = async (
+  selectedRole: string[],
+  selectedFields: string[]
+) => {
+  try {
+    const response = await axiosInstance.post("/report/onboard", {
+      categories: selectedRole,
+      fields_of_interest: selectedFields,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error purchasing screener survey:", error);
+    throw error;
+  }
+};
+
+export const GetLatestReport = async () => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/latest`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetMostRecentReport = async () => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/recent`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetPopularReport = async () => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/popular`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetReportDetailsById = async (id: number) => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetReportCommentsAndReplies = async (id: string) => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/${id}/comments`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetReportBookmark = async (id: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `/report/blog/bookmark-status/${id}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetReportStats = async () => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/stats`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetSearchResults = async (params: any) => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/search`, {
+      params: {
+        search_term: params.search_term,
+        page: params.page || 1,
+        page_size: params.page_size || 20,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const ReportBookmark = async (reportId: string) => {
+  try {
+    const response = await axiosInstance.post(`/report/blog/bookmark`, {
+      report_id: reportId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling bookmark:", error);
+    throw error;
+  }
+};
+
+export const ReportEcho = async (
+  report_id: string,
+  number_of_echoes: number | undefined
+) => {
+  try {
+    const response = await axiosInstance.post("/report/echo", {
+      report_id,
+      number_of_echoes,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const ReportComment = async (
+  report_id: string,
+  content: string,
+  media?: any
+) => {
+  try {
+    const response = await axiosInstance.post("/report/comment", {
+      report_id,
+      content,
+      media,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const EditReportComment = async (
+  comment_id: string,
+  content: string,
+  media?: any
+) => {
+  try {
+    const response = await axiosInstance.patch("/report/comment", {
+      comment_id,
+      content,
+      media,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const DeleteReportComment = async (comment_id: string) => {
+  try {
+    const response = await axiosInstance.delete("/report/comment", {
+      data: {
+        comment_id,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const EchoReportComment = async (comment_id: string) => {
+  try {
+    const response = await axiosInstance.post("/report/comment/echo", {
+      comment_id,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const NestedReportComment = async (
+  comment_id: string,
+  content: string,
+  media?: any
+) => {
+  try {
+    const response = await axiosInstance.post("/report/reply", {
+      comment_id,
+      content,
+      media,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const EditNestedReportComment = async (
+  reply_id: string,
+  comment_id: string,
+  content: string,
+  media?: any
+) => {
+  try {
+    const response = await axiosInstance.patch("/report/reply", {
+      reply_id,
+      comment_id,
+      content,
+      media,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const DeleteNestedReportComment = async (
+  reply_id: string,
+  comment_id: string
+) => {
+  try {
+    const response = await axiosInstance.delete("/report/comment", {
+      data: {
+        reply_id,
+        comment_id,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const EchoNestedReportComment = async (
+  reply_id: string,
+  comment_id: string
+) => {
+  try {
+    const response = await axiosInstance.post("/report/reply/echo", {
+      reply_id,
+      comment_id,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
+    throw error;
+  }
+};
+
+export const GetReportBySlug = async (slug: string) => {
+  try {
+    const response = await axiosInstance.get(`/report/blog/${slug}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reports data:", error);
     throw error;
   }
 };

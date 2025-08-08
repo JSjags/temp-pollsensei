@@ -149,6 +149,7 @@ import criteriaReducer from "./slices/criteriaSlice";
 import earnDialogReducer from "./slices/earnDialogSlice";
 import becomePaidRespondentReducer from "./slices/becomePaidRespondentSlice";
 import limitationReducer from "./slices/limitation.slice";
+import blogReducer from "./slices/blog.slice";
 // At the top of the file, after imports
 export type RootState = {
   user: ReturnType<typeof userReducer>;
@@ -171,6 +172,7 @@ export type RootState = {
   quickSurvey: ReturnType<typeof quickSurveyReducer>;
   earnDialogSlice: ReturnType<typeof earnDialogReducer>;
   becomePaidRespondentSlice: ReturnType<typeof becomePaidRespondentReducer>;
+  blogSlice: ReturnType<typeof blogReducer>;
 };
 
 const rootReducer = combineReducers({
@@ -193,6 +195,7 @@ const rootReducer = combineReducers({
   earnDialogSlice: earnDialogReducer,
   becomePaidRespondentSlice: becomePaidRespondentReducer,
   limitation: limitationReducer,
+  blogSlice: blogReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 }) as unknown as Reducer<RootState>;
 
