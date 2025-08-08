@@ -289,7 +289,7 @@ export default function ReportsPage() {
           </Tabs.List>
         </div>
 
-        <div className="flex justify-between items-center my-6">
+        <div className="flex justify-between items-center my-6 max-md:flex-col gap-4 max-md:items-start">
           <h3
             className="text-lg font-semibold flex items-center gap-2 cursor-pointer hover:underline transition-all duration-300 ease-in-out"
             onClick={() => router.back()}

@@ -1,6 +1,12 @@
 import { Checkbox } from "@/components/shop/components/Checkbox";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogBody, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React from "react";
 import {
@@ -9,11 +15,11 @@ import {
 } from "../../queries/useOnboardState";
 import { toast } from "react-toastify";
 
-type TermsDialogProps={
+type TermsDialogProps = {
   active: string | null;
   onAgree?: () => void;
-}
-export default function Terms({active, onAgree}:TermsDialogProps) {
+};
+export default function Terms({ active, onAgree }: TermsDialogProps) {
   const [checked, setChecked] = React.useState<boolean>(false);
   const { data, refetch } = useReportOnboardState();
 
@@ -26,9 +32,9 @@ export default function Terms({active, onAgree}:TermsDialogProps) {
 
     mutate(payload, {
       onSuccess: () => {
-        refetch()
+        refetch();
         toast.success("Terms accepted successfully");
-         if (onAgree) onAgree();
+        if (onAgree) onAgree();
       },
       onError: (error: any) => {
         // Try to surface a useful message from the error object
@@ -38,6 +44,7 @@ export default function Terms({active, onAgree}:TermsDialogProps) {
           "Something went wrong while saving. Please try again.";
 
         toast.error(message);
+        refetch();
       },
     });
   };
@@ -49,7 +56,10 @@ export default function Terms({active, onAgree}:TermsDialogProps) {
           Proceed
         </Button>
       </DialogTrigger>
-      <DialogContent className="min-w-[800px] max-h-[650px]" showXBtn={false}>
+      <DialogContent
+        className="min-w-[800px] max-md:min-w-0 max-h-[650px]"
+        showXBtn={false}
+      >
         <DialogBody>
           <div>
             <h4 className="text-tertiary font-bold text-2xl">

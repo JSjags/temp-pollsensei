@@ -1,3 +1,251 @@
+// "use client";
+
+// import { useParams, useRouter, useSearchParams } from "next/navigation";
+// import { ArrowLeft } from "lucide-react";
+// import DOMPurify from "dompurify";
+// import { usePreviewReportById } from "@/components/reports/queries/useCategories";
+// import { Button } from "@/components/ui/button";
+// import { toast } from "react-toastify";
+// import { usePublishReports } from "@/components/reports/queries/usePublishReports";
+// import Image from "next/image";
+// import {  useState } from "react";
+// import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoins/CheckoutDialog";
+// import { ScrollArea } from "@/components/ui/scrollarea";
+
+// // Define interfaces for the content structure (based on Editor.js format)
+// interface BlockData {
+//   text?: string; // For paragraph blocks
+
+// }
+
+// interface Block {
+//   id: string;
+//   type: string;
+//   data: BlockData;
+// }
+
+// interface EditorContent {
+//   time: number;
+//   blocks: Block[];
+//   version: string;
+// }
+
+// export default function Published() {
+//   const { id } = useParams();
+//   const reportId = id as string;
+//   const publishMutation = usePublishReports();
+//   const { data, isLoading, isError, error } = usePreviewReportById(reportId);
+//   const router = useRouter();
+//   const searchParams = useSearchParams();
+
+//   const post = data?.post;
+//   const reportMeta = data?.report;
+
+
+//   if (isLoading) {
+//     return (
+//       <div className="flex items-center justify-center min-h-screen w-full">
+//         <LoadingSpinner />
+//       </div>
+//     );
+//   }
+
+//   const Header = () => {
+//     const isDraft = post?.status === "draft";
+//     const isPublished = post?.status === "published";
+
+//     const renderActionButton = () => {
+//       if (!post) {
+//         return (
+//           <Button variant="gradient" className="rounded-md">
+//             Create Post
+//           </Button>
+//         );
+//       }
+
+//       if (isPublished) {
+//         return (
+//           <Button
+//             onClick={handlePublish}
+//             disabled={publishMutation.isPending}
+//             variant="destructive"
+//             className="rounded-md"
+//           >
+//             {publishMutation.isPending ? "Unpublishing..." : "Unpublish"}
+//           </Button>
+//         );
+//       }
+
+//       if (isDraft) {
+//         return (
+//           <Button
+//             onClick={handlePublish}
+//             disabled={publishMutation.isPending}
+//             variant="gradient"
+//             className="rounded-md"
+//           >
+//             {publishMutation.isPending ? "Publishing..." : "Publish"}
+//           </Button>
+//         );
+//       }
+
+//       return null;
+//     };
+
+//     return (
+//       <div className="mb-6 w-full flex items-center justify-between sticky top-0 backdrop-blur px-6 py-3 z-10 border-b">
+//         <div
+//           onClick={() => router.back()}
+//           className="flex items-center cursor-pointer hover:text-tertiary transition-colors duration-200 ease-in-out"
+//         >
+//           <ArrowLeft className="w-5 h-5" />
+//           <span className="ml-2 text-lg font-medium">
+//             {data?.report?.name || post?.name || "Report Preview"}
+//           </span>
+//         </div>
+
+//         {renderActionButton()}
+//       </div>
+//     );
+//   };
+
+//   if (isError) {
+//     return (
+//       <div className="text-center text-red-500 mt-12">
+//         Failed to load report: {(error as Error)?.message ?? "Unknown error"}
+//       </div>
+//     );
+//   }
+
+//   const handlePublish = () => {
+//     if (!post._id) return;
+
+//     publishMutation.mutate(post._id, {
+//       onSuccess: (updatedPost: any) => {
+//         if (updatedPost.status === "published") {
+//           toast.success("Report published successfully!");
+//         } else if (updatedPost.status === "draft") {
+//           toast.success("Report unpublished successfully!");
+//         } else {
+//           toast.success("Report status updated.");
+//         }
+//         router.push(`/reports/${reportMeta?.survey_id}`)
+        
+//       },
+//       onError: (error: any) => {
+//         toast.error(
+//           error?.response?.data?.message || "Failed to update report status"
+//         );
+//       },
+//     });
+//   };
+
+//   // Function to determine if content is JSON or HTML
+//   const isJsonContent = (content: string): boolean => {
+//     try {
+//       const parsed = JSON.parse(content);
+//       return parsed && typeof parsed === 'object' && parsed.blocks;
+//     } catch {
+//       return false;
+//     }
+//   };
+
+//   // Parse content based on its format
+//   const renderContent = () => {
+//     if (!isLoading && !post?.content) {
+//       return <p>No content available.</p>;
+//     }
+
+//     // Check if content is JSON (Editor.js format) or HTML
+//     if (isJsonContent(post?.content)) {
+//       // Handle Editor.js JSON format
+//       try {
+//         const parsedContent: EditorContent = JSON.parse(post?.content);
+//         const contentBlocks = parsedContent.blocks || [];
+        
+//         return contentBlocks.length > 0 ? (
+//           contentBlocks.map((block) => renderBlock(block))
+//         ) : (
+//           <p>No content available.</p>
+//         );
+//       } catch (err) {
+//         console.error("Failed to parse JSON content:", err);
+//         return <p>Failed to parse content.</p>;
+//       }
+//     } else {
+//       // Handle HTML content
+//       const sanitizedHtml = DOMPurify.sanitize(post?.content, {
+//         ALLOWED_TAGS: [
+//           'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'h1', 'h2', 'h3', 
+//           'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'img', 'div', 'span'
+//         ],
+//         ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id', 'style'],
+//       });
+      
+//       return (
+//         <div 
+//           className="prose max-w-none"
+//           dangerouslySetInnerHTML={{ __html: sanitizedHtml }} 
+//         />
+//       );
+//     }
+//   };
+
+//   // Render each block based on its type (for Editor.js format)
+//   const renderBlock = (block: Block) => {
+//     const { id, type, data } = block;
+
+//     switch (type) {
+//       case "paragraph":
+//         // Sanitize the text to prevent XSS
+//         const sanitizedText = DOMPurify.sanitize(data.text || "", {
+//           ALLOWED_TAGS: ["b", "i", "u", "a", "strong", "em"],
+//           ALLOWED_ATTR: ["href"],
+//         });
+//         return (
+//           <p key={id} dangerouslySetInnerHTML={{ __html: sanitizedText }} />
+//         );
+
+//       // Add more cases for other block types (e.g., header, list, image) as needed
+//       default:
+//         return null;
+//     }
+//   };
+
+//   return (
+//     <div className="w-full relative pb-24 overflow-hidden h-[calc(100vh-124px)]">
+//       <Header />
+//       <ScrollArea.Root className="max-w-4xl mx-auto py-10 px-6 overflow-y-auto bg-white">
+
+//           <>
+//             <h1 className="text-3xl font-bold mb-4">{post?.name}</h1>
+//             <p className="text-gray-600 text-sm mb-2">
+//               Created: {new Date(reportMeta?.createdAt).toLocaleDateString()}
+//             </p>
+
+//             <p className="text-base text-muted-foreground mb-6">
+//               {post?.description}
+//             </p>
+
+//             {post?.thumbnail && (
+//               <Image
+//                 src={post?.thumbnail}
+//                 alt="Report thumbnail"
+//                 className="w-full max-h-[300px] object-cover rounded-md mb-6"
+//                 width={500}
+//                 height={500}
+//               />
+//             )}
+
+//             <section className="prose max-w-none">
+//               {renderContent()}
+//             </section>
+//           </>
+//       </ScrollArea.Root>
+//     </div>
+//   );
+// }
+
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
@@ -8,14 +256,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { usePublishReports } from "@/components/reports/queries/usePublishReports";
 import Image from "next/image";
-import {  useState } from "react";
+import { useState, useEffect } from "react";
 import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoins/CheckoutDialog";
 import { ScrollArea } from "@/components/ui/scrollarea";
 
-// Define interfaces for the content structure (based on Editor.js format)
 interface BlockData {
-  text?: string; // For paragraph blocks
-
+  text?: string;
 }
 
 interface Block {
@@ -37,18 +283,14 @@ export default function Published() {
   const { data, isLoading, isError, error } = usePreviewReportById(reportId);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isClient, setIsClient] = useState(false);
 
   const post = data?.post;
   const reportMeta = data?.report;
 
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen w-full">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const Header = () => {
     const isDraft = post?.status === "draft";
@@ -100,7 +342,7 @@ export default function Published() {
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="ml-2 text-lg font-medium">
-            {data?.report?.name || post?.name || "Report Preview"}
+            {reportMeta?.name || post?.name || "Report Preview"}
           </span>
         </div>
 
@@ -108,6 +350,14 @@ export default function Published() {
       </div>
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen w-full">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   if (isError) {
     return (
@@ -118,7 +368,7 @@ export default function Published() {
   }
 
   const handlePublish = () => {
-    if (!post._id) return;
+    if (!post?._id) return;
 
     publishMutation.mutate(post._id, {
       onSuccess: (updatedPost: any) => {
@@ -129,8 +379,7 @@ export default function Published() {
         } else {
           toast.success("Report status updated.");
         }
-        router.push(`/reports/${reportMeta?.survey_id}`)
-        
+        router.push(`/reports/${reportMeta?.survey_id}`);
       },
       onError: (error: any) => {
         toast.error(
@@ -140,8 +389,8 @@ export default function Published() {
     });
   };
 
-  // Function to determine if content is JSON or HTML
   const isJsonContent = (content: string): boolean => {
+    if (!content) return false;
     try {
       const parsed = JSON.parse(content);
       return parsed && typeof parsed === 'object' && parsed.blocks;
@@ -150,17 +399,14 @@ export default function Published() {
     }
   };
 
-  // Parse content based on its format
   const renderContent = () => {
-    if (!isLoading && !post?.content) {
+    if (!post?.content) {
       return <p>No content available.</p>;
     }
 
-    // Check if content is JSON (Editor.js format) or HTML
-    if (isJsonContent(post?.content)) {
-      // Handle Editor.js JSON format
+    if (isJsonContent(post.content)) {
       try {
-        const parsedContent: EditorContent = JSON.parse(post?.content);
+        const parsedContent: EditorContent = JSON.parse(post.content);
         const contentBlocks = parsedContent.blocks || [];
         
         return contentBlocks.length > 0 ? (
@@ -173,8 +419,7 @@ export default function Published() {
         return <p>Failed to parse content.</p>;
       }
     } else {
-      // Handle HTML content
-      const sanitizedHtml = DOMPurify.sanitize(post?.content, {
+      const sanitizedHtml = DOMPurify.sanitize(post.content, {
         ALLOWED_TAGS: [
           'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'h1', 'h2', 'h3', 
           'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'img', 'div', 'span'
@@ -191,13 +436,11 @@ export default function Published() {
     }
   };
 
-  // Render each block based on its type (for Editor.js format)
   const renderBlock = (block: Block) => {
     const { id, type, data } = block;
 
     switch (type) {
       case "paragraph":
-        // Sanitize the text to prevent XSS
         const sanitizedText = DOMPurify.sanitize(data.text || "", {
           ALLOWED_TAGS: ["b", "i", "u", "a", "strong", "em"],
           ALLOWED_ATTR: ["href"],
@@ -205,42 +448,47 @@ export default function Published() {
         return (
           <p key={id} dangerouslySetInnerHTML={{ __html: sanitizedText }} />
         );
-
-      // Add more cases for other block types (e.g., header, list, image) as needed
       default:
         return null;
     }
   };
 
+  if (!isClient) {
+    return (
+      <div className="flex items-center justify-center min-h-screen w-full">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full relative pb-24 overflow-hidden h-[calc(100vh-124px)]">
       <Header />
       <ScrollArea.Root className="max-w-4xl mx-auto py-10 px-6 overflow-y-auto bg-white">
+        <>
+          <h1 className="text-3xl font-bold mb-4">{post?.name}</h1>
+          <p className="text-gray-600 text-sm mb-2">
+            Created: {new Date(reportMeta?.createdAt || Date.now()).toLocaleDateString()}
+          </p>
 
-          <>
-            <h1 className="text-3xl font-bold mb-4">{post?.name}</h1>
-            <p className="text-gray-600 text-sm mb-2">
-              Created: {new Date(reportMeta?.createdAt).toLocaleDateString()}
-            </p>
+          <p className="text-base text-muted-foreground mb-6">
+            {post?.description}
+          </p>
 
-            <p className="text-base text-muted-foreground mb-6">
-              {post?.description}
-            </p>
+          {post?.thumbnail && (
+            <Image
+              src={post.thumbnail}
+              alt="Report thumbnail"
+              className="w-full max-h-[300px] object-cover rounded-md mb-6"
+              width={500}
+              height={500}
+            />
+          )}
 
-            {post?.thumbnail && (
-              <Image
-                src={post?.thumbnail}
-                alt="Report thumbnail"
-                className="w-full max-h-[300px] object-cover rounded-md mb-6"
-                width={500}
-                height={500}
-              />
-            )}
-
-            <section className="prose max-w-none">
-              {renderContent()}
-            </section>
-          </>
+          <section className="prose max-w-none">
+            {renderContent()}
+          </section>
+        </>
       </ScrollArea.Root>
     </div>
   );

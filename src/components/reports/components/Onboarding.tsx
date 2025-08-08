@@ -80,7 +80,7 @@ export default function Onboarding() {
       {
         onSuccess: (res) => {
           toast.success("Onboarding completed successfully!");
-          // setStep("finish");
+          setStep("finish");
           router.push("/reports");
           // Wait a short moment before navigating (optional)
           setTimeout(() => {
