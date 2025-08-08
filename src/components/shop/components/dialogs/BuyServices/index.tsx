@@ -63,12 +63,12 @@ export function BuyServicesDialog(props: BuyDialogProps) {
 
   useEffect(() => {
     if (credit) {
-      const calculatedAmount = (parseFloat(credit) * pricePerCredit).toFixed(2);
+      const calculatedAmount = (parseFloat(credit) / pricePerCredit).toFixed(2);
       setAnalysisAmount(calculatedAmount);
     } else {
       setAnalysisAmount("");
     }
-  }, [credit, setAnalysisAmount, pricePerCredit]);
+  }, [credit, setAnalysisAmount,pricePerCredit]);
 
   const validate = () => {
     const quantityNum = parseFloat(credit);
@@ -151,8 +151,8 @@ export function BuyServicesDialog(props: BuyDialogProps) {
                     <Skeleton className="h-5 w-full mt-2" />
                   ) : (
                     <p className="mt-1 text-xs">
-                      Today&apos;s {title} rate: {pricePerCredit}pc ={" "}
-                      {creditsPerUnit} {title}
+                      Today&apos;s {title} rate: {creditsPerUnit}pc ={" "}
+                      {pricePerCredit} {title}
                     </p>
                   )}
                 </div>

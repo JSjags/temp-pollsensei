@@ -16,9 +16,7 @@ export default function ReportsPage() {
     return <div>Error loading onboard state</div>;
   }
 
-  // If data is undefined/null/false, user is not onboarded
-  // If data has truthy value, user is onboarded
-  const isOnboard = !!data;
+const isOnboard = !!(data?.categories?.length);
   
   return <div>{isOnboard ? <MyReports /> : <Onboarding />}</div>;
 }

@@ -25,6 +25,7 @@
 // import { toast } from "react-toastify";
 // import axiosInstance from "@/lib/axios-instance";
 // import { PublishReportPayload } from "@/components/reports/queries/usePostOnboard";
+// import { useReportDraftStore } from "@/components/reports/stores";
 
 // const defaultCategories = [
 //   { value: "health", label: "Health" },
@@ -54,6 +55,7 @@
 //   categoryId?: string;
 //   interestIds?: string[];
 // }
+
 // export default function DraftPreviewPage() {
 //   const searchParams = useSearchParams();
 //   const { id } = useParams();
@@ -61,6 +63,10 @@
 
 //   const title = searchParams.get("title");
 //   const url = searchParams.get("url");
+
+//   // Get AI summary data from store
+//   const summaryMethod = useReportDraftStore((s) => s.summaryMethod);
+//   const summaryContent = useReportDraftStore((s) => s.summaryContent);
 
 //   const [docxError, setDocxError] = useState<string | null>(null);
 //   const [quillContent, setQuillContent] = useState(
@@ -72,6 +78,7 @@
 //   const [reportId, setReportId] = useState<string>("");
 //   const [isPublishing, setIsPublishing] = useState(false);
 //   const [reportUrl, setReportUrl] = useState<string>("");
+//   const [isLoadingAiContent, setIsLoadingAiContent] = useState(false);
 //   const [formState, setFormState] = useState<ReportFormState>({
 //     title: "",
 //     description: "",
@@ -106,6 +113,48 @@
 //     return defaultInterests;
 //   }, [interestsData]);
 
+//   // Function to load AI content from URL
+//   const loadAiContent = async (summaryUrl: string) => {
+//     setIsLoadingAiContent(true);
+//     try {
+//       const response = await fetch(summaryUrl);
+//       const arrayBuffer = await response.arrayBuffer();
+
+//       const { value: rawHtml } = await mammoth.convertToHtml({ arrayBuffer });
+//       const cleanHtml = DOMPurify.sanitize(rawHtml);
+      
+//       // Set the AI content directly to Quill editor
+//       setQuillContent(cleanHtml);
+//       toast.success("AI summary loaded successfully!");
+//     } catch (error: any) {
+//       console.error("Failed to load AI content:", error);
+//       toast.error("Failed to load AI summary content");
+//       // Fallback to text content if available
+//       if (summaryContent) {
+//         setQuillContent(`<p>${summaryContent}</p>`);
+//       }
+//     } finally {
+//       setIsLoadingAiContent(false);
+//     }
+//   };
+
+//   // Effect to handle AI content loading
+//   useEffect(() => {
+//     if (summaryMethod === "ai" && summaryContent) {
+//       // Check if summaryContent is a URL (contains .docx) or direct text
+//       if (typeof summaryContent === "string" && summaryContent.includes(".docx")) {
+//         // It's a URL, load the document
+//         loadAiContent(summaryContent);
+//       } else {
+//         // It's direct text content
+//         const htmlContent = typeof summaryContent === "string" 
+//           ? `<p>${summaryContent}</p>` 
+//           : "<p>AI content loaded</p>";
+//         setQuillContent(htmlContent);
+//       }
+//     }
+//   }, [summaryMethod, summaryContent]);
+
 //   const handlePublishReport = async () => {
 //     if (
 //       !formState.title ||
@@ -127,13 +176,12 @@
 //         description: formState.description,
 //         categories: [formState.category],
 //         fields_of_interest: formState.interests,
-//         summarized_by: "manual",
+//         summarized_by: summaryMethod || "manual",
 //         content: quillContent,
 //         thumbnail: formState.thumbnailUrl,
 //       };
 
 //       const response = await axiosInstance.post("/report", payload);
-
 
 //       toast.success("Post created successfully!");
 //       router.push(`/reports/published/${response.data._id}`);
@@ -175,6 +223,7 @@
 //       }));
 //     }
 //   };
+
 //   useEffect(() => {
 //     if (reportData) {
 //       setFormState((prev) => ({
@@ -187,6 +236,7 @@
 //       }));
 //     }
 //   }, [reportData]);
+
 //   const crumbs: Crumb[] = [
 //     { label: "Reports", href: "/reports" },
 //     { label: "My Reports", href: "/reports" },
@@ -214,6 +264,7 @@
 //       console.error("Error fetching report data:", error);
 //     }
 //   };
+
 //   useEffect(() => {
 //     if (reportId) {
 //       fetchReportData(reportId);
@@ -221,7 +272,6 @@
 //   }, [reportId]);
 
 //   // Parse and extract all elements for rendering
-
 //   const parseDocxHtml = (html: string) => {
 //     const parser = new DOMParser();
 //     const doc = parser.parseFromString(html, "text/html");
@@ -239,6 +289,7 @@
 
 //     setDocxElements(elements);
 //   };
+
 //   // Handle import button clicks
 //   const handleImportClick = (element: HTMLElement) => {
 //     const htmlContent = element.outerHTML;
@@ -264,6 +315,7 @@
 //       setIsLoading(false);
 //     }
 //   }, []);
+
 //   useEffect(() => {
 //     const fetchDocx = async () => {
 //       if (!url) return;
@@ -294,6 +346,11 @@
 //           </div>
 //         </div>
 //         <div className="flex items-center space-x-4">
+//           {summaryMethod === "ai" && (
+//             <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
+//               AI Summary Loaded
+//             </span>
+//           )}
 //           <button
 //             onClick={() => setShowComparison(!showComparison)}
 //             className="text-tertiary hover:text-tertiary/85 flex items-center space-x-2 text-sm"
@@ -312,7 +369,12 @@
 //         {/* Left: Editor Panel */}
 //         <div className="w-1/2 border-r flex flex-col">
 //           <div className="p-6 border-b bg-white flex-shrink-0">
-//             <h2 className="text-xl font-bold">Draft Editor</h2>
+//             <h2 className="text-xl font-bold">
+//               Draft Editor {summaryMethod === "ai" && "(AI Summary)"}
+//             </h2>
+//             {isLoadingAiContent && (
+//               <p className="text-sm text-blue-600 mt-1">Loading AI content...</p>
+//             )}
 //           </div>
 //           <div className="flex-1 overflow-y-auto p-6 bg-white">
 //             <ReactQuill
@@ -342,11 +404,12 @@
 //                     !formState.title ||
 //                     !formState.description ||
 //                     isPublishing ||
-//                     quillContent.length === 0
+//                     quillContent.length === 0 ||
+//                     isLoadingAiContent
 //                   }
 //                   className="flex items-center space-x-1 text-white rounded transition-colors"
 //                 >
-//                   {isPublishing && <LoadingSpinner />}
+//                   {(isPublishing || isLoadingAiContent) && <LoadingSpinner />}
 //                   <ExternalLink className="w-3 h-3" />
 //                   <span>Create</span>
 //                 </Button>
@@ -424,6 +487,7 @@
 //     </div>
 //   );
 // }
+
 "use client";
 
 import { useSearchParams, useParams, useRouter } from "next/navigation";
@@ -482,6 +546,20 @@ interface ReportData {
   interestIds?: string[];
 }
 
+// Word counting utility function
+const countWords = (html: string): number => {
+  // Create a temporary div to extract text from HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  const text = tempDiv.textContent || tempDiv.innerText || '';
+  
+  // Split by whitespace and filter out empty strings
+  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+  return text.trim() === '' ? 0 : words.length;
+};
+
+const MAX_WORDS = 1000;
+
 export default function DraftPreviewPage() {
   const searchParams = useSearchParams();
   const { id } = useParams();
@@ -498,6 +576,7 @@ export default function DraftPreviewPage() {
   const [quillContent, setQuillContent] = useState(
     "<p>Your editable content here...</p>"
   );
+  const [wordCount, setWordCount] = useState(0);
   const [docxElements, setDocxElements] = useState<HTMLElement[]>([]);
   const [showComparison, setShowComparison] = useState(true);
   const [reportData, setReportData] = useState<ReportData | null>(null);
@@ -551,13 +630,17 @@ export default function DraftPreviewPage() {
       
       // Set the AI content directly to Quill editor
       setQuillContent(cleanHtml);
+      // Update word count
+      setWordCount(countWords(cleanHtml));
       toast.success("AI summary loaded successfully!");
     } catch (error: any) {
       console.error("Failed to load AI content:", error);
       toast.error("Failed to load AI summary content");
       // Fallback to text content if available
       if (summaryContent) {
-        setQuillContent(`<p>${summaryContent}</p>`);
+        const fallbackContent = `<p>${summaryContent}</p>`;
+        setQuillContent(fallbackContent);
+        setWordCount(countWords(fallbackContent));
       }
     } finally {
       setIsLoadingAiContent(false);
@@ -577,9 +660,25 @@ export default function DraftPreviewPage() {
           ? `<p>${summaryContent}</p>` 
           : "<p>AI content loaded</p>";
         setQuillContent(htmlContent);
+        setWordCount(countWords(htmlContent));
       }
     }
   }, [summaryMethod, summaryContent]);
+
+  // Handle Quill content change with word limit
+  const handleQuillChange = (content: string) => {
+    const currentWordCount = countWords(content);
+    
+    if (currentWordCount <= MAX_WORDS) {
+      setQuillContent(content);
+      setWordCount(currentWordCount);
+    } else {
+      // If over limit, show warning but still update (user can edit to reduce)
+      setQuillContent(content);
+      setWordCount(currentWordCount);
+      toast.warn(`Word limit exceeded! Please reduce content to ${MAX_WORDS} words or less.`);
+    }
+  };
 
   const handlePublishReport = async () => {
     if (
@@ -590,6 +689,11 @@ export default function DraftPreviewPage() {
       !formState.thumbnailUrl
     ) {
       toast.error("Please fill all required fields before publishing");
+      return;
+    }
+
+    if (wordCount > MAX_WORDS) {
+      toast.error(`Content exceeds word limit. Please reduce to ${MAX_WORDS} words or less.`);
       return;
     }
 
@@ -663,6 +767,11 @@ export default function DraftPreviewPage() {
     }
   }, [reportData]);
 
+  // Initialize word count on component mount
+  useEffect(() => {
+    setWordCount(countWords(quillContent));
+  }, []);
+
   const crumbs: Crumb[] = [
     { label: "Reports", href: "/reports" },
     { label: "My Reports", href: "/reports" },
@@ -719,7 +828,16 @@ export default function DraftPreviewPage() {
   // Handle import button clicks
   const handleImportClick = (element: HTMLElement) => {
     const htmlContent = element.outerHTML;
-    setQuillContent((prev) => prev + htmlContent);
+    const newContent = quillContent + htmlContent;
+    const newWordCount = countWords(newContent);
+    
+    if (newWordCount > MAX_WORDS) {
+      toast.warn(`Adding this content would exceed the ${MAX_WORDS} word limit. Current: ${wordCount}, New total would be: ${newWordCount}`);
+      return;
+    }
+    
+    setQuillContent(newContent);
+    setWordCount(newWordCount);
   };
 
   // Get URL parameters
@@ -762,6 +880,8 @@ export default function DraftPreviewPage() {
     fetchDocx();
   }, [url]);
 
+  const isOverWordLimit = wordCount > MAX_WORDS;
+
   return (
     <div className="flex flex-col h-screen">
       {/* Fixed Header */}
@@ -791,22 +911,40 @@ export default function DraftPreviewPage() {
       </div>
 
       {/* Main Content Area with Independent Scrolling */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 md:overflow-hidden max-md:flex-col gap-4">
         {/* Left: Editor Panel */}
-        <div className="w-1/2 border-r flex flex-col">
+        <div className="w-1/2 border-r flex flex-col max-md:w-full">
           <div className="p-6 border-b bg-white flex-shrink-0">
-            <h2 className="text-xl font-bold">
-              Draft Editor {summaryMethod === "ai" && "(AI Summary)"}
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">
+                Draft Editor {summaryMethod === "ai" && "(AI Summary)"}
+              </h2>
+              <div className="flex items-center space-x-2">
+                <span 
+                  className={`text-sm px-2 py-1 rounded ${
+                    isOverWordLimit 
+                      ? 'text-red-600 bg-red-50 border border-red-200' 
+                      : 'text-gray-600 bg-gray-50'
+                  }`}
+                >
+                  {wordCount}/{MAX_WORDS} words
+                </span>
+              </div>
+            </div>
             {isLoadingAiContent && (
               <p className="text-sm text-blue-600 mt-1">Loading AI content...</p>
+            )}
+            {isOverWordLimit && (
+              <p className="text-sm text-red-600 mt-1">
+                Content exceeds word limit. Please reduce to continue.
+              </p>
             )}
           </div>
           <div className="flex-1 overflow-y-auto p-6 bg-white">
             <ReactQuill
               theme="snow"
               value={quillContent}
-              onChange={setQuillContent}
+              onChange={handleQuillChange}
               className="bg-white"
               style={{ height: "calc(100vh - 200px)" }}
             />
@@ -814,7 +952,7 @@ export default function DraftPreviewPage() {
         </div>
 
         {/* Right: Preview/Editor Panel */}
-        <div className="w-1/2 flex flex-col bg-white">
+        <div className="w-1/2 flex flex-col bg-white max-md:w-full">
           {/* Fixed Header for Right Panel */}
           <div className="border-b p-4 flex-shrink-0 bg-white">
             <div className="flex items-center justify-between mb-3">
@@ -831,7 +969,8 @@ export default function DraftPreviewPage() {
                     !formState.description ||
                     isPublishing ||
                     quillContent.length === 0 ||
-                    isLoadingAiContent
+                    isLoadingAiContent ||
+                    isOverWordLimit
                   }
                   className="flex items-center space-x-1 text-white rounded transition-colors"
                 >
