@@ -32,6 +32,9 @@ import {
   deleteQuestionFromSection,
   resetSurvey,
   deleteSection,
+  updateSection,
+  updateTopic,
+  updateDescription,
 } from "@/redux/slices/survey.slice";
 import { useRouter, usePathname } from "next/navigation";
 import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
@@ -96,7 +99,16 @@ import {
   MoveRight,
   MoreVertical,
   BringToFront,
+  Paintbrush,
+  AlignVerticalSpaceAround,
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SkipLogicEditor, {
+  SkipLogicRule,
+  SkipLogicRuleV2,
+  transformSurveySkipLogic,
+} from "./SkipLogicEditor";
+import { setSkipLogic } from "@/redux/slices/survey.slice";
 
 // Define Section type at the top (after imports)
 type Section = {
@@ -160,6 +172,15 @@ const AddQuestionPage = () => {
   const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Skip Logic State
+  const [skipLogic, setSkipLogicState] = useState<
+    (SkipLogicRule | SkipLogicRuleV2)[]
+  >([]);
+  const surveySkipLogic = useSelector(
+    (state: RootState) => state?.survey?.skipLogic || []
+  );
+  const [activeTab, setActiveTab] = useState("questions");
 
   const [
     createSurvey,
@@ -329,10 +350,15 @@ const AddQuestionPage = () => {
       console.error("Invalid edit index.");
       return;
     }
+
     const updatedQuestionData = {
       question: updatedQuestion,
       options:
-        updatedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions,
+        updatedQuestionType === "boolean"
+          ? ["Yes", "No"]
+          : updatedQuestionType === "star_rating"
+          ? ["1", "2", "3", "4", "5"]
+          : updatedOptions,
       question_type: updatedQuestionType,
       is_required: isRequired,
       minValue,
@@ -423,76 +449,107 @@ const AddQuestionPage = () => {
             : headerUrl,
         logo_url:
           typeof logoUrl === "string" && logoUrl.startsWith("#") ? "" : logoUrl,
-        sections: sections.map((section, idx) => {
-          return {
-            section_topic: section.title,
-            section_description: section.description,
-            questions: section.questions.map((question: any) => {
-              const baseQuestion = {
-                question: question.question,
-                description: question.description || question.question,
-                question_type: question.question_type,
-                is_required: question.is_required,
-              };
-              switch (question.question_type) {
-                case "slider":
-                  return {
-                    ...baseQuestion,
-                    min: question.min,
-                    max: question.max,
-                    step: question.step || 1,
-                  };
-                case "checkbox":
-                case "multiple_choice":
-                case "single_choice":
-                case "drop_down":
-                case "likert_scale":
-                case "rating_scale":
-                case "star_rating":
-                case "boolean":
-                  return {
-                    ...baseQuestion,
-                    options: question.options,
-                  };
-                case "matrix_multiple_choice":
-                case "matrix_checkbox":
-                  return {
-                    ...baseQuestion,
-                    description: question.description || "Matrix Question",
-                    rows: question.rows,
-                    columns: question.columns,
-                  };
-                case "number":
-                  return {
-                    ...baseQuestion,
-                    min: question.min,
-                    max: question.max,
-                  };
-                case "long_text":
-                  return {
-                    ...baseQuestion,
-                    can_accept_media: question.can_accept_media || false,
-                  };
-                case "short_text":
-                case "media":
-                default:
-                  return baseQuestion;
+        sections: sections.map((section, sectionIdx) => {
+          const baseSection = {
+            questions: section.questions.map(
+              (question: any, questionIdx: any) => {
+                const baseQuestion = {
+                  question: question.question,
+                  description: question.description || question.question,
+                  question_type: question.question_type,
+                  is_required: question.is_required,
+                };
+
+                // Add skip logic if available for this question
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  sectionIdx,
+                  questionIdx
+                );
+                const questionId = `Question${globalQuestionIndex + 1}`;
+                const processedSkipLogic = transformSkipLogic();
+                const questionSkipLogic = processedSkipLogic
+                  .filter((logic) => logic.questionId === questionId)
+                  .map((logic) => logic.skipLogic);
+
+                const questionWithSkipLogic = {
+                  ...baseQuestion,
+                  ...(questionSkipLogic.length > 0 && {
+                    skip_logic: questionSkipLogic,
+                  }),
+                };
+
+                switch (question.question_type) {
+                  case "slider":
+                    return {
+                      ...questionWithSkipLogic,
+                      min: question.min,
+                      max: question.max,
+                      step: question.step || 1,
+                    };
+                  case "checkbox":
+                  case "multiple_choice":
+                  case "single_choice":
+                  case "drop_down":
+                  case "likert_scale":
+                  case "rating_scale":
+                  case "star_rating":
+                  case "boolean":
+                    return {
+                      ...questionWithSkipLogic,
+                      options: question.options,
+                    };
+                  case "matrix_multiple_choice":
+                  case "matrix_checkbox":
+                    return {
+                      ...questionWithSkipLogic,
+                      description: question.description || "Matrix Question",
+                      rows: question.rows,
+                      columns: question.columns,
+                    };
+                  case "number":
+                    return {
+                      ...questionWithSkipLogic,
+                      min: question.min,
+                      max: question.max,
+                    };
+                  case "long_text":
+                    return {
+                      ...questionWithSkipLogic,
+                      can_accept_media: question.can_accept_media || false,
+                    };
+                  case "short_text":
+                  case "media":
+                  default:
+                    return questionWithSkipLogic;
+                }
               }
-            }),
+            ),
           };
+
+          // Handle section headers like in EditSurvey
+          if (sectionIdx === 0) {
+            return baseSection;
+          } else {
+            return {
+              section_topic: section.title,
+              section_description: section.description,
+              ...baseSection,
+            };
+          }
         }),
       };
       await createSurvey(processedSurvey).unwrap();
-      setSurvey_id(createdSurveyData?.data?._id || "");
-      setReview(true);
+      // Removed setSurvey_id and setReview calls to prevent infinite loop
+      // These are now handled only in the useEffect when isSuccess becomes true
     } catch (e) {
       console.error("Survey creation error:", e);
     }
   };
 
+  console.log(sections);
+
   useEffect(() => {
     if (isSuccess) {
-      setReview((prev) => !prev);
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
       setReview(true);
@@ -539,16 +596,311 @@ const AddQuestionPage = () => {
         "Failed to create survey, Don't panic, your progress was saved"
       );
     }
-  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
+  }, [
+    isSuccess,
+    isError,
+    error,
+    dispatch,
+    router,
+    saveprogress,
+    createdSurveyData,
+    sections,
+    headerUrl,
+    logoUrl,
+  ]);
 
   useEffect(() => {
-    if (progressSuccess) {
-      router.push("/surveys/survey-list");
-    }
+    // Don't redirect on progressSuccess - that just means draft was saved
+    // Only redirect on actual survey creation success (handled in the main useEffect)
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError, progressSuccess]);
+  }, [progressError, progressIsError]);
+
+  // Skip Logic synchronization with Redux
+  useEffect(() => {
+    if (surveySkipLogic.length > 0) {
+      setSkipLogicState(surveySkipLogic);
+    }
+  }, [surveySkipLogic]);
+
+  // Handle skip logic updates
+  const handleSkipLogicUpdate = useCallback(
+    (newSkipLogic: (SkipLogicRule | SkipLogicRuleV2)[]) => {
+      setSkipLogicState(newSkipLogic);
+      dispatch(setSkipLogic(newSkipLogic));
+    },
+    [dispatch]
+  );
+
+  // Sync sections with Redux for persistence
+  const syncSectionsWithRedux = useCallback(() => {
+    // Clear existing sections in Redux
+    const currentReduxSections = survey.sections;
+
+    // Remove all existing sections
+    for (let i = currentReduxSections.length - 1; i >= 0; i--) {
+      dispatch(deleteSection(i));
+    }
+
+    // Add current sections to Redux
+    sections.forEach((section, index) => {
+      const reduxSection = {
+        section_topic: section.title,
+        section_description: section.description,
+        questions: section.questions,
+      };
+
+      if (index === 0) {
+        // First section doesn't need section_topic/description in Redux
+        dispatch(addSection({ questions: section.questions }));
+      } else {
+        dispatch(addSection(reduxSection));
+      }
+    });
+
+    // Also update survey topic and description from first section
+    if (sections.length > 0) {
+      dispatch(updateTopic(sections[0].title || ""));
+      dispatch(updateDescription(sections[0].description || ""));
+    }
+  }, [sections, survey.sections, dispatch]);
+
+  // Restore sections from Redux on component mount
+  useEffect(() => {
+    if (survey.sections.length > 0) {
+      const restoredSections = survey.sections.map((section, index) => ({
+        title:
+          index === 0
+            ? survey.topic || "Untitled Section"
+            : section.section_topic || "Untitled Section",
+        description:
+          index === 0
+            ? survey.description || ""
+            : section.section_description || "",
+        questions: section.questions || [],
+      }));
+
+      setSections(restoredSections);
+      console.log("Restored sections from Redux:", restoredSections);
+    }
+  }, []); // Only run on mount
+
+  // Sync sections with Redux when sections change (with debounce to prevent excessive updates)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      syncSectionsWithRedux();
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [sections]); // Removed syncSectionsWithRedux from dependencies to prevent infinite loop
+
+  // Helper function to get global question index across all sections
+  const getGlobalQuestionIndex = (
+    sectionIndex: number,
+    questionIndex: number
+  ): number => {
+    let globalIndex = 0;
+    for (let s = 0; s < sections.length; s++) {
+      if (s < sectionIndex) {
+        globalIndex += sections[s].questions.length;
+      } else if (s === sectionIndex) {
+        globalIndex += questionIndex;
+        break;
+      }
+    }
+    return globalIndex;
+  };
+
+  // Transform skip logic to API format
+  const transformSkipLogic = useCallback(() => {
+    const processedLogic: any[] = [];
+
+    skipLogic.forEach((rule) => {
+      if ("conditions" in rule && "action" in rule) {
+        // New rule format (SkipLogicRuleV2)
+        const {
+          conditions,
+          logicalOperator,
+          action,
+          target,
+          mainQuestionSection,
+          mainQuestionIndex,
+        } = rule;
+
+        // Determine which question this logic applies to
+        let targetQuestionId = null;
+
+        if (action === "end_survey") {
+          if (conditions.length > 0) {
+            const firstCondition = conditions[0];
+            const questionIndex = firstCondition.questionIndex;
+            const sectionIndex = firstCondition.sectionIndex;
+            if (questionIndex !== null && sectionIndex !== null) {
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                sectionIndex,
+                questionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
+            }
+          } else {
+            if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                mainQuestionSection,
+                mainQuestionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
+            }
+          }
+        } else {
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            const globalQuestionIndex = getGlobalQuestionIndex(
+              mainQuestionSection,
+              mainQuestionIndex
+            );
+            targetQuestionId = `Question${globalQuestionIndex + 1}`;
+          }
+        }
+
+        if (targetQuestionId) {
+          const rules = conditions
+            .map((cond: any) => {
+              const sourceQuestionIndex = cond.questionIndex;
+              const sourceSectionIndex = cond.sectionIndex;
+              if (sourceQuestionIndex === null || sourceSectionIndex === null)
+                return null;
+
+              // For end_survey actions, use flattened question index
+              let questionId;
+              if (action === "end_survey") {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  sourceSectionIndex,
+                  sourceQuestionIndex
+                );
+                questionId = `Question${globalQuestionIndex + 1}`;
+              } else {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  sourceSectionIndex,
+                  sourceQuestionIndex
+                );
+                questionId = `Question${globalQuestionIndex + 1}`;
+              }
+
+              const rule = {
+                source_id: questionId,
+                operator: cond.operator,
+                value: cond.value,
+              };
+
+              return rule;
+            })
+            .filter(Boolean);
+
+          let actionType = action;
+          let targetType = "question";
+          let targetId = "Question1";
+
+          if (action === "end_survey") {
+            actionType = "end_survey";
+            targetType = "question";
+            // For end_survey, use the question that has the logic (from conditions or main question)
+            if (conditions.length > 0) {
+              const firstCondition = conditions[0];
+              const questionIndex = firstCondition.questionIndex;
+              if (questionIndex !== null) {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  firstCondition.sectionIndex,
+                  questionIndex
+                );
+                targetId = `Question${globalQuestionIndex + 1}`;
+              } else {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  mainQuestionSection,
+                  mainQuestionIndex
+                );
+                targetId = `Question${globalQuestionIndex + 1}`;
+              }
+            } else {
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                mainQuestionSection,
+                mainQuestionIndex
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
+            }
+          } else if (action === "jump_to") {
+            actionType = "jump_to";
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              // Use flattened question index for jump_to questions
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                target.sectionIndex,
+                target.questionIndex
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+          } else {
+            // hide/show actions
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+          }
+
+          // Determine logic_type based on action
+          let logicType = "skip_logic"; // default
+          if (action === "hide" || action === "show") {
+            logicType = "display_logic";
+          } else if (action === "jump_to") {
+            logicType = "skip_logic";
+          } else if (action === "end_survey") {
+            logicType = "skip_logic";
+          }
+
+          const skipLogicEntry = {
+            logic_type: logicType,
+            condition: {
+              logical_operator: logicalOperator,
+              rules: rules,
+              action: {
+                type: actionType,
+                target_type: targetType,
+                target_id: targetId,
+              },
+            },
+          };
+
+          processedLogic.push({
+            questionId: targetQuestionId,
+            skipLogic: skipLogicEntry,
+          });
+        }
+      }
+    });
+
+    return processedLogic;
+  }, [skipLogic, sections]);
 
   const handleCancel = () => {
     // setEditIndex(null);
@@ -605,14 +957,13 @@ const AddQuestionPage = () => {
 
   const handleSaveDraft = async () => {
     try {
-      await saveprogress({
-        ...survey,
-        sections: sections.map((section) => ({
-          section_topic: section.title,
-          section_description: section.description,
-          questions: section.questions,
-        })),
-      });
+      // Ensure sections are synced with Redux before saving
+      syncSectionsWithRedux();
+
+      // Use the Redux survey state for saving (which now includes our sections)
+      const updatedSurvey = store.getState().survey;
+      await saveprogress(updatedSurvey);
+
       toast.success("Survey saved as draft");
       if (pendingNavigation) {
         pendingNavigation();
@@ -620,6 +971,22 @@ const AddQuestionPage = () => {
       setShowExitDialog(false);
     } catch (error) {
       toast.error("Failed to save draft");
+    }
+  };
+
+  // Manual save progress function for immediate persistence
+  const handleSaveProgress = async () => {
+    try {
+      // Ensure sections are synced with Redux before saving
+      syncSectionsWithRedux();
+
+      // Use the Redux survey state for saving (which now includes our sections)
+      const updatedSurvey = store.getState().survey;
+      await saveprogress(updatedSurvey);
+
+      toast.success("Progress saved successfully");
+    } catch (error) {
+      toast.error("Failed to save progress");
     }
   };
 
@@ -1758,8 +2125,47 @@ const AddQuestionPage = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
-          <StyleEditor surveyData={surveyData} setSurveyData={setSurveyData} />
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger
+                value="questions"
+                className="flex items-center gap-2"
+              >
+                <Paintbrush className="h-4 w-4" />
+                Style
+              </TabsTrigger>
+              <TabsTrigger
+                value="skip-logic"
+                className="flex items-center gap-2"
+              >
+                <AlignVerticalSpaceAround className="h-4 w-4" />
+                Skip Logic
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="questions" className="h-full">
+              <StyleEditor
+                surveyData={surveyData}
+                setSurveyData={setSurveyData}
+              />
+            </TabsContent>
+
+            <TabsContent value="skip-logic" className="h-full">
+              <SkipLogicEditor
+                sections={sections.map((section) => ({
+                  section_topic: section.title,
+                  section_description: section.description,
+                  questions: section.questions,
+                }))}
+                skipLogic={skipLogic}
+                onChange={handleSkipLogicUpdate}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 

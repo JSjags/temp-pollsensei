@@ -52,7 +52,7 @@ interface Question {
 interface FormErrors {
   respondent_email?: string;
   respondent_name?: string;
-  questions: Record<string, string>;
+  questions: Record<string, string | undefined>;
 }
 
 const PublicResponse = () => {
@@ -137,24 +137,71 @@ const PublicResponse = () => {
     answers: any
   ): {
     hidden: Set<string>;
+    hiddenSections: Set<string>;
     endSurvey: boolean;
     jumpToSection?: number;
     jumpToQuestion?: number;
+    showActions: Array<{ sectionId: string; sectionIndex: number }>;
   } => {
     const allQuestions = flattenQuestions(sections);
     const hidden = new Set<string>();
+    const hiddenSections = new Set<string>();
     let endSurvey = false;
     let jumpToSection: number | undefined;
     let jumpToQuestion: number | undefined;
+    const showActions: Array<{ sectionId: string; sectionIndex: number }> = [];
 
     // Initialize hidden set with questions that have "show" logic (they should be hidden by default)
+    // BUT only if the show action targets the question itself, not if it targets a section
     allQuestions.forEach((q) => {
       if (
         q.skip_logic?.some(
-          (logic: any) => logic.condition.action.type === "show"
+          (logic: any) =>
+            logic.condition.action.type === "show" &&
+            logic.condition.action.target_type !== "section"
         )
       ) {
         hidden.add(q._id);
+        console.log(
+          `Initializing question as hidden due to show logic: ${q._id} (${q.question})`
+        );
+      }
+    });
+
+    // Initialize hidden sections set with sections that have "show" logic (they should be hidden by default)
+    // Also hide sections that are targeted by "show" actions from other questions
+    sections.forEach((section, sectionIndex) => {
+      // Check if this section has its own show logic
+      if (
+        section.skip_logic?.some(
+          (logic: any) => logic.condition.action.type === "show"
+        )
+      ) {
+        hiddenSections.add(section._id);
+        console.log(
+          `Initializing section as hidden due to its own show logic: ${
+            section._id
+          } (${section.section_topic || "Section " + (sectionIndex + 1)})`
+        );
+      }
+
+      // Check if any question has show logic targeting this section
+      const isTargetedByShowLogic = allQuestions.some((q) =>
+        q.skip_logic?.some(
+          (logic: any) =>
+            logic.condition.action.type === "show" &&
+            logic.condition.action.target_type === "section" &&
+            logic.condition.action.target_id === section._id
+        )
+      );
+
+      if (isTargetedByShowLogic) {
+        hiddenSections.add(section._id);
+        console.log(
+          `Initializing section as hidden due to show logic from other questions: ${
+            section._id
+          } (${section.section_topic || "Section " + (sectionIndex + 1)})`
+        );
       }
     });
 
@@ -309,6 +356,7 @@ const PublicResponse = () => {
             operator: rule.operator,
             isNumericComparison,
             isLikertScale,
+            rawAnswer: getAnswer(rule.source_id),
           });
 
           let result;
@@ -340,6 +388,21 @@ const PublicResponse = () => {
           }
 
           console.log(`Rule result: ${result} for ${rule.operator} comparison`);
+
+          // Special debug for end_survey logic
+          if (action.type === "end_survey") {
+            console.log("🔍 END_SURVEY RULE DEBUG:", {
+              sourceId: rule.source_id,
+              operator: rule.operator,
+              compareVal,
+              compareValType: typeof compareVal,
+              ruleValue,
+              ruleValueType: typeof ruleValue,
+              result,
+              rawAnswer: getAnswer(rule.source_id),
+            });
+          }
+
           return result;
         });
 
@@ -362,12 +425,41 @@ const PublicResponse = () => {
           });
 
           if (action.type === "hide") {
-            // Hide the question that contains the skip logic (source question)
-            hidden.add(q._id);
+            // Check if target is a question or section
+            if (action.target_type === "section") {
+              // Hide the target section
+              hiddenSections.add(action.target_id);
+            } else {
+              // Hide the question that contains the skip logic (source question)
+              hidden.add(q._id);
+            }
           } else if (action.type === "show") {
-            // Show the question that contains the skip logic (source question)
-            hidden.delete(q._id);
+            // Check if target is a question or section
+            if (action.target_type === "section") {
+              // Show the target section
+              hiddenSections.delete(action.target_id);
+              const sectionIndex = sections.findIndex(
+                (s: any) => s._id === action.target_id
+              );
+              if (sectionIndex !== -1) {
+                showActions.push({ sectionId: action.target_id, sectionIndex });
+              }
+            } else {
+              // Show the question that contains the skip logic (source question)
+              hidden.delete(q._id);
+            }
           } else if (action.type === "end_survey") {
+            console.log("🚨 END_SURVEY TRIGGERED:", {
+              triggeringQuestion: q.question,
+              triggeringQuestionId: q._id,
+              condMet,
+              ruleResults,
+              rules: logic.condition.rules,
+              answers: Object.keys(answers).map((sectionIdx) => ({
+                sectionIndex: sectionIdx,
+                answers: answers[sectionIdx],
+              })),
+            });
             endSurvey = true;
 
             // If end_survey_type is "hide_questions", hide all remaining questions after the current one
@@ -388,68 +480,131 @@ const PublicResponse = () => {
               }
             }
           } else if (action.type === "jump_to") {
-            // Find the target question and set jump coordinates
-            const targetQ = allQuestions.find(
-              (qq: any) => qq._id === action.target_id
-            );
-            if (targetQ) {
-              jumpToSection = targetQ.sectionIndex;
-              jumpToQuestion = targetQ.questionIndex;
+            // For jump_to actions, hide everything between source and target
+            const sourceQuestion = q;
+            const sourceGlobalIndex = sourceQuestion.globalIndex;
 
-              console.log(`Jump logic triggered:`, {
-                sourceQuestion: q.question,
-                sourceIndex: q.globalIndex,
-                targetQuestion: targetQ.question,
-                targetIndex: targetQ.globalIndex,
-                action: action,
-              });
-
-              // For jump_to logic, we need to hide:
-              // 1. All questions between source and target (excluding both source and target)
-              // Note: We DON'T hide the source question - it should remain visible until answered
-              // Note: We DON'T hide questions after the target - the survey should continue normally
-
-              const sourceIdx = q.globalIndex;
-              const targetIdx = targetQ.globalIndex;
-
-              console.log(
-                `Jump logic: source=${sourceIdx}, target=${targetIdx}`
+            if (action.target_type === "section") {
+              // Jump to section: hide everything between source question and target section start
+              const targetSectionIndex = sections.findIndex(
+                (s: any) => s._id === action.target_id
               );
 
-              // Hide all questions between source and target (excluding both source and target)
-              if (sourceIdx < targetIdx) {
-                // Forward jump: hide questions from source+1 to target-1
-                for (let i = sourceIdx + 1; i < targetIdx; i++) {
-                  hidden.add(allQuestions[i]._id);
-                  console.log(
-                    `Hiding question between: ${allQuestions[i].question} (${allQuestions[i]._id})`
-                  );
+              if (targetSectionIndex !== -1) {
+                // Calculate target section's first question global index
+                let targetGlobalIndex = 0;
+                for (let s = 0; s < targetSectionIndex; s++) {
+                  targetGlobalIndex += sections[s].questions.length;
                 }
-              } else {
-                // Backward jump: hide questions from target+1 to source-1
-                for (let i = targetIdx + 1; i < sourceIdx; i++) {
-                  hidden.add(allQuestions[i]._id);
-                  console.log(
-                    `Hiding question between: ${allQuestions[i].question} (${allQuestions[i]._id})`
-                  );
+
+                console.log(
+                  `Jump to section: source=${sourceGlobalIndex}, target section start=${targetGlobalIndex}`
+                );
+
+                // Hide all questions between source and target section start
+                for (
+                  let i = sourceGlobalIndex + 1;
+                  i < targetGlobalIndex;
+                  i++
+                ) {
+                  if (allQuestions[i]) {
+                    hidden.add(allQuestions[i]._id);
+                    console.log(
+                      `Hiding question ${i}: ${allQuestions[i].question}`
+                    );
+                  }
+                }
+
+                // Hide all sections between source section and target section
+                for (
+                  let s = sourceQuestion.sectionIndex + 1;
+                  s < targetSectionIndex;
+                  s++
+                ) {
+                  if (sections[s]) {
+                    hiddenSections.add(sections[s]._id);
+                    console.log(
+                      `Hiding section ${s}: ${
+                        sections[s].section_topic || "Section " + (s + 1)
+                      }`
+                    );
+                  }
+                }
+
+                // Don't force target section visibility - respect other skip logic
+                // The target section should only be visible if other logic allows it
+              }
+            } else if (action.target_type === "question") {
+              // Jump to specific question: hide everything between source and target question
+              const targetQuestion = allQuestions.find(
+                (qq: any) => qq._id === action.target_id
+              );
+
+              if (targetQuestion) {
+                const targetGlobalIndex = targetQuestion.globalIndex;
+
+                console.log(
+                  `Jump to question: source=${sourceGlobalIndex}, target=${targetGlobalIndex}`
+                );
+
+                // Hide all questions between source and target (exclusive)
+                for (
+                  let i = sourceGlobalIndex + 1;
+                  i < targetGlobalIndex;
+                  i++
+                ) {
+                  if (allQuestions[i]) {
+                    hidden.add(allQuestions[i]._id);
+                    console.log(
+                      `Hiding question ${i}: ${allQuestions[i].question}`
+                    );
+                  }
+                }
+
+                // Hide all sections that are completely between source and target sections
+                for (
+                  let s = sourceQuestion.sectionIndex + 1;
+                  s < targetQuestion.sectionIndex;
+                  s++
+                ) {
+                  if (sections[s]) {
+                    hiddenSections.add(sections[s]._id);
+                    console.log(
+                      `Hiding section ${s}: ${
+                        sections[s].section_topic || "Section " + (s + 1)
+                      }`
+                    );
+                  }
                 }
               }
-
-              // DO NOT hide questions after the target - the survey should continue normally
-              console.log(
-                `Jump logic: Questions after target will remain visible`
-              );
             }
           }
         }
       }
     }
-    return { hidden, endSurvey, jumpToSection, jumpToQuestion };
+
+    console.log(`Final skip logic result:`, {
+      hiddenQuestions: Array.from(hidden),
+      hiddenSections: Array.from(hiddenSections),
+      endSurvey,
+      jumpToSection,
+      jumpToQuestion,
+      showActions,
+    });
+
+    return {
+      hidden,
+      hiddenSections,
+      endSurvey,
+      jumpToSection,
+      jumpToQuestion,
+      showActions,
+    };
   };
 
   // Validate single question
   const validateQuestion = (question: any, value: any) => {
-    const error = validateQuestionResponse(question, value);
+    let error = validateQuestionResponse(question, value);
 
     // Additional validation for matrix questions
     if (
@@ -465,20 +620,13 @@ const PublicResponse = () => {
         const missingRows = question.rows.filter(
           (row: string) => !answeredRows.has(row)
         );
-        const errorMessage = `Please select at least one option for the following rows: ${missingRows.join(
+        error = `Please select at least one option for the following rows: ${missingRows.join(
           ", "
         )}`;
-        setFormErrors((prev) => ({
-          ...prev,
-          questions: {
-            ...prev.questions,
-            [question.question]: errorMessage,
-          },
-        }));
-        return errorMessage;
       }
     }
 
+    // Update form errors state
     if (error) {
       setFormErrors((prev) => ({
         ...prev,
@@ -497,6 +645,7 @@ const PublicResponse = () => {
         };
       });
     }
+
     return error;
   };
 
@@ -525,10 +674,17 @@ const PublicResponse = () => {
       const newAnswers = { ...prev, [currentSection]: updatedSection };
 
       // Evaluate skip logic after updating answers
-      const { endSurvey, jumpToSection, jumpToQuestion } = evaluateSkipLogic(
-        sections,
-        newAnswers
-      );
+      const { endSurvey, jumpToSection, jumpToQuestion, showActions } =
+        evaluateSkipLogic(sections, newAnswers);
+
+      // Debug: Log end survey evaluation
+      console.log("🎯 ANSWER CHANGE DEBUG:", {
+        questionKey: key,
+        answerValue: value,
+        endSurvey,
+        currentAnswers: newAnswers,
+        end_survey_type,
+      });
 
       // Handle end survey action based on end_survey_type
       if (endSurvey) {
@@ -546,16 +702,25 @@ const PublicResponse = () => {
         }
       }
 
-      // Handle jump to action
-      if (jumpToSection !== undefined && jumpToSection !== currentSection) {
-        setCurrentSection(jumpToSection);
-      }
+      // Don't automatically navigate - let users choose when to navigate
+      // Sections will be shown/hidden based on skip logic, but navigation is manual
 
       return newAnswers;
     });
 
     if (question) {
-      validateQuestion(question, value);
+      const error = validateQuestion(question, value);
+      // Clear error if question is now valid
+      if (!error && formErrors.questions[question.question]) {
+        setFormErrors((prev) => {
+          const newQuestions = { ...prev.questions };
+          delete newQuestions[question.question];
+          return {
+            ...prev,
+            questions: newQuestions,
+          };
+        });
+      }
     }
   };
 
@@ -596,10 +761,8 @@ const PublicResponse = () => {
       const newAnswersState = { ...prev, [currentSection]: updatedSection };
 
       // Evaluate skip logic after updating answers
-      const { endSurvey, jumpToSection } = evaluateSkipLogic(
-        sections,
-        newAnswersState
-      );
+      const { endSurvey, jumpToSection, jumpToQuestion, showActions } =
+        evaluateSkipLogic(sections, newAnswersState);
 
       // Handle end survey action based on end_survey_type
       if (endSurvey) {
@@ -620,13 +783,11 @@ const PublicResponse = () => {
         }
       }
 
-      // Handle jump to action
-      if (jumpToSection !== undefined && jumpToSection !== currentSection) {
-        setCurrentSection(jumpToSection);
-      }
+      // Don't automatically navigate - let users choose when to navigate
+      // Sections will be shown/hidden based on skip logic, but navigation is manual
 
       // Validate
-      validateQuestion(
+      const error = validateQuestion(
         {
           question: key,
           question_type:
@@ -635,6 +796,18 @@ const PublicResponse = () => {
         },
         updatedSection[key]
       );
+
+      // Clear error if question is now valid
+      if (!error && formErrors.questions[key]) {
+        setFormErrors((prev) => {
+          const newQuestions = { ...prev.questions };
+          delete newQuestions[key];
+          return {
+            ...prev,
+            questions: newQuestions,
+          };
+        });
+      }
       return newAnswersState;
     });
   };
@@ -733,7 +906,15 @@ const PublicResponse = () => {
     answers: any,
     currentSection: number
   ): any[] => {
-    const { hidden } = evaluateSkipLogic(sections, answers);
+    const { hidden, hiddenSections } = evaluateSkipLogic(sections, answers);
+
+    // Check if the current section is hidden
+    const currentSectionData = sections[currentSection];
+    if (currentSectionData && hiddenSections.has(currentSectionData._id)) {
+      console.log(`Section ${currentSection} is hidden by skip logic`);
+      return [];
+    }
+
     const visibleQuestions = sections[currentSection]?.questions.filter(
       (q: any) => !hidden.has(q._id)
     );
@@ -744,12 +925,92 @@ const PublicResponse = () => {
       hidden:
         sections[currentSection]?.questions.length - visibleQuestions.length,
       hiddenIds: Array.from(hidden),
+      sectionHidden: hiddenSections.has(currentSectionData?._id || ""),
     });
 
     return visibleQuestions;
   };
 
+  // Helper function to check if a section is visible (not hidden by skip logic)
+  const isSectionVisible = (sectionIndex: number): boolean => {
+    const { hiddenSections } = evaluateSkipLogic(sections, answers);
+    const sectionData = sections[sectionIndex];
+    return !(sectionData && hiddenSections.has(sectionData._id));
+  };
+
+  // Helper function to get the next visible section
+  const getNextVisibleSection = (currentSectionIndex: number): number => {
+    for (let i = currentSectionIndex + 1; i < sections.length; i++) {
+      if (isSectionVisible(i)) {
+        return i;
+      }
+    }
+    return currentSectionIndex; // Return current if no next visible section found
+  };
+
+  // Helper function to get the previous visible section
+  const getPreviousVisibleSection = (currentSectionIndex: number): number => {
+    for (let i = currentSectionIndex - 1; i >= 0; i--) {
+      if (isSectionVisible(i)) {
+        return i;
+      }
+    }
+    return currentSectionIndex; // Return current if no previous visible section found
+  };
+
+  // Helper function to get total number of visible sections
+  const getVisibleSectionsCount = (): number => {
+    return sections.filter((_: any, index: number) => isSectionVisible(index))
+      .length;
+  };
+
+  // Helper function to get current visible section index (among visible sections only)
+  const getCurrentVisibleSectionIndex = (): number => {
+    let visibleIndex = 0;
+    for (let i = 0; i <= currentSection; i++) {
+      if (isSectionVisible(i)) {
+        if (i === currentSection) {
+          return visibleIndex;
+        }
+        visibleIndex++;
+      }
+    }
+    return 0;
+  };
+
+  // Helper function to check if a section has validation errors
+  const getSectionValidationStatus = (sectionIndex: number) => {
+    const visibleQuestions = getVisibleQuestions(
+      sections,
+      answers,
+      sectionIndex
+    );
+    const hasErrors = visibleQuestions.some((quest: any) => {
+      if (!quest.is_required) return false;
+      const error = validateQuestionResponse(
+        quest,
+        answers[sectionIndex]?.[quest.question]
+      );
+      return !!error;
+    });
+
+    return {
+      hasErrors,
+      errorCount: visibleQuestions.filter((quest: any) => {
+        if (!quest.is_required) return false;
+        const error = validateQuestionResponse(
+          quest,
+          answers[sectionIndex]?.[quest.question]
+        );
+        return !!error;
+      }).length,
+    };
+  };
+
   // Auto submit function for skip logic end survey
+
+  // No automatic navigation - users stay on whatever section they're on
+  // Sections become visible/hidden based on skip logic, but navigation is completely manual
 
   // Validate all required questions in all sections (only visible questions)
   const isAllRequiredAnswered = React.useMemo(() => {
@@ -787,49 +1048,25 @@ const PublicResponse = () => {
     endSurveyTriggered,
   ]);
 
-  // Enhanced submit handler with full validation
+  // Enhanced submit handler with comprehensive validation
   const handleSubmitResponse = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    // Check if survey should end due to skip logic
-    if (shouldEndSurvey || endSurveyTriggered) {
-      setSubmitSurveySuccess(true);
-      return;
-    }
+    // Always submit the form normally, regardless of end survey state
+    // The end survey confirmation should only happen when answering questions, not when submitting
 
-    const currentQuestions =
-      question?.data?.sections[currentSection]?.questions;
-    if (!currentQuestions) {
-      toast.warning("No questions found in this section");
-      return;
-    }
-
-    // Format answers for all sections (only visible questions)
     const allSections = question?.data?.sections || [];
-    const formattedAnswers = allSections.flatMap(
-      (section: any, sIdx: number) => {
-        const visibleQuestions = getVisibleQuestions(sections, answers, sIdx);
-        return visibleQuestions.map((question: any) => {
-          const answer = answers[sIdx]?.[question.question];
-          const formattedAnswer = {
-            question: question.question,
-            question_type: question.question_type,
-            ...answer,
-          };
-          // Add duration field for long text with media URL
-          if (question.question_type === "long_text" && answer?.media_url) {
-            formattedAnswer.duration = answer.duration || 0;
-          }
-          return formattedAnswer;
-        });
-      }
-    );
+    if (!allSections.length) {
+      toast.warning("No sections found in this survey");
+      return;
+    }
 
-    // Validate required fields
+    // Initialize validation errors
     const newFormErrors: FormErrors = {
       questions: {},
     };
 
+    // Validate respondent information if required
     if (
       question?.data?.settings?.collect_email_addresses &&
       !respondent_email
@@ -844,35 +1081,107 @@ const PublicResponse = () => {
       newFormErrors.respondent_name = "Name is required";
     }
 
-    // Validate all visible questions in current section
-    const visibleQuestions = getVisibleQuestions(
-      sections,
-      answers,
-      currentSection
-    );
-    visibleQuestions.forEach((quest: any) => {
-      if (quest.is_required) {
-        const error = validateQuestionResponse(
-          quest,
-          answers[currentSection]?.[quest.question]
-        );
-        if (error) {
-          newFormErrors.questions[quest.question] = error;
+    // Validate all visible questions across all sections
+    let hasValidationErrors = false;
+    const allVisibleQuestions: any[] = [];
+
+    for (let sIdx = 0; sIdx < allSections.length; sIdx++) {
+      const visibleQuestions = getVisibleQuestions(sections, answers, sIdx);
+
+      visibleQuestions.forEach((quest: any) => {
+        allVisibleQuestions.push({
+          ...quest,
+          sectionIndex: sIdx,
+        });
+
+        // Only validate required questions
+        if (quest.is_required) {
+          const answer = answers[sIdx]?.[quest.question];
+          const error = validateQuestionResponse(quest, answer);
+
+          if (error) {
+            newFormErrors.questions[quest.question] = error;
+            hasValidationErrors = true;
+            console.log(
+              `Validation error in section ${sIdx + 1}: ${
+                quest.question
+              } - ${error}`
+            );
+          }
         }
-      }
+      });
+    }
+
+    console.log("Validation summary:", {
+      totalVisibleQuestions: allVisibleQuestions.length,
+      requiredQuestions: allVisibleQuestions.filter((q) => q.is_required)
+        .length,
+      validationErrors: Object.keys(newFormErrors.questions).length,
+      hasErrors: hasValidationErrors,
     });
 
+    // Update form errors state
     setFormErrors(newFormErrors);
 
-    // Check if there are any errors
+    // Check if there are any validation errors
     if (
-      Object.keys(newFormErrors.questions).length > 0 ||
+      hasValidationErrors ||
       newFormErrors.respondent_email ||
       newFormErrors.respondent_name
     ) {
-      toast.error("Please fix the validation errors before submitting");
+      // Create a more detailed error message
+      const errorSections = new Set<number>();
+      Object.keys(newFormErrors.questions).forEach((questionName) => {
+        const question = allVisibleQuestions.find(
+          (q) => q.question === questionName
+        );
+        if (question) {
+          errorSections.add(question.sectionIndex + 1);
+        }
+      });
+
+      const sectionList = Array.from(errorSections)
+        .sort((a: number, b: number) => a - b)
+        .join(", ");
+      const errorMessage =
+        errorSections.size > 0
+          ? `Please fix validation errors in section(s): ${sectionList}`
+          : "Please fix the validation errors before submitting";
+
+      toast.error(errorMessage);
+
+      // If there are errors in the current section, stay on it
+      // If there are errors in other sections, navigate to the first section with errors
+      const firstErrorSection = allVisibleQuestions.find(
+        (quest: any) => newFormErrors.questions[quest.question]
+      )?.sectionIndex;
+
+      if (
+        firstErrorSection !== undefined &&
+        firstErrorSection !== currentSection
+      ) {
+        setCurrentSection(firstErrorSection);
+      }
+
       return;
     }
+
+    // Format answers for submission (only visible questions)
+    const formattedAnswers = allVisibleQuestions.map((quest: any) => {
+      const answer = answers[quest.sectionIndex]?.[quest.question];
+      const formattedAnswer = {
+        question: quest.question,
+        question_type: quest.question_type,
+        ...answer,
+      };
+
+      // Add duration field for long text with media URL
+      if (quest.question_type === "long_text" && answer?.media_url) {
+        formattedAnswer.duration = answer.duration || 0;
+      }
+
+      return formattedAnswer;
+    });
 
     // Submit response
     const responsePayload: any = {
@@ -892,8 +1201,6 @@ const PublicResponse = () => {
     }
 
     try {
-      // console.log(responsePayload);
-
       await submitPublicResponse(responsePayload).unwrap();
       toast.success("Your response was saved successfully");
       setSubmitSurveySuccess(true);
@@ -903,13 +1210,13 @@ const PublicResponse = () => {
     }
   };
 
-  // Update navigatePage to use sections
+  // Update navigatePage to use sections and skip logic
   const navigatePage = (direction: "next" | "prev") => {
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
-        return prevIndex < sections.length - 1 ? prevIndex + 1 : prevIndex;
+        return getNextVisibleSection(prevIndex);
       } else {
-        return prevIndex > 0 ? prevIndex - 1 : prevIndex;
+        return getPreviousVisibleSection(prevIndex);
       }
     });
   };
@@ -1826,7 +2133,7 @@ const PublicResponse = () => {
           </motion.div>
         </motion.div>
       )}
-      {submitSurveySuccess && !shouldEndSurvey && !endSurveyTriggered && (
+      {submitSurveySuccess && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1942,130 +2249,6 @@ const PublicResponse = () => {
         </motion.div>
       )}
 
-      {/* Unique dialog for survey ending due to skip logic */}
-      {submitSurveySuccess && (shouldEndSurvey || endSurveyTriggered) && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-        >
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.5, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-            }}
-            className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 max-w-lg w-full mx-4 shadow-[0_0_50px_rgba(255,165,0,0.25)] border border-orange-100"
-          >
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-col items-center"
-            >
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 260,
-                  damping: 20,
-                  delay: 0.2,
-                }}
-                className="relative"
-              >
-                <div className="absolute inset-0 bg-orange-500/20 rounded-full blur-xl animate-pulse" />
-                <div className="text-orange-500 text-7xl mb-6 relative z-10 drop-shadow-lg">
-                  🚧
-                </div>
-              </motion.div>
-
-              <motion.h1
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-3xl font-bold mb-3 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent text-center"
-              >
-                {endSurveyTriggered ? "Survey Completed!" : "Survey Ended!"}
-              </motion.h1>
-
-              <motion.p
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-gray-600 text-lg mb-6 text-center"
-              >
-                {endSurveyTriggered
-                  ? "Your response has been submitted successfully."
-                  : "Based on your answer, this survey has been completed early."}
-                <br />
-                <span className="font-medium text-orange-600">
-                  Thank you for your participation!
-                </span>
-              </motion.p>
-
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="flex flex-col sm:flex-row gap-4 w-full"
-              >
-                <Link
-                  href="/"
-                  className="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-orange-500 to-red-500 text-white h-12 px-6 py-3 hover:opacity-90 group relative"
-                >
-                  <span className="absolute inset-0 rounded-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="relative flex items-center gap-2">
-                    <motion.span
-                      initial={{ x: 0 }}
-                      whileHover={{ x: -4 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                    >
-                      Go to Home Page
-                    </motion.span>
-                    <motion.span
-                      initial={{ x: 0, opacity: 0.5 }}
-                      whileHover={{ x: 4, opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                      className="transition-transform duration-200"
-                    >
-                      →
-                    </motion.span>
-                  </span>
-                </Link>
-
-                <Button
-                  onClick={() => {
-                    location.reload();
-                  }}
-                  variant="outline"
-                  className="flex-1 relative inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-orange-500 hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white h-12 px-6 py-3 group overflow-hidden"
-                >
-                  <span className="relative flex items-center gap-2 z-20">
-                    <motion.span
-                      animate={{ rotate: [0, 360] }}
-                      transition={{
-                        duration: 0.5,
-                        delay: 0.1,
-                        ease: "easeInOut",
-                      }}
-                      className="text-lg"
-                    >
-                      ↺
-                    </motion.span>
-                    Take Survey Again
-                  </span>
-                  <span className="absolute inset-0 translate-y-[102%] bg-gradient-to-r from-orange-500 to-red-500 group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                </Button>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-      )}
       {!submitSurveySuccess && (
         <div>
           {question?.data && (
@@ -2099,6 +2282,46 @@ const PublicResponse = () => {
                       priority
                     />
                   </div>
+                )}
+
+                {/* Validation Error Summary */}
+                {Object.keys(formErrors.questions).length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg
+                        className="w-5 h-5 text-red-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      <h3 className="text-red-800 font-medium">
+                        Please fix the following errors:
+                      </h3>
+                    </div>
+                    <ul className="text-sm text-red-700 space-y-1">
+                      {Object.entries(formErrors.questions).map(
+                        ([question, error]) => (
+                          <li key={question} className="flex items-start gap-2">
+                            <span className="text-red-500 mt-1">•</span>
+                            <span>
+                              <strong>{question}:</strong> {error}
+                            </span>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </motion.div>
                 )}
 
                 <div className="bg-white rounded-lg w-full my-3 sm:my-4 flex gap-2 px-4 sm:px-8 md:px-11 py-3 sm:py-4 flex-col">
@@ -2171,14 +2394,29 @@ const PublicResponse = () => {
                         <Input
                           id="full_name"
                           type="text"
-                          className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
+                          className={`border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base ${
+                            formErrors.respondent_name ? "border-red-500" : ""
+                          }`}
                           required={
                             question?.data?.settings
                               ?.collect_name_of_respondents
                           }
-                          onChange={(e) => setRespondent_name(e.target.value)}
+                          onChange={(e) => {
+                            setRespondent_name(e.target.value);
+                            if (formErrors.respondent_name) {
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                respondent_name: undefined,
+                              }));
+                            }
+                          }}
                           value={respondent_name}
                         />
+                        {formErrors.respondent_name && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {formErrors.respondent_name}
+                          </p>
+                        )}
                       </div>
                     )}
                     {question?.data?.settings?.collect_email_addresses && (
@@ -2193,13 +2431,28 @@ const PublicResponse = () => {
                         <Input
                           id="email"
                           type="email"
-                          className="border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base"
+                          className={`border-0 border-b rounded-none ring-0 active:border-none focus:border-none py-1 px-0 outline-none text-sm sm:text-base ${
+                            formErrors.respondent_email ? "border-red-500" : ""
+                          }`}
                           required={
                             question?.data?.settings?.collect_email_addresses
                           }
-                          onChange={(e) => setRespondent_email(e.target.value)}
+                          onChange={(e) => {
+                            setRespondent_email(e.target.value);
+                            if (formErrors.respondent_email) {
+                              setFormErrors((prev) => ({
+                                ...prev,
+                                respondent_email: undefined,
+                              }));
+                            }
+                          }}
                           value={respondent_email}
                         />
+                        {formErrors.respondent_email && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {formErrors.respondent_email}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2214,24 +2467,24 @@ const PublicResponse = () => {
                 </AnimatePresence>
 
                 {/* Sticky PaginationBtn */}
-                {sections.length > 1 && (
+                {getVisibleSectionsCount() > 1 && (
                   <div className="flex w-full md:w-auto md:justify-end items-center mb-6 mt-10 sticky bottom-10 z-30">
                     <PaginationBtn
-                      currentSection={currentSection}
-                      totalSections={sections.length}
+                      currentSection={getCurrentVisibleSectionIndex()}
+                      totalSections={getVisibleSectionsCount()}
                       onNavigate={navigatePage}
                     />
                   </div>
                 )}
 
-                {/* Show submit button on last section or when end survey is triggered */}
+                {/* Show submit button on last visible section */}
                 {(currentSection === sections.length - 1 ||
-                  endSurveyTriggered) && (
+                  getNextVisibleSection(currentSection) === currentSection) && (
                   <div className="rounded-full flex flex-col justify-center w-full py-5 text-center">
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r rounded-full from-[#5b03b2] h-12 to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium"
-                      disabled={submitting}
+                      className="w-full bg-gradient-to-r rounded-full from-[#5b03b2] h-12 to-[#9d50bb] hover:from-[#4a0291] hover:to-[#8544a0] transition-all duration-300 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={submitting || !isAllRequiredAnswered}
                     >
                       {submitting ? (
                         <>
@@ -2242,6 +2495,13 @@ const PublicResponse = () => {
                         "Submit"
                       )}
                     </Button>
+
+                    {/* Show validation status */}
+                    {!isAllRequiredAnswered && (
+                      <p className="text-sm text-orange-600 mt-2">
+                        Please complete all required questions before submitting
+                      </p>
+                    )}
                   </div>
                 )}
                 {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">

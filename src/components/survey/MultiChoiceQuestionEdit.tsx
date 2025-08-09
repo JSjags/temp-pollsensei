@@ -423,6 +423,13 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
         );
       } else if (editedQuestionType === "boolean") {
         onSave(editedQuestion, ["Yes", "No"], editedQuestionType, isRequired);
+      } else if (editedQuestionType === "star_rating") {
+        onSave(
+          editedQuestion,
+          ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"],
+          editedQuestionType,
+          isRequired
+        );
       } else {
         onSave(
           editedQuestion,
@@ -691,7 +698,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       className={cn(
-        "bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        "bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300 mt-6",
         {
           [`font-${questionText?.name
             ?.split(" ")
@@ -705,9 +712,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       }}
     >
       <div className="flex items-start gap-4">
-        <motion.div whileHover={{ scale: 1.1 }} className="mt-2">
+        {/* <motion.div whileHover={{ scale: 1.1 }} className="mt-2">
           <Grip className="text-gray-400" />
-        </motion.div>
+        </motion.div> */}
 
         <div className="flex-1 space-y-6">
           <div className="flex items-center gap-2">

@@ -238,6 +238,24 @@ const EditSubmittedSurvey = () => {
     return transformSurveySkipLogic(mockSurveyData);
   };
 
+  // Helper function to get global question index across all sections
+  const getGlobalQuestionIndex = (
+    sectionIndex: number,
+    questionIndex: number,
+    sections: any[]
+  ): number => {
+    let globalIndex = 0;
+    for (let s = 0; s < sections.length; s++) {
+      if (s < sectionIndex) {
+        globalIndex += sections[s].questions.length;
+      } else if (s === sectionIndex) {
+        globalIndex += questionIndex;
+        break;
+      }
+    }
+    return globalIndex;
+  };
+
   // Helper function to transform skip logic to API format
   const transformSkipLogicToAPI = (
     skipLogic: (SkipLogicRule | SkipLogicRuleV2)[],
@@ -264,13 +282,24 @@ const EditSubmittedSurvey = () => {
           if (conditions.length > 0) {
             const firstCondition = conditions[0];
             const questionIndex = firstCondition.questionIndex;
-            if (questionIndex !== null) {
-              targetQuestionId = `Question${questionIndex + 1}`;
+            const sectionIndex = firstCondition.sectionIndex;
+            if (questionIndex !== null && sectionIndex !== null) {
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                sectionIndex,
+                questionIndex,
+                sections
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
             }
           }
         } else {
-          if (mainQuestionIndex !== null) {
-            targetQuestionId = `Question${mainQuestionIndex + 1}`;
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            const globalQuestionIndex = getGlobalQuestionIndex(
+              mainQuestionSection,
+              mainQuestionIndex,
+              sections
+            );
+            targetQuestionId = `Question${globalQuestionIndex + 1}`;
           }
         }
 
@@ -278,10 +307,20 @@ const EditSubmittedSurvey = () => {
           const rules = conditions
             .map((cond: any) => {
               const sourceQuestionIndex = cond.questionIndex;
-              if (sourceQuestionIndex === null) return null;
+              const sourceSectionIndex = cond.sectionIndex;
+              if (sourceQuestionIndex === null || sourceSectionIndex === null)
+                return null;
+
+              // Use flattened question index for all actions
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                sourceSectionIndex,
+                sourceQuestionIndex,
+                sections
+              );
+              const questionId = `Question${globalQuestionIndex + 1}`;
 
               return {
-                source_id: `Question${sourceQuestionIndex + 1}`,
+                source_id: questionId,
                 operator: cond.operator,
                 value: cond.value,
               };
@@ -301,9 +340,17 @@ const EditSubmittedSurvey = () => {
             if (
               target.type === "question" &&
               target.questionIndex !== undefined &&
-              target.questionIndex !== null
+              target.questionIndex !== null &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
             ) {
-              targetId = `Question${target.questionIndex + 1}`;
+              // Use flattened question index for jump_to questions
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                target.sectionIndex,
+                target.questionIndex,
+                sections
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
             } else if (
               target.type === "section" &&
               target.sectionIndex !== undefined &&
@@ -313,12 +360,21 @@ const EditSubmittedSurvey = () => {
               targetId = `Section${target.sectionIndex + 1}`;
             }
           } else {
+            // hide/show actions
             if (
               target.type === "question" &&
               target.questionIndex !== undefined &&
-              target.questionIndex !== null
+              target.questionIndex !== null &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
             ) {
-              targetId = `Question${target.questionIndex + 1}`;
+              // Use flattened question index for hide/show questions
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                target.sectionIndex,
+                target.questionIndex,
+                sections
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
             } else if (
               target.type === "section" &&
               target.sectionIndex !== undefined &&
@@ -652,7 +708,13 @@ const EditSubmittedSurvey = () => {
         sections: surveyData.sections.map((section, sectionIdx) => ({
           ...section,
           questions: section.questions.map((question, questionIdx) => {
-            const questionId = `Question${questionIdx + 1}`;
+            // Use flattened question index to match transformSkipLogicToAPI output
+            const globalQuestionIndex = getGlobalQuestionIndex(
+              sectionIdx,
+              questionIdx,
+              surveyData.sections
+            );
+            const questionId = `Question${globalQuestionIndex + 1}`;
             const questionSkipLogic =
               questionSkipLogicMap.get(questionId) || [];
 

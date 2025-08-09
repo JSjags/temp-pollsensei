@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstancev3 from "@/lib/axios-instance-v3";
+import axiosInstance from "@/lib/axios-instance";
 
 /*
  * Example usage of transformSurveySkipLogic function:
@@ -212,7 +213,13 @@ export const transformSurveySkipLogic = (
     { sectionIndex: number; questionIndex: number }
   >();
 
+  // Create a map to find sections by their _id
+  const sectionIdMap = new Map<string, number>();
+
   surveyData.sections.forEach((section: any, sectionIndex: number) => {
+    if (section._id) {
+      sectionIdMap.set(section._id, sectionIndex);
+    }
     section.questions.forEach((question: any, questionIndex: number) => {
       if (question._id) {
         questionIdMap.set(question._id, { sectionIndex, questionIndex });
@@ -220,6 +227,7 @@ export const transformSurveySkipLogic = (
     });
   });
 
+  // Process question-level skip logic
   surveyData.sections.forEach((section: any, sectionIndex: number) => {
     section.questions.forEach((question: any, questionIndex: number) => {
       if (question.skip_logic && Array.isArray(question.skip_logic)) {
@@ -259,8 +267,27 @@ export const transformSurveySkipLogic = (
 
             if (logic.condition.action.type === "end_survey") {
               target = { type: "end" };
+            } else if (logic.condition.action.target_type === "section") {
+              // Handle section targets
+              const targetSectionIndex = sectionIdMap.get(
+                logic.condition.action.target_id
+              );
+              if (targetSectionIndex === undefined) {
+                console.warn(
+                  `Could not find target section with id: ${logic.condition.action.target_id}`
+                );
+                target = {
+                  type: "section",
+                  sectionIndex: 0,
+                };
+              } else {
+                target = {
+                  type: "section",
+                  sectionIndex: targetSectionIndex,
+                };
+              }
             } else {
-              // Find the target question by its _id
+              // Handle question targets
               const targetQuestion = questionIdMap.get(
                 logic.condition.action.target_id
               );
@@ -292,19 +319,31 @@ export const transformSurveySkipLogic = (
               logic.condition.action.type === "hide"
             ) {
               // For show/hide, the main question is the target question (the one being shown/hidden)
-              const targetQuestion = questionIdMap.get(
-                logic.condition.action.target_id
-              );
-              if (targetQuestion) {
-                mainQuestionSection = targetQuestion.sectionIndex;
-                mainQuestionIndex = targetQuestion.questionIndex;
+              if (logic.condition.action.target_type === "section") {
+                const targetSectionIndex = sectionIdMap.get(
+                  logic.condition.action.target_id
+                );
+                if (targetSectionIndex !== undefined) {
+                  mainQuestionSection = targetSectionIndex;
+                  mainQuestionIndex = 0; // For section targets, use first question
+                } else {
+                  mainQuestionSection = sectionIndex;
+                  mainQuestionIndex = questionIndex;
+                }
               } else {
-                mainQuestionSection = sectionIndex;
-                mainQuestionIndex = questionIndex;
+                const targetQuestion = questionIdMap.get(
+                  logic.condition.action.target_id
+                );
+                if (targetQuestion) {
+                  mainQuestionSection = targetQuestion.sectionIndex;
+                  mainQuestionIndex = targetQuestion.questionIndex;
+                } else {
+                  mainQuestionSection = sectionIndex;
+                  mainQuestionIndex = questionIndex;
+                }
               }
             } else if (logic.condition.action.type === "end_survey") {
               // For end_survey, the main question is the question that triggers the end survey
-              // This is typically the question containing the logic itself
               mainQuestionSection = sectionIndex;
               mainQuestionIndex = questionIndex;
             } else {
@@ -332,15 +371,171 @@ export const transformSurveySkipLogic = (
     });
   });
 
+  // Process section-level skip logic
+  surveyData.sections.forEach((section: any, sectionIndex: number) => {
+    if (section.skip_logic && Array.isArray(section.skip_logic)) {
+      section.skip_logic.forEach((logic: any, logicIndex: number) => {
+        if (logic.condition && logic.condition.rules) {
+          const conditions: SkipLogicCondition[] = logic.condition.rules.map(
+            (rule: any) => {
+              // Find the source question by its _id
+              const sourceQuestion = questionIdMap.get(rule.source_id);
+              if (!sourceQuestion) {
+                console.warn(
+                  `Could not find source question with id: ${rule.source_id}`
+                );
+                return {
+                  sectionIndex: 0,
+                  questionIndex: 0,
+                  operator: rule.operator,
+                  value: rule.value,
+                };
+              }
+
+              return {
+                sectionIndex: sourceQuestion.sectionIndex,
+                questionIndex: sourceQuestion.questionIndex,
+                operator: rule.operator,
+                value: rule.value,
+              };
+            }
+          );
+
+          // Determine target based on action type
+          let target: {
+            type: string;
+            sectionIndex?: number;
+            questionIndex?: number;
+          };
+
+          if (logic.condition.action.type === "end_survey") {
+            target = { type: "end" };
+          } else if (logic.condition.action.target_type === "section") {
+            // Handle section targets
+            const targetSectionIndex = sectionIdMap.get(
+              logic.condition.action.target_id
+            );
+            if (targetSectionIndex === undefined) {
+              console.warn(
+                `Could not find target section with id: ${logic.condition.action.target_id}`
+              );
+              target = {
+                type: "section",
+                sectionIndex: 0,
+              };
+            } else {
+              target = {
+                type: "section",
+                sectionIndex: targetSectionIndex,
+              };
+            }
+          } else {
+            // Handle question targets
+            const targetQuestion = questionIdMap.get(
+              logic.condition.action.target_id
+            );
+            if (!targetQuestion) {
+              console.warn(
+                `Could not find target question with id: ${logic.condition.action.target_id}`
+              );
+              target = {
+                type: logic.condition.action.target_type || "question",
+                sectionIndex: 0,
+                questionIndex: 0,
+              };
+            } else {
+              target = {
+                type: logic.condition.action.target_type || "question",
+                sectionIndex: targetQuestion.sectionIndex,
+                questionIndex: targetQuestion.questionIndex,
+              };
+            }
+          }
+
+          // For section-level logic, mainQuestionSection and mainQuestionIndex should point to the target
+          let mainQuestionSection: number;
+          let mainQuestionIndex: number;
+
+          if (
+            logic.condition.action.type === "show" ||
+            logic.condition.action.type === "hide"
+          ) {
+            // For show/hide, the main question is the target section (use first question)
+            if (logic.condition.action.target_type === "section") {
+              const targetSectionIndex = sectionIdMap.get(
+                logic.condition.action.target_id
+              );
+              if (targetSectionIndex !== undefined) {
+                mainQuestionSection = targetSectionIndex;
+                mainQuestionIndex = 0; // For section targets, use first question
+              } else {
+                mainQuestionSection = sectionIndex;
+                mainQuestionIndex = 0;
+              }
+            } else {
+              const targetQuestion = questionIdMap.get(
+                logic.condition.action.target_id
+              );
+              if (targetQuestion) {
+                mainQuestionSection = targetQuestion.sectionIndex;
+                mainQuestionIndex = targetQuestion.questionIndex;
+              } else {
+                mainQuestionSection = sectionIndex;
+                mainQuestionIndex = 0;
+              }
+            }
+          } else if (logic.condition.action.type === "end_survey") {
+            // For end_survey, use the section containing the logic
+            mainQuestionSection = sectionIndex;
+            mainQuestionIndex = 0;
+          } else {
+            // For jump_to, use the section containing the logic
+            mainQuestionSection = sectionIndex;
+            mainQuestionIndex = 0;
+          }
+
+          const newRule: SkipLogicRuleV2 = {
+            id:
+              logic._id ||
+              `section_rule_${sectionIndex}_${logicIndex}_${Date.now()}`,
+            conditions,
+            logicalOperator: logic.condition.logical_operator || "and",
+            action: logic.condition.action.type,
+            target,
+            mainQuestionSection,
+            mainQuestionIndex,
+          };
+
+          rules.push(newRule);
+        }
+      });
+    }
+  });
+
   return rules;
 };
 
 // --- Mapping for user-friendly action labels ---
 const actionTypeLabels: Record<string, string> = {
-  hide: "Hide question",
-  show: "Display question",
-  jump_to: "Jump to question", // or "Jump to question" if you want to clarify
+  hide: "Hide", // Will be dynamic based on target type
+  show: "Display", // Will be dynamic based on target type
+  jump_to: "Jump to", // Will be dynamic based on target type
   end_survey: "End the survey",
+};
+
+// Helper function to get dynamic action label based on target type
+const getDynamicActionLabel = (action: string, targetType: string): string => {
+  const baseAction = actionTypeLabels[action] || action;
+
+  if (action === "hide") {
+    return targetType === "section" ? "Hide section" : "Hide question";
+  } else if (action === "show") {
+    return targetType === "section" ? "Display section" : "Display question";
+  } else if (action === "jump_to") {
+    return targetType === "section" ? "Jump to section" : "Jump to question";
+  }
+
+  return baseAction;
 };
 
 // Animation variants
@@ -443,7 +638,7 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
   const { data: constants, isLoading: constantsLoading } = useQuery({
     queryKey: ["skip-logic-constants"],
     queryFn: async () => {
-      const res = await axiosInstancev3.get("/survey/skip-logic-constants");
+      const res = await axiosInstance.get("/survey/skip-logic-constants");
       return res.data;
     },
     staleTime: 5 * 60 * 1000,
@@ -493,7 +688,7 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
     ],
     logicalOperator: "and",
     action: "", // Start empty
-    targetType: "question",
+    targetType: "", // Start empty - will be selected first
     targetSection: 0,
     targetQuestion: null,
     mainQuestionSection: 0,
@@ -573,21 +768,35 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       );
 
     const actionValid = form.action;
+    const targetTypeValid = form.targetType;
+
+    const targetValid =
+      form.targetType === "section" ? true : form.mainQuestionIndex !== null;
 
     const mainQuestionValid =
       form.action === "end_survey" ||
       (form.mainQuestionSection !== null && form.mainQuestionIndex !== null);
 
-    const isValid = conditionsValid && actionValid && mainQuestionValid;
+    const isValid =
+      conditionsValid &&
+      actionValid &&
+      targetTypeValid &&
+      targetValid &&
+      mainQuestionValid;
 
     console.log("Validation check:", {
       conditionsValid,
       actionValid,
+      targetTypeValid,
+      targetValid,
       mainQuestionValid,
       isValid,
       form: {
         conditionsLength: form.conditions.length,
         action: form.action,
+        targetType: form.targetType,
+        targetSection: form.targetSection,
+        targetQuestion: form.targetQuestion,
         mainQuestionSection: form.mainQuestionSection,
         mainQuestionIndex: form.mainQuestionIndex,
       },
@@ -611,12 +820,20 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       target:
         form.action === "end_survey"
           ? { type: "end" } // For end_survey, target is just "end"
-          : {
-              type: form.targetType || "question", // Default to "question" if empty
+          : form.action === "jump_to"
+          ? {
+              type: form.targetType,
               sectionIndex: form.targetSection,
-              ...((form.targetType || "question") === "question" &&
-              form.targetQuestion !== null
+              ...(form.targetType === "question" && form.targetQuestion !== null
                 ? { questionIndex: form.targetQuestion }
+                : {}),
+            }
+          : {
+              type: form.targetType,
+              sectionIndex: form.mainQuestionSection,
+              ...(form.targetType === "question" &&
+              form.mainQuestionIndex !== null
+                ? { questionIndex: form.mainQuestionIndex }
                 : {}),
             },
       mainQuestionSection: form.mainQuestionSection,
@@ -657,7 +874,7 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       ],
       logicalOperator: "and",
       action: "", // Start empty
-      targetType: "question", // Default to "question" instead of empty string
+      targetType: "", // Start empty - will be selected first
       targetSection: 0,
       targetQuestion: null,
       mainQuestionSection: 0,
@@ -674,12 +891,15 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       conditions: rule.conditions,
       logicalOperator: rule.logicalOperator,
       action: rule.action,
-      targetType:
-        rule.action === "end_survey" ? "" : rule.target.type || "question",
+      targetType: rule.action === "end_survey" ? "question" : rule.target.type,
       targetSection:
-        rule.action === "end_survey" ? 0 : rule.target.sectionIndex ?? 0,
+        rule.action === "jump_to"
+          ? (rule.target as any).sectionIndex ?? 0
+          : rule.mainQuestionSection ?? 0,
       targetQuestion:
-        rule.action === "end_survey" ? null : rule.target.questionIndex ?? null,
+        rule.action === "jump_to"
+          ? (rule.target as any).questionIndex ?? null
+          : rule.mainQuestionIndex ?? null,
       mainQuestionSection: rule.mainQuestionSection ?? 0,
       mainQuestionIndex: rule.mainQuestionIndex ?? null,
     });
@@ -703,8 +923,14 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       conditions: [
         ...f.conditions,
         {
-          sectionIndex: f.action === "jump_to" ? f.mainQuestionSection : 0, // For jump_to, use the selected source section; for others, start with first section
-          questionIndex: f.action === "jump_to" ? f.mainQuestionIndex : null, // For jump_to, use the selected source question; for others, start empty
+          sectionIndex:
+            f.action === "jump_to" || f.action === "end_survey"
+              ? f.mainQuestionSection
+              : 0, // For jump_to and end_survey, use the selected source section
+          questionIndex:
+            f.action === "jump_to" || f.action === "end_survey"
+              ? f.mainQuestionIndex
+              : null, // For jump_to and end_survey, use the selected source question
           operator: "",
           value: "",
         },
@@ -748,13 +974,21 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
 
   // Helper to check if all required fields are filled
   const canShowFooter =
-    (form.mainQuestionIndex !== null || form.action === "end_survey") &&
+    form.targetType &&
     form.action &&
+    ((form.targetType === "question" && form.mainQuestionIndex !== null) ||
+      (form.targetType === "section" && form.mainQuestionSection !== null) ||
+      form.action === "end_survey" ||
+      (form.action === "jump_to" &&
+        ((form.targetType === "question" && form.targetQuestion !== null) ||
+          form.targetType === "section"))) &&
     form.conditions.every((cond) => {
-      // For jump_to, questionIndex is automatically set to source question
-      // For end_survey, questionIndex is required for conditions
+      // For jump_to and end_survey, questionIndex is automatically set to source question
+      // For other actions, questionIndex is required for conditions
       const hasValidQuestion =
-        form.action === "jump_to" ? true : cond.questionIndex !== null;
+        form.action === "jump_to" || form.action === "end_survey"
+          ? true
+          : cond.questionIndex !== null;
       return (
         hasValidQuestion &&
         cond.operator &&
@@ -833,7 +1067,10 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
             setForm((f) => {
               const newConds = [...f.conditions];
               if (newConds[idx]) {
-                newConds[idx].value = [val]; // For demo, single select; replace with multi-select as needed
+                newConds[idx] = {
+                  ...newConds[idx],
+                  value: [val], // For demo, single select; replace with multi-select as needed
+                };
               }
               return { ...f, conditions: newConds };
             });
@@ -868,7 +1105,10 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
             setForm((f) => {
               const newConds = [...f.conditions];
               if (newConds[idx]) {
-                newConds[idx].value = val;
+                newConds[idx] = {
+                  ...newConds[idx],
+                  value: val,
+                };
               }
               return { ...f, conditions: newConds };
             });
@@ -890,7 +1130,10 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
           onValueChange={(val) => {
             setForm((f) => {
               const newConds = [...f.conditions];
-              newConds[idx].value = val;
+              newConds[idx] = {
+                ...newConds[idx],
+                value: val,
+              };
               return { ...f, conditions: newConds };
             });
           }}
@@ -924,7 +1167,10 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
             setForm((f) => {
               const newConds = [...f.conditions];
               if (newConds[idx]) {
-                newConds[idx].value = val;
+                newConds[idx] = {
+                  ...newConds[idx],
+                  value: val,
+                };
               }
               return { ...f, conditions: newConds };
             });
@@ -941,7 +1187,10 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
           setForm((f) => {
             const newConds = [...f.conditions];
             if (newConds[idx]) {
-              newConds[idx].value = val;
+              newConds[idx] = {
+                ...newConds[idx],
+                value: val,
+              };
             }
             return { ...f, conditions: newConds };
           });
@@ -1018,7 +1267,10 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
   // Helper to check if question selection is needed
   const isQuestionSelectionNeeded = () => {
     return (
-      form.action && form.action !== "jump_to" && form.action !== "end_survey"
+      form.action &&
+      form.targetType &&
+      form.action !== "end_survey" &&
+      form.action !== "jump_to"
     );
   };
 
@@ -1030,16 +1282,24 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
       return `Jump to Question ${(rule.to.questionIndex ?? 0) + 1}`;
     } else if ("action" in rule && "target" in rule) {
       const v2Rule = rule as SkipLogicRuleV2;
+      const actionLabel = getDynamicActionLabel(
+        v2Rule.action,
+        v2Rule.target.type
+      );
+
       switch (v2Rule.action) {
         case "hide":
-          return `Hide Question ${v2Rule.mainQuestionIndex + 1}`;
         case "show":
-          return `Show Question ${v2Rule.mainQuestionIndex + 1}`;
+          if (v2Rule.target.type === "section") {
+            return `${actionLabel} ${(v2Rule.target.sectionIndex ?? 0) + 1}`;
+          } else {
+            return `${actionLabel} ${v2Rule.mainQuestionIndex + 1}`;
+          }
         case "jump_to":
           if (v2Rule.target.type === "section") {
-            return `Jump to Section ${(v2Rule.target.sectionIndex ?? 0) + 1}`;
+            return `${actionLabel} ${(v2Rule.target.sectionIndex ?? 0) + 1}`;
           } else {
-            return `Jump to Question ${(v2Rule.target.questionIndex ?? 0) + 1}`;
+            return `${actionLabel} ${(v2Rule.target.questionIndex ?? 0) + 1}`;
           }
         case "end_survey":
           return "End Survey";
@@ -1259,274 +1519,88 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
           >
             <DialogHeader className="w-full text-center mb-4">
               <DialogTitle className="text-2xl font-bold">
-                {editRule ? "Edit Question Logic" : "Create Question logic"}
+                {editRule ? "Edit Skip Logic" : "Create Skip Logic"}
               </DialogTitle>
               <p className="text-gray-400 text-base font-normal mb-4">
-                Select a question you wish to apply skip logic on. You can
-                select multiple questions
+                Configure skip logic to control the flow of your survey based on
+                user responses
               </p>
             </DialogHeader>
             <div className="w-full space-y-6 mt-4">
-              {/* --- STEP 1: CHOOSE SKIP ACTION --- */}
+              {/* --- STEP 1: CHOOSE TARGET TYPE --- */}
               <div className="p-0 mb-4">
                 <label className="block text-base font-medium mb-2 text-gray-800 text-left">
-                  Choose Skip Action
+                  What do you want to apply logic to?
                 </label>
                 <Select
-                  value={form.action}
-                  onValueChange={(val) =>
-                    setForm((f) => ({ ...f, action: val }))
-                  }
+                  value={form.targetType}
+                  onValueChange={(val) => {
+                    setForm((f) => ({
+                      ...f,
+                      targetType: val,
+                      targetSection: 0,
+                      targetQuestion: null,
+                      action: "", // Reset action when target type changes
+                    }));
+                  }}
                 >
                   <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
-                    <SelectValue placeholder="- Select action -" />
+                    <SelectValue placeholder="- Select target type -" />
                   </SelectTrigger>
                   <SelectContent>
-                    {logicConstants.action_types.map((a: string) => (
-                      <SelectItem key={a} value={a} className="truncate">
-                        {actionTypeLabels[a] ||
-                          a.charAt(0).toUpperCase() +
-                            a.slice(1).replace(/_/g, " ")}
+                    <SelectItem value="question" className="truncate">
+                      Question
+                    </SelectItem>
+                    {sections.length > 1 && (
+                      <SelectItem value="section" className="truncate">
+                        Section
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
-                {/* If 'jump_to' is selected, show source question selection first */}
-                {form.action === "jump_to" && (
-                  <div className="mt-4 space-y-4">
-                    <div>
-                      <label className="block text-base font-medium mb-2 text-gray-800 text-left">
-                        Select source question
-                      </label>
-                      <div className="flex gap-2 items-center">
-                        {/* Source Section select (only if more than one section) */}
-                        {sections.length > 1 && (
-                          <Select
-                            value={form.mainQuestionSection.toString()}
-                            onValueChange={(val) => {
-                              setForm((f) => {
-                                const newMainQuestionSection = Number(val);
-                                // For jump_to action, automatically populate the condition's sectionIndex with the selected source section
-                                const newConditions = f.conditions.map(
-                                  (cond, idx) => {
-                                    if (f.action === "jump_to" && idx === 0) {
-                                      return {
-                                        ...cond,
-                                        sectionIndex: newMainQuestionSection,
-                                        questionIndex: null, // Reset question index when section changes
-                                      };
-                                    }
-                                    return cond;
-                                  }
-                                );
-
-                                return {
-                                  ...f,
-                                  mainQuestionSection: newMainQuestionSection,
-                                  mainQuestionIndex: null,
-                                  conditions: newConditions,
-                                };
-                              });
-                            }}
-                          >
-                            <SelectTrigger className="w-full max-w-[180px] truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
-                              <SelectValue placeholder="- Select section -" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {sections.map((s, i) => (
-                                <SelectItem
-                                  key={i}
-                                  value={i.toString()}
-                                  className="truncate"
-                                >
-                                  Section {i + 1}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                        {/* Source Question select */}
-                        <Select
-                          value={
-                            form.mainQuestionIndex === null
-                              ? ""
-                              : form.mainQuestionIndex.toString()
-                          }
-                          onValueChange={(val) => {
-                            setForm((f) => {
-                              const newMainQuestionIndex =
-                                val === "" ? null : Number(val);
-                              // For jump_to action, automatically populate the condition's questionIndex with the selected source question
-                              const newConditions = f.conditions.map(
-                                (cond, idx) => {
-                                  if (f.action === "jump_to" && idx === 0) {
-                                    return {
-                                      ...cond,
-                                      sectionIndex: f.mainQuestionSection,
-                                      questionIndex: newMainQuestionIndex,
-                                    };
-                                  }
-                                  return cond;
-                                }
-                              );
-
-                              return {
-                                ...f,
-                                mainQuestionIndex: newMainQuestionIndex,
-                                conditions: newConditions,
-                              };
-                            });
-                          }}
-                        >
-                          <SelectTrigger className="w-full max-w-full truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
-                            <SelectValue placeholder="- Select question -" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {sections[form.mainQuestionSection]?.questions.map(
-                              (q, i) => (
-                                <SelectItem
-                                  key={i}
-                                  value={i.toString()}
-                                  className="truncate"
-                                  disabled={
-                                    form.mainQuestionSection === 0 && i === 0
-                                  }
-                                >
-                                  {getQuestionLabelWithNumber(
-                                    form.mainQuestionSection,
-                                    i
-                                  )}
-                                  {form.mainQuestionSection === 0 &&
-                                    i === 0 && (
-                                      <span className="text-gray-400 ml-2">
-                                        (No previous questions)
-                                      </span>
-                                    )}
-                                </SelectItem>
-                              )
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    {/* Jump target selection - show after source question is selected */}
-                    {form.mainQuestionIndex !== null && (
-                      <div>
-                        <label className="block text-base font-medium mb-2 text-gray-800 text-left">
-                          Jump to
-                        </label>
-                        <div className="flex gap-2 items-center">
-                          {/* Target Section select */}
-                          <Select
-                            value={form.targetSection.toString()}
-                            onValueChange={(val) => {
-                              setForm((f) => ({
-                                ...f,
-                                targetSection: Number(val),
-                                targetQuestion: null,
-                              }));
-                            }}
-                          >
-                            <SelectTrigger className="w-full max-w-[180px] truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
-                              <SelectValue placeholder="- Select section -" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {sections.map((s, i) => (
-                                <SelectItem
-                                  key={i}
-                                  value={i.toString()}
-                                  className="truncate"
-                                >
-                                  Section {i + 1}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {/* Target Question select */}
-                          <Select
-                            value={
-                              form.targetQuestion === null
-                                ? ""
-                                : form.targetQuestion.toString()
-                            }
-                            onValueChange={(val) => {
-                              setForm((f) => ({
-                                ...f,
-                                targetQuestion: val === "" ? null : Number(val),
-                              }));
-                            }}
-                          >
-                            <SelectTrigger className="w-full max-w-full truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
-                              <SelectValue placeholder="- Select question -" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {sections[form.targetSection]?.questions
-                                .filter((_, qIdx) => {
-                                  // Only show questions that come after the source question
-                                  if (form.mainQuestionIndex === null)
-                                    return true;
-                                  return (
-                                    form.targetSection >
-                                      form.mainQuestionSection ||
-                                    (form.targetSection ===
-                                      form.mainQuestionSection &&
-                                      qIdx > form.mainQuestionIndex)
-                                  );
-                                })
-                                .map((q, i) => (
-                                  <SelectItem
-                                    key={i}
-                                    value={i.toString()}
-                                    className="truncate"
-                                  >
-                                    {getQuestionLabelWithNumber(
-                                      form.targetSection,
-                                      i
-                                    )}
-                                  </SelectItem>
-                                )) || []}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        {form.mainQuestionIndex !== null &&
-                          sections[form.targetSection]?.questions.filter(
-                            (_, qIdx) => {
-                              if (form.mainQuestionIndex === null) return true;
-                              return (
-                                form.targetSection > form.mainQuestionSection ||
-                                (form.targetSection ===
-                                  form.mainQuestionSection &&
-                                  qIdx > form.mainQuestionIndex)
-                              );
-                            }
-                          ).length === 0 && (
-                            <p className="text-sm text-gray-500 mt-1">
-                              No questions available to jump to. The selected
-                              question is the last question in the survey.
-                            </p>
-                          )}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
-              {/* --- STEP 2: SELECT SECTION & QUESTION (animated in) --- */}
-              <AnimatePresence>
-                {isQuestionSelectionNeeded() && (
-                  <motion.div
-                    className="p-0 mb-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+
+              {/* --- STEP 2: CHOOSE SKIP ACTION --- */}
+              {form.targetType && (
+                <div className="p-0 mb-4">
+                  <label className="block text-base font-medium mb-2 text-gray-800 text-left">
+                    Choose Skip Action
+                  </label>
+                  <Select
+                    value={form.action}
+                    onValueChange={(val) =>
+                      setForm((f) => ({
+                        ...f,
+                        action: val,
+                        // Automatically set targetType to "question" when end_survey is selected
+                        targetType:
+                          val === "end_survey" ? "question" : f.targetType,
+                      }))
+                    }
                   >
+                    <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                      <SelectValue placeholder="- Select action -" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {logicConstants.action_types.map((a: string) => (
+                        <SelectItem key={a} value={a} className="truncate">
+                          {getDynamicActionLabel(a, form.targetType)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* --- STEP 3: SELECT SOURCE QUESTION (for jump_to action) --- */}
+              {form.action === "jump_to" && form.targetType && (
+                <div className="mt-4 space-y-4">
+                  <div>
                     <label className="block text-base font-medium mb-2 text-gray-800 text-left">
-                      {form.action === "jump_to"
-                        ? "Select source question"
-                        : "Select question"}
+                      Select source question
                     </label>
-                    <div className="flex gap-2 items-center mb-2 w-full">
-                      {/* Section select (only if more than one section) */}
+                    <div className="flex gap-2 items-center">
+                      {/* Source Section select (only if more than one section) */}
                       {sections.length > 1 && (
                         <Select
                           value={form.mainQuestionSection.toString()}
@@ -1566,13 +1640,14 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                 value={i.toString()}
                                 className="truncate"
                               >
-                                Section {i + 1}
+                                Section {i + 1}:{" "}
+                                {s.section_topic || `Section ${i + 1}`}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       )}
-                      {/* Question select (always shown) */}
+                      {/* Source Question select */}
                       <Select
                         value={
                           form.mainQuestionIndex === null
@@ -1609,40 +1684,8 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                           <SelectValue placeholder="- Select question -" />
                         </SelectTrigger>
                         <SelectContent>
-                          {sections[form.mainQuestionSection]?.questions
-                            .filter((_, qIdx) => {
-                              // For jump_to: only show questions that come BEFORE the target question
-                              if (
-                                form.action === "jump_to" &&
-                                form.targetQuestion !== null
-                              ) {
-                                // If same section, only show questions before the target question
-                                if (
-                                  form.mainQuestionSection ===
-                                  form.targetSection
-                                ) {
-                                  return qIdx < form.targetQuestion;
-                                }
-                                // If different section, only show questions from sections before the target section
-                                return (
-                                  form.mainQuestionSection < form.targetSection
-                                );
-                              }
-                              // For hide/show/end_survey: only show questions that have previous questions to create conditions from
-                              if (
-                                form.action === "hide" ||
-                                form.action === "show" ||
-                                form.action === "end_survey"
-                              ) {
-                                return isValidQuestionForConditionalLogic(
-                                  form.mainQuestionSection,
-                                  qIdx
-                                );
-                              }
-                              // For other actions, show all questions
-                              return true;
-                            })
-                            .map((q, i) => (
+                          {sections[form.mainQuestionSection]?.questions.map(
+                            (q, i) => (
                               <SelectItem
                                 key={i}
                                 value={i.toString()}
@@ -1669,14 +1712,387 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                     </span>
                                   )}
                               </SelectItem>
-                            ))}
+                            )
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* --- STEP 4: SELECT TARGET (for jump_to action) --- */}
+              {form.action === "jump_to" &&
+                form.targetType &&
+                form.mainQuestionIndex !== null && (
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label className="block text-base font-medium mb-2 text-gray-800 text-left">
+                        Select target {form.targetType}
+                      </label>
+                      {form.targetType === "section" ? (
+                        <Select
+                          value={form.targetSection.toString()}
+                          onValueChange={(val) => {
+                            setForm((f) => ({
+                              ...f,
+                              targetSection: Number(val),
+                            }));
+                          }}
+                        >
+                          <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                            <SelectValue placeholder="- Select target section -" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sections
+                              .filter((_, i) => {
+                                // For jump_to: only show sections that come AFTER the source section
+                                return i > form.mainQuestionSection;
+                              })
+                              .map((s, i) => {
+                                const actualIndex =
+                                  i + form.mainQuestionSection + 1;
+                                return (
+                                  <SelectItem
+                                    key={actualIndex}
+                                    value={actualIndex.toString()}
+                                    className="truncate"
+                                  >
+                                    Section {actualIndex + 1}:{" "}
+                                    {s.section_topic ||
+                                      `Section ${actualIndex + 1}`}
+                                  </SelectItem>
+                                );
+                              })}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex gap-2 items-center">
+                          {/* Target Section select (only if more than one section) */}
+                          {sections.length > 1 && (
+                            <Select
+                              value={form.targetSection.toString()}
+                              onValueChange={(val) => {
+                                setForm((f) => ({
+                                  ...f,
+                                  targetSection: Number(val),
+                                  targetQuestion: null, // Reset question when section changes
+                                }));
+                              }}
+                            >
+                              <SelectTrigger className="w-full max-w-[180px] truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                <SelectValue placeholder="- Select section -" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {sections
+                                  .filter((_, i) => {
+                                    // For jump_to: only show sections that come AFTER the source section
+                                    return i > form.mainQuestionSection;
+                                  })
+                                  .map((s, i) => {
+                                    const actualIndex =
+                                      i + form.mainQuestionSection + 1;
+                                    return (
+                                      <SelectItem
+                                        key={actualIndex}
+                                        value={actualIndex.toString()}
+                                        className="truncate"
+                                      >
+                                        Section {actualIndex + 1}:{" "}
+                                        {s.section_topic ||
+                                          `Section ${actualIndex + 1}`}
+                                      </SelectItem>
+                                    );
+                                  })}
+                              </SelectContent>
+                            </Select>
+                          )}
+                          {/* Target Question select */}
+                          <Select
+                            value={
+                              form.targetQuestion === null
+                                ? ""
+                                : form.targetQuestion.toString()
+                            }
+                            onValueChange={(val) => {
+                              setForm((f) => ({
+                                ...f,
+                                targetQuestion: val === "" ? null : Number(val),
+                              }));
+                            }}
+                          >
+                            <SelectTrigger className="w-full max-w-full truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                              <SelectValue placeholder="- Select question -" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {sections[form.targetSection]?.questions
+                                .filter((_, i) => {
+                                  // For jump_to: only show questions that come AFTER the source question
+                                  // If target section is same as source section, only show questions after source question
+                                  if (
+                                    form.targetSection ===
+                                      form.mainQuestionSection &&
+                                    form.mainQuestionIndex !== null
+                                  ) {
+                                    return i > form.mainQuestionIndex;
+                                  }
+                                  // If target section is different, show all questions in target section
+                                  return true;
+                                })
+                                .map((q, i) => {
+                                  const actualIndex =
+                                    form.targetSection ===
+                                      form.mainQuestionSection &&
+                                    form.mainQuestionIndex !== null
+                                      ? i + form.mainQuestionIndex + 1
+                                      : i;
+                                  return (
+                                    <SelectItem
+                                      key={actualIndex}
+                                      value={actualIndex.toString()}
+                                      className="truncate"
+                                    >
+                                      {getQuestionLabelWithNumber(
+                                        form.targetSection,
+                                        actualIndex
+                                      )}
+                                    </SelectItem>
+                                  );
+                                })}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* --- STEP 3: SELECT SECTION & QUESTION (for hide/show actions) --- */}
+              <AnimatePresence>
+                {isQuestionSelectionNeeded() && (
+                  <motion.div
+                    className="p-0 mb-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  >
+                    <label className="block text-base font-medium mb-2 text-gray-800 text-left">
+                      Select {form.targetType} to apply logic to
+                    </label>
+                    <div className="flex gap-2 items-center mb-2 w-full">
+                      {form.targetType === "section" ? (
+                        /* Section select for section target */
+                        <Select
+                          value={form.mainQuestionSection.toString()}
+                          onValueChange={(val) => {
+                            setForm((f) => {
+                              const newMainQuestionSection = Number(val);
+                              return {
+                                ...f,
+                                mainQuestionSection: newMainQuestionSection,
+                                mainQuestionIndex: null,
+                              };
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                            <SelectValue
+                              placeholder="- Select section to apply logic to -"
+                              className={
+                                form.mainQuestionSection === 0
+                                  ? "text-gray-400"
+                                  : ""
+                              }
+                            >
+                              {form.mainQuestionSection === 0
+                                ? "- Select section to apply logic to -"
+                                : (() => {
+                                    const idx = Number(
+                                      form.mainQuestionSection
+                                    );
+                                    const s = sections[idx];
+                                    return s
+                                      ? `Section ${idx + 1}: ${
+                                          s.section_topic ||
+                                          `Section ${idx + 1}`
+                                        }`
+                                      : "";
+                                  })()}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sections
+                              .filter((_, i) => {
+                                // For section targets: exclude the first section since there are no previous sections to create conditions from
+                                return i > 0; // Only show sections after the first one
+                              })
+                              .map((s, i) => {
+                                // Adjust the index for display since we're filtering
+                                const displayIndex = i + 1;
+                                return (
+                                  <SelectItem
+                                    key={i}
+                                    value={displayIndex.toString()}
+                                    className="truncate"
+                                  >
+                                    Section {displayIndex + 1}:{" "}
+                                    {s.section_topic ||
+                                      `Section ${displayIndex + 1}`}
+                                  </SelectItem>
+                                );
+                              })}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        /* Question select for question target */
+                        <>
+                          {/* Section select (only if more than one section) */}
+                          {sections.length > 1 && (
+                            <Select
+                              value={form.mainQuestionSection.toString()}
+                              onValueChange={(val) => {
+                                setForm((f) => {
+                                  const newMainQuestionSection = Number(val);
+                                  // For jump_to action, automatically populate the condition's sectionIndex with the selected source section
+                                  const newConditions = f.conditions.map(
+                                    (cond, idx) => {
+                                      if (f.action === "jump_to" && idx === 0) {
+                                        return {
+                                          ...cond,
+                                          sectionIndex: newMainQuestionSection,
+                                          questionIndex: null, // Reset question index when section changes
+                                        };
+                                      }
+                                      return cond;
+                                    }
+                                  );
+
+                                  return {
+                                    ...f,
+                                    mainQuestionSection: newMainQuestionSection,
+                                    mainQuestionIndex: null,
+                                    conditions: newConditions,
+                                  };
+                                });
+                              }}
+                            >
+                              <SelectTrigger className="w-full max-w-[180px] truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                                <SelectValue placeholder="- Select section -" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {sections.map((s, i) => (
+                                  <SelectItem
+                                    key={i}
+                                    value={i.toString()}
+                                    className="truncate"
+                                  >
+                                    Section {i + 1}:{" "}
+                                    {s.section_topic || `Section ${i + 1}`}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                          {/* Question select */}
+                          <Select
+                            value={
+                              form.mainQuestionIndex === null
+                                ? ""
+                                : form.mainQuestionIndex.toString()
+                            }
+                            onValueChange={(val) => {
+                              setForm((f) => {
+                                const newMainQuestionIndex =
+                                  val === "" ? null : Number(val);
+                                // For jump_to action, automatically populate the condition's questionIndex with the selected source question
+                                const newConditions = f.conditions.map(
+                                  (cond, idx) => {
+                                    if (f.action === "jump_to" && idx === 0) {
+                                      return {
+                                        ...cond,
+                                        sectionIndex: f.mainQuestionSection,
+                                        questionIndex: newMainQuestionIndex,
+                                      };
+                                    }
+                                    return cond;
+                                  }
+                                );
+
+                                return {
+                                  ...f,
+                                  mainQuestionIndex: newMainQuestionIndex,
+                                  conditions: newConditions,
+                                };
+                              });
+                            }}
+                          >
+                            <SelectTrigger className="w-full max-w-full truncate bg-white border border-gray-300 rounded-md px-3 py-2 text-sm">
+                              <SelectValue placeholder="- Select question -" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {sections[form.mainQuestionSection]?.questions
+                                .map((q, originalIdx) => ({
+                                  question: q,
+                                  originalIdx,
+                                }))
+                                .filter(({ originalIdx }) => {
+                                  // For hide/show/end_survey: only show questions that have previous questions to create conditions from
+                                  if (
+                                    form.action === "hide" ||
+                                    form.action === "show" ||
+                                    form.action === "end_survey"
+                                  ) {
+                                    return isValidQuestionForConditionalLogic(
+                                      form.mainQuestionSection,
+                                      originalIdx
+                                    );
+                                  }
+                                  // For jump_to: allow all questions (including first question)
+                                  if (form.action === "jump_to") {
+                                    return true;
+                                  }
+                                  // For other actions, show all questions
+                                  return true;
+                                })
+                                .map(({ question, originalIdx }) => (
+                                  <SelectItem
+                                    key={originalIdx}
+                                    value={originalIdx.toString()}
+                                    className="truncate"
+                                    disabled={
+                                      (form.action === "hide" ||
+                                        form.action === "show" ||
+                                        form.action === "end_survey") &&
+                                      form.mainQuestionSection === 0 &&
+                                      originalIdx === 0
+                                    }
+                                  >
+                                    {getQuestionLabelWithNumber(
+                                      form.mainQuestionSection,
+                                      originalIdx
+                                    )}
+                                    {(form.action === "hide" ||
+                                      form.action === "show" ||
+                                      form.action === "end_survey") &&
+                                      form.mainQuestionSection === 0 &&
+                                      originalIdx === 0 && (
+                                        <span className="text-gray-400 ml-2">
+                                          (No previous questions)
+                                        </span>
+                                      )}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </>
+                      )}
+                    </div>
                     {/* Show message when no valid questions available for conditional logic */}
-                    {(form.action === "hide" ||
-                      form.action === "show" ||
-                      form.action === "end_survey") &&
+                    {form.targetType === "question" &&
+                      (form.action === "hide" ||
+                        form.action === "show" ||
+                        form.action === "end_survey") &&
                       sections[form.mainQuestionSection]?.questions.filter(
                         (_, qIdx) =>
                           isValidQuestionForConditionalLogic(
@@ -1693,9 +2109,11 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                   </motion.div>
                 )}
               </AnimatePresence>
-              {/* --- STEP 3: CONDITIONS (show only after question and skip action are selected) --- */}
-              {((form.mainQuestionIndex !== null &&
-                form.mainQuestionIndex !== undefined) ||
+              {/* --- STEP 4: CONDITIONS (show only after question and skip action are selected) --- */}
+              {((form.targetType === "question" &&
+                form.mainQuestionIndex !== null) ||
+                (form.targetType === "section" &&
+                  form.mainQuestionSection !== null) ||
                 form.action === "end_survey") &&
                 form.action && (
                   <>
@@ -1784,12 +2202,13 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                                 ...f.conditions,
                                               ];
                                               if (newConds[idx]) {
-                                                newConds[idx].sectionIndex =
-                                                  Number(val);
-                                                newConds[idx].questionIndex =
-                                                  null;
-                                                newConds[idx].operator = "";
-                                                newConds[idx].value = "";
+                                                newConds[idx] = {
+                                                  ...newConds[idx],
+                                                  sectionIndex: Number(val),
+                                                  questionIndex: null,
+                                                  operator: "",
+                                                  value: "",
+                                                };
                                               }
                                               return {
                                                 ...f,
@@ -1802,15 +2221,30 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                             <SelectValue placeholder="- Select section -" />
                                           </SelectTrigger>
                                           <SelectContent>
-                                            {sections.map((s, i) => (
-                                              <SelectItem
-                                                key={i}
-                                                value={i.toString()}
-                                                className="truncate"
-                                              >
-                                                Section {i + 1}
-                                              </SelectItem>
-                                            ))}
+                                            {sections
+                                              .filter((_, i) => {
+                                                // For section targets: only show sections that come before the target section
+                                                if (
+                                                  form.targetType === "section"
+                                                ) {
+                                                  return (
+                                                    i < form.mainQuestionSection
+                                                  );
+                                                }
+                                                // For question targets: show all sections
+                                                return true;
+                                              })
+                                              .map((s, i) => (
+                                                <SelectItem
+                                                  key={i}
+                                                  value={i.toString()}
+                                                  className="truncate"
+                                                >
+                                                  Section {i + 1}:{" "}
+                                                  {s.section_topic ||
+                                                    `Section ${i + 1}`}
+                                                </SelectItem>
+                                              ))}
                                           </SelectContent>
                                         </Select>
                                       )}
@@ -1825,10 +2259,15 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                           setForm((f) => {
                                             const newConds = [...f.conditions];
                                             if (newConds[idx]) {
-                                              newConds[idx].questionIndex =
-                                                val === "" ? null : Number(val);
-                                              newConds[idx].operator = "";
-                                              newConds[idx].value = "";
+                                              newConds[idx] = {
+                                                ...newConds[idx],
+                                                questionIndex:
+                                                  val === ""
+                                                    ? null
+                                                    : Number(val),
+                                                operator: "",
+                                                value: "",
+                                              };
                                             }
                                             return {
                                               ...f,
@@ -1871,40 +2310,27 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                               );
                                             }
 
-                                            // For hide/show: only show questions that come BEFORE the main selected question
+                                            // For hide/show: only show questions that come BEFORE the main selected question/section
                                             if (
                                               form.action === "hide" ||
                                               form.action === "show"
                                             ) {
-                                              const mainQuestionIndex =
-                                                form.mainQuestionIndex;
-                                              const mainSectionIndex =
-                                                form.mainQuestionSection;
-
-                                              if (mainQuestionIndex === null)
-                                                return [];
-
-                                              return (
-                                                sections[
-                                                  cond.sectionIndex
-                                                ]?.questions
-                                                  .filter((_, qIdx) => {
-                                                    // If same section, only show questions before the main question
-                                                    if (
-                                                      cond.sectionIndex ===
-                                                      mainSectionIndex
-                                                    ) {
-                                                      return (
-                                                        qIdx < mainQuestionIndex
-                                                      );
-                                                    }
-                                                    // If different section, only show questions from sections before the main section
-                                                    return (
-                                                      cond.sectionIndex <
-                                                      mainSectionIndex
-                                                    );
-                                                  })
-                                                  .map((q, i) => (
+                                              if (
+                                                form.targetType === "section"
+                                              ) {
+                                                // For section targets: only show questions from sections before the target section
+                                                const targetSectionIndex =
+                                                  form.mainQuestionSection;
+                                                if (
+                                                  cond.sectionIndex >=
+                                                  targetSectionIndex
+                                                ) {
+                                                  return [];
+                                                }
+                                                return (
+                                                  sections[
+                                                    cond.sectionIndex
+                                                  ]?.questions.map((q, i) => (
                                                     <SelectItem
                                                       key={i}
                                                       value={i.toString()}
@@ -1916,7 +2342,52 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                                       )}
                                                     </SelectItem>
                                                   )) || []
-                                              );
+                                                );
+                                              } else {
+                                                // For question targets: only show questions that come BEFORE the main selected question
+                                                const mainQuestionIndex =
+                                                  form.mainQuestionIndex;
+                                                const mainSectionIndex =
+                                                  form.mainQuestionSection;
+
+                                                if (mainQuestionIndex === null)
+                                                  return [];
+
+                                                return (
+                                                  sections[
+                                                    cond.sectionIndex
+                                                  ]?.questions
+                                                    .filter((_, qIdx) => {
+                                                      // If same section, only show questions before the main question
+                                                      if (
+                                                        cond.sectionIndex ===
+                                                        mainSectionIndex
+                                                      ) {
+                                                        return (
+                                                          qIdx <
+                                                          mainQuestionIndex
+                                                        );
+                                                      }
+                                                      // If different section, only show questions from sections before the main section
+                                                      return (
+                                                        cond.sectionIndex <
+                                                        mainSectionIndex
+                                                      );
+                                                    })
+                                                    .map((q, i) => (
+                                                      <SelectItem
+                                                        key={i}
+                                                        value={i.toString()}
+                                                        className="truncate"
+                                                      >
+                                                        {getQuestionLabelWithNumber(
+                                                          cond.sectionIndex,
+                                                          i
+                                                        )}
+                                                      </SelectItem>
+                                                    )) || []
+                                                );
+                                              }
                                             }
 
                                             // For other actions, show all questions
@@ -1971,8 +2442,11 @@ const SkipLogicEditor: React.FC<SkipLogicEditorProps> = ({
                                         setForm((f) => {
                                           const newConds = [...f.conditions];
                                           if (newConds[idx]) {
-                                            newConds[idx].operator = val;
-                                            newConds[idx].value = "";
+                                            newConds[idx] = {
+                                              ...newConds[idx],
+                                              operator: val,
+                                              value: "",
+                                            };
                                           }
                                           return { ...f, conditions: newConds };
                                         });

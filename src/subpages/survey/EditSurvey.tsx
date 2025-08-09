@@ -589,6 +589,23 @@ const EditSurvey = () => {
   const transformSkipLogic = (skipLogic: any[], sections: any[]) => {
     const questionSkipLogicMap = new Map();
 
+    // Helper function to get global question index from section and question indices
+    const getGlobalQuestionIndex = (
+      sectionIndex: number,
+      questionIndex: number
+    ): number => {
+      let globalIndex = 0;
+      for (let s = 0; s < sections.length; s++) {
+        if (s < sectionIndex) {
+          globalIndex += sections[s].questions.length;
+        } else if (s === sectionIndex) {
+          globalIndex += questionIndex;
+          break;
+        }
+      }
+      return globalIndex;
+    };
+
     skipLogic.forEach((rule) => {
       console.log("🔄 Processing skip logic rule:", rule);
       if ("conditions" in rule && "action" in rule) {
@@ -620,13 +637,24 @@ const EditSurvey = () => {
           if (conditions.length > 0) {
             const firstCondition = conditions[0];
             const questionIndex = firstCondition.questionIndex;
-            if (questionIndex !== null) {
-              targetQuestionId = `Question${questionIndex + 1}`;
+            const sectionIndex = firstCondition.sectionIndex;
+            if (questionIndex !== null && sectionIndex !== null) {
+              // Flatten the question index across all sections
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                sectionIndex,
+                questionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
             }
           } else {
             // For end_survey with no conditions, use the main question
             if (mainQuestionIndex !== null && mainQuestionSection !== null) {
-              targetQuestionId = `Question${mainQuestionIndex + 1}`;
+              // Flatten the question index across all sections
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                mainQuestionSection,
+                mainQuestionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
             }
           }
 
@@ -712,8 +740,20 @@ const EditSurvey = () => {
                 return null;
               }
 
+              // For end_survey actions, use flattened question index
+              let questionId;
+              if (action === "end_survey" && cond.sectionIndex !== null) {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  cond.sectionIndex,
+                  sourceQuestionIndex
+                );
+                questionId = `Question${globalQuestionIndex + 1}`;
+              } else {
+                questionId = `Question${sourceQuestionIndex + 1}`;
+              }
+
               const rule = {
-                source_id: `Question${sourceQuestionIndex + 1}`,
+                source_id: questionId,
                 operator: cond.operator,
                 value: cond.value,
               };
@@ -764,10 +804,20 @@ const EditSurvey = () => {
             if (
               target.type === "question" &&
               target.questionIndex !== undefined &&
-              target.questionIndex !== null
+              target.questionIndex !== null &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
             ) {
-              targetId = `Question${target.questionIndex + 1}`;
-              console.log("✅ Set targetId for question:", targetId);
+              // Use flattened question index for jump_to questions
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                target.sectionIndex,
+                target.questionIndex
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
+              console.log(
+                "✅ Set targetId for question (flattened):",
+                targetId
+              );
             } else if (
               target.type === "section" &&
               target.sectionIndex !== undefined &&
@@ -1179,8 +1229,7 @@ const EditSurvey = () => {
 
       await createSurvey(processedSurvey).unwrap();
       handleClearSurvey();
-      setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
+      // Don't set state here - let the useEffect handle success state updates
     } catch (e) {
       console.log(e);
     }
@@ -1209,7 +1258,7 @@ const EditSurvey = () => {
         "Failed to create survey, Don't panic, your progress was saved"
       );
     }
-  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
+  }, [isSuccess, isError, error, dispatch, createdSurveyData]);
 
   useEffect(() => {
     if (progressSuccess) {
@@ -1218,7 +1267,7 @@ const EditSurvey = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError]);
+  }, [progressError, progressIsError, progressSuccess]);
 
   // Update the handleNavigation function
   const handleNavigation = useCallback(
@@ -1554,12 +1603,12 @@ const EditSurvey = () => {
                                   description: section?.section_description,
                                 }}
                                 headerText={
-                                  "header_text" in section
+                                  section && "header_text" in section
                                     ? section.header_text
                                     : survey?.header_text
                                 }
                                 bodyText={
-                                  "body_text" in section
+                                  section && "body_text" in section
                                     ? section.body_text
                                     : survey?.body_text
                                 }
@@ -2409,7 +2458,8 @@ const EditSurvey = () => {
           openModal={review}
           onClose={() => {
             setReview((prev) => !prev);
-            router.push("/surveys/survey-list");
+            // Removed automatic redirect - let users interact with the modal first
+            // They can navigate manually using the modal's buttons
           }}
         />
       )}
