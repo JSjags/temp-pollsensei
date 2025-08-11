@@ -83,13 +83,13 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
   const { data: userBalance, isLoading: isBalanceLoading } = useQuery({
     queryKey: [APP_KEYS.UNRESTRICTED_BALANCE, reportData?._id],
     queryFn: () => fetchUserBalance(),
-    enabled: !!reportData?._id,
+    enabled: !!reportData?._id && !!user,
   });
 
   const { data: bookmarkData, isLoading: isLoadingBookmark } = useQuery({
     queryKey: [APP_KEYS.REPORTS_BOOKMARK_BY_ID, reportData?._id],
     queryFn: () => GetReportBookmark(reportData?._id),
-    enabled: !!reportData?._id,
+    enabled: !!reportData?._id && !!user,
   });
 
   // ============================================================================
@@ -285,13 +285,13 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
           {/* Left Column - Article Content */}
           <div className="w-full">
             <article className="bg-white rounded-lg shadow-sm p-8">
-              <h1 className="text-6xl font-bold text-gray-900 mb-4">
+              <h1 className="text-2xl xl:text-6xl font-bold text-gray-900 mb-4">
                 {report.survey_id.topic}
               </h1>
 
               <p className="text-gray-600 mb-6">{report.description}</p>
 
-              <div className="flex items-center gap-4 mb-8 text-sm text-gray-500 pb-1 border-b-2 w-[25%]">
+              <div className="flex items-center gap-4 mb-8 text-sm text-gray-500 pb-1 border-b-2 w-auto xl:w-[25%]">
                 <div className="w-auto flex items-center gap-1">
                   <IoMdTime className="text-gray-500 text-base" />
                   <span>{readTime} minute read</span>

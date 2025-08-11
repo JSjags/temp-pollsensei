@@ -114,7 +114,7 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="min-w-7xl mx-auto px-6 py-8">
         <div className="flex flex-col gap-8">
-          <div className="w-full grid grid-cols-2 gap-3 h-auto">
+          <div className="w-full grid grid-cols-1 xl:grid-cols-2 gap-3 h-auto">
             {/* Left Column - Featured (Latest Report) */}
             <div className="h-auto">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Latest</h2>
@@ -142,7 +142,7 @@ const Dashboard = () => {
               </h3>
 
               <div
-                className="grid gap-3 flex-1"
+                className="flex flex-col xl:grid gap-7 xl:gap-3 flex-1"
                 style={{
                   gridTemplateColumns: "1.2fr 0.8fr",
                   gridTemplateRows: "1fr 1fr",
@@ -190,13 +190,13 @@ const Dashboard = () => {
             </h3>
 
             {isPopularReportsLoading ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-7 xl:gap-3">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <ReportCardSkeleton key={index} />
                 ))}
               </div>
             ) : popularReportsData.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-7 xl:gap-3">
                 {popularReportsData.map((report: any) => (
                   <ReportCard
                     key={report._id}
