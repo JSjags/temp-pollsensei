@@ -530,12 +530,9 @@ const PaidRespondentSurveyResponse = () => {
 
       setLoading(false);
     } catch (error: any) {
-      if (error.message) {
-        const { message, error: { hint } = {} } = error;
-        toast.error(`${message}`);
-      } else {
-        toast.error("An error occurred while submitting your response");
-      }
+      toast.error(
+        error.message || "An error occurred while submitting your response"
+      );
     } finally {
       setLoading(false);
     }

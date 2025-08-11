@@ -29,6 +29,7 @@ import { useGeoLocation } from "../settings/subscription/PricingCards";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { PlaceholderRightSide } from "@/components/reusable/coming-soon";
+import { redirectUtils } from "@/utils/redirectUtils";
 
 const constraints = {
   name: {
@@ -114,6 +115,7 @@ const RegisterPage = () => {
     isError: locationError,
   } = useGeoLocation();
 
+  // Update the register success handler
   const onSubmit = async (values: any) => {
     try {
       await registerUser({
@@ -124,7 +126,14 @@ const RegisterPage = () => {
       toast.success(
         "User registered successfully, check your email to continue"
       );
-      router.push(`/verify-email${ed ? `?ed=${ed}` : ""}`);
+
+      // Check for stored redirect route for post-verification
+      const storedRoute = sessionStorage.getItem("auth_redirect_url");
+      const redirectParam = storedRoute
+        ? `&redirect=${encodeURIComponent(storedRoute)}`
+        : "";
+
+      router.push(`/verify-email${ed ? `?ed=${ed}` : ""}${redirectParam}`);
     } catch (err: any) {
       toast.error(
         typeof err?.data?.message === "string"
@@ -141,10 +150,6 @@ const RegisterPage = () => {
     }
   };
 
-  const validateForm = (values: any) => {
-    return validate(values, constraints) || {};
-  };
-
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
       const accessToken = response.access_token;
@@ -157,8 +162,9 @@ const RegisterPage = () => {
         toast.success(
           "Registration successful, please continue with same Google account"
         );
-        // router.push("/verify-email");
-        router.push("/login");
+
+        const redirectRoute = redirectUtils.getRedirectAfterAuth([]);
+        router.push(redirectRoute);
       } catch (err: any) {
         toast.error(
           typeof err?.data?.message === "string"
@@ -175,6 +181,10 @@ const RegisterPage = () => {
     },
     flow: "implicit",
   });
+
+  const validateForm = (values: any) => {
+    return validate(values, constraints) || {};
+  };
 
   const facebookSignUp = async () => {
     try {

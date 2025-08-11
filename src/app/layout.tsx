@@ -29,6 +29,7 @@ import FeatureLimitation from "@/components/feature-limitation/feature-limitatio
 import ContextProvider from "@/contexts/index";
 import Image from "next/image";
 import { GlobalSidebarProvider } from "@/components/blog/GlobalSidebarProvider";
+import { RouteWatcher } from "@/components/RouteWatcher";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -167,7 +168,9 @@ export default function RootLayout({
                 <GlobalSidebarProvider>
                   <SenseiProvider>
                     <UpgradeModal />
-                    <MixPanelProvider>{children}</MixPanelProvider>
+                    <MixPanelProvider>
+                      <RouteWatcher>{children}</RouteWatcher>
+                    </MixPanelProvider>
                   </SenseiProvider>
                 </GlobalSidebarProvider>
               </ReduxContext>

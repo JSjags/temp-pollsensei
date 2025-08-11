@@ -12,20 +12,18 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import ShareModal from "@/components/blog/ShareModal";
-import { toast } from "react-toastify";
+import { useBlogAuthRedirect } from "@/hooks/useBlogAuthRedirect";
 
 interface ReportActionsProps {
   reportId: string;
   reportTitle: string;
   onEcho: () => void;
   onComment: () => void;
-  onShare: () => void;
   onBookmark: () => void;
   echoes?: number;
   comments?: number;
   isEchoed?: boolean;
   isBookmarked?: boolean;
-  isAuthenticated: boolean;
   isBookmarkLoading?: boolean;
   isEchoLoading?: boolean;
 }
@@ -35,13 +33,11 @@ const ReportActions: React.FC<ReportActionsProps> = ({
   reportTitle,
   onEcho,
   onComment,
-  onShare,
   onBookmark,
   echoes = 0,
   comments = 0,
   isEchoed = false,
   isBookmarked = false,
-  isAuthenticated,
   isBookmarkLoading = false,
   isEchoLoading = false,
 }) => {
@@ -49,24 +45,35 @@ const ReportActions: React.FC<ReportActionsProps> = ({
     (state: RootState) => state.blogSlice.showComments
   );
 
-  // State for controlling ShareModal visibility
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // Generate proper report URL
+  const { requireAuth, isAuthenticated } = useBlogAuthRedirect();
+
   const reportUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/blog/${reportId}`
-      : `https://yoursite.com/blog/${reportId}`;
+      : "";
 
-  const handleShareClick = () => {
-    if (isAuthenticated) {
-      setShowShareModal(true);
-    } else {
-      onShare(); // This will handle the auth redirect in parent
-    }
+  const handleEcho = () => {
+    if (!requireAuth()) return;
+    onEcho();
   };
 
-  // Helper function to get button opacity based on auth state
+  const handleComment = () => {
+    if (!requireAuth()) return;
+    onComment();
+  };
+
+  const handleBookmark = () => {
+    if (!requireAuth()) return;
+    onBookmark();
+  };
+
+  const handleShare = () => {
+    if (!requireAuth()) return;
+    setShowShareModal(true);
+  };
+
   const getButtonOpacity = (isLoading: boolean = false) => {
     if (isLoading) return "opacity-50 cursor-not-allowed";
     if (!isAuthenticated) return "opacity-75 hover:opacity-100";
@@ -79,7 +86,7 @@ const ReportActions: React.FC<ReportActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={onEcho}
+        onClick={handleEcho}
         disabled={isEchoLoading}
         className={`flex items-center gap-2 hover:bg-purple-50 hover:text-purple-600 transition-all ${
           isEchoed ? "text-purple-600 bg-purple-50" : "text-gray-600"
@@ -100,7 +107,7 @@ const ReportActions: React.FC<ReportActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={onComment}
+        onClick={handleComment}
         className={`flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-all ${
           showComments ? "text-blue-600 bg-blue-50" : "text-gray-600"
         } ${getButtonOpacity()}`}
@@ -116,7 +123,7 @@ const ReportActions: React.FC<ReportActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={handleShareClick}
+        onClick={handleShare}
         className={`flex items-center gap-2 hover:bg-green-50 hover:text-green-600 text-gray-600 transition-all ${getButtonOpacity()}`}
         title={
           !isAuthenticated ? "Login to share this report" : "Share this report"
@@ -129,7 +136,7 @@ const ReportActions: React.FC<ReportActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={onBookmark}
+        onClick={handleBookmark}
         disabled={isBookmarkLoading}
         className={`flex items-center gap-2 hover:bg-yellow-50 hover:text-yellow-600 transition-all ${
           isBookmarked ? "text-yellow-600 bg-yellow-50" : "text-gray-600"
@@ -145,13 +152,13 @@ const ReportActions: React.FC<ReportActionsProps> = ({
         {isBookmarkLoading ? (
           <AiOutlineLoading3Quarters className="w-4 h-4 animate-spin" />
         ) : isBookmarked ? (
-          <BsBookmarkFill className="w-4 h-4" />
+          <BsBookmarkFill className="w-4 h-4 text-[#5B03B2]" />
         ) : (
           <BsBookmark className="w-4 h-4" />
         )}
       </Button>
 
-      {/* ShareModal with proper control */}
+      {/* ShareModal - only show for authenticated users */}
       {showShareModal && isAuthenticated && (
         <ShareModal
           reportTitle={reportTitle}

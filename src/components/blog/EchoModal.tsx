@@ -40,8 +40,6 @@ const EchoModal: React.FC<EchoModalProps> = ({
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setError("");
-
-    // Only allow positive integers
     if (value === "" || /^\d+$/.test(value)) {
       setEchoAmount(value);
 
@@ -77,7 +75,6 @@ const EchoModal: React.FC<EchoModalProps> = ({
   };
 
   const totalCost = parseInt(echoAmount) || 0;
-  const remainingBalance = userBalance - totalCost;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -90,7 +87,6 @@ const EchoModal: React.FC<EchoModalProps> = ({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* User Balance Display */}
           <div className="bg-purple-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-purple-900">
@@ -105,7 +101,6 @@ const EchoModal: React.FC<EchoModalProps> = ({
             </div>
           </div>
 
-          {/* Echo Amount Input */}
           <div className="space-y-2">
             <div className="flex items-center gap-5">
               <Label htmlFor="echo-amount">Number of Echoes</Label>
@@ -126,7 +121,6 @@ const EchoModal: React.FC<EchoModalProps> = ({
             {error && <p className="text-sm text-red-600">{error}</p>}
           </div>
 
-          {/* Cost Breakdown */}
           {echoAmount && !error && (
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <div className="flex justify-between text-sm">
@@ -150,12 +144,11 @@ const EchoModal: React.FC<EchoModalProps> = ({
             </div>
           )}
 
-          {/* Echo Description */}
           <div className="text-sm text-gray-600">
             <p>
               Echoing shows your support for this report and helps boost its
-              visibility. Each echo costs 1 pollcoin and goes directly to the
-              report author.
+              visibility. Each echo costs 1 pollcoin and 80% of the pollcoin
+              goes directly to the report author.
             </p>
           </div>
         </div>

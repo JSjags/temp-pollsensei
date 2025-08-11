@@ -4,8 +4,9 @@ import { useIsLoggedIn } from "@/lib/helpers";
 import { RootState } from "@/redux/store";
 import RegisterPage from "@/subpages/auth/RegisterPage";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { redirectUtils } from "@/utils/redirectUtils";
 
 type Props = {};
 
@@ -14,13 +15,22 @@ const Page = (props: Props) => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
-  const userToken = useSelector(
-    (state: RootState) => state.user?.access_token || state.user.token
+
+  const userRoles = useSelector(
+    (state: RootState) => state.user.user?.roles[0].role || []
   );
 
+  useEffect(() => {
+    if (state.user) {
+      const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles);
+      router.push(redirectRoute);
+    }
+  }, [state.user, userRoles, router]);
+
   if (state.user) {
-    router.push(`/dashboard`);
+    return null;
   }
+
   return <RegisterPage />;
 };
 

@@ -70,9 +70,9 @@ const SidebarReportCard: FC<ReportCardProps> = ({
           </div>
 
           <h4 className="font-bold text-sm mb-2 line-clamp-2 leading-tight">
-            {report.title?.length > 25
-              ? `${report.title.slice(0, 25)}...`
-              : report.title}
+            {report.survey_id.topic?.length > 15
+              ? `${report.survey_id.topic.slice(0, 15)}...`
+              : report.survey_id.topic}
           </h4>
 
           <p className="text-xs line-clamp-2 mb-3 text-gray-600">
@@ -125,9 +125,9 @@ const SidebarReportCard: FC<ReportCardProps> = ({
         </div>
 
         <h4 className="font-bold text-base mb-2 line-clamp-2">
-          {report.title?.length > 40
-            ? `${report.title.slice(0, 40)}...`
-            : report.title}
+          {report.survey_id.topic?.length > 30
+            ? `${report.survey_id.topic.slice(0, 30)}...`
+            : report.survey_id.topic}
         </h4>
 
         <p className="text-sm line-clamp-2 mb-3 text-gray-600">
