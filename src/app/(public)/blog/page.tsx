@@ -9,10 +9,10 @@ const BlogPage = () => {
   const user = useSelector((state: RootState) => state.user?.user);
 
   return (
-    <>
+    <div className="w-full">
       {user ? <Navbar showReportsHeader={true} /> : <NavBar />}
       <Dashboard />
-    </>
+    </div>
   );
 };
 export default BlogPage;

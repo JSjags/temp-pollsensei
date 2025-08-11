@@ -166,7 +166,6 @@ const Dashboard = () => {
                             className="grid-item bg-gray-100 rounded-lg flex items-center justify-center"
                           >
                             &nbsp;
-                            {/* <p className="text-gray-400 text-sm">No report</p> */}
                           </div>
                         );
                       }

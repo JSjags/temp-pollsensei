@@ -24,6 +24,10 @@ interface FeaturedReport {
   echoes_count: number;
   comments_count: number;
   slug: string;
+  survey_id: {
+    _id: string;
+    topic: string;
+  };
 }
 
 interface FeaturedReportCarouselProps {
@@ -159,7 +163,7 @@ const FeaturedReportCarousel: React.FC<FeaturedReportCarouselProps> = ({
 
         {/* Title */}
         <h3 className="text-[44px] text-[#333333] mb-3 leading-tight capitalize">
-          {currentReport.title}
+          {currentReport.survey_id.topic}
         </h3>
 
         {/* Description */}

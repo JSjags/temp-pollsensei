@@ -238,6 +238,10 @@ const Navbar: FC<NavbarProps> = ({
     router.push("/login");
   };
 
+  const shouldShowReportHighlight =
+    path.includes("/blog") && !path.includes("/blog/bookmarks");
+  const shouldShowCategoryNav = path === "/blog";
+
   return (
     <div
       className={cn("w-full bg-white", isSidebarOpen && "h-screen lg:h-auto")}
@@ -249,7 +253,7 @@ const Navbar: FC<NavbarProps> = ({
             ${path.includes("/blog") ? "justify-between" : "justify-end"}`}
         >
           {/* Left Section - Stats or Back Button */}
-          {path.includes("/blog/") && (
+          {shouldShowReportHighlight && (
             <Button
               variant="ghost"
               onClick={() => router.back()}
@@ -279,7 +283,7 @@ const Navbar: FC<NavbarProps> = ({
                     My Reports
                   </Button>
 
-                  <Button
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     onClick={() => router.push("/blog")}
@@ -289,7 +293,7 @@ const Navbar: FC<NavbarProps> = ({
                       <FaRegEdit className="text-base text-[#5B03B2]" />
                     )}
                     <span className="">Publish</span>
-                  </Button>
+                  </Button> */}
                 </>
               )}
               {/* Notifications Dropdown */}
@@ -517,9 +521,9 @@ const Navbar: FC<NavbarProps> = ({
           </div>
         </div>
 
-        {path.includes("/blog") && <ReportHighlight />}
+        {shouldShowReportHighlight && <ReportHighlight />}
 
-        {path.includes("/blog") && (
+        {shouldShowCategoryNav && (
           <ScrollArea className="h-auto max-w-[90%] rounded-md border-none p-0">
             <CategoryNav
               categories={categories}

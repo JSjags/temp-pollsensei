@@ -53,10 +53,9 @@ const FieldBadge: React.FC<FieldBadgeProps> = ({
 
   const handleClick = () => {
     if (isLoading) {
-      console.log("⏳ FieldBadge: Ignoring click - still loading");
       return;
     }
-    onToggle(field._id); 
+    onToggle(field._id);
   };
 
   if (isLoading) {

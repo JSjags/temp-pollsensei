@@ -81,12 +81,12 @@ const FilterRespondents = () => {
       dispatch(setQualifyingTemplateId(response?._id));
       dispatch(setPurchaseDialog(true));
       // console.log({ response });
-    } catch (e: any) {
+    } catch (error: any) {
       toast.error(
-        e?.message ??
+        error.message ||
           "Error encountered while saving criteria, please try again."
       );
-      console.error("Error saving criteria:", e);
+      console.error("Error saving criteria:", error);
     } finally {
       setIsLoading(false);
     }
@@ -140,9 +140,11 @@ const FilterRespondents = () => {
       dispatch(setPurchaseDialog(true));
       // dispatch(resetQuestion());
       // dispatch(resetSurvey());
-    } catch (e: any) {
-      console.error("Failed to save and continue:", e);
-      toast.error(e ?? "Error encountered while creating survey screener.");
+    } catch (error: any) {
+      console.error("Failed to save and continue:", error);
+      toast.error(
+        error.message || "Error encountered while creating survey screener."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -169,12 +171,12 @@ const FilterRespondents = () => {
       dispatch(setFilterBy("qualifyingCriteria"));
       dispatch(setQuickSurveyQualifyingTemplateId(response?._id));
       dispatch(proceedToPurchase());
-    } catch (e: any) {
+    } catch (error: any) {
       toast.error(
-        e?.message ??
+        error.message ||
           "Error encountered while saving criteria, please try again."
       );
-      console.error("Error saving criteria:", e);
+      console.error("Error saving criteria:", error);
     } finally {
       setIsLoading(false);
     }
@@ -225,9 +227,11 @@ const FilterRespondents = () => {
       dispatch(setFilterBy("screenerSurvey"));
       dispatch(setQuickSurveyScreenerId(response?._id));
       dispatch(proceedToPurchase());
-    } catch (e: any) {
-      console.error("Failed to save and continue:", e);
-      toast.error(e ?? "Error encountered while creating survey screener.");
+    } catch (error: any) {
+      console.error("Failed to save and continue:", error);
+      toast.error(
+        error.message || "Error encountered while creating survey screener."
+      );
     } finally {
       setIsLoading(false);
     }

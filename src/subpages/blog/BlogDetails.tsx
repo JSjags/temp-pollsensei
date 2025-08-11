@@ -26,6 +26,8 @@ import {
 import { IoMdTime } from "react-icons/io";
 import { toast } from "react-toastify";
 import { fetchUserBalance } from "@/services/api/getUserBalance";
+import SecureContentRenderer from "@/components/blog/SecureContentRenderer";
+import Image from "next/image";
 
 interface BlogDetailsProps {
   slug?: string;
@@ -51,14 +53,6 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
 
   const navigateToReport = (slug: string) => {
     router.push(`/blog/${slug}`, { scroll: false });
-  };
-
-  const handleAuthRequired = (actionName: string) => {
-    if (!user) {
-      router.push("/login");
-      return false;
-    }
-    return true;
   };
 
   // ============================================================================
@@ -118,8 +112,8 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
       setShowEchoModal(false);
       toast.success("Report echoed successfully!");
     },
-    onError: () => {
-      toast.error("Failed to echo report");
+    onError: (error) => {
+      toast.error(error.message || "Failed to echo report");
     },
   });
 
@@ -135,10 +129,15 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
       queryClient.invalidateQueries({
         queryKey: [APP_KEYS.REPORTS_BOOKMARK_BY_ID, reportData?._id],
       });
+      queryClient.invalidateQueries({
+        queryKey: [APP_KEYS.REPORTS_BOOKMARK_COUNT],
+      });
     },
     onError: (error) => {
       console.error("Bookmark error:", error);
-      toast.error("Failed to update bookmark. Please try again.");
+      toast.error(
+        error.message || "Failed to update bookmark. Please try again."
+      );
     },
   });
 
@@ -172,31 +171,19 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
     }
   }, [reportData, commentsData, dispatch, isBookmarked]);
 
-  console.log("bookmarkData", bookmarkData);
-  console.log("isBookmarked", isBookmarked);
-
   // ============================================================================
   // Action Handlers
   // ============================================================================
 
   const handleEcho = () => {
-    if (!handleAuthRequired("Echo")) return;
     setShowEchoModal(true);
   };
 
   const handleComment = () => {
-    if (!handleAuthRequired("Comment")) return;
     dispatch({ type: "blog/toggleComments" });
   };
 
-  const handleShare = () => {
-    if (!handleAuthRequired("Share")) return;
-    // Share logic handled in ReportActions component
-  };
-
   const handleBookmark = () => {
-    if (!handleAuthRequired("Bookmark")) return;
-
     if (!reportData?._id) {
       toast.error("Report not found");
       return;
@@ -207,10 +194,6 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
 
   const handleEchoConfirm = (amount?: number | undefined) => {
     echoMutation.mutate({ reportId: reportData._id, number_of_echoes: amount });
-  };
-
-  const handleImageError = () => {
-    setImageError(true);
   };
 
   // ============================================================================
@@ -281,7 +264,6 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
   const parsedContent = parseEditorContent(report.content || "");
   const readTime = calculateReadTime(parsedContent);
 
-  // Transform recent reports data properly
   const recentReports = Array.isArray(recentReportsResponse)
     ? recentReportsResponse
     : [];
@@ -303,8 +285,8 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
           {/* Left Column - Article Content */}
           <div className="w-full">
             <article className="bg-white rounded-lg shadow-sm p-8">
-              <h1 className="text-[69px] font-bold text-gray-900 mb-4">
-                {report.title}
+              <h1 className="text-6xl font-bold text-gray-900 mb-4">
+                {report.survey_id.topic}
               </h1>
 
               <p className="text-gray-600 mb-6">{report.description}</p>
@@ -320,46 +302,50 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
                 </div>
               </div>
 
-              <div
-                className="text-gray-700 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: parsedContent }}
-              />
+              <SecureContentRenderer content={parsedContent} />
 
               {/* Author and Actions */}
               <div className="border-t pt-6 mt-8">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">
-                        {(report.published_by?.name || "A")
-                          .charAt(0)
-                          .toUpperCase()}
-                      </span>
-                    </div>
+                    {report.published_by?.photo_url ? (
+                      <Image
+                        src={report.published_by.photo_url}
+                        alt={report.published_by.name}
+                        width={48}
+                        height={48}
+                        className="rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-semibold text-lg">
+                          {(report.published_by?.name || "A")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+                      </div>
+                    )}
                     <span className="font-semibold">
                       {report.published_by?.name || "Anonymous"}
                     </span>
                   </div>
 
-                  {/* Report Actions with API Bookmark */}
+                  {/* ReportActions */}
                   <ReportActions
                     reportId={report._id}
                     reportTitle={report.title}
                     onEcho={handleEcho}
                     onComment={handleComment}
-                    onShare={handleShare}
                     onBookmark={handleBookmark}
                     echoes={report.echoes_count || 0}
                     comments={report.comments_count || 0}
                     isEchoed={isEchoed}
                     isBookmarked={isBookmarked}
-                    isAuthenticated={!!user}
                     isBookmarkLoading={bookmarkMutation.isPending}
                     isEchoLoading={echoMutation.isPending}
                   />
                 </div>
 
-                {/* Tags */}
                 <div className="flex gap-2 mt-4">
                   {report.fields_of_interest?.map((field: any) => (
                     <Badge key={field._id} variant="secondary">
@@ -376,7 +362,7 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
                 <CommentSection
                   reportId={report._id}
                   onHideReplies={() =>
-                    dispatch({ type: "report/toggleComments" })
+                    dispatch({ type: "blog/toggleComments" })
                   }
                 />
               ) : (

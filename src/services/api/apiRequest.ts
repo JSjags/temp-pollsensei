@@ -1,6 +1,7 @@
 "use client";
 import axiosInstance from "@/lib/axios-instance";
 import { BuyPaidRespondentResponse, SurveyData } from "@/types/survey";
+import { AnyBuyerError } from "@stripe/stripe-js";
 
 /************** BECOME PAID RESPONDENT ***********/
 
@@ -10,9 +11,10 @@ export const fetchOTP = async (phone: string) => {
       phone_number: phone,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching OTP:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || error.message || "Error fetching OTP";
+    throw new Error(errorMessage);
   }
 };
 
@@ -23,9 +25,10 @@ export const confirmOTP = async (phone: string, otp: string) => {
       otp,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error confirming OTP:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || error.message || "Error confirming OTP";
+    throw new Error(errorMessage);
   }
 };
 
@@ -40,9 +43,12 @@ export const GetUserSurveyData =
         },
       });
       return response.data;
-    } catch (error) {
-      console.error("Error fetching user survey data:", error);
-      throw error;
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Error fetching user survey data";
+      throw new Error(errorMessage);
     }
   };
 
@@ -50,9 +56,12 @@ export const GetUserSurveysArray = async (): Promise<SurveyData[]> => {
   try {
     const response = await GetUserSurveyData();
     return response.data;
-  } catch (error) {
-    console.error("Error fetching user surveys array:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching user survey Array";
+    throw new Error(errorMessage);
   }
 };
 
@@ -69,9 +78,12 @@ export const PurchasePaidRespondent = async (
       }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error purchasing paid respondent:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error purchasing paid respondent";
+    throw new Error(errorMessage);
   }
 };
 
@@ -90,9 +102,12 @@ export const PurchaseQualifiedPaidRespondent = async (
       }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error purchasing qualified paid respondent:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error purchasing qualified paid respondent";
+    throw new Error(errorMessage);
   }
 };
 
@@ -108,9 +123,12 @@ export const ScreenerSurveyPurchase = async (
       numberOfRespondents: selectedRespondentsNumber,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error purchasing screener survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error purchasing screener survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -121,9 +139,12 @@ export const FilterPaidRespondent = async (payload: any) => {
       payload
     );
     return response.data;
-  } catch (error) {
-    console.error("Error filtering paid respondent:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error filtering paid respondent";
+    throw new Error(errorMessage);
   }
 };
 
@@ -133,9 +154,12 @@ export const GetRespondentData = async (activeTab: string) => {
       `/paid-respondent/section/${activeTab}`
     );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching respondent data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching respondent data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -145,9 +169,12 @@ export const GetRespondentSectionData = async (section: string) => {
       `/paid-respondent/section/${section}`
     );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching respondent section data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching respondent section data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -155,9 +182,12 @@ export const fetchPaidRespondentStatus = async () => {
   try {
     const response = await axiosInstance.get("/paid-respondent/check-status");
     return response.data;
-  } catch (error) {
-    console.error("Error fetching paid respondent status:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching paid respondent status";
+    throw new Error(errorMessage);
   }
 };
 
@@ -170,9 +200,12 @@ export const CreateScreenerSurvey = async (payload: any) => {
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error creating screener survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error creating screener survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -180,9 +213,12 @@ export const fetchPurchasedRespondentsStats = async () => {
   try {
     const response = await axiosInstance.get("/paid-respondent/stats");
     return response.data;
-  } catch (error) {
-    console.error("Error fetching purchased respondents stats:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching purchased respondents stats";
+    throw new Error(errorMessage);
   }
 };
 
@@ -191,9 +227,12 @@ export const fetchDailyReward = async () => {
   try {
     const response = await axiosInstance.get("/daily-login");
     return response.data;
-  } catch (error) {
-    console.error("Error fetching daily reward:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching daily reward";
+    throw new Error(errorMessage);
   }
 };
 
@@ -201,9 +240,12 @@ export const fetchLoginStreak = async () => {
   try {
     const response = await axiosInstance.get("/daily-login/streak");
     return response.data;
-  } catch (error) {
-    console.error("Error fetching login streak:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching login streak";
+    throw new Error(errorMessage);
   }
 };
 
@@ -219,9 +261,12 @@ export const fetchAvailableSurveys = async (
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching available surveys:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching available surveys";
+    throw new Error(errorMessage);
   }
 };
 
@@ -240,9 +285,12 @@ export const fetchApplySurveys = async (
       }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching apply surveys:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching apply surveys";
+    throw new Error(errorMessage);
   }
 };
 
@@ -258,9 +306,12 @@ export const fetchApplicationSurveys = async (
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching application surveys:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching application surveys";
+    throw new Error(errorMessage);
   }
 };
 
@@ -268,9 +319,12 @@ export const fetchScreenerSurveyById = async (screenerId: string | null) => {
   try {
     const response = await axiosInstance.get(`/screener-survey/${screenerId}`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching screener survey by ID:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching screener survey by ID";
+    throw new Error(errorMessage);
   }
 };
 
@@ -282,9 +336,12 @@ export const fetchScreenerSurveyBySurveyId = async (
       `/screener-survey/survey/${surveyId}`
     );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching screener survey by survey ID:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching screener survey by survey ID";
+    throw new Error(errorMessage);
   }
 };
 
@@ -295,9 +352,12 @@ export const submitScreenerSurvey = async (payload: any, surveyId: string) => {
       payload
     );
     return response.data;
-  } catch (error) {
-    console.error("Error submitting screener survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error submitting screener survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -305,9 +365,12 @@ export const submitPaidSurvey = async (payload: any) => {
   try {
     const response = await axiosInstance.post("/ps/survey/respond", payload);
     return response.data;
-  } catch (error) {
-    console.error("Error submitting paid survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error submitting paid survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -323,9 +386,12 @@ export const startPaidSurvey = async (
       }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error starting paid survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error starting paid survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -333,9 +399,12 @@ export const fetchSurveyById = async (surveyId: string | null) => {
   try {
     const response = await axiosInstance.get(`/survey/public/${surveyId}`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching survey by ID:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching survey by ID";
+    throw new Error(errorMessage);
   }
 };
 
@@ -344,9 +413,12 @@ export const fetchTotalPurchasedRespondents = async () => {
   try {
     const response = await axiosInstance.get("/purchases/respondents/history");
     return response.data;
-  } catch (error) {
-    console.error("Error fetching total purchased respondents:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching total purchased respondents";
+    throw new Error(errorMessage);
   }
 };
 
@@ -360,9 +432,12 @@ export const fetchScreenerParticipants = async (
       `/screener-survey/participant-review/${surveyId}/${screenerId}`
     );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching screener participants:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching screener participants";
+    throw new Error(errorMessage);
   }
 };
 
@@ -372,9 +447,12 @@ export const fetchParticipantById = async (participantId: string | null) => {
       `/paid-respondent/${participantId}`
     );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching participant by ID:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching participant by ID";
+    throw new Error(errorMessage);
   }
 };
 
@@ -391,9 +469,12 @@ export const submitReviewedParticipant = async (
       }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error submitting reviewed participant:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error submitting reviewed participant";
+    throw new Error(errorMessage);
   }
 };
 
@@ -405,9 +486,12 @@ export const CreateQuickSurvey = async (surveyId: string | null) => {
       survey_id: surveyId,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error creating survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error creating quick survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -427,9 +511,12 @@ export const DirectQuickSurvey = async (
       close_on_duration_reached: durationReached,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error creating survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error creating quick survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -454,9 +541,12 @@ export const QuickSurveyQualifyingPurchase = async (
       }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error creating survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error creating quick survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -481,9 +571,12 @@ export const QuickSurveyScreenerPurchase = async (
       }
     );
     return response.data;
-  } catch (error) {
-    console.error("Error creating survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error creating quick survey";
+    throw new Error(errorMessage);
   }
 };
 
@@ -493,9 +586,12 @@ export const GetUserReportsCategories = async () => {
   try {
     const response = await axiosInstance.get(`/report/categories`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -503,9 +599,12 @@ export const GetUserReportsInterest = async () => {
   try {
     const response = await axiosInstance.get(`/report/interests`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -519,9 +618,12 @@ export const ReportOnboarding = async (
       fields_of_interest: selectedFields,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error purchasing screener survey:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error creating reports onboarding";
+    throw new Error(errorMessage);
   }
 };
 
@@ -529,9 +631,12 @@ export const GetLatestReport = async () => {
   try {
     const response = await axiosInstance.get(`/report/blog/latest`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching latest reports data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -539,9 +644,12 @@ export const GetMostRecentReport = async () => {
   try {
     const response = await axiosInstance.get(`/report/blog/recent`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching most recent reports data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -549,9 +657,12 @@ export const GetPopularReport = async () => {
   try {
     const response = await axiosInstance.get(`/report/blog/popular`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching popular reports data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -559,19 +670,31 @@ export const GetReportDetailsById = async (id: number) => {
   try {
     const response = await axiosInstance.get(`/report/blog/${id}`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports details data";
+    throw new Error(errorMessage);
   }
 };
 
-export const GetReportCommentsAndReplies = async (id: string) => {
+export const GetReportCommentsAndReplies = async (
+  id: string,
+  page = 1,
+  pageSize = 20
+) => {
   try {
-    const response = await axiosInstance.get(`/report/blog/${id}/comments`);
+    const response = await axiosInstance.get(`/report/blog/${id}/comments`, {
+      params: { page, page_size: pageSize },
+    });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports comments";
+    throw new Error(errorMessage);
   }
 };
 
@@ -581,9 +704,12 @@ export const GetReportBookmark = async (id: string) => {
       `/report/blog/bookmark-status/${id}`
     );
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports bookmarks";
+    throw new Error(errorMessage);
   }
 };
 
@@ -591,9 +717,27 @@ export const GetReportStats = async () => {
   try {
     const response = await axiosInstance.get(`/report/blog/stats`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports stats";
+    throw new Error(errorMessage);
+  }
+};
+
+export const GetReportBookmarksCount = async () => {
+  try {
+    const response = await axiosInstance.get(
+      `/report/blog/my-bookmarked-count`
+    );
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports stats";
+    throw new Error(errorMessage);
   }
 };
 
@@ -607,9 +751,12 @@ export const GetSearchResults = async (params: any) => {
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching search reports data";
+    throw new Error(errorMessage);
   }
 };
 
@@ -619,9 +766,12 @@ export const ReportBookmark = async (reportId: string) => {
       report_id: reportId,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error toggling bookmark:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error toggling reports bookmark";
+    throw new Error(errorMessage);
   }
 };
 
@@ -635,9 +785,12 @@ export const ReportEcho = async (
       number_of_echoes,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error toggling reports echo";
+    throw new Error(errorMessage);
   }
 };
 
@@ -653,9 +806,12 @@ export const ReportComment = async (
       media,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error toggling reports comment";
+    throw new Error(errorMessage);
   }
 };
 
@@ -671,9 +827,12 @@ export const EditReportComment = async (
       media,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error editing reports comment";
+    throw new Error(errorMessage);
   }
 };
 
@@ -685,9 +844,12 @@ export const DeleteReportComment = async (comment_id: string) => {
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error deleting reports comment";
+    throw new Error(errorMessage);
   }
 };
 
@@ -695,16 +857,18 @@ export const EchoReportComment = async (comment_id: string) => {
   try {
     const response = await axiosInstance.post("/report/comment/echo", {
       comment_id,
+      number_of_echoes: 1,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || error.message || "Error echoing reports";
+    throw new Error(errorMessage);
   }
 };
 
 export const NestedReportComment = async (
-  comment_id: string,
+  comment_id: string | undefined,
   content: string,
   media?: any
 ) => {
@@ -715,15 +879,18 @@ export const NestedReportComment = async (
       media,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error creating reports comment reply";
+    throw new Error(errorMessage);
   }
 };
 
 export const EditNestedReportComment = async (
-  reply_id: string,
   comment_id: string,
+  reply_id: string,
   content: string,
   media?: any
 ) => {
@@ -735,9 +902,12 @@ export const EditNestedReportComment = async (
       media,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error Editing reports comment reply";
+    throw new Error(errorMessage);
   }
 };
 
@@ -746,32 +916,39 @@ export const DeleteNestedReportComment = async (
   comment_id: string
 ) => {
   try {
-    const response = await axiosInstance.delete("/report/comment", {
+    const response = await axiosInstance.delete("/report/reply", {
       data: {
         reply_id,
         comment_id,
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to delete reply. Please try again.";
+    throw new Error(errorMessage);
   }
 };
 
 export const EchoNestedReportComment = async (
-  reply_id: string,
-  comment_id: string
+  comment_id: string,
+  reply_id: string
 ) => {
   try {
     const response = await axiosInstance.post("/report/reply/echo", {
       reply_id,
       comment_id,
+      number_of_echoes: 1,
     });
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error echoing reports comment reply";
+    throw new Error(errorMessage);
   }
 };
 
@@ -779,8 +956,29 @@ export const GetReportBySlug = async (slug: string) => {
   try {
     const response = await axiosInstance.get(`/report/blog/${slug}`);
     return response.data;
-  } catch (error) {
-    console.error("Error fetching reports data:", error);
-    throw error;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports by slug";
+    throw new Error(errorMessage);
+  }
+};
+
+export const GetBookmarkedReport = async (page = 1, pageSize = 20) => {
+  try {
+    const response = await axiosInstance.get(
+      `/report/blog/my-bookmarked-reports`,
+      {
+        params: { page, page_size: pageSize },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports bookmarks";
+    throw new Error(errorMessage);
   }
 };

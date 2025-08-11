@@ -16,10 +16,10 @@ const BlogPageContent: React.FC<BlogPageContentProps> = ({ params }) => {
   const user = useSelector((state: RootState) => state.user?.user);
 
   return (
-    <>
+    <div className="w-full">
       {user ? <Navbar showReportsHeader={true} /> : <NavBar />}
       <BlogDetails slug={params.slug} />
-    </>
+    </div>
   );
 };
 

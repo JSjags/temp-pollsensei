@@ -45,13 +45,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     refetch: refetchComments,
   } = useQuery({
     queryKey: [APP_KEYS.REPORT_COMMENTS, reportId],
-    queryFn: () => GetReportCommentsAndReplies(reportId),
+    queryFn: () => GetReportCommentsAndReplies(reportId, 1, 20),
     enabled: !!reportId,
     staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
   });
 
-  // Helper function to invalidate all related queries
   const invalidateCommentQueries = async () => {
     try {
       await queryClient.invalidateQueries({
@@ -63,14 +62,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       await queryClient.refetchQueries({
         queryKey: [APP_KEYS.REPORT_COMMENTS, reportId],
       });
-      console.log("Cache invalidation completed successfully");
     } catch (error) {
-      console.error("Cache invalidation failed:", error);
       refetchComments();
     }
   };
 
-  // Add comment mutation
   const addCommentMutation = useMutation({
     mutationFn: ({ content, media }: { content: string; media?: any }) =>
       ReportComment(reportId, content, media),
@@ -116,11 +112,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       return { previousComments };
     },
     onSuccess: async (data) => {
-      console.log("Comment added successfully:", data);
       await invalidateCommentQueries();
       setShowMainReplyForm(false);
       setTimeout(() => setShowMainReplyForm(true), 100);
-      toast.success("Comment added successfully!");
     },
     onError: (error, variables, context) => {
       console.error("Add comment error:", error);
@@ -128,7 +122,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         [APP_KEYS.REPORT_COMMENTS, reportId],
         context?.previousComments
       );
-      toast.error("Failed to add comment. Please try again.");
+      toast.error(error.message || "Failed to add comment. Please try again.");
     },
   });
 
@@ -143,24 +137,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       content: string;
       media?: any;
     }) => {
-      console.log("🔧 EDIT MAIN COMMENT - API called with:", { commentId, content });
       return EditReportComment(commentId, content, media);
     },
     onSuccess: async (data) => {
-      console.log("✅ Main comment edited successfully:", data);
       await invalidateCommentQueries();
-      toast.success("Comment updated successfully!");
     },
     onError: (error) => {
       console.error("❌ Edit main comment error:", error);
-      toast.error("Failed to update comment. Please try again.");
+      toast.error(
+        error.message || "Failed to update comment. Please try again."
+      );
     },
   });
 
   // Delete main comment mutation
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId: string) => {
-      console.log("🗑️ DELETE MAIN COMMENT - API called with:", { commentId });
       return DeleteReportComment(commentId);
     },
     onMutate: async (commentId) => {
@@ -192,9 +184,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       return { previousComments };
     },
     onSuccess: async (data) => {
-      console.log("✅ Main comment deleted successfully:", data);
       await invalidateCommentQueries();
-      toast.success("Comment deleted successfully!");
     },
     onError: (error, commentId, context) => {
       console.error("❌ Delete main comment error:", error);
@@ -202,11 +192,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         [APP_KEYS.REPORT_COMMENTS, reportId],
         context?.previousComments
       );
-      toast.error("Failed to delete comment. Please try again.");
+      toast.error(
+        error.message || "Failed to delete comment. Please try again."
+      );
     },
   });
 
-  // FIXED: Edit nested comment mutation with consistent parameter order and debug info
   const editNestedCommentMutation = useMutation({
     mutationFn: async ({
       replyId,
@@ -219,31 +210,24 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       content: string;
       media?: any;
     }) => {
-      console.log("🔧 EDIT NESTED COMMENT - API called with:", {
+      const result = await EditNestedReportComment(
         parentCommentId,
         replyId,
         content,
         media
-      });
-      
-      // FIXED: Ensure consistent parameter order
-      const result = await EditNestedReportComment(parentCommentId, replyId, content, media);
-      console.log("✅ EditNestedReportComment API response:", result);
+      );
       return result;
     },
     onSuccess: async (data, variables) => {
-      console.log("✅ Nested comment edited successfully:", data);
       await invalidateCommentQueries();
-      toast.success("Reply updated successfully!");
     },
     onError: (error, variables) => {
       console.error("❌ Edit nested comment error:", error);
       console.error("❌ Failed variables:", variables);
-      toast.error("Failed to update reply. Please try again.");
+      toast.error(error.message || "Failed to update reply. Please try again.");
     },
   });
 
-  // FIXED: Delete nested comment mutation with consistent parameter order and debug info
   const deleteNestedCommentMutation = useMutation({
     mutationFn: async ({
       replyId,
@@ -252,30 +236,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       replyId: string;
       parentCommentId: string;
     }) => {
-      console.log("🗑️ DELETE NESTED COMMENT - API called with:", {
-        replyId,
-        parentCommentId
-      });
-      
-      // FIXED: Ensure consistent parameter order - check your API signature!
-      // If your API expects (replyId, parentCommentId), use this:
       const result = await DeleteNestedReportComment(replyId, parentCommentId);
-      
-      // If your API expects (parentCommentId, replyId), use this instead:
-      // const result = await DeleteNestedReportComment(parentCommentId, replyId);
-      
-      console.log("✅ DeleteNestedReportComment API response:", result);
       return result;
     },
     onSuccess: async (data, variables) => {
-      console.log("✅ Nested comment deleted successfully:", data);
       await invalidateCommentQueries();
-      toast.success("Reply deleted successfully!");
     },
     onError: (error, variables) => {
       console.error("❌ Delete nested comment error:", error);
       console.error("❌ Failed variables:", variables);
-      toast.error("Failed to delete reply. Please try again.");
+      toast.error(error.message || "Failed to delete reply. Please try again.");
     },
   });
 
@@ -283,12 +253,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const echoMainCommentMutation = useMutation({
     mutationFn: (commentId: string) => EchoReportComment(commentId),
     onSuccess: async (data) => {
-      console.log("Comment echoed successfully:", data);
       await invalidateCommentQueries();
     },
     onError: (error) => {
       console.error("Echo comment error:", error);
-      toast.error("Failed to echo comment. Please try again.");
+      toast.error(error.message || "Failed to echo comment. Please try again.");
     },
   });
 
@@ -302,12 +271,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       commentId: string;
     }) => EchoNestedReportComment(replyId, commentId),
     onSuccess: async (data) => {
-      console.log("Reply echoed successfully:", data);
       await invalidateCommentQueries();
     },
     onError: (error) => {
       console.error("Echo reply error:", error);
-      toast.error("Failed to echo reply. Please try again.");
+      toast.error(error.message || "Failed to echo reply. Please try again.");
     },
   });
 
@@ -318,18 +286,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       content,
       media,
     }: {
-      parentId: string;
+      parentId: string | undefined;
       content: string;
       media?: any;
     }) => NestedReportComment(parentId, content, media),
     onSuccess: async (data) => {
-      console.log("Reply added successfully:", data);
       await invalidateCommentQueries();
-      toast.success("Reply added successfully!");
     },
     onError: (error) => {
       console.error("Add reply error:", error);
-      toast.error("Failed to add reply. Please try again.");
+      toast.error(error.message || "Failed to add reply. Please try again.");
     },
   });
 
@@ -346,57 +312,38 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     addCommentMutation.mutate({ content });
   };
 
-  // FIXED: Enhanced edit handler with debug info
   const handleEditComment = (
     commentId: string,
     content: string,
     isNested: boolean = false,
     parentCommentId?: string
   ) => {
-    console.log("🎯 HANDLE EDIT COMMENT called with:", {
-      commentId,
-      content,
-      isNested,
-      parentCommentId
-    });
-
     if (!handleAuthRequired()) return;
 
     if (isNested && parentCommentId) {
-      console.log("📝 Triggering NESTED edit mutation...");
       editNestedCommentMutation.mutate({
         replyId: commentId,
         parentCommentId: parentCommentId,
         content,
       });
     } else {
-      console.log("📝 Triggering MAIN edit mutation...");
       editCommentMutation.mutate({ commentId, content });
     }
   };
 
-  // FIXED: Enhanced delete handler with debug info
   const handleDeleteComment = (
     commentId: string,
     isNested: boolean = false,
     parentCommentId?: string
   ) => {
-    console.log("🎯 HANDLE DELETE COMMENT called with:", {
-      commentId,
-      isNested,
-      parentCommentId
-    });
-
     if (!handleAuthRequired()) return;
 
     if (isNested && parentCommentId) {
-      console.log("🗑️ Triggering NESTED delete mutation...");
       deleteNestedCommentMutation.mutate({
         replyId: commentId,
         parentCommentId: parentCommentId,
       });
     } else {
-      console.log("🗑️ Triggering MAIN delete mutation...");
       deleteCommentMutation.mutate(commentId);
     }
   };
@@ -414,17 +361,35 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
   };
 
-  const handleReplyToComment = (parentId: string, content: string) => {
+  const handleReplyToComment = (
+    parentId: string | undefined,
+    content: string
+  ) => {
     if (!handleAuthRequired()) return;
+
     replyCommentMutation.mutate({ parentId, content });
   };
 
-  const canModifyComment = (comment: any) => {
-    return user && comment.user_id?._id === (user as any)?._id;
+  // Updated logic to check if user can reply to their own comment
+  const canReplyToOwnComment = (comment: any) => {
+    if (!user || comment.user_id?._id !== (user as any)?._id) return false;
+
+    // User can only reply to their own comment if there are replies from other users
+    const hasRepliesFromOthers = comment.replies?.some(
+      (reply: any) => reply.user_id?._id !== (user as any)?._id
+    );
+
+    return hasRepliesFromOthers;
   };
 
-  const canReplyToComment = (comment: any) => {
+  // Check if user can reply to someone else's comment
+  const canReplyToOthersComment = (comment: any) => {
     return user && comment.user_id?._id !== (user as any)?._id;
+  };
+
+  // Check if user can modify (edit/delete) a comment
+  const canModifyComment = (comment: any) => {
+    return user && comment.user_id?._id === (user as any)?._id;
   };
 
   if (isCommentsLoading) {
@@ -488,6 +453,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         {user ? (
           showMainReplyForm ? (
             <div className="mb-6">
+              {/* Comment Section Disclaimer */}
+              <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                <p className="text-sm text-purple-800">
+                  <span className="font-semibold">Community Guidelines:</span>{" "}
+                  We encourage respectful discussion and diverse perspectives.
+                  We do not tolerate violent language, hate speech, harassment,
+                  or threats. Please keep comments constructive and relevant to
+                  the topic. Violations may result in comment removal or account
+                  restrictions.
+                </p>
+              </div>
+
               <ReplyForm
                 onSubmit={handleAddComment}
                 onCancel={() => setShowMainReplyForm(false)}
@@ -518,55 +495,66 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
         {comments.length > 0 ? (
           <div className="space-y-6">
-            {comments.map((comment: any) => (
-              <Comment
-                key={comment._id}
-                comment={{
-                  id: comment._id,
-                  content: comment.content,
-                  author: {
-                    id: comment.user_id?._id,
-                    name: comment.user_id?.name || "Anonymous",
-                    avatar:
-                      comment.user_id?.name?.slice(0, 1)?.toUpperCase() || "A",
-                  },
-                  likes: comment.echoes || 0,
-                  isLiked: comment.is_echoed || false,
-                  replies:
-                    comment.replies?.map((reply: any) => ({
-                      id: reply._id,
-                      content: reply.content,
-                      author: {
-                        id: reply.user_id?._id,
-                        name: reply.user_id?.name || "Anonymous",
-                        avatar:
-                          reply.user_id?.name?.slice(0, 1)?.toUpperCase() ||
-                          "A",
-                      },
-                      likes: reply.echoes || 0,
-                      isLiked: reply.is_echoed || false,
-                      replies: [],
-                      parentId: comment._id,
-                      timestamp: reply.createdAt,
-                      editTimestamp: reply.updatedAt,
-                      reportId: reportId,
-                    })) || [],
-                  parentId: comment.parent_id,
-                  timestamp: comment.createdAt,
-                  editTimestamp: comment.updatedAt,
-                  reportId: reportId,
-                }}
-                reportId={reportId}
-                onLike={handleLikeComment}
-                onReply={handleReplyToComment}
-                onEdit={handleEditComment}
-                onDelete={handleDeleteComment}
-                currentUserId={(user as any)?._id}
-                rootCommentId={comment._id}
-                canReply={Boolean(canReplyToComment(comment))}
-                canModify={Boolean(canModifyComment(comment))}
-              />
-            ))}
+            {comments.map((comment: any) => {
+              const canReplyOwn = canReplyToOwnComment(comment);
+              const canReplyOthers = canReplyToOthersComment(comment);
+              const canModify = canModifyComment(comment);
+
+              return (
+                <Comment
+                  key={comment._id}
+                  comment={{
+                    id: comment._id,
+                    content: comment.content,
+                    author: {
+                      id: comment.user_id?._id,
+                      name:
+                        comment.user_id?.name.toString().split(" ")[0] ||
+                        "Anonymous",
+                      avatar:
+                        comment.user_id?.name?.slice(0, 1)?.toUpperCase() ||
+                        "A",
+                    },
+                    likes: comment.echoes || 0,
+                    isLiked: comment.is_echoed || false,
+                    replies:
+                      comment.replies?.map((reply: any) => ({
+                        id: reply._id,
+                        content: reply.content,
+                        author: {
+                          id: reply.user_id?._id,
+                          name:
+                            reply.user_id?.name.toString().split(" ")[0] ||
+                            "Anonymous",
+                          avatar:
+                            reply.user_id?.name?.slice(0, 1)?.toUpperCase() ||
+                            "A",
+                        },
+                        likes: reply.echoes || 0,
+                        isLiked: reply.is_echoed || false,
+                        replies: [],
+                        parentId: comment._id,
+                        timestamp: reply.createdAt,
+                        editTimestamp: reply.updatedAt,
+                        reportId: reportId,
+                      })) || [],
+                    parentId: comment.parent_id,
+                    timestamp: comment.createdAt,
+                    editTimestamp: comment.updatedAt,
+                    reportId: reportId,
+                  }}
+                  reportId={reportId}
+                  onLike={handleLikeComment}
+                  onReply={handleReplyToComment}
+                  onEdit={handleEditComment}
+                  onDelete={handleDeleteComment}
+                  currentUserId={(user as any)?._id}
+                  rootCommentId={comment._id}
+                  canReply={canReplyOwn || canReplyOthers}
+                  canModify={canModify}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">
