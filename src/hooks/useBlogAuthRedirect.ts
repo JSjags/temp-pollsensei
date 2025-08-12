@@ -1,5 +1,6 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
+import { useCallback, useRef } from "react";
 import { RootState } from "@/redux/store";
 import { redirectUtils } from "@/utils/redirectUtils";
 
@@ -8,21 +9,41 @@ export const useBlogAuthRedirect = () => {
   const router = useRouter();
   const user = useSelector((state: RootState) => state.user?.user);
 
-  const redirectToAuth = (authType: "login" | "register" = "login") => {
-    if (redirectUtils.shouldStoreRoute(pathname)) {
-      redirectUtils.storeRedirectRoute(pathname);
-    }
+  // Prevent multiple simultaneous redirects
+  const redirectingRef = useRef(false);
 
-    router.push(`/${authType}`);
-  };
+  const redirectToAuth = useCallback(
+    (authType: "login" | "register" = "login") => {
+      if (redirectingRef.current) {
+        return;
+      }
 
-  const requireAuth = (authType: "login" | "register" = "login"): boolean => {
-    if (!user) {
-      redirectToAuth(authType);
-      return false;
-    }
-    return true;
-  };
+      redirectingRef.current = true;
+
+      if (redirectUtils.shouldStoreRoute(pathname)) {
+        redirectUtils.storeRedirectRoute(pathname);
+      }
+
+      router.push(`/${authType}`);
+
+      // Reset the flag after navigation
+      setTimeout(() => {
+        redirectingRef.current = false;
+      }, 1000);
+    },
+    [pathname, router]
+  );
+
+  const requireAuth = useCallback(
+    (authType: "login" | "register" = "login"): boolean => {
+      if (!user) {
+        redirectToAuth(authType);
+        return false;
+      }
+      return true;
+    },
+    [user, redirectToAuth]
+  );
 
   return {
     redirectToAuth,

@@ -162,7 +162,7 @@ const FeaturedReportCarousel: React.FC<FeaturedReportCarouselProps> = ({
         </div>
 
         {/* Title */}
-        <h3 className="text-[44px] text-[#333333] mb-3 leading-tight capitalize">
+        <h3 className="text-lg lg:text-[44px] text-[#333333] mb-3 leading-tight capitalize">
           {currentReport.survey_id.topic}
         </h3>
 

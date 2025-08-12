@@ -27,7 +27,6 @@ import { dark_theme_logo, pollsensei_new_logo } from "@/assets/images";
 import axiosInstance from "@/lib/axios-instance";
 import { useGoogleLoginMutation } from "@/services/user.service";
 import { PlaceholderRightSide } from "@/components/reusable/coming-soon";
-import { redirectUtils } from "@/utils/redirectUtils";
 
 const constraints = {
   email: {
@@ -70,11 +69,6 @@ const LoginPage = () => {
       toast.success("Login successful");
       setState(true);
       setLoginState(false);
-
-      // Use redirect utilities for routing
-      const userRoles = response?.data?.user?.roles?.[0]?.role || [];
-      const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles, ed);
-      router.push(redirectRoute);
     },
     onError: (err: any) => {
       toast.error(
@@ -104,11 +98,6 @@ const LoginPage = () => {
         dispatch(updateUser(userData.data));
         setState(true);
         setLoginState(false);
-
-        // Use redirect utilities for routing
-        const userRoles = userData.data?.user?.roles?.[0]?.role || [];
-        const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles, ed);
-        router.push(redirectRoute);
       } catch (err: any) {
         toast.error(
           "Failed to register user " + (err?.data?.message || err.message)
@@ -119,18 +108,6 @@ const LoginPage = () => {
     onError: () => console.error("Google Sign-In Failed"),
     flow: "implicit",
   });
-
-  useEffect(() => {
-    if (user) {
-      if (ed) {
-        if (ed === "2") {
-          router.push("/surveys/edit-survey");
-        } else if (ed === "3") {
-          router.push("/surveys/manual-survey-create");
-        }
-      }
-    }
-  }, [user, router, ed]);
 
   const onSubmit = (values: { email: string; password: string }) => {
     loginMutation.mutate(values);
