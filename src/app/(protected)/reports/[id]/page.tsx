@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { usePreviewReportById, useReports } from "@/components/reports/queries/useCategories";
+import { useReports } from "@/components/reports/queries/useCategories";
 import * as Tabs from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, SearchIcon } from "lucide-react";

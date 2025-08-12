@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React from "react";
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
@@ -27,6 +27,8 @@ import { LoadingSpinner } from "@/components/shop/components/dialogs/BuyPollcoin
 import * as Dialog from "@radix-ui/react-dialog";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useReportOnboardState } from "../queries/useOnboardState";
+import { useQueryClient } from "@tanstack/react-query";
 
 const categoryIcons: Record<
   string,
@@ -43,6 +45,7 @@ const categoryIcons: Record<
 export default function Onboarding() {
   const user = useSelector((state: RootState) => state.user.user);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const step = useOnboardingStore((state) => state.step);
   const nextStep = useOnboardingStore((state) => state.nextStep);
   const prevStep = useOnboardingStore((state) => state.prevStep);
@@ -57,6 +60,7 @@ export default function Onboarding() {
   const selectedCategories = useOnboardingStore(
     (state) => state.selectedCategories
   );
+  const { refetch } = useReportOnboardState();
 
   const toggleCategory = useOnboardingStore((state) => state.toggleCategory);
   const selectedInterests = useOnboardingStore(
@@ -80,17 +84,21 @@ export default function Onboarding() {
       {
         onSuccess: (res) => {
           toast.success("Onboarding completed successfully!");
+
+          // Show finish step
           setStep("finish");
-          router.push("/reports");
-          // Wait a short moment before navigating (optional)
+          router.refresh();
+          // Refetch after a short delay to let user see the finish step
           setTimeout(() => {
-            router.push("/reports");
-          }, 1500); // optional delay for loading dialog effect
-          // Redirect, show toast, etc.
+            queryClient.invalidateQueries({
+              queryKey: ["report", "onboardstate"],
+            });
+            refetch();
+          }, 2000); // Show finish step for 2 seconds
         },
         onError: (error) => {
           console.error("❌ Failed to submit onboarding:", error);
-          // Show toast or error message
+          toast.error("Failed to complete onboarding. Please try again.");
         },
       }
     );
@@ -171,10 +179,11 @@ export default function Onboarding() {
 
               <div className="flex items-center justify-center flex-wrap gap-6 mt-6">
                 {interestsLoading
-                  ? Array.from({ length: 6 }).map((_, index) => (
-                      <div key={index} className="border p-4 rounded-md">
-                        <p>loading</p>
-                      </div>
+                  ? Array.from({ length: 16 }).map((_, index) => (
+                      <Skeleton
+                        key={index}
+                        className="w-20 h-10 rounded-full"
+                      />
                     ))
                   : interests?.map((interest) => (
                       <div

@@ -31,7 +31,7 @@ export const useAllSurveys = (page: number, pageSize: number = 9) => {
   return useQuery({
     queryKey: ["surveys", page, pageSize],
     queryFn: () => fetchAllSurveys(page, pageSize),
-    staleTime: 1000 * 60 * 1, // 5 minutes
+    // staleTime: 1000 * 60 * 1, // 5 minutes
   });
 };
 
