@@ -22,20 +22,48 @@ export const fetchReportInterests = async (): Promise<ReportCategory[]> => {
   }
 };
 
-
 export const fetchOnboardState = async (): Promise<OnboardingData> => {
   try {
-    const response = await axiosInstance.get("/report/onboard");
-    return response.data;
+    const response = await axiosInstance.get<OnboardingResponse>("/report/onboard");
+    
+    // If successful, return the data part
+    if (response.data.success) {
+      return response.data.data;
+    } else {
+      // Handle unsuccessful response (shouldn't normally happen in try block)
+      throw new Error(response.data.message);
+    }
   } catch (err) {
-    const error = err as AxiosError;
+    const error = err as AxiosError<OnboardingResponse>;
 
-    // Optional: Log or format backend error message
+    // Check if this is the "not onboarded yet" case
+    if (error.response?.status === 400 || error.response?.status === 404) {
+      const errorResponse = error.response.data;
+      
+      // If it's specifically about not being onboarded, return empty state
+      if (errorResponse?.message?.includes("You have not onboarded yet") || 
+          errorResponse?.message?.includes("not onboarded")) {
+        console.log("User not onboarded yet, returning empty state");
+        
+        // Return a valid OnboardingData structure with empty arrays
+        return {
+          _id: "",
+          organization_id: "",
+          categories: [],
+          fields_of_interest: [],
+          accepted_terms: false,
+          createdAt: "",
+          updatedAt: "",
+          __v: 0
+        };
+      }
+    }
+
+    // Handle other errors normally
     if (error.response) {
       console.error("Backend error:", error.response.data);
-      // You can optionally throw a clearer message here
       throw new Error(
-        (error.response.data as any)?.message || "Failed to fetch onboarding state"
+        error.response.data?.message || "Failed to fetch onboarding state"
       );
     } else if (error.request) {
       console.error("No response received:", error.request);
@@ -46,7 +74,6 @@ export const fetchOnboardState = async (): Promise<OnboardingData> => {
     }
   }
 };
-
 export const fetchAllSurveys = async (page = 1, pageSize = 9) => {
   try {
     const response = await axiosInstance.get("/report/surveys", {
