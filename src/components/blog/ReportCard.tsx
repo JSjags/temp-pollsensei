@@ -3,14 +3,15 @@ import React, { FC, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { FaUser, FaRegCommentDots } from "react-icons/fa";
-import { BsMegaphone } from "react-icons/bs";
+import { BsMegaphone, BsBookmarkFill } from "react-icons/bs";
 
 interface ReportCardProps {
   report: any;
   onClick: (report: any) => void;
+  isBookmarked?: boolean;
 }
 
-const ReportCard: FC<ReportCardProps> = ({ report, onClick }) => {
+const ReportCard: FC<ReportCardProps> = ({ report, onClick, isBookmarked }) => {
   const [imageError, setImageError] = useState(false);
 
   const defaultImage =
@@ -58,7 +59,9 @@ const ReportCard: FC<ReportCardProps> = ({ report, onClick }) => {
               </div>
 
               <h4 className="font-bold text-black mb-3 text-base leading-tight line-clamp-2">
-                {report.title}
+                {report.survey_id.topic?.length > 30
+                  ? `${report.survey_id.topic.slice(0, 30)}...`
+                  : report.survey_id.topic}
               </h4>
 
               <p className="text-[#404040] text-[13px] leading-relaxed line-clamp-3 mb-4">
@@ -89,6 +92,9 @@ const ReportCard: FC<ReportCardProps> = ({ report, onClick }) => {
                   {report.comments_count || 0}
                 </span>
               </div>
+              {isBookmarked && (
+                <BsBookmarkFill className="w-4 h-4 text-[#5B03B2]" />
+              )}
             </div>
           </div>
 

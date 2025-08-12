@@ -94,7 +94,7 @@ const PhoneVerification = () => {
       setOTP(response);
     } catch (error: any) {
       console.error(error);
-      toast.error(error?.message ?? "Wrong phone number, please try again.");
+      toast.error(error.message ?? "Wrong phone number, please try again.");
     }
   };
 
@@ -112,7 +112,7 @@ const PhoneVerification = () => {
       }
     } catch (error: any) {
       console.error(error);
-      toast.error(error?.message ?? "Wrong OTP, please try again.");
+      toast.error(error.message ?? "Wrong OTP, please try again.");
     } finally {
       setIsLoading(false);
     }

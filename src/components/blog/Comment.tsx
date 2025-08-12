@@ -49,7 +49,7 @@ interface CommentProps {
   timestamp?: string | undefined;
   reportId?: string;
   onLike: (commentId: string, rootCommentId?: string) => void;
-  onReply: (parentId: string, content: string) => void;
+  onReply: (parentId: string | undefined, content: string) => void;
   onEdit?: (
     commentId: string,
     content: string,
@@ -66,8 +66,25 @@ interface CommentProps {
   maxDepth?: number;
   rootCommentId?: string;
   canReply?: boolean;
-  canModify?: boolean;
+  canModify?: any;
 }
+
+const parseContentWithMentions = (text: string) => {
+  const mentionMatch = text.match(/^@(\w+)\s+(.*)/);
+
+  if (mentionMatch) {
+    const [, username, remainingText] = mentionMatch;
+    return (
+      <>
+        <span className="text-purple-600 font-medium">@{username}</span>
+        {remainingText && (
+          <span className="text-gray-700"> {remainingText}</span>
+        )}
+      </>
+    );
+  }
+  return <span className="text-gray-700">{text}</span>;
+};
 
 const Comment: React.FC<CommentProps> = ({
   comment,
@@ -88,18 +105,7 @@ const Comment: React.FC<CommentProps> = ({
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  // DEBUG: Log component props
-  console.log("🎨 Comment component rendered with:", {
-    commentId: comment.id,
-    depth,
-    rootCommentId,
-    hasOnEdit: !!onEdit,
-    hasOnDelete: !!onDelete,
-    canModify,
-    currentUserId,
-    authorId: comment.author.id,
-  });
+  const [replyingTo, setReplyingTo] = useState<string>("");
 
   const formatTimestamp = (timestamp: string) => {
     try {
@@ -125,55 +131,36 @@ const Comment: React.FC<CommentProps> = ({
   };
 
   const handleReply = async (content: string) => {
-    console.log("💬 REPLY button clicked:", { parentId: comment.id, content });
     try {
-      await onReply(comment.id, content);
+      const targetParentId = depth === 0 ? comment.id : rootCommentId;
+
+      await onReply(targetParentId, content);
       setShowReplyForm(false);
-      toast.success("Reply posted successfully!");
-    } catch (error) {
+      setReplyingTo("");
+    } catch (error: any) {
       console.error("Error posting reply:", error);
-      toast.error("Failed to post reply. Please try again.");
+      toast.error(error.message || "Failed to post reply. Please try again.");
     }
   };
 
-  // FIXED: Enhanced edit handler with proper debug info and parameter validation
   const handleEdit = async (content: string) => {
-    console.log("✏️ EDIT button clicked (from ReplyForm):", {
-      commentId: comment.id,
-      content,
-      depth,
-      rootCommentId,
-      hasOnEdit: !!onEdit,
-    });
-
     if (onEdit) {
       try {
         const isNested = depth > 0;
         const parentCommentId = isNested ? rootCommentId : undefined;
 
-        console.log("✏️ Calling onEdit with params:", {
-          commentId: comment.id,
-          content,
-          isNested,
-          parentCommentId,
-          depthCheck: depth,
-          rootCommentIdCheck: rootCommentId,
-        });
-
-        // CRITICAL FIX: Ensure we pass the parameters in the correct order
         if (isNested && parentCommentId) {
-          console.log("✏️ ✅ NESTED EDIT - Calling with nested params");
           await onEdit(comment.id, content, true, parentCommentId);
         } else {
-          console.log("✏️ ✅ MAIN EDIT - Calling with main params");
           await onEdit(comment.id, content, false);
         }
 
         setIsEditing(false);
-        toast.success("Comment updated successfully!");
-      } catch (error) {
+      } catch (error: any) {
         console.error("❌ Error editing comment:", error);
-        toast.error("Failed to edit comment. Please try again.");
+        toast.error(
+          error.message || "Failed to edit comment. Please try again."
+        );
       }
     } else {
       console.error("❌ onEdit prop is undefined!");
@@ -188,32 +175,19 @@ const Comment: React.FC<CommentProps> = ({
     try {
       const currentRootCommentId = depth === 0 ? comment.id : rootCommentId;
       await onLike(comment.id, currentRootCommentId);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error liking comment:", error);
-      toast.error("Failed to like comment. Please try again.");
+      toast.error(error.message || "Failed to like comment. Please try again.");
     } finally {
       setIsLikeLoading(false);
     }
   };
 
   const handleDeleteConfirmation = () => {
-    console.log("🗑️ DELETE confirmation dialog opened for:", {
-      commentId: comment.id,
-      depth,
-      rootCommentId,
-    });
     setShowDeleteDialog(true);
   };
 
-  // FIXED: Enhanced delete handler with proper debug info
   const handleDeleteConfirmed = async () => {
-    console.log("🗑️ DELETE confirmed button clicked:", {
-      commentId: comment.id,
-      depth,
-      rootCommentId,
-      hasOnDelete: !!onDelete,
-    });
-
     if (!onDelete) {
       console.error("❌ onDelete prop is undefined!");
       toast.error("Delete function not available");
@@ -227,55 +201,46 @@ const Comment: React.FC<CommentProps> = ({
       const isNested = depth > 0;
       const parentCommentId = isNested ? rootCommentId : undefined;
 
-      console.log("🗑️ Calling onDelete with params:", {
-        commentId: comment.id,
-        isNested,
-        parentCommentId,
-        depthCheck: depth,
-        rootCommentIdCheck: rootCommentId,
-      });
-
-      // CRITICAL FIX: Ensure we pass the parameters in the correct order
       if (isNested && parentCommentId) {
-        console.log("🗑️ ✅ NESTED DELETE - Calling with nested params");
         await onDelete(comment.id, true, parentCommentId);
       } else {
-        console.log("🗑️ ✅ MAIN DELETE - Calling with main params");
         await onDelete(comment.id, false);
       }
-
-      toast.success(
-        `${depth === 0 ? "Comment" : "Reply"} deleted successfully!`
-      );
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error deleting comment:", error);
-      toast.error("Failed to delete comment. Please try again.");
+      toast.error(
+        error.message || "Failed to delete comment. Please try again."
+      );
     } finally {
       setIsDeleteLoading(false);
     }
   };
 
+  const handleReplyClick = (authorName: string) => {
+    setReplyingTo(authorName);
+    setShowReplyForm(true);
+  };
+
   const isNested = depth > 0;
   const canNest = depth < maxDepth;
+  const isCurrentUser = currentUserId && comment.author.id === currentUserId;
 
-  const canReplyToThisComment =
-    canReply && currentUserId && comment.author.id !== currentUserId;
+  // Check if user can reply to this specific comment
+  const canReplyToThisComment = () => {
+    if (!currentUserId) return false;
 
-  const canModifyThisComment =
-    (onEdit || onDelete) &&
-    currentUserId &&
-    comment.author.id === currentUserId;
+    if (isCurrentUser) {
+      // User can only reply to their own comment if there are replies from other users
+      const hasRepliesFromOthers = comment.replies?.some(
+        (reply: any) => reply.author.id !== currentUserId
+      );
+      return hasRepliesFromOthers;
+    } else {
+      return true;
+    }
+  };
 
-  // DEBUG: Log permission calculations
-  console.log("🔐 Permission check for comment:", comment.id, {
-    canReplyToThisComment,
-    canModifyThisComment,
-    canReply,
-    canModify,
-    currentUserId,
-    authorId: comment.author.id,
-    userMatch: currentUserId === comment.author.id,
-  });
+  const showReplyButton = canNest && canReplyToThisComment();
 
   return (
     <div
@@ -299,9 +264,11 @@ const Comment: React.FC<CommentProps> = ({
               <span className="font-semibold text-sm text-gray-900">
                 {comment.author?.name}
               </span>
-              {comment.editTimestamp !== comment.timestamp ? (
+
+              {comment.editTimestamp &&
+              comment.editTimestamp !== comment.timestamp ? (
                 <span className="text-xs text-gray-500">
-                  (Edited {formatTimestamp(comment.editTimestamp ?? "")})
+                  (Edited {formatTimestamp(comment.editTimestamp)})
                 </span>
               ) : (
                 <span className="text-xs text-gray-500">
@@ -311,16 +278,13 @@ const Comment: React.FC<CommentProps> = ({
             </div>
 
             {/* Only show dropdown for comment owner */}
-            {canModifyThisComment && (
+            {isCurrentUser && canModify && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                    onClick={() =>
-                      console.log("🎛️ Dropdown menu opened for:", comment.id)
-                    }
                   >
                     <FaEllipsisV className="text-gray-700 text-xs" />
                   </Button>
@@ -328,7 +292,6 @@ const Comment: React.FC<CommentProps> = ({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     onClick={() => {
-                      console.log("✏️ Edit menu item clicked for:", comment.id);
                       setIsEditing(true);
                     }}
                     disabled={isEditing}
@@ -338,10 +301,6 @@ const Comment: React.FC<CommentProps> = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
-                      console.log(
-                        "🗑️ Delete menu item clicked for:",
-                        comment.id
-                      );
                       handleDeleteConfirmation();
                     }}
                     disabled={isDeleteLoading}
@@ -361,7 +320,6 @@ const Comment: React.FC<CommentProps> = ({
               <ReplyForm
                 onSubmit={handleEdit}
                 onCancel={() => {
-                  console.log("❌ Edit cancelled for:", comment.id);
                   setIsEditing(false);
                 }}
                 placeholder="Edit your comment..."
@@ -370,7 +328,7 @@ const Comment: React.FC<CommentProps> = ({
             </div>
           ) : (
             <div className="text-sm text-gray-700 mb-2 whitespace-pre-wrap">
-              {comment.content}
+              {parseContentWithMentions(comment.content)}
             </div>
           )}
 
@@ -397,9 +355,10 @@ const Comment: React.FC<CommentProps> = ({
                 )}
               </button>
 
-              {canNest && canReplyToThisComment && (
+              {/* Show reply button only when user can reply */}
+              {showReplyButton && (
                 <button
-                  onClick={() => setShowReplyForm(!showReplyForm)}
+                  onClick={() => handleReplyClick(comment.author?.name)}
                   className="flex items-center gap-1 px-2 py-1 rounded-full text-gray-500 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                 >
                   <IoChatbubbleEllipsesOutline className="text-sm" />
@@ -410,17 +369,31 @@ const Comment: React.FC<CommentProps> = ({
                   )}
                 </button>
               )}
+
+              {/* Show/Hide replies toggle when there are replies */}
+              {comment.replies.length > 0 && (
+                <button
+                  onClick={() => setShowReplies(!showReplies)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-gray-500 hover:text-gray-700 transition-colors text-xs"
+                >
+                  {showReplies ? "Hide replies" : "Show replies"}
+                </button>
+              )}
             </div>
           )}
 
           {/* Reply Form */}
-          {showReplyForm && !isEditing && canReplyToThisComment && (
+          {showReplyForm && !isEditing && showReplyButton && (
             <div className="mt-3">
               <ReplyForm
                 onSubmit={handleReply}
-                onCancel={() => setShowReplyForm(false)}
-                placeholder={`Reply to ${comment.author?.name}...`}
-                parentAuthor={comment.author?.name}
+                onCancel={() => {
+                  setShowReplyForm(false);
+                  setReplyingTo("");
+                }}
+                placeholder={`Reply to ${replyingTo}...`}
+                parentAuthor={replyingTo}
+                initialContent={replyingTo ? `@${replyingTo} ` : ""}
               />
             </div>
           )}
@@ -429,9 +402,7 @@ const Comment: React.FC<CommentProps> = ({
           {comment.replies?.length > 0 && showReplies && !isEditing && (
             <div className="mt-4 space-y-4">
               {comment.replies.map((reply) => {
-                const canReplyToReply =
-                  currentUserId && reply.author.id !== currentUserId;
-                const canModifyReply =
+                const isReplyOwner =
                   currentUserId && reply.author.id === currentUserId;
 
                 return (
@@ -442,14 +413,14 @@ const Comment: React.FC<CommentProps> = ({
                     reportId={comment.reportId}
                     onLike={onLike}
                     onReply={onReply}
-                    onEdit={canModifyReply ? onEdit : undefined}
-                    onDelete={canModifyReply ? onDelete : undefined}
+                    onEdit={isReplyOwner ? onEdit : undefined}
+                    onDelete={isReplyOwner ? onDelete : undefined}
                     currentUserId={currentUserId}
                     depth={depth + 1}
                     maxDepth={maxDepth}
                     rootCommentId={depth === 0 ? comment.id : rootCommentId}
-                    canReply={Boolean(canReplyToReply)}
-                    canModify={Boolean(canModifyReply)}
+                    canReply={true}
+                    canModify={isReplyOwner}
                   />
                 );
               })}
@@ -470,15 +441,11 @@ const Comment: React.FC<CommentProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={isDeleteLoading}
-              onClick={() => console.log("❌ Delete cancelled via dialog")}
-            >
+            <AlertDialogCancel disabled={isDeleteLoading}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                console.log("🗑️ Delete confirmed via dialog button");
                 handleDeleteConfirmed();
               }}
               disabled={isDeleteLoading}

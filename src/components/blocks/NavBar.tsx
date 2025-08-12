@@ -19,6 +19,7 @@ import CategoryNav from "@/components/blog/CategoryNav";
 import { FiUser } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import BlogSearchBar from "@/components/navbar/BlogSearchBar";
+import { useBlogAuthRedirect } from "@/hooks/useBlogAuthRedirect";
 
 interface NavBarProps {
   searchTerm?: string;
@@ -38,6 +39,7 @@ const NavBar: FC<NavBarProps> = ({
   const dispatch = useDispatch();
   const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
+  const { redirectToAuth } = useBlogAuthRedirect();
   const pathname = usePathname();
   const router = useRouter();
   const { scrollY } = useScroll();
@@ -335,13 +337,13 @@ const NavBar: FC<NavBarProps> = ({
                 <div className="flex items-center gap-3">
                   <Button
                     variant="ghost"
-                    onClick={() => router.push("/login")}
+                    onClick={() => redirectToAuth("login")}
                     className="bg-purple-600 hover:bg-purple-700 text-white hover:text-white text-base"
                   >
                     Sign in
                   </Button>
                   <Button
-                    onClick={() => router.push("/register")}
+                    onClick={() => redirectToAuth("register")}
                     className="bg-white hover:bg-white border-2 border-purple-600 text-text-white flex items-center gap-2"
                   >
                     <span className="text-purple-600">Create account</span>

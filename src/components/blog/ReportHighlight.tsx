@@ -2,9 +2,17 @@
 import { MdOutlineShowChart } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
-import { GetReportStats } from "@/services/api/apiRequest";
+import {
+  GetReportStats,
+  GetReportBookmarksCount,
+} from "@/services/api/apiRequest";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const ReportHighlight = () => {
+  const user = useSelector((state: RootState) => state.user?.user);
+  const router = useRouter();
   const {
     data: reportStats,
     isLoading,
@@ -14,7 +22,15 @@ const ReportHighlight = () => {
     queryFn: () => GetReportStats(),
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  const { data: bookmarkStats } = useQuery({
+    queryKey: [APP_KEYS.REPORTS_BOOKMARK_COUNT],
+    queryFn: () => GetReportBookmarksCount(),
+  });
+
+  if (isLoading)
+    return (
+      <div className="animate-pulse h-1 bg-gray-200 rounded w-20">&nbsp;</div>
+    );
   if (error) return <div>Error loading stats</div>;
   if (!reportStats || !Array.isArray(reportStats) || reportStats.length === 0) {
     return <div>No stats available</div>;
@@ -24,6 +40,18 @@ const ReportHighlight = () => {
 
   return (
     <div className="w-full flex items-center gap-3 bg-transparent">
+      {user && (
+        <p
+          className="text-[#1C1C1C] text-base cursor-pointer hover:underline"
+          onClick={() => router.push("/blog/bookmarks")}
+        >
+          Bookmarks{" "}
+          <span className="text-[#A9A9B1] text-sm">
+            {" "}
+            ({bookmarkStats?.bookmarked_reports_count}){" "}
+          </span>{" "}
+        </p>
+      )}
       <div className="w-auto flex items-center gap-1">
         <span className="font-bold text-base text-[#1C1C1C]">
           +{stats.total_published_reports || 0}

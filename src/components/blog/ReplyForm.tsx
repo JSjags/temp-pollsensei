@@ -36,12 +36,6 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
 
     const trimmedContent = content.trim();
 
-    console.log("📝 ReplyForm handleSubmit called with:", {
-      content: trimmedContent,
-      initialContent,
-      isEdit: !!initialContent,
-    });
-
     if (!trimmedContent) {
       setError("Comment cannot be empty");
       textareaRef.current?.focus();
@@ -55,7 +49,6 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
 
     setError("");
 
-    console.log("📤 ReplyForm calling onSubmit with content:", trimmedContent);
     onSubmit(trimmedContent);
 
     if (!initialContent) {
@@ -64,7 +57,6 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
   };
 
   const handleCancel = () => {
-    console.log("❌ ReplyForm handleCancel called");
     setContent(initialContent);
     setError("");
     onCancel();
@@ -183,7 +175,7 @@ const ReplyForm: React.FC<ReplyFormProps> = ({
               Posting...
             </>
           ) : (
-            <span>{initialContent ? "Update" : "Post"}</span>
+            <span>{initialContent ? "Post Reply" : "Post"}</span>
           )}
         </Button>
       </div>

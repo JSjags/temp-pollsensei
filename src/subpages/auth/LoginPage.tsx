@@ -27,6 +27,7 @@ import { dark_theme_logo, pollsensei_new_logo } from "@/assets/images";
 import axiosInstance from "@/lib/axios-instance";
 import { useGoogleLoginMutation } from "@/services/user.service";
 import { PlaceholderRightSide } from "@/components/reusable/coming-soon";
+import { redirectUtils } from "@/utils/redirectUtils";
 
 const constraints = {
   email: {
@@ -69,13 +70,11 @@ const LoginPage = () => {
       toast.success("Login successful");
       setState(true);
       setLoginState(false);
-      if (ed) {
-        if (ed === "2") {
-          router.push("/surveys/edit-survey");
-        } else if (ed === "3") {
-          router.push("/surveys/manual-survey-create");
-        }
-      }
+
+      // Use redirect utilities for routing
+      const userRoles = response?.data?.user?.roles?.[0]?.role || [];
+      const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles, ed);
+      router.push(redirectRoute);
     },
     onError: (err: any) => {
       toast.error(
@@ -94,29 +93,31 @@ const LoginPage = () => {
     retry: false,
   });
 
-  const googleLoginMutation = useMutation({
-    mutationFn: (code: string) => {
-      return axios.post("/api/auth/google", { code });
-    },
-    onSuccess: (response) => {
-      dispatch(updateUser(response.data.data));
-      toast.success("Sign in success");
-      if (ed) {
-        if (ed === "2") {
-          router.push("/surveys/edit-survey");
-        } else if (ed === "3") {
-          router.push("/surveys/manual-survey-create");
-        }
-      } else {
-        router.push("/dashboard");
+  // Update the Google login success handler
+  const googleSignUp = useGoogleLogin({
+    onSuccess: async (response) => {
+      const accessToken = response.access_token;
+
+      try {
+        const userData = await googleLogin({ code: accessToken }).unwrap();
+        toast.success("Sign in success");
+        dispatch(updateUser(userData.data));
+        setState(true);
+        setLoginState(false);
+
+        // Use redirect utilities for routing
+        const userRoles = userData.data?.user?.roles?.[0]?.role || [];
+        const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles, ed);
+        router.push(redirectRoute);
+      } catch (err: any) {
+        toast.error(
+          "Failed to register user " + (err?.data?.message || err.message)
+        );
+        console.error("Failed to sign up user", err);
       }
     },
-    onError: (error: any) => {
-      toast.error(
-        "Failed to register user " +
-          (error?.response?.data?.message || error.message)
-      );
-    },
+    onError: () => console.error("Google Sign-In Failed"),
+    flow: "implicit",
   });
 
   useEffect(() => {
@@ -138,27 +139,6 @@ const LoginPage = () => {
   const validateForm = (values: any) => {
     return validate(values, constraints) || {};
   };
-
-  const googleSignUp = useGoogleLogin({
-    onSuccess: async (response) => {
-      const accessToken = response.access_token; // Directly get the access token
-
-      try {
-        const userData = await googleLogin({ code: accessToken }).unwrap();
-        toast.success("Sign in  success");
-        dispatch(updateUser(userData.data));
-        setState(true);
-        setLoginState(false);
-      } catch (err: any) {
-        toast.error(
-          "Failed to register user " + (err?.data?.message || err.message)
-        );
-        console.error("Failed to sign up user", err);
-      }
-    },
-    onError: () => console.error("Google Sign-In Failed"),
-    flow: "implicit",
-  });
 
   if (user || state) {
     return (
