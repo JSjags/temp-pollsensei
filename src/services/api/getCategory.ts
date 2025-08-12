@@ -1,5 +1,6 @@
 import { OnboardingData, OnboardingResponse, ReportCategory } from "@/components/reports/types";
 import axiosInstance from "@/lib/axios-instance";
+import rawAxiosInstance from "@/lib/rawAxiosInstance";
 import { AxiosError } from "axios";
 
 export const fetchReportCategory = async (): Promise<ReportCategory[]> => {
@@ -24,7 +25,7 @@ export const fetchReportInterests = async (): Promise<ReportCategory[]> => {
 
 export const fetchOnboardState = async (): Promise<OnboardingData> => {
   try {
-    const response = await axiosInstance.get<OnboardingResponse>("/report/onboard");
+    const response = await rawAxiosInstance.get<OnboardingResponse>("/report/onboard");
     
     // If successful, return the data part
     if (response.data.success) {
@@ -74,6 +75,9 @@ export const fetchOnboardState = async (): Promise<OnboardingData> => {
     }
   }
 };
+
+
+
 export const fetchAllSurveys = async (page = 1, pageSize = 9) => {
   try {
     const response = await axiosInstance.get("/report/surveys", {
@@ -101,7 +105,6 @@ export const fetchAllSurveys = async (page = 1, pageSize = 9) => {
   }
 };
 
- // adjust path to your axios instance
 
 export const fetchAllReports = async (
   surveyId: string,

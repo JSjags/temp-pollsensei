@@ -74,40 +74,6 @@ export const useOnboardingStore = create<OnboardingState>()(
   )
 );
 
-
-// interface ReportDraftState {
-//   summaryMethod: "ai" | "manual" | null;
-//   summaryContent: string;
-//   setSummaryMethod: (method: "ai" | "manual") => void;
-//   setSummaryContent: (content: string) => void;
-
-//   // For autosave
-//   body: string;
-//   setBody: (body: string) => void;
-
-//   reset: () => void;
-// }
-
-// export const useReportDraftStore = create<ReportDraftState>()(
-//   persist(
-//     (set) => ({
-//       summaryMethod: null,
-//       summaryContent: "",
-//       body: "",
-
-//       setSummaryMethod: (method) => set({ summaryMethod: method }),
-//       setSummaryContent: (content) => set({ summaryContent: content }),
-//       setBody: (body) => set({ body }),
-
-//       reset: () => set({ summaryMethod: null, summaryContent: "", body: "" }),
-//     }),
-//     {
-//       name: "report-draft-store", // key in localStorage
-//     }
-//   )
-// );
-
-
 export type SummaryMethod = "ai" | "manual" | null;
 
 export interface StoredReportDraft {
