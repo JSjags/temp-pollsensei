@@ -2,7 +2,7 @@
 
 import { useSearchParams, useParams, useRouter } from "next/navigation";
 import { ExternalLink, Loader2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import DOMPurify from "dompurify";
 import mammoth from "mammoth";
 import dynamic from "next/dynamic";
@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import axiosInstance from "@/lib/axios-instance";
 import { PublishReportPayload } from "@/components/reports/queries/usePostOnboard";
 import { useReportDraftStore } from "@/components/reports/stores";
+import { AxiosError } from "axios";
 
 const defaultCategories = [
   { value: "health", label: "Health" },
@@ -59,13 +60,16 @@ interface ReportData {
 // Word counting utility function
 const countWords = (html: string): number => {
   // Create a temporary div to extract text from HTML
-  const tempDiv = document.createElement('div');
+  const tempDiv = document.createElement("div");
   tempDiv.innerHTML = html;
-  const text = tempDiv.textContent || tempDiv.innerText || '';
-  
+  const text = tempDiv.textContent || tempDiv.innerText || "";
+
   // Split by whitespace and filter out empty strings
-  const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-  return text.trim() === '' ? 0 : words.length;
+  const words = text
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0);
+  return text.trim() === "" ? 0 : words.length;
 };
 
 const MAX_WORDS = 1000;
@@ -103,6 +107,10 @@ export default function DraftPreviewPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  // Add ref to track if word limit toast has been shown
+  const hasShownWordLimitToast = useRef(false);
+  const previousWordCount = useRef(0);
+
   const { data: categoriesData, isLoading: categoriesLoading } =
     useReportCategory();
   const { data: interestsData, isLoading: interestsLoading } =
@@ -137,11 +145,17 @@ export default function DraftPreviewPage() {
 
       const { value: rawHtml } = await mammoth.convertToHtml({ arrayBuffer });
       const cleanHtml = DOMPurify.sanitize(rawHtml);
-      
+
       // Set the AI content directly to Quill editor
       setQuillContent(cleanHtml);
       // Update word count
-      setWordCount(countWords(cleanHtml));
+      const newWordCount = countWords(cleanHtml);
+      setWordCount(newWordCount);
+      previousWordCount.current = newWordCount;
+
+      // Reset toast flag when loading new content
+      hasShownWordLimitToast.current = false;
+
       toast.success("AI summary loaded successfully!");
     } catch (error: any) {
       console.error("Failed to load AI content:", error);
@@ -150,7 +164,10 @@ export default function DraftPreviewPage() {
       if (summaryContent) {
         const fallbackContent = `<p>${summaryContent}</p>`;
         setQuillContent(fallbackContent);
-        setWordCount(countWords(fallbackContent));
+        const newWordCount = countWords(fallbackContent);
+        setWordCount(newWordCount);
+        previousWordCount.current = newWordCount;
+        hasShownWordLimitToast.current = false;
       }
     } finally {
       setIsLoadingAiContent(false);
@@ -161,16 +178,23 @@ export default function DraftPreviewPage() {
   useEffect(() => {
     if (summaryMethod === "ai" && summaryContent) {
       // Check if summaryContent is a URL (contains .docx) or direct text
-      if (typeof summaryContent === "string" && summaryContent.includes(".docx")) {
+      if (
+        typeof summaryContent === "string" &&
+        summaryContent.includes(".docx")
+      ) {
         // It's a URL, load the document
         loadAiContent(summaryContent);
       } else {
         // It's direct text content
-        const htmlContent = typeof summaryContent === "string" 
-          ? `<p>${summaryContent}</p>` 
-          : "<p>AI content loaded</p>";
+        const htmlContent =
+          typeof summaryContent === "string"
+            ? `<p>${summaryContent}</p>`
+            : "<p>AI content loaded</p>";
         setQuillContent(htmlContent);
-        setWordCount(countWords(htmlContent));
+        const newWordCount = countWords(htmlContent);
+        setWordCount(newWordCount);
+        previousWordCount.current = newWordCount;
+        hasShownWordLimitToast.current = false;
       }
     }
   }, [summaryMethod, summaryContent]);
@@ -178,16 +202,28 @@ export default function DraftPreviewPage() {
   // Handle Quill content change with word limit
   const handleQuillChange = (content: string) => {
     const currentWordCount = countWords(content);
-    
-    if (currentWordCount <= MAX_WORDS) {
-      setQuillContent(content);
-      setWordCount(currentWordCount);
-    } else {
-      // If over limit, show warning but still update (user can edit to reduce)
-      setQuillContent(content);
-      setWordCount(currentWordCount);
-      toast.warn(`Word limit exceeded! Please reduce content to ${MAX_WORDS} words or less.`);
+    const wasUnderLimit = previousWordCount.current <= MAX_WORDS;
+    const isNowOverLimit = currentWordCount > MAX_WORDS;
+
+    // Update content and word count regardless
+    setQuillContent(content);
+    setWordCount(currentWordCount);
+
+    // Show toast only when transitioning from under limit to over limit
+    if (wasUnderLimit && isNowOverLimit && !hasShownWordLimitToast.current) {
+      toast.warn(
+        `Word limit exceeded! Please reduce content to ${MAX_WORDS} words or less.`
+      );
+      hasShownWordLimitToast.current = true;
     }
+
+    // Reset the flag when back under the limit
+    if (isNowOverLimit === false && hasShownWordLimitToast.current) {
+      hasShownWordLimitToast.current = false;
+    }
+
+    // Update previous word count
+    previousWordCount.current = currentWordCount;
   };
 
   const handlePublishReport = async () => {
@@ -203,7 +239,9 @@ export default function DraftPreviewPage() {
     }
 
     if (wordCount > MAX_WORDS) {
-      toast.error(`Content exceeds word limit. Please reduce to ${MAX_WORDS} words or less.`);
+      toast.error(
+        `Content exceeds word limit. Please reduce to ${MAX_WORDS} words or less.`
+      );
       return;
     }
 
@@ -279,7 +317,9 @@ export default function DraftPreviewPage() {
 
   // Initialize word count on component mount
   useEffect(() => {
-    setWordCount(countWords(quillContent));
+    const initialWordCount = countWords(quillContent);
+    setWordCount(initialWordCount);
+    previousWordCount.current = initialWordCount;
   }, []);
 
   const crumbs: Crumb[] = [
@@ -291,22 +331,24 @@ export default function DraftPreviewPage() {
 
   const fetchReportData = async (id: string) => {
     try {
-      setReportData({
-        _id: "687e3c390110af1da4840815",
-        name: "My first duplicate",
-        status: "draft",
-        createdAt: "2025-07-21T13:10:17.756Z",
-        updatedAt: "2025-07-22T15:50:56.389Z",
-        url: reportUrl,
-        survey: {
-          description:
-            "This survey aims to gather public opinions on the Nigeria Police Force's performance, trust, accountability, community engagement, and suggestions for improvement.",
-          topic: "Public Perception of Nigeria Police: Liability or Asset?",
-          _id: "6877de769a7f4fc9902203e6",
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching report data:", error);
+      const response = await axiosInstance.get(`/report/${reportId}`);
+      setReportData(response?.data?.report);
+      return response.data;
+    } catch (err) {
+      const error = err as AxiosError;
+
+      if (error.response) {
+        console.error("Backend error:", error.response.data);
+        throw new Error(
+          (error.response.data as any)?.message || "Failed to fetch report"
+        );
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        throw new Error("No response from server");
+      } else {
+        console.error("Unknown error:", error.message);
+        throw new Error("An unexpected error occurred");
+      }
     }
   };
 
@@ -340,14 +382,18 @@ export default function DraftPreviewPage() {
     const htmlContent = element.outerHTML;
     const newContent = quillContent + htmlContent;
     const newWordCount = countWords(newContent);
-    
+
     if (newWordCount > MAX_WORDS) {
-      toast.warn(`Adding this content would exceed the ${MAX_WORDS} word limit. Current: ${wordCount}, New total would be: ${newWordCount}`);
+      toast.warn(
+        `Adding this content would exceed the ${MAX_WORDS} word limit. Current: ${wordCount}, New total would be: ${newWordCount}`
+      );
       return;
     }
-    
+
     setQuillContent(newContent);
     setWordCount(newWordCount);
+    previousWordCount.current = newWordCount;
+    hasShownWordLimitToast.current = false; // Reset flag when importing
   };
 
   // Get URL parameters
@@ -430,11 +476,11 @@ export default function DraftPreviewPage() {
                 Draft Editor {summaryMethod === "ai" && "(AI Summary)"}
               </h2>
               <div className="flex items-center space-x-2">
-                <span 
+                <span
                   className={`text-sm px-2 py-1 rounded ${
-                    isOverWordLimit 
-                      ? 'text-red-600 bg-red-50 border border-red-200' 
-                      : 'text-gray-600 bg-gray-50'
+                    isOverWordLimit
+                      ? "text-red-600 bg-red-50 border border-red-200"
+                      : "text-gray-600 bg-gray-50"
                   }`}
                 >
                   {wordCount}/{MAX_WORDS} words
@@ -442,7 +488,9 @@ export default function DraftPreviewPage() {
               </div>
             </div>
             {isLoadingAiContent && (
-              <p className="text-sm text-blue-600 mt-1">Loading AI content...</p>
+              <p className="text-sm text-blue-600 mt-1">
+                Loading AI content...
+              </p>
             )}
             {isOverWordLimit && (
               <p className="text-sm text-red-600 mt-1">
