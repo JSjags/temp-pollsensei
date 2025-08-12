@@ -689,7 +689,7 @@ const CommentWithMediaQuestion: React.FC<ComponentQuestionProps> = ({
     (state: RootState) => state?.survey?.color_theme
   );
 
-  console.log(response);
+  // console.log(response);
 
   const [editableResponse, setEditableResponse] = useState(response || "");
   const [isPlaying, setIsPlaying] = useState(false);

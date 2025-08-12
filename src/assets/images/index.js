@@ -73,9 +73,117 @@ import cratf from "./craft.svg";
 import tut1 from "./tut1.svg";
 import tut2 from "./tut2.svg";
 import tut4 from "./tut4.svg";
+import Coins from "./shop/coins.svg";
+import Arrow from "./shop/arrow.svg";
+import AvailableIcon from "./shop/available.svg";
+import NonRedeemable from './shop/non-redeemable.svg'
+import WalletIcon from "./shop/wallet.svg";
+import MoneyIcon from "./shop/money.svg";
+import RespondentIcon from "./shop/respondents.svg";
+import InfoIcon from "./shop/info.svg";
+import Purchases1 from "./shop/resp.svg";
+import Purchases2 from "./shop/credit.svg";
+import Purchases3 from "./shop/OCRScan.svg";
+import Purchases4 from "./shop/AIAnalysis.svg";
+import Purchases5 from "./shop/AIReporting.svg";
+import Purchases6 from "./shop/VoiceTranscription.svg";
+import Check from "./shop/check.svg";
+import LockIcon from "./shop/lock.svg";
+import PaystackLogo from "./shop/paystack.svg";
+import StripeLogo from "./shop/stripe.svg";
+import VisaLogo from "./shop/visa.svg";
+import Coin from "./shop/coin.svg";
+import CoinCard from "./shop/coin+card.svg";
+import Caret from "./shop/caret.svg";
+import RedeemableEmpty from "./shop/redeemable.svg";
+import RedeemableCoins from "./referrals/coins.svg";
+import RedeemedCoins from "./referrals/redeemed.svg";
+import RedeemCoins from "./referrals/redeem-points.svg";
+import RedeemableHowIcon from "./referrals/how-icon.svg";
+import ReferralIcon from "./referrals/referral.svg";
+import CopyIcon from "./referrals/Copy.svg";
+import CheckIcon from "./referrals/check.svg";
+import HowIcon from "./referrals/how-icon.svg";
+import StackedCoin from "./referrals/stacked-coin.svg";
+import Share from "./referrals/share-2.svg";
+import Facebook from "./referrals/Facebook.svg";
+import X from "./referrals/X.svg";
+import Tiktok from "./referrals/Tiktok.svg";
+import LinkedIn from "./referrals/LinkedIn.svg";
+import Youtube from "./referrals/Youtube.svg";
+import Instagram from "./referrals/Instagram.svg";
+import PayoutCash from "./payouts/money.svg";
+import OverallEarnings from "./payouts/overall-earnings.svg";
+import CoinsObtained from "./payouts/coins-obtained.svg";
+import CoinRedeemed from "./payouts/coins-redeemed.svg";
+import RedeemableCoin from "./payouts/redeemable-coin.svg";
+import PayoutInfoIcon from "./payouts/Info.svg";
+import AIGeneration from './shop/MdOutlineFactCheck.svg'
+import OCR from './shop/MdOutlineDocumentScanner.svg'
+import Analysis from './shop/MdQueryStats.svg'
+import AIReporting from './shop/BsClipboardData.svg'
+import Voice from './shop/MdOutlineKeyboardVoice.svg'
+import Pollcoin from './shop/pollcoin.svg'
+import More from './reports/more.svg'
+import ShareIcon from './reports/share.svg'
+import DownloadIcon from './reports/download.svg'
 
 export {
   teamIcon,
+  Facebook,
+  X,
+  More,
+  Tiktok,
+  Instagram,
+  Pollcoin,
+  ShareIcon,
+  DownloadIcon,
+  AIGeneration,
+  OCR,
+  Analysis,
+  AIReporting,
+  Voice,
+  Youtube,
+  LinkedIn,
+  RedeemCoins,
+  RedeemableCoins,
+  RedeemableHowIcon,
+  RedeemedCoins,
+  ReferralIcon,
+  Share,
+  StackedCoin,
+  HowIcon,
+  CopyIcon,
+  CheckIcon,
+  PayoutCash,
+  OverallEarnings,
+  PayoutInfoIcon,
+  CoinRedeemed,
+  CoinsObtained,
+  RedeemableCoin,
+  NonRedeemable,
+  Coins,
+  Coin,
+  CoinCard,
+  Caret,
+  Arrow,
+  AvailableIcon,
+  RedeemableEmpty,
+  StripeLogo,
+  PaystackLogo,
+  VisaLogo,
+  LockIcon,
+  Check,
+  WalletIcon,
+  MoneyIcon,
+  Purchases1,
+  Purchases2,
+  Purchases3,
+  Purchases4,
+  Purchases5,
+  Purchases6,
+  RespondentIcon,
+  InfoIcon,
   userPlaceholder,
   pollsensei_new_logo,
   pollsensei_icon,

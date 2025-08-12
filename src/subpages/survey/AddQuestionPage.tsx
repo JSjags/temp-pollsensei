@@ -1,8 +1,9 @@
+"use client";
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { VscLayersActive } from "react-icons/vsc";
-import { Fragment, useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -55,7 +56,7 @@ import NumberQuestion from "@/components/survey/NumberQuestion";
 import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
-import ReviewModal from "@/components/modals/ReviewModal";
+// import ReviewModal from "@/components/modals/ReviewModal";
 import MediaQuestion from "@/components/survey/MediaQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import {
@@ -116,6 +117,8 @@ type Section = {
   description: string;
   questions: any[]; // Replace 'any' with 'Question' if you have a type for questions
 };
+import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
+import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();
@@ -155,7 +158,10 @@ const AddQuestionPage = () => {
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  const questions = sections[currentSectionIndex]?.questions || [];
+  const questions = useMemo(
+    () => sections[currentSectionIndex]?.questions || [],
+    [sections, currentSectionIndex]
+  );
 
   const userToken = useSelector(
     (state: RootState) => state?.user?.access_token || state.user.token
@@ -169,7 +175,7 @@ const AddQuestionPage = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
-  const [review, setReview] = useState(false);
+  // const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -181,6 +187,10 @@ const AddQuestionPage = () => {
     (state: RootState) => state?.survey?.skipLogic || []
   );
   const [activeTab, setActiveTab] = useState("questions");
+
+  const { showQuickSurveyFlow } = useSelector(
+    (state: RootState) => state.quickSurvey
+  );
 
   const [
     createSurvey,
@@ -552,7 +562,10 @@ const AddQuestionPage = () => {
     if (isSuccess) {
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
+      dispatch(startQuickSurveyFlow());
+      // dispatch(resetQuestion());
+      // dispatch(resetSurvey());
+      // setReview(true);
       // router.push("/surveys/survey-list");
     }
 
@@ -2101,7 +2114,7 @@ const AddQuestionPage = () => {
                 isLoading ||
                 !Boolean(sectionTopic.trim().length) ||
                 !Boolean(sectionDescription?.trim().length) ||
-                !questions.length
+                !questions?.length
               }
               size="lg"
               className="w-full h-12 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl"
@@ -2221,7 +2234,7 @@ const AddQuestionPage = () => {
       </Dialog>
 
       {/* ... rest of your existing modals ... */}
-      {review && (
+      {/* {review && (
         <ReviewModal
           survey_id={survey_id}
           openModal={review}
@@ -2229,8 +2242,13 @@ const AddQuestionPage = () => {
             setReview((prev) => !prev);
             router.push("/surveys/survey-list");
           }}
-        />
+        /> 
+        )} */}
+
+      {showQuickSurveyFlow && survey_id && (
+        <BuyQuickSurveyRespondent surveyId={survey_id} />
       )}
+
       <Dialog
         open={(!userToken || !user) && showAuthModal}
         onOpenChange={() => setShowAuthModal(false)}
@@ -2276,6 +2294,7 @@ const AddQuestionPage = () => {
           </p>
         </DialogContent>
       </Dialog>
+
       <ExitSurveyDialog
         isLoading={isLoading}
         isOpen={showExitDialog}

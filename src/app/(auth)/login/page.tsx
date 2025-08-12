@@ -4,8 +4,9 @@ import { useIsLoggedIn } from "@/lib/helpers";
 import { RootState } from "@/redux/store";
 import LoginPage from "@/subpages/auth/LoginPage";
 import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { redirectUtils } from "@/utils/redirectUtils";
 
 type Props = {};
 
@@ -14,7 +15,6 @@ const Login = (props: Props) => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
-  console.log(useSelector((state: RootState) => state.user));
 
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
@@ -23,35 +23,33 @@ const Login = (props: Props) => {
   const searchParams = useSearchParams();
   const ed = searchParams.get("ed");
 
-  console.log(userRoles);
-  console.log(state);
+  useEffect(() => {
+    if (
+      isLoggedIn &&
+      state.user !== null &&
+      (state.access_token !== null || state.token !== null)
+    ) {
+      const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles, ed);
+      router.push(redirectRoute);
+    }
+  }, [
+    isLoggedIn,
+    state.user,
+    state.access_token,
+    state.token,
+    userRoles,
+    ed,
+    router,
+  ]);
+
   if (
     isLoggedIn &&
     state.user !== null &&
     (state.access_token !== null || state.token !== null)
   ) {
-    if (userRoles.includes("Super Admin")) {
-      router.push("/super-admin");
-    } else if (userRoles.includes("Admin")) {
-      if (state.user) {
-      }
-      router.push(
-        `${
-          ed
-            ? ed === "2"
-              ? "/surveys/edit-survey"
-              : ed === "3"
-              ? "/surveys/manual-survey-create"
-              : ed === "as"
-              ? "/settings/account-security"
-              : "/dashboard"
-            : "/dashboard"
-        }`
-      );
-    } else {
-      return null;
-    }
+    return null;
   }
+
   return <LoginPage />;
 };
 

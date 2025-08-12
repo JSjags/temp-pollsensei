@@ -66,7 +66,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     surveyData?.color_theme || colorTheme || "#ff5722"
   );
 
-  console.log(surveyData);
+  // console.log(surveyData);
 
   // Update state when props change
   useEffect(() => {

@@ -1230,42 +1230,8 @@ const PublicResponse = () => {
       "Other",
       "other",
       "others",
-      "Other...",
-      "Others...",
-      "Other option",
-      "Other options",
-      "Other choice",
-      "Other choices",
-      "Something else",
-      "Something else...",
-      "Specify other",
-      "Please specify",
-      "Please specify other",
-      "Please specify others",
-      "Custom option",
-      "Custom choice",
-      "Please specify here",
-      "Please specify below",
-      "Please provide details",
-      "Please explain",
-      "Please describe",
-      "Please elaborate",
-      "Please write here",
-      "Please enter details",
-      "Please tell us more",
-      "Specify here",
-      "Enter other option",
-      "Write your answer",
-      "Other option (please specify)",
-      "Other options (please specify)",
-      "Other choice (please specify)",
-      "Other choices (please specify)",
-      "Specify other option",
-      "Specify other options",
     ];
-    return otherOptions.some(
-      (otherOption) => otherOption.toLowerCase() === option.toLowerCase().trim()
-    );
+    return otherOptions.includes(option);
   };
 
   // Question rendering with enhanced UI and animations
@@ -2197,7 +2163,7 @@ const PublicResponse = () => {
                 className="flex gap-4"
               >
                 <Link
-                  href="/"
+                  href="/dashboard"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white h-10 px-4 py-2 hover:opacity-90 group relative"
                 >
                   <span className="absolute inset-0 rounded-md bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

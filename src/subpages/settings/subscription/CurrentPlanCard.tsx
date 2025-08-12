@@ -21,7 +21,7 @@ import React, { useEffect } from "react";
 
 export function CurrentPlanCard() {
   const user = useSelector((state: RootState) => state.user.user);
-  console.log(user?.plan);
+  // console.log(user?.plan);
 
   const userData = useQuery<{ data: User }>({
     queryKey: ["profile"],

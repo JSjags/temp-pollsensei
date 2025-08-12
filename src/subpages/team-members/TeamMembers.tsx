@@ -119,8 +119,8 @@ const TeamMembersPage: React.FC = () => {
     },
   });
 
-  console.log("Helelep");
-  console.log(user);
+  // console.log("Helelep");
+  // console.log(user);
 
   const handleToggle = () => {
     if (user?.plan.name !== "Basic Plan") {
@@ -145,13 +145,13 @@ const TeamMembersPage: React.FC = () => {
         ...values,
         role: values.role.map((option) => option.value),
       };
-      console.log(inviteeDetails);
+      // console.log(inviteeDetails);
       await invite(inviteeDetails).unwrap();
       toast.success("Invitation sent, check email to continue");
       handleToggle();
       setInviteSucc(!inviteSucc);
       setMemberTableState(!memberTableState);
-      console.log("Invitation sent");
+      // console.log("Invitation sent");
     } catch (err: any) {
       toast.error("Failed to send invite " + err?.data?.message || err.message);
       console.error("Failed to send invite", err);

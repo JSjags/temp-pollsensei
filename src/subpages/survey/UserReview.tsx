@@ -1,4 +1,7 @@
-import { useCreateReviewMutation, useGetReviewQuestionQuery } from "@/services/superadmin.service";
+import {
+  useCreateReviewMutation,
+  useGetReviewQuestionQuery,
+} from "@/services/superadmin.service";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
@@ -11,13 +14,17 @@ interface Question {
 
 const UserReview: React.FC = () => {
   const router = useRouter();
-  const { data: reviewQuestion, } = useGetReviewQuestionQuery(null);
+  const { data: reviewQuestion } = useGetReviewQuestionQuery(null);
   const [answers, setAnswers] = useState<{
-    [key: string]: { selected_options?: string[]; scale_value?: string; text?: string };
+    [key: string]: {
+      selected_options?: string[];
+      scale_value?: string;
+      text?: string;
+    };
   }>({});
 
-  console.log(reviewQuestion)
-  
+  // console.log(reviewQuestion)
+
   const [reviewerDetails, setReviewerDetails] = useState({
     reviewer_name: "",
     reviewer_email: "",
@@ -25,20 +32,30 @@ const UserReview: React.FC = () => {
     reviewer_country: "",
   });
 
-
-
   const survey_id = "6720b91b2bd7efe551ecd6b5";
 
   const questions: Question[] = reviewQuestion?.data || [
     {
       question: "Which best describes you?",
       question_type: "single_choice",
-      options: ["Business", "Marketing / Sales", "Student", "Academic", "Government / NGO"],
+      options: [
+        "Business",
+        "Marketing / Sales",
+        "Student",
+        "Academic",
+        "Government / NGO",
+      ],
     },
     {
       question: "Rate your ease of use",
       question_type: "likert_scale",
-      options: ["Strongly Dissatisfied", "Dissatisfied", "Neutral", "Satisfied", "Strongly Satisfied"],
+      options: [
+        "Strongly Dissatisfied",
+        "Dissatisfied",
+        "Neutral",
+        "Satisfied",
+        "Strongly Satisfied",
+      ],
     },
     {
       question: "Which do you find most useful?",
@@ -59,23 +76,41 @@ const UserReview: React.FC = () => {
     {
       question: "Rate the pre-made survey design available in PollSensei.",
       question_type: "likert_scale",
-      options: ["Strongly Dissatisfied", "Dissatisfied", "Neutral", "Satisfied", "Strongly Satisfied"],
+      options: [
+        "Strongly Dissatisfied",
+        "Dissatisfied",
+        "Neutral",
+        "Satisfied",
+        "Strongly Satisfied",
+      ],
     },
     {
       question: "What improvement do you suggest for PollSensei?",
       question_type: "short_text",
     },
     {
-      question: "How satisfied are you with your overall experience on PollSensei?",
+      question:
+        "How satisfied are you with your overall experience on PollSensei?",
       question_type: "single_choice",
-      options: ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
+      options: [
+        "Very satisfied",
+        "Satisfied",
+        "Neutral",
+        "Dissatisfied",
+        "Very Dissatisfied",
+      ],
     },
   ];
 
   const handleAnswerChange = (key: string, value: any, type: string) => {
     setAnswers((prev) => ({
       ...prev,
-      [key]: type === "short_text" ? { text: value } : type === "likert_scale" ? { scale_value: value } : { selected_options: [value] },
+      [key]:
+        type === "short_text"
+          ? { text: value }
+          : type === "likert_scale"
+          ? { scale_value: value }
+          : { selected_options: [value] },
     }));
   };
 
@@ -100,7 +135,7 @@ const UserReview: React.FC = () => {
       reviews,
     };
 
-    console.log(payload)
+    // console.log(payload)
 
     try {
       await createReview(payload).unwrap();
@@ -114,12 +149,15 @@ const UserReview: React.FC = () => {
   return (
     <div className="w-full container mx-auto px-4 py-10">
       <div className="mx-auto w-[60%] bg-[#e5e5e5] p-8">
-        <h1 className="text-xl font-bold text-center mb-4">PollSensei Survey</h1>
+        <h1 className="text-xl font-bold text-center mb-4">
+          PollSensei Survey
+        </h1>
         <h2 className="font-medium text-center">Help Us Serve You Better</h2>
-        <p className="text-[#838383] font-normal text-center">Take a minute survey</p>
+        <p className="text-[#838383] font-normal text-center">
+          Take a minute survey
+        </p>
         <form onSubmit={handleSubmit} className="space-y-6 mx-auto">
-
-        {/* <div className="grid grid-cols-1 gap-4 border md:grid-cols-2 mt-10">
+          {/* <div className="grid grid-cols-1 gap-4 border md:grid-cols-2 mt-10">
             <div className="">
               <label className="block font-medium mb-2" htmlFor="reviewer_name">Your Name</label>
               <input
@@ -176,50 +214,72 @@ const UserReview: React.FC = () => {
                 <span>{index + 1}. </span>
                 {question.question}
               </p>
-              {question.question_type === "single_choice" && question.options && (
-                <div className="space-y-1">
-                  {question.options.map((option) => (
-                    <label key={option} className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name={question.question}
-                        value={option}
-                        className="cursor-pointer"
-                        onChange={(e) =>
-                          handleAnswerChange(question.question, e.target.value, question.question_type)
-                        }
-                      />
-                      <span>{option}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
+              {question.question_type === "single_choice" &&
+                question.options && (
+                  <div className="space-y-1">
+                    {question.options.map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name={question.question}
+                          value={option}
+                          className="cursor-pointer"
+                          onChange={(e) =>
+                            handleAnswerChange(
+                              question.question,
+                              e.target.value,
+                              question.question_type
+                            )
+                          }
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               {question.question_type === "short_text" && (
                 <input
                   type="text"
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Type your answer here..."
-                  onChange={(e) => handleAnswerChange(question.question, e.target.value, question.question_type)}
+                  onChange={(e) =>
+                    handleAnswerChange(
+                      question.question,
+                      e.target.value,
+                      question.question_type
+                    )
+                  }
                 />
               )}
-              {question.question_type === "likert_scale" && question.options && (
-                <div className="flex items-center justify-between space-x-2">
-                  {question.options.map((option) => (
-                    <label key={option} className="flex flex-col items-center">
-                      <input
-                        type="radio"
-                        name={question.question}
-                        value={option}
-                        className="cursor-pointer"
-                        onChange={(e) =>
-                          handleAnswerChange(question.question, e.target.value, question.question_type)
-                        }
-                      />
-                      <span>{option}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
+              {question.question_type === "likert_scale" &&
+                question.options && (
+                  <div className="flex items-center justify-between space-x-2">
+                    {question.options.map((option) => (
+                      <label
+                        key={option}
+                        className="flex flex-col items-center"
+                      >
+                        <input
+                          type="radio"
+                          name={question.question}
+                          value={option}
+                          className="cursor-pointer"
+                          onChange={(e) =>
+                            handleAnswerChange(
+                              question.question,
+                              e.target.value,
+                              question.question_type
+                            )
+                          }
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
             </div>
           ))}
           <button

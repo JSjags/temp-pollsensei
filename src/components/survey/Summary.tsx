@@ -170,7 +170,7 @@ function getTopWords(textResponses: string[], topN: number = 10) {
 }
 
 const Summary: React.FC<SummaryProps> = ({ result }) => {
-  console.log("result", result);
+  // console.log("result", result);
 
   const transformDataForChart = (questionData: any) => {
     const { question_type } = questionData;

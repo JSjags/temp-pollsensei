@@ -98,7 +98,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
   );
   const [dynamicOptions, setDynamicOptions] = useState<string[]>([]);
 
-  console.log(item);
+  // console.log(item);
 
   // Extract range from question text
   const extractRange = (question: string) => {

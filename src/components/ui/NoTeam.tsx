@@ -74,7 +74,7 @@ const NoTeam: React.FC = () => {
       toast.success("Invitation sent, check email to continue");
       dispatch(closeForm());
       setInviteSucc(true);
-      console.log("Invitation sent");
+      // console.log("Invitation sent");
     } catch (err: any) {
       toast.error(
         "Failed to send invite " + (err?.data?.message || err.message)

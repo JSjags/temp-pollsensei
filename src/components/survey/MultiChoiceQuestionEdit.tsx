@@ -287,7 +287,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     columns,
   ]);
 
-  console.log(isValid);
+  // console.log(isValid);
 
   const handleTypeChange = (value: string) => {
     setEditedQuestionType(value);

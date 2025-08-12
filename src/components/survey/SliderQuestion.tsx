@@ -67,7 +67,7 @@ const SliderQuestion: React.FC<SliderQuestionProps> = ({
     (state: RootState) => state?.survey?.question_text
   );
 
-  console.log(item);
+  // console.log(item);
 
   const [innerMin, innerMax] =
     item && Array.isArray(item.options) && item.options.length > 0

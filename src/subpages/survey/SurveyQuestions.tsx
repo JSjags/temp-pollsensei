@@ -69,7 +69,8 @@ const SurveyQuestions = () => {
             Oops! Something went wrong
           </h2>
           <p className="text-gray-600">
-            We're having trouble loading your survey. Please try again later.
+            We&apos;re having trouble loading your survey. Please try again
+            later.
           </p>
         </motion.div>
       </div>
@@ -100,7 +101,7 @@ const SurveyQuestions = () => {
     );
   }
 
-  console.log(data?.data?.sections[currentSection]?.questions);
+  // console.log(data?.data?.sections[currentSection]?.questions);
 
   const getFontClass = (fontName?: string | null) => {
     if (!fontName || typeof fontName !== "string") return "";

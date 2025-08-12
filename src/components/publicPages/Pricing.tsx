@@ -8,7 +8,7 @@ interface PricingProps {
 
 const Pricing: React.FC<PricingProps> = ({ currency }) => {
   const { data, isLoading } = useGetPlanQuery(null);
-  console.log(data);
+  // console.log(data)
   const plans = [
     {
       name: "Basic",

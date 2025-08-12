@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 z-[1000000]",
       className
     )}
     {...props}
@@ -34,10 +34,18 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     buttonClassName?: string;
     overlayClassName?: string;
+    showXBtn?: boolean;
   }
 >(
   (
-    { className, children, buttonClassName, overlayClassName, ...props },
+    {
+      className,
+      children,
+      buttonClassName,
+      overlayClassName,
+      showXBtn = "true",
+      ...props
+    },
     ref
   ) => (
     <DialogPortal>
@@ -55,10 +63,12 @@ const DialogContent = React.forwardRef<
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-          <X className={cn("h-4 w-4", buttonClassName)} />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        {showXBtn && (
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <X className={cn("h-4 w-4", buttonClassName)} />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Content>
     </DialogPortal>
   )
@@ -93,6 +103,16 @@ const DialogFooter = ({
 );
 DialogFooter.displayName = "DialogFooter";
 
+type BodyElement = React.ElementRef<"div">;
+type BodyProps = Omit<React.ComponentPropsWithoutRef<"div">, "dir">;
+
+const DialogBody = React.forwardRef<BodyElement, BodyProps>((props, ref) => {
+  const { className, ...bodyProps } = props;
+  return <div className="flex flex-1 overflow-auto">{bodyProps.children}</div>;
+});
+
+DialogBody.displayName = "DialogBody";
+
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -126,6 +146,7 @@ export {
   DialogOverlay,
   DialogClose,
   DialogTrigger,
+  DialogBody,
   DialogContent,
   DialogHeader,
   DialogFooter,

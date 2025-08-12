@@ -269,13 +269,17 @@ const EditSurvey = () => {
   const [question_count, setQuestionCount] = useState<number>(0);
   const [addMoreQuestion, setAddMoreQuestion] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const [review, setReview] = useState(false);
+  // const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<
     (() => void) | null
   >(null);
+
+  const { showQuickSurveyFlow } = useSelector(
+    (state: RootState) => state.quickSurvey
+  );
 
   const [surveyData, setSurveyData] = useState<SurveyData>({
     topic: "",
@@ -363,6 +367,7 @@ const EditSurvey = () => {
     setIsEdit(true);
     setIsSidebarOpen(false);
     setAiChatbot(true);
+    // console.log(index);
     setSelectIndex(index);
     // Set current edit values
     const currentQ = questions[currentSection]?.questions[index];
@@ -406,7 +411,7 @@ const EditSurvey = () => {
     const currentSectionData = updatedSections[currentSection];
 
     if (editIndex !== null && currentSectionData) {
-      console.log(editIndex);
+      // console.log(editIndex);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[editIndex],
@@ -429,7 +434,7 @@ const EditSurvey = () => {
     }
 
     if (editIndex && currentSectionData) {
-      console.log(currentSectionData);
+      // console.log(currentSectionData);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[editIndex],
@@ -471,7 +476,7 @@ const EditSurvey = () => {
     const currentSectionData = updatedSections[currentSection];
 
     if (aiEditIndex !== null && currentSectionData) {
-      console.log(aiEditIndex);
+      // console.log(aiEditIndex);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[aiEditIndex!],
@@ -494,7 +499,7 @@ const EditSurvey = () => {
     }
 
     if (aiEditIndex && currentSectionData) {
-      console.log(currentSectionData);
+      // console.log(currentSectionData);
 
       const updatedQuestionData = {
         ...currentSectionData.questions[aiEditIndex],
@@ -1231,7 +1236,7 @@ const EditSurvey = () => {
       handleClearSurvey();
       // Don't set state here - let the useEffect handle success state updates
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -1241,7 +1246,7 @@ const EditSurvey = () => {
       dispatch(resetSurvey());
       hasPopulatedSkipLogic.current = false; // Reset the ref when survey is created successfully
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
+      // setReview(true);
       // router.push("/surveys/survey-list");
     }
 
@@ -1261,9 +1266,9 @@ const EditSurvey = () => {
   }, [isSuccess, isError, error, dispatch, createdSurveyData]);
 
   useEffect(() => {
-    if (progressSuccess) {
-      router.push("/surveys/survey-list");
-    }
+    // if (progressSuccess) {
+    //   router.push("/surveys/survey-list");
+    // }
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
@@ -2452,7 +2457,7 @@ const EditSurvey = () => {
           />
         </motion.div>
       </AnimatePresence>
-      {review && (
+      {/* {review && (
         <ReviewModal
           survey_id={survey_id}
           openModal={review}
@@ -2462,7 +2467,12 @@ const EditSurvey = () => {
             // They can navigate manually using the modal's buttons
           }}
         />
+      )} */}
+
+      {showQuickSurveyFlow && survey_id && (
+        <BuyQuickSurveyRespondent surveyId={survey_id} />
       )}
+
       <Dialog
         open={(!userToken || !user) && showAuthModal}
         onOpenChange={() => setShowAuthModal(false)}
@@ -2478,7 +2488,7 @@ const EditSurvey = () => {
               </DialogTitle>
               <DialogDescription className="text-gray-600 text-lg leading-relaxed max-w-sm">
                 To continue creating your survey and access all features, please
-                log in to your account or sign up if you're new here.
+                log in to your account or sign up if you&apos;re new here.
               </DialogDescription>
             </div>
           </DialogHeader>

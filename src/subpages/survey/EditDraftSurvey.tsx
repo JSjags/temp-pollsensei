@@ -143,7 +143,7 @@ const EditDraftSurvey = () => {
     setIsEdit(true);
     // setIsSidebarOpen(false);
     // setAiChatbot(true);
-    console.log(index);
+    // console.log(index);
     // setSelectIndex(index);
   };
 
@@ -373,7 +373,7 @@ const EditDraftSurvey = () => {
     },
   });
 
-  console.log(data?.data);
+  // console.log(data?.data);
 
   // Move this function up, before any JSX that uses it
   const saveSurvey = async () => {

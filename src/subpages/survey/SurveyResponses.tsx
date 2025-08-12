@@ -380,7 +380,7 @@ const SurveyResponses = () => {
                   {processingSteps[loadingStep]}
                 </motion.p>
                 <p className="text-sm text-gray-500 text-center mt-4">
-                  Please don't close this window while we process your
+                  Please don&apos;t close this window while we process your
                   documents.
                 </p>
               </div>

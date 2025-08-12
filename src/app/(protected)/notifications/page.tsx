@@ -75,14 +75,14 @@ const NotificationsPage = () => {
     );
   }
 
-  console.log(data);
+  // console.log(data);
 
   // Flatten all pages into a single array of notifications
   const notifications = data?.pages.flatMap((page) => page.data) ?? [];
   const isEmpty = notifications.length === 0;
 
   return (
-    <div className="container py-8 bg-white">
+    <div className="container py-8 min-h-screen bg-white">
       <h1 className="text-2xl font-semibold mb-6">Notifications</h1>
       <div className="space-y-4">
         {notifications.map((notification) => (
@@ -128,12 +128,12 @@ const NotificationsPage = () => {
               All Caught Up!
             </h3>
             <p className="mt-2 text-center text-gray-600 max-w-sm">
-              You're all up to date. When you receive notifications, they'll
-              appear here.
+              You&apos;re all up to date. When you receive notifications,
+              they&apos;ll appear here.
             </p>
             <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-100">
               <p className="text-sm text-purple-700">
-                We'll notify you when there's something important to see.
+                Well notify you when there&apos;s something important to see.
               </p>
             </div>
           </div>

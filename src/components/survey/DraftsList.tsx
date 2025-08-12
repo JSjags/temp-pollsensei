@@ -196,7 +196,7 @@ const DraftsList = ({ onBack }: DraftsListProps) => {
             No Draft Surveys
           </h3>
           <p className="text-gray-500">
-            You don't have any surveys saved as drafts.
+            You don&apos;t have any surveys saved as drafts.
           </p>
         </motion.div>
       ) : (

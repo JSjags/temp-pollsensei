@@ -319,7 +319,7 @@ const CreateSurveyPage: React.FC = () => {
     dispatch(resetSurvey());
   }, []);
 
-  console.log(survey);
+  // console.log(survey);
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center bg-white">

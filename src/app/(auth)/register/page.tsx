@@ -3,9 +3,10 @@
 import { useIsLoggedIn } from "@/lib/helpers";
 import { RootState } from "@/redux/store";
 import RegisterPage from "@/subpages/auth/RegisterPage";
-import { useRouter } from "next/navigation";
-import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { redirectUtils } from "@/utils/redirectUtils";
 
 type Props = {};
 
@@ -14,13 +15,44 @@ const Page = (props: Props) => {
   const dispatch = useDispatch();
   const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
-  const userToken = useSelector(
-    (state: RootState) => state.user?.access_token || state.user.token
+
+  const userRoles = useSelector(
+    (state: RootState) => state.user.user?.roles[0].role || []
   );
 
-  if (state.user) {
-    router.push(`/dashboard`);
+  // Get search params to maintain consistency with login page
+  const searchParams = useSearchParams();
+  const ed = searchParams.get("ed");
+
+  useEffect(() => {
+    if (
+      isLoggedIn &&
+      state.user !== null &&
+      (state.access_token !== null || state.token !== null)
+    ) {
+      // Use the same logic as login page, including 'ed' parameter
+      const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles, ed);
+      router.push(redirectRoute);
+    }
+  }, [
+    isLoggedIn,
+    state.user,
+    state.access_token,
+    state.token,
+    userRoles,
+    ed,
+    router,
+  ]);
+
+  // Use same condition as login page for consistency
+  if (
+    isLoggedIn &&
+    state.user !== null &&
+    (state.access_token !== null || state.token !== null)
+  ) {
+    return null;
   }
+
   return <RegisterPage />;
 };
 

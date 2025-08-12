@@ -76,6 +76,11 @@ const SuperAdminSidebar: React.FC = () => {
       path: "/coupons",
       icon: <Ticket className="h-4 w-4" />,
     },
+    {
+      label: "Payouts",
+      path: "/payout",
+      icon: <CreditCard className="h-4 w-4" />,
+    },
   ];
 
   return (

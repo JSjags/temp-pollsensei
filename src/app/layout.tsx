@@ -11,6 +11,8 @@ import {
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import Script from "next/script";
 import type { NextFontWithVariable } from "next/dist/compiled/@next/font";
 import { cn } from "@/lib/utils";
@@ -24,6 +26,10 @@ import UpgradeModal from "@/components/subscription/modal-upgrade";
 import { AOSInit } from "@/components/ui/Aos";
 import MetaPixel from "@/components/MetaPixel";
 import FeatureLimitation from "@/components/feature-limitation/feature-limitation";
+import ContextProvider from "@/contexts/index";
+import Image from "next/image";
+import { GlobalSidebarProvider } from "@/components/blog/GlobalSidebarProvider";
+import { RouteWatcher } from "@/components/RouteWatcher";
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -125,7 +131,7 @@ export default function RootLayout({
           />
         )}
         <noscript>
-          <img
+          <Image
             height="1"
             width="1"
             style={{ display: "none" }}
@@ -155,15 +161,21 @@ export default function RootLayout({
         {/* <CookieConsent /> */}
         <GoogleAnalytics gaId="G-TV4GCEE1JQ" />
         <GoogleOAuthProvider clientId={googleClientId}>
-          <TanstackProvider>
-            <ToastContainer className={"z-[1000000]"} limit={1} />
-            <ReduxContext>
-              <SenseiProvider>
-                <UpgradeModal />
-                <MixPanelProvider>{children}</MixPanelProvider>
-              </SenseiProvider>
-            </ReduxContext>
-          </TanstackProvider>
+          <ContextProvider>
+            <TanstackProvider>
+              <ToastContainer className={"z-[1000000]"} limit={1} />
+              <ReduxContext>
+                <GlobalSidebarProvider>
+                  <SenseiProvider>
+                    <UpgradeModal />
+                    <MixPanelProvider>
+                      <RouteWatcher>{children}</RouteWatcher>
+                    </MixPanelProvider>
+                  </SenseiProvider>
+                </GlobalSidebarProvider>
+              </ReduxContext>
+            </TanstackProvider>
+          </ContextProvider>
         </GoogleOAuthProvider>
       </body>
     </html>

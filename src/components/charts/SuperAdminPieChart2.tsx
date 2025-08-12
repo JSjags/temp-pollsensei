@@ -31,12 +31,13 @@ export function SuperAdminPieChart2({
 }: SuperAdminPieChartProps) {
   const [month, setMonth] = React.useState("January");
   const [year, setYear] = React.useState("2025");
-  const [fetchSurveyData, { data = [], isLoading }] = useLazySurveyTypeDistributionQuery();
+  const [fetchSurveyData, { data = [], isLoading }] =
+    useLazySurveyTypeDistributionQuery();
 
   // Transform data for PieChart
   const chartData = React.useMemo(() => {
     if (!data || !data.data) return [];
-  
+
     return [
       {
         name: "Quantitative",
@@ -55,7 +56,6 @@ export function SuperAdminPieChart2({
       },
     ];
   }, [data]);
-  
 
   React.useEffect(() => {
     fetchSurveyData({ month, year });
@@ -63,7 +63,7 @@ export function SuperAdminPieChart2({
 
   const [activeIndex, setActiveIndex] = React.useState(0);
 
-  const handlePieEnter = (_:any, index: number) => {
+  const handlePieEnter = (_: any, index: number) => {
     setActiveIndex(index);
   };
 
@@ -71,44 +71,46 @@ export function SuperAdminPieChart2({
     <Card className="flex flex-col w-full">
       <CardHeader className="flex-row items-start space-y-0 pb-0">
         <div className="grid gap-1">
-          <CardTitle className="text-sm font-medium text-gray-800">{title}</CardTitle>
+          <CardTitle className="text-sm font-medium text-gray-800">
+            {title}
+          </CardTitle>
           {/* <CardDescription>Select month and year to view distribution</CardDescription> */}
         </div>
         <Select
-  value={month}
-  onValueChange={(value) => {
-    console.log("Selected Month:", value);
-    setMonth(value); // Updates the state
-  }}
->
-  <SelectTrigger
-    className="ml-auto h-7 w-auto rounded-lg pl-2.5"
-    aria-label="Select a month"
-  >
-    <SelectValue placeholder="Select month" />
-    <span>{month}</span> {/* Display current state */}
-  </SelectTrigger>
-  <SelectContent align="end" className="rounded-xl">
-    {[
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ].map((key) => (
-      <SelectItem key={key} value={key} className="rounded-lg">
-        {key}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+          value={month}
+          onValueChange={(value) => {
+            // console.log("Selected Month:", value);
+            setMonth(value); // Updates the state
+          }}
+        >
+          <SelectTrigger
+            className="ml-auto h-7 w-auto rounded-lg pl-2.5"
+            aria-label="Select a month"
+          >
+            <SelectValue placeholder="Select month" />
+            <span>{month}</span> {/* Display current state */}
+          </SelectTrigger>
+          <SelectContent align="end" className="rounded-xl">
+            {[
+              "January",
+              "February",
+              "March",
+              "April",
+              "May",
+              "June",
+              "July",
+              "August",
+              "September",
+              "October",
+              "November",
+              "December",
+            ].map((key) => (
+              <SelectItem key={key} value={key} className="rounded-lg">
+                {key}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={year} onValueChange={(value) => setYear(value)}>
           <SelectTrigger
             className="ml-2 h-7 w-auto rounded-lg pl-2.5"
@@ -139,7 +141,7 @@ export function SuperAdminPieChart2({
               outerRadius={80}
               activeIndex={activeIndex}
               onMouseEnter={handlePieEnter}
-              activeShape={(props:any) => (
+              activeShape={(props: any) => (
                 <Sector {...props} outerRadius={props.outerRadius + 10} />
               )}
             >

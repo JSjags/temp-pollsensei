@@ -13,12 +13,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
       onQueryStarted: async (credentials, { dispatch, queryFulfilled }) => {
         try {
           const data = await queryFulfilled;
-          console.log(data);
+          // console.log(data);
           const accessToken = data?.data?.data?.access_token;
           const user = data?.data?.data?.user;
 
-          console.log(accessToken);
-          console.log(user);
+          // console.log(accessToken);
+          // console.log(user);
 
           dispatch(
             updateUser({
@@ -27,7 +27,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
             })
           );
         } catch (error) {
-          console.log(error);
+          console.error(error);
           return;
         }
       },
@@ -51,12 +51,12 @@ export const userApiSlice = apiSlice.injectEndpoints({
       onQueryStarted: async (credentials, { dispatch, queryFulfilled }) => {
         try {
           const data = await queryFulfilled;
-          console.log(data);
+          // console.log(data);
           const accessToken = data?.data?.data?.access_token;
           const user = data?.data?.data?.user;
 
-          console.log(accessToken);
-          console.log(user);
+          // console.log(accessToken);
+          // console.log(user);
 
           dispatch(
             updateUser({
@@ -65,7 +65,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
             })
           );
         } catch (error) {
-          console.log(error);
+          console.error(error);
           return;
         }
       },

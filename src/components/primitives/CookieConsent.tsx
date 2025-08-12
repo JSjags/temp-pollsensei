@@ -62,8 +62,8 @@ export function CookieConsent() {
       <div>
         <p className="text-sm text-muted-foreground mb-4">
           We use cookies to enhance your browsing experience, serve personalized
-          ads or content, and analyze our traffic. By clicking "Accept All", you
-          consent to our use of cookies.
+          ads or content, and analyze our traffic. By clicking &quot;Accept
+          All&quot;, you consent to our use of cookies.
         </p>
       </div>
       <div className="flex justify-between">

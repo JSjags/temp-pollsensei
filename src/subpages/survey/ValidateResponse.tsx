@@ -83,9 +83,9 @@ const ValidateResponse = () => {
     (state: RootState) => state.answer as any
   );
   const ocr = useSelector((state: RootState) => state.answer);
-  console.log(ocr);
-  console.log(params.id);
-  console.log(OCRresponses);
+  // console.log(ocr);
+  // console.log(params.id);
+  // console.log(OCRresponses);
   const [currentSection, setCurrentSection] = useState(0);
   const [submitResponse, { data, isLoading, isSuccess, isError, error }] =
     useSubmitResponseMutation();
@@ -98,8 +98,8 @@ const ValidateResponse = () => {
 
   const [ocrRes, setOcrRes] = useState<ResponseData | null>(null);
 
-  console.log(OCRresponses);
-  console.log(ocrRes);
+  // console.log(OCRresponses);
+  // console.log(ocrRes);
 
   useEffect(() => {
     if (OCRresponses as any) {
@@ -125,6 +125,7 @@ const ValidateResponse = () => {
   };
 
   const handleSubmitResponse = async () => {
+    // console.log("U clicked");
     // @ts-ignore
     const answers = (ocrRes as any)?.extracted_answers
       ?.map((item: any) => {
@@ -193,13 +194,13 @@ const ValidateResponse = () => {
           }
         : {}),
     };
-    console.log(responsePayload);
+    // console.log(responsePayload);
     try {
       await submitResponse(responsePayload).unwrap();
       toast.success("Submitted successfully");
     } catch (e) {
       toast.error("Error submitting data: " + e);
-      console.log(e);
+      console.error(e);
     }
   };
 

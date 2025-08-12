@@ -17,14 +17,15 @@ export default function TermsAndConditions() {
         </CardHeader>
         <CardContent className="px-0">
           <p>
-            Oaks Intelligence Ltd. ("Oaks Intelligence") provides website
-            features, mobile applications, and other products and services for
-            you through PollSensei (collectively, "PollSensei Services"). By
-            accessing PollSensei, you agree to these terms and conditions.
-            Please also refer to our Privacy Policy to understand how we collect
-            and process your personal information. PollSensei is an AI-driven
-            survey and data analysis tool designed to simplify and enhance
-            survey creation, data collection, and reporting.
+            Oaks Intelligence Ltd. (&quot;Oaks Intelligence&quot;) provides
+            website features, mobile applications, and other products and
+            services for you through PollSensei (collectively, &quot;PollSensei
+            Services&quot;). By accessing PollSensei, you agree to these terms
+            and conditions. Please also refer to our Privacy Policy to
+            understand how we collect and process your personal information.
+            PollSensei is an AI-driven survey and data analysis tool designed to
+            simplify and enhance survey creation, data collection, and
+            reporting.
           </p>
         </CardContent>
       </Card>

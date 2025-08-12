@@ -20,6 +20,11 @@ const ReduxContext = ({ children }: Props) => {
   if (!isClient) {
     return null;
   }
+
+  // console.log("beans1");
+  // console.log(store);
+  // console.log("beans2");
+
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>{children}</PersistGate>

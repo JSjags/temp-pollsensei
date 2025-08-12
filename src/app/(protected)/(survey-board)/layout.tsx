@@ -98,7 +98,7 @@ export default function SurveyLayout({
 
   // Set active tab based on current path
 
-  console.log(path);
+  // console.log(path);
 
   useEffect(() => {
     if (path === "/surveys") {
