@@ -1,4 +1,5 @@
 const REDIRECT_KEY = "auth_redirect_url";
+const LAST_STORED_KEY = "last_stored_route";
 
 export const redirectUtils = {
   storeRedirectRoute: (currentPath: string): void => {
@@ -8,8 +9,15 @@ export const redirectUtils = {
 
     if (isBlogRoute) {
       try {
+        // Prevent storing the same route multiple times
+        const lastStored = sessionStorage.getItem(LAST_STORED_KEY);
+        if (lastStored === currentPath) {
+          console.log("Route already stored, skipping:", currentPath);
+          return;
+        }
+
         sessionStorage.setItem(REDIRECT_KEY, currentPath);
-        console.log("Stored redirect route:", currentPath);
+        sessionStorage.setItem(LAST_STORED_KEY, currentPath);
       } catch (error) {
         console.warn("Failed to store redirect route:", error);
       }
@@ -21,7 +29,7 @@ export const redirectUtils = {
       const storedRoute = sessionStorage.getItem(REDIRECT_KEY);
       if (storedRoute) {
         sessionStorage.removeItem(REDIRECT_KEY);
-        console.log("Retrieved and cleared redirect route:", storedRoute);
+        sessionStorage.removeItem(LAST_STORED_KEY);
         return storedRoute;
       }
     } catch (error) {

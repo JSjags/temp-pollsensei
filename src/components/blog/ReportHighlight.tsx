@@ -25,6 +25,7 @@ const ReportHighlight = () => {
   const { data: bookmarkStats } = useQuery({
     queryKey: [APP_KEYS.REPORTS_BOOKMARK_COUNT],
     queryFn: () => GetReportBookmarksCount(),
+    enabled: !!user,
   });
 
   if (isLoading)

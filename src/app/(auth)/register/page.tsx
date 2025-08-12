@@ -3,7 +3,7 @@
 import { useIsLoggedIn } from "@/lib/helpers";
 import { RootState } from "@/redux/store";
 import RegisterPage from "@/subpages/auth/RegisterPage";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { redirectUtils } from "@/utils/redirectUtils";
@@ -20,14 +20,36 @@ const Page = (props: Props) => {
     (state: RootState) => state.user.user?.roles[0].role || []
   );
 
+  // Get search params to maintain consistency with login page
+  const searchParams = useSearchParams();
+  const ed = searchParams.get("ed");
+
   useEffect(() => {
-    if (state.user) {
-      const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles);
+    if (
+      isLoggedIn &&
+      state.user !== null &&
+      (state.access_token !== null || state.token !== null)
+    ) {
+      // Use the same logic as login page, including 'ed' parameter
+      const redirectRoute = redirectUtils.getRedirectAfterAuth(userRoles, ed);
       router.push(redirectRoute);
     }
-  }, [state.user, userRoles, router]);
+  }, [
+    isLoggedIn,
+    state.user,
+    state.access_token,
+    state.token,
+    userRoles,
+    ed,
+    router,
+  ]);
 
-  if (state.user) {
+  // Use same condition as login page for consistency
+  if (
+    isLoggedIn &&
+    state.user !== null &&
+    (state.access_token !== null || state.token !== null)
+  ) {
     return null;
   }
 

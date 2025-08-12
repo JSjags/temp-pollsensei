@@ -116,6 +116,9 @@ const RegisterPage = () => {
   } = useGeoLocation();
 
   // Update the register success handler
+  // Key fixes for RegisterPage.tsx - apply these changes to your existing file:
+
+  // 1. Fix the onSubmit function to handle redirects consistently:
   const onSubmit = async (values: any) => {
     try {
       await registerUser({
@@ -150,6 +153,7 @@ const RegisterPage = () => {
     }
   };
 
+  // 2. Fix the Google signup to use consistent redirect logic:
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
       const accessToken = response.access_token;
@@ -163,8 +167,16 @@ const RegisterPage = () => {
           "Registration successful, please continue with same Google account"
         );
 
-        const redirectRoute = redirectUtils.getRedirectAfterAuth([]);
-        router.push(redirectRoute);
+        // Use the same redirect logic as login page instead of redirectUtils
+        // This ensures consistency and proper handling of stored routes
+        const storedRoute = sessionStorage.getItem("auth_redirect_url");
+        if (storedRoute) {
+          sessionStorage.removeItem("auth_redirect_url");
+          router.push(storedRoute);
+        } else {
+          const redirectRoute = redirectUtils.getRedirectAfterAuth([], ed);
+          router.push(redirectRoute);
+        }
       } catch (err: any) {
         toast.error(
           typeof err?.data?.message === "string"

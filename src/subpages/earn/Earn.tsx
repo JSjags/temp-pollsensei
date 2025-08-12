@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dialog";
 
 const Earn = () => {
+  const user = useSelector((state: RootState) => state.user?.user);
   const router = useRouter();
   const [activitiesCompleted, setActivitiesCompleted] = useState<number>(0);
 
@@ -53,7 +54,7 @@ const Earn = () => {
   } = useQuery({
     queryKey: [...[APP_KEYS.UNRESTRICTED_BALANCE]],
     queryFn: () => fetchUserBalance(),
-    enabled: true,
+    enabled: !!user,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
