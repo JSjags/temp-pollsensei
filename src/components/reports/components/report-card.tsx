@@ -52,6 +52,8 @@ export function ReportCard({
   const [pageSize, setPageSize] = useState(6);
   const { refetch } = useReports(data?.report?.survey_id, tab, page, pageSize);
   const publishMutation = usePublishReports();
+  console.log(report);
+  
   const moreContent = [
     { label: "Rename", action: onRenameClick },
     {

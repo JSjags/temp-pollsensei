@@ -121,12 +121,11 @@ export const fetchAllReports = async (
     if (status !== "all") {
       params.status = status;
     }
+console.log(surveyId, 'API survey id');
 
     const response = await axiosInstance.get(`/report/list/${surveyId}`, {
       params,
     });
-
-  console.log(params, "Params for fetching reports");
   
     return response.data;
   } catch (err) {

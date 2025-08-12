@@ -21,33 +21,31 @@ type TermsDialogProps = {
 };
 export default function Terms({ active, onAgree }: TermsDialogProps) {
   const [checked, setChecked] = React.useState<boolean>(false);
-  const { data, refetch } = useReportOnboardState();
+  const { refetch } = useReportOnboardState();
 
   const { mutate, isPending } = useUpdateOnboard();
 
-  const handleUpdate = () => {
-    const payload = !!data
-      ? { ...data, accepted_terms: true }
-      : { accepted_terms: true };
+const handleUpdate = () => {
+  const payload = { accepted_terms: true };
 
-    mutate(payload, {
-      onSuccess: () => {
-        refetch();
-        toast.success("Terms accepted successfully");
-        if (onAgree) onAgree();
-      },
-      onError: (error: any) => {
-        // Try to surface a useful message from the error object
-        const message =
-          error?.response?.data?.message ??
-          error?.message ??
-          "Something went wrong while saving. Please try again.";
+  mutate(payload, {
+    onSuccess: () => {
+      refetch();
+      toast.success("Terms accepted successfully");
+      if (onAgree) onAgree();
+    },
+    onError: (error: any) => {
+      // Try to surface a useful message from the error object
+      const message =
+        error?.response?.data?.message ??
+        error?.message ??
+        "Something went wrong while saving. Please try again.";
 
-        toast.error(message);
-        refetch();
-      },
-    });
-  };
+      toast.error(message);
+      refetch();
+    },
+  });
+};
 
   return (
     <Dialog>

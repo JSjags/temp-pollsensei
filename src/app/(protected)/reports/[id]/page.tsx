@@ -40,13 +40,12 @@ export default function ReportsPage() {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState(6);
 
-  const { data, isLoading, isError } = useReports(
+  const { data, isLoading, isError,refetch } = useReports(
     surveyId,
     tab,
     page,
     pageSize
   );
-  const { refetch } = useReports(surveyId, tab, page, pageSize);
  
 
   const deleteMutation = useDeleteReport();
