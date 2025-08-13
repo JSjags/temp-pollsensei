@@ -155,15 +155,15 @@ const DashboardPage = () => {
     // console.log({ isPaidRespondentStatus });
 
     return (
-      <div className="p-2 md:p-6 w-full mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
+      <div className="p-2 md:p-2 w-full mx-auto">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 md:mb-8 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <h1 className="text-xl md:text-[38px] font-bold">
                 Hey, {user?.name.split(" ")[0]} 👋
               </h1>
             </div>
-            <p className="text-lg md:text-4xl text-gray-400">
+            <p className="text-lg md:text-3xl text-gray-400">
               Great to have you here!
             </p>
             {}
@@ -173,13 +173,13 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4">
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="flex items-center p-2 md:p-4 gap-2 md:gap-4">
-                <div className="text-[13px] md:text-[32px] font-semibold border border-[#00000030] rounded-full size-14 md:size-16 flex justify-center items-center">
+                <div className="text-xl md:text-[32px] font-semibold border border-[#00000030] rounded-full size-14 md:size-16 flex justify-center items-center">
                   {day}
                 </div>
-                <div className="text-xs md:text-sm">
+                <div className="text-lg md:text-sm">
                   <div>{weekday},</div>
                   <div>{month}</div>
                 </div>
@@ -190,7 +190,7 @@ const DashboardPage = () => {
               <>
                 <Separator
                   orientation="vertical"
-                  className="h-6 bg-[#00000030]"
+                  className="h-6 bg-[#00000030] hidden sm:block"
                 />
                 <Button
                   size="default"
@@ -211,7 +211,7 @@ const DashboardPage = () => {
         </div>
 
         {/********** Display Grid on large screens ******/}
-        <div className="hidden md:grid grid-cols-4 gap-4">
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
           {metrics.map((metric, index) => (
             <Card key={index} className="bg-white border border-[#F0F2F5]">
               <CardContent className="p-4 md:p-6">
@@ -225,11 +225,11 @@ const DashboardPage = () => {
         </div>
 
         {/********** Display flex on small screens ******/}
-        <div className="flex md:hidden w-[93vw] overflow-x-scroll whitespace-nowrap gap-3">
+        <div className="grid grid-cols-2 md:hidden w-full overflow-x-scroll whitespace-nowrap gap-3">
           {metrics.map((metric, index) => (
             <Card
               key={index}
-              className="bg-white border border-[#F0F2F5] w-[186px]"
+              className="bg-white border border-[#F0F2F5] w-full"
             >
               <CardContent className="p-4 md:p-6">
                 <h3 className="text-[#7A8699] mb-2 text-xs">{metric.title}</h3>
@@ -338,7 +338,7 @@ const DashboardPage = () => {
                   </button>
                 </div>
               </div>
-              <div className="radius h-fit shadow-sm border border-border !rounded-lg overflow-x-auto">
+              <div className="radius h-fit !border-0 border-border !rounded-lg overflow-x-auto">
                 {surveys?.data?.length > 0 ? (
                   <SurveyTable />
                 ) : (

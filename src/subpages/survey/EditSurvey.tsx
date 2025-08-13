@@ -89,6 +89,7 @@ import SkipLogicEditor, {
   SkipLogicCondition,
   transformSurveySkipLogic,
 } from "./SkipLogicEditor";
+import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {

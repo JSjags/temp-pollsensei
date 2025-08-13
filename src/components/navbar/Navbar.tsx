@@ -145,7 +145,7 @@ const Navbar: FC<NavbarProps> = ({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-
+  const [isScrolled, setIsScrolled] = useState(false);
   const persistor = persistStore(store);
   const queryClient = useQueryClient();
 
@@ -227,6 +227,14 @@ const Navbar: FC<NavbarProps> = ({
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const { open: isOpen, toggleSidebar: toogleMainSidebar } = useSidebar();
 
   // console.log(notifications?.data);
@@ -244,7 +252,13 @@ const Navbar: FC<NavbarProps> = ({
 
   return (
     <div
-      className={cn("w-full bg-white", isSidebarOpen && "h-screen lg:h-auto")}
+      className={cn(
+        "w-full transition-all duration-300",
+        isScrolled
+          ? "bg-white shadow-[0_3px_10px_rgba(0,0,0,0.1)]"
+          : "bg-[#F7F8FB]",
+        isSidebarOpen && "h-screen lg:h-auto"
+      )}
     >
       {/* Main Header */}
       <header className="w-full px-6 py-4 flex flex-col gap-3 overflow-x-auto">
@@ -533,7 +547,12 @@ const Navbar: FC<NavbarProps> = ({
           </ScrollArea>
         )}
 
-        <div className="lg:hidden flex items-center gap-2 cursor-pointer">
+        <div
+          className={cn(
+            "lg:hidden flex items-center gap-2 cursor-pointer",
+            shouldShowReportHighlight ? "" : "absolute left-4 top-5"
+          )}
+        >
           <div className="flex gap-4 items-center h-10">
             {isOpen ? (
               <Image
