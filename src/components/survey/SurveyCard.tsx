@@ -308,7 +308,10 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                         }}
                         className={`gap-2 cursor-pointer ${className || ""}`}
                       >
-                        <Icon className="h-4 w-4 text-xl" />
+                        <Icon
+                          className="h-4 w-4 text-xl"
+                          strokeWidth={Icon === VscOpenPreview ? 0.3 : 2}
+                        />
                         <span>{label}</span>
                       </DropdownMenuItem>
                     )

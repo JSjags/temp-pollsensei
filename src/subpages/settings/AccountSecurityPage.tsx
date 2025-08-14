@@ -71,7 +71,7 @@ const AccountSecurityPage = () => {
           </p>
         </div>
         <Button
-          className="shadow-md border border-border/30 bg-white text-sm rounded text-[#898989] px-4 py-2 w-full lg:w-auto mt-4 lg:mt-0"
+          className="shadow-md border border-border/30 hover:bg-gray-100 bg-white text-sm rounded text-[#898989] px-4 py-2 w-full lg:w-auto mt-4 lg:mt-0"
           onClick={() => handlePasswordReset()}
           disabled={resetCodeQuery.isLoading}
         >
@@ -100,8 +100,8 @@ const AccountSecurityPage = () => {
         />
       </div> */}
       {/* Delete Account Section */}
-      <div className="mt-6 flex gap-3 items-start justify-between">
-        <div>
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center pb-5 space-y-4 lg:space-y-0">
+        <div className="flex flex-col lg:w-2/3">
           <h3 className="text-lg sm:text-xl font-bold text-red-600 mb-2">
             Delete Account
           </h3>

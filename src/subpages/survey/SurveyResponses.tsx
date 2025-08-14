@@ -154,6 +154,7 @@ const SurveyResponses = () => {
           survey: uploadOCR?.data.survey,
           extracted_answers: uploadOCR?.data.extracted_answers,
           uploaded_files: uploadOCR?.data.uploaded_files,
+          respondent_details: uploadOCR?.data.respondent_details,
         })
       );
       handleToggle();

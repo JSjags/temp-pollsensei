@@ -294,36 +294,42 @@ const SurveyPDFDocument = ({
           </View>
 
           {/* Name and Email Section */}
-          {nameAndEmail && (
+          {(nameAndEmail.name || nameAndEmail.email) && (
             <View style={styles.section}>
-              {nameAndEmail.name && (
-                <View style={dynamicStyles.card}>
-                  <Text style={dynamicStyles.question as any}>Name:</Text>
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "#ccc",
-                      minHeight: 24,
-                      borderRadius: 4,
-                      marginTop: 4,
-                      marginBottom: 12,
-                      padding: 6,
-                    }}
-                  />
-                  <Text style={dynamicStyles.question as any}>Email:</Text>
-                  <View
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "#ccc",
-                      minHeight: 24,
-                      borderRadius: 4,
-                      marginTop: 4,
-                      marginBottom: 12,
-                      padding: 6,
-                    }}
-                  />
-                </View>
-              )}
+              <View style={dynamicStyles.card}>
+                {nameAndEmail.name && (
+                  <>
+                    <Text style={dynamicStyles.question as any}>Name:</Text>
+                    <View
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#ccc",
+                        minHeight: 24,
+                        borderRadius: 4,
+                        marginTop: 4,
+                        marginBottom: 12,
+                        padding: 6,
+                      }}
+                    />
+                  </>
+                )}
+                {nameAndEmail.email && (
+                  <>
+                    <Text style={dynamicStyles.question as any}>Email:</Text>
+                    <View
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#ccc",
+                        minHeight: 24,
+                        borderRadius: 4,
+                        marginTop: 4,
+                        marginBottom: 12,
+                        padding: 6,
+                      }}
+                    />
+                  </>
+                )}
+              </View>
             </View>
           )}
 

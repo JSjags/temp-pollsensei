@@ -51,11 +51,14 @@ const SpearmanCorrelation: React.FC<TestProps> = (props) => {
     {}
   );
 
+  // Check if there are any results
+  const hasResults = Object.keys(flattenedResults).length > 0;
+
   const [selectedResult, setSelectedResult] = useState<string>(
-    Object.keys(flattenedResults)[0]
+    hasResults ? Object.keys(flattenedResults)[0] : ""
   );
 
-  const currentResult = flattenedResults[selectedResult];
+  const currentResult = hasResults ? flattenedResults[selectedResult] : null;
 
   const handleImageDownload = async (url: string, name: string) => {
     try {
@@ -81,6 +84,37 @@ const SpearmanCorrelation: React.FC<TestProps> = (props) => {
       .join(" ");
   };
 
+  // If no results, show a message
+  if (!hasResults) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{props.test_name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">
+                No test results available. The test could not be performed due
+                to insufficient data.
+              </p>
+              {props.test_results.description && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-700 mb-2">
+                    Test Information:
+                  </h4>
+                  <p className="text-gray-600 text-sm">
+                    {extractDescription(props.test_results.description)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -102,66 +136,82 @@ const SpearmanCorrelation: React.FC<TestProps> = (props) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Statistical Values Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">Statistic</th>
-                  <th className="text-right py-2">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentResult.table_data.statistics &&
-                  currentResult.table_data.value &&
-                  currentResult.table_data.statistics.map((stat, index) => (
-                    <tr key={stat} className="border-b">
-                      <td className="py-2">{stat}</td>
-                      <td className="text-right py-2">
-                        {typeof currentResult.table_data.value[index] ===
-                        "number"
-                          ? Number(
-                              currentResult.table_data.value[index]
-                            ).toFixed(4)
-                          : currentResult.table_data.value[index]}
-                      </td>
+          {!currentResult ? (
+            <div className="p-4">
+              <p>No data available for this selection.</p>
+            </div>
+          ) : (
+            <>
+              {/* Statistical Values Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Statistic</th>
+                      <th className="text-right py-2">Value</th>
                     </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Plot Images */}
-          <div className="grid grid-cols-1 gap-4">
-            {currentResult.plot_urls?.map((url: string, index: number) => (
-              <div key={url} className="relative">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="text-center font-medium">
-                    Correlation Scatter Plot
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      handleImageDownload(url, currentResult.plot_names[index])
-                    }
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Download</span>
-                  </Button>
-                </div>
-                <div className="relative aspect-video mt-2">
-                  <Image
-                    src={url}
-                    alt={currentResult.plot_names[index]}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
+                  </thead>
+                  <tbody>
+                    {currentResult.table_data.statistics &&
+                      currentResult.table_data.value &&
+                      currentResult.table_data.statistics.map((stat, index) => (
+                        <tr key={stat} className="border-b">
+                          <td className="py-2">{stat}</td>
+                          <td className="text-right py-2">
+                            {typeof currentResult.table_data.value[index] ===
+                            "number"
+                              ? Number(
+                                  currentResult.table_data.value[index]
+                                ).toFixed(4)
+                              : currentResult.table_data.value[index]}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
+
+              {/* Plot Images */}
+              {currentResult.plot_urls &&
+                currentResult.plot_urls.length > 0 && (
+                  <div className="grid grid-cols-1 gap-4">
+                    {currentResult.plot_urls.map(
+                      (url: string, index: number) => (
+                        <div key={url} className="relative">
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="text-center font-medium">
+                              Correlation Scatter Plot
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleImageDownload(
+                                  url,
+                                  currentResult.plot_names[index]
+                                )
+                              }
+                              className="flex items-center gap-2"
+                            >
+                              <Download className="h-4 w-4" />
+                              <span>Download</span>
+                            </Button>
+                          </div>
+                          <div className="relative aspect-video mt-2">
+                            <Image
+                              src={url}
+                              alt={currentResult.plot_names[index]}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+            </>
+          )}
         </CardContent>
       </Card>
 

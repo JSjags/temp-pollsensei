@@ -79,6 +79,8 @@ const UnAuthCreateSurveyPage = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [manualTopic, setManualTopic] = useState("");
+  const [addSkipLogic, setAddSkipLogic] = useState(false);
+
   const generated_by = useSelector(
     (state: RootState) => state.survey.generated_by
   );
@@ -319,6 +321,8 @@ const UnAuthCreateSurveyPage = () => {
             handleGenerateTopics={handleGenerateTopics}
             manualTopic={manualTopic}
             setManualTopic={setManualTopic}
+            addSkipLogic={addSkipLogic}
+            setAddSkipLogic={setAddSkipLogic}
           />
         )}
 

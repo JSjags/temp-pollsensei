@@ -65,7 +65,7 @@ const CreateSurveyButton = ({
       <>
         <Button
           onClick={handleCreateSurvey}
-          className="group relative !mt-6 overflow-hidden rounded-full bg-gradient-to-r from-purple-700 to-pink-600 px-8 shadow-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(139,92,246,0.7)] hover:scale-[1.02]"
+          className="w-full sm:w-auto group relative sm:!mt-6 overflow-hidden rounded-full bg-gradient-to-r from-purple-700 to-pink-600 px-8 shadow-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(139,92,246,0.7)] hover:scale-[1.02]"
         >
           <div className="absolute inset-0">
             {[...Array(12)].map((_, i) => (
@@ -98,7 +98,9 @@ const CreateSurveyButton = ({
             ))}
           </div>
           <div className="relative flex items-center gap-3 text-white">
-            <span className="text-base font-medium">Create New Survey</span>
+            <span className="text-xs sm:text-base font-medium">
+              Create New Survey
+            </span>
             <svg
               className="w-5 h-5 transform transition-transform duration-300 group-hover:rotate-90"
               viewBox="0 0 24 24"

@@ -614,7 +614,11 @@ export default function DragAndDropPage() {
           {(variablesQuery.isLoading || testsLibraryQuery.isLoading) && (
             <AnalysisLoadingScreen isExtractingVariables />
           )}
-          {variablesQuery.isError && <AnalysisErrorComponent />}
+          {variablesQuery.isError && (
+            <AnalysisErrorComponent
+              externalRetry={() => runTestMutation.mutate()}
+            />
+          )}
           {variablesQuery.isSuccess && (
             <>
               {/* Keep the error dialog the same */}

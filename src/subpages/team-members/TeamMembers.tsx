@@ -123,7 +123,7 @@ const TeamMembersPage: React.FC = () => {
   // console.log(user);
 
   const handleToggle = () => {
-    if (user?.plan.name === "Basic Plan") {
+    if (user?.plan.name !== "Basic Plan") {
       return dispatch(showModal("invite member"));
     }
     setIsToggled((prev) => !prev);
@@ -227,32 +227,34 @@ const TeamMembersPage: React.FC = () => {
               </Slide>
             )}
           </div>
-          {data?.data?.data.length < 1 && <NoTeam />}
+          {/* {data?.data?.data.length < 1 && <NoTeam />} */}
 
-          <div className="flex my-10 items-center justify-between w-full">
-            <div className="flex gap-2 sm:gap-5 items-center w-full">
-              <FilterButton
-                text="Filter by"
-                icon={<IoFilterOutline />}
-                buttonClassName="rounded-full border-[#d9d9d9]"
-                setFilter={setFilter}
-                onClick={(val: string) => {
-                  setFilter(val);
-                }}
-              />
-
-              <div className="flex flex-1 items-center px-4 gap-2 rounded-[2rem] border-[1px] border-[#d9d9d9] w-full max-w-[420px] h-[40px]">
-                <input
-                  className="ring-0 text-[#838383] flex-1 outline-none bg-transparent"
-                  type="text"
-                  placeholder="Search team members by name, email address"
-                  onChange={(e) => setQuery(e.target.value)}
-                  value={query}
+          {teamMembers?.data?.data.length >= 1 && (
+            <div className="flex my-10 items-center justify-between w-full">
+              <div className="flex gap-2 sm:gap-5 items-center w-full">
+                <FilterButton
+                  text="Filter by"
+                  icon={<IoFilterOutline />}
+                  buttonClassName="rounded-full border-[#d9d9d9]"
+                  setFilter={setFilter}
+                  onClick={(val: string) => {
+                    setFilter(val);
+                  }}
                 />
-                <Image src={search} alt="Search" width={24} height={24} />
+
+                <div className="flex flex-1 items-center px-4 gap-2 rounded-[2rem] border-[1px] border-[#d9d9d9] w-full max-w-[420px] h-[40px]">
+                  <input
+                    className="ring-0 text-[#838383] flex-1 outline-none bg-transparent"
+                    type="text"
+                    placeholder="Search team members by name, email address"
+                    onChange={(e) => setQuery(e.target.value)}
+                    value={query}
+                  />
+                  <Image src={search} alt="Search" width={24} height={24} />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {teamMembers.isLoading && (
             <div className="w-full">
@@ -322,29 +324,38 @@ const TeamMembersPage: React.FC = () => {
             </Slide>
           )}
           {teamMembers?.data?.data.length <= 0 && (
-            <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
-              <div className="w-75 text-center mt-16">
-                <Image
-                  src={teamIcon.src}
-                  alt="no team icon"
-                  width={70}
-                  height={70}
-                  className="mx-auto"
-                />
-                <p className="text-2xl font-bold mt-3">No team member found</p>
-                <p className="text-[#7A8699] font-normal text-[calc(1rem+2px)]">
-                  Your search and filter criteria did not match any team members
-                </p>
-                <button
-                  className="auth-btn mt-5"
-                  onClick={() => {
-                    setQuery("");
-                  }}
-                >
-                  Reset filter and search
-                </button>
-              </div>
-            </div>
+            <>
+              {Boolean(query.length) ? (
+                <div className="min-h-[calc(100vh-280px)] flex items-center justify-center">
+                  <div className="w-75 text-center mt-16">
+                    <Image
+                      src={teamIcon.src}
+                      alt="no team icon"
+                      width={70}
+                      height={70}
+                      className="mx-auto"
+                    />
+                    <p className="text-2xl font-bold mt-3">
+                      No team member found
+                    </p>
+                    <p className="text-[#7A8699] font-normal text-[calc(1rem+2px)]">
+                      Your search and filter criteria did not match any team
+                      members
+                    </p>
+                    <button
+                      className="auth-btn mt-5"
+                      onClick={() => {
+                        setQuery("");
+                      }}
+                    >
+                      Reset filter and search
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <NoTeam />
+              )}
+            </>
           )}
 
           {/* Invite member */}

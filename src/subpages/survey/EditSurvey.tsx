@@ -24,6 +24,7 @@ import {
   updateSurvey,
   addSection,
   deleteSection,
+  setSkipLogic,
 } from "@/redux/slices/survey.slice";
 import store from "@/redux/store";
 import PaginationBtn from "@/components/common/PaginationBtn";
@@ -54,6 +55,14 @@ import {
   Sparkles,
   TableRowsSplit,
   Trash2,
+  Wand2,
+  Scissors,
+  MoveRight,
+  MoreVertical,
+  SquareMenu,
+  BringToFront,
+  Paintbrush,
+  AlignVerticalSpaceAround,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/shadcn-input";
@@ -65,10 +74,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import ExitSurveyDialog from "@/components/dialogs/ExitSurveyDialog";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
+import { StrictModeDroppable } from "@/components/ui/StrictModeDroppable";
+import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SkipLogicEditor, {
+  SkipLogicRule,
+  SkipLogicRuleV2,
+  SkipLogicCondition,
+  transformSurveySkipLogic,
+} from "./SkipLogicEditor";
 import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
-import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -102,6 +123,100 @@ interface Section {
   header_text?: { name: string; size: number };
   body_text?: { name: string; size: number };
 }
+
+// Animated divider component for cutting sections
+const CutSectionDivider = ({ onCut }: { onCut: () => void }) => {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <motion.div
+      className="relative flex items-center z-[1000] justify-center w-full"
+      initial={false}
+      animate={hovered ? "hovered" : "initial"}
+      variants={{
+        initial: { height: 24 },
+        hovered: {
+          height: 48,
+          transition: { type: "spring", stiffness: 200, damping: 18 },
+        },
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ minHeight: 12 }}
+    >
+      {/* Reveal divider only on hover */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            key="divider"
+            initial={{ scaleX: 0, opacity: 0, y: 10 }}
+            animate={{
+              scaleX: 1,
+              opacity: 1,
+              y: 0,
+              transition: { type: "spring", stiffness: 300, damping: 18 },
+            }}
+            exit={{
+              scaleX: 0,
+              opacity: 0,
+              y: -10,
+              transition: { duration: 0.3, ease: "easeInOut" },
+            }}
+            className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-pink-200 via-purple-400 to-pink-200 rounded-full shadow-lg z-0"
+            style={{ pointerEvents: "none" }}
+          />
+        )}
+      </AnimatePresence>
+      {/* Reveal button only on hover */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.button
+            key="scissors"
+            initial={{ scale: 0.5, opacity: 0, rotate: -30, y: 20 }}
+            animate={{
+              scale: 1,
+              opacity: 1,
+              rotate: 0,
+              y: 0,
+              transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 18,
+                delay: 0.08,
+              },
+            }}
+            exit={{
+              scale: 0.5,
+              opacity: 0,
+              rotate: 30,
+              y: -20,
+              transition: { duration: 0.25, ease: "circIn" },
+            }}
+            className="absolute -top-7 mx-auto bg-white border border-pink-300 shadow-lg rounded-full p-2 z-10 hover:bg-pink-100 active:scale-95 focus:outline-none focus:ring-2 focus:ring-pink-400"
+            onClick={onCut}
+            aria-label="Cut and create new section"
+            whileTap={{ scale: 0.85, rotate: -10 }}
+          >
+            <Scissors className="w-6 h-6 text-pink-600" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+      {/* Tooltip on hover */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            key="tooltip"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0, transition: { delay: 0.15 } }}
+            exit={{ opacity: 0, y: 10, transition: { duration: 0.18 } }}
+            className="absolute mx-auto w-fit top-10 bg-white px-3 py-1 rounded shadow text-xs text-pink-700 font-medium border border-pink-200"
+          >
+            Cut here & create new section
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
 
 const EditSurvey = () => {
   // const question = useSelector((state: RootState) => state.question);
@@ -198,9 +313,45 @@ const EditSurvey = () => {
     number | null
   >(null);
 
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">(
+    "right"
+  );
+
+  const skipLogic = useSelector((state: RootState) => state.survey.skipLogic);
+
+  // Skip logic state for existing surveys
+  const [existingSkipLogic, setExistingSkipLogic] = useState<
+    (SkipLogicRule | SkipLogicRuleV2)[]
+  >([]);
+  const [hasExistingSkipLogic, setHasExistingSkipLogic] = useState(false);
+
+  // Helper function to check if survey has existing skip logic
+  const checkForExistingSkipLogic = (sections: any[]): boolean => {
+    return sections.some((section) =>
+      section.questions.some(
+        (question: any) =>
+          question.skip_logic &&
+          Array.isArray(question.skip_logic) &&
+          question.skip_logic.length > 0
+      )
+    );
+  };
+
+  // Helper function to transform skip logic from API format to editor format
+  const transformSkipLogicFromAPI = (
+    sections: any[]
+  ): (SkipLogicRule | SkipLogicRuleV2)[] => {
+    // Create a mock survey data structure to use with the new transformation function
+    const mockSurveyData = {
+      sections: sections,
+    };
+
+    return transformSurveySkipLogic(mockSurveyData);
+  };
+
   const handleClearSurvey = () => {
-    // dispatch(resetSurvey());
-    dispatch(startQuickSurveyFlow());
+    dispatch(resetSurvey());
+    hasPopulatedSkipLogic.current = false; // Reset the ref when clearing survey
     setShowClearDialog(false);
     setShowExitDialog(false);
     toast.success("Survey cleared successfully", {
@@ -240,6 +391,7 @@ const EditSurvey = () => {
       );
     }
     saveHeaderIfEditing();
+    setSlideDirection(direction === "next" ? "right" : "left");
     setCurrentSection((prevIndex) => {
       if (direction === "next") {
         return prevIndex < questions.length - 1 ? prevIndex + 1 : prevIndex;
@@ -439,6 +591,366 @@ const EditSurvey = () => {
     }
   }, [dispatch, newQuestionGenerate, newSingleSurvey]);
 
+  // Helper function to transform skip logic to the required format
+  const transformSkipLogic = (skipLogic: any[], sections: any[]) => {
+    const questionSkipLogicMap = new Map();
+
+    // Helper function to get global question index from section and question indices
+    const getGlobalQuestionIndex = (
+      sectionIndex: number,
+      questionIndex: number
+    ): number => {
+      let globalIndex = 0;
+      for (let s = 0; s < sections.length; s++) {
+        if (s < sectionIndex) {
+          globalIndex += sections[s].questions.length;
+        } else if (s === sectionIndex) {
+          globalIndex += questionIndex;
+          break;
+        }
+      }
+      return globalIndex;
+    };
+
+    skipLogic.forEach((rule) => {
+      console.log("🔄 Processing skip logic rule:", rule);
+      if ("conditions" in rule && "action" in rule) {
+        // Skip rules with empty conditions (except for end_survey and jump_to which can have no conditions)
+        if (
+          rule.conditions.length === 0 &&
+          rule.action !== "end_survey" &&
+          rule.action !== "jump_to"
+        ) {
+          console.log("Skipping rule with empty conditions:", rule);
+          return;
+        }
+        // New rule format (SkipLogicRuleV2)
+        const {
+          conditions,
+          logicalOperator,
+          action,
+          target,
+          mainQuestionSection,
+          mainQuestionIndex,
+        } = rule;
+
+        // Determine which question this logic applies to
+        let targetQuestionId = null;
+
+        if (action === "end_survey") {
+          // For end_survey, we need to find which question has this logic
+          // We'll attach it to the first question that has conditions referencing it
+          if (conditions.length > 0) {
+            const firstCondition = conditions[0];
+            const questionIndex = firstCondition.questionIndex;
+            const sectionIndex = firstCondition.sectionIndex;
+            if (questionIndex !== null && sectionIndex !== null) {
+              // Flatten the question index across all sections
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                sectionIndex,
+                questionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
+            }
+          } else {
+            // For end_survey with no conditions, use the main question
+            if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+              // Flatten the question index across all sections
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                mainQuestionSection,
+                mainQuestionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
+            }
+          }
+
+          // Debug logging for end_survey
+          console.log("🔍 END_SURVEY DEBUG:", {
+            action,
+            conditions,
+            mainQuestionSection,
+            mainQuestionIndex,
+            targetQuestionId,
+          });
+        } else if (action === "jump_to") {
+          // For jump_to, attach the logic to the main question that the user selected
+          // This is the question that will trigger the jump when conditions are met
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            targetQuestionId = `Question${mainQuestionIndex + 1}`;
+          }
+
+          // Debug logging for jump_to
+          console.log("🔍 JUMP_TO DEBUG:", {
+            action,
+            conditions,
+            conditionsLength: conditions.length,
+            mainQuestionSection,
+            mainQuestionIndex,
+            targetQuestionId,
+            target,
+          });
+
+          // Debug each condition for jump_to
+          conditions.forEach((cond: any, idx: number) => {
+            console.log(`🔍 JUMP_TO Condition ${idx}:`, {
+              sectionIndex: cond.sectionIndex,
+              questionIndex: cond.questionIndex,
+              operator: cond.operator,
+              value: cond.value,
+              isQuestionIndexNull: cond.questionIndex === null,
+            });
+          });
+        } else {
+          // For hide/show, use the main question that the user selected
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            // The target question is the main question the user selected
+            targetQuestionId = `Question${mainQuestionIndex + 1}`;
+          }
+        }
+
+        if (targetQuestionId) {
+          // Debug conditions transformation
+          console.log("🔍 CONDITIONS DEBUG:", {
+            conditions,
+            conditionsLength: conditions.length,
+          });
+
+          // Transform conditions to rules format
+          const rules = conditions
+            .map((cond: any, index: number) => {
+              console.log(`🔍 Condition ${index}:`, cond);
+              const sourceQuestionIndex = cond.questionIndex;
+              console.log(`🔍 Source question index:`, sourceQuestionIndex);
+
+              if (sourceQuestionIndex === null) {
+                console.log(
+                  `❌ Skipping condition ${index} - questionIndex is null`
+                );
+                // For jump_to, if questionIndex is null, try to use mainQuestionIndex
+                if (action === "jump_to" && mainQuestionIndex !== null) {
+                  console.log(
+                    `🔄 Using mainQuestionIndex for jump_to condition ${index}:`,
+                    mainQuestionIndex
+                  );
+                  const rule = {
+                    source_id: `Question${mainQuestionIndex + 1}`,
+                    operator: cond.operator,
+                    value: cond.value,
+                  };
+                  console.log(
+                    `✅ Created rule for jump_to condition ${index} using mainQuestionIndex:`,
+                    rule
+                  );
+                  return rule;
+                }
+                return null;
+              }
+
+              // For end_survey actions, use flattened question index
+              let questionId;
+              if (action === "end_survey" && cond.sectionIndex !== null) {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  cond.sectionIndex,
+                  sourceQuestionIndex
+                );
+                questionId = `Question${globalQuestionIndex + 1}`;
+              } else {
+                questionId = `Question${sourceQuestionIndex + 1}`;
+              }
+
+              const rule = {
+                source_id: questionId,
+                operator: cond.operator,
+                value: cond.value,
+              };
+              console.log(`✅ Created rule for condition ${index}:`, rule);
+              return rule;
+            })
+            .filter(Boolean);
+
+          console.log("📋 Final rules array:", rules);
+
+          // Transform action
+          let actionType = action;
+          let targetType = "question";
+          let targetId = "Question1"; // Default fallback
+
+          if (action === "end_survey") {
+            actionType = "end_survey";
+            targetType = "question";
+            // For end_survey, use the question that has the logic (from conditions or main question)
+            if (conditions.length > 0) {
+              const firstCondition = conditions[0];
+              const questionIndex = firstCondition.questionIndex;
+              if (questionIndex !== null) {
+                targetId = `Question${questionIndex + 1}`;
+              } else {
+                targetId = `Question${mainQuestionIndex + 1}`;
+              }
+            } else {
+              targetId = `Question${mainQuestionIndex + 1}`;
+            }
+            console.log(
+              "✅ Set targetId for end_survey:",
+              targetId,
+              "mainQuestionIndex:",
+              mainQuestionIndex,
+              "conditions:",
+              conditions
+            );
+          } else if (action === "jump_to") {
+            actionType = "jump_to";
+            console.log("🎯 JUMP_TO TARGET DEBUG:", {
+              target,
+              targetType: target.type,
+              targetQuestionIndex: target.questionIndex,
+              targetSectionIndex: target.sectionIndex,
+            });
+
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              // Use flattened question index for jump_to questions
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                target.sectionIndex,
+                target.questionIndex
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
+              console.log(
+                "✅ Set targetId for question (flattened):",
+                targetId
+              );
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+              console.log("✅ Set targetId for section:", targetId);
+            } else {
+              console.log("❌ Invalid target for jump_to:", target);
+              // Don't add this rule if target is invalid
+              return;
+            }
+          } else {
+            // hide/show actions
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+            // Keep default targetId if conditions above fail
+          }
+
+          // Determine logic_type based on action
+          let logicType = "skip_logic"; // default
+          if (action === "hide" || action === "show") {
+            logicType = "display_logic";
+          } else if (action === "jump_to") {
+            logicType = "skip_logic";
+          } else if (action === "end_survey") {
+            logicType = "skip_logic";
+          }
+
+          const skipLogicEntry = {
+            logic_type: logicType,
+            condition: {
+              logical_operator: logicalOperator,
+              rules: rules,
+              action: {
+                type: actionType,
+                target_type: targetType,
+                target_id: targetId,
+              },
+            },
+          };
+
+          console.log("🎯 FINAL TARGET DEBUG:", {
+            action,
+            targetId,
+            targetType,
+            actionType,
+            skipLogicEntry,
+            rulesLength: rules.length,
+          });
+
+          console.log("Skip Logic Entry:", {
+            targetQuestionId,
+            action,
+            target,
+            actionType,
+            targetType,
+            targetId,
+            skipLogicEntry,
+          });
+
+          if (!questionSkipLogicMap.has(targetQuestionId)) {
+            questionSkipLogicMap.set(targetQuestionId, []);
+          }
+          questionSkipLogicMap.get(targetQuestionId).push(skipLogicEntry);
+
+          // Debug logging for skip logic entry
+          console.log("📝 Skip Logic Entry Added:", {
+            targetQuestionId,
+            skipLogicEntry,
+            action,
+            targetId,
+          });
+        }
+      } else if ("from" in rule && "to" in rule) {
+        // Old rule format (SkipLogicRule)
+        const { from, to } = rule;
+        const sourceQuestionId = `Question${from.questionIndex + 1}`;
+        const targetQuestionId =
+          "end" in to ? "end_survey" : `Question${(to.questionIndex ?? 0) + 1}`;
+
+        const skipLogicEntry = {
+          logic_type: "skip_logic", // Old rules are typically skip_logic
+          condition: {
+            logical_operator: "and",
+            rules: [
+              {
+                source_id: sourceQuestionId,
+                operator: "equals",
+                value: from.answer,
+              },
+            ],
+            action: {
+              type: "end" in to ? "end_survey" : "jump_to",
+              target_type: "end" in to ? "question" : "question",
+              target_id: targetQuestionId,
+            },
+          },
+        };
+
+        // For old rules, we need to determine which question this applies to
+        // We'll use the source question as the target question for the skip logic
+        const targetQuestionIdForMap = `Question${from.questionIndex + 1}`;
+
+        if (!questionSkipLogicMap.has(targetQuestionIdForMap)) {
+          questionSkipLogicMap.set(targetQuestionIdForMap, []);
+        }
+        questionSkipLogicMap.get(targetQuestionIdForMap).push(skipLogicEntry);
+      }
+    });
+
+    return questionSkipLogicMap;
+  };
+
   const handleSurveyCreation = async () => {
     // Check if all sections have at least one question
     const hasEmptySection = questions.some(
@@ -459,6 +971,12 @@ const EditSurvey = () => {
     try {
       // Get base survey state
       const updatedSurvey = store.getState().survey;
+
+      // Transform skip logic to the required format
+      const questionSkipLogicMap = transformSkipLogic(
+        updatedSurvey.skipLogic || [],
+        updatedSurvey.sections
+      );
 
       // Process survey to ensure questions match their type structure
       const processedSurvey = {
@@ -488,108 +1006,186 @@ const EditSurvey = () => {
         sections: updatedSurvey.sections.map((section, idx) => {
           // For the first section, do not include section_topic/section_description
           const baseSection = {
-            questions: section.questions.map((question: Question) => {
-              // Check if empty question type but has matrix structure
-              if (
-                !question.question_type &&
-                question.rows?.length &&
-                question.columns?.length
-              ) {
-                return {
-                  ...question,
-                  question_type: "matrix_multiple_choice",
-                  description: question.description || "Matrix Question",
+            questions: section.questions.map(
+              (question: Question, questionIdx: number) => {
+                // Get skip logic for this question
+                // Calculate global question index to match the targetQuestionId from skip logic
+                let globalQuestionIndex = 0;
+                for (let s = 0; s < updatedSurvey.sections.length; s++) {
+                  if (s < idx) {
+                    globalQuestionIndex +=
+                      updatedSurvey.sections[s].questions.length;
+                  } else if (s === idx) {
+                    globalQuestionIndex += questionIdx;
+                    break;
+                  }
+                }
+                const questionId = `Question${globalQuestionIndex + 1}`;
+                const questionSkipLogic =
+                  questionSkipLogicMap.get(questionId) || [];
+
+                // Add skip_logic to the question if it exists
+                const questionWithSkipLogic =
+                  questionSkipLogic.length > 0
+                    ? { ...question, skip_logic: questionSkipLogic }
+                    : question;
+
+                // Log questions that have skip logic added
+                if (questionSkipLogic.length > 0) {
+                  console.log(`🔗 Skip Logic Added to ${questionId}:`, {
+                    question: questionWithSkipLogic.question,
+                    questionId,
+                    sectionIndex: idx,
+                    questionIndex: questionIdx,
+                    skipLogicCount: questionSkipLogic.length,
+                    skipLogic: questionSkipLogic,
+                  });
+                }
+                // Check if empty question type but has matrix structure
+                if (
+                  !questionWithSkipLogic.question_type &&
+                  questionWithSkipLogic.rows?.length &&
+                  questionWithSkipLogic.columns?.length
+                ) {
+                  return {
+                    ...questionWithSkipLogic,
+                    question_type: "matrix_multiple_choice",
+                    description:
+                      questionWithSkipLogic.description || "Matrix Question",
+                  } as Question;
+                }
+                const baseQuestion = {
+                  question: questionWithSkipLogic.question,
+                  description:
+                    questionWithSkipLogic?.description ||
+                    questionWithSkipLogic.question,
+                  question_type: questionWithSkipLogic.question_type,
+                  is_required: questionWithSkipLogic.is_required,
                 } as Question;
-              }
-              const baseQuestion = {
-                question: question.question,
-                description: question?.description || question.question,
-                question_type: question.question_type,
-                is_required: question.is_required,
-              } as Question;
-              switch (question.question_type) {
-                case "slider":
-                  const extractRange = (questionText: string) => {
-                    const numberWords: { [key: string]: number } = {
-                      one: 1,
-                      two: 2,
-                      three: 3,
-                      four: 4,
-                      five: 5,
-                      six: 6,
-                      seven: 7,
-                      eight: 8,
-                      nine: 9,
-                      ten: 10,
-                    };
-                    let processedText = questionText.toLowerCase();
-                    Object.entries(numberWords).forEach(([word, num]) => {
-                      processedText = processedText.replace(
-                        new RegExp(word, "g"),
-                        num.toString()
+                switch (questionWithSkipLogic.question_type) {
+                  case "slider":
+                    const extractRange = (questionText: string) => {
+                      const numberWords: { [key: string]: number } = {
+                        one: 1,
+                        two: 2,
+                        three: 3,
+                        four: 4,
+                        five: 5,
+                        six: 6,
+                        seven: 7,
+                        eight: 8,
+                        nine: 9,
+                        ten: 10,
+                      };
+                      let processedText = questionText.toLowerCase();
+                      Object.entries(numberWords).forEach(([word, num]) => {
+                        processedText = processedText.replace(
+                          new RegExp(word, "g"),
+                          num.toString()
+                        );
+                      });
+                      const match = processedText.match(
+                        /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
                       );
-                    });
-                    const match = processedText.match(
-                      /(\d+)\s*(?:-|to|\.\.|points?\s*=.*?\/\s*|points?\s*=.*?)\s*(\d+)/i
-                    );
-                    return match
-                      ? {
-                          min: parseInt(match[1]),
-                          max: parseInt(match[2]),
-                        }
-                      : { min: 0, max: 10 };
-                  };
-                  const range = extractRange(question.question);
-                  return {
-                    ...baseQuestion,
-                    min: range.min,
-                    max: range.max,
-                    step: 1,
-                  } as Question;
-                case "checkbox":
-                case "multiple_choice":
-                case "single_choice":
-                case "drop_down":
-                case "likert_scale":
-                case "rating_scale":
-                case "star_rating":
-                case "boolean":
-                  return {
-                    ...baseQuestion,
-                    options: question.options,
-                  } as Question;
-                case "matrix_multiple_choice":
-                case "matrix_checkbox":
-                  return {
-                    ...baseQuestion,
-                    description: question.description || "Matrix Question",
-                    rows:
-                      question.rows ||
-                      (question as any)?.Rows ||
-                      (question?.options as any)?.Rows,
-                    columns:
-                      question.columns ||
-                      (question as any)?.Columns ||
-                      (question?.options as any)?.Columns,
-                  } as Question;
-                case "number":
-                  return {
-                    ...baseQuestion,
-                    min: (question as Question).min,
-                    max: question.max,
-                  } as Question;
-                case "long_text":
-                  return {
-                    ...baseQuestion,
-                    can_accept_media:
-                      (question as Question).can_accept_media || false,
-                  } as Question;
-                case "short_text":
-                case "media":
-                default:
-                  return baseQuestion;
+                      return match
+                        ? {
+                            min: parseInt(match[1]),
+                            max: parseInt(match[2]),
+                          }
+                        : { min: 0, max: 10 };
+                    };
+                    const range = extractRange(questionWithSkipLogic.question);
+                    return {
+                      ...baseQuestion,
+                      min: range.min,
+                      max: range.max,
+                      step: 1,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "checkbox":
+                  case "multiple_choice":
+                  case "single_choice":
+                  case "drop_down":
+                  case "likert_scale":
+                  case "rating_scale":
+                  case "star_rating":
+                  case "boolean":
+                    return {
+                      ...baseQuestion,
+                      options: questionWithSkipLogic.options,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "matrix_multiple_choice":
+                  case "matrix_checkbox":
+                    return {
+                      ...baseQuestion,
+                      description:
+                        questionWithSkipLogic.description || "Matrix Question",
+                      rows:
+                        questionWithSkipLogic.rows ||
+                        (questionWithSkipLogic as any)?.Rows ||
+                        (questionWithSkipLogic?.options as any)?.Rows,
+                      columns:
+                        questionWithSkipLogic.columns ||
+                        (questionWithSkipLogic as any)?.Columns ||
+                        (questionWithSkipLogic?.options as any)?.Columns,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+
+                  // case "matrix":
+                  //   return {
+                  //     ...baseQuestion,
+                  //     description:
+                  //       questionWithSkipLogic.description || "Matrix Question",
+                  //     rows:
+                  //       questionWithSkipLogic.rows ||
+                  //       (questionWithSkipLogic as any)?.Rows ||
+                  //       (questionWithSkipLogic?.options as any)?.Rows,
+                  //     columns:
+                  //       questionWithSkipLogic.columns ||
+                  //       (questionWithSkipLogic as any)?.Columns ||
+                  //       (questionWithSkipLogic?.options as any)?.Columns,
+                  //     ...(questionSkipLogic.length > 0 && {
+                  //       skip_logic: questionSkipLogic,
+                  //     }),
+                  //   } as Question;
+                  case "number":
+                    return {
+                      ...baseQuestion,
+                      min: (questionWithSkipLogic as Question).min,
+                      max: questionWithSkipLogic.max,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "long_text":
+                    return {
+                      ...baseQuestion,
+                      can_accept_media:
+                        (questionWithSkipLogic as Question).can_accept_media ||
+                        false,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                  case "short_text":
+                  case "media":
+                  default:
+                    return {
+                      ...baseQuestion,
+                      ...(questionSkipLogic.length > 0 && {
+                        skip_logic: questionSkipLogic,
+                      }),
+                    } as Question;
+                }
               }
-            }),
+            ),
           };
           if (idx === 0) {
             // First section: do not include section_topic/section_description
@@ -604,13 +1200,42 @@ const EditSurvey = () => {
           }
         }),
       };
-      console.log(processedSurvey);
-      await createSurvey(processedSurvey).unwrap();
-      dispatch(startQuickSurveyFlow());
-      // handleClearSurvey();
-      setSurvey_id(createdSurveyData.data._id);
+      if (Object.prototype.hasOwnProperty.call(processedSurvey, "skipLogic")) {
+        delete (processedSurvey as any).skipLogic;
+      }
+      console.log("Processed Survey:", processedSurvey);
+      console.log("Skip Logic Map:", questionSkipLogicMap);
 
-      // setReview(true);
+      // Log summary of all questions with skip logic
+      console.log("📊 SKIP LOGIC SUMMARY:");
+      console.log("=".repeat(50));
+      let totalSkipLogicRules = 0;
+      processedSurvey.sections.forEach((section, sectionIdx) => {
+        section.questions.forEach((question: any, questionIdx) => {
+          if (question.skip_logic && question.skip_logic.length > 0) {
+            totalSkipLogicRules += question.skip_logic.length;
+            console.log(
+              `📋 Section ${sectionIdx + 1}, Question ${questionIdx + 1}: "${
+                question.question
+              }"`
+            );
+            console.log(
+              `   └─ ${question.skip_logic.length} skip logic rule(s)`
+            );
+            question.skip_logic.forEach((logic: any, logicIdx: number) => {
+              console.log(
+                `      ${logicIdx + 1}. ${logic.condition.action.type} → ${
+                  logic.condition.action.target_id
+                }`
+              );
+            });
+          }
+        });
+      });
+
+      await createSurvey(processedSurvey).unwrap();
+      handleClearSurvey();
+      // Don't set state here - let the useEffect handle success state updates
     } catch (e) {
       console.error(e);
     }
@@ -618,10 +1243,9 @@ const EditSurvey = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      // setReview((prev) => !prev);
       toast.success("Survey created successfully");
-      // dispatch(resetSurvey());
-      dispatch(startQuickSurveyFlow());
+      dispatch(resetSurvey());
+      hasPopulatedSkipLogic.current = false; // Reset the ref when survey is created successfully
       setSurvey_id(createdSurveyData.data._id);
       // setReview(true);
       // router.push("/surveys/survey-list");
@@ -640,7 +1264,7 @@ const EditSurvey = () => {
         "Failed to create survey, Don't panic, your progress was saved"
       );
     }
-  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
+  }, [isSuccess, isError, error, dispatch, createdSurveyData]);
 
   useEffect(() => {
     // if (progressSuccess) {
@@ -649,7 +1273,7 @@ const EditSurvey = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError]);
+  }, [progressError, progressIsError, progressSuccess]);
 
   // Update the handleNavigation function
   const handleNavigation = useCallback(
@@ -787,417 +1411,842 @@ const EditSurvey = () => {
     setCurrentSection(newSection);
   };
 
-  console.log(questions);
+  // Drag and drop handler for reordering questions
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+    const section = questions[currentSection];
+    const items = Array.from(section.questions);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    const updatedSection = { ...section, questions: items };
+    dispatch(
+      updateSection({ index: currentSection, newSection: updatedSection })
+    );
+  };
+
+  // Utility: validate skipLogic rules against current questions - DISABLED for now
+  // This validation was too strict and was clearing valid rules
+  // useEffect(() => {
+  //   if (!Array.isArray(skipLogic) || skipLogic.length === 0) return;
+  //
+  //   console.log("Validating skipLogic rules:", skipLogic);
+  //   console.log("Current questions:", questions);
+  //
+  //   const isValid = skipLogic.every((rule: SkipLogicRule | SkipLogicRuleV2) => {
+  //     console.log("Validating rule:", rule);
+  //
+  //     if ("from" in rule && "to" in rule) {
+  //       // Old rule type
+  //       const fromSection = questions[rule.from.sectionIndex];
+  //       if (!fromSection) {
+  //         console.log("Invalid: fromSection not found");
+  //         return false;
+  //       }
+  //       const fromQuestion = fromSection.questions[rule.from.questionIndex];
+  //       if (!fromQuestion) {
+  //         console.log("Invalid: fromQuestion not found");
+  //         return false;
+  //       }
+  //       // Check answer
+  //       const options =
+  //         Array.isArray(fromQuestion.options) && fromQuestion.options.length > 0
+  //           ? fromQuestion.options
+  //           : fromQuestion.question_type === "boolean"
+  //           ? ["Yes", "No"]
+  //           : ["Any answer"];
+  //       if (!options.includes(rule.from.answer)) {
+  //         console.log("Invalid: answer not found in options");
+  //         return false;
+  //       }
+  //       // Check target
+  //       if ("end" in rule.to) return true;
+  //       const toSection = questions[rule.to.sectionIndex];
+  //       if (!toSection) {
+  //         console.log("Invalid: toSection not found");
+  //         return false;
+  //       }
+  //       const toQuestion = toSection.questions[rule.to.questionIndex ?? 0];
+  //       if (!toQuestion) {
+  //         console.log("Invalid: toQuestion not found");
+  //         return false;
+  //       }
+  //       return true;
+  //     } else if ("conditions" in rule && "action" in rule && "target" in rule) {
+  //       // New rule type
+  //       console.log("Validating new rule type");
+  //
+  //       // Validate all conditions
+  //       const allCondsValid = (rule.conditions as SkipLogicCondition[]).every(
+  //         (cond: SkipLogicCondition) => {
+  //           console.log("Validating condition:", cond);
+  //           const section = questions[cond.sectionIndex];
+  //           if (!section) {
+  //             console.log("Invalid: section not found for condition");
+  //             return false;
+  //           }
+  //           if (cond.questionIndex === null) {
+  //             console.log("Invalid: questionIndex is null for condition");
+  //             return false;
+  //           }
+  //           const question = section.questions[cond.questionIndex];
+  //           if (!question) {
+  //             console.log("Invalid: question not found for condition");
+  //             return false;
+  //           }
+  //           return true;
+  //         }
+  //       );
+  //       if (!allCondsValid) {
+  //         console.log("Invalid: conditions validation failed");
+  //         return false;
+  //       }
+  //
+  //       // For new rules, we don't need to validate target as strictly
+  //       // since the target is often the main question itself
+  //       console.log("New rule validation passed");
+  //       return true;
+  //     }
+  //     // Unknown rule type
+  //     console.log("Invalid: unknown rule type");
+  //     return false;
+  //   });
+  //
+  //   console.log("Overall validation result:", isValid);
+  //
+  //   if (!isValid) {
+  //     console.log("Clearing skipLogic due to validation failure");
+  //     dispatch(setSkipLogic([]));
+  //   }
+  // }, [questions, skipLogic, dispatch]);
+
+  // Check for existing skip logic when sections change
+  const hasPopulatedSkipLogic = React.useRef(false);
+
+  // Reset the ref when questions change significantly (like loading a new survey)
+  useEffect(() => {
+    hasPopulatedSkipLogic.current = false;
+  }, [questions?.length]); // Reset when the number of sections changes
+
+  useEffect(() => {
+    if (questions && questions.length > 0 && !hasPopulatedSkipLogic.current) {
+      const hasExisting = checkForExistingSkipLogic(questions);
+      setHasExistingSkipLogic(hasExisting);
+
+      if (hasExisting) {
+        const transformedSkipLogic = transformSkipLogicFromAPI(questions);
+        setExistingSkipLogic(transformedSkipLogic);
+
+        // If there's existing skip logic and no current skip logic in Redux, populate it
+        // Only populate if skipLogic is empty to prevent infinite loops
+        if (
+          transformedSkipLogic.length > 0 &&
+          (!skipLogic || skipLogic.length === 0)
+        ) {
+          dispatch(setSkipLogic(transformedSkipLogic));
+          hasPopulatedSkipLogic.current = true; // Mark as populated to prevent re-running
+        }
+      }
+    }
+  }, [questions, dispatch, skipLogic]); // Removed skipLogic from dependencies to prevent infinite loop
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full relative`}>
       <div className={`${theme} flex justify-between gap-6 w-full`}>
         <div className="lg:w-2/3 flex flex-col overflow-y-auto max-h-screen custom-scrollbar px-4 sm:px- lg:pl-6">
           {/* {isNewSection ? ( */}
-          <div className="w-full">
-            {(() => {
-              if (currentSection === 0) {
-                return (
-                  <div className="flex items-center justify-between">
-                    <SurveyHeader
-                      logoUrl={surveyData.logo_url}
-                      headerUrl={surveyData.header_url}
-                      survey={survey}
-                      headerText={survey.header_text}
-                      bodyText={survey.body_text}
-                      canEdit={true}
-                      onSave={(localHeaderText, localBodyText) => {
-                        setSurveyData((prev) => ({
-                          ...prev,
-                          header_text: localHeaderText,
-                          body_text: localBodyText,
-                        }));
-                      }}
-                      isEdit={isHeaderEditing}
-                    />
-                  </div>
-                );
-              } else {
-                const section = questions[currentSection];
-                return (
-                  <div className="flex items-center justify-between">
-                    <SurveyHeader
-                      logoUrl={surveyData.logo_url}
-                      headerUrl={surveyData.header_url}
-                      survey={{
-                        ...survey,
-                        topic: section?.section_topic,
-                        description: section?.section_description,
-                      }}
-                      headerText={
-                        (section as any)?.header_text || survey?.header_text
-                      }
-                      bodyText={
-                        (section as any)?.body_text || survey?.body_text
-                      }
-                      canEdit={true}
-                      onSave={(_localHeaderText, _localBodyText) => {
-                        dispatch(
-                          updateSection({
-                            index: currentSection,
-                            newSection: {
-                              ...section,
-                              section_topic:
-                                _localHeaderText?.value ||
-                                section.section_topic,
-                              section_description:
-                                _localBodyText?.value ||
-                                section.section_description,
-                              ...({
-                                header_text: _localHeaderText,
-                                body_text: _localBodyText,
-                              } as any),
-                            },
-                          })
-                        );
-                      }}
-                      isEdit={isHeaderEditing}
-                    />
-                  </div>
-                );
-              }
-            })()}
-            {questions[currentSection]?.questions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200 my-6">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 mb-4">
-                  <HiOutlinePlus className="w-8 h-8 text-purple-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                  No questions yet
-                </h3>
-                <p className="text-gray-500 mb-6 max-w-xs mx-auto">
-                  Click the{" "}
-                  <span className="font-semibold text-purple-700">
-                    Add Question
-                  </span>{" "}
-                  button below to start building your survey section.
-                </p>
-                <Button
-                  variant="outline"
-                  className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                  // onClick={() => setAddMoreQuestion((prev) => !prev)}
-                  disabled={generatingSingleSurvey}
-                >
-                  {generatingSingleSurvey ? (
-                    <ClipLoader size={24} />
-                  ) : (
-                    <div className="flex gap-2 items-center">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            id="add-question-btn"
-                            variant="outline"
-                            className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                          >
-                            <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
-                            <span className="group-hover:tracking-wide transition-all duration-200">
+          <motion.div
+            key={currentSection}
+            initial={
+              slideDirection === "right"
+                ? { x: 100, opacity: 0 }
+                : { x: -100, opacity: 0 }
+            }
+            animate={{ x: 0, opacity: 1 }}
+            exit={
+              slideDirection === "right"
+                ? { x: -100, opacity: 0 }
+                : { x: 100, opacity: 0 }
+            }
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <div className="w-full">
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <StrictModeDroppable droppableId="questions">
+                  {(provided: any) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                      {(() => {
+                        if (currentSection === 0) {
+                          return (
+                            <div className="flex items-center justify-between">
+                              <SurveyHeader
+                                logoUrl={surveyData.logo_url}
+                                headerUrl={surveyData.header_url}
+                                survey={survey}
+                                headerText={survey.header_text}
+                                bodyText={survey.body_text}
+                                canEdit={true}
+                                onSave={(localHeaderText, localBodyText) => {
+                                  setSurveyData((prev) => ({
+                                    ...prev,
+                                    header_text: localHeaderText,
+                                    body_text: localBodyText,
+                                  }));
+                                }}
+                                isEdit={isHeaderEditing}
+                              />
+                            </div>
+                          );
+                        } else {
+                          const section = questions[currentSection];
+                          return (
+                            <div className="flex items-center justify-between">
+                              <SurveyHeader
+                                logoUrl={surveyData.logo_url}
+                                headerUrl={surveyData.header_url}
+                                survey={{
+                                  ...survey,
+                                  topic: section?.section_topic,
+                                  description: section?.section_description,
+                                }}
+                                headerText={
+                                  section && "header_text" in section
+                                    ? section.header_text
+                                    : survey?.header_text
+                                }
+                                bodyText={
+                                  section && "body_text" in section
+                                    ? section.body_text
+                                    : survey?.body_text
+                                }
+                                canEdit={true}
+                                onSave={(_localHeaderText, _localBodyText) => {
+                                  dispatch(
+                                    updateSection({
+                                      index: currentSection,
+                                      newSection: {
+                                        ...section,
+                                        section_topic:
+                                          _localHeaderText?.value ||
+                                          section.section_topic,
+                                        section_description:
+                                          _localBodyText?.value ||
+                                          section.section_description,
+                                        ...({
+                                          header_text: _localHeaderText,
+                                          body_text: _localBodyText,
+                                        } as any),
+                                      },
+                                    })
+                                  );
+                                }}
+                                isEdit={isHeaderEditing}
+                              />
+                            </div>
+                          );
+                        }
+                      })()}
+                      {questions[currentSection]?.questions.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-lg border border-dashed border-gray-200 my-6">
+                          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 mb-4">
+                            <HiOutlinePlus className="w-8 h-8 text-purple-600" />
+                          </div>
+                          <h3 className="text-xl font-semibold mb-2 text-gray-800">
+                            No questions yet
+                          </h3>
+                          <p className="text-gray-500 mb-6 max-w-xs mx-auto">
+                            Click the{" "}
+                            <span className="font-semibold text-purple-700">
                               Add Question
-                            </span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                            </span>{" "}
+                            button below to start building your survey section.
+                          </p>
+                          <Button
+                            variant="outline"
+                            className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                            // onClick={() => setAddMoreQuestion((prev) => !prev)}
+                            disabled={generatingSingleSurvey}
+                          >
+                            {generatingSingleSurvey ? (
+                              <ClipLoader size={24} />
+                            ) : (
+                              <div className="flex gap-2 items-center">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      id="add-question-btn"
+                                      variant="outline"
+                                      className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                                    >
+                                      <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                                      <span className="group-hover:tracking-wide transition-all duration-200">
+                                        Add Question
+                                      </span>
+                                      <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent
+                                    align="start"
+                                    collisionPadding={{ bottom: 40 }}
+                                    className="w-56"
+                                  >
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const newQuestion = {
+                                          question: "New Question",
+                                          description: "Question description",
+                                          question_type: "short_text",
+                                          is_required: false,
+                                          options: [],
+                                        };
+
+                                        const updatedSections = [...questions];
+                                        const currentSectionData =
+                                          updatedSections[currentSection];
+
+                                        const updatedSection = {
+                                          ...currentSectionData,
+                                          questions: [
+                                            ...currentSectionData.questions,
+                                            newQuestion,
+                                          ],
+                                        };
+
+                                        dispatch(
+                                          updateSection({
+                                            index: currentSection,
+                                            newSection: updatedSection,
+                                          })
+                                        );
+                                        setEditIndex(
+                                          currentSectionData.questions.length
+                                        );
+                                        setIsEdit(true);
+                                      }}
+                                      className="gap-2"
+                                    >
+                                      <PencilIcon className="h-4 w-4" />
+                                      <span>Add Manually</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setAiTargetSectionIndex(currentSection);
+                                        setAddMoreQuestion(true);
+                                      }}
+                                      className="gap-2"
+                                    >
+                                      <Sparkles className="h-4 w-4" />
+                                      <span>Generate with AI</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            )}
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="start"
-                          collisionPadding={{ bottom: 40 }}
-                          className="w-56"
-                        >
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const newQuestion = {
-                                question: "New Question",
-                                description: "Question description",
-                                question_type: "short_text",
-                                is_required: false,
-                                options: [],
-                              };
-
-                              const updatedSections = [...questions];
-                              const currentSectionData =
-                                updatedSections[currentSection];
-
-                              const updatedSection = {
-                                ...currentSectionData,
-                                questions: [
-                                  ...currentSectionData.questions,
-                                  newQuestion,
-                                ],
-                              };
-
-                              dispatch(
-                                updateSection({
-                                  index: currentSection,
-                                  newSection: updatedSection,
-                                })
-                              );
-                              setEditIndex(currentSectionData.questions.length);
-                              setIsEdit(true);
-                            }}
-                            className="gap-2"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                            <span>Add Manually</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setAiTargetSectionIndex(currentSection);
-                              setAddMoreQuestion(true);
-                            }}
-                            className="gap-2"
-                          >
-                            <Sparkles className="h-4 w-4" />
-                            <span>Generate with AI</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  )}
-                </Button>
-              </div>
-            ) : (
-              questions[currentSection]?.questions.map(
-                (item: any, index: number) => (
-                  <div key={index} className="mb-4">
-                    <QuestionRenderer
-                      item={item}
-                      index={index}
-                      isEdit={isEdit}
-                      editIndex={editIndex}
-                      currentSection={currentSection}
-                      handleSave={handleSave}
-                      handleCancel={handleCancel}
-                      handleAISave={handleAISave}
-                      EditQuestion={EditQuestion}
-                      handleDeleteQuestion={handleDeleteQuestion}
-                      handleRequiredToggle={(index) =>
-                        handleRequiredToggle(
-                          index,
-                          currentSection,
-                          questions,
-                          dispatch
+                        </div>
+                      ) : (
+                        questions[currentSection]?.questions.map(
+                          (item: any, index: number) => (
+                            <Draggable
+                              key={index}
+                              draggableId={index.toString()}
+                              index={index}
+                              isDragDisabled={isEdit} // Disable drag when editing
+                            >
+                              {(provided, snapshot) => (
+                                <React.Fragment key={index}>
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={`relative ${
+                                      snapshot.isDragging ? "" : ""
+                                    }`}
+                                  >
+                                    <div className="flex items-start group">
+                                      <div className="flex flex-col">
+                                        {/* Drag handle */}
+                                        <div
+                                          {...provided.dragHandleProps}
+                                          className="mr-2 cursor-grab group-hover:scale-110 transition-transform duration-200"
+                                          title="Drag to reorder"
+                                        >
+                                          <svg
+                                            width="18"
+                                            height="18"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <circle
+                                              cx="5"
+                                              cy="6"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="5"
+                                              cy="12"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="5"
+                                              cy="18"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="12"
+                                              cy="6"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="12"
+                                              cy="12"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="12"
+                                              cy="18"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="19"
+                                              cy="6"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="19"
+                                              cy="12"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                            <circle
+                                              cx="19"
+                                              cy="18"
+                                              r="1.5"
+                                              fill="#a78bfa"
+                                            />
+                                          </svg>
+                                        </div>
+                                        {/* Actions button under drag handle */}
+                                        {questions.length > 1 && (
+                                          <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                              <Button
+                                                className="mt-2 mr-2 h-6 bg-transparent p-1 rounded-full px-0 hover:bg-gray-100 text-gray-600 transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus:ring-transparent focus-visible:ring-transparent focus-within:outline-none focus-within:ring-0 focus-within:ring-transparent"
+                                                title="More actions"
+                                              >
+                                                <BringToFront
+                                                  strokeWidth={1.5}
+                                                  className="size-[18px] text-[#a78bfa]"
+                                                />
+                                              </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent
+                                              align="start"
+                                              className="z-[10000] min-w-[180px]"
+                                            >
+                                              <DropdownMenuSub>
+                                                <DropdownMenuSubTrigger className="flex items-center gap-2">
+                                                  <MoveRight className="w-4 h-4 text-[#a78bfa]" />
+                                                  <span>Move to section</span>
+                                                </DropdownMenuSubTrigger>
+                                                <DropdownMenuSubContent className="z-[10000] min-w-[180px]">
+                                                  {questions.map(
+                                                    (section, secIdx) =>
+                                                      secIdx !==
+                                                      currentSection ? (
+                                                        <DropdownMenuItem
+                                                          key={secIdx}
+                                                          onClick={() => {
+                                                            // Remove from current section
+                                                            const sectionList =
+                                                              [...questions];
+                                                            const fromSection =
+                                                              sectionList[
+                                                                currentSection
+                                                              ];
+                                                            const toSection =
+                                                              sectionList[
+                                                                secIdx
+                                                              ];
+                                                            const movingQuestion =
+                                                              fromSection
+                                                                .questions[
+                                                                index
+                                                              ];
+                                                            // Remove from current
+                                                            const newFromQuestions =
+                                                              fromSection.questions.filter(
+                                                                (_, i) =>
+                                                                  i !== index
+                                                              );
+                                                            // Add to end of target
+                                                            const newToQuestions =
+                                                              [
+                                                                ...toSection.questions,
+                                                                movingQuestion,
+                                                              ];
+                                                            // Update sections
+                                                            dispatch(
+                                                              updateSection({
+                                                                index:
+                                                                  currentSection,
+                                                                newSection: {
+                                                                  ...fromSection,
+                                                                  questions:
+                                                                    newFromQuestions,
+                                                                },
+                                                              })
+                                                            );
+                                                            dispatch(
+                                                              updateSection({
+                                                                index: secIdx,
+                                                                newSection: {
+                                                                  ...toSection,
+                                                                  questions:
+                                                                    newToQuestions,
+                                                                },
+                                                              })
+                                                            );
+                                                          }}
+                                                          className="flex items-center gap-2"
+                                                        >
+                                                          <span className="font-medium">
+                                                            Section {secIdx + 1}
+                                                          </span>
+                                                          {section.section_topic && (
+                                                            <span className="text-xs text-muted-foreground ml-2">
+                                                              {
+                                                                section.section_topic
+                                                              }
+                                                            </span>
+                                                          )}
+                                                        </DropdownMenuItem>
+                                                      ) : null
+                                                  )}
+                                                </DropdownMenuSubContent>
+                                              </DropdownMenuSub>
+                                            </DropdownMenuContent>
+                                          </DropdownMenu>
+                                        )}
+                                      </div>
+                                      <div
+                                        className={cn(
+                                          `flex-1`,
+                                          snapshot.isDragging &&
+                                            "z-50 shadow-2xl scale-[1.02] rounded-xl"
+                                        )}
+                                      >
+                                        <QuestionRenderer
+                                          item={item}
+                                          index={index}
+                                          isEdit={isEdit}
+                                          editIndex={editIndex}
+                                          currentSection={currentSection}
+                                          handleSave={handleSave}
+                                          handleCancel={handleCancel}
+                                          handleAISave={handleAISave}
+                                          EditQuestion={EditQuestion}
+                                          handleDeleteQuestion={
+                                            handleDeleteQuestion
+                                          }
+                                          handleRequiredToggle={(index) =>
+                                            handleRequiredToggle(
+                                              index,
+                                              currentSection,
+                                              questions,
+                                              dispatch
+                                            )
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                    {/* Animated cut-to-section hover area (not after last question) */}
+                                    {index <
+                                      questions[currentSection].questions
+                                        .length -
+                                        1 && (
+                                      <CutSectionDivider
+                                        key={`divider-${index}`}
+                                        onCut={() => {
+                                          // Split section logic
+                                          const section =
+                                            questions[currentSection];
+                                          const before =
+                                            section.questions.slice(
+                                              0,
+                                              index + 1
+                                            );
+                                          const after = section.questions.slice(
+                                            index + 1
+                                          );
+                                          if (after.length === 0) return; // Don't cut if nothing after
+                                          // Create new section with 'after' questions
+                                          const newSection = {
+                                            section_topic:
+                                              section.section_topic ||
+                                              `Section ${questions.length + 1}`,
+                                            section_description:
+                                              section.section_description || "",
+                                            questions: after,
+                                            header_text:
+                                              "header_text" in section
+                                                ? section.header_text
+                                                : survey?.header_text,
+                                            body_text:
+                                              "body_text" in section
+                                                ? section.body_text
+                                                : survey?.body_text,
+                                          };
+                                          // Update current section to only have 'before' questions
+                                          const updatedSection = {
+                                            ...section,
+                                            questions: before,
+                                          };
+                                          dispatch(
+                                            updateSection({
+                                              index: currentSection,
+                                              newSection: updatedSection,
+                                            })
+                                          );
+                                          dispatch(addSection(newSection));
+                                          safeSetCurrentSection(
+                                            questions.length
+                                          ); // Go to new section
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                </React.Fragment>
+                              )}
+                            </Draggable>
+                          )
                         )
-                      }
-                    />
-                  </div>
-                )
-              )
-            )}
-
-            {questions?.length > 1 && (
-              <div className="flex w-full md:w-auto md:justify-end items-center mb-6 sticky bottom-10">
-                <PaginationBtn
-                  currentSection={currentSection}
-                  totalSections={questions.length}
-                  onNavigate={navigatePage}
-                />
-              </div>
-            )}
-
-            <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
-              <div className="flex flex-wrap gap-2 items-center">
-                <Button
-                  variant="outline"
-                  className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                  // onClick={() => setAddMoreQuestion((prev) => !prev)}
-                  disabled={generatingSingleSurvey}
-                >
-                  {generatingSingleSurvey ? (
-                    <ClipLoader size={24} />
-                  ) : (
-                    <div className="flex gap-2 items-center">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            id="add-question-btn"
-                            variant="outline"
-                            className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
-                          >
-                            <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
-                            <span className="group-hover:tracking-wide transition-all duration-200">
-                              Add Question
-                            </span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="start"
-                          collisionPadding={{ bottom: 40 }}
-                          className="w-56"
-                        >
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const newQuestion = {
-                                question: "New Question",
-                                description: "Question description",
-                                question_type: "short_text",
-                                is_required: false,
-                                options: [],
-                              };
-
-                              const updatedSections = [...questions];
-                              const currentSectionData =
-                                updatedSections[currentSection];
-
-                              const updatedSection = {
-                                ...currentSectionData,
-                                questions: [
-                                  ...currentSectionData.questions,
-                                  newQuestion,
-                                ],
-                              };
-
-                              dispatch(
-                                updateSection({
-                                  index: currentSection,
-                                  newSection: updatedSection,
-                                })
-                              );
-                              setEditIndex(currentSectionData.questions.length);
-                              setIsEdit(true);
-                            }}
-                            className="gap-2"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                            <span>Add Manually</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setAiTargetSectionIndex(currentSection);
-                              setAddMoreQuestion(true);
-                            }}
-                            className="gap-2"
-                          >
-                            <Sparkles className="h-4 w-4" />
-                            <span>Generate with AI</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      )}
                     </div>
                   )}
-                </Button>
+                </StrictModeDroppable>
+              </DragDropContext>
 
-                <Button
-                  variant="outline"
-                  className="group relative rounded-full transition-all duration-200 border-red-200 text-red-500 hover:!text-red-600 overflow-hidden"
-                  onClick={() => setShowClearDialog(true)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
-                  <span className="group-hover:tracking-wide group-hover:text-red-600 transition-all duration-200">
-                    Clear Survey
-                  </span>
-                  <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
-                </Button>
-              </div>
-              <div className="flex gap-4 flex-wrap">
-                <Button
-                  variant="outline"
-                  className="group relative rounded-full transition-all duration-200 border-green-200 text-green-600 hover:!text-green-700 overflow-hidden"
-                  onClick={() => {
-                    let prevSection = questions[questions.length - 1];
-                    const newSection: Section = {
-                      section_topic:
-                        prevSection?.section_topic ||
-                        survey.topic ||
-                        `Section ${questions.length + 1}`,
-                      section_description:
-                        prevSection?.section_description ||
-                        survey.description ||
-                        "",
-                      questions: [],
-                      header_text:
-                        (prevSection as any)?.header_text || survey.header_text,
-                      body_text:
-                        (prevSection as any)?.body_text || survey.body_text,
-                    };
-                    dispatch(addSection(newSection));
-                    safeSetCurrentSection(questions.length); // Go to the new section
-                  }}
-                >
-                  <Sheet className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
-                  <span className="group-hover:tracking-wide transition-all duration-200">
-                    Add New Section
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-200 to-green-400 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
-                </Button>
-                {questions.length > 1 && (
-                  <Button
-                    variant="destructive"
-                    onClick={handleRemoveSection}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-200 text-red-600 hover:text-white rounded-full shadow-sm hover:bg-red-500"
-                    title="Remove Current Section"
-                  >
-                    <TableRowsSplit className="w-5 h-5" />
-                    Remove Current Section
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <WaitingMessagesModal
-              otherPossibleCondition={generatingSingleSurvey}
-              openModal={openModal}
-              setOpenModal={
-                generatingSingleSurvey === false
-                  ? () => setOpenModal(false)
-                  : () => setOpenModal(true)
-              }
-            />
-
-            <div className="rounded-md flex flex-col justify-center w-full overflow-visible py-5 text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <Button
-                  onClick={handleSurveyCreation}
-                  className="group relative h-12 mt-10 !w-full py-3 px-8 rounded-xl flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90"
-                  disabled={isLoading}
-                >
-                  <span className="group-hover:tracking-wider transition-all duration-200">
-                    {isLoading ? "Submitting" : "Continue"}
-                  </span>
-                  {!isLoading && (
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{
-                        duration: 1.2,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                      className="flex items-center"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </motion.div>
-                  )}
-                  {isLoading && (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                      className="flex items-center"
-                    >
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    </motion.div>
-                  )}
-                  <motion.div
-                    className="absolute inset-0 bg-white"
-                    initial={{ scale: 0, opacity: 0 }}
-                    whileHover={{ scale: 1, opacity: 0.1 }}
-                    transition={{ duration: 0.2 }}
+              {questions?.length > 1 && (
+                <div className="flex mt-6 w-full md:w-auto md:justify-end items-center sticky bottom-10">
+                  <PaginationBtn
+                    currentSection={currentSection}
+                    totalSections={questions.length}
+                    onNavigate={navigatePage}
                   />
-                </Button>
-              </motion.div>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-4 md:flex-row justify-between items-center mt-6">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Button
+                    variant="outline"
+                    className="px-0 relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                    // onClick={() => setAddMoreQuestion((prev) => !prev)}
+                    disabled={generatingSingleSurvey}
+                  >
+                    {generatingSingleSurvey ? (
+                      <ClipLoader size={24} />
+                    ) : (
+                      <div className="flex gap-2 items-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              id="add-question-btn"
+                              variant="outline"
+                              className="group relative rounded-full transition-all duration-200 border-none overflow-hidden"
+                            >
+                              <HiOutlinePlus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                              <span className="group-hover:tracking-wide transition-all duration-200">
+                                Add Question
+                              </span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] opacity-0 hover:opacity-10 transition-opacity duration-200" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            collisionPadding={{ bottom: 40 }}
+                            className="w-56"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const newQuestion = {
+                                  question: "New Question",
+                                  description: "Question description",
+                                  question_type: "short_text",
+                                  is_required: false,
+                                  options: [],
+                                };
+
+                                const updatedSections = [...questions];
+                                const currentSectionData =
+                                  updatedSections[currentSection];
+
+                                const updatedSection = {
+                                  ...currentSectionData,
+                                  questions: [
+                                    ...currentSectionData.questions,
+                                    newQuestion,
+                                  ],
+                                };
+
+                                dispatch(
+                                  updateSection({
+                                    index: currentSection,
+                                    newSection: updatedSection,
+                                  })
+                                );
+                                setEditIndex(
+                                  currentSectionData.questions.length
+                                );
+                                setIsEdit(true);
+                              }}
+                              className="gap-2"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                              <span>Add Manually</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setAiTargetSectionIndex(currentSection);
+                                setAddMoreQuestion(true);
+                              }}
+                              className="gap-2"
+                            >
+                              <Sparkles className="h-4 w-4" />
+                              <span>Generate with AI</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="group relative rounded-full transition-all duration-200 border-red-200 text-red-500 hover:!text-red-600 overflow-hidden"
+                    onClick={() => setShowClearDialog(true)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
+                    <span className="group-hover:tracking-wide group-hover:text-red-600 transition-all duration-200">
+                      Clear Survey
+                    </span>
+                    <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                  </Button>
+                </div>
+                <div className="flex gap-4 flex-wrap">
+                  <Button
+                    variant="outline"
+                    className="group relative rounded-full transition-all duration-200 border-green-200 text-green-600 hover:!text-green-700 overflow-hidden"
+                    onClick={() => {
+                      let prevSection = questions[questions.length - 1];
+                      const newSection: Section = {
+                        section_topic:
+                          prevSection?.section_topic ||
+                          survey.topic ||
+                          `Section ${questions.length + 1}`,
+                        section_description:
+                          prevSection?.section_description ||
+                          survey.description ||
+                          "",
+                        questions: [],
+                        header_text:
+                          (prevSection as any)?.header_text ||
+                          survey.header_text,
+                        body_text:
+                          (prevSection as any)?.body_text || survey.body_text,
+                      };
+                      dispatch(addSection(newSection));
+                      safeSetCurrentSection(questions.length); // Go to the new section
+                    }}
+                  >
+                    <Sheet className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-200" />
+                    <span className="group-hover:tracking-wide transition-all duration-200">
+                      Add New Section
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-200 to-green-400 opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
+                  </Button>
+                  {questions.length > 1 && (
+                    <Button
+                      variant="destructive"
+                      onClick={handleRemoveSection}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-200 text-red-600 hover:text-white rounded-full shadow-sm hover:bg-red-500"
+                      title="Remove Current Section"
+                    >
+                      <TableRowsSplit className="w-5 h-5" />
+                      Remove Current Section
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <WaitingMessagesModal
+                otherPossibleCondition={generatingSingleSurvey}
+                openModal={openModal}
+                setOpenModal={
+                  generatingSingleSurvey === false
+                    ? () => setOpenModal(false)
+                    : () => setOpenModal(true)
+                }
+              />
+
+              <div className="rounded-md flex flex-col justify-center w-full overflow-visible py-5 text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <Button
+                    onClick={handleSurveyCreation}
+                    className="group relative h-12 mt-10 !w-full py-3 px-8 rounded-xl flex items-center justify-center gap-2 font-medium transition-all duration-200 overflow-hidden active:scale-[0.98] bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90"
+                    disabled={isLoading}
+                  >
+                    <span className="group-hover:tracking-wider transition-all duration-200">
+                      {isLoading ? "Submitting" : "Continue"}
+                    </span>
+                    {!isLoading && (
+                      <motion.div
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{
+                          duration: 1.2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                        className="flex items-center"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.div>
+                    )}
+                    {isLoading && (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="flex items-center"
+                      >
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      </motion.div>
+                    )}
+                    <motion.div
+                      className="absolute inset-0 bg-white"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileHover={{ scale: 1, opacity: 0.1 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  </Button>
+                </motion.div>
+              </div>
+              <WatermarkBanner className="mb-10" />
             </div>
-            <WatermarkBanner className="mb-10" />
-          </div>
+          </motion.div>
           {/* ) : (
             <CreateNewSection />
           )} */}
@@ -1205,11 +2254,81 @@ const EditSurvey = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
-          <StyleEditor
-            surveyData={survey as SurveyData}
-            setSurveyData={setSurveyData}
-          />
+          <Tabs defaultValue="style" className="w-full">
+            <TabsList className="w-full flex bg-gray-50 border-b p-0 sticky top-0 z-[100000] !pb-0">
+              <TabsTrigger
+                value="style"
+                className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Paintbrush size={16} />
+                  Style Editor
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="skip"
+                className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <AlignVerticalSpaceAround size={16} />
+                  Logic
+                </span>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="style" className="w-full">
+              <StyleEditor
+                surveyData={survey as SurveyData}
+                setSurveyData={setSurveyData}
+              />
+            </TabsContent>
+            <TabsContent value="skip" className="w-full">
+              <Tabs defaultValue="skip-logic" className="w-full">
+                {/* <TabsList className="w-full flex bg-gray-50 border-b p-0 sticky top-0 z-[100000] !pb-0">
+                  <TabsTrigger
+                    value="skip-logic"
+                    className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                  >
+                    Skip Logic
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="display-logic"
+                    className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                  >
+                    Display Logic
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="display-options"
+                    className="flex-1 font-semibold text-gray-700 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-purple-600 rounded-none"
+                  >
+                    Display Options
+                  </TabsTrigger>
+                </TabsList> */}
+                <TabsContent value="skip-logic" className="w-full">
+                  <SkipLogicEditor
+                    sections={questions}
+                    skipLogic={skipLogic}
+                    onChange={(rules) => dispatch(setSkipLogic(rules))}
+                  />
+                </TabsContent>
+                <TabsContent value="display-logic" className="w-full">
+                  <div className="p-8 text-center text-gray-500">
+                    <h2 className="text-lg font-semibold mb-2">
+                      Display Logic
+                    </h2>
+                    <p>Display Logic configuration coming soon.</p>
+                  </div>
+                </TabsContent>
+                <TabsContent value="display-options" className="w-full">
+                  <div className="p-8 text-center text-gray-500">
+                    <h2 className="text-lg font-semibold mb-2">
+                      Display Options Logic
+                    </h2>
+                    <p>Display Options Logic configuration coming soon.</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
@@ -1345,7 +2464,8 @@ const EditSurvey = () => {
           openModal={review}
           onClose={() => {
             setReview((prev) => !prev);
-            router.push("/surveys/survey-list");
+            // Removed automatic redirect - let users interact with the modal first
+            // They can navigate manually using the modal's buttons
           }}
         />
       )} */}

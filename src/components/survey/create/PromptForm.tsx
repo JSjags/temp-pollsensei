@@ -7,9 +7,10 @@ import { updateTopic } from "@/redux/slices/survey.slice";
 import { motion, AnimatePresence } from "framer-motion";
 import TextArea from "@/components/ui/TextArea";
 import { Textarea } from "@/components/ui/shadcn-textarea";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { debounce } from "lodash";
+import { Switch } from "@/components/ui/switch";
 
 interface PromptFormProps {
   surveyPrompt: string;
@@ -17,6 +18,8 @@ interface PromptFormProps {
   handleGenerateTopics: () => Promise<void> | any;
   manualTopic: string;
   setManualTopic: (value: string) => void;
+  addSkipLogic: boolean;
+  setAddSkipLogic: (value: boolean) => void;
 }
 
 const PromptForm: React.FC<PromptFormProps> = ({
@@ -25,6 +28,8 @@ const PromptForm: React.FC<PromptFormProps> = ({
   handleGenerateTopics,
   manualTopic,
   setManualTopic,
+  addSkipLogic,
+  setAddSkipLogic,
 }) => {
   const dispatch = useDispatch();
   const maxCharacters = 3000;
@@ -147,6 +152,27 @@ const PromptForm: React.FC<PromptFormProps> = ({
             />
             <div className="text-sm text-gray-500 text-right">
               {localPrompt.length}/{maxCharacters}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <label
+                htmlFor="add-skip-logic"
+                className="text-sm font-medium text-gray-700 flex items-center gap-1"
+              >
+                <span>Add skip logic</span>
+                <span className="relative group">
+                  <HelpCircle className="w-4 h-4 text-gray-400 cursor-pointer" />
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg p-3 text-xs text-gray-700 opacity-0 group-hover:opacity-100 pointer-events-auto transition-opacity duration-200 z-20">
+                    Skip logic lets you show or hide questions based on previous
+                    answers, creating a personalized survey experience for each
+                    respondent.
+                  </div>
+                </span>
+              </label>
+              <Switch
+                id="add-skip-logic"
+                checked={addSkipLogic}
+                onCheckedChange={setAddSkipLogic}
+              />
             </div>
           </div>
           <motion.button

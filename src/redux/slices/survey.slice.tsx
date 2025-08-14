@@ -40,6 +40,7 @@ export interface SurveyState {
   logo_url: File | string | null;
   header_url: File | string | null;
   generated_by: string | null;
+  skipLogic: any[];
 }
 
 const initialState: SurveyState = {
@@ -56,6 +57,7 @@ const initialState: SurveyState = {
   logo_url: "",
   header_url: "",
   generated_by: "",
+  skipLogic: [],
 };
 
 const surveySlice = createSlice({
@@ -159,7 +161,10 @@ const surveySlice = createSlice({
       state.generated_by = action.payload;
     },
     resetSurvey: (_state) => {
-      return initialState;
+      return {
+        ...initialState,
+        skipLogic: [],
+      };
     },
     deleteQuestionFromSection: (
       state,
@@ -171,6 +176,9 @@ const surveySlice = createSlice({
       if (section && section.questions[questionIndex]) {
         section.questions.splice(questionIndex, 1);
       }
+    },
+    setSkipLogic: (state, action: PayloadAction<any[]>) => {
+      state.skipLogic = action.payload;
     },
   },
 });
@@ -195,6 +203,7 @@ export const {
   updateDescription,
   resetSurvey,
   deleteQuestionFromSection,
+  setSkipLogic,
 } = surveySlice.actions;
 
 export default surveySlice.reducer;

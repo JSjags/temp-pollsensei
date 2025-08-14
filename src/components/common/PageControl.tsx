@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { motion } from "framer-motion";
 
@@ -16,11 +17,45 @@ const PageControl: React.FC<PaginationProps> = ({
   isLoading = false,
   onPageChange,
 }) => {
-  // console.log(isLoading);
+  const [inputPage, setInputPage] = useState(currentPage.toString());
 
-  // The buttons were not properly disabled because the disabled prop was only being set based on
-  // currentPage position, and isLoading was only used in the className and click handler.
-  // To properly disable the buttons when loading, we need to include isLoading in the disabled prop condition.
+  React.useEffect(() => {
+    setInputPage(currentPage.toString());
+  }, [currentPage]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/[^0-9]/g, "");
+    // If value is greater than totalPages, set to totalPages immediately
+    if (value) {
+      let num = parseInt(value, 10);
+      if (num > totalPages) {
+        value = totalPages.toString();
+      }
+    }
+    setInputPage(value);
+  };
+
+  const handleInputBlurOrEnter = () => {
+    let pageNum = parseInt(inputPage, 10);
+    if (isNaN(pageNum)) {
+      setInputPage(currentPage.toString());
+      return;
+    }
+    if (pageNum < 1) pageNum = 1;
+    if (pageNum > totalPages) pageNum = totalPages;
+    if (pageNum !== currentPage && onPageChange) {
+      onPageChange(pageNum);
+    } else {
+      setInputPage(currentPage.toString());
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
   return (
     <div className="w-full flex justify-center">
       <div className="flex flex-row flex-wrap items-center justify-center gap-2 sm:gap-4">
@@ -49,7 +84,24 @@ const PageControl: React.FC<PaginationProps> = ({
               isLoading ? "text-gray-400" : "text-gray-700"
             }`}
           >
-            Page {currentPage} of {totalPages}
+            Page
+            <input
+              type="number"
+              min={1}
+              max={totalPages}
+              value={inputPage}
+              onChange={handleInputChange}
+              onBlur={handleInputBlurOrEnter}
+              onKeyDown={handleInputKeyDown}
+              disabled={isLoading}
+              className={`mx-1 w-12 text-center border rounded focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all ${
+                isLoading
+                  ? "bg-gray-100 text-gray-400"
+                  : "bg-white text-gray-700"
+              }`}
+              style={{ MozAppearance: "textfield" }}
+            />
+            of {totalPages}
           </motion.span>
         </div>
 

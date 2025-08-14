@@ -200,7 +200,7 @@ const SurveyQuestions = () => {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: direction === "next" ? -300 : 300, opacity: 0 }}
                 transition={{ type: "tween", duration: 0.5 }}
-                className="pb-20"
+                className="pb-20 space-y-4"
               >
                 {data?.data?.sections[currentSection]?.questions?.map(
                   (item: any, index: number) => (
