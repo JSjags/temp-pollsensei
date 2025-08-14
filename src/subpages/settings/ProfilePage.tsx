@@ -88,25 +88,43 @@ const getPlanBadgeProps = (planName: string) => {
   switch (planName.toLowerCase()) {
     case "basic plan":
       return {
-        icon: <Shield className="w-4 h-4 mr-1 text-violet-300" />, // premium purple
-        bg: "bg-gradient-to-r from-purple-500 to-violet-700 text-white border-purple-400 shadow-md",
-        tooltipIcon: <Shield className="w-4 h-4 mr-1 text-violet-300" />,
+        icon: <Star className="w-4 h-4 mr-1 text-blue-400" />,
+        bg: "bg-gradient-to-r from-blue-200 to-blue-400 text-blue-900 border-blue-300 shadow",
+        tooltipIcon: <Star className="w-4 h-4 mr-1 text-blue-400" />,
       };
-    case "pro plan":
+    case "essential plan":
       return {
-        icon: <Rocket className="w-4 h-4 mr-1 text-amber-200" />, // gold
-        bg: "bg-gradient-to-r from-amber-300 to-yellow-600 text-white border-amber-500 shadow-lg",
+        icon: <Shield className="w-4 h-4 mr-1 text-purple-400" />,
+        bg: "bg-gradient-to-r from-purple-400 to-purple-700 text-white border-purple-400 shadow-md",
+        tooltipIcon: <Shield className="w-4 h-4 mr-1 text-purple-400" />,
+      };
+    case "starter plan":
+      return {
+        icon: <Rocket className="w-4 h-4 mr-1 text-amber-400" />,
+        bg: "bg-gradient-to-r from-yellow-200 to-yellow-500 text-yellow-900 border-yellow-400 shadow-lg",
         tooltipIcon: <Rocket className="w-4 h-4 mr-1 text-amber-400" />,
       };
-    case "team plan":
+    case "professional plan":
       return {
-        icon: <Users className="w-4 h-4 mr-1 text-gray-300" />, // silver
-        bg: "bg-gradient-to-r from-gray-700 to-gray-900 text-gray-200 border-gray-500 shadow-lg",
-        tooltipIcon: <Users className="w-4 h-4 mr-1 text-gray-300" />,
+        icon: <Users className="w-4 h-4 mr-1 text-gray-400" />,
+        bg: "bg-gradient-to-r from-gray-200 to-gray-600 text-gray-900 border-gray-400 shadow-lg",
+        tooltipIcon: <Users className="w-4 h-4 mr-1 text-gray-400" />,
+      };
+    case "enterprise plan":
+      return {
+        icon: <Shield className="w-4 h-4 mr-1 text-indigo-500" />,
+        bg: "bg-gradient-to-r from-indigo-200 to-indigo-700 text-white border-indigo-400 shadow-lg",
+        tooltipIcon: <Shield className="w-4 h-4 mr-1 text-indigo-500" />,
+      };
+    case "custom enterprise plan":
+      return {
+        icon: <Star className="w-4 h-4 mr-1 text-pink-400" />,
+        bg: "bg-gradient-to-r from-pink-200 to-pink-600 text-white border-pink-400 shadow-lg",
+        tooltipIcon: <Star className="w-4 h-4 mr-1 text-pink-400" />,
       };
     default:
       return {
-        icon: <Star className="w-4 h-4 mr-1 text-blue-400" />, // fallback
+        icon: <Star className="w-4 h-4 mr-1 text-blue-400" />,
         bg: "bg-gradient-to-r from-blue-200 to-blue-400 text-blue-900 border-blue-300 shadow",
         tooltipIcon: <Star className="w-4 h-4 mr-1 text-blue-400" />,
       };
@@ -308,7 +326,7 @@ const ProfilePage: React.FC = () => {
                     <DialogTrigger asChild>
                       <Badge
                         variant="secondary"
-                        className={`cursor-pointer h-8 px-4 py-2 text-sm font-bold rounded-full border-2 flex items-center gap-2 ${bg} transition-transform duration-200 hover:scale-105`}
+                        className={`cursor-pointer h-8 px-4 py-2 text-sm font-bold rounded-full border-1 flex items-center gap-2 ${bg} transition-transform duration-200 hover:scale-105`}
                         style={{ letterSpacing: 0.5, minWidth: 140 }}
                       >
                         {icon}

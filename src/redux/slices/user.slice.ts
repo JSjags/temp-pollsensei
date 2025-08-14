@@ -66,7 +66,7 @@ export interface User {
     _id: string;
     name: string;
     description: string;
-    number_of_collaborators: number;
+    number_of_contributors: number;
     number_of_monthly_responses: number;
     number_of_accounts: number;
     features: string[];

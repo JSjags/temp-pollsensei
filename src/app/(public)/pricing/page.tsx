@@ -29,9 +29,29 @@ interface Plan {
   total_yearly_price_naira: number;
   total_yearly_price_dollar: number;
   trial_period: number;
-  number_of_collaborators: number | string;
+  number_of_contributors: number | string;
   number_of_monthly_responses: number | string;
   number_of_accounts: number | string;
+  ai_survey_generation: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  ai_data_analysis: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  ai_report_generation: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  voice_transcription: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  ocr_document_scanning: {
+    credit: number | string;
+    usage_capacity: string;
+  };
   features: Feature[];
 }
 
@@ -200,6 +220,140 @@ const PricingPage: React.FC = () => {
 
                 <div className="flex-grow">
                   <ul className="space-y-3 mb-8">
+                    {/* AI Features */}
+                    <li className="flex items-start space-x-2">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-700">
+                        {plan.ai_survey_generation?.usage_capacity ||
+                          "AI Survey Generation"}
+                      </span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-700">
+                        {plan.ai_data_analysis?.usage_capacity ||
+                          "AI Data Analysis"}
+                      </span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-700">
+                        {plan.ai_report_generation?.usage_capacity ||
+                          "AI Report Generation"}
+                      </span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-700">
+                        {plan.voice_transcription?.usage_capacity ||
+                          "Voice Transcription"}
+                      </span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-700">
+                        {plan.ocr_document_scanning?.usage_capacity ||
+                          "OCR Document Scanning"}
+                      </span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-700">
+                        {plan.number_of_monthly_responses?.toLocaleString()}{" "}
+                        monthly responses
+                      </span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <svg
+                        className="w-5 h-5 text-green-500 mt-1 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-gray-700">
+                        {plan.number_of_contributors} contributors
+                      </span>
+                    </li>
+                    {/* Additional Features */}
                     {plan.features.map((feature) => (
                       <li
                         key={feature._id}
@@ -247,7 +401,7 @@ const PricingPage: React.FC = () => {
                         <span className="font-medium">Team Members</span>
                       </div>
                       <span className="text-[#5B03B2] font-semibold">
-                        {plan.number_of_collaborators.toLocaleString()}
+                        {plan.number_of_contributors.toLocaleString()}
                       </span>
                     </div>
 
