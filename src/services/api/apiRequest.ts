@@ -965,14 +965,67 @@ export const GetReportBySlug = async (slug: string) => {
   }
 };
 
-export const GetBookmarkedReport = async (page = 1, pageSize = 20) => {
+export const GetBookmarkedReport = async (page: number, page_size: number) => {
   try {
     const response = await axiosInstance.get(
       `/report/blog/my-bookmarked-reports`,
       {
-        params: { page, page_size: pageSize },
+        params: { page, page_size },
       }
     );
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports bookmarks";
+    throw new Error(errorMessage);
+  }
+};
+
+export const GetAllBlogPost = async (page: number, page_size: number) => {
+  try {
+    const response = await axiosInstance.get(`/report/blog`, {
+      params: { page, page_size },
+    });
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports bookmarks";
+    throw new Error(errorMessage);
+  }
+};
+
+export const GetBlogPostByCategory = async (
+  category: string | undefined,
+  page: number,
+  page_size: number
+) => {
+  try {
+    const response = await axiosInstance.get(`/report/blog`, {
+      params: { category, page, page_size },
+    });
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching reports bookmarks";
+    throw new Error(errorMessage);
+  }
+};
+
+export const GetBlogPostByInterest = async (
+  interest: string | undefined,
+  page: number,
+  page_size: number
+) => {
+  try {
+    const response = await axiosInstance.get(`/report/blog`, {
+      params: { interest, page, page_size },
+    });
     return response.data;
   } catch (error: any) {
     const errorMessage =

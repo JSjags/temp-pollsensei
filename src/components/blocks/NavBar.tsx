@@ -20,19 +20,22 @@ import { FiUser } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import BlogSearchBar from "@/components/navbar/BlogSearchBar";
 import { useBlogAuthRedirect } from "@/hooks/useBlogAuthRedirect";
+import { FilterType } from "@/app/(public)/blog/page";
 
 interface NavBarProps {
   searchTerm?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   scrollToSection?: (id: string) => void;
+  activeFilter?: string | undefined;
+  onFilterChange?: (filter: FilterType) => void;
 }
-
-const categories = ["Explore All", "Categories", "Interests"];
 
 const NavBar: FC<NavBarProps> = ({
   searchTerm = "",
   onSearchChange,
   scrollToSection,
+  activeFilter,
+  onFilterChange,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -52,7 +55,7 @@ const NavBar: FC<NavBarProps> = ({
   const navItems = [
     "Benefits",
     "Features",
-    "Blog",
+    "Reports",
     "Pricing",
     "Resource Hub",
     "Leaderboard",
@@ -72,7 +75,7 @@ const NavBar: FC<NavBarProps> = ({
       router.push("/leaderboard");
     } else if (item === "FAQs") {
       router.push("/faq");
-    } else if (item === "Blog") {
+    } else if (item === "Reports") {
       router.push("/blog");
     } else {
       router.push(`/${item.toLowerCase().replace(" ", "-")}`);
@@ -352,10 +355,12 @@ const NavBar: FC<NavBarProps> = ({
                 </div>
               </div>
             </div>
-            <CategoryNav
-              categories={categories}
-              selectedCategory="Explore All"
-            />
+            {pathname === "/blog" && onFilterChange && (
+              <CategoryNav
+                activeFilter={activeFilter}
+                onFilterChange={onFilterChange}
+              />
+            )}
           </nav>
         </motion.header>
       )}
