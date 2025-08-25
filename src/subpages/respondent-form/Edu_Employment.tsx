@@ -2,7 +2,6 @@
 import React, { FC, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
-import ProgressBar from "@/components/respondent-form/ProgressBar";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -37,19 +36,67 @@ const Edu_Employment: FC<Props> = ({
 }) => {
   const { mutate: submitForm, isPending } = useSubmitRespondentForm();
   const pathname = usePathname();
+
+  // Filter formData to only include fields relevant to this form
+  const relevantFormData = {
+    educationLevel: formData.educationLevel,
+    employmentStatus: formData.employmentStatus,
+    industry: formData.industry,
+    jobRole: formData.jobRole,
+    workingHours: formData.workingHours,
+    incomeRange: formData.incomeRange,
+    techSavvy: formData.techSavvy,
+    otherIndustry: formData.otherIndustry,
+    otherJob: formData.otherIndustry,
+  };
+
+  // console.log('Edu_Employment - Relevant form data:', relevantFormData);
+
   const {
     register,
     handleSubmit,
     control,
+    reset,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(educationAndEmploymentSchema),
-    defaultValues: formData,
+    defaultValues: relevantFormData,
   });
+
+  // Watch form values for debugging
+  const watchedValues = watch();
+  console.log("Current form values:", {
+    educationLevel: watchedValues.educationLevel,
+    employmentStatus: watchedValues.employmentStatus,
+    industry: watchedValues.industry,
+    jobRole: watchedValues.jobRole,
+    workingHours: watchedValues.workingHours,
+    incomeRange: watchedValues.incomeRange,
+    techSavvy: watchedValues.techSavvy,
+  });
+
+  // Reset form when relevant formData changes
+  useEffect(() => {
+    console.log("Resetting form with relevant data:", relevantFormData);
+    reset(relevantFormData);
+  }, [
+    formData.educationLevel,
+    formData.employmentStatus,
+    formData.industry,
+    formData.jobRole,
+    formData.workingHours,
+    formData.incomeRange,
+    formData.techSavvy,
+    formData.otherIndustry,
+    formData.otherIndustry,
+    reset,
+  ]);
 
   const handleContinue = (
     data: z.infer<typeof educationAndEmploymentSchema>
   ) => {
+    console.log("Form submitted with data:", data);
     submitForm(
       { tab: "educationEmployment", formData: data },
       {
@@ -75,9 +122,6 @@ const Edu_Employment: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
-      {pathname === "/respondent-form" && (
-        <ProgressBar skip={true} progress={37.5} onContinue={onContinue} />
-      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack
@@ -88,6 +132,7 @@ const Edu_Employment: FC<Props> = ({
             Education & Employment
           </h2>
         </div>
+
         <form
           className="flex flex-col gap-3"
           onSubmit={handleSubmit(handleContinue)}
