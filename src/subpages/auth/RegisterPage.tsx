@@ -315,54 +315,187 @@ const RegisterPage = () => {
                     </Field>
                     <Field name="password">
                       {({ input, meta }) => (
+                        <div>
+                          <PasswordField
+                            id="password"
+                            eyeState={eyeState.password}
+                            toggleEye={() => toggleEye("password")}
+                            placeholder="*******"
+                            label="Password"
+                            form={form}
+                            {...input}
+                            onFocus={() => setPwdFocus(true)}
+                            onBlur={() => setPwdFocus(false)}
+                            eye={
+                              (
+                                <small className="icon-container">
+                                  {!meta.active &&
+                                  !pattern.test(input.value) ? (
+                                    ""
+                                  ) : pattern.test(input.value) ? (
+                                    <IoCheckmarkCircle
+                                      className="text-green-600"
+                                      size={20}
+                                    />
+                                  ) : (
+                                    <FaTimesCircle
+                                      className="text-red-600"
+                                      size={20}
+                                    />
+                                  )}
+                                </small>
+                              ) as any
+                            }
+                          />
+                          {pwdFocus && (
+                            <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                              <p className="font-medium mb-2">
+                                Password must contain:
+                              </p>
+                              <ul className="space-y-1">
+                                <li
+                                  className={`flex items-center ${
+                                    input.value.length >= 8
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least 8 characters
+                                </li>
+                                <li
+                                  className={`flex items-center ${
+                                    /[A-Z]/.test(input.value)
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least one uppercase letter
+                                </li>
+                                <li
+                                  className={`flex items-center ${
+                                    /\d/.test(input.value)
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least one number
+                                </li>
+                                <li
+                                  className={`flex items-center ${
+                                    /[@$!%*?&]/.test(input.value)
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least one special character (@$!%*?&)
+                                </li>
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Field>
+
+                    <Field name="confirmPassword">
+                      {({ input, meta }) => (
                         <PasswordField
-                          id="password"
-                          eyeState={eyeState.password}
-                          toggleEye={() => toggleEye("password")}
+                          id="confirmPassword"
+                          eyeState={eyeState.confirmPassword}
+                          toggleEye={() => toggleEye("confirmPassword")}
                           placeholder="*******"
-                          label="Password"
+                          label="Confirm Password"
                           form={form}
                           {...input}
-                          onFocus={() => setPwdFocus(true)}
-                          onBlur={() => setPwdFocus(false)}
-                          eye={null}
+                          onFocus={() => setMatchFocus(true)}
+                          onBlur={() => setMatchFocus(false)}
+                          eye={
+                            (
+                              <small className="icon-container">
+                                {!meta.active ? (
+                                  ""
+                                ) : input.value === values.password ? (
+                                  <IoCheckmarkCircle
+                                    className="text-green-600"
+                                    size={20}
+                                  />
+                                ) : (
+                                  <FaTimesCircle
+                                    className="text-red-600"
+                                    size={20}
+                                  />
+                                )}
+                              </small>
+                            ) as any
+                          }
                         />
                       )}
                     </Field>
+
+                    <div className="pt-3">
+                      <label className="auth-label font-sans pb-2">
+                        Referral Code (Optional)
+                      </label>
+                      <input
+                        value={refCode}
+                        onChange={(e) => setRefCode(e?.target?.value)}
+                        type="text"
+                        className="auth-input w-full focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground placeholder:text-foreground/40"
+                        placeholder="Enter referral code"
+                        readOnly={!!refValue}
+                      />
+                    </div>
                     <div className="flex items-center gap-2">
                       <Field name="terms" type="checkbox">
                         {({ input, meta }) => (
-                          <>
-                            <input
-                              {...input}
-                              type="checkbox"
-                              id="terms"
-                              className="accent-purple-600"
-                            />
-                            <label htmlFor="terms" className="ml-2 text-sm">
-                              I agree with{" "}
-                              <Link
-                                href="/terms-of-service"
-                                className="text-primary underline"
-                                target="_blank"
-                              >
-                                Terms of Use
-                              </Link>{" "}
-                              and{" "}
-                              <Link
-                                href="/privacy-policy"
-                                className="text-primary underline"
-                                target="_blank"
-                              >
-                                Privacy Policy
-                              </Link>
-                            </label>
+                          <div>
+                            <div>
+                              <input
+                                {...input}
+                                type="checkbox"
+                                id="terms"
+                                className="accent-purple-600"
+                              />
+                              <label htmlFor="terms" className="ml-2 text-sm">
+                                I agree with{" "}
+                                <Link
+                                  href="/terms-of-service"
+                                  className="text-primary underline"
+                                  target="_blank"
+                                >
+                                  Terms of Use
+                                </Link>{" "}
+                                and{" "}
+                                <Link
+                                  href="/privacy-policy"
+                                  className="text-primary underline"
+                                  target="_blank"
+                                >
+                                  Privacy Policy
+                                </Link>
+                              </label>
+                            </div>
                             {meta.error && meta.touched && (
-                              <span className="text-red-600 text-xs ml-2">
+                              <p className="text-red-600 text-xs ml-2">
                                 {meta.error}
-                              </span>
+                              </p>
                             )}
-                          </>
+                          </div>
                         )}
                       </Field>
                     </div>

@@ -48,11 +48,11 @@ const supportMenu: MenuItem[] = [
     path: "/settings/subscription",
     icons: <TbStack />,
   },
-  {
-    label: "Resource Monitor",
-    path: "/settings/resource-monitor",
-    icons: <TbChartBar />,
-  },
+  // {
+  //   label: "Resource Monitor",
+  //   path: "/settings/resource-monitor",
+  //   icons: <TbChartBar />,
+  // },
 ];
 
 const editRespondentMenuItem: MenuItem = {
