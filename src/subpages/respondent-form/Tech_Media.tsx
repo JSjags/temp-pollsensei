@@ -43,11 +43,16 @@ const Tech_Media: FC<Props> = ({
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(techAndMediaSchema),
     defaultValues: formData,
   });
+
+  useEffect(() => {
+    reset(formData);
+  }, [formData, reset]);
 
   const handleContinue = (data: z.infer<typeof techAndMediaSchema>) => {
     submitForm(

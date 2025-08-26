@@ -98,7 +98,12 @@ const SettingsSidebar = () => {
               <Link
                 className={`${checkActive(
                   menu.path
-                )} flex items-center text-[#898989] gap-2 rounded mb-2 py-2 px-3 w-full whitespace-nowrap`}
+                )} items-center text-[#898989] gap-2 rounded mb-2 py-2 px-3 w-full whitespace-nowrap ${
+                  isBecomeRespondentSurveyCompleted &&
+                  menu.label !== "Edit Respondent"
+                    ? "hidden"
+                    : "flex"
+                }`}
                 href={menu.path}
               >
                 <span
@@ -111,7 +116,7 @@ const SettingsSidebar = () => {
               </Link>
             </div>
           ))}
-          {isBecomeRespondentSurveyCompleted && (
+          {/* {isBecomeRespondentSurveyCompleted && (
             <div
               key={editRespondentMenuItem.label}
               className="text-sm flex-shrink-0 lg:flex-shrink"
@@ -135,7 +140,7 @@ const SettingsSidebar = () => {
                 </span>
               </Link>
             </div>
-          )}
+          )} */}
         </div>
       </nav>
     </div>

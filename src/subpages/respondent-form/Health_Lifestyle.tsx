@@ -42,11 +42,17 @@ const Health_Lifestyle: FC<Props> = ({
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(healthAndLifestyleSchema),
     defaultValues: formData,
   });
+
+  // Reset form when formData changes
+  useEffect(() => {
+    reset(formData);
+  }, [formData, reset]);
 
   const handleContinue = (data: z.infer<typeof healthAndLifestyleSchema>) => {
     submitForm(

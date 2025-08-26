@@ -24,11 +24,13 @@ import {
 
 interface CommentSectionProps {
   reportId: string;
+  reportAuthorId: string;
   onHideReplies: () => void;
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   reportId,
+  reportAuthorId,
   onHideReplies,
 }) => {
   const [showMainReplyForm, setShowMainReplyForm] = useState(true);
@@ -389,7 +391,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   // Check if user can modify (edit/delete) a comment
   const canModifyComment = (comment: any) => {
-    return user && comment.user_id?._id === (user as any)?._id;
+    return (
+      (user && comment.user_id?._id === user?._id) ||
+      reportAuthorId === user?._id
+    );
   };
 
   if (isCommentsLoading) {

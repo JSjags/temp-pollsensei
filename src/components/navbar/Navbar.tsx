@@ -72,6 +72,7 @@ import { FaSearch, FaPlus, FaFileAlt, FaRegEdit } from "react-icons/fa";
 import { MdMail, MdMailOutline, MdNotificationsOff } from "react-icons/md";
 import BlogSearchBar from "@/components/navbar/BlogSearchBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FilterType } from "@/app/(public)/blog/page";
 
 interface Notification {
   _id: string;
@@ -100,9 +101,9 @@ export interface NotificationResponse {
 interface NavbarProps {
   searchTerm?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  selectedCategory?: string;
-  onCategorySelect?: (category: string) => void;
   showReportsHeader?: boolean;
+  activeFilter?: string | undefined;
+  onFilterChange?: (filter: FilterType) => void;
 }
 
 const fetchNotifications = async () => {
@@ -133,9 +134,9 @@ const categories = ["Explore All", "Categories", "Interests"];
 const Navbar: FC<NavbarProps> = ({
   searchTerm = "",
   onSearchChange,
-  selectedCategory = "Explore All",
-  onCategorySelect,
   showReportsHeader = false,
+  activeFilter,
+  onFilterChange,
 }) => {
   const user = useSelector((state: RootState) => state.user?.user);
   const dispatch = useDispatch();
@@ -537,12 +538,11 @@ const Navbar: FC<NavbarProps> = ({
 
         {shouldShowReportHighlight && <ReportHighlight />}
 
-        {shouldShowCategoryNav && (
+        {shouldShowCategoryNav && onFilterChange && (
           <ScrollArea className="h-auto max-w-[90%] rounded-md border-none p-0">
             <CategoryNav
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategorySelect={onCategorySelect ?? (() => {})}
+              activeFilter={activeFilter}
+              onFilterChange={onFilterChange}
             />
           </ScrollArea>
         )}
