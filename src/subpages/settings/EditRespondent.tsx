@@ -1,23 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FiUser } from "react-icons/fi";
 import { LuGraduationCap } from "react-icons/lu";
 import { PiHeartbeat } from "react-icons/pi";
-import { PiUserList } from "react-icons/pi";
 import { BsSuitcase2 } from "react-icons/bs";
 import { MdOutlineHomeWork } from "react-icons/md";
-import PersonalInformation from "@/subpages/respondent-form/PersonalInformation";
-import Geo_Culture from "@/subpages/respondent-form/Geo_Culture";
 import Edu_Employment from "@/subpages/respondent-form/Edu_Employment";
 import Health_LifeStyle from "@/subpages/respondent-form/Health_Lifestyle";
 import Tech_Media from "@/subpages/respondent-form/Tech_Media";
 import Housing_Living from "@/subpages/respondent-form/Housing_Living";
 import Mobility_Travel from "@/subpages/respondent-form/Mobility_Travel";
-import IdentityVerification from "@/subpages/respondent-form/IdentityVerification";
 import Image from "next/image";
-import marker from "@/assets/images/marker.svg";
 import tech from "@/assets/images/tech.svg";
+import FormSkeleton from "@/components/respondent-form/FormSkeleton";
 import { getInitialValuesFromSchema } from "@/utils/respondentUtils";
 import { combinedSchema, CombinedFormData } from "@/utils/combinedSchema";
 import { useQuery } from "@tanstack/react-query";
@@ -27,8 +22,10 @@ import { APP_KEYS } from "@/constants";
 const EditRespondent = () => {
   const [activeTab, setActiveTab] = useState("educationEmployment");
   const initialFormData = getInitialValuesFromSchema(combinedSchema);
-
   const [formData, setFormData] = useState<CombinedFormData>(initialFormData);
+
+  // Debug: let's see what initialFormData contains
+  console.log("initialFormData:", initialFormData);
 
   const tabs = [
     {
@@ -151,28 +148,36 @@ const EditRespondent = () => {
     refetchOnMount: false,
   });
 
+  // Debug: let's see what the API returns
+  console.log("API Response:", respondentData);
+  console.log("isLoading:", isLoading);
+
   useEffect(() => {
     if (isLoading) {
       return;
     }
 
+    console.log("Processing API data for tab:", activeTab);
+    console.log("API sectionData:", respondentData?.data?.sectionData);
+
     if (respondentData?.data?.sectionData) {
-      const newFormData = {
-        ...initialFormData,
-        ...respondentData.data.sectionData,
-      };
-      if (JSON.stringify(newFormData) !== JSON.stringify(formData)) {
-        setFormData(newFormData);
-      }
-    } else {
-      setFormData(initialFormData);
+      // Update formData with the fetched data
+      setFormData((prevFormData) => {
+        const updatedFormData = {
+          ...prevFormData,
+          ...respondentData.data.sectionData,
+        };
+        console.log("Updated formData:", updatedFormData);
+        return updatedFormData;
+      });
     }
-  }, [respondentData, initialFormData, isLoading, formData]);
+  }, [respondentData, isLoading, activeTab]);
 
   return (
     <Tabs
       value={activeTab}
       onValueChange={(newTab) => {
+        console.log("Tab changed to:", newTab);
         setActiveTab(newTab);
       }}
       className="w-full h-auto flex gap-5 items-start p-2"
@@ -195,7 +200,13 @@ const EditRespondent = () => {
           value={`${tab?.value}`}
           className="lg:bg-white lg:shadow-lg shadow-[#A9A7A72E] w-full h-full lg:h-[85vh] m-0 rounded-xl lg:p-3 overflow-y-auto"
         >
-          {tab?.component}
+          {isLoading ? (
+            <FormSkeleton
+              fieldCount={tab.value === "technologyMedia" ? 9 : 7}
+            />
+          ) : (
+            tab?.component
+          )}
         </TabsContent>
       ))}
     </Tabs>

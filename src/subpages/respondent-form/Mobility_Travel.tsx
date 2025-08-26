@@ -37,11 +37,16 @@ const Mobility_Travel: FC<Props> = ({
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(mobilityAndTravelSchema),
     defaultValues: formData,
   });
+
+  useEffect(() => {
+    reset(formData);
+  }, [formData, reset]);
 
   const handleContinue = (data: z.infer<typeof mobilityAndTravelSchema>) => {
     submitForm(

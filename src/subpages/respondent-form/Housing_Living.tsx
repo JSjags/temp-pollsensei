@@ -37,11 +37,16 @@ const Housing_Living: FC<Props> = ({
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(housingAndLivingSchema),
     defaultValues: formData,
   });
+
+  useEffect(() => {
+    reset(formData);
+  }, [formData, reset]);
 
   const handleContinue = (data: z.infer<typeof housingAndLivingSchema>) => {
     submitForm(

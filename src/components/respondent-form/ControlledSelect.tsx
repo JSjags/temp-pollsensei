@@ -45,46 +45,63 @@ export const ControlledSelect: React.FC<ControlledSelectProps> = ({
       <Controller
         name={name}
         control={control}
-        render={({ field }) => (
-          <>
-            <Select
-              value={field.value}
-              onValueChange={(value) => field.onChange(value)}
-              disabled={disabled}
-            >
-              <SelectTrigger
-                className={`w-full h-auto border-2 border-[#E0E0E0] text-black text-sm rounded-md py-2 px-3 active:outline-none ${
-                  disabled ? "bg-gray-100" : ""
-                }`}
-              >
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-              <SelectContent className="w-full h-auto">
-                <SelectGroup>
-                  {options.map((option) => (
-                    <SelectItem
-                      value={option.value}
-                      className="text-base"
-                      key={option.value}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+        render={({ field }) => {
+          // Debug logging - remove this after fixing
+          console.log(`Field ${name}:`, {
+            fieldValue: field.value,
+            availableOptions: options.map((opt) => opt.value),
+            hasValue: !!field.value,
+            valueExists: options.some((opt) => opt.value === field.value),
+          });
 
-            {field.value === "other" && otherFieldName && register && (
-              <input
-                type="text"
-                placeholder="Other (Please specify)"
-                className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-black text-sm rounded-md mt-2"
-                {...register(otherFieldName)}
-                autoFocus
-              />
-            )}
-          </>
-        )}
+          return (
+            <>
+              <Select
+                value={field.value || ""} // Ensure we don't pass undefined
+                onValueChange={(value) => {
+                  console.log(`${name} changed to:`, value);
+                  field.onChange(value);
+                }}
+                disabled={disabled}
+              >
+                <SelectTrigger
+                  className={`w-full h-auto border-2 border-[#E0E0E0] text-black text-sm rounded-md py-2 px-3 active:outline-none ${
+                    disabled ? "bg-gray-100" : ""
+                  }`}
+                >
+                  <SelectValue
+                    placeholder={placeholder}
+                    // Force re-render when value changes
+                    key={field.value}
+                  />
+                </SelectTrigger>
+                <SelectContent className="w-full h-auto">
+                  <SelectGroup>
+                    {options.map((option) => (
+                      <SelectItem
+                        value={option.value}
+                        className="text-base"
+                        key={option.value}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              {field.value === "other" && otherFieldName && register && (
+                <input
+                  type="text"
+                  placeholder="Other (Please specify)"
+                  className="w-full h-auto px-2 py-1 border-2 border-[#E0E0E0] text-black text-sm rounded-md mt-2"
+                  {...register(otherFieldName)}
+                  autoFocus
+                />
+              )}
+            </>
+          );
+        }}
       />
       {error && <p className="text-red-500 text-sm">{error.message}</p>}
     </div>

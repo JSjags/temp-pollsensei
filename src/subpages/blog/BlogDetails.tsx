@@ -2,6 +2,7 @@
 import React, { FC, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import ReportCard from "@/components/blog/ReportCard";
+import Pagination from "@/components/blog/Pagination";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter, useParams } from "next/navigation";
@@ -22,6 +23,7 @@ import {
 import {
   ReportCardSkeleton,
   BlogDetailsSkeleton,
+  PaginationSkeleton,
 } from "@/components/blog/Skeletons";
 import { IoMdTime } from "react-icons/io";
 import { toast } from "react-toastify";
@@ -41,6 +43,10 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
   const [imageError, setImageError] = useState(false);
   const [isEchoed, setIsEchoed] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+
+  // Pagination state for similar reports
+  const [similarReportsPage, setSimilarReportsPage] = useState(1);
+  const [similarReportsPageSize] = useState(6); // 2 columns x 3 rows
 
   const user = useSelector((state: RootState) => state.user?.user);
   const dispatch = useDispatch();
@@ -71,7 +77,8 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
 
   const { data: recentReportsResponse, isLoading: isRecentLoading } = useQuery({
     queryKey: [APP_KEYS.MOST_RECENT_REPORTS],
-    queryFn: GetMostRecentReport,
+    queryFn: () => GetMostRecentReport(),
+    enabled: !showComments, // Only fetch when not showing comments
   });
 
   const { data: commentsData, isLoading: isCommentsLoading } = useQuery({
@@ -196,6 +203,15 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
     echoMutation.mutate({ reportId: reportData._id, number_of_echoes: amount });
   };
 
+  const handleSimilarReportsPageChange = (page: number) => {
+    setSimilarReportsPage(page);
+    // Optional: scroll to top of similar reports section
+    document.getElementById("similar-reports-section")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   // ============================================================================
   // Helper Functions
   // ============================================================================
@@ -264,9 +280,24 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
   const parsedContent = parseEditorContent(report.content || "");
   const readTime = calculateReadTime(parsedContent);
 
-  const recentReports = Array.isArray(recentReportsResponse)
-    ? recentReportsResponse
-    : [];
+  // Handle both paginated and non-paginated response formats
+  const recentReports =
+    recentReportsResponse?.data || recentReportsResponse || [];
+  const transformReport = (report: any) => ({
+    ...report,
+    author: report.published_by?.name || "Anonymous",
+    authorImage: null,
+    image:
+      report.thumbnail ||
+      "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=600&fit=crop",
+    date: new Date(report.published_at).toLocaleDateString(),
+    views: report.echoes_count || 0,
+    comments: report.comments_count || 0,
+    excerpt: report.description,
+    tags: report.fields_of_interest?.map((field: any) => field.name) || [],
+  });
+
+  // console.log("report", report);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -361,40 +392,73 @@ const BlogDetails: FC<BlogDetailsProps> = ({ slug: propSlug }) => {
               {showComments ? (
                 <CommentSection
                   reportId={report._id}
+                  reportAuthorId={report.published_by._id}
                   onHideReplies={() =>
                     dispatch({ type: "blog/toggleComments" })
                   }
                 />
               ) : (
-                <section className="animate-in slide-in-from-top-4 duration-300">
+                <section
+                  className="animate-in slide-in-from-top-4 duration-300"
+                  id="similar-reports-section"
+                >
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-2">
                     Similar reports
                   </h2>
-                  <div className="space-y-6">
-                    {isRecentLoading ? (
-                      <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3">
-                        {Array.from({ length: 6 }).map((_, index) => (
-                          <ReportCardSkeleton key={index} />
-                        ))}
+
+                  {isRecentLoading ? (
+                    <>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3 mb-8">
+                        {Array.from({ length: similarReportsPageSize }).map(
+                          (_, index) => (
+                            <ReportCardSkeleton key={index} />
+                          )
+                        )}
                       </div>
-                    ) : recentReports.length > 0 ? (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3">
+                      <PaginationSkeleton />
+                    </>
+                  ) : Array.isArray(recentReports) &&
+                    recentReports.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3 mb-8">
                         {recentReports.map((report: any) => (
                           <ReportCard
                             key={report._id}
-                            report={report}
+                            report={transformReport(report)}
                             onClick={() => navigateToReport(report.slug)}
                           />
                         ))}
                       </div>
-                    ) : (
-                      <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <p className="text-gray-500">
-                          No recent reports available
-                        </p>
-                      </div>
-                    )}
-                  </div>
+
+                      {/* Pagination Component */}
+                      <Pagination
+                        currentPage={
+                          recentReportsResponse?.currentPage ||
+                          similarReportsPage
+                        }
+                        totalPages={
+                          recentReportsResponse?.totalPages ||
+                          Math.ceil(
+                            recentReports.length / similarReportsPageSize
+                          )
+                        }
+                        onPageChange={handleSimilarReportsPageChange}
+                        showInfo={true}
+                        totalItems={
+                          recentReportsResponse?.totalItems ||
+                          recentReports.length
+                        }
+                        itemsPerPage={similarReportsPageSize}
+                        className="mt-8"
+                      />
+                    </>
+                  ) : (
+                    <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <p className="text-gray-500">
+                        No recent reports available
+                      </p>
+                    </div>
+                  )}
                 </section>
               )}
             </div>
