@@ -29,6 +29,7 @@ import { useGeoLocation } from "../settings/subscription/PricingCards";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { PlaceholderRightSide } from "@/components/reusable/coming-soon";
+import { redirectUtils } from "@/utils/redirectUtils";
 
 const constraints = {
   name: {
@@ -114,6 +115,10 @@ const RegisterPage = () => {
     isError: locationError,
   } = useGeoLocation();
 
+  // Update the register success handler
+  // Key fixes for RegisterPage.tsx - apply these changes to your existing file:
+
+  // 1. Fix the onSubmit function to handle redirects consistently:
   const onSubmit = async (values: any) => {
     try {
       await registerUser({
@@ -124,7 +129,14 @@ const RegisterPage = () => {
       toast.success(
         "User registered successfully, check your email to continue"
       );
-      router.push(`/verify-email${ed ? `?ed=${ed}` : ""}`);
+
+      // Check for stored redirect route for post-verification
+      const storedRoute = sessionStorage.getItem("auth_redirect_url");
+      const redirectParam = storedRoute
+        ? `&redirect=${encodeURIComponent(storedRoute)}`
+        : "";
+
+      router.push(`/verify-email${ed ? `?ed=${ed}` : ""}${redirectParam}`);
     } catch (err: any) {
       toast.error(
         typeof err?.data?.message === "string"
@@ -141,10 +153,7 @@ const RegisterPage = () => {
     }
   };
 
-  const validateForm = (values: any) => {
-    return validate(values, constraints) || {};
-  };
-
+  // 2. Fix the Google signup to use consistent redirect logic:
   const googleSignUp = useGoogleLogin({
     onSuccess: async (response) => {
       const accessToken = response.access_token;
@@ -157,8 +166,17 @@ const RegisterPage = () => {
         toast.success(
           "Registration successful, please continue with same Google account"
         );
-        // router.push("/verify-email");
-        router.push("/login");
+
+        // Use the same redirect logic as login page instead of redirectUtils
+        // This ensures consistency and proper handling of stored routes
+        const storedRoute = sessionStorage.getItem("auth_redirect_url");
+        if (storedRoute) {
+          sessionStorage.removeItem("auth_redirect_url");
+          router.push(storedRoute);
+        } else {
+          const redirectRoute = redirectUtils.getRedirectAfterAuth([], ed);
+          router.push(redirectRoute);
+        }
       } catch (err: any) {
         toast.error(
           typeof err?.data?.message === "string"
@@ -171,10 +189,14 @@ const RegisterPage = () => {
       }
     },
     onError: (err) => {
-      console.log(error);
+      console.error(error);
     },
     flow: "implicit",
   });
+
+  const validateForm = (values: any) => {
+    return validate(values, constraints) || {};
+  };
 
   const facebookSignUp = async () => {
     try {
@@ -293,54 +315,187 @@ const RegisterPage = () => {
                     </Field>
                     <Field name="password">
                       {({ input, meta }) => (
+                        <div>
+                          <PasswordField
+                            id="password"
+                            eyeState={eyeState.password}
+                            toggleEye={() => toggleEye("password")}
+                            placeholder="*******"
+                            label="Password"
+                            form={form}
+                            {...input}
+                            onFocus={() => setPwdFocus(true)}
+                            onBlur={() => setPwdFocus(false)}
+                            eye={
+                              (
+                                <small className="icon-container">
+                                  {!meta.active &&
+                                  !pattern.test(input.value) ? (
+                                    ""
+                                  ) : pattern.test(input.value) ? (
+                                    <IoCheckmarkCircle
+                                      className="text-green-600"
+                                      size={20}
+                                    />
+                                  ) : (
+                                    <FaTimesCircle
+                                      className="text-red-600"
+                                      size={20}
+                                    />
+                                  )}
+                                </small>
+                              ) as any
+                            }
+                          />
+                          {pwdFocus && (
+                            <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                              <p className="font-medium mb-2">
+                                Password must contain:
+                              </p>
+                              <ul className="space-y-1">
+                                <li
+                                  className={`flex items-center ${
+                                    input.value.length >= 8
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least 8 characters
+                                </li>
+                                <li
+                                  className={`flex items-center ${
+                                    /[A-Z]/.test(input.value)
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least one uppercase letter
+                                </li>
+                                <li
+                                  className={`flex items-center ${
+                                    /\d/.test(input.value)
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least one number
+                                </li>
+                                <li
+                                  className={`flex items-center ${
+                                    /[@$!%*?&]/.test(input.value)
+                                      ? "text-green-600"
+                                      : "text-gray-500"
+                                  }`}
+                                >
+                                  <IoCheckmarkCircle
+                                    size={16}
+                                    className="mr-2"
+                                  />
+                                  At least one special character (@$!%*?&)
+                                </li>
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Field>
+
+                    <Field name="confirmPassword">
+                      {({ input, meta }) => (
                         <PasswordField
-                          id="password"
-                          eyeState={eyeState.password}
-                          toggleEye={() => toggleEye("password")}
+                          id="confirmPassword"
+                          eyeState={eyeState.confirmPassword}
+                          toggleEye={() => toggleEye("confirmPassword")}
                           placeholder="*******"
-                          label="Password"
+                          label="Confirm Password"
                           form={form}
                           {...input}
-                          onFocus={() => setPwdFocus(true)}
-                          onBlur={() => setPwdFocus(false)}
-                          eye={null}
+                          onFocus={() => setMatchFocus(true)}
+                          onBlur={() => setMatchFocus(false)}
+                          eye={
+                            (
+                              <small className="icon-container">
+                                {!meta.active ? (
+                                  ""
+                                ) : input.value === values.password ? (
+                                  <IoCheckmarkCircle
+                                    className="text-green-600"
+                                    size={20}
+                                  />
+                                ) : (
+                                  <FaTimesCircle
+                                    className="text-red-600"
+                                    size={20}
+                                  />
+                                )}
+                              </small>
+                            ) as any
+                          }
                         />
                       )}
                     </Field>
+
+                    <div className="pt-3">
+                      <label className="auth-label font-sans pb-2">
+                        Referral Code (Optional)
+                      </label>
+                      <input
+                        value={refCode}
+                        onChange={(e) => setRefCode(e?.target?.value)}
+                        type="text"
+                        className="auth-input w-full focus:outline-purple-800 focus:ring-focus focus:ring-1 font-sans border border-border text-foreground placeholder:text-foreground/40"
+                        placeholder="Enter referral code"
+                        readOnly={!!refValue}
+                      />
+                    </div>
                     <div className="flex items-center gap-2">
                       <Field name="terms" type="checkbox">
                         {({ input, meta }) => (
-                          <>
-                            <input
-                              {...input}
-                              type="checkbox"
-                              id="terms"
-                              className="accent-purple-600"
-                            />
-                            <label htmlFor="terms" className="ml-2 text-sm">
-                              I agree with{" "}
-                              <Link
-                                href="/terms-of-service"
-                                className="text-primary underline"
-                                target="_blank"
-                              >
-                                Terms of Use
-                              </Link>{" "}
-                              and{" "}
-                              <Link
-                                href="/privacy-policy"
-                                className="text-primary underline"
-                                target="_blank"
-                              >
-                                Privacy Policy
-                              </Link>
-                            </label>
+                          <div>
+                            <div>
+                              <input
+                                {...input}
+                                type="checkbox"
+                                id="terms"
+                                className="accent-purple-600"
+                              />
+                              <label htmlFor="terms" className="ml-2 text-sm">
+                                I agree with{" "}
+                                <Link
+                                  href="/terms-of-service"
+                                  className="text-primary underline"
+                                  target="_blank"
+                                >
+                                  Terms of Use
+                                </Link>{" "}
+                                and{" "}
+                                <Link
+                                  href="/privacy-policy"
+                                  className="text-primary underline"
+                                  target="_blank"
+                                >
+                                  Privacy Policy
+                                </Link>
+                              </label>
+                            </div>
                             {meta.error && meta.touched && (
-                              <span className="text-red-600 text-xs ml-2">
+                              <p className="text-red-600 text-xs ml-2">
                                 {meta.error}
-                              </span>
+                              </p>
                             )}
-                          </>
+                          </div>
                         )}
                       </Field>
                     </div>
