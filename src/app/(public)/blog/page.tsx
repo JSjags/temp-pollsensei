@@ -90,13 +90,13 @@ const BlogPage = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  console.log({
-    dashboardData,
-    categories,
-    fieldsOfInterest,
-    categoryData,
-    interestData,
-  });
+  // console.log({
+  //   dashboardData,
+  //   categories,
+  //   fieldsOfInterest,
+  //   categoryData,
+  //   interestData,
+  // });
 
   useEffect(() => {
     if (isDashboardSuccess && !isInitialLoadComplete) {
