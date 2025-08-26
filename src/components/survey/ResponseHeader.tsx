@@ -210,7 +210,8 @@ const ResponseHeader: React.FC<ResponseHeaderProps> = ({
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {totalCount} Response{(totalCount ?? 0) > 1 && "s"}
+                    {isNaN(totalCount) ? "No" : totalCount} Response
+                    {(totalCount ?? 0) > 1 && "s"}
                   </motion.span>
                 </Badge>
               )}

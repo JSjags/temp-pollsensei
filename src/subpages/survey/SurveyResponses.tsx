@@ -203,7 +203,7 @@ const SurveyResponses = () => {
       className="container px-4 sm:px-6 lg:px-8 pb-2 my-6 sm:my-10 flex flex-col justify-center min-h-[60vh]"
     >
       <AnimatePresence mode="wait">
-        {data?.data?.response_count === 0 ? (
+        {/* {data?.data?.response_count === 0 ? (
           <motion.div
             key="no-response"
             initial={{ opacity: 0, y: 20 }}
@@ -212,16 +212,16 @@ const SurveyResponses = () => {
           >
             <NoResponse />
           </motion.div>
-        ) : (
-          <motion.div
-            key="responses"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          >
-            <Responses data={data?.data} />
-          </motion.div>
-        )}
+        ) : ( */}
+        <motion.div
+          key="responses"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+        >
+          <Responses data={data?.data} />
+        </motion.div>
+        {/* )} */}
       </AnimatePresence>
 
       <Dialog open={uploadState} onOpenChange={() => dispatch(closeUpload())}>

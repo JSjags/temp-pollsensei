@@ -309,11 +309,17 @@ const ValidateResponse = () => {
 
           case "long_text":
           case "short_text":
-            if (!answer?.text?.trim()) {
+            let textValue = answer?.text;
+
+            if (Array.isArray(textValue)) {
+              textValue = textValue[0];
+            }
+            if (!textValue || !String(textValue).trim()) {
               errors.push(
                 `Question ${questionNum}: Please provide a text response for "${item.question}"`
               );
             }
+
             break;
 
           case "number":
@@ -580,13 +586,23 @@ const ValidateResponse = () => {
           }
           return {
             ...baseAnswer,
-            text: typeof answer.text === "string" ? answer.text : "",
+            text:
+              typeof answer.text === "string"
+                ? answer.text
+                : Array.isArray(answer.text)
+                ? answer.text[0] || ""
+                : "",
           };
         }
         case "short_text":
           return {
             ...baseAnswer,
-            text: typeof answer.text === "string" ? answer.text : "",
+            text:
+              typeof answer.text === "string"
+                ? answer.text
+                : Array.isArray(answer.text)
+                ? answer.text[0] || ""
+                : "",
           };
         case "media":
           return {
@@ -599,9 +615,9 @@ const ValidateResponse = () => {
             boolean_value:
               typeof answer.boolean_value === "boolean"
                 ? answer.boolean_value
-                : answer.boolean_value === "true"
+                : answer.boolean_value[0] === "True"
                 ? true
-                : answer.boolean_value === "false"
+                : answer.boolean_value[0] === "false"
                 ? false
                 : Boolean(answer.boolean_value),
           };
@@ -1005,7 +1021,7 @@ const ValidateResponse = () => {
                     className="mb-4 flex flex-col w-full p-3 gap-4 sm:gap-5 rounded-lg transition-all duration-300"
                     onValueChange={(value) =>
                       handleAnswerChange(quest.question, {
-                        boolean_value: value === "true",
+                        boolean_value: value === "True",
                       })
                     }
                     required={quest.is_required}
@@ -1013,6 +1029,9 @@ const ValidateResponse = () => {
                     <div className="flex items-center space-x-3 sm:space-x-4 p-2 sm:p-3 rounded-md transition-colors duration-200 hover:bg-gray-50">
                       <RadioGroupItem
                         value="true"
+                        checked={
+                          answers[quest.question]?.boolean_value?.[0] === "True"
+                        }
                         id={`${quest.question}-yes`}
                         className="size-4 sm:size-5"
                       />
@@ -1027,6 +1046,10 @@ const ValidateResponse = () => {
                     <div className="flex items-center space-x-3 sm:space-x-4 p-2 sm:p-3 rounded-md transition-colors duration-200">
                       <RadioGroupItem
                         value="false"
+                        checked={
+                          answers[quest.question]?.boolean_value?.[0] ===
+                          "False"
+                        }
                         id={`${quest.question}-no`}
                         className="size-4 sm:size-5"
                       />
@@ -1089,6 +1112,7 @@ const ValidateResponse = () => {
                           text: e.target.value,
                         })
                       }
+                      value={answers[quest.question]?.text || ""}
                       style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
                     />
                   </div>

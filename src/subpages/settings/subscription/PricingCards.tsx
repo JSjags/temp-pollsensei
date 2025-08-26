@@ -352,8 +352,8 @@ export function PricingCards() {
                             ? "FREE"
                             : !locationData?.isNigeria
                             ? `$${tier.monthly_price_dollar.toLocaleString()}`
-                            : `₦${tier.monthly_price_naira.toLocaleString()}`}
-                          {tier.monthly_price_naira === 0 &&
+                            : `$${tier.monthly_price_dollar.toLocaleString()}`}
+                          {tier.monthly_price_dollar === 0 &&
                           tier.monthly_price_dollar === 0
                             ? ""
                             : "/month"}
