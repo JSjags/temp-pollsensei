@@ -683,24 +683,25 @@ const SurveyCreationNav = () => {
           </nav>
 
           {path.includes("survey-response-upload") ? (
-            userData.plan?.name !== "Basic Plan" ? (
-              <Button
-                className={cn(
-                  "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
-                  (surveyError as any)?.data.message && "grayscale"
-                )}
-                onClick={() => {
-                  if ((surveyError as any)?.data.message) {
-                    return toast.error((surveyError as any)?.data.message);
-                  }
-                  dispatch(openUpload());
-                }}
-              >
-                <FiUpload className="w-5 h-5" />
-                Upload Response
-              </Button>
-            ) : null
+            // userData.plan?.name !== "Basic Plan" ? (
+            <Button
+              className={cn(
+                "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
+                (surveyError as any)?.data.message && "grayscale"
+              )}
+              size={"sm"}
+              onClick={() => {
+                if ((surveyError as any)?.data.message) {
+                  return toast.error((surveyError as any)?.data.message);
+                }
+                dispatch(openUpload());
+              }}
+            >
+              <FiUpload className="w-5 h-5" />
+              Upload Response
+            </Button>
           ) : (
+            // ) : null
             <div className="flex justify-between items-center gap-3">
               {path === "/surveys/create-survey" ||
               path === "/surveys/add-question-m" ||
@@ -1159,12 +1160,13 @@ const SurveyCreationNav = () => {
           </nav>
 
           {path.includes("survey-response-upload") &&
-          userData.plan?.name !== "Basic Plan" ? (
+          userData.plan?.name !== "" ? (
             <Button
               className={cn(
                 "flex items-center justify-center gap-3 text-white text-[1rem] text-sm rounded-xl px-5 py-3  bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]",
                 (surveyError as any)?.data.message && "grayscale"
               )}
+              size={"sm"}
               onClick={() => {
                 if ((surveyError as any)?.data.message) {
                   return toast.error((surveyError as any)?.data.message);
