@@ -92,9 +92,6 @@ const ValidateResponse = () => {
     queryFn: () => getSurveySettings({ surveyId: params?.id as string }),
   });
 
-  // console.log(surveySettings);
-  console.log(OCRresponses);
-
   // Utility function to extract number from string
   const extractNumberFromString = (value: any): number | null => {
     if (value === null || value === undefined) return null;
@@ -148,8 +145,10 @@ const ValidateResponse = () => {
         survey: OCRresponses.survey || [],
         extracted_answers: OCRresponses.extracted_answers || [],
         uploaded_files: OCRresponses.uploaded_files || [],
-        respondent_details: OCRresponses.respondent_details || [],
+        respondent_details: OCRresponses.respondent_details || null,
       });
+
+      console.log(OCRresponses.respondent_details);
 
       setRespondent_name(OCRresponses?.respondent_details?.name);
       setRespondent_email(OCRresponses?.respondent_details?.email);
@@ -731,6 +730,7 @@ const ValidateResponse = () => {
   }, [isSuccess, isError, error, router]);
 
   const handleBack = () => {
+    resetAnswers();
     router.push(`/surveys/${params.id}/survey-response-upload`);
   };
 
