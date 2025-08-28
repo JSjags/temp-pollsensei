@@ -510,9 +510,16 @@ const ValidateResponse = () => {
           return {
             ...baseAnswer,
             selected_options: Array.isArray(answer.selected_options)
-              ? answer.selected_options
+              ? answer.selected_options.filter((opt: any) =>
+                  Array.isArray(item.options)
+                    ? item.options.includes(opt)
+                    : true
+                )
               : answer.selected_options
-              ? [answer.selected_options]
+              ? Array.isArray(item.options) &&
+                item.options.includes(answer.selected_options)
+                ? [answer.selected_options]
+                : []
               : [],
           };
         case "drop_down":
@@ -967,9 +974,12 @@ const ValidateResponse = () => {
                 return (
                   <>
                     <Select
+                      value={
+                        answers[quest.question]?.drop_down_value?.[0] || ""
+                      }
                       onValueChange={(value) =>
                         handleAnswerChange(quest.question, {
-                          drop_down_value: value,
+                          drop_down_value: [value],
                         })
                       }
                     >
@@ -977,10 +987,13 @@ const ValidateResponse = () => {
                         className="mb-4 bg-[#FAFAFA] w-full"
                         style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
                       >
-                        <SelectValue
-                          placeholder="Select an option"
+                        {/* Show the full selected value, not just the first letter */}
+                        <span
                           style={{ fontSize: `clamp(0.75rem, 16px, 0.875rem)` }}
-                        />
+                        >
+                          {answers[quest.question]?.drop_down_value ||
+                            "Select an option"}
+                        </span>
                       </SelectTrigger>
                       <SelectContent>
                         {quest.options?.map((option: any) => (
