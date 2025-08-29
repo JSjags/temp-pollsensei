@@ -92,8 +92,52 @@ const ValidateResponse = () => {
     queryFn: () => getSurveySettings({ surveyId: params?.id as string }),
   });
 
-  // console.log(surveySettings);
-  console.log(OCRresponses);
+  // Utility function to extract number from string
+  const extractNumberFromString = (value: any): number | null => {
+    if (value === null || value === undefined) return null;
+
+    // If it's already a number, return it
+    if (typeof value === "number") return value;
+
+    // If it's an array, take the first element
+    if (Array.isArray(value)) {
+      value = value[0];
+    }
+
+    // If it's a string, extract the number
+    if (typeof value === "string") {
+      // Remove all non-numeric characters except decimal points and negative signs
+      const numericString = value.replace(/[^0-9.-]/g, "");
+      const extractedNumber = parseFloat(numericString);
+
+      // Return the number if it's valid, otherwise null
+      return isNaN(extractedNumber) ? null : extractedNumber;
+    }
+
+    return null;
+  };
+
+  // Utility function to convert extracted matrix answers format to expected format
+  const convertMatrixAnswersFormat = (matrixAnswers: any): any[] => {
+    if (!matrixAnswers || typeof matrixAnswers !== "object") return [];
+
+    const convertedAnswers: any[] = [];
+
+    // Handle the format where matrix_answers is an object with column names as keys
+    // and arrays of row names as values
+    Object.keys(matrixAnswers).forEach((column) => {
+      const rows = matrixAnswers[column];
+      if (Array.isArray(rows)) {
+        rows.forEach((row) => {
+          if (row && typeof row === "string") {
+            convertedAnswers.push({ row, column });
+          }
+        });
+      }
+    });
+
+    return convertedAnswers;
+  };
 
   useEffect(() => {
     if (OCRresponses && Object.keys(answers).length === 0) {
@@ -101,8 +145,10 @@ const ValidateResponse = () => {
         survey: OCRresponses.survey || [],
         extracted_answers: OCRresponses.extracted_answers || [],
         uploaded_files: OCRresponses.uploaded_files || [],
-        respondent_details: OCRresponses.respondent_details || [],
+        respondent_details: OCRresponses.respondent_details || null,
       });
+
+      console.log(OCRresponses.respondent_details);
 
       setRespondent_name(OCRresponses?.respondent_details?.name);
       setRespondent_email(OCRresponses?.respondent_details?.email);
@@ -131,6 +177,22 @@ const ValidateResponse = () => {
             scale_value = val;
           }
         }
+
+        // Extract number from string for number question types
+        let numValue = item?.num || null;
+        if (item.question_type === "number") {
+          numValue = extractNumberFromString(item?.num);
+        }
+
+        // Convert matrix answers format for matrix question types
+        let matrixAnswers = item?.matrix_answers || [];
+        if (
+          item.question_type === "matrix_checkbox" ||
+          item.question_type === "matrix_multiple_choice"
+        ) {
+          matrixAnswers = convertMatrixAnswersFormat(item?.matrix_answers);
+        }
+
         existingAnswers[item.question] = {
           selected_options: item?.selected_options || [],
           scale_value,
@@ -140,8 +202,9 @@ const ValidateResponse = () => {
           boolean_value:
             item?.boolean_value !== undefined ? item.boolean_value : null,
           text: item?.text || "",
-          num: item?.num || null,
+          num: numValue,
           media_url: item?.media_url || "",
+          matrix_answers: matrixAnswers,
         };
       });
 
@@ -667,6 +730,7 @@ const ValidateResponse = () => {
   }, [isSuccess, isError, error, router]);
 
   const handleBack = () => {
+    resetAnswers();
     router.push(`/surveys/${params.id}/survey-response-upload`);
   };
 

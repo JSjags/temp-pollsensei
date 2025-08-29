@@ -43,6 +43,7 @@ interface OCRResponse {
     name?: string;
     email?: string;
   } | null;
+  respondent_details?: any;
 }
 
 // Define initial state
@@ -54,12 +55,14 @@ interface AnswerState {
     name?: string;
     email?: string;
   } | null;
+  respondent_details: any | null;
 }
 
 const initialState: AnswerState = {
   survey: null,
   extracted_answers: [],
   uploaded_files: [],
+  respondent_details: null,
   respondent_details: undefined,
 };
 
@@ -74,6 +77,7 @@ const answerSlice = createSlice({
       state.survey = survey;
       state.extracted_answers = extracted_answers;
       state.uploaded_files = uploaded_files || [];
+      state.respondent_details = respondent_details || null;
     },
 
     addAnswer: (state, action: PayloadAction<Answer>) => {
@@ -98,6 +102,7 @@ const answerSlice = createSlice({
     resetAnswers: (state) => {
       state.survey = null;
       state.extracted_answers = [];
+      state.respondent_details = null;
       state.uploaded_files = [];
     },
   },
