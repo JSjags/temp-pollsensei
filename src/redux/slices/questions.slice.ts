@@ -28,7 +28,7 @@ export const createScreenerSurvey = createAsyncThunk(
     try {
       const response = await CreateScreenerSurvey(payload);
       dispatch(setSurveyCreated(true));
-      return response.data;
+      return response;
     } catch (e) {
       console.error("Failed to save and continue:", e);
       dispatch(setSurveyCreated(false));
