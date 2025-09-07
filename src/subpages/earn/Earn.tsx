@@ -132,6 +132,7 @@ const Earn = () => {
         <div className="w-full h-auto rounded-xl bg-gradient-to-r from-[#260D3E] via-[#260D3E] to-[#EB06AB] px-4 py-2 flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1 items-center justify-start lg:justify-normal h-[120px] lg:h-auto">
             <div className="flex gap-1 items-center">
+              <Image src={logoGold} width={20} height={20} alt="pollcoin" />
               <h1 className="text-[32px] md:text-[42px] font-bold text-white">
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
@@ -139,7 +140,6 @@ const Earn = () => {
                   formatLargeNumber(balance?.unrestrictedBalance || 0)
                 )}
               </h1>
-              <Image src={logoGold} width={20} height={20} alt="pollcoin" />
             </div>
             <p className="text-xs lg:text-sm text-white/80">Pollcoins Earned</p>
           </div>
