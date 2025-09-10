@@ -39,10 +39,10 @@ interface OCRResponse {
   survey: Survey;
   extracted_answers: Answer[];
   uploaded_files?: string[];
-  respondent_details?: {
-    name?: string;
-    email?: string;
-  } | null;
+  // respondent_details?: {
+  //   name?: string;
+  //   email?: string;
+  // } | null;
   respondent_details?: any;
 }
 
@@ -51,10 +51,10 @@ interface AnswerState {
   survey: Survey | null;
   extracted_answers: Answer[];
   uploaded_files: string[];
-  respondent_details?: {
-    name?: string;
-    email?: string;
-  } | null;
+  // respondent_details?: {
+  //   name?: string;
+  //   email?: string;
+  // } | null;
   respondent_details: any | null;
 }
 
@@ -63,7 +63,7 @@ const initialState: AnswerState = {
   extracted_answers: [],
   uploaded_files: [],
   respondent_details: null,
-  respondent_details: undefined,
+  // respondent_details: undefined,
 };
 
 const answerSlice = createSlice({
