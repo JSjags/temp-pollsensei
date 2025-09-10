@@ -90,6 +90,7 @@ import SkipLogicEditor, {
   transformSurveySkipLogic,
 } from "./SkipLogicEditor";
 import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
+import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 // Springy Animation Variants for the mascot
 const mascotVariants = {
@@ -956,7 +957,7 @@ const EditSurvey = () => {
     const hasEmptySection = questions.some(
       (section: Section) => !section.questions || section.questions.length === 0
     );
-    if (hasEmptySection) {
+    if (hasEmptySection) { 
       toast.error(
         "All sections must have at least one question before submitting."
       );
@@ -1247,6 +1248,7 @@ const EditSurvey = () => {
       dispatch(resetSurvey());
       hasPopulatedSkipLogic.current = false; // Reset the ref when survey is created successfully
       setSurvey_id(createdSurveyData.data._id);
+      dispatch(startQuickSurveyFlow());
       // setReview(true);
       // router.push("/surveys/survey-list");
     }

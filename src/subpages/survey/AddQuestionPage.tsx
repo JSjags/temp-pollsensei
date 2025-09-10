@@ -110,6 +110,8 @@ import SkipLogicEditor, {
   transformSurveySkipLogic,
 } from "./SkipLogicEditor";
 import { setSkipLogic } from "@/redux/slices/survey.slice";
+import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
+import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 // Define Section type at the top (after imports)
 type Section = {
@@ -117,8 +119,6 @@ type Section = {
   description: string;
   questions: any[]; // Replace 'any' with 'Question' if you have a type for questions
 };
-import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
-import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 const AddQuestionPage = () => {
   const dispatch = useDispatch();

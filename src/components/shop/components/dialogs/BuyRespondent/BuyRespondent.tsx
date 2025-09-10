@@ -336,8 +336,8 @@ const BuyRespondent = () => {
             >
               <div className="flex flex-col items-center justify-center">
                 <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
-                  Respondents{" "}
-                  <Image src={Arrow} alt="icons" className="w-4 h-4" />
+                  Response Collection{" "}
+                  <Image src={Arrow} alt="icons" className="w-3 h-3" />
                 </Button>
               </div>
             </DialogTrigger>
