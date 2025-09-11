@@ -32,6 +32,7 @@ import {
   fetchPurchasedRespondentsStats,
 } from "@/services/api/apiRequest";
 import { useWindowSize } from "@uidotdev/usehooks";
+import { formatLargeNumber } from "@/utils";
 
 type ServiceBalance = {
   serviceType: string;
@@ -62,37 +63,41 @@ export function Analytics() {
   const { restrictedBalance, unrestrictedBalance, totalBalance } = data || {};
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const parseFormattedNumber = (formattedNum: string): number => {
+    return Number(formattedNum.replace(/,/g, ""));
+  };
+
   const analyticData = [
     {
-      label: "AI Survey Generation",
+      label: "Survey Generation",
       value: 0,
       icon: AIGeneration,
       iconColor: "#3575FF",
       key: "ai-survey-generation",
     },
     {
-      label: "OCR Document Scan",
+      label: "OCR Processing",
       value: 0,
       icon: OCR,
       iconColor: "#F36643",
       key: "ocr-document",
     },
     {
-      label: "AI Analysis",
+      label: "Data Analysis",
       value: 0,
       icon: Analysis,
       iconColor: "#4524F8",
       key: "ai-analysis",
     },
     {
-      label: "AI Reporting",
+      label: "Report Generation",
       value: 0,
       icon: AIReporting,
       iconColor: "#0ACF80",
       key: "ai-reporting",
     },
     {
-      label: "Voice Transcription",
+      label: "Speech-to-Text",
       value: 0,
       icon: Voice,
       iconColor: "#0ACF80",
@@ -316,7 +321,9 @@ export function Analytics() {
                           <Skeleton className="h-6 w-full" />
                         ) : (
                           <h4 className="text-xl font-bold">
-                            {analytic.value}
+                            {formatLargeNumber(
+                              parseFormattedNumber(String(analytic.value)) ?? 0
+                            )}
                           </h4>
                         )}
                         <span>
