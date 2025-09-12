@@ -23,8 +23,8 @@ type ShopState = {
   loading: boolean;
   pollstep: DialogStep;
   aiStep: DialogStep;
-  ocrStep:DialogStep;
-  aiReportingStep:DialogStep;
+  ocrStep: DialogStep;
+  aiReportingStep: DialogStep;
   pollDialogOpen: boolean;
   aiDialogOpen: boolean;
   servicesStep: DialogStep;
@@ -33,7 +33,7 @@ type ShopState = {
   orderSummary: PollcoinOrderSummaryResponse["data"]["orderSummary"] | null;
   orderBreakdown: PollcoinOrderSummaryResponse["data"]["breakdown"] | null;
   ocrAmount: string;
-  aiReportingAmount: string
+  aiReportingAmount: string;
   setOCRAmount: (value: string) => void;
   setAIDialogOpen: (open: boolean) => void;
   setPollDialogOpen: (open: boolean) => void;
@@ -51,8 +51,12 @@ type ShopState = {
   setOCRCredits: (value: string) => void;
   setAIReportingCredits: (value: string) => void;
   setPollcoins: (value: string) => void;
-  setOrderSummary: (summary: PollcoinOrderSummaryResponse["data"]["orderSummary"]) => void;
-  setOrderBreakdown: (summary: PollcoinOrderSummaryResponse["data"]["breakdown"]) => void;
+  setOrderSummary: (
+    summary: PollcoinOrderSummaryResponse["data"]["orderSummary"]
+  ) => void;
+  setOrderBreakdown: (
+    summary: PollcoinOrderSummaryResponse["data"]["breakdown"]
+  ) => void;
   setTotalPollcoins: (value: string) => void;
   addPollcoinsToTotal: (amount: string) => void;
   setAiErrors: (errors: { amount?: string; quantity?: string }) => void;
@@ -63,19 +67,16 @@ type ShopState = {
   reset: () => void;
 };
 
-
 type ShopPersist = {
   totalPollcoins: string;
 };
 
-
 const persistOptions: PersistOptions<ShopState, ShopPersist> = {
   name: "shop-store",
   partialize: (state) => ({
-    totalPollcoins: state.totalPollcoins, 
+    totalPollcoins: state.totalPollcoins,
   }),
 };
-
 
 export const useShopStore = create<ShopState>()(
   persist(
@@ -86,7 +87,7 @@ export const useShopStore = create<ShopState>()(
       ocrCredits: "",
       aiReportingCredit: "",
       pollcoins: "",
-      totalPollcoins: "0", 
+      totalPollcoins: "0",
       aiErrors: {},
       pollErrors: {},
       loading: false,
@@ -104,7 +105,6 @@ export const useShopStore = create<ShopState>()(
       ocrAmount: "",
       aiReportingAmount: "",
 
-  
       setOCRAmount: (value) => set({ ocrAmount: value }),
       setAIReportingAmount: (value) => set({ aiReportingAmount: value }),
       setAIDialogOpen: (open) => set({ aiDialogOpen: open }),
@@ -127,7 +127,6 @@ export const useShopStore = create<ShopState>()(
       setOrderBreakdown: (breakdown) => set({ orderBreakdown: breakdown }),
       setTotalPollcoins: (value) => set({ totalPollcoins: value }),
 
-
       addPollcoinsToTotal: (amount) => {
         const current = parseInt(get().totalPollcoins) || 0;
         const amountToAdd = parseInt(amount) || 0;
@@ -136,34 +135,31 @@ export const useShopStore = create<ShopState>()(
 
       setAiErrors: (errors) => set({ aiErrors: errors }),
       setPollErrors: (errors) => set({ pollErrors: errors }),
-      clearAiError: (field) => set((state) => ({
-        aiErrors: { ...state.aiErrors, [field]: undefined },
-      })),
-      clearPollError: (field) => set((state) => ({
-        pollErrors: { ...state.pollErrors, [field]: undefined },
-      })),
-
+      clearAiError: (field) =>
+        set((state) => ({
+          aiErrors: { ...state.aiErrors, [field]: undefined },
+        })),
+      clearPollError: (field) =>
+        set((state) => ({
+          pollErrors: { ...state.pollErrors, [field]: undefined },
+        })),
 
       setLoading: (loading) => set({ loading }),
 
-
-      reset: () => set({
-        aiAmount: "",
-        pollAmount: "",
-        credits: "",
-        pollcoins: "",
-        aiErrors: {},
-        pollErrors: {},
-        loading: false,
-        aiStep: "buy",
-        pollstep: "buy",
-        servicesStep: "buy",
-      }),
+      reset: () =>
+        set({
+          aiAmount: "",
+          pollAmount: "",
+          credits: "",
+          pollcoins: "",
+          aiErrors: {},
+          pollErrors: {},
+          loading: false,
+          aiStep: "buy",
+          pollstep: "buy",
+          servicesStep: "buy",
+        }),
     }),
     persistOptions
   )
 );
-
-
-
-

@@ -24,7 +24,7 @@ import { useUserBalance, useUserServicesBalance } from "../queries/useBalance";
 import { Skeleton } from "@/components/ui/skeleton";
 import Slider, { Settings } from "react-slick";
 import { motion } from "framer-motion";
-import BuyPollcoinsFlow from "./dialogs/BuyPollcoins";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { APP_KEYS } from "@/constants";
 import {
@@ -55,6 +55,7 @@ interface TotalPurchasedRespondentsData {
 }
 
 export function Analytics() {
+  const router = useRouter();
   const [showAllSurveys, setShowAllSurveys] = useState(false);
   const { data, isLoading: balanceLoading } = useUserBalance();
   const { data: servicesBalance, isLoading: servicesBalanceLoading } =
@@ -203,15 +204,14 @@ export function Analytics() {
               features such as Survey generation, Survey Reporting, Voice
               Transcription, Survey Analysis and OCR Document scanning.
             </p>
-            <BuyPollcoinsFlow>
-              <Button
-                variant={"gradient"}
-                className="min-w-[131px] h-[51px] max-md:h-11 max-md:w-full font-bold gap-1 py-[7px] max-md:mt-6 z-40"
-              >
-                Buy Pollcoins
-                <Image src={Arrow} alt="icons" className="size-5" />
-              </Button>
-            </BuyPollcoinsFlow>
+            <Button
+              onClick={() => router.push("/shop/buy-pollcoins")}
+              variant={"gradient"}
+              className="min-w-[131px] h-[51px] max-md:h-11 max-md:w-full font-bold gap-1 py-[7px] max-md:mt-6 z-40"
+            >
+              Buy Pollcoins
+              <Image src={Arrow} alt="icons" className="size-5" />
+            </Button>
           </div>
         </div>
         <div className="absolute top-0 right-0">

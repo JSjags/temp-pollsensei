@@ -23,29 +23,30 @@ const WatermarkBanner: React.FC<WatermarkBannerProps> = ({
     return null;
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center py-5 text-center relative ${className}`}
-    >
-      <div className="flex flex-col items-center gap-2">
-        <p className="text-gray-600">Form created by</p>
-        <Image
-          src={pollsensei_new_logo}
-          alt="PollSensei Logo"
-          className="h-8 w-auto"
-        />
-      </div>
-      <Button
-        variant="link"
-        className="absolute bottom-2 right-4 text-[#828282] hover:text-[#5B03B2] transition-colors"
-        onClick={() => router.push("/settings/subscription")}
-      >
-        Remove watermark
-      </Button>
-    </motion.div>
-  );
+  return null;
+  // (
+  //   <motion.div
+  //     initial={{ opacity: 0, y: 20 }}
+  //     animate={{ opacity: 1, y: 0 }}
+  //     className={`bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center py-5 text-center relative ${className}`}
+  //   >
+  //     <div className="flex flex-col items-center gap-2">
+  //       <p className="text-gray-600">Form created by</p>
+  //       <Image
+  //         src={pollsensei_new_logo}
+  //         alt="PollSensei Logo"
+  //         className="h-8 w-auto"
+  //       />
+  //     </div>
+  //     <Button
+  //       variant="link"
+  //       className="absolute bottom-2 right-4 text-[#828282] hover:text-[#5B03B2] transition-colors"
+  //       onClick={() => router.push("/settings/subscription")}
+  //     >
+  //       Remove watermark
+  //     </Button>
+  //   </motion.div>
+  // );
 };
 
 export default WatermarkBanner;

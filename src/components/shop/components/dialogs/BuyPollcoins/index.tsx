@@ -169,12 +169,15 @@ export default function BuyPollcoinsFlow({
     const trxref = searchParams.get("trxref");
     const reference = searchParams.get("reference");
     const payment_intent = searchParams.get("payment_intent");
-    const payment_intent_client_secret = searchParams.get("payment_intent_client_secret");
-    
+    const payment_intent_client_secret = searchParams.get(
+      "payment_intent_client_secret"
+    );
+
     // Check for either Paystack or Stripe success parameters
     const isPaystackSuccess = success === "true" && (trxref || reference);
-    const isStripeSuccess = success === "true" && (payment_intent || payment_intent_client_secret);
-    
+    const isStripeSuccess =
+      success === "true" && (payment_intent || payment_intent_client_secret);
+
     if ((isPaystackSuccess || isStripeSuccess) && pollstep !== "success") {
       // Retrieve the purchased pollcoins from localStorage
       const purchasedPollcoins = localStorage.getItem("purchasedPollcoins");

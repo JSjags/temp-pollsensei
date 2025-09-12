@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { cn, generateInitials } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { pollsensei_icon, pollsensei_new_logo } from "@/assets/images";
+import {
+  Pollcoin,
+  pollsensei_icon,
+  pollsensei_new_logo,
+} from "@/assets/images";
 import { logoutUser } from "@/redux/slices/user.slice";
 import { useDispatch } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,6 +33,10 @@ import {
   LogOut,
   User,
   Ticket,
+  ChevronDown,
+  ChevronRight,
+  Package,
+  Coins,
 } from "lucide-react";
 import { Button } from "../ui/button";
 
@@ -38,6 +46,10 @@ const SuperAdminSidebar: React.FC = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const pathname = usePathname();
   const isActiveRoute = (route: string) => pathname === route;
+  const [expandedItems, setExpandedItems] = useState<string[]>(() => {
+    // Auto-expand bundles if user is on a bundles-related page
+    return pathname.startsWith("/bundles") ? ["Bundles"] : [];
+  });
 
   const { open, isMobile, setOpenMobile } = useSidebar();
 
@@ -45,6 +57,14 @@ const SuperAdminSidebar: React.FC = () => {
     if (isMobile) {
       setOpenMobile(false);
     }
+  };
+
+  const toggleExpanded = (itemLabel: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(itemLabel)
+        ? prev.filter((item) => item !== itemLabel)
+        : [...prev, itemLabel]
+    );
   };
 
   const sidebarItems = [
@@ -75,6 +95,27 @@ const SuperAdminSidebar: React.FC = () => {
       label: "Coupons",
       path: "/coupons",
       icon: <Ticket className="h-4 w-4" />,
+    },
+    {
+      label: "Bundles",
+      path: "/bundles",
+      icon: <Package className="h-4 w-4" />,
+      children: [
+        {
+          label: "Pollcoins",
+          path: "/bundles/pollcoins",
+          icon: (
+            <Image
+              src={Pollcoin}
+              alt="PollCoin"
+              className={cn(
+                "w-4 h-4 brightness-0",
+                pathname.includes("bundles") && "brightness-[500%]"
+              )}
+            />
+          ),
+        },
+      ],
     },
     {
       label: "Payouts",
@@ -108,20 +149,70 @@ const SuperAdminSidebar: React.FC = () => {
       <SidebarContent>
         <SidebarGroup>
           {sidebarItems.map((item) => (
-            <Link key={item.path} href={item.path}>
-              <Button
-                variant={isActiveRoute(item.path) ? "secondary" : "ghost"}
-                className={cn(
-                  "w-full justify-start",
-                  isActiveRoute(item.path) &&
-                    "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:from-[#5B03B2] hover:to-[#9D50BB]",
-                  !open && "justify-center"
-                )}
-              >
-                {item.icon}
-                {open && <span className="ml-2">{item.label}</span>}
-              </Button>
-            </Link>
+            <div key={item.path}>
+              {item.children ? (
+                <div>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start",
+                      !open && "justify-center"
+                    )}
+                    onClick={() => toggleExpanded(item.label)}
+                  >
+                    {item.icon}
+                    {open && (
+                      <>
+                        <span className="ml-2">{item.label}</span>
+                        {expandedItems.includes(item.label) ? (
+                          <ChevronDown className="h-4 w-4 ml-auto" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 ml-auto" />
+                        )}
+                      </>
+                    )}
+                  </Button>
+                  {open && expandedItems.includes(item.label) && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {item.children.map((child) => (
+                        <Link key={child.path} href={child.path}>
+                          <Button
+                            variant={
+                              isActiveRoute(child.path) ? "secondary" : "ghost"
+                            }
+                            className={cn(
+                              "w-full justify-start text-sm",
+                              isActiveRoute(child.path) &&
+                                "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:from-[#5B03B2] hover:to-[#9D50BB]"
+                            )}
+                            onClick={handleNavClick}
+                          >
+                            {child.icon}
+                            <span className="ml-2">{child.label}</span>
+                          </Button>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link href={item.path}>
+                  <Button
+                    variant={isActiveRoute(item.path) ? "secondary" : "ghost"}
+                    className={cn(
+                      "w-full justify-start",
+                      isActiveRoute(item.path) &&
+                        "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:from-[#5B03B2] hover:to-[#9D50BB]",
+                      !open && "justify-center"
+                    )}
+                    onClick={handleNavClick}
+                  >
+                    {item.icon}
+                    {open && <span className="ml-2">{item.label}</span>}
+                  </Button>
+                </Link>
+              )}
+            </div>
           ))}
         </SidebarGroup>
       </SidebarContent>

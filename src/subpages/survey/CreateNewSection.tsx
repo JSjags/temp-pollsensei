@@ -392,7 +392,7 @@ const CreateNewSection = () => {
             <div>Pagination</div>
           </div>
 
-          <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+          {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
               <p>Form created by</p>
               <Image src={pollsensei_new_logo} alt="Logo" />
@@ -400,7 +400,7 @@ const CreateNewSection = () => {
             <span className="absolute bottom-2 right-4 text-[#828282]">
               Remove watermark
             </span>
-          </div>
+          </div> */}
         </div>
         <div
           className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}

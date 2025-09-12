@@ -572,7 +572,7 @@ const PublicResponse = () => {
                     {submitting ? "Submitting..." : "Submit"}
                   </button>
                 </div>
-                <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+                {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
                   <div className="flex flex-col">
                     <p>Form created by</p>
                     <Image src={pollsensei_new_logo} alt="Logo" />
@@ -580,7 +580,7 @@ const PublicResponse = () => {
                   <span className="absolute bottom-2 right-4 text-[#828282]">
                     Remove watermark
                   </span>
-                </div>
+                </div> */}
               </form>
             </div>
           )}

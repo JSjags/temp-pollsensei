@@ -8,11 +8,13 @@ import { useDailyRate } from "@/components/shop/queries/useDailyRate";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 import { usePollcoinOrderSummary } from "@/components/shop/queries/usePollcoinsPurchase";
+import { useRouter } from "next/navigation";
 
 import { LoadingSpinner } from "./CheckoutDialog";
 import { OrderSummaryPayload } from "@/components/shop/types";
 
 export function BuyFirstStep() {
+  const router = useRouter();
   const {
     pollAmount,
     pollcoins,
@@ -25,7 +27,7 @@ export function BuyFirstStep() {
     setLoading,
     loading,
     setOrderSummary,
-    setOrderBreakdown
+    setOrderBreakdown,
   } = useShopStore();
   const { data: dailyRate, isLoading } = useDailyRate();
   const {
@@ -93,7 +95,7 @@ export function BuyFirstStep() {
     setPollErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const handleSubmit = async () => {
     if (!validate()) return;
 
@@ -108,7 +110,7 @@ export function BuyFirstStep() {
 
       const res = await pollcoinSummaryMutation.mutateAsync(payload);
       const summary = res?.data?.orderSummary;
-      const breakdown = res?.data.breakdown
+      const breakdown = res?.data.breakdown;
 
       if (summary) {
         setOrderSummary(summary);
@@ -185,15 +187,26 @@ export function BuyFirstStep() {
         </div>
       </div>
 
-      <Button
-        onClick={handleSubmit}
-        disabled={loading || !pollAmount || !pollcoins || (!baseAmount && !isNigeria)}
-        variant="gradient"
-        className="w-full rounded mt-12 gap-2"
-      >
-        {loading && <LoadingSpinner />}
-        {loading ? "Processing..." : "Pay"}
-      </Button>
+      <div className="flex gap-3 mt-12">
+        <Button
+          onClick={() => router.push("/shop/buy-pollcoins")}
+          variant="outline"
+          className="flex-1"
+        >
+          Back to Bundles
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            loading || !pollAmount || !pollcoins || (!baseAmount && !isNigeria)
+          }
+          variant="gradient"
+          className="flex-1 gap-2"
+        >
+          {loading && <LoadingSpinner />}
+          {loading ? "Processing..." : "Pay"}
+        </Button>
+      </div>
     </Dialog.Body>
   );
 }

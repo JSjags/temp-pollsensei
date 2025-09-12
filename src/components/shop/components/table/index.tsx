@@ -13,7 +13,7 @@ import { Table } from "@/components/ui/table/index";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Arrow } from "@/assets/images";
-import BuyPollcoinsFlow from "../dialogs/BuyPollcoins";
+import { useRouter } from "next/navigation";
 import { useGeoLocation } from "@/subpages/settings/subscription/PricingCards";
 
 type TxnHistoryTableProps = {
@@ -31,6 +31,7 @@ export function TransactionHistoryTable({
   historyData,
   pagination,
 }: TxnHistoryTableProps) {
+  const router = useRouter();
   const { data: locationData } = useGeoLocation();
   const isNigeria = locationData?.isNigeria;
   const table = useReactTable<TransactionHistory>({
@@ -68,20 +69,17 @@ export function TransactionHistoryTable({
                       Oops! No recorded transactions yet. Buy Pollcoins to use
                       the AI features of PollSensei
                     </p>
-                    <BuyPollcoinsFlow>
-                      <Button
-                        variant={"gradient"}
-                        className="font-bold gap-1 text-sm"
-                      >
-                        Buy Pollcoins{" "}
-                        <Image src={Arrow} alt="icons" className="size-3.5" />
-                      </Button>
-                    </BuyPollcoinsFlow>
+                    <Button
+                      onClick={() => router.push("/shop/buy-pollcoins")}
+                      variant={"gradient"}
+                      className="font-bold gap-1 text-sm"
+                    >
+                      Buy Pollcoins{" "}
+                      <Image src={Arrow} alt="icons" className="size-3.5" />
+                    </Button>
                   </div>
                 ) : (
-                  <p className="text-lg">
-                    No data found.
-                  </p>
+                  <p className="text-lg">No data found.</p>
                 )}
               </div>
             </div>

@@ -43,7 +43,6 @@ interface OCRResponse {
     name?: string;
     email?: string;
   } | null;
-  respondent_details?: any;
 }
 
 // Define initial state
@@ -55,7 +54,6 @@ interface AnswerState {
     name?: string;
     email?: string;
   } | null;
-  respondent_details: any | null;
 }
 
 const initialState: AnswerState = {
@@ -63,7 +61,6 @@ const initialState: AnswerState = {
   extracted_answers: [],
   uploaded_files: [],
   respondent_details: null,
-  respondent_details: undefined,
 };
 
 const answerSlice = createSlice({
