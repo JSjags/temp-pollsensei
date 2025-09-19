@@ -79,7 +79,7 @@ const PricingTable: React.FC = () => {
           </tr>
           <tr className="bg-white">
             <td className="p-4 border border-gray-200 text-left font-medium">
-              AI Survey Generation
+              Survey Generation
             </td>
             {plansData?.map((plan: any) => (
               <td
@@ -92,7 +92,7 @@ const PricingTable: React.FC = () => {
           </tr>
           <tr className="bg-gray-50">
             <td className="p-4 border border-gray-200 text-left font-medium">
-              AI Data Analysis
+              Data Analysis
             </td>
             {plansData?.map((plan: any) => (
               <td
@@ -105,7 +105,7 @@ const PricingTable: React.FC = () => {
           </tr>
           <tr className="bg-white">
             <td className="p-4 border border-gray-200 text-left font-medium">
-              AI Report Generation
+              Report Generation
             </td>
             {plansData?.map((plan: any) => (
               <td
@@ -118,7 +118,7 @@ const PricingTable: React.FC = () => {
           </tr>
           <tr className="bg-gray-50">
             <td className="p-4 border border-gray-200 text-left font-medium">
-              Voice Transcription
+              Speech-to-Text
             </td>
             {plansData?.map((plan: any) => (
               <td
@@ -131,7 +131,7 @@ const PricingTable: React.FC = () => {
           </tr>
           <tr className="bg-white">
             <td className="p-4 border border-gray-200 text-left font-medium">
-              OCR Document Scanning
+              OCR Processing
             </td>
             {plansData?.map((plan: any) => (
               <td

@@ -24,6 +24,7 @@ import {
   proceedToPurchase,
   setQuickSurveyQualifyingTemplateId,
   setQuickSurveyScreenerId,
+  startQuickSurveyFlow,
 } from "@/redux/slices/quickSurveySlice";
 import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
 
@@ -170,6 +171,9 @@ const FilterRespondents = () => {
       const response = await FilterPaidRespondent(payload);
       dispatch(setFilterBy("qualifyingCriteria"));
       dispatch(setQuickSurveyQualifyingTemplateId(response?._id));
+
+      // Ensure quick survey flow is active
+      dispatch(startQuickSurveyFlow());
       dispatch(proceedToPurchase());
     } catch (error: any) {
       toast.error(
@@ -224,8 +228,11 @@ const FilterRespondents = () => {
       const response = await dispatch(
         createScreenerSurvey({ payload }) as any
       ).unwrap();
+      // console.log({ response });
       dispatch(setFilterBy("screenerSurvey"));
       dispatch(setQuickSurveyScreenerId(response?._id));
+
+      dispatch(startQuickSurveyFlow());
       dispatch(proceedToPurchase());
     } catch (error: any) {
       console.error("Failed to save and continue:", error);
@@ -303,6 +310,13 @@ const FilterRespondents = () => {
   if (!isInitialized || !hasAccess) {
     return null;
   }
+
+  // console.log({
+  //   quickSurveyId,
+  //   quickSurveyQualifyingTemplateId,
+  //   quickSurveyScreenerId,
+  //   showQuickSurveyFlow,
+  // });
 
   return (
     <div className="w-full h-auto relative">

@@ -30,9 +30,9 @@ export function InAppPurchases() {
   const servicesWithPurchaseHandlers = [
     {
       serviceType: "ai-survey-generation",
-      title: "AI Survey Generation Credit",
-      cta: "AI Survey Generation",
-      placeholder: "Enter AI-Credit amount",
+      title: "Survey Generation",
+      cta: "Survey Generation",
+      placeholder: "Enter Survey Credit amount",
       src: "/assets/shop/svg/credit.svg",
       creditsPerUnit: surveyRate?.creditsPerUnit,
       pricePerCredit: surveyRate?.pricePerCredit,
@@ -41,8 +41,8 @@ export function InAppPurchases() {
     },
     {
       serviceType: "ocr",
-      title: "OCR Document Scan Credit",
-      cta: "OCR Document Scan",
+      title: "OCR Processing",
+      cta: "OCR Processing",
       placeholder: "Enter OCR Credit amount",
       src: "/assets/shop/svg/OCRScan.svg",
       creditsPerUnit: ocrRate?.creditsPerUnit,
@@ -52,9 +52,9 @@ export function InAppPurchases() {
     },
     {
       serviceType: "ai-analysis",
-      title: "AI Analysis Credit",
-      cta: "AI Analysis",
-      placeholder: "Enter AI Analysis Credit Amount",
+      title: "Data Analysis",
+      cta: "Data Analysis",
+      placeholder: "Enter Analysis Credit Amount",
       src: "/assets/shop/svg/AIAnalysis.svg",
       creditsPerUnit: analysisRate?.creditsPerUnit,
       pricePerCredit: analysisRate?.pricePerCredit,
@@ -63,9 +63,9 @@ export function InAppPurchases() {
     },
     {
       serviceType: "ai-reporting",
-      title: "AI Report Generation Credit",
-      cta: "AI Reporting",
-      placeholder: "Enter AI Report Generation amount",
+      title: "Report Generation",
+      cta: "Report Generation",
+      placeholder: "Enter Report Credit amount",
       src: "/assets/shop/svg/AIReporting.svg",
       creditsPerUnit: reportingRate?.creditsPerUnit,
       pricePerCredit: reportingRate?.pricePerCredit,
@@ -74,9 +74,9 @@ export function InAppPurchases() {
     },
     {
       serviceType: "voice-transcription",
-      title: "Voice Transcription Credit",
-      cta: "Voice Transcription",
-      placeholder: "Enter Voice Transcription credit amount",
+      title: "Speech-to-Text",
+      cta: "Speech-to-Text",
+      placeholder: "Enter Transcription credit amount",
       src: "/assets/shop/svg/VoiceTranscription.svg",
       creditsPerUnit: voiceRate?.creditsPerUnit,
       pricePerCredit: voiceRate?.pricePerCredit,
@@ -153,7 +153,7 @@ export function InAppPurchases() {
                     className="h-6 gap-1 text-xs w-full px-0.5"
                   >
                     {cta}
-                    <Image src={Arrow} alt="icons" className="w-4 h-4" />
+                    <Image src={Arrow} alt="icons" className="w-3 h-3" />
                   </Button>
                 </BuyServicesDialog>
               </div>

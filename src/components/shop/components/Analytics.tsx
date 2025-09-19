@@ -38,6 +38,7 @@ import {
   fetchPurchasedRespondentsStats,
 } from "@/services/api/apiRequest";
 import { useWindowSize } from "@uidotdev/usehooks";
+import { formatLargeNumber } from "@/utils";
 
 type ServiceBalance = {
   serviceType: string;
@@ -68,6 +69,10 @@ export function Analytics() {
     useUserServicesBalance();
   const { restrictedBalance, unrestrictedBalance, totalBalance } = data || {};
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const parseFormattedNumber = (formattedNum: string): number => {
+    return Number(formattedNum.replace(/,/g, ""));
+  };
 
   const analyticData = [
     {
@@ -339,19 +344,15 @@ export function Analytics() {
                             <Skeleton className="h-6 w-full" />
                           ) : (
                             <h4 className="text-xl font-bold">
-                              {analytic.value}
+                              {formatLargeNumber(
+                                parseFormattedNumber(String(analytic.value)) ??
+                                  0
+                              )}
                             </h4>
                           )}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-help">
-                                <Image src={InfoIcon} alt="icons" />
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">{analytic.description}</p>
-                            </TooltipContent>
-                          </Tooltip>
+                          <span>
+                            <Image src={InfoIcon} alt="icons" />
+                          </span>
                         </div>
                       </div>
                     </div>

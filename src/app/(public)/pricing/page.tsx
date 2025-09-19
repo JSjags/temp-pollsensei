@@ -237,7 +237,7 @@ const PricingPage: React.FC = () => {
                       </svg>
                       <span className="text-gray-700">
                         {plan.ai_survey_generation?.usage_capacity ||
-                          "AI Survey Generation"}
+                          "Survey Generation"}
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">
@@ -256,7 +256,7 @@ const PricingPage: React.FC = () => {
                       </svg>
                       <span className="text-gray-700">
                         {plan.ai_data_analysis?.usage_capacity ||
-                          "AI Data Analysis"}
+                          "Data Analysis"}
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">
@@ -275,7 +275,7 @@ const PricingPage: React.FC = () => {
                       </svg>
                       <span className="text-gray-700">
                         {plan.ai_report_generation?.usage_capacity ||
-                          "AI Report Generation"}
+                          "Report Generation"}
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">
@@ -294,7 +294,7 @@ const PricingPage: React.FC = () => {
                       </svg>
                       <span className="text-gray-700">
                         {plan.voice_transcription?.usage_capacity ||
-                          "Voice Transcription"}
+                          "Speech-to-Text"}
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">
@@ -313,7 +313,7 @@ const PricingPage: React.FC = () => {
                       </svg>
                       <span className="text-gray-700">
                         {plan.ocr_document_scanning?.usage_capacity ||
-                          "OCR Document Scanning"}
+                          "OCR Processing"}
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">

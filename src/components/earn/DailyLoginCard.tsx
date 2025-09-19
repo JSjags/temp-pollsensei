@@ -117,7 +117,7 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
     for (let day = 1; day <= daysInMonth; day++) {
       rewards.push({
         day: day.toString(),
-        price: "1",
+        price: "0.08",
       });
     }
 
@@ -171,8 +171,8 @@ const DailyLoginCard: FC<DailyLoginCardProps> = ({
         >
           <p className="text-[#333333] text-xs">Day {login.day}</p>
           <div className="flex items-center gap-1">
-            <p className="text-sm text-[#5B03B2] font-bold">+{login.price}</p>
             <Image src={logoGold} width={15} height={15} alt="pollcoin" />
+            <p className="text-sm text-[#5B03B2] font-bold">+{login.price}</p>
           </div>
           <Button
             variant="default"

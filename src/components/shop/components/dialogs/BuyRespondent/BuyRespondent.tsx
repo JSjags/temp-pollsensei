@@ -336,8 +336,8 @@ const BuyRespondent = () => {
             >
               <div className="flex flex-col items-center justify-center">
                 <Button variant="gradient" className="h-6 gap-1 text-xs w-full">
-                  Respondents{" "}
-                  <Image src={Arrow} alt="icons" className="w-4 h-4" />
+                  Response Collection{" "}
+                  <Image src={Arrow} alt="icons" className="w-3 h-3" />
                 </Button>
               </div>
             </DialogTrigger>
@@ -427,13 +427,14 @@ const BuyRespondent = () => {
                     <p className="text-[10px] lg:text-xs">
                       Average Respondent rate per Survey:{" "}
                       <div className="w-auto flex items-center gap-1">
-                        <span className="font-semibold">5</span>
                         <Image
                           src={logoGold}
                           width={15}
                           height={15}
                           alt="logoGold"
                         />
+                        <span className="font-semibold">5</span>
+
                         <span className="font-semibold">/Respondent </span>
                       </div>
                     </p>
@@ -469,15 +470,15 @@ const BuyRespondent = () => {
                       <p className="text-[10px]  lg:text-xs">
                         Cost:{" "}
                         <div className="w-auto flex items-center gap-1">
-                          <p className="text-base lg:text-lg text-[#5F08B2]">
-                            {respondentsNumber * 5 || 0}
-                          </p>
                           <Image
                             src={logoGold}
                             width={15}
                             height={15}
                             alt="logoGold"
                           />
+                          <p className="text-base lg:text-lg text-[#5F08B2]">
+                            {respondentsNumber * 5 || 0}
+                          </p>
                         </div>
                       </p>
                     </div>
@@ -571,8 +572,8 @@ const BuyRespondent = () => {
                   Unit cost per Respondent
                 </p>
                 <div className="w-auto flex items-center gap-1">
-                  <p className="text-base lg:text-lg text-[#5F08B2]">5</p>
                   <Image src={logoGold} width={15} height={15} alt="logoGold" />
+                  <p className="text-base lg:text-lg text-[#5F08B2]">5</p>
                 </div>
               </div>
               <div className="w-full flex justify-between items-center border-b border-dotted border-[#A9A9B1] pb-2">
@@ -580,10 +581,10 @@ const BuyRespondent = () => {
                   Number of PollCoins
                 </p>
                 <div className="w-auto flex items-center gap-1">
+                  <Image src={logoGold} width={15} height={15} alt="logoGold" />
                   <p className="text-base lg:text-lg text-[#5F08B2]">
                     {selectedRespondentsNumber * 5}
                   </p>
-                  <Image src={logoGold} width={15} height={15} alt="logoGold" />
                 </div>
               </div>
             </div>

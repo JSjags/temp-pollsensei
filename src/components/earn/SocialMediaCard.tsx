@@ -75,13 +75,13 @@ const SocialMediaCard = () => {
                 <div className="flex flex-row items-center flex-wrap text-xs text-[#767171]">
                   Follow us on {social.name} to Claim{" "}
                   <div className="flex items-center gap-1">
-                    <p className="text-sm text-[#5B03B2] font-bold">100</p>
                     <Image
                       src={logoGold}
                       width={15}
                       height={15}
                       alt="pollcoin"
                     />
+                    <p className="text-sm text-[#5B03B2] font-bold">100</p>
                   </div>
                 </div>
               </div>
