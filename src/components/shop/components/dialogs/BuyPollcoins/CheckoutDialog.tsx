@@ -340,13 +340,13 @@ function CheckoutDialog() {
       localStorage.setItem("purchasedPollcoins", pollcoinsInt.toString());
 
       // Ensure paymentGateway is properly typed
-      const paymentGateway = gatewayToUse;
+      const paymentGateway = gatewayToUse || "stripe";
 
       const redirectUrl = `${window.location.origin}/shop?success=true`;
 
       // Create payload based on payment gateway type
       let paymentPayload: PurchasePayload;
-      const currency = orderBreakdown?.paymentDetails?.currency;
+      const currency = orderBreakdown?.paymentDetails?.currency || "USD";
       if (gatewayToUse === "stripe") {
         paymentPayload = {
           paymentGateway,
