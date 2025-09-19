@@ -1,16 +1,27 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Star, Loader2 } from "lucide-react";
 import { Pollcoin } from "@/assets/images";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useShopStore } from "../store/useShopStore";
 import { cn } from "@/lib/utils";
-import BuyPollcoinsFlow from "@/components/shop/components/dialogs/BuyPollcoins";
+import { useQuery } from "@tanstack/react-query";
+import {
+  fetchUserBundles,
+  UserPollcoinBundle,
+} from "@/services/api/getUserBundles";
+import { usePollcoinPurchase, PurchasePayload } from "@/lib/purchase";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import axiosInstance from "@/lib/axios-instance";
+import axios from "axios";
+import { redirectUrls } from "@/services/api/constants.api";
 
 interface PollCoinBundle {
   id: string;
+  name?: string;
   price: number;
   pollcoins: number;
   bonus?: number;
@@ -18,68 +29,414 @@ interface PollCoinBundle {
   discount?: number;
   originalPrice?: number;
   popular?: boolean;
+  currency: string;
 }
 
-const pollCoinBundles: PollCoinBundle[] = [
-  {
-    id: "bundle-1",
-    price: 25,
-    pollcoins: 50,
-  },
-  {
-    id: "bundle-2",
-    price: 47.5,
-    pollcoins: 95,
-    bonus: 5,
-    tag: "Early Bird",
-    popular: true,
-  },
-  {
-    id: "bundle-3",
-    price: 115,
-    pollcoins: 230,
-    discount: 53,
-    originalPrice: 125,
-  },
-  {
-    id: "bundle-4",
-    price: 220,
-    pollcoins: 440,
-    bonus: 60,
-  },
-  {
-    id: "bundle-5",
-    price: 400,
-    pollcoins: 800,
-    bonus: 200,
-  },
-  {
-    id: "bundle-6",
-    price: 950,
-    pollcoins: 1900,
-    bonus: 600,
-  },
-];
+// Loading skeleton component
+const BundleSkeleton = () => (
+  <div className="relative bg-white overflow-hidden rounded-xl border border-gray-200 p-4 animate-pulse">
+    {/* Background skeleton */}
+    <div className="absolute pointer-events-none z-0 flex items-center justify-end top-1/2 right-3 transform -translate-y-1/2">
+      <div className="w-28 h-28 bg-gray-200 rounded-full opacity-20" />
+    </div>
+
+    {/* Tag skeleton */}
+    <div className="absolute top-0 right-0 w-full flex justify-end pointer-events-none z-20">
+      <div className="w-20 h-6 bg-gray-200 rounded transform rotate-45" />
+    </div>
+
+    <div className="text-start relative z-10">
+      {/* Bundle name skeleton */}
+      <div className="mb-2">
+        <div className="h-6 w-24 bg-gray-200 rounded" />
+      </div>
+
+      {/* Price skeleton */}
+      <div className="mb-4">
+        <div className="h-6 w-16 bg-gray-200 rounded" />
+      </div>
+
+      {/* PollCoins skeleton */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 bg-gray-200 rounded-full" />
+          <div className="h-6 w-20 bg-gray-200 rounded" />
+        </div>
+        <div className="h-4 w-32 bg-gray-200 rounded" />
+      </div>
+
+      {/* Button skeleton */}
+      <div className="h-10 w-20 bg-gray-200 rounded-full" />
+    </div>
+  </div>
+);
+
+// Currency formatting utility
+const formatCurrency = (amount: number, currency: string): string => {
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+  return formatter.format(amount);
+};
+
+// Get currency symbol
+const getCurrencySymbol = (currency: string): string => {
+  switch (currency.toUpperCase()) {
+    case "USD":
+      return "$";
+    case "NGN":
+      return "₦";
+    case "EUR":
+      return "€";
+    case "GBP":
+      return "£";
+    default:
+      return currency;
+  }
+};
+
+// Transform API data to component format
+const transformBundleData = (apiBundle: UserPollcoinBundle): PollCoinBundle => {
+  const pollcoins = apiBundle.amount;
+  let price = apiBundle.price;
+  let bonus: number | undefined;
+  let discount: number | undefined;
+  let originalPrice: number | undefined;
+
+  // Calculate pricing based on discount type
+  if (apiBundle.discount_type === "percentage" && apiBundle.percentage) {
+    originalPrice = price;
+    price = price * (1 - apiBundle.percentage / 100);
+    discount = apiBundle.percentage;
+  } else if (apiBundle.discount_type === "bonus" && apiBundle.bonus) {
+    bonus = apiBundle.bonus;
+  }
+
+  return {
+    id: apiBundle._id,
+    name: apiBundle.name,
+    price: Math.round(price * 100) / 100, // Round to 2 decimal places
+    pollcoins,
+    bonus,
+    tag: apiBundle.tag,
+    discount,
+    originalPrice,
+    popular:
+      apiBundle.tag?.toLowerCase().includes("popular") ||
+      apiBundle.tag?.toLowerCase().includes("black friday") ||
+      apiBundle.tag?.toLowerCase().includes("early bird") ||
+      false,
+    currency: apiBundle.currency,
+  };
+};
 
 export function PollCoinBundles() {
   const router = useRouter();
   const { setPollcoins, setPollAmount, setPollDialogOpen, setPollStep } =
     useShopStore();
+  const { toast } = useToast();
+  const purchasePollcoins = usePollcoinPurchase();
 
-  const handlePurchase = (bundle: PollCoinBundle) => {
-    // Set the bundle values in the store
-    setPollcoins(bundle.pollcoins.toString());
-    setPollAmount(bundle.price.toString());
+  // Loading state for each bundle (tracked by bundle ID)
+  const [loadingBundles, setLoadingBundles] = useState<Set<string>>(new Set());
 
-    // Open the PollCoin purchase dialog directly
-    setPollDialogOpen(true);
-    setPollStep("checkout");
+  // Geo location for payment gateway selection
+  const {
+    data: locationData,
+    isLoading: locationLoading,
+    isError: locationError,
+  } = useQuery({
+    queryKey: ["geolocation"],
+    queryFn: async () => {
+      const response = await axios.get("https://ipapi.co/json/");
+      return {
+        country: response.data.country_name,
+        isNigeria: response.data.country_name === "Nigeria",
+        isSuccess: true,
+      };
+    },
+    retry: 1,
+  });
+
+  // Debug current state
+  console.log("🔍 Component state:", {
+    loadingBundles: Array.from(loadingBundles),
+    locationData,
+    isNigeria: locationData?.isNigeria,
+    note: "Payment gateway will be determined by server response",
+  });
+
+  // Fetch bundles from API
+  const {
+    data: bundlesResponse,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["user-pollcoin-bundles"],
+    queryFn: () => fetchUserBundles({ page: 1, page_size: 50 }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+
+  // Transform API data
+  const bundles = React.useMemo(() => {
+    if (Boolean(bundlesResponse?.data?.length)) {
+      return bundlesResponse!.data
+        .filter((bundle) => bundle.status === "published")
+        .map(transformBundleData);
+    }
+    return [];
+  }, [bundlesResponse]);
+
+  const handleBuyNow = async (bundle: PollCoinBundle) => {
+    console.log("🔍 Starting handleBuyNow with bundle:", bundle);
+
+    // Check if this bundle is already loading
+    if (loadingBundles.has(bundle.id)) {
+      console.log("🔍 Bundle already loading, ignoring click");
+      return;
+    }
+
+    // Check if location data is loaded
+    if (locationLoading) {
+      toast({
+        title: "Loading",
+        description: "Detecting your location for payment...",
+        variant: "default",
+      });
+      return;
+    }
+
+    if (locationError || !locationData) {
+      toast({
+        title: "Error",
+        description: "Unable to detect your location. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Add this bundle to loading state
+    setLoadingBundles((prev) => new Set(prev).add(bundle.id));
+    try {
+      // Make POST request to get order summary
+      console.log(
+        "🔍 Making API call to /purchases/pollcoins/order-summary with bundleId:",
+        bundle.id
+      );
+      const response = await axiosInstance.post(
+        "/purchases/pollcoins/order-summary",
+        {
+          bundleId: bundle.id,
+        }
+      );
+
+      console.log("🔍 API response:", response.data);
+      console.log(
+        "🔍 Full API response (copy this):",
+        JSON.stringify(response.data, null, 2)
+      );
+
+      if (response.data.orderSummary) {
+        console.log("🔍 Order summary received:", response.data);
+        const { orderSummary, breakdown } = response.data;
+
+        // Set the bundle values in the store for success handling
+        setPollcoins(orderSummary.pollcoinsAmount.toString());
+        setPollAmount(orderSummary.totalAmount.toString());
+
+        // Store in localStorage for success page handling
+        localStorage.setItem(
+          "purchasedPollcoins",
+          orderSummary.pollcoinsAmount.toString()
+        );
+
+        // Use the reference ID from the order summary
+        const orderReferenceId = orderSummary.referenceId;
+
+        // Use the payment gateway from the order summary response
+        const paymentGateway = breakdown.paymentDetails.gateway_to_use;
+
+        console.log("🔍 Payment gateway from API:", {
+          gatewayFromAPI: paymentGateway,
+          country: locationData?.country,
+          isNigeria: locationData?.isNigeria,
+        });
+
+        // Create payment payload
+        const paymentPayload: PurchasePayload = {
+          paymentGateway,
+          orderReferenceId,
+          redirect_url: redirectUrls.success,
+        };
+
+        console.log("🔍 Initiating payment with payload:", paymentPayload);
+
+        // Initiate payment directly
+        const result = await purchasePollcoins.mutateAsync(paymentPayload);
+
+        console.log("🔍 Payment initiation result:", result);
+        console.log(
+          "🔍 Full payment result (copy this):",
+          JSON.stringify(result, null, 2)
+        );
+
+        // Extract publishable key from payment response if available
+        const publishableKey =
+          (result.data?.payment as any)?.publishable_key ||
+          (result.data as any)?.publishable_key;
+        if (publishableKey) {
+          console.log(
+            "🔍 Publishable key from payment response:",
+            publishableKey.substring(0, 20) + "..."
+          );
+          // Store the publishable key for the checkout page
+          sessionStorage.setItem("stripe_publishable_key", publishableKey);
+        }
+
+        if (result.success) {
+          if (
+            paymentGateway === "stripe" &&
+            result.data?.payment?.client_secret
+          ) {
+            // Handle Stripe payment - redirect to checkout page
+            const checkoutUrl = `/shop/checkout?cs=${result.data.payment.client_secret}&amount=${orderSummary.totalAmount}&pollcoins=${orderSummary.pollcoinsAmount}`;
+            console.log("🔍 Redirecting to Stripe checkout:", checkoutUrl);
+            window.location.href = checkoutUrl; // Re-enabled for testing
+          } else if (
+            paymentGateway === "paystack" &&
+            result.data?.payment?.authorization_url
+          ) {
+            // Handle Paystack payment - redirect to authorization URL
+            console.log(
+              "🔍 Redirecting to Paystack:",
+              result.data.payment.authorization_url
+            );
+            console.log("🔍 Paystack payment details:", {
+              reference: result.data.payment.reference,
+              access_code: result.data.payment.access_code,
+              authorization_url: result.data.payment.authorization_url,
+            });
+            window.location.href = result.data.payment.authorization_url;
+          } else {
+            toast({
+              title: "Payment Error",
+              description: "Invalid payment response from server",
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Payment Error",
+            description: result.message || "Failed to initiate payment",
+            variant: "destructive",
+          });
+        }
+      } else {
+        console.log("🔍 API returned success: false");
+        toast({
+          title: "Error",
+          description: response.data.message || "Failed to get order summary",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("🔍 Failed to get order summary:", error);
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.message || "Failed to get order summary",
+        variant: "destructive",
+      });
+    } finally {
+      // Remove this bundle from loading state
+      setLoadingBundles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(bundle.id);
+        return newSet;
+      });
+    }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <BundleSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="w-full flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="text-red-500 text-lg font-medium mb-2">
+            Failed to load bundles
+          </div>
+          <div className="text-gray-600">Please try refreshing the page</div>
+        </div>
+      </div>
+    );
+  }
+
+  // No bundles state
+  if (bundles.length === 0) {
+    return (
+      <div className="w-full flex items-center justify-center py-16">
+        <div className="text-center max-w-md mx-auto">
+          {/* Empty state illustration */}
+          <div className="mb-6">
+            <div className="w-32 h-32 mx-auto bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-300 to-purple-400 rounded-full flex items-center justify-center">
+                <Image
+                  src={Pollcoin}
+                  alt="PollCoin"
+                  className="w-12 h-12 opacity-60"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Empty state content */}
+          <div className="space-y-3">
+            <h3 className="text-xl font-semibold text-gray-800">
+              No bundles available
+            </h3>
+            <p className="text-gray-500 leading-relaxed">
+              We're currently preparing some amazing PollCoin bundles for you.
+              Check back soon for great deals and special offers!
+            </p>
+          </div>
+
+          {/* Action button */}
+          <div className="mt-8">
+            <Button
+              variant="outline"
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 transition-colors"
+            >
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
-        {pollCoinBundles.map((bundle) => (
+        {bundles.map((bundle) => (
           <div
             key={bundle.id}
             className={cn(
@@ -162,14 +519,23 @@ export function PollCoinBundles() {
             )}
 
             <div className="text-start relative z-10">
+              {/* Bundle Name */}
+              {bundle.name && (
+                <div className="mb-2">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {bundle.name}
+                  </h3>
+                </div>
+              )}
+
               {/* Price */}
               <div className="mb-4">
                 <span className="text-xl font-bold text-gray-700 mr-2">
-                  ${bundle.price}
+                  {formatCurrency(bundle.price, bundle.currency)}
                 </span>
                 {bundle.originalPrice && (
                   <span className="!text-lg text-gray-400 line-through">
-                    ${bundle.originalPrice}
+                    {formatCurrency(bundle.originalPrice, bundle.currency)}
                   </span>
                 )}
               </div>
@@ -179,7 +545,7 @@ export function PollCoinBundles() {
                 <div className="flex items-center justify-start gap-2 mb-2">
                   <Image src={Pollcoin} alt="PollCoin" className="w-8 h-8" />
                   <span className="text-2xl font-bold text-purple-800">
-                    {bundle.pollcoins}
+                    {bundle.pollcoins.toLocaleString()}
                   </span>
                   <span className="text-2xl text-purple-800 font-bold">
                     PollCoins
@@ -190,22 +556,38 @@ export function PollCoinBundles() {
                 <div className="h-10">
                   {bundle.bonus && (
                     <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium inline-block">
-                      +{bundle.bonus} PollCoins Bonus
+                      +{bundle.bonus.toLocaleString()} PollCoins Bonus
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Purchase Button */}
-              <BuyPollcoinsFlow>
-                <Button
-                  variant="ghost"
-                  className="h-10 rounded-full text-base hover:!bg-transparent text-gray-500 hover:text-gray-700 px-0 font-medium gap-2 hover:scale-105 transition-transform w-fit"
-                >
-                  Buy now
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </BuyPollcoinsFlow>
+              <Button
+                variant="ghost"
+                className="h-10 rounded-full text-base hover:!bg-transparent text-gray-500 hover:text-gray-700 px-0 font-medium gap-2 hover:scale-105 transition-transform w-fit"
+                onClick={() => {
+                  console.log("🔍 Button clicked, calling handleBuyNow");
+                  handleBuyNow(bundle);
+                }}
+                disabled={
+                  loadingBundles.has(bundle.id) ||
+                  purchasePollcoins.isPending ||
+                  locationLoading
+                }
+              >
+                {loadingBundles.has(bundle.id) || locationLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {locationLoading ? "Detecting location..." : "Loading..."}
+                  </>
+                ) : (
+                  <>
+                    Buy now
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         ))}

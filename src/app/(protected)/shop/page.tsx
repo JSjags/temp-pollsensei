@@ -4,14 +4,17 @@ import Shop from "@/components/shop";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useShopStore } from "@/components/shop/store/useShopStore";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Page() {
   const searchParams = useSearchParams();
   const { setPollDialogOpen, setPollStep } = useShopStore();
+  const { toast } = useToast();
 
   useEffect(() => {
     const bundle = searchParams.get("bundle");
     const custom = searchParams.get("custom");
+    const success = searchParams.get("success");
 
     if (bundle === "true") {
       // Auto-open the PollCoin purchase dialog at checkout step
@@ -29,8 +32,31 @@ export default function Page() {
       // Clean up the URL
       const newUrl = window.location.pathname;
       window.history.replaceState(null, "", newUrl);
+    } else if (success === "true") {
+      // Show success message for completed payment
+      const purchasedPollcoins = localStorage.getItem("purchasedPollcoins");
+      if (purchasedPollcoins) {
+        toast({
+          title: "Payment Successful! 🎉",
+          description: `You have successfully purchased ${purchasedPollcoins} PollCoins!`,
+          variant: "default",
+        });
+        // Clean up localStorage
+        localStorage.removeItem("purchasedPollcoins");
+      } else {
+        toast({
+          title: "Payment Successful! 🎉",
+          description:
+            "Your PollCoin purchase has been completed successfully!",
+          variant: "default",
+        });
+      }
+
+      // Clean up the URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState(null, "", newUrl);
     }
-  }, [searchParams, setPollDialogOpen, setPollStep]);
+  }, [searchParams, setPollDialogOpen, setPollStep, toast]);
 
   return (
     // <ComingSoon

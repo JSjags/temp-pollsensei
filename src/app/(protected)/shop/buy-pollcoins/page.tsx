@@ -8,7 +8,7 @@ export default function BuyPollCoinsPage() {
   const router = useRouter();
 
   return (
-    <div className="md:px-10 pb-16 py-8 pt-0 max-md:w-screen">
+    <div className="md:px-10 px-4 pb-16 py-8 pt-0 max-md:w-screen">
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => router.back()}

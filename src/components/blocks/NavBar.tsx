@@ -58,8 +58,8 @@ const NavBar: FC<NavBarProps> = ({
     "Reports",
     "Pricing",
     "Resource Hub",
-    "Leaderboard",
-    "FAQs",
+    // "Leaderboard",
+    // "FAQs",
   ];
 
   const handleLinkClick = (item: string) => {

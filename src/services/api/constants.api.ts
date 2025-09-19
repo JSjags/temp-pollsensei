@@ -40,3 +40,10 @@ export const queryKeys = Object.freeze({
 
   REFERRERS: "getReferrers",
 });
+
+export const redirectUrls = Object.freeze({
+  shop: "/shop",
+  buyPollcoins: "/shop/buy-pollcoins",
+  checkout: "/shop/checkout",
+  success: "https://pollsensei.ai/shop?success=true",
+});

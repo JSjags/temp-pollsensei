@@ -1,14 +1,14 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import rawAxiosInstance from "./rawAxiosInstance";
 import axiosInstance from "./axios-instance";
 
 export type PurchasePayload = {
-  paymentGateway: string | undefined;
-  currency: string | undefined;
+  paymentGateway: string;
   orderReferenceId: string;
-  redirect_url?: string;
-  // Optional fields
+  redirect_url?: string; // required for paystack but optional for stripe
+  bundleId?: string; // bundle ID for bundle purchases
+  // Optional fields for backward compatibility
+  currency?: string;
   amount?: number;
   pollcoins?: number;
   orderSummaryId?: string;
@@ -26,7 +26,7 @@ type PurchaseResponse = {
       status: string;
     };
     payment: {
-      authorization_url?: string; 
+      authorization_url?: string;
       client_secret?: string;
       access_code?: string;
       reference: string;
@@ -38,44 +38,32 @@ export const usePollcoinPurchase = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: PurchasePayload) => {
-      let requestPayload: Record<string, any>;
-      
-      if (payload.paymentGateway === 'stripe') {
-        // For Stripe, only include these specific fields
-        requestPayload = {
-          paymentGateway: payload.paymentGateway,
-          currency: payload.currency,
-          orderReferenceId: payload.orderReferenceId,
-          pollcoins: payload.pollcoins
-          // redirect_url: payload.redirect_url,
-        };
-        
-        // Only add orderSummaryId if it exists
-        if (payload.orderSummaryId) {
-          requestPayload.orderSummaryId = payload.orderSummaryId;
-        }
-      } else {
-        // For other payment gateways (like Paystack), include amount and pollcoins
-        requestPayload = {
-          paymentGateway: payload.paymentGateway,
-          currency: payload.currency,
-          orderReferenceId: payload.orderReferenceId,
-          redirect_url: payload.redirect_url,
-        };
-        
-        // Add amount and pollcoins if they exist
-        if (payload.amount !== undefined) {
-          requestPayload.amount = Number(payload.amount);
-        }
-        
-        if (payload.pollcoins !== undefined) {
-          requestPayload.pollcoins = Number(payload.pollcoins);
-        }
-        
-        // Add orderSummaryId if it exists
-        if (payload.orderSummaryId) {
-          requestPayload.orderSummaryId = payload.orderSummaryId;
-        }
+      // Create the request payload with only the required fields
+      const requestPayload: Record<string, any> = {
+        paymentGateway: payload.paymentGateway,
+        orderReferenceId: payload.orderReferenceId,
+      };
+
+      // Add redirect_url if provided (required for paystack, optional for stripe)
+      if (payload.redirect_url) {
+        requestPayload.redirect_url = payload.redirect_url;
+      }
+
+      // Add optional fields if they exist (for backward compatibility)
+      if (payload.bundleId) {
+        requestPayload.bundleId = payload.bundleId;
+      }
+      if (payload.currency) {
+        requestPayload.currency = payload.currency;
+      }
+      if (payload.amount !== undefined) {
+        requestPayload.amount = Number(payload.amount);
+      }
+      if (payload.pollcoins !== undefined) {
+        requestPayload.pollcoins = Number(payload.pollcoins);
+      }
+      if (payload.orderSummaryId) {
+        requestPayload.orderSummaryId = payload.orderSummaryId;
       }
 
       const res = await rawAxiosInstance.post<PurchaseResponse>(

@@ -26,9 +26,9 @@ const items = [
     icon: "/assets/sidebar/home.svg",
   },
   {
-    title: "Earn",
-    url: "/earn",
-    icon: "/assets/sidebar/earn.svg",
+    title: "Survey Board",
+    url: "/surveys",
+    icon: "/assets/sidebar/survey-board.svg",
   },
   {
     title: "Reports",
@@ -41,11 +41,6 @@ const items = [
     icon: "/assets/sidebar/shop.svg",
   },
   {
-    title: "Survey Board",
-    url: "/surveys",
-    icon: "/assets/sidebar/survey-board.svg",
-  },
-  {
     title: "Payouts",
     url: "/payouts",
     icon: "/assets/sidebar/payouts.svg",
@@ -54,6 +49,11 @@ const items = [
     title: "Referrals",
     url: "/referrals",
     icon: "/assets/sidebar/referrals.svg",
+  },
+  {
+    title: "Earn",
+    url: "/earn",
+    icon: "/assets/sidebar/earn.svg",
   },
   {
     title: "Learning Hub",
