@@ -5,14 +5,13 @@ on:
     branches:
       - main
       - v2-main
-      - staging-v2
       - release
 
 env:
   AZURE_CONTAINER_REGISTRY: oaksdevacr.azurecr.io
   ACR_RESOURCE_GROUP: OAKS-SERVICES-RG
-  AKS_RESOURCE_GROUP: Pollsensei-RG
-  CLUSTER_NAME: oaksPollsenseiCluster
+  AKS_RESOURCE_GROUP: general-RG
+  CLUSTER_NAME: oaksGeneralCluster
 
 jobs:
   build-and-deploy:
@@ -35,14 +34,14 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             echo "DEPLOY_ENV=production" >> $GITHUB_ENV
             echo "IMAGE_TAG=prod-$COMMIT_SHA" >> $GITHUB_ENV
-            echo "NAMESPACE=production" >> $GITHUB_ENV
+            echo "NAMESPACE=prod-pollsensei-web" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_APP_DOMAIN=https://pollsensei.ai" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL }}" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}" >> $GITHUB_ENV
           elif [ "${{ github.ref }}" == "refs/heads/v2-main" ]; then
             echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
             echo "IMAGE_TAG=stg-$COMMIT_SHA" >> $GITHUB_ENV
-            echo "NAMESPACE=staging" >> $GITHUB_ENV
+            echo "NAMESPACE=staging-pollsensei-web" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_APP_DOMAIN=https://staging.pollsensei.ai" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL_DEV }}" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_DEV }}" >> $GITHUB_ENV
@@ -56,7 +55,7 @@ jobs:
           elif [ "${{ github.ref }}" == "refs/heads/release" ]; then
             echo "DEPLOY_ENV=release" >> $GITHUB_ENV
             echo "IMAGE_TAG=rel-$COMMIT_SHA" >> $GITHUB_ENV
-            echo "NAMESPACE=release" >> $GITHUB_ENV
+            echo "NAMESPACE=release-pollsensei-web" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_APP_DOMAIN=https://release.pollsensei.ai" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_APP_BASE_URL=${{ secrets.NEXT_PUBLIC_APP_BASE_URL }}" >> $GITHUB_ENV
             echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_DEV }}" >> $GITHUB_ENV

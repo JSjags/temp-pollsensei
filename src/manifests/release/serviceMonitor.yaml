@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: pollsensei-web-monitor
-  namespace: release
+  namespace: release-pollsensei-web
   labels:
     release: prometheus-stack
 spec:
@@ -11,7 +11,7 @@ spec:
       app: pollsensei-web-app
   namespaceSelector:
     matchNames:
-      - release
+      - release-pollsensei-web
   endpoints:
     - port: http
       interval: 30s
