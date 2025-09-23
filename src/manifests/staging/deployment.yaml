@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pollsensei-web-app
-  namespace: staging
+  namespace: staging-pollsensei-web
 spec:
   replicas: 1
   selector:
@@ -15,6 +15,7 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/arch: amd64
+        env: dev
       containers:
         - name:  pollsensei-web-app
           image: oaksdevacr.azurecr.io/pollsensei-web:${IMAGE_TAG}
@@ -23,11 +24,11 @@ spec:
             - containerPort: 3000
           resources:
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "250Mi"
+              cpu: "200m"
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "200Mi"
+              cpu: "100m"
           env:
             - name: NEXT_PUBLIC_APP_ENV
               value: "staging"
