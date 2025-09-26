@@ -1,15 +1,16 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FaRegBell, FaRegUserCircle } from "react-icons/fa";
 import { TbChartBar, TbShieldHalf, TbStack } from "react-icons/tb";
-// import { LuCreditCard } from "react-icons/lu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaRegEdit } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { useRouter } from "next/router";
 import { LuCreditCard } from "react-icons/lu";
+import { useQuery } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
+import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
 
 interface MenuItem {
   label: string;
@@ -17,7 +18,7 @@ interface MenuItem {
   icons: React.ReactNode;
 }
 
-const supportMenu: MenuItem[] = [
+const baseSupportMenu: MenuItem[] = [
   {
     label: "Profile",
     path: "/settings/profile",
@@ -38,21 +39,11 @@ const supportMenu: MenuItem[] = [
     path: "/settings/referral-reward",
     icons: <LuCreditCard />,
   },
-  // {
-  //   label: "Payment",
-  //   path: "/settings/payment",
-  //   icons: <LuCreditCard />,
-  // },
   {
     label: "Subscription",
     path: "/settings/subscription",
     icons: <TbStack />,
   },
-  // {
-  //   label: "Resource Monitor",
-  //   path: "/settings/resource-monitor",
-  //   icons: <TbChartBar />,
-  // },
 ];
 
 const editRespondentMenuItem: MenuItem = {
@@ -63,6 +54,26 @@ const editRespondentMenuItem: MenuItem = {
 
 const SettingsSidebar = () => {
   const pathname = usePathname();
+  const user = useSelector((state: RootState) => state.user?.user);
+
+  const { data: isPaidRespondent } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
+    queryFn: () => fetchPaidRespondentStatus(),
+    enabled: !!user,
+  });
+
+  const isPaidRespondentStatus = isPaidRespondent?.isPaidRespondent;
+
+  const supportMenu = useMemo(() => {
+    const menu = [...baseSupportMenu];
+
+    // Add Edit Respondent menu item for paid respondents
+    if (isPaidRespondentStatus) {
+      menu.splice(1, 0, editRespondentMenuItem); // Insert after Profile
+    }
+
+    return menu;
+  }, [isPaidRespondentStatus]);
 
   const checkActive = (value: string): string => {
     return pathname?.includes(value) ? "support" : "";
@@ -71,18 +82,6 @@ const SettingsSidebar = () => {
   const checkActiveIcon = (value: string): string => {
     return pathname?.includes(value) ? "icon-active" : "";
   };
-
-  // const router = useRouter();
-  const isBecomeRespondentSurveyCompleted = useSelector(
-    (state: RootState) =>
-      state.becomePaidRespondentSlice.isBecomeRespondentSurveyCompleted
-  );
-
-  // useEffect(() => {
-  //   if (!isBecomeRespondentSurveyCompleted) {
-  //     router.push("/settings/profile");
-  //   }
-  // }, [isBecomeRespondentSurveyCompleted, router]);
 
   return (
     <div className="relative max-w-[100vw]">
@@ -98,12 +97,7 @@ const SettingsSidebar = () => {
               <Link
                 className={`${checkActive(
                   menu.path
-                )} items-center text-[#898989] gap-2 rounded mb-2 py-2 px-3 w-full whitespace-nowrap ${
-                  isBecomeRespondentSurveyCompleted &&
-                  menu.label !== "Edit Respondent"
-                    ? "hidden"
-                    : "flex"
-                }`}
+                )} flex items-center text-[#898989] gap-2 rounded mb-2 py-2 px-3 w-full whitespace-nowrap`}
                 href={menu.path}
               >
                 <span
@@ -116,31 +110,6 @@ const SettingsSidebar = () => {
               </Link>
             </div>
           ))}
-          {/* {isBecomeRespondentSurveyCompleted && (
-            <div
-              key={editRespondentMenuItem.label}
-              className="text-sm flex-shrink-0 lg:flex-shrink"
-            >
-              <Link
-                className={`${checkActive(
-                  editRespondentMenuItem.path
-                )} flex items-center text-[#898989] gap-2 rounded mb-2 py-2 px-3 w-full whitespace-nowrap`}
-                href={editRespondentMenuItem.path}
-              >
-                <span
-                  className={`${checkActiveIcon(
-                    editRespondentMenuItem.path
-                  )} x-small d-block`}
-                  style={{ fontWeight: "400" }}
-                >
-                  {editRespondentMenuItem.icons}
-                </span>
-                <span className="bold small">
-                  {editRespondentMenuItem.label}
-                </span>
-              </Link>
-            </div>
-          )} */}
         </div>
       </nav>
     </div>

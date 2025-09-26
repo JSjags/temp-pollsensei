@@ -1,16 +1,20 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FiUser } from "react-icons/fi";
 import { LuGraduationCap } from "react-icons/lu";
 import { PiHeartbeat } from "react-icons/pi";
 import { BsSuitcase2 } from "react-icons/bs";
 import { MdOutlineHomeWork } from "react-icons/md";
+import PersonalInformation from "@/subpages/respondent-form/PersonalInformation";
+import Geo_Culture from "@/subpages/respondent-form/Geo_Culture";
 import Edu_Employment from "@/subpages/respondent-form/Edu_Employment";
 import Health_LifeStyle from "@/subpages/respondent-form/Health_Lifestyle";
 import Tech_Media from "@/subpages/respondent-form/Tech_Media";
 import Housing_Living from "@/subpages/respondent-form/Housing_Living";
 import Mobility_Travel from "@/subpages/respondent-form/Mobility_Travel";
 import Image from "next/image";
+import marker from "@/assets/images/marker.svg";
 import tech from "@/assets/images/tech.svg";
 import FormSkeleton from "@/components/respondent-form/FormSkeleton";
 import { getInitialValuesFromSchema } from "@/utils/respondentUtils";
@@ -20,7 +24,7 @@ import { GetRespondentData } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
 
 const EditRespondent = () => {
-  const [activeTab, setActiveTab] = useState("educationEmployment");
+  const [activeTab, setActiveTab] = useState("personalInfo");
   const initialFormData = getInitialValuesFromSchema(combinedSchema);
   const [formData, setFormData] = useState<CombinedFormData>(initialFormData);
 
@@ -30,6 +34,49 @@ const EditRespondent = () => {
   const tabs = [
     {
       id: 1,
+      name: "Personal Information",
+      value: "personalInfo",
+      icon: (
+        <FiUser
+          className={`text-xl ${
+            activeTab === "personalInfo" ? "text-[#5B03B2]" : "text-[#898989]"
+          }`}
+        />
+      ),
+      component: (
+        <PersonalInformation
+          onContinue={() => setActiveTab("geographicInfo")}
+          formData={formData}
+          setFormData={setFormData}
+        />
+      ),
+    },
+    {
+      id: 2,
+      name: "Geography & Culture",
+      value: "geographicInfo",
+      icon: (
+        <Image
+          src={marker}
+          alt="marker"
+          width={15}
+          height={15}
+          className={`${
+            activeTab === "geographicInfo" ? "text-[#5B03B2]" : "text-[#898989]"
+          }`}
+        />
+      ),
+      component: (
+        <Geo_Culture
+          onContinue={() => setActiveTab("educationEmployment")}
+          onPrevious={() => setActiveTab("personalInfo")}
+          formData={formData}
+          setFormData={setFormData}
+        />
+      ),
+    },
+    {
+      id: 3,
       name: "Education & Employment",
       value: "educationEmployment",
       icon: (
@@ -51,7 +98,7 @@ const EditRespondent = () => {
       ),
     },
     {
-      id: 2,
+      id: 4,
       name: "Health & Lifestyle Markers",
       value: "healthLifestyle",
       icon: (
@@ -73,7 +120,7 @@ const EditRespondent = () => {
       ),
     },
     {
-      id: 3,
+      id: 5,
       name: "Technology & Media Usage",
       value: "technologyMedia",
       icon: (
@@ -99,7 +146,7 @@ const EditRespondent = () => {
       ),
     },
     {
-      id: 4,
+      id: 6,
       name: "Housing & Living Situations",
       value: "housingLiving",
       icon: (
@@ -119,7 +166,7 @@ const EditRespondent = () => {
       ),
     },
     {
-      id: 5,
+      id: 7,
       name: "Mobility & Travel",
       value: "mobilityTravel",
       icon: (
