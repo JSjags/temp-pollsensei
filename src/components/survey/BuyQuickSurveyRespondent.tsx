@@ -116,7 +116,9 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     (state: RootState) =>
       state?.quickSurvey?.formData?.surveyTopic || state?.survey?.topic
   );
+  // const surveyLog = useSelector((state: RootState) => state?.survey);
 
+  // console.log({ surveyLog });
   // Initialize default duration (1 hour)
   const defaultDuration = React.useMemo(() => {
     const date = new Date();
@@ -420,7 +422,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     } else {
       return `${hours}h ${minutes}m`;
     }
-  }, [duration, totalMinutesValue]); // Correct dependencies
+  }, [duration]); // Correct dependencies
 
   if (!showQuickSurveyFlow) {
     return null;

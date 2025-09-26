@@ -350,11 +350,15 @@ const EditSurvey = () => {
     return transformSurveySkipLogic(mockSurveyData);
   };
 
-  const handleClearSurvey = () => {
+  const handleClearSurveyState = () => {
     dispatch(resetSurvey());
-    hasPopulatedSkipLogic.current = false; // Reset the ref when clearing survey
+    hasPopulatedSkipLogic.current = false;
     setShowClearDialog(false);
     setShowExitDialog(false);
+  };
+
+  const handleClearSurvey = () => {
+    handleClearSurveyState();
     toast.success("Survey cleared successfully", {
       position: "bottom-right",
     });
@@ -957,7 +961,7 @@ const EditSurvey = () => {
     const hasEmptySection = questions.some(
       (section: Section) => !section.questions || section.questions.length === 0
     );
-    if (hasEmptySection) { 
+    if (hasEmptySection) {
       toast.error(
         "All sections must have at least one question before submitting."
       );
@@ -1235,8 +1239,6 @@ const EditSurvey = () => {
       });
 
       await createSurvey(processedSurvey).unwrap();
-      handleClearSurvey();
-      // Don't set state here - let the useEffect handle success state updates
     } catch (e) {
       console.error(e);
     }
@@ -1245,12 +1247,9 @@ const EditSurvey = () => {
   useEffect(() => {
     if (isSuccess) {
       toast.success("Survey created successfully");
-      dispatch(resetSurvey());
-      hasPopulatedSkipLogic.current = false; // Reset the ref when survey is created successfully
+      handleClearSurveyState();
       setSurvey_id(createdSurveyData.data._id);
       dispatch(startQuickSurveyFlow());
-      // setReview(true);
-      // router.push("/surveys/survey-list");
     }
 
     if (isError || error) {

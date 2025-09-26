@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/respondent-form/FormInput";
 import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
 import { ControlledMultiSelect } from "@/components/respondent-form/ControlledMultiSelect";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onContinue: () => void;
@@ -32,6 +33,7 @@ const PersonalInformation: FC<Props> = ({
   formData,
   setFormData,
 }) => {
+  const pathname = usePathname();
   const user = useSelector((state: RootState) => state.user.user);
   const nameParts = user?.name?.split(" ") || [];
   const firstName = nameParts[0] || "";
@@ -83,20 +85,25 @@ const PersonalInformation: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-start mx-auto">
-      <ProgressBar skip={false} progress={12.5} onContinue={onContinue} />
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={false} progress={12.5} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex flex-col gap-3">
           <h2 className="text-lg lg:text-2xl font-bold">
             Basic Personal Information
           </h2>
-          <div className="border-l-4 border-[#5B03B29E] pl-3 w-[90%]">
-            <p className="text-sm text-[#898989]">
-              Researchers often look for people who match certain demographic
-              groups. This information will help us link you to studies that are
-              most relevant to you.
-            </p>
-          </div>
+          {pathname === "/respondent-form" && (
+            <div className="border-l-4 border-[#5B03B29E] pl-3 w-[90%]">
+              <p className="text-sm text-[#898989]">
+                Researchers often look for people who match certain demographic
+                groups. This information will help us link you to studies that
+                are most relevant to you.
+              </p>
+            </div>
+          )}
         </div>
+
         <form
           className="flex flex-col gap-3"
           onSubmit={handleSubmit(handleContinue)}

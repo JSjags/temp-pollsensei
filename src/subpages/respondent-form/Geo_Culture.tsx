@@ -32,6 +32,7 @@ import {
 import { Controller } from "react-hook-form";
 import { APP_KEYS } from "@/constants";
 import { getCountries } from "@yusifaliyevpro/countries";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onContinue: () => void;
@@ -46,6 +47,7 @@ const Geo_Culture: FC<Props> = ({
   formData,
   setFormData,
 }) => {
+  const pathname = usePathname();
   const [searchNationality, setSearchNationality] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -116,7 +118,9 @@ const Geo_Culture: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
-      <ProgressBar skip={false} progress={25} onContinue={onContinue} />
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={false} progress={25} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack

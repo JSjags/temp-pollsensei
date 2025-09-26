@@ -1,5 +1,5 @@
 "use client";
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { IoArrowBack } from "react-icons/io5";
 import { useForm } from "react-hook-form";
@@ -19,6 +19,7 @@ import {
 import { useSubmitRespondentForm } from "@/hooks/useBecomePaidRespondent";
 import { toast } from "react-toastify";
 import { ControlledSelect } from "@/components/respondent-form/ControlledSelect";
+import ProgressBar from "@/components/respondent-form/ProgressBar";
 import { usePathname } from "next/navigation";
 
 interface Props {
@@ -38,17 +39,20 @@ const Edu_Employment: FC<Props> = ({
   const pathname = usePathname();
 
   // Filter formData to only include fields relevant to this form
-  const relevantFormData = {
-    educationLevel: formData.educationLevel,
-    employmentStatus: formData.employmentStatus,
-    industry: formData.industry,
-    jobRole: formData.jobRole,
-    workingHours: formData.workingHours,
-    incomeRange: formData.incomeRange,
-    techSavvy: formData.techSavvy,
-    otherIndustry: formData.otherIndustry,
-    otherJob: formData.otherIndustry,
-  };
+  const relevantFormData = useMemo(
+    () => ({
+      educationLevel: formData.educationLevel,
+      employmentStatus: formData.employmentStatus,
+      industry: formData.industry,
+      jobRole: formData.jobRole,
+      workingHours: formData.workingHours,
+      incomeRange: formData.incomeRange,
+      techSavvy: formData.techSavvy,
+      otherIndustry: formData.otherIndustry,
+      otherJob: formData.otherIndustry,
+    }),
+    [formData]
+  );
 
   // console.log('Edu_Employment - Relevant form data:', relevantFormData);
 
@@ -91,6 +95,7 @@ const Edu_Employment: FC<Props> = ({
     formData.otherIndustry,
     formData.otherIndustry,
     reset,
+    relevantFormData,
   ]);
 
   const handleContinue = (
@@ -122,6 +127,9 @@ const Edu_Employment: FC<Props> = ({
 
   return (
     <div className="w-full h-full flex flex-col items-center mx-auto">
+      {pathname === "/respondent-form" && (
+        <ProgressBar skip={true} progress={37.5} onContinue={onContinue} />
+      )}
       <div className="flex flex-col gap-4 w-full lg:w-[70%] mx-auto">
         <div className="flex items-center gap-3">
           <IoArrowBack
