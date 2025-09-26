@@ -549,24 +549,18 @@ const AddQuestionPage = () => {
         }),
       };
       await createSurvey(processedSurvey).unwrap();
-      // Removed setSurvey_id and setReview calls to prevent infinite loop
-      // These are now handled only in the useEffect when isSuccess becomes true
     } catch (e) {
       console.error("Survey creation error:", e);
     }
   };
 
-  console.log(sections);
+  // console.log(sections);
 
   useEffect(() => {
     if (isSuccess) {
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
       dispatch(startQuickSurveyFlow());
-      // dispatch(resetQuestion());
-      // dispatch(resetSurvey());
-      // setReview(true);
-      // router.push("/surveys/survey-list");
     }
 
     if (isError || error) {
