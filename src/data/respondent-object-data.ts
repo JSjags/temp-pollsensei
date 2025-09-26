@@ -306,15 +306,15 @@ export const browserOptions = [
 ];
 
 export const internetUsageOptions = [
+  { value: "yes", label: "Yes" },
+  { value: "no", label: "No" },
+];
+
+export const internetAccessOptions = [
   { value: "smartphone", label: "Smartphone" },
   { value: "laptop or desktop", label: "Laptop/Desktop" },
   { value: "tablet", label: "Tablet" },
   { value: "other", label: "Other (Please specify)" },
-];
-
-export const internetAccessOptions = [
-  { value: "yes", label: "Yes" },
-  { value: "no", label: "No" },
 ];
 
 export const socialMediaUsageOptions = [
