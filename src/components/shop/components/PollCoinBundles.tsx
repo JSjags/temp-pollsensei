@@ -185,11 +185,8 @@ export function PollCoinBundles() {
   }, [bundlesResponse]);
 
   const handleBuyNow = async (bundle: PollCoinBundle) => {
-    console.log("🔍 Starting handleBuyNow with bundle:", bundle);
-
     // Check if this bundle is already loading
     if (loadingBundles.has(bundle.id)) {
-      console.log("🔍 Bundle already loading, ignoring click");
       return;
     }
 
@@ -216,10 +213,6 @@ export function PollCoinBundles() {
     setLoadingBundles((prev) => new Set(prev).add(bundle.id));
     try {
       // Make POST request to get order summary
-      console.log(
-        "🔍 Making API call to /purchases/pollcoins/order-summary with bundleId:",
-        bundle.id
-      );
       const response = await axiosInstance.post(
         "/purchases/pollcoins/order-summary",
         {
@@ -227,14 +220,7 @@ export function PollCoinBundles() {
         }
       );
 
-      console.log("🔍 API response:", response.data);
-      console.log(
-        "🔍 Full API response (copy this):",
-        JSON.stringify(response.data, null, 2)
-      );
-
       if (response.data.orderSummary) {
-        console.log("🔍 Order summary received:", response.data);
         const { orderSummary, breakdown } = response.data;
 
         // Set the bundle values in the store for success handling
@@ -253,12 +239,6 @@ export function PollCoinBundles() {
         // Use the payment gateway from the order summary response
         const paymentGateway = breakdown.paymentDetails.gateway_to_use;
 
-        console.log("🔍 Payment gateway from API:", {
-          gatewayFromAPI: paymentGateway,
-          country: locationData?.country,
-          isNigeria: locationData?.isNigeria,
-        });
-
         // Create payment payload
         const paymentPayload: PurchasePayload = {
           paymentGateway,
@@ -266,26 +246,14 @@ export function PollCoinBundles() {
           redirect_url: redirectUrls.success,
         };
 
-        console.log("🔍 Initiating payment with payload:", paymentPayload);
-
         // Initiate payment directly
         const result = await purchasePollcoins.mutateAsync(paymentPayload);
-
-        console.log("🔍 Payment initiation result:", result);
-        console.log(
-          "🔍 Full payment result (copy this):",
-          JSON.stringify(result, null, 2)
-        );
 
         // Extract publishable key from payment response if available
         const publishableKey =
           (result.data?.payment as any)?.publishable_key ||
           (result.data as any)?.publishable_key;
         if (publishableKey) {
-          console.log(
-            "🔍 Publishable key from payment response:",
-            publishableKey.substring(0, 20) + "..."
-          );
           // Store the publishable key for the checkout page
           sessionStorage.setItem("stripe_publishable_key", publishableKey);
         }
@@ -297,22 +265,14 @@ export function PollCoinBundles() {
           ) {
             // Handle Stripe payment - redirect to checkout page
             const checkoutUrl = `/shop/checkout?cs=${result.data.payment.client_secret}&amount=${orderSummary.totalAmount}&pollcoins=${orderSummary.pollcoinsAmount}`;
-            console.log("🔍 Redirecting to Stripe checkout:", checkoutUrl);
+
             window.location.href = checkoutUrl; // Re-enabled for testing
           } else if (
             paymentGateway === "paystack" &&
             result.data?.payment?.authorization_url
           ) {
             // Handle Paystack payment - redirect to authorization URL
-            console.log(
-              "🔍 Redirecting to Paystack:",
-              result.data.payment.authorization_url
-            );
-            console.log("🔍 Paystack payment details:", {
-              reference: result.data.payment.reference,
-              access_code: result.data.payment.access_code,
-              authorization_url: result.data.payment.authorization_url,
-            });
+
             window.location.href = result.data.payment.authorization_url;
           } else {
             toast({
@@ -329,7 +289,6 @@ export function PollCoinBundles() {
           });
         }
       } else {
-        console.log("🔍 API returned success: false");
         toast({
           title: "Error",
           description: response.data.message || "Failed to get order summary",
@@ -337,7 +296,6 @@ export function PollCoinBundles() {
         });
       }
     } catch (error: any) {
-      console.error("🔍 Failed to get order summary:", error);
       toast({
         title: "Error",
         description:
@@ -559,7 +517,6 @@ export function PollCoinBundles() {
                 variant="ghost"
                 className="h-10 rounded-full text-base hover:!bg-transparent text-gray-500 hover:text-gray-700 px-0 font-medium gap-2 hover:scale-105 transition-transform w-fit"
                 onClick={() => {
-                  console.log("🔍 Button clicked, calling handleBuyNow");
                   handleBuyNow(bundle);
                 }}
                 disabled={
