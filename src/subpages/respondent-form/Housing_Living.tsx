@@ -99,6 +99,7 @@ const Housing_Living: FC<Props> = ({
             label="What is your current living arrangement?"
             error={errors.livingArrangement}
             disabled={isPending}
+            otherFieldName="otherLivingArrangement"
             register={register}
           />
 
@@ -110,6 +111,7 @@ const Housing_Living: FC<Props> = ({
             label="Do you own or rent your home?"
             error={errors.homeOwnership}
             disabled={isPending}
+            otherFieldName="otherHomeOwnership"
             register={register}
           />
 

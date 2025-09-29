@@ -39,7 +39,7 @@ export const personalInformationSchema = z.object({
   email: z.string().email("Invalid email address"),
   phoneNumber: z.string().min(10, "Phone number is required"),
   gender: z.string().min(1, "Gender is required"),
-  // otherGender: z.string().optional(),
+  otherGender: z.string().optional(),
   maritalStatus: z.string().min(1, "Marital status is required"),
   ageGroup: z.string().min(1, "Age group is required"),
   children: z.string().min(1, "Children/Dependents field is required"),
@@ -90,18 +90,18 @@ export const healthAndLifestyleSchema = z.object({
 export const techAndMediaSchema = z.object({
   internetUsage: z.string().optional(),
   internetAccess: z.string().optional(),
-  // otherInternetAccess: z.string().optional(),
+  otherInternetAccess: z.string().optional(),
   socialMediaUsage: z.string().optional(),
   contentEngagement: z.array(z.string()).optional(),
   socialMediaPlatforms: z.array(z.string()).optional(),
   internetBrowsers: z.array(z.string()).optional(),
-  // otherInternetBrowsers: z.string().optional(),
+  otherInternetBrowsers: z.string().optional(),
   computerOS: z.string().optional(),
-  // otherComputerOS: z.string().optional(),
+  otherComputerOS: z.string().optional(),
   smartphoneOS: z.string().optional(),
-  // otherSmartphoneOS: z.string().optional(),
+  otherSmartphoneOS: z.string().optional(),
   tabletOS: z.string().optional(),
-  // otherTabletOS: z.string().optional(),
+  otherTabletOS: z.string().optional(),
 });
 
 export const housingAndLivingSchema = z.object({

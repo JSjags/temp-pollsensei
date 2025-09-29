@@ -101,7 +101,7 @@ const Edu_Employment: FC<Props> = ({
   const handleContinue = (
     data: z.infer<typeof educationAndEmploymentSchema>
   ) => {
-    console.log("Form submitted with data:", data);
+    // console.log("Form submitted with data:", data);
     submitForm(
       { tab: "educationEmployment", formData: data },
       {

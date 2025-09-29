@@ -24,36 +24,36 @@ export interface RespondentFormData {
   // Personal Information
   firstName: string;
   lastName: string;
-  // otherName?: string;
+  otherName?: string;
   email: string;
   phoneNumber: string;
   gender: string;
-  // otherGender?: string;
+  otherGender?: string;
   maritalStatus: string;
   ageGroup: string;
   children: string;
   pets: string[];
-  // otherPet?: string;
+  otherPet?: string;
 
   // Geography & Culture
   currentLocation: string;
-  // otherLocation?: string;
+  otherLocation?: string;
   region: string;
-  // otherRegion?: string;
+  otherRegion?: string;
   nationality: string;
   ethnicity: string;
-  // otherEthnicity?: string;
+  otherEthnicity?: string;
   languages: string[];
-  // otherLanguage?: string;
+  otherLanguage?: string;
   religion?: string;
-  // otherReligion?: string;
+  otherReligion?: string;
 
   // Education & Employment
   educationLevel?: string;
   employmentStatus?: string;
   industry?: string;
   jobRole?: string;
-  // otherJob?: string;
+  otherJob?: string;
   workingHours?: string;
   incomeRange?: string;
   techSavvy?: string;
@@ -61,12 +61,12 @@ export interface RespondentFormData {
   //Health & Lifestyle
   overallHealth?: string;
   healthInsurance?: string;
-  // otherHealthInsurance?: string;
+  otherHealthInsurance?: string;
   chronicConditions?: string;
-  // otherHealthCondition?: string;
+  otherHealthCondition?: string;
   physicalActivity?: string;
   dietaryRestrictions?: string;
-  // otherDietryRestrictions?: string;
+  otherDietryRestrictions?: string;
   tobaccoUse?: string;
   alcoholUse?: string;
   sleepHours?: string;
@@ -74,32 +74,31 @@ export interface RespondentFormData {
   //Technology & Media
   internetUsage?: string;
   internetAccess?: string;
-  // otherPrimaryAccess?: string;
+  otherPrimaryAccess?: string;
   socialMediaUsage?: string;
   contentEngagement?: string[];
   socialMediaPlatforms?: string[];
   internetBrowsers?: string[];
-  // otherInternetBrowsers?: string;
+  otherInternetBrowsers?: string;
   computerOS?: string;
-  // computerOS?: string;
   smartphoneOS?: string;
-  // otherMobileOperatingSystem?: string;
+  otherMobileOperatingSystem?: string;
   tabletOS?: string;
-  // otherTabletOperatingSystem?: string;
+  otherTabletOperatingSystem?: string;
 
   //Housing & Living
   livingArrangement?: string;
-  // otherLivingArrangement?: string;
+  otherLivingArrangement?: string;
   homeOwnership?: string;
-  // otherHomeStatus?: string;
+  otherHomeStatus?: string;
   householdSize?: string;
 
   //Mobility & Travel
   commute?: string;
-  // otherCommute?: string;
+  otherCommute?: string;
   travelFrequency?: string;
   vehicleOwnership?: string;
-  // otherVehicle?: string;
+  otherVehicle?: string;
 
   //Identity Verification
   identityVerification?: DocumentType;

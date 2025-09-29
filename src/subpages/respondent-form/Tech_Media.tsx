@@ -121,7 +121,7 @@ const Tech_Media: FC<Props> = ({
             label="How do you primarily access the internet?"
             error={errors.internetAccess}
             disabled={isPending}
-            // otherFieldName="otherPrimaryAccess"
+            otherFieldName="otherPrimaryAccess"
             register={register}
           />
 
@@ -178,7 +178,7 @@ const Tech_Media: FC<Props> = ({
             label="What computer operating system(s) do you use?"
             error={errors.computerOS}
             disabled={isPending}
-            // otherFieldName="otherPcOperatingSystem"
+            otherFieldName="otherPcOperatingSystem"
             register={register}
           />
 
@@ -190,7 +190,7 @@ const Tech_Media: FC<Props> = ({
             label="What Smartphone operating system(s) do you use?"
             error={errors.smartphoneOS}
             disabled={isPending}
-            // otherFieldName="otherMobileOperatingSystem"
+            otherFieldName="otherMobileOperatingSystem"
             register={register}
           />
 
@@ -202,7 +202,7 @@ const Tech_Media: FC<Props> = ({
             label="What tablet operating system(s) do you use?"
             error={errors.tabletOS}
             disabled={isPending}
-            // otherFieldName="otherTabletOperatingSystem"
+            otherFieldName="otherTabletOperatingSystem"
             register={register}
           />
 
