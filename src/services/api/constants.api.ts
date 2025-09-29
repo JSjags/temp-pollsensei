@@ -45,5 +45,5 @@ export const redirectUrls = Object.freeze({
   shop: "/shop",
   buyPollcoins: "/shop/buy-pollcoins",
   checkout: "/shop/checkout",
-  success: "https://pollsensei.ai/shop?success=true",
+  success: `${window.location.origin}/shop?success=true`,
 });

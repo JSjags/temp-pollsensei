@@ -161,14 +161,6 @@ export function PollCoinBundles() {
     retry: 1,
   });
 
-  // Debug current state
-  console.log("🔍 Component state:", {
-    loadingBundles: Array.from(loadingBundles),
-    locationData,
-    isNigeria: locationData?.isNigeria,
-    note: "Payment gateway will be determined by server response",
-  });
-
   // Fetch bundles from API
   const {
     data: bundlesResponse,
