@@ -145,7 +145,7 @@ const Geo_Culture: FC<Props> = ({
             required={true}
             error={errors.currentLocation}
             disabled={isPending}
-            // otherFieldName="otherLocation"
+            otherFieldName="otherLocation"
             register={register}
           />
 
@@ -158,7 +158,7 @@ const Geo_Culture: FC<Props> = ({
             required={true}
             error={errors.region}
             disabled={isPending}
-            // otherFieldName="otherRegion"
+            otherFieldName="otherRegion"
             register={register}
           />
 
@@ -232,7 +232,7 @@ const Geo_Culture: FC<Props> = ({
             required={true}
             error={errors.ethnicity}
             disabled={isPending}
-            // otherFieldName="otherEthnicity"
+            otherFieldName="otherEthnicity"
             register={register}
           />
 
@@ -244,7 +244,7 @@ const Geo_Culture: FC<Props> = ({
             placeholder="Select languages"
             error={errors.languages}
             disabled={isPending}
-            // otherFieldName="otherLanguage"
+            otherFieldName="otherLanguage"
             register={register}
             required={true}
             contentHeight="300px"
@@ -259,7 +259,7 @@ const Geo_Culture: FC<Props> = ({
             required={false}
             error={errors.religion}
             disabled={isPending}
-            // otherFieldName="otherReligion"
+            otherFieldName="otherReligion"
             register={register}
           />
 

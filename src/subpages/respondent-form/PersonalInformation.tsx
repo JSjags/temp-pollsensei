@@ -54,11 +54,12 @@ const PersonalInformation: FC<Props> = ({
       email: user?.email || "",
       phoneNumber: formData.phoneNumber || "",
       gender: formData.gender || "",
+      otherGender: formData.otherGender || "",
       maritalStatus: formData.maritalStatus || "",
       ageGroup: formData.ageGroup || "",
       children: formData.children || "",
       pets: formData.pets || [],
-      // otherPet: formData.otherPet || "",
+      otherPet: formData.otherPet || "",
     },
   });
 
@@ -168,6 +169,8 @@ const PersonalInformation: FC<Props> = ({
             error={errors.gender}
             required
             disabled={isPending}
+            otherFieldName="otherGender"
+            register={register}
           />
 
           <ControlledSelect

@@ -462,7 +462,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
               className="rounded-t-lg"
             />
           </div>
-          <div className="w-full h-auto flex flex-col gap-5 p-5 bg-red-500">
+          <div className="w-full h-auto flex flex-col gap-5 p-5">
             <div className="flex flex-col gap-3">
               <h2 className="text-2xl text-center font-bold">
                 Convert to QuickSurvey
