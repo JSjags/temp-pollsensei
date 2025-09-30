@@ -433,7 +433,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       {/* INITIAL DIALOG - "Convert to QuickSurvey" */}
       <Dialog open={currentDialog === "initial"} onOpenChange={undefined}>
         <DialogContent
-          className="min-w-[90%] lg:min-w-[300px] min-h-auto bg-white border-0 outline-none p-0 flex flex-col justify-center items-center gap-5 relative rounded-t-md"
+          className="min-w-[90%] lg:min-w-[300px] min-h-auto bg-white rounded-lg overflow-hidden border-0 outline-none p-0 flex flex-col justify-center items-center gap-5 relative rounded-t-md"
           style={{
             zIndex: 100000000,
             position: "fixed",
@@ -453,10 +453,16 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
             <X size={20} />
           </button>
 
-          <div className="w-full h-auto flex justify-center items-center bg-[#F3ECF5]">
-            <Image src={quick} alt="quick survey" width={300} height={300} />
+          <div className="w-full h-auto flex justify-center items-center bg-[#F3ECF5] rounded-t-lg">
+            <Image
+              src={quick}
+              alt="quick survey"
+              width={300}
+              height={300}
+              className="rounded-t-lg"
+            />
           </div>
-          <div className="w-full h-auto flex flex-col gap-5 p-5">
+          <div className="w-full h-auto flex flex-col gap-5 p-5 bg-red-500">
             <div className="flex flex-col gap-3">
               <h2 className="text-2xl text-center font-bold">
                 Convert to QuickSurvey
