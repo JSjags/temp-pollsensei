@@ -1,8 +1,9 @@
+"use client";
 import Image from "next/image";
 import { pollsensei_new_logo, sparkly } from "@/assets/images";
 import { HiOutlinePlus } from "react-icons/hi";
 import { VscLayersActive } from "react-icons/vsc";
-import { Fragment, useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useDispatch } from "react-redux";
@@ -32,6 +33,9 @@ import {
   deleteQuestionFromSection,
   resetSurvey,
   deleteSection,
+  updateSection,
+  updateTopic,
+  updateDescription,
 } from "@/redux/slices/survey.slice";
 import { useRouter, usePathname } from "next/navigation";
 import LikertScaleQuestion from "@/components/survey/LikertScaleQuestion";
@@ -52,7 +56,7 @@ import NumberQuestion from "@/components/survey/NumberQuestion";
 import DropdownQuestion from "@/components/survey/DropdownQuestion";
 import CheckboxQuestion from "@/components/survey/CheckboxQuestion";
 import RatingScaleQuestion from "@/components/survey/RatingScaleQuestion";
-import ReviewModal from "@/components/modals/ReviewModal";
+// import ReviewModal from "@/components/modals/ReviewModal";
 import MediaQuestion from "@/components/survey/MediaQuestion";
 import MultiChoiceQuestionEdit from "@/components/survey/MultiChoiceQuestionEdit";
 import {
@@ -66,7 +70,7 @@ import { IoDocumentOutline } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/shadcn-textarea";
-import { Edit, Save, Trash2, Pencil } from "lucide-react";
+import { Edit, Save, Trash2, Pencil, Scissors } from "lucide-react";
 import { X } from "lucide-react";
 import { SurveyData } from "./EditSubmittedSurvey";
 import { cn } from "@/lib/utils";
@@ -86,8 +90,28 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
-import { Sparkles, PencilIcon } from "lucide-react";
+import {
+  Sparkles,
+  PencilIcon,
+  MoveRight,
+  MoreVertical,
+  BringToFront,
+  Paintbrush,
+  AlignVerticalSpaceAround,
+} from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SkipLogicEditor, {
+  SkipLogicRule,
+  SkipLogicRuleV2,
+  transformSurveySkipLogic,
+} from "./SkipLogicEditor";
+import { setSkipLogic } from "@/redux/slices/survey.slice";
+import BuyQuickSurveyRespondent from "@/components/survey/BuyQuickSurveyRespondent";
+import { startQuickSurveyFlow } from "@/redux/slices/quickSurveySlice";
 
 // Define Section type at the top (after imports)
 type Section = {
@@ -134,7 +158,10 @@ const AddQuestionPage = () => {
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
 
-  const questions = sections[currentSectionIndex]?.questions || [];
+  const questions = useMemo(
+    () => sections[currentSectionIndex]?.questions || [],
+    [sections, currentSectionIndex]
+  );
 
   const userToken = useSelector(
     (state: RootState) => state?.user?.access_token || state.user.token
@@ -148,9 +175,22 @@ const AddQuestionPage = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
-  const [review, setReview] = useState(false);
+  // const [review, setReview] = useState(false);
   const [survey_id, setSurvey_id] = useState("");
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Skip Logic State
+  const [skipLogic, setSkipLogicState] = useState<
+    (SkipLogicRule | SkipLogicRuleV2)[]
+  >([]);
+  const surveySkipLogic = useSelector(
+    (state: RootState) => state?.survey?.skipLogic || []
+  );
+  const [activeTab, setActiveTab] = useState("questions");
+
+  const { showQuickSurveyFlow } = useSelector(
+    (state: RootState) => state.quickSurvey
+  );
 
   const [
     createSurvey,
@@ -320,10 +360,15 @@ const AddQuestionPage = () => {
       console.error("Invalid edit index.");
       return;
     }
+
     const updatedQuestionData = {
       question: updatedQuestion,
       options:
-        updatedQuestionType === "boolean" ? ["Yes", "No"] : updatedOptions,
+        updatedQuestionType === "boolean"
+          ? ["Yes", "No"]
+          : updatedQuestionType === "star_rating"
+          ? ["1", "2", "3", "4", "5"]
+          : updatedOptions,
       question_type: updatedQuestionType,
       is_required: isRequired,
       minValue,
@@ -414,80 +459,108 @@ const AddQuestionPage = () => {
             : headerUrl,
         logo_url:
           typeof logoUrl === "string" && logoUrl.startsWith("#") ? "" : logoUrl,
-        sections: sections.map((section, idx) => {
-          return {
-            section_topic: section.title,
-            section_description: section.description,
-            questions: section.questions.map((question: any) => {
-              const baseQuestion = {
-                question: question.question,
-                description: question.description || question.question,
-                question_type: question.question_type,
-                is_required: question.is_required,
-              };
-              switch (question.question_type) {
-                case "slider":
-                  return {
-                    ...baseQuestion,
-                    min: question.min,
-                    max: question.max,
-                    step: question.step || 1,
-                  };
-                case "checkbox":
-                case "multiple_choice":
-                case "single_choice":
-                case "drop_down":
-                case "likert_scale":
-                case "rating_scale":
-                case "star_rating":
-                case "boolean":
-                  return {
-                    ...baseQuestion,
-                    options: question.options,
-                  };
-                case "matrix_multiple_choice":
-                case "matrix_checkbox":
-                  return {
-                    ...baseQuestion,
-                    description: question.description || "Matrix Question",
-                    rows: question.rows,
-                    columns: question.columns,
-                  };
-                case "number":
-                  return {
-                    ...baseQuestion,
-                    min: question.min,
-                    max: question.max,
-                  };
-                case "long_text":
-                  return {
-                    ...baseQuestion,
-                    can_accept_media: question.can_accept_media || false,
-                  };
-                case "short_text":
-                case "media":
-                default:
-                  return baseQuestion;
+        sections: sections.map((section, sectionIdx) => {
+          const baseSection = {
+            questions: section.questions.map(
+              (question: any, questionIdx: any) => {
+                const baseQuestion = {
+                  question: question.question,
+                  description: question.description || question.question,
+                  question_type: question.question_type,
+                  is_required: question.is_required,
+                };
+
+                // Add skip logic if available for this question
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  sectionIdx,
+                  questionIdx
+                );
+                const questionId = `Question${globalQuestionIndex + 1}`;
+                const processedSkipLogic = transformSkipLogic();
+                const questionSkipLogic = processedSkipLogic
+                  .filter((logic) => logic.questionId === questionId)
+                  .map((logic) => logic.skipLogic);
+
+                const questionWithSkipLogic = {
+                  ...baseQuestion,
+                  ...(questionSkipLogic.length > 0 && {
+                    skip_logic: questionSkipLogic,
+                  }),
+                };
+
+                switch (question.question_type) {
+                  case "slider":
+                    return {
+                      ...questionWithSkipLogic,
+                      min: question.min,
+                      max: question.max,
+                      step: question.step || 1,
+                    };
+                  case "checkbox":
+                  case "multiple_choice":
+                  case "single_choice":
+                  case "drop_down":
+                  case "likert_scale":
+                  case "rating_scale":
+                  case "star_rating":
+                  case "boolean":
+                    return {
+                      ...questionWithSkipLogic,
+                      options: question.options,
+                    };
+                  case "matrix_multiple_choice":
+                  case "matrix_checkbox":
+                    return {
+                      ...questionWithSkipLogic,
+                      description: question.description || "Matrix Question",
+                      rows: question.rows,
+                      columns: question.columns,
+                    };
+                  case "number":
+                    return {
+                      ...questionWithSkipLogic,
+                      min: question.min,
+                      max: question.max,
+                    };
+                  case "long_text":
+                    return {
+                      ...questionWithSkipLogic,
+                      can_accept_media: question.can_accept_media || false,
+                    };
+                  case "short_text":
+                  case "media":
+                  default:
+                    return questionWithSkipLogic;
+                }
               }
-            }),
+            ),
           };
+
+          // Handle section headers like in EditSurvey
+          if (sectionIdx === 0) {
+            return baseSection;
+          } else {
+            return {
+              section_topic: section.title,
+              section_description: section.description,
+              ...baseSection,
+            };
+          }
         }),
       };
       await createSurvey(processedSurvey).unwrap();
-      setSurvey_id(createdSurveyData?.data?._id || "");
-      setReview(true);
     } catch (e) {
       console.error("Survey creation error:", e);
     }
   };
 
+  // console.log(sections);
+
   useEffect(() => {
     if (isSuccess) {
-      setReview((prev) => !prev);
       dispatch(resetSurvey());
       setSurvey_id(createdSurveyData.data._id);
-      setReview(true);
-      // router.push("/surveys/survey-list");
+      dispatch(startQuickSurveyFlow());
     }
 
     if (isError || error) {
@@ -530,16 +603,311 @@ const AddQuestionPage = () => {
         "Failed to create survey, Don't panic, your progress was saved"
       );
     }
-  }, [isSuccess, isError, error, dispatch, router, saveprogress, survey]);
+  }, [
+    isSuccess,
+    isError,
+    error,
+    dispatch,
+    router,
+    saveprogress,
+    createdSurveyData,
+    sections,
+    headerUrl,
+    logoUrl,
+  ]);
 
   useEffect(() => {
-    if (progressSuccess) {
-      router.push("/surveys/survey-list");
-    }
+    // Don't redirect on progressSuccess - that just means draft was saved
+    // Only redirect on actual survey creation success (handled in the main useEffect)
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError, progressSuccess]);
+  }, [progressError, progressIsError]);
+
+  // Skip Logic synchronization with Redux
+  useEffect(() => {
+    if (surveySkipLogic.length > 0) {
+      setSkipLogicState(surveySkipLogic);
+    }
+  }, [surveySkipLogic]);
+
+  // Handle skip logic updates
+  const handleSkipLogicUpdate = useCallback(
+    (newSkipLogic: (SkipLogicRule | SkipLogicRuleV2)[]) => {
+      setSkipLogicState(newSkipLogic);
+      dispatch(setSkipLogic(newSkipLogic));
+    },
+    [dispatch]
+  );
+
+  // Sync sections with Redux for persistence
+  const syncSectionsWithRedux = useCallback(() => {
+    // Clear existing sections in Redux
+    const currentReduxSections = survey.sections;
+
+    // Remove all existing sections
+    for (let i = currentReduxSections.length - 1; i >= 0; i--) {
+      dispatch(deleteSection(i));
+    }
+
+    // Add current sections to Redux
+    sections.forEach((section, index) => {
+      const reduxSection = {
+        section_topic: section.title,
+        section_description: section.description,
+        questions: section.questions,
+      };
+
+      if (index === 0) {
+        // First section doesn't need section_topic/description in Redux
+        dispatch(addSection({ questions: section.questions }));
+      } else {
+        dispatch(addSection(reduxSection));
+      }
+    });
+
+    // Also update survey topic and description from first section
+    if (sections.length > 0) {
+      dispatch(updateTopic(sections[0].title || ""));
+      dispatch(updateDescription(sections[0].description || ""));
+    }
+  }, [sections, survey.sections, dispatch]);
+
+  // Restore sections from Redux on component mount
+  useEffect(() => {
+    if (survey.sections.length > 0) {
+      const restoredSections = survey.sections.map((section, index) => ({
+        title:
+          index === 0
+            ? survey.topic || "Untitled Section"
+            : section.section_topic || "Untitled Section",
+        description:
+          index === 0
+            ? survey.description || ""
+            : section.section_description || "",
+        questions: section.questions || [],
+      }));
+
+      setSections(restoredSections);
+      console.log("Restored sections from Redux:", restoredSections);
+    }
+  }, []); // Only run on mount
+
+  // Sync sections with Redux when sections change (with debounce to prevent excessive updates)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      syncSectionsWithRedux();
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [sections]); // Removed syncSectionsWithRedux from dependencies to prevent infinite loop
+
+  // Helper function to get global question index across all sections
+  const getGlobalQuestionIndex = (
+    sectionIndex: number,
+    questionIndex: number
+  ): number => {
+    let globalIndex = 0;
+    for (let s = 0; s < sections.length; s++) {
+      if (s < sectionIndex) {
+        globalIndex += sections[s].questions.length;
+      } else if (s === sectionIndex) {
+        globalIndex += questionIndex;
+        break;
+      }
+    }
+    return globalIndex;
+  };
+
+  // Transform skip logic to API format
+  const transformSkipLogic = useCallback(() => {
+    const processedLogic: any[] = [];
+
+    skipLogic.forEach((rule) => {
+      if ("conditions" in rule && "action" in rule) {
+        // New rule format (SkipLogicRuleV2)
+        const {
+          conditions,
+          logicalOperator,
+          action,
+          target,
+          mainQuestionSection,
+          mainQuestionIndex,
+        } = rule;
+
+        // Determine which question this logic applies to
+        let targetQuestionId = null;
+
+        if (action === "end_survey") {
+          if (conditions.length > 0) {
+            const firstCondition = conditions[0];
+            const questionIndex = firstCondition.questionIndex;
+            const sectionIndex = firstCondition.sectionIndex;
+            if (questionIndex !== null && sectionIndex !== null) {
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                sectionIndex,
+                questionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
+            }
+          } else {
+            if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                mainQuestionSection,
+                mainQuestionIndex
+              );
+              targetQuestionId = `Question${globalQuestionIndex + 1}`;
+            }
+          }
+        } else {
+          if (mainQuestionIndex !== null && mainQuestionSection !== null) {
+            const globalQuestionIndex = getGlobalQuestionIndex(
+              mainQuestionSection,
+              mainQuestionIndex
+            );
+            targetQuestionId = `Question${globalQuestionIndex + 1}`;
+          }
+        }
+
+        if (targetQuestionId) {
+          const rules = conditions
+            .map((cond: any) => {
+              const sourceQuestionIndex = cond.questionIndex;
+              const sourceSectionIndex = cond.sectionIndex;
+              if (sourceQuestionIndex === null || sourceSectionIndex === null)
+                return null;
+
+              // For end_survey actions, use flattened question index
+              let questionId;
+              if (action === "end_survey") {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  sourceSectionIndex,
+                  sourceQuestionIndex
+                );
+                questionId = `Question${globalQuestionIndex + 1}`;
+              } else {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  sourceSectionIndex,
+                  sourceQuestionIndex
+                );
+                questionId = `Question${globalQuestionIndex + 1}`;
+              }
+
+              const rule = {
+                source_id: questionId,
+                operator: cond.operator,
+                value: cond.value,
+              };
+
+              return rule;
+            })
+            .filter(Boolean);
+
+          let actionType = action;
+          let targetType = "question";
+          let targetId = "Question1";
+
+          if (action === "end_survey") {
+            actionType = "end_survey";
+            targetType = "question";
+            // For end_survey, use the question that has the logic (from conditions or main question)
+            if (conditions.length > 0) {
+              const firstCondition = conditions[0];
+              const questionIndex = firstCondition.questionIndex;
+              if (questionIndex !== null) {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  firstCondition.sectionIndex,
+                  questionIndex
+                );
+                targetId = `Question${globalQuestionIndex + 1}`;
+              } else {
+                const globalQuestionIndex = getGlobalQuestionIndex(
+                  mainQuestionSection,
+                  mainQuestionIndex
+                );
+                targetId = `Question${globalQuestionIndex + 1}`;
+              }
+            } else {
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                mainQuestionSection,
+                mainQuestionIndex
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
+            }
+          } else if (action === "jump_to") {
+            actionType = "jump_to";
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              // Use flattened question index for jump_to questions
+              const globalQuestionIndex = getGlobalQuestionIndex(
+                target.sectionIndex,
+                target.questionIndex
+              );
+              targetId = `Question${globalQuestionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+          } else {
+            // hide/show actions
+            if (
+              target.type === "question" &&
+              target.questionIndex !== undefined &&
+              target.questionIndex !== null
+            ) {
+              targetId = `Question${target.questionIndex + 1}`;
+            } else if (
+              target.type === "section" &&
+              target.sectionIndex !== undefined &&
+              target.sectionIndex !== null
+            ) {
+              targetType = "section";
+              targetId = `Section${target.sectionIndex + 1}`;
+            }
+          }
+
+          // Determine logic_type based on action
+          let logicType = "skip_logic"; // default
+          if (action === "hide" || action === "show") {
+            logicType = "display_logic";
+          } else if (action === "jump_to") {
+            logicType = "skip_logic";
+          } else if (action === "end_survey") {
+            logicType = "skip_logic";
+          }
+
+          const skipLogicEntry = {
+            logic_type: logicType,
+            condition: {
+              logical_operator: logicalOperator,
+              rules: rules,
+              action: {
+                type: actionType,
+                target_type: targetType,
+                target_id: targetId,
+              },
+            },
+          };
+
+          processedLogic.push({
+            questionId: targetQuestionId,
+            skipLogic: skipLogicEntry,
+          });
+        }
+      }
+    });
+
+    return processedLogic;
+  }, [skipLogic, sections]);
 
   const handleCancel = () => {
     // setEditIndex(null);
@@ -596,14 +964,13 @@ const AddQuestionPage = () => {
 
   const handleSaveDraft = async () => {
     try {
-      await saveprogress({
-        ...survey,
-        sections: sections.map((section) => ({
-          section_topic: section.title,
-          section_description: section.description,
-          questions: section.questions,
-        })),
-      });
+      // Ensure sections are synced with Redux before saving
+      syncSectionsWithRedux();
+
+      // Use the Redux survey state for saving (which now includes our sections)
+      const updatedSurvey = store.getState().survey;
+      await saveprogress(updatedSurvey);
+
       toast.success("Survey saved as draft");
       if (pendingNavigation) {
         pendingNavigation();
@@ -611,6 +978,22 @@ const AddQuestionPage = () => {
       setShowExitDialog(false);
     } catch (error) {
       toast.error("Failed to save draft");
+    }
+  };
+
+  // Manual save progress function for immediate persistence
+  const handleSaveProgress = async () => {
+    try {
+      // Ensure sections are synced with Redux before saving
+      syncSectionsWithRedux();
+
+      // Use the Redux survey state for saving (which now includes our sections)
+      const updatedSurvey = store.getState().survey;
+      await saveprogress(updatedSurvey);
+
+      toast.success("Progress saved successfully");
+    } catch (error) {
+      toast.error("Failed to save progress");
     }
   };
 
@@ -699,6 +1082,100 @@ const AddQuestionPage = () => {
           ? { ...section, questions: [...section.questions, newQuestion] }
           : section
       )
+    );
+  };
+
+  // Animated divider component for cutting sections
+  const CutSectionDivider = ({ onCut }: { onCut: () => void }) => {
+    const [hovered, setHovered] = useState(false);
+    return (
+      <motion.div
+        className="relative flex items-center z-[1000] justify-center w-full"
+        initial={false}
+        animate={hovered ? "hovered" : "initial"}
+        variants={{
+          initial: { height: 24 },
+          hovered: {
+            height: 48,
+            transition: { type: "spring", stiffness: 200, damping: 18 },
+          },
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{ minHeight: 12 }}
+      >
+        {/* Reveal divider only on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              key="divider"
+              initial={{ scaleX: 0, opacity: 0, y: 10 }}
+              animate={{
+                scaleX: 1,
+                opacity: 1,
+                y: 0,
+                transition: { type: "spring", stiffness: 300, damping: 18 },
+              }}
+              exit={{
+                scaleX: 0,
+                opacity: 0,
+                y: -10,
+                transition: { duration: 0.3, ease: "easeInOut" },
+              }}
+              className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-pink-200 via-purple-400 to-pink-200 rounded-full shadow-lg z-0"
+              style={{ pointerEvents: "none" }}
+            />
+          )}
+        </AnimatePresence>
+        {/* Reveal button only on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.button
+              key="scissors"
+              initial={{ scale: 0.5, opacity: 0, rotate: -30, y: 20 }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+                rotate: 0,
+                y: 0,
+                transition: {
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 18,
+                  delay: 0.08,
+                },
+              }}
+              exit={{
+                scale: 0.5,
+                opacity: 0,
+                rotate: 30,
+                y: -20,
+                transition: { duration: 0.25, ease: "circIn" },
+              }}
+              className="absolute -top-7 mx-auto bg-white border border-pink-300 shadow-lg rounded-full p-2 z-10 hover:bg-pink-100 active:scale-95 focus:outline-none focus:ring-2 focus:ring-pink-400"
+              onClick={onCut}
+              aria-label="Cut and create new section"
+              whileTap={{ scale: 0.85, rotate: -10 }}
+            >
+              <Scissors className="w-6 h-6 text-pink-600" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+        {/* Tooltip on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              key="tooltip"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0, transition: { delay: 0.15 } }}
+              exit={{ opacity: 0, y: 10, transition: { duration: 0.18 } }}
+              className="absolute mx-auto w-fit top-10 bg-white px-3 py-1 rounded shadow text-xs text-pink-700 font-medium border border-pink-200"
+            >
+              Cut here & create new section
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     );
   };
 
@@ -977,7 +1454,7 @@ const AddQuestionPage = () => {
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className="mb-4 relative"
+                                className="relative"
                                 onMouseEnter={() =>
                                   !isTouchDevice &&
                                   setHoveredQuestionIndex(index)
@@ -991,199 +1468,450 @@ const AddQuestionPage = () => {
                                   setHoveredQuestionIndex(index)
                                 }
                               >
-                                {renderQuestionActions(index)}
-                                {
-                                  // Conditionally render based on question type
-                                  isEdit &&
-                                  editIndex === index &&
-                                  item.question_type === "matrix_checkbox" ? (
-                                    <MatrixQuestionEdit
-                                      question={item.question}
-                                      options={item.options}
-                                      is_required={item.is_required}
-                                      questionType={item.question_type}
-                                      onSave={handleSaveEdittedQuestion}
-                                      onCancel={handleCancel}
-                                    />
-                                  ) : isEdit && editIndex === index ? (
-                                    <MultiChoiceQuestionEdit
-                                      // index={index + 1}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      is_required={item.is_required}
-                                      onSave={handleSaveEdittedQuestion}
-                                      onCancel={handleCancel}
-                                      surveyData={surveyData}
-                                      can_accept_audio={item.canAcceptAudio}
-                                    />
-                                  ) : item.question_type ===
-                                    "multiple_choice" ? (
-                                    <MultiChoiceQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "single_choice" ? (
-                                    <SingleChoiceQuestion
-                                      index={index + 1}
-                                      key={index}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "checkbox" ? (
-                                    <CheckboxQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "rating_scale" ? (
-                                    <RatingScaleQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "drop_down" ? (
-                                    <DropdownQuestion
-                                      index={index + 1}
-                                      key={index}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "number" ? (
-                                    <NumberQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "long_text" ? (
-                                    <CommentQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "media" ? (
-                                    <MediaQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                    />
-                                  ) : item.question_type === "short_text" ? (
-                                    <ShortTextQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "likert_scale" ? (
-                                    <LikertScaleQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "star_rating" ? (
-                                    <StarRatingQuestion
-                                      question={item.question}
-                                      // maxRating={5}
-                                      index={index + 1}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type ===
-                                      "matrix_checkbox" ||
-                                    item.question_type ===
-                                      "matrix_multiple_choice" ? (
-                                    <MatrixQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      // options={item.options}
-                                      rows={item.rows}
-                                      columns={item.columns}
-                                      question={item.question}
-                                      is_required={item.is_required}
-                                      questionType={item.question_type}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "boolean" ? (
-                                    <BooleanQuestion
-                                      key={index}
-                                      index={index + 1}
-                                      question={item.question}
-                                      options={item.options}
-                                      questionType={item.question_type}
-                                      EditQuestion={() => EditQuestion(index)}
-                                      DeleteQuestion={() =>
-                                        handleDeleteQuestion(index)
-                                      }
-                                      surveyData={surveyData}
-                                    />
-                                  ) : item.question_type === "slider" ? (
-                                    <SliderQuestion
-                                      question={item.question}
-                                      options={item.options}
-                                      // step={item.options.length}
-                                      questionType={item.question_type}
-                                      index={index + 1}
-                                      is_required={item.is_required}
-                                      surveyData={surveyData}
-                                      item={item}
-                                    />
-                                  ) : null
-                                }
+                                <div className="flex items-start group">
+                                  <div className="flex flex-col">
+                                    {/* Drag handle */}
+                                    <div
+                                      {...provided.draggableProps}
+                                      className="cursor-grab group-hover:scale-110 transition-transform duration-200 mr-2"
+                                      title="Drag to reorder"
+                                    >
+                                      <svg
+                                        width="18"
+                                        height="18"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <circle
+                                          cx="5"
+                                          cy="6"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="5"
+                                          cy="12"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="5"
+                                          cy="18"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="12"
+                                          cy="6"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="12"
+                                          cy="12"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="12"
+                                          cy="18"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="19"
+                                          cy="6"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="19"
+                                          cy="12"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                        <circle
+                                          cx="19"
+                                          cy="18"
+                                          r="1.5"
+                                          fill="#a78bfa"
+                                        />
+                                      </svg>
+                                    </div>
+                                    {/* Actions button under drag handle */}
+                                    {sections.length > 1 && (
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            className="mt-2 mr-2 h-6 bg-transparent p-1 rounded-full px-0 hover:bg-gray-100 text-gray-600 transition-all duration-150 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 focus:ring-transparent focus-visible:ring-transparent focus-within:outline-none focus-within:ring-0 focus-within:ring-transparent"
+                                            title="More actions"
+                                          >
+                                            <BringToFront
+                                              strokeWidth={1.5}
+                                              className="size-[18px] text-[#a78bfa]"
+                                            />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                          align="start"
+                                          className="z-[10000] min-w-[180px]"
+                                        >
+                                          <DropdownMenuSub>
+                                            <DropdownMenuSubTrigger className="flex items-center gap-2">
+                                              <MoveRight className="w-4 h-4 text-[#a78bfa]" />
+                                              <span>Move to section</span>
+                                            </DropdownMenuSubTrigger>
+                                            <DropdownMenuSubContent className="z-[10000] min-w-[180px]">
+                                              {sections.map((section, secIdx) =>
+                                                secIdx !==
+                                                currentSectionIndex ? (
+                                                  <DropdownMenuItem
+                                                    key={secIdx}
+                                                    onClick={() => {
+                                                      // Remove from current section
+                                                      const sectionList = [
+                                                        ...sections,
+                                                      ];
+                                                      const fromSection =
+                                                        sectionList[
+                                                          currentSectionIndex
+                                                        ];
+                                                      const toSection =
+                                                        sectionList[secIdx];
+                                                      const movingQuestion =
+                                                        fromSection.questions[
+                                                          index
+                                                        ];
+                                                      // Remove from current
+                                                      const newFromQuestions =
+                                                        fromSection.questions.filter(
+                                                          (_, i) => i !== index
+                                                        );
+                                                      // Add to end of target
+                                                      const newToQuestions = [
+                                                        ...toSection.questions,
+                                                        movingQuestion,
+                                                      ];
+                                                      // Update sections
+                                                      setSections((sections) =>
+                                                        sections.map((s, i) =>
+                                                          i ===
+                                                          currentSectionIndex
+                                                            ? {
+                                                                ...fromSection,
+                                                                questions:
+                                                                  newFromQuestions,
+                                                              }
+                                                            : i === secIdx
+                                                            ? {
+                                                                ...toSection,
+                                                                questions:
+                                                                  newToQuestions,
+                                                              }
+                                                            : s
+                                                        )
+                                                      );
+                                                    }}
+                                                    className="flex items-center gap-2"
+                                                  >
+                                                    <span className="font-medium">
+                                                      Section {secIdx + 1}
+                                                    </span>
+                                                    {section.title && (
+                                                      <span className="text-xs text-muted-foreground ml-2">
+                                                        {section.title}
+                                                      </span>
+                                                    )}
+                                                  </DropdownMenuItem>
+                                                ) : null
+                                              )}
+                                            </DropdownMenuSubContent>
+                                          </DropdownMenuSub>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    )}
+                                  </div>
+                                  <div className="flex-1">
+                                    {/* ... existing question rendering ... */}
+                                    {renderQuestionActions(index)}
+                                    {
+                                      // Conditionally render based on question type
+                                      isEdit &&
+                                      editIndex === index &&
+                                      item.question_type ===
+                                        "matrix_checkbox" ? (
+                                        <MatrixQuestionEdit
+                                          question={item.question}
+                                          options={item.options}
+                                          is_required={item.is_required}
+                                          questionType={item.question_type}
+                                          onSave={handleSaveEdittedQuestion}
+                                          onCancel={handleCancel}
+                                        />
+                                      ) : isEdit && editIndex === index ? (
+                                        <MultiChoiceQuestionEdit
+                                          // index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          is_required={item.is_required}
+                                          onSave={handleSaveEdittedQuestion}
+                                          onCancel={handleCancel}
+                                          surveyData={surveyData}
+                                          can_accept_audio={item.canAcceptAudio}
+                                        />
+                                      ) : item.question_type ===
+                                        "multiple_choice" ? (
+                                        <MultiChoiceQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "single_choice" ? (
+                                        <SingleChoiceQuestion
+                                          index={index + 1}
+                                          key={index}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "checkbox" ? (
+                                        <CheckboxQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "rating_scale" ? (
+                                        <RatingScaleQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "drop_down" ? (
+                                        <DropdownQuestion
+                                          index={index + 1}
+                                          key={index}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "number" ? (
+                                        <NumberQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "long_text" ? (
+                                        <CommentQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "media" ? (
+                                        <MediaQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                        />
+                                      ) : item.question_type ===
+                                        "short_text" ? (
+                                        <ShortTextQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "likert_scale" ? (
+                                        <LikertScaleQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                        "star_rating" ? (
+                                        <StarRatingQuestion
+                                          question={item.question}
+                                          // maxRating={5}
+                                          index={index + 1}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type ===
+                                          "matrix_checkbox" ||
+                                        item.question_type ===
+                                          "matrix_multiple_choice" ? (
+                                        <MatrixQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          // options={item.options}
+                                          rows={item.rows}
+                                          columns={item.columns}
+                                          question={item.question}
+                                          is_required={item.is_required}
+                                          questionType={item.question_type}
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "boolean" ? (
+                                        <BooleanQuestion
+                                          key={index}
+                                          index={index + 1}
+                                          question={item.question}
+                                          options={item.options}
+                                          questionType={item.question_type}
+                                          EditQuestion={() =>
+                                            EditQuestion(index)
+                                          }
+                                          DeleteQuestion={() =>
+                                            handleDeleteQuestion(index)
+                                          }
+                                          surveyData={surveyData}
+                                        />
+                                      ) : item.question_type === "slider" ? (
+                                        <SliderQuestion
+                                          question={item.question}
+                                          options={item.options}
+                                          // step={item.options.length}
+                                          questionType={item.question_type}
+                                          index={index + 1}
+                                          is_required={item.is_required}
+                                          surveyData={surveyData}
+                                          item={item}
+                                        />
+                                      ) : null
+                                    }
+                                    {/* Animated cut-to-section hover area (not after last question) */}
+                                    {index < questions.length - 1 && (
+                                      <CutSectionDivider
+                                        onCut={() => {
+                                          // Split section logic
+                                          const section =
+                                            sections[currentSectionIndex];
+                                          const before =
+                                            section.questions.slice(
+                                              0,
+                                              index + 1
+                                            );
+                                          const after = section.questions.slice(
+                                            index + 1
+                                          );
+                                          if (after.length === 0) return;
+                                          // Create new section with 'after' questions
+                                          setSections((sections) => {
+                                            const newSection = {
+                                              title:
+                                                section.title ||
+                                                `Section ${
+                                                  sections.length + 1
+                                                }`,
+                                              description:
+                                                section.description || "",
+                                              questions: after,
+                                            };
+                                            const updatedSections =
+                                              sections.map((s, i) =>
+                                                i === currentSectionIndex
+                                                  ? {
+                                                      ...section,
+                                                      questions: before,
+                                                    }
+                                                  : s
+                                              );
+                                            return [
+                                              ...updatedSections.slice(
+                                                0,
+                                                currentSectionIndex + 1
+                                              ),
+                                              newSection,
+                                              ...updatedSections.slice(
+                                                currentSectionIndex + 1
+                                              ),
+                                            ];
+                                          });
+                                          setCurrentSectionIndex(
+                                            currentSectionIndex + 1
+                                          );
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             )}
                           </Draggable>
@@ -1226,7 +1954,7 @@ const AddQuestionPage = () => {
 
               {/* New bottom section design from EditSurvey */}
               {sections.length > 1 && (
-                <div className="flex w-full md:w-auto md:justify-end items-center mb-6 sticky bottom-10 z-10">
+                <div className="flex w-full md:w-auto md:justify-end items-center mt-6 mb-6 sticky bottom-10 z-10">
                   <PaginationBtn
                     currentSection={currentSectionIndex}
                     totalSections={sections.length}
@@ -1249,7 +1977,7 @@ const AddQuestionPage = () => {
                 </div>
               )}
 
-              <div className="flex flex-col gap-4 md:flex-row justify-between items-center">
+              <div className="flex flex-col gap-4 md:flex-row justify-between items-center mt-6">
                 <div className="flex flex-wrap gap-2 items-center">
                   <Button
                     variant="outline"
@@ -1380,7 +2108,7 @@ const AddQuestionPage = () => {
                 isLoading ||
                 !Boolean(sectionTopic.trim().length) ||
                 !Boolean(sectionDescription?.trim().length) ||
-                !questions.length
+                !questions?.length
               }
               size="lg"
               className="w-full h-12 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:opacity-90 transition-all duration-300 scale-95 hover:scale-100 hover:shadow-lg rounded-xl"
@@ -1404,8 +2132,47 @@ const AddQuestionPage = () => {
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}
         >
-          {/* {isSidebar ? <StyleEditor /> : <QuestionType />} */}
-          <StyleEditor surveyData={surveyData} setSurveyData={setSurveyData} />
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger
+                value="questions"
+                className="flex items-center gap-2"
+              >
+                <Paintbrush className="h-4 w-4" />
+                Style
+              </TabsTrigger>
+              <TabsTrigger
+                value="skip-logic"
+                className="flex items-center gap-2"
+              >
+                <AlignVerticalSpaceAround className="h-4 w-4" />
+                Skip Logic
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="questions" className="h-full">
+              <StyleEditor
+                surveyData={surveyData}
+                setSurveyData={setSurveyData}
+              />
+            </TabsContent>
+
+            <TabsContent value="skip-logic" className="h-full">
+              <SkipLogicEditor
+                sections={sections.map((section) => ({
+                  section_topic: section.title,
+                  section_description: section.description,
+                  questions: section.questions,
+                }))}
+                skipLogic={skipLogic}
+                onChange={handleSkipLogicUpdate}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
@@ -1461,7 +2228,7 @@ const AddQuestionPage = () => {
       </Dialog>
 
       {/* ... rest of your existing modals ... */}
-      {review && (
+      {/* {review && (
         <ReviewModal
           survey_id={survey_id}
           openModal={review}
@@ -1469,8 +2236,13 @@ const AddQuestionPage = () => {
             setReview((prev) => !prev);
             router.push("/surveys/survey-list");
           }}
-        />
+        /> 
+        )} */}
+
+      {showQuickSurveyFlow && survey_id && (
+        <BuyQuickSurveyRespondent surveyId={survey_id} />
       )}
+
       <Dialog
         open={(!userToken || !user) && showAuthModal}
         onOpenChange={() => setShowAuthModal(false)}
@@ -1516,6 +2288,7 @@ const AddQuestionPage = () => {
           </p>
         </DialogContent>
       </Dialog>
+
       <ExitSurveyDialog
         isLoading={isLoading}
         isOpen={showExitDialog}

@@ -17,11 +17,15 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, message }) => {
   const { isLoggedIn } = useIsLoggedIn({ message: "", dispatch: dispatch });
   const state = useSelector((state: RootState) => state.user);
 
-  console.log(state?.user?.roles);
+  // console.log(state?.user?.roles);
 
-  const logoutMessage = message || "You must be logged in to access this page.";
+  const logoutMessage = message || "";
 
-  console.log(isLoggedIn);
+  // if (process.env.NODE_ENV === "development") {
+  //   return <>{children}</>;
+  // }
+
+  // console.log(isLoggedIn);
 
   if (!isLoggedIn || state.user === null || state.access_token === null) {
     return <LoadRedirect text={logoutMessage} goto="/login" />;

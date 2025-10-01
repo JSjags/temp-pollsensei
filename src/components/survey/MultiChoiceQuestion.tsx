@@ -94,7 +94,7 @@ const MultiChoiceQuestion: React.FC<MultiChoiceQuestionProps> = ({
   return (
     <div
       className={cn(
-        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        "bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
         {
           [`font-${questionText?.name
             ?.split(" ")

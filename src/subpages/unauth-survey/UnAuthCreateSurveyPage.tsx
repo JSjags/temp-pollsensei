@@ -79,6 +79,8 @@ const UnAuthCreateSurveyPage = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [manualTopic, setManualTopic] = useState("");
+  const [addSkipLogic, setAddSkipLogic] = useState(false);
+
   const generated_by = useSelector(
     (state: RootState) => state.survey.generated_by
   );
@@ -130,7 +132,7 @@ const UnAuthCreateSurveyPage = () => {
   };
 
   const maxCharacters = 3000;
-  console.log(data);
+  // console.log(data);
 
   const handleSurveyType = (userType: string, prompt: string) => {
     setSelectedDiv(userType);
@@ -190,9 +192,9 @@ const UnAuthCreateSurveyPage = () => {
   };
 
   const survey = store.getState().survey;
-  console.log(survey);
-  console.log(data);
-  console.log(survey.sections);
+  // console.log(survey);
+  // console.log(data);
+  // console.log(survey.sections);
 
   useEffect(() => {
     dispatch(resetQuestion());
@@ -319,6 +321,8 @@ const UnAuthCreateSurveyPage = () => {
             handleGenerateTopics={handleGenerateTopics}
             manualTopic={manualTopic}
             setManualTopic={setManualTopic}
+            addSkipLogic={addSkipLogic}
+            setAddSkipLogic={setAddSkipLogic}
           />
         )}
 

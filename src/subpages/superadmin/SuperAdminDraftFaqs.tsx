@@ -47,6 +47,9 @@ const SuperAdminDraftFaqs = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onNavigate={navigatePage}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+          }}
         />
       </div>
     </div>

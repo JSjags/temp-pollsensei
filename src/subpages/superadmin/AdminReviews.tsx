@@ -54,7 +54,7 @@ const AdminReviews: React.FC = () => {
   const openModal = (reviews: ReviewData) => {
     setSelectedReview(reviews);
     setIsModalOpen(true);
-    console.log(reviews);
+    // console.log(reviews);
   };
 
   const closeModal = () => {
@@ -121,7 +121,7 @@ const AdminReviews: React.FC = () => {
     </>
   );
 
-  console.log(reviews);
+  // console.log(reviews);
 
   return (
     <div className="p-4 max-w-7xl mx-auto space-y-6">
@@ -340,6 +340,9 @@ const AdminReviews: React.FC = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onNavigate={navigatePage}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+          }}
         />
       </div>
     </div>

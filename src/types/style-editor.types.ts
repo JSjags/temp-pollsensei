@@ -11,5 +11,5 @@ export interface SizeOption {
 
 export interface FontSettings {
   name: string;
-  size: number;
+  size: string | number;
 }

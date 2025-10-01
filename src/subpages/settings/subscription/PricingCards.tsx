@@ -39,23 +39,33 @@ export interface TPricing {
   total_yearly_price_naira: number;
   total_yearly_price_dollar: number;
   trial_period: number;
-  number_of_collaborators: number;
+  number_of_contributors: number;
   number_of_monthly_responses: number;
   number_of_accounts: number;
-  features: [
-    {
-      _id: string;
-      feature_name: string;
-    },
-    {
-      _id: string;
-      feature_name: string;
-    },
-    {
-      _id: string;
-      feature_name: string;
-    }
-  ];
+  ai_survey_generation: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  ai_data_analysis: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  ai_report_generation: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  voice_transcription: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  ocr_document_scanning: {
+    credit: number | string;
+    usage_capacity: string;
+  };
+  features: Array<{
+    _id: string;
+    feature_name: string;
+  }>;
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -164,22 +174,32 @@ export function PricingCards() {
 
   const renderButton = (tier: TPricing, index: number, plans: TPricing[]) => {
     const currentPlanId = userData.data?.data?.plan?._id;
-    const planOrder = getPlanOrder(plans);
-    const currentIndex = planOrder.indexOf(currentPlanId!);
-    if (tier._id === currentPlanId) {
+    const isCurrentPlan = tier._id === currentPlanId;
+    const isFreePlan =
+      tier.monthly_price_naira === 0 && tier.monthly_price_dollar === 0;
+
+    // Show "Current Plan" button for current plan
+    if (isCurrentPlan) {
       return (
         <Button
-          className={cn(
-            "w-full text-xs sm:text-sm bg-transparent border-0 hover:bg-transparent",
-            index === 1 && "text-white"
-          )}
+          className="w-full text-xs sm:text-sm bg-transparent border border-purple-400 text-white hover:bg-transparent"
           variant="secondary"
           disabled
         >
-          Current plan
+          Current Plan
         </Button>
       );
-    } else if (currentIndex < index) {
+    }
+
+    // Don't show button for free plan
+    if (isFreePlan) {
+      return null;
+    }
+
+    const planOrder = getPlanOrder(plans);
+    const currentIndex = planOrder.indexOf(currentPlanId!);
+
+    if (currentIndex < index) {
       // Upgrade
       return (
         <Button
@@ -190,19 +210,8 @@ export function PricingCards() {
           Upgrade plan
         </Button>
       );
-    } else if (currentIndex > index) {
-      // Downgrade
-      return null;
-      // (
-      //   <Button
-      //     onClick={() => handleUpgrade(index)}
-      //     className="w-full text-xs sm:text-sm border-0"
-      //     variant="outline"
-      //   >
-      //     Downgrade plan
-      //   </Button>
-      // );
     }
+
     return null;
   };
 
@@ -300,95 +309,183 @@ export function PricingCards() {
       {tiersData.isSuccess && (
         <>
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {tiersData.data.map((tier, index) => (
-              <motion.div
-                key={tier._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 + 0.2 }}
-                className={cn(
-                  "relative rounded-lg sm:rounded-xl bg-card p-4 sm:p-6 overflow-hidden border flex flex-col flex-1",
-                  tier.name === "Pro Plan"
-                    ? "border-[#EDEDED] bg-[#5B03B2] text-white"
-                    : "border-[#9D50BB21] bg-[#ffffff]"
-                )}
-              >
-                {/* Highlight Pro Plan as Most Popular */}
-                {tier.name === "Pro Plan" && (
-                  <div className="absolute top-0 right-0 rounded-bl-xl bg-gradient-to-r from-[#F7AC0A] to-[#BE6C07] px-3 py-2 text-xs sm:text-sm font-medium text-white">
-                    Most Popular
-                  </div>
-                )}
-                <div className="space-y-4 flex-1">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-medium">
-                      {tier.name}
-                    </h3>
-                    <div className="mt-2 flex items-baseline">
-                      <span
-                        className={cn(
-                          "text-2xl sm:text-3xl font-bold tracking-tight text-purple-600",
-                          tier.name === "Pro Plan"
-                            ? "text-white"
-                            : "text-purple-600"
-                        )}
-                      >
-                        {tier.monthly_price_naira === 0 &&
-                        tier.monthly_price_dollar === 0
-                          ? "FREE"
-                          : !locationData?.isNigeria
-                          ? `$${tier.monthly_price_dollar.toLocaleString()}`
-                          : `₦${tier.monthly_price_naira.toLocaleString()}`}
-                      </span>
-                      <span
-                        className={cn(
-                          "ml-1 text-xs sm:text-sm text-muted-foreground",
-                          tier.name === "Pro Plan" ? "text-white/80" : ""
-                        )}
-                      >
-                        {tier.monthly_price_naira === 0 &&
-                        tier.monthly_price_dollar === 0
-                          ? ""
-                          : "per month"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="my-6 h-[1px] bg-gray-500/30" />
-                  <div className="space-y-2">
-                    <h4 className="text-xs sm:text-sm font-medium">
-                      What you will get
-                    </h4>
-                    <ul
-                      className={cn(
-                        "space-y-2 text-xs sm:text-sm text-muted-foreground",
-                        tier.name === "Pro Plan" ? "text-white/80" : ""
-                      )}
-                    >
-                      {tier.features.map((feature) => (
-                        <li
-                          key={feature._id}
-                          className="flex justify-start items-center"
+            {tiersData.data.map((tier, index) => {
+              const isCurrentPlan = tier._id === userData.data?.data?.plan?._id;
+              return (
+                <motion.div
+                  key={tier._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 + 0.2 }}
+                  className={cn(
+                    "relative rounded-lg sm:rounded-xl bg-card p-4 sm:p-6 border flex flex-col flex-1",
+                    isCurrentPlan
+                      ? "border-[#EDEDED] bg-[#5B03B2] text-white"
+                      : "border-[#9D50BB21] bg-[#ffffff]"
+                  )}
+                >
+                  {/* Highlight Essential Plan as New */}
+                  {tier.name === "Essential Plan" && (
+                    <Image
+                      src="/assets/new-plan.png"
+                      alt="New Plan"
+                      width={60}
+                      height={60}
+                      className="inline-block mr-1 absolute -top-2 -left-2"
+                    />
+                  )}
+                  {/* Highlight Current Plan */}
+                  <div className="space-y-4 flex-1">
+                    <div>
+                      <h3 className="text-base sm:text-lg font-medium">
+                        {tier.name}
+                      </h3>
+                      <div className="mt-2 flex gap-0 items-baseline">
+                        <span
+                          className={cn(
+                            "text-2xl sm:text-3xl font-bold tracking-tight text-purple-600",
+                            isCurrentPlan ? "text-white" : "text-purple-600"
+                          )}
                         >
+                          {tier.monthly_price_naira === 0 &&
+                          tier.monthly_price_dollar === 0
+                            ? "FREE"
+                            : !locationData?.isNigeria
+                            ? `$${tier.monthly_price_dollar.toLocaleString()}`
+                            : `$${tier.monthly_price_dollar.toLocaleString()}`}
+                          {tier.monthly_price_dollar === 0 &&
+                          tier.monthly_price_dollar === 0
+                            ? ""
+                            : "/month"}
+                        </span>
+                        {/* <span
+                          className={cn(
+                            "ml-1 text-2xl sm:text-3xl font-bold tracking-tight text-purple-600 bg-blue-500",
+                            isCurrentPlan ? "text-white" : ""
+                          )}
+                        >
+                          {tier.monthly_price_naira === 0 &&
+                          tier.monthly_price_dollar === 0
+                            ? ""
+                            : "/month"}
+                        </span> */}
+                      </div>
+                    </div>
+                    <div className="my-6 h-[1px] bg-gray-500/30" />
+                    <div className="space-y-2">
+                      <h4 className="text-xs sm:text-sm font-medium">
+                        What you will get
+                      </h4>
+                      <ul
+                        className={cn(
+                          "space-y-2 text-xs sm:text-sm text-muted-foreground",
+                          isCurrentPlan ? "text-white" : ""
+                        )}
+                      >
+                        {/* AI Features */}
+                        <li className="flex justify-start items-center">
                           <CheckCircle2Icon
                             className={cn(
-                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-purple-600 shrink-0",
-                              tier.name === "Pro Plan"
-                                ? "text-white"
-                                : "text-purple-600"
+                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                              isCurrentPlan ? "text-white" : "text-gray-500"
                             )}
                           />
                           <span className="text-left">
-                            {feature.feature_name}
+                            {tier.ai_survey_generation.usage_capacity}
                           </span>
                         </li>
-                      ))}
-                    </ul>
+                        <li className="flex justify-start items-center">
+                          <CheckCircle2Icon
+                            className={cn(
+                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                              isCurrentPlan ? "text-white" : "text-gray-500"
+                            )}
+                          />
+                          <span className="text-left">
+                            {tier.ai_data_analysis.usage_capacity}
+                          </span>
+                        </li>
+                        <li className="flex justify-start items-center">
+                          <CheckCircle2Icon
+                            className={cn(
+                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                              isCurrentPlan ? "text-white" : "text-gray-500"
+                            )}
+                          />
+                          <span className="text-left">
+                            {tier.ai_report_generation.usage_capacity}
+                          </span>
+                        </li>
+                        <li className="flex justify-start items-center">
+                          <CheckCircle2Icon
+                            className={cn(
+                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                              isCurrentPlan ? "text-white" : "text-gray-500"
+                            )}
+                          />
+                          <span className="text-left">
+                            {tier.voice_transcription.usage_capacity}
+                          </span>
+                        </li>
+                        <li className="flex justify-start items-center">
+                          <CheckCircle2Icon
+                            className={cn(
+                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                              isCurrentPlan ? "text-white" : "text-gray-500"
+                            )}
+                          />
+                          <span className="text-left">
+                            {tier.ocr_document_scanning.usage_capacity}
+                          </span>
+                        </li>
+                        <li className="flex justify-start items-center">
+                          <CheckCircle2Icon
+                            className={cn(
+                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                              isCurrentPlan ? "text-white" : "text-gray-500"
+                            )}
+                          />
+                          <span className="text-left">
+                            {tier.number_of_monthly_responses.toLocaleString()}{" "}
+                            monthly responses
+                          </span>
+                        </li>
+                        <li className="flex justify-start items-center">
+                          <CheckCircle2Icon
+                            className={cn(
+                              "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                              isCurrentPlan ? "text-white" : "text-gray-500"
+                            )}
+                          />
+                          <span className="text-left">
+                            {tier.number_of_contributors} contributors
+                          </span>
+                        </li>
+                        {/* Additional Features */}
+                        {tier.features.map((feature) => (
+                          <li
+                            key={feature._id}
+                            className="flex justify-start items-center"
+                          >
+                            <CheckCircle2Icon
+                              className={cn(
+                                "mr-2 h-3 w-3 sm:h-4 sm:w-4 text-gray-500 shrink-0",
+                                isCurrentPlan ? "text-white" : "text-gray-500"
+                              )}
+                            />
+                            <span className="text-left">
+                              {feature.feature_name}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="py-3"></div>
                   </div>
-                  <div className="py-3"></div>
-                </div>
-                {renderButton(tier, index, tiersData.data)}
-              </motion.div>
-            ))}
+                  {renderButton(tier, index, tiersData.data)}
+                </motion.div>
+              );
+            })}
           </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

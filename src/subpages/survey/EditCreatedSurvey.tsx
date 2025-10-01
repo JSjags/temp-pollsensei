@@ -564,14 +564,14 @@ const EditCreatedSurvey = () => {
 
   const saveSurvey = async () => {
     setSurveyData((prevData: any) => {
-      console.log("Updated Payload:", prevData); // Log the updated survey data
+      // console.log("Updated Payload:", prevData); // Log the updated survey data
       return prevData;
     });
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      console.log("Sending Updated Data:", surveyData);
+      // console.log("Sending Updated Data:", surveyData);
       await editSurvey({ id: params.id, surveyData }).unwrap();
       toast.success("Survey updated successfully!");
       router.push("/surveys/survey-list");

@@ -41,18 +41,19 @@ const CreateNewSection = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const newSectionTopic = useSelector(
-    (state: RootState) => state.question[0]?.sectionTopic
+    (state: RootState) => state.question.sectionTopic
   );
   const newSectionDesc = useSelector(
-    (state: RootState) => state.question[0]?.sectionDescription
+    (state: RootState) => state.question.sectionDescription
   );
+
   const [sectionTitle, setSectionTitle] = useState("");
   const [sDescription, setsDescription] = useState("");
   const [isEditing, setIsEditing] = useState(true);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(0);
   const questions = useSelector(
-    (state: RootState) => state.question[0]?.questions || []
+    (state: RootState) => state.question?.questions || []
   );
   const theme = useSelector((state: RootState) => state?.survey?.theme);
   const [createSurvey, { isLoading, isSuccess, isError, error }] =
@@ -93,7 +94,7 @@ const CreateNewSection = () => {
     );
     setEditIndex(questionIndex);
     setIsEdit(true);
-    console.log(questions[questionIndex]);
+    // console.log(questions[questionIndex]);
     setIsSidebarOpen(false);
   };
 
@@ -116,7 +117,7 @@ const CreateNewSection = () => {
             questions: questions,
           })
         );
-        console.log({ questions: questions });
+        // console.log({ questions: questions });
       } else {
         dispatch(
           addSection({
@@ -125,22 +126,22 @@ const CreateNewSection = () => {
             questions: questions,
           })
         );
-        console.log({
-          section_topic: newSectionTopic,
-          section_description: newSectionDesc,
-          questions: questions,
-        });
+        // console.log({
+        //   section_topic: newSectionTopic,
+        //   section_description: newSectionDesc,
+        //   questions: questions,
+        // });
       }
     }
 
     const updatedSurvey = store.getState().survey;
-    console.log(updatedSurvey.sections);
+    // console.log(updatedSurvey.sections);
 
     try {
       const updatedSurvey = store.getState().survey;
       await createSurvey(updatedSurvey);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -173,10 +174,10 @@ const CreateNewSection = () => {
     if (progressIsError || progressError) {
       toast.error("Failed to save progress, please try again later");
     }
-  }, [progressError, progressIsError]);
+  }, [progressError, progressIsError, progressSuccess, router]);
 
-  console.log(questions);
-  console.log(survey);
+  // console.log(questions);
+  // console.log(survey);
 
   return (
     <div className={`${theme} flex flex-col gap-5 w-full pl-16`}>
@@ -316,7 +317,7 @@ const CreateNewSection = () => {
                   options: options,
                   is_required: is_required,
                 };
-                console.log(newQuestion);
+                // console.log(newQuestion);
                 dispatch(addQuestion(newQuestion));
                 setAddQuestions((prev) => !prev);
               }}
@@ -391,7 +392,7 @@ const CreateNewSection = () => {
             <div>Pagination</div>
           </div>
 
-          <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+          {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
               <p>Form created by</p>
               <Image src={pollsensei_new_logo} alt="Logo" />
@@ -399,7 +400,7 @@ const CreateNewSection = () => {
             <span className="absolute bottom-2 right-4 text-[#828282]">
               Remove watermark
             </span>
-          </div>
+          </div> */}
         </div>
         <div
           className={`w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}

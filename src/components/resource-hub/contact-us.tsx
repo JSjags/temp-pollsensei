@@ -8,13 +8,10 @@ const ContactUs: React.FC = () => {
         <h1 className="text-6xl font-bold text-gray-900">Contact Us</h1>
         <p className="text-gray-600 text-sm mt-4">
           Do you have questions or concerns that we can help you with?
-         
         </p>
         <p className="text-gray-600 text-sm mt-4">
-        Please use the contact form below, and we'll get back to you.
-         
+          Please use the contact form below, and we&apos;ll get back to you.
         </p>
-
       </div>
 
       {/* Right Section (Form) */}
@@ -47,9 +44,7 @@ const ContactUs: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-gray-700 font-medium">
-                Phone Number
-              </label>
+              <label className="text-gray-700 font-medium">Phone Number</label>
               <input
                 type="tel"
                 placeholder="+1 (xxx) (xxxx)"

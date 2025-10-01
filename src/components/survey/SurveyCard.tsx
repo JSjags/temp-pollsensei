@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,6 @@ import {
 import { FaWhatsapp } from "react-icons/fa";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
-
 import { Switch } from "../ui/switch";
 import {
   DropdownMenu,
@@ -31,10 +30,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import eyes from "../../assets/images/eyes.svg";
 import share from "../../assets/images/share.svg";
-
 import RenameSurvey from "./RenameSurvey";
 import DeleteSurvey from "./DeleteSurvey";
 import DuplicateSurvey from "./DuplicateSurvey";
@@ -54,6 +51,9 @@ import {
 } from "@/services/survey.service";
 import { Button } from "../ui/button";
 import { Spinner } from "../loaders/page-loaders/AnalysisPageLoader";
+import { VscOpenPreview } from "react-icons/vsc";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import ReviewDialog from "@/components/survey/ReviewDialog";
 
 interface SurveyCardProps {
   topic: string;
@@ -62,6 +62,7 @@ interface SurveyCardProps {
   number_of_responses: number;
   _id: string;
   index: number;
+  is_quick_survey?: boolean;
 }
 
 const SurveyCard: React.FC<SurveyCardProps> = ({
@@ -71,6 +72,7 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   number_of_responses,
   _id,
   index,
+  is_quick_survey,
 }) => {
   const [modalStates, setModalStates] = useState({
     delete: false,
@@ -82,7 +84,10 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   });
 
   const [surveyName, setSurveyName] = useState<string>(topic);
-
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState<boolean>(false);
+  const [numberOfRespondents, setNumberOfRespondents] = useState<string>("");
+  const [isCreateQuickSurveyLoading, setIsCreateQuickSurveyLoading] =
+    useState<boolean>(false);
   const router = useRouter();
   const userRoles = useSelector(
     (state: RootState) => state.user.user?.roles[0].role || []
@@ -192,6 +197,10 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
     }
   }, [_id, deleteSurvey, handleCloseAll, refetch]);
 
+  const handleReview = () => {
+    setIsReviewDialogOpen(true);
+  };
+
   const statusStyles = {
     Closed: {
       text: "Closed",
@@ -221,6 +230,11 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
   return (
     <>
       <div className="bg-white relative rounded-[12px] border-[1px] w-full max-w-[720px] h-auto sm:h-fit transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-purple-400">
+        {is_quick_survey && (
+          <div className="text-white text-[10px] w-fit h-fit px-3 py-[2px] bg-green-400 rounded-tl-[12px] roundend-br-[12px] absolute top-0 left-0">
+            Quick Survey
+          </div>
+        )}
         <div className="">
           <div
             style={{
@@ -245,8 +259,14 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                 <DropdownMenuContent align="end" className="w-48">
                   {[
                     { label: "Rename", icon: Pencil, action: "rename" },
-                    { label: "Edit Survey", icon: Edit, action: "edit" },
                     { label: "Preview", icon: Eye, action: "preview" },
+                    { label: "Edit Survey", icon: Edit, action: "edit" },
+                    {
+                      label: "Participant Review",
+                      icon: VscOpenPreview,
+                      action: "review",
+                      onReviewClick: handleReview,
+                    },
                     { label: "Share", icon: Share2, action: "share" },
                     { label: "Make a copy", icon: Copy, action: "copy" },
                     status === "On going"
@@ -272,16 +292,30 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
                       className:
                         "text-red-600 focus:text-red-600 focus:bg-red-50",
                     },
-                  ].map(({ label, icon: Icon, action, className }) => (
-                    <DropdownMenuItem
-                      key={action}
-                      onClick={() => handleSelectOption(action)}
-                      className={`gap-2 cursor-pointer ${className || ""}`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{label}</span>
-                    </DropdownMenuItem>
-                  ))}
+                  ].map(
+                    ({
+                      label,
+                      icon: Icon,
+                      action,
+                      className,
+                      onReviewClick,
+                    }) => (
+                      <DropdownMenuItem
+                        key={action}
+                        onClick={() => {
+                          handleSelectOption(action);
+                          onReviewClick && onReviewClick();
+                        }}
+                        className={`gap-2 cursor-pointer ${className || ""}`}
+                      >
+                        <Icon
+                          className="h-4 w-4 text-xl"
+                          strokeWidth={Icon === VscOpenPreview ? 0.3 : 2}
+                        />
+                        <span>{label}</span>
+                      </DropdownMenuItem>
+                    )
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -399,6 +433,23 @@ const SurveyCard: React.FC<SurveyCardProps> = ({
         onClose={handleCloseAll}
         _id={_id}
       />
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[95vh] lg:max-h-[90vw] overflow-hidden">
+          <ReviewDialog
+            setIsReviewDialogOpen={setIsReviewDialogOpen}
+            surveyId={_id}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="max-w-[95vw] lg:max-w-[90vw] max-h-[95vh] lg:max-h-[90vw] overflow-hidden">
+          <ReviewDialog
+            setIsReviewDialogOpen={setIsReviewDialogOpen}
+            surveyId={_id}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

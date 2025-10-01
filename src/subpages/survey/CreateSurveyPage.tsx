@@ -59,6 +59,7 @@ const CreateSurveyPage: React.FC = () => {
   const [selectedSurveyType, setSelectedSurveyType] = useState("");
   const [isSelected, setIsSelected] = useState<number | null>(null);
   const [manualTopic, setManualTopic] = useState("");
+  const [addSkipLogic, setAddSkipLogic] = useState(false);
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -152,6 +153,7 @@ const CreateSurveyPage: React.FC = () => {
     try {
       const response = await generateTopics({
         user_query: surveyPrompt,
+        ...(addSkipLogic ? { add_skip_logic: true } : {}),
       });
 
       // Check if topics are empty and show a user-friendly warning
@@ -181,7 +183,8 @@ const CreateSurveyPage: React.FC = () => {
 
       await createAiSurvey({
         user_query: surveyPrompt,
-        survey_type: selectedSurveyType,
+        survey_type: selectedSurveyType === "" ? "both" : selectedSurveyType,
+        ...(addSkipLogic ? { add_skip_logic: true } : {}),
       });
     } catch (e) {
       toast.error("Failed to create survey");
@@ -316,7 +319,7 @@ const CreateSurveyPage: React.FC = () => {
     dispatch(resetSurvey());
   }, []);
 
-  console.log(survey);
+  // console.log(survey);
 
   return (
     <div className="flex flex-col justify-center items-center min-h-[80vh] px-5 text-center bg-white">
@@ -347,6 +350,8 @@ const CreateSurveyPage: React.FC = () => {
             handleGenerateTopics={handleGenerateTopics}
             manualTopic={manualTopic}
             setManualTopic={setManualTopic}
+            addSkipLogic={addSkipLogic}
+            setAddSkipLogic={setAddSkipLogic}
           />
         )}
 

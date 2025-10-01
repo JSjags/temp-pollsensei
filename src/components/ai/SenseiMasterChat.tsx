@@ -146,7 +146,7 @@ const SenseiMasterChat: React.FC<Props> = ({
         handleAiMessage(args[0]?.reply_text ?? args[0]?.response);
         break;
       case "ai_trigger":
-        console.log(args);
+        // console.log(args);
         handleAiMessage(args[0]?.reply_text ?? args[0]?.response, args[0]);
         break;
       // Add more cases for different events here
@@ -274,7 +274,7 @@ const SenseiMasterChat: React.FC<Props> = ({
         ...(type === "analysis" ? { survey_id: surveyId } : {}),
         survey_stage: type === "analysis" ? "analysis" : "generation",
       };
-      console.log("user_message", payload);
+      // console.log("user_message", payload);
       emitEvent("user_message", payload);
     }
   };
@@ -286,7 +286,7 @@ const SenseiMasterChat: React.FC<Props> = ({
 
       if (actionInput.toLowerCase().includes("rephrase")) {
         const index = Number(actionInput[actionInput.length - 1]);
-        console.log(index);
+        // console.log(index);
 
         // setEditId(index - 1);
         const payload = {
@@ -312,7 +312,7 @@ const SenseiMasterChat: React.FC<Props> = ({
       }
       if (actionInput.toLowerCase().includes("option")) {
         const index = Number(actionInput[actionInput.length - 1]);
-        console.log(index);
+        // console.log(index);
 
         // setEditId(index - 1);
         const payload = {
@@ -338,9 +338,9 @@ const SenseiMasterChat: React.FC<Props> = ({
       }
       if (actionInput.toLowerCase().includes("compatibility")) {
         const index = Number(actionInput[actionInput.length - 1]);
-        console.log(index);
+        // console.log(index);
 
-        console.log(currentQuestionType);
+        // console.log(currentQuestionType);
 
         // setEditId(index - 1);
         const payload = {

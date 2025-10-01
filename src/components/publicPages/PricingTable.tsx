@@ -66,14 +66,79 @@ const PricingTable: React.FC = () => {
           </tr>
           <tr className="bg-gray-50">
             <td className="p-4 border border-gray-200 text-left font-medium">
-              Collaborators
+              Contributors
             </td>
             {plansData?.map((plan: any) => (
               <td
                 key={plan._id}
                 className="p-4 border border-gray-200 text-center"
               >
-                {plan.number_of_collaborators}
+                {plan.number_of_contributors}
+              </td>
+            ))}
+          </tr>
+          <tr className="bg-white">
+            <td className="p-4 border border-gray-200 text-left font-medium">
+              Survey Generation
+            </td>
+            {plansData?.map((plan: any) => (
+              <td
+                key={plan._id}
+                className="p-4 border border-gray-200 text-center"
+              >
+                {plan.ai_survey_generation?.usage_capacity || "-"}
+              </td>
+            ))}
+          </tr>
+          <tr className="bg-gray-50">
+            <td className="p-4 border border-gray-200 text-left font-medium">
+              Data Analysis
+            </td>
+            {plansData?.map((plan: any) => (
+              <td
+                key={plan._id}
+                className="p-4 border border-gray-200 text-center"
+              >
+                {plan.ai_data_analysis?.usage_capacity || "-"}
+              </td>
+            ))}
+          </tr>
+          <tr className="bg-white">
+            <td className="p-4 border border-gray-200 text-left font-medium">
+              Report Generation
+            </td>
+            {plansData?.map((plan: any) => (
+              <td
+                key={plan._id}
+                className="p-4 border border-gray-200 text-center"
+              >
+                {plan.ai_report_generation?.usage_capacity || "-"}
+              </td>
+            ))}
+          </tr>
+          <tr className="bg-gray-50">
+            <td className="p-4 border border-gray-200 text-left font-medium">
+              Speech-to-Text
+            </td>
+            {plansData?.map((plan: any) => (
+              <td
+                key={plan._id}
+                className="p-4 border border-gray-200 text-center"
+              >
+                {plan.voice_transcription?.usage_capacity || "-"}
+              </td>
+            ))}
+          </tr>
+          <tr className="bg-white">
+            <td className="p-4 border border-gray-200 text-left font-medium">
+              OCR Processing
+            </td>
+            {plansData?.map((plan: any) => (
+              <td
+                key={plan._id}
+                className="p-4 border border-gray-200 text-center"
+              >
+                {plan.ocr_document_scanning?.usage_capacity || "-"}
               </td>
             ))}
           </tr>

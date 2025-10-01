@@ -83,9 +83,9 @@ const ValidateResponse = () => {
     (state: RootState) => state.answer as any
   );
   const ocr = useSelector((state: RootState) => state.answer);
-  console.log(ocr);
-  console.log(params.id);
-  console.log(OCRresponses);
+  // console.log(ocr);
+  // console.log(params.id);
+  // console.log(OCRresponses);
   const [currentSection, setCurrentSection] = useState(0);
   const [submitResponse, { data, isLoading, isSuccess, isError, error }] =
     useSubmitResponseMutation();
@@ -98,8 +98,8 @@ const ValidateResponse = () => {
 
   const [ocrRes, setOcrRes] = useState<ResponseData | null>(null);
 
-  console.log(OCRresponses);
-  console.log(ocrRes);
+  // console.log(OCRresponses);
+  // console.log(ocrRes);
 
   useEffect(() => {
     if (OCRresponses as any) {
@@ -125,6 +125,7 @@ const ValidateResponse = () => {
   };
 
   const handleSubmitResponse = async () => {
+    // console.log("U clicked");
     // @ts-ignore
     const answers = (ocrRes as any)?.extracted_answers
       ?.map((item: any) => {
@@ -193,13 +194,13 @@ const ValidateResponse = () => {
           }
         : {}),
     };
-    console.log(responsePayload);
+    // console.log(responsePayload);
     try {
       await submitResponse(responsePayload).unwrap();
       toast.success("Submitted successfully");
     } catch (e) {
       toast.error("Error submitting data: " + e);
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -504,7 +505,7 @@ const ValidateResponse = () => {
               {isLoading ? "Submitting..." : "Submit Response"}
             </button>
           </div>
-          <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+          {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
               <p>Form created by</p>
               <Image src={pollsensei_new_logo} alt="Logo" />
@@ -512,7 +513,7 @@ const ValidateResponse = () => {
             <span className="absolute bottom-2 right-4 text-[#828282]">
               Remove watermark
             </span>
-          </div>
+          </div> */}
         </div>
         <div
           className={`hidden lg:flex lg:w-1/3 overflow-y-auto max-h-screen custom-scrollbar bg-white`}

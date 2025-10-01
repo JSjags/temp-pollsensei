@@ -17,11 +17,12 @@ export default function PrivacyPolicy() {
         </CardHeader>
         <CardContent className="px-0">
           <p>
-            Oaks Intelligence Ltd. ("Oaks Intelligence," "we," "us," or "our")
-            values your privacy. This Privacy Policy describes how Oaks
-            Intelligence collects, uses, and shares your personal information
-            when you access PollSensei's website, services, applications, and
-            products (collectively, "PollSensei Services"). By using PollSensei
+            Oaks Intelligence Ltd. (&quot;Oaks Intelligence,&quot;
+            &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) values your
+            privacy. This Privacy Policy describes how Oaks Intelligence
+            collects, uses, and shares your personal information when you access
+            PollSensei&apos;s website, services, applications, and products
+            (collectively, &quot;PollSensei Services&quot;). By using PollSensei
             Services, you consent to the practices outlined in this Privacy
             Policy.
           </p>

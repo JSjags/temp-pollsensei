@@ -132,11 +132,9 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
               &lt;
             </button>
             <span className="font-semibold mx-2">Responses</span>
-            <span>
-              {startRange}-{endRange}
-            </span>
+            <span>{isNaN(endRange) ? 0 : `${startRange}-${endRange}`}</span>
             <span className="mx-1">of</span>
-            <span>{totalCount}</span>
+            <span>{isNaN(totalCount) ? 0 : totalCount}</span>
             <button
               className={`p-2 ${
                 curerentSurvey === totalSurveys
@@ -152,148 +150,152 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
         )}
 
         {/* Filters */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <ThreeStepDropdown
-              questions={surveyData?.answers}
-              isLoading={isLoading}
-            />
-          </div>
+        {(totalCount > 0 || isLoading) && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <ThreeStepDropdown
+                questions={surveyData?.answers}
+                isLoading={isLoading}
+              />
+            </div>
 
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-full justify-between"
-              >
-                {value
-                  ? respondent_data?.find(
-                      (respondent) => respondent.name === value
-                    )?.name
-                  : "Filter by name..."}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full min-w-[250px] p-0">
-              <Command>
-                <CommandInput placeholder="Search name..." />
-                <CommandEmpty>No name found.</CommandEmpty>
-                <CommandList>
-                  {Array.from(
-                    new Set(respondent_data?.map((r) => r.name))
-                  )?.map((name) => (
-                    <CommandItem
-                      key={name}
-                      value={name}
-                      onSelect={(currentValue) => {
-                        setValue(currentValue === value ? "" : currentValue);
-                        dispatch(
-                          setName(currentValue === value ? "" : currentValue)
-                        );
-                        setOpen(false);
-                      }}
-                      className=""
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === name ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {name}
-                    </CommandItem>
-                  ))}
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between"
+                >
+                  {value
+                    ? respondent_data?.find(
+                        (respondent) => respondent.name === value
+                      )?.name
+                    : "Filter by name..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full min-w-[250px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search name..." />
+                  <CommandEmpty>No name found.</CommandEmpty>
+                  <CommandList>
+                    {Array.from(
+                      new Set(respondent_data?.map((r) => r.name))
+                    )?.map((name) => (
+                      <CommandItem
+                        key={name}
+                        value={name}
+                        onSelect={(currentValue) => {
+                          setValue(currentValue === value ? "" : currentValue);
+                          dispatch(
+                            setName(currentValue === value ? "" : currentValue)
+                          );
+                          setOpen(false);
+                        }}
+                        className=""
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === name ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {name}
+                      </CommandItem>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
       </div>
 
       {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-        {/* Stats */}
-        <div className="grid grid-cols-2 bg-white border border-gray-100 p-3 rounded-xl max-w-fit gap-4">
-          <div className="flex items-center space-x-3">
-            <span className="h-3 w-3 rounded-full bg-green-500"></span>
-            <span className="text-gray-700 font-medium text-sm">Valid</span>
-            <span className="bg-green-50 text-green-700 px-3 py-0.5 text-sm rounded-full font-semibold">
-              {valid_response}
-            </span>
+      {(totalCount > 0 || isLoading) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+          {/* Stats */}
+          <div className="grid grid-cols-2 bg-white border border-gray-100 p-3 rounded-xl max-w-fit gap-4">
+            <div className="flex items-center space-x-3">
+              <span className="h-3 w-3 rounded-full bg-green-500"></span>
+              <span className="text-gray-700 font-medium text-sm">Valid</span>
+              <span className="bg-green-50 text-green-700 px-3 py-0.5 text-sm rounded-full font-semibold">
+                {valid_response}
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <span className="h-3 w-3 rounded-full bg-red-500"></span>
+              <span className="text-gray-700 font-medium text-sm">Invalid</span>
+              <span className="bg-red-50 text-red-700 px-3 py-0.5 text-sm rounded-full font-semibold">
+                {invalid_response}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <span className="h-3 w-3 rounded-full bg-red-500"></span>
-            <span className="text-gray-700 font-medium text-sm">Invalid</span>
-            <span className="bg-red-50 text-red-700 px-3 py-0.5 text-sm rounded-full font-semibold">
-              {invalid_response}
-            </span>
-          </div>
-        </div>
 
-        {/* Delete Button */}
-        <div className="flex justify-end gap-4">
-          {name && (
+          {/* Delete Button */}
+          <div className="flex justify-end gap-4">
+            {name && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleResetFilters}
+                className="w-fit gap-2 px-4"
+                title="Reset all filters"
+              >
+                Clear name filter <X className="h-4 w-4" />
+              </Button>
+            )}
             <Button
-              variant="outline"
-              size="icon"
-              onClick={handleResetFilters}
-              className="w-fit gap-2 px-4"
-              title="Reset all filters"
+              disabled={isLoading || isDeletingResponse}
+              className="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-x-2 group"
+              onClick={() => setShowDeleteDialog(true)}
             >
-              Clear name filter <X className="h-4 w-4" />
+              <span>Delete Response</span>
+              <svg
+                className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
             </Button>
-          )}
-          <Button
-            disabled={isLoading || isDeletingResponse}
-            className="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-x-2 group"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <span>Delete Response</span>
-            <svg
-              className="w-4 h-4 group-hover:rotate-12 transition-transform duration-200"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </Button>
 
-          <AlertDialog
-            open={showDeleteDialog}
-            onOpenChange={setShowDeleteDialog}
-          >
-            <AlertDialogContent
-              className="z-[100000]"
-              overlayClassName="z-[100000]"
+            <AlertDialog
+              open={showDeleteDialog}
+              onOpenChange={setShowDeleteDialog}
             >
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  this response.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-red-500 hover:bg-red-600"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+              <AlertDialogContent
+                className="z-[100000]"
+                overlayClassName="z-[100000]"
+              >
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    this response.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-red-500 hover:bg-red-600"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

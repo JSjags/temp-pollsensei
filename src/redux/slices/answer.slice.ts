@@ -39,7 +39,10 @@ interface OCRResponse {
   survey: Survey;
   extracted_answers: Answer[];
   uploaded_files?: string[];
-  respondent_details?: any;
+  respondent_details?: {
+    name?: string;
+    email?: string;
+  } | null;
 }
 
 // Define initial state
@@ -47,7 +50,10 @@ interface AnswerState {
   survey: Survey | null;
   extracted_answers: Answer[];
   uploaded_files: string[];
-  respondent_details: any | null;
+  respondent_details?: {
+    name?: string;
+    email?: string;
+  } | null;
 }
 
 const initialState: AnswerState = {
@@ -64,6 +70,7 @@ const answerSlice = createSlice({
     setSurvey: (state, action: PayloadAction<OCRResponse>) => {
       const { survey, extracted_answers, uploaded_files, respondent_details } =
         action.payload;
+      state.respondent_details = respondent_details;
       state.survey = survey;
       state.extracted_answers = extracted_answers;
       state.uploaded_files = uploaded_files || [];

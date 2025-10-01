@@ -23,8 +23,8 @@ const Page = (props: Props) => {
 
   const [showModal, setShowModal] = useState(true);
 
-  console.log(latestMilestone.isError);
-  console.log(latestMilestone);
+  // console.log(latestMilestone.isError);
+  // console.log(latestMilestone);
 
   return (
     <>

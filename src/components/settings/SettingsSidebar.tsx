@@ -1,11 +1,16 @@
 "use client";
-
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { FaRegBell, FaRegUserCircle } from "react-icons/fa";
 import { TbChartBar, TbShieldHalf, TbStack } from "react-icons/tb";
-import { LuCreditCard } from "react-icons/lu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FaRegEdit } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { LuCreditCard } from "react-icons/lu";
+import { useQuery } from "@tanstack/react-query";
+import { APP_KEYS } from "@/constants";
+import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
 
 interface MenuItem {
   label: string;
@@ -13,7 +18,7 @@ interface MenuItem {
   icons: React.ReactNode;
 }
 
-const supportMenu: MenuItem[] = [
+const baseSupportMenu: MenuItem[] = [
   {
     label: "Profile",
     path: "/settings/profile",
@@ -34,25 +39,41 @@ const supportMenu: MenuItem[] = [
     path: "/settings/referral-reward",
     icons: <LuCreditCard />,
   },
-  // {
-  //   label: "Payment",
-  //   path: "/settings/payment",
-  //   icons: <LuCreditCard />,
-  // },
   {
     label: "Subscription",
     path: "/settings/subscription",
     icons: <TbStack />,
   },
-  {
-    label: "Resource Monitor",
-    path: "/settings/resource-monitor",
-    icons: <TbChartBar />,
-  },
 ];
 
-const SettingsSidebar: React.FC = () => {
+const editRespondentMenuItem: MenuItem = {
+  label: "Edit Respondent",
+  path: "/settings/edit-respondent",
+  icons: <FaRegEdit />,
+};
+
+const SettingsSidebar = () => {
   const pathname = usePathname();
+  const user = useSelector((state: RootState) => state.user?.user);
+
+  const { data: isPaidRespondent } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
+    queryFn: () => fetchPaidRespondentStatus(),
+    enabled: !!user,
+  });
+
+  const isPaidRespondentStatus = isPaidRespondent?.isPaidRespondent;
+
+  const supportMenu = useMemo(() => {
+    const menu = [...baseSupportMenu];
+
+    // Add Edit Respondent menu item for paid respondents
+    if (isPaidRespondentStatus) {
+      menu.splice(1, 0, editRespondentMenuItem); // Insert after Profile
+    }
+
+    return menu;
+  }, [isPaidRespondentStatus]);
 
   const checkActive = (value: string): string => {
     return pathname?.includes(value) ? "support" : "";

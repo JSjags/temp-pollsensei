@@ -58,6 +58,7 @@ interface MultiChoiceQuestionEditProps {
   can_accept_media?: boolean;
   can_accept_audio?: boolean;
   item?: any;
+  step?: number;
 }
 
 const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
@@ -71,6 +72,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
   index,
   minValue: initialMinValue = 0,
   maxValue: initialMaxValue = 10,
+  step: initialStep = 1,
   matrixRows: initialRows = [],
   matrixColumns: initialColumns = [],
   surveyData,
@@ -285,7 +287,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
     columns,
   ]);
 
-  console.log(isValid);
+  // console.log(isValid);
 
   const handleTypeChange = (value: string) => {
     setEditedQuestionType(value);
@@ -421,6 +423,13 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
         );
       } else if (editedQuestionType === "boolean") {
         onSave(editedQuestion, ["Yes", "No"], editedQuestionType, isRequired);
+      } else if (editedQuestionType === "star_rating") {
+        onSave(
+          editedQuestion,
+          ["1 Star", "2 Stars", "3 Stars", "4 Stars", "5 Stars"],
+          editedQuestionType,
+          isRequired
+        );
       } else {
         onSave(
           editedQuestion,
@@ -559,8 +568,8 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
           <div className="space-y-4">
             <Slider
               value={[minValue, maxValue]}
-              min={Math.min(minValue, maxValue)}
-              max={Math.max(minValue, maxValue)}
+              min={Math.min(minValue, 45)}
+              max={Math.max(minValue, 45)}
               step={1}
               className="bg-gradient-to-r from-[#5B03B2] to-[#9D50BB]"
               onValueChange={([min, max]) => {
@@ -689,7 +698,7 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       className={cn(
-        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        "bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300 mt-6",
         {
           [`font-${questionText?.name
             ?.split(" ")
@@ -703,9 +712,9 @@ const MultiChoiceQuestionEdit: React.FC<MultiChoiceQuestionEditProps> = ({
       }}
     >
       <div className="flex items-start gap-4">
-        <motion.div whileHover={{ scale: 1.1 }} className="mt-2">
+        {/* <motion.div whileHover={{ scale: 1.1 }} className="mt-2">
           <Grip className="text-gray-400" />
-        </motion.div>
+        </motion.div> */}
 
         <div className="flex-1 space-y-6">
           <div className="flex items-center gap-2">

@@ -108,14 +108,14 @@ const PublicResponse = () => {
       setTextResponses(updatedTextResponses);
     }
 
-    console.log("Selected Options:", selectedOptions);
-    console.log("Text Responses:", textResponses);
+    // console.log("Selected Options:", selectedOptions);
+    // console.log("Text Responses:", textResponses);
   };
 
-  console.log(textResponses);
-  console.log(selectedOptions);
+  // console.log(textResponses);
+  // console.log(selectedOptions);
 
-  console.log(params.id);
+  // console.log(params.id);
   const question =
     typeof params?.id === "string" && params.id.startsWith("ps-")
       ? psId
@@ -203,7 +203,7 @@ const PublicResponse = () => {
         (answer: any) =>
           answer !== null && (answer.selected_options?.length || answer.text)
       );
-    console.log(formattedAnswers);
+    // console.log(formattedAnswers);
 
     if (
       !formattedAnswers ||
@@ -225,11 +225,11 @@ const PublicResponse = () => {
       answers: formattedAnswers,
     };
 
-    console.log(responsePayload);
+    // console.log(responsePayload);
     try {
       await submitPublicResponse(responsePayload);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
@@ -244,7 +244,7 @@ const PublicResponse = () => {
     }
   }, [submitSuccess, errorSubmitting, router]);
 
-  console.log(question);
+  // console.log(question);
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
@@ -572,7 +572,7 @@ const PublicResponse = () => {
                     {submitting ? "Submitting..." : "Submit"}
                   </button>
                 </div>
-                <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+                {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
                   <div className="flex flex-col">
                     <p>Form created by</p>
                     <Image src={pollsensei_new_logo} alt="Logo" />
@@ -580,7 +580,7 @@ const PublicResponse = () => {
                   <span className="absolute bottom-2 right-4 text-[#828282]">
                     Remove watermark
                   </span>
-                </div>
+                </div> */}
               </form>
             </div>
           )}

@@ -48,6 +48,13 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --tertiary: 270 97% 35%;
+    --new-sec-bg: 220 33% 98%;
+    --sec-text: 0 0% 54%;
+    --new-tertiary: 0 0% 20%;
+    --new-elements: 0 0% 75%;
+    --new-muted:	0 0% 51%;
+    --new-elements-border: 216 20% 95%;
     --font-lexend: "Lexend", sans-serif;
     --font-roboto: "Roboto", sans-serif;
     --font-playfair: "Playfair Display", serif;
@@ -73,6 +80,7 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
+    --sec-text: 0 0% 54%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
@@ -90,6 +98,10 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --tertiary: 270 97% 35%;
+    --new-tertiary: 0 0% 20%;
+    --new-elements: 0 0% 75%;
+    --new-elements-border: 216 20% 95%;
     --font-lexend: "Lexend", sans-serif;
     --font-roboto: "Roboto", sans-serif;
     --font-playfair: "Playfair Display", serif;
@@ -628,45 +640,67 @@ input[type="radio"].radio:checked:before {
   @apply flex w-full flex-col gap-y-3 rounded-lg bg-white px-1 py-2 shadow-popoverShadow;
 }
 
-/* Add these custom scrollbar styles */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+.your-table-container [style*="min-width: 100%"] {
+  min-width: 0 !important;
+  width: 100% !important;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+.analytics .slick-slide {
+  padding: 0 8px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
+.slick-prev::before,
+.slick-next::before {
+  display: none;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.Toastify__toast-container {
+  z-index: 100000000000 !important;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.ProseMirror {
+  padding: 0;
+  outline: none;
+  font-size: 1.5rem;
+  color: #333333;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
+.ProseMirror:focus {
+  outline: none;
 }
 
-@layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
+/* Custom carousel styles */
+.daily-login-slider {
+  width: 100%;
+}
 
+.daily-login-slider .slick-slide {
+  padding: 0 4px;
+}
+
+.daily-login-slider .slick-list {
+  margin: 0 -4px;
+  padding: 10px 0;
+}
+
+.daily-login-slider .slick-prev:before,
+.daily-login-slider .slick-next:before {
+  color: #5b03b2;
+  font-size: 24px;
+}
+
+.daily-login-slider .slick-track {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Arrow styling */
+.daily-login-slider .slick-arrow {
+  width: 30px;
+  height: 30px;
+  background: rgba(91, 3, 178, 0.2);
+  border-radius: 50%;
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
@@ -692,6 +726,10 @@ input[type="radio"].radio:checked:before {
 .prose p {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.daily-login-slider .slick-arrow:hover {
+  background: rgba(91, 3, 178, 0.4);
 }
 
 .prose ul,
@@ -782,4 +820,38 @@ input[type="radio"].radio:checked:before {
 
 .animate-glow {
   animation: glow 1.5s infinite alternate;
+}
+
+.import-wrapper {
+  position: relative;
+}
+
+.import-wrapper:hover .import-icon {
+  display: inline-flex;
+}
+
+/* tiptap.css */
+.ProseMirror {
+  outline: none;
+  min-height: 600px;
+}
+
+.ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid #ddd;
+  padding: 8px;
 }

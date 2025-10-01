@@ -1,8 +1,9 @@
 "use client";
-
 import "./style.css";
 import Navbar from "../../components/navbar/Navbar";
 import trophy from "../../assets/images/trophy.svg";
+import emptyCart from "../../assets/images/EmptyCart.svg";
+import user_placeholder from "../../assets/images/user-placeholder.jpg";
 import LineChart from "../../components/charts/LineChart";
 import {
   useDataCollectorCountQuery,
@@ -27,6 +28,9 @@ import { Separator } from "@/components/ui/separator";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import CreateSurveyButton from "@/components/reusable/CreateSurveyButton";
+import { APP_KEYS } from "@/constants";
+import { fetchPaidRespondentStatus } from "@/services/api/apiRequest";
+import { useQuery } from "@tanstack/react-query";
 
 // Move the styles definition outside the component
 const twinkleStyles = `
@@ -50,6 +54,14 @@ const DashboardPage = () => {
     useSurveyLeaderboardQuery("year");
   const { data: surveys, isLoading: isSurveysLoading } = useSurveyQuery("year");
 
+  const { data: isPaidRespondent, isSuccess } = useQuery({
+    queryKey: [...[APP_KEYS.IS_PAID_RESPONDENT]],
+    queryFn: () => fetchPaidRespondentStatus(),
+    enabled: true,
+  });
+
+  const isPaidRespondentStatus = isPaidRespondent?.isPaidRespondent;
+
   function DashboardSkeleton() {
     return (
       <div className="p-4 md:p-6 w-full mx-auto">
@@ -61,26 +73,42 @@ const DashboardPage = () => {
             <Skeleton className="h-4 md:h-6 w-28 md:w-36" />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 md:gap-4">
+          <div className="flex items-center flex-wrap gap-3 md:gap-4">
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="flex items-center p-2 md:p-4 gap-2 md:gap-4">
                 <Skeleton className="size-16 md:size-20 rounded-full" />
+
                 <div className="space-y-2">
                   <Skeleton className="h-3 md:h-4 w-12 md:w-16" />
                   <Skeleton className="h-3 md:h-4 w-16 md:w-20" />
                 </div>
               </CardContent>
             </Card>
-            <Separator
-              orientation="vertical"
-              className="hidden md:block h-6 bg-[#00000030]"
-            />
-            <Skeleton className="h-10 w-full md:w-36 rounded-full" />
-            <Skeleton className="size-10 rounded-full hidden md:block" />
+            {!isPaidRespondentStatus && (
+              <>
+                <Separator
+                  orientation="vertical"
+                  className="h-6 bg-[#00000030]"
+                />
+                <Skeleton className="h-10 w-full md:w-36 rounded-full" />
+              </>
+            )}
           </div>
         </div>
+        {/********* Large screens skeleton ********/}
+        <div className="hidden md:grid grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((index) => (
+            <Card key={index}>
+              <CardContent className="p-4 md:p-6">
+                <Skeleton className="h-3 md:h-4 w-20 md:w-24 mb-2" />
+                <Skeleton className="h-6 md:h-8 w-12 md:w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        {/********* Small screens skeleton ********/}
+        <div className="flex lg:hidden gap-3 w-[93vw] overflow-x-auto whitespace-nowrap">
           {[1, 2, 3, 4].map((index) => (
             <Card key={index}>
               <CardContent className="p-4 md:p-6">
@@ -124,66 +152,90 @@ const DashboardPage = () => {
       return <DashboardSkeleton />;
     }
 
+    // console.log({ isPaidRespondentStatus });
+
     return (
-      <div className="p-2 md:p-6 w-full mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
+      <div className="p-2 md:p-2 w-full mx-auto">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 md:mb-8 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-3xl font-bold">
+              <h1 className="text-xl md:text-[38px] font-bold">
                 Hey, {user?.name.split(" ")[0]} 👋
               </h1>
             </div>
-            <p className="text-lg md:text-2xl text-gray-400">
+            <p className="text-lg md:text-3xl text-gray-400">
               Great to have you here!
             </p>
-            <CreateSurveyButton type="dashboard" />
+            {}
+            <div className="hidden lg:flex">
+              {" "}
+              <CreateSurveyButton type="dashboard" />{" "}
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 md:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4">
             <Card className="border-none shadow-none bg-transparent">
               <CardContent className="flex items-center p-2 md:p-4 gap-2 md:gap-4">
-                <div className="text-2xl md:text-4xl font-semibold border border-[#00000030] rounded-full size-16 md:size-20 flex justify-center items-center">
+                <div className="text-xl md:text-[32px] font-semibold border border-[#00000030] rounded-full size-14 md:size-16 flex justify-center items-center">
                   {day}
                 </div>
-                <div className="text-xs md:text-sm">
+                <div className="text-lg md:text-sm">
                   <div>{weekday},</div>
                   <div>{month}</div>
                 </div>
               </CardContent>
             </Card>
-            <Separator
-              orientation="vertical"
-              className="hidden md:block h-6 bg-[#00000030]"
-            />
-            <Button
-              size="lg"
-              className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-full text-sm md:text-base"
-              onClick={() => router.push("/surveys/survey-list")}
-            >
-              Show My Surveys
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
 
-            <Button
-              size="icon"
-              variant="outline"
-              className="relative rounded-full hidden md:flex"
-              onClick={() => router.push("/calendar")}
-            >
-              <Calendar className="w-4 h-4" />
-              <span className="absolute top-1 right-1 size-1 bg-[#5B03B2] rounded-full" />
-            </Button>
+            {isSuccess && !isPaidRespondentStatus && (
+              <>
+                <Separator
+                  orientation="vertical"
+                  className="h-6 bg-[#00000030] hidden sm:block"
+                />
+                <Button
+                  size="default"
+                  className="w-full md:w-auto bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 rounded-full text-xs md:text-sm p-2 lg:p-4 hover:scale-x-105 transition-all"
+                  onClick={() => router.push("/respondent-form/verify-phone")}
+                  disabled={isPaidRespondentStatus}
+                >
+                  Become a Paid Respondent
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </>
+            )}
+          </div>
+          <div className="flex lg:hidden">
+            {" "}
+            <CreateSurveyButton type="dashboard" />{" "}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        {/********** Display Grid on large screens ******/}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
           {metrics.map((metric, index) => (
-            <Card key={index}>
+            <Card key={index} className="bg-white border border-[#F0F2F5]">
               <CardContent className="p-4 md:p-6">
-                <h3 className="text-gray-500 mb-2 text-sm md:text-base">
-                  {metric.title}
-                </h3>
-                <p className="text-xl md:text-2xl font-bold">{metric.value}</p>
+                <h3 className="text-[#7A8699] mb-2 text-sm">{metric.title}</h3>
+                <p className="text-xl md:text-2xl font-bold text-[#1D2939]">
+                  {metric.value}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/********** Display flex on small screens ******/}
+        <div className="grid grid-cols-2 md:hidden w-full overflow-x-scroll whitespace-nowrap gap-3">
+          {metrics.map((metric, index) => (
+            <Card
+              key={index}
+              className="bg-white border border-[#F0F2F5] w-full"
+            >
+              <CardContent className="p-4 md:p-6">
+                <h3 className="text-[#7A8699] mb-2 text-xs">{metric.title}</h3>
+                <p className="text-xl md:text-2xl font-bold text-[#1D2939]">
+                  {metric.value}
+                </p>
               </CardContent>
             </Card>
           ))}
@@ -202,14 +254,18 @@ const DashboardPage = () => {
               <LineChart />
             </div>
             <div className="stat w-full lg:max-w-[305px] flex flex-col gap-4 px-2">
-              <div className="stat w-full lg:max-w-[305px] h-auto bg-white rounded-lg shadow-sm border-border border">
+              <h4 className="text-lg md:text-sm text-[#6E6474] font-bold">
+                {" "}
+                Leaderboard{" "}
+              </h4>
+              <div className="stat w-full lg:max-w-[305px] h-full bg-white rounded-lg shadow-sm border-border border relative before:content-[''] ">
                 <div className="h-[68px] top-response-rate w-full flex items-center">
-                  <div className="flex justify-between items-center w-full px-4">
+                  <div className="flex items-center w-full px-4 gap-7 lg:gap-3">
                     <div className="flex flex-col gap-1">
-                      <p className="top-response-title text-[10px] md:text-xs">
+                      <p className="top-response-title text-sm md:text-xs font-bold">
                         TOP RESPONSE RATE
                       </p>
-                      <p className="top-response-text text-xs md:text-sm">
+                      <p className="top-response-text text-xs md:text-[10px]">
                         PollSensei Leaderboard
                       </p>
                     </div>
@@ -218,7 +274,7 @@ const DashboardPage = () => {
                       alt="Trophy"
                       width={24}
                       height={24}
-                      className="size-5 md:size-6"
+                      className="size-10"
                     />
                   </div>
                 </div>
@@ -269,21 +325,35 @@ const DashboardPage = () => {
             <div className="w-full flex flex-col gap-4">
               <div className="w-full">
                 <div className="flex justify-between items-center">
-                  <p className="survey-head text-base md:text-lg font-semibold">
+                  <p className="survey-head text-base md:text-xl text-[#333333] font-bold">
                     Surveys
                   </p>
                   <button className="survey-view-btn text-xs md:text-sm">
-                    <Link href={"/surveys/survey-list"}>View all</Link>
+                    <Link
+                      href={"/surveys/survey-list"}
+                      className="text-[#333333]"
+                    >
+                      View all
+                    </Link>
                   </button>
                 </div>
               </div>
-              <div className="radius h-fit shadow-sm border border-border !rounded-lg overflow-x-auto">
+              <div className="radius h-fit !border-0 border-border !rounded-lg overflow-x-auto">
                 {surveys?.data?.length > 0 ? (
                   <SurveyTable />
                 ) : (
-                  <NoSurvey
-                    onCreateSurvey={() => router.push("/surveys/create-survey")}
-                  />
+                  <div className="w-full h-auto flex flex-col gap-5 items-center justify-center">
+                    <Image
+                      src={emptyCart}
+                      width={100}
+                      height={100}
+                      className="size-32 md:size-52"
+                      alt="No Survey"
+                    />
+                    <p className="text-[#333333CC] text-lg text-center">
+                      No Active surveys are available at the moment
+                    </p>
+                  </div>
                 )}
               </div>
             </div>

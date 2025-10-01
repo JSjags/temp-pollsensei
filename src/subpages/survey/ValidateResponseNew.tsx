@@ -57,12 +57,15 @@ const PublicResponse = () => {
   const [submitSurveySuccess, setSubmitSurveySuccess] = useState(false);
   const router = useRouter();
 
-  const [activeInput, setActiveInput] = useState<Record<string, "textarea" | "audio" | null>>({});
-    const [quilValue, setQuilValue] = useState("");
-  
+  const [activeInput, setActiveInput] = useState<
+    Record<string, "textarea" | "audio" | null>
+  >({});
+  const [quilValue, setQuilValue] = useState("");
 
-
-  const handleInputFocus = (question: string, inputType: "textarea" | "audio") => {
+  const handleInputFocus = (
+    question: string,
+    inputType: "textarea" | "audio"
+  ) => {
     setActiveInput((prev) => ({ ...prev, [question]: inputType }));
   };
 
@@ -70,7 +73,8 @@ const PublicResponse = () => {
     setActiveInput((prev) => ({ ...prev, [question]: null }));
   };
 
-  const isTextareaDisabled = (question: string) => activeInput[question] === "audio";
+  const isTextareaDisabled = (question: string) =>
+    activeInput[question] === "audio";
   const isAudioDisabled = (question: string) =>
     activeInput[question] === "textarea" || !!answers[question]?.text;
 
@@ -100,10 +104,10 @@ const PublicResponse = () => {
     });
   };
 
-  console.log(textResponses);
-  console.log(selectedOptions);
+  // console.log(textResponses);
+  // console.log(selectedOptions);
 
-  console.log(params.id);
+  // console.log(params.id);
   const question =
     typeof params?.id === "string" && params.id.startsWith("ps-")
       ? psId
@@ -147,18 +151,18 @@ const PublicResponse = () => {
       answers: formattedAnswers,
     };
 
-    console.log(responsePayload);
+    // console.log(responsePayload);
     try {
       await submitPublicResponse(responsePayload).unwrap();
       toast.success("Your response was saved successfully");
       setSubmitSurveySuccess(true);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       toast.error("An error occurred while submitting your response");
     }
   };
 
-  console.log(question);
+  // console.log(question);
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
@@ -478,7 +482,9 @@ const PublicResponse = () => {
                                   // onFocus={handleTextareaFocus}
                                   // onBlur={resetActiveInput}
                                   // disabled={activeInput === "audio"}
-                                  onFocus={() => handleInputFocus(quest.question, "textarea")}
+                                  onFocus={() =>
+                                    handleInputFocus(quest.question, "textarea")
+                                  }
                                   onBlur={() => handleInputBlur(quest.question)}
                                   readOnly={isTextareaDisabled(quest.question)}
                                   value={answers[quest.question]?.text || ""}
@@ -489,29 +495,32 @@ const PublicResponse = () => {
                                   }
                                 />
                                 <div className="py-8">
-                            {/* <AppReactQuill
+                                  {/* <AppReactQuill
                               quilValue={quilValue}
                               setQuilValue={setQuilValue}
                             /> */}
-                          </div>
-                                {
-                                  quest.can_accept_media &&   <ResponseFile
-                                  question={quest.question}
-                                  handleAnswerChange={handleAnswerChange}
-                                  selectedValue={
-                                    answers[quest.question]?.media_url || ""
-                                  }
-                                  required={quest.is_required}
-                                  // onFocus={handleAudioFocus}
-                                  // onBlur={resetActiveInput} 
-                                  // isDisabled={activeInput === "textarea"} 
-                                  onFocus={() => handleInputFocus(quest.question, "audio")}
-                                  onBlur={() => handleInputBlur(quest.question)}
-                                  isDisabled={isAudioDisabled(quest.question)}
-                                />
-                                }
-                            
-                            </div>
+                                </div>
+                                {quest.can_accept_media && (
+                                  <ResponseFile
+                                    question={quest.question}
+                                    handleAnswerChange={handleAnswerChange}
+                                    selectedValue={
+                                      answers[quest.question]?.media_url || ""
+                                    }
+                                    required={quest.is_required}
+                                    // onFocus={handleAudioFocus}
+                                    // onBlur={resetActiveInput}
+                                    // isDisabled={activeInput === "textarea"}
+                                    onFocus={() =>
+                                      handleInputFocus(quest.question, "audio")
+                                    }
+                                    onBlur={() =>
+                                      handleInputBlur(quest.question)
+                                    }
+                                    isDisabled={isAudioDisabled(quest.question)}
+                                  />
+                                )}
+                              </div>
                             );
                           case "short_text":
                             return (
@@ -525,7 +534,7 @@ const PublicResponse = () => {
                                     })
                                   }
                                 />
-                            </div>
+                              </div>
                             );
                           case "star_rating":
                             return (
@@ -687,7 +696,7 @@ const PublicResponse = () => {
                     {submitting ? "Submitting..." : "Submit"}
                   </button>
                 </div>
-                <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+                {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
                   <div className="flex flex-col">
                     <p>Form created by</p>
                     <Image src={pollsensei_new_logo} alt="Logo" />
@@ -695,7 +704,7 @@ const PublicResponse = () => {
                   <span className="absolute bottom-2 right-4 text-[#828282]">
                     Remove watermark
                   </span>
-                </div>
+                </div> */}
               </form>
             </div>
           )}

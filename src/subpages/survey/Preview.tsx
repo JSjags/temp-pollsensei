@@ -33,7 +33,7 @@ const Preview = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
-  console.log(questions);
+  // console.log(questions);
 
   const navigatePage = (direction: any) => {
     setCurrentSection((prevIndex) => {
@@ -184,7 +184,7 @@ const Preview = () => {
             </div>
           )} */}
 
-          <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
+          {/* <div className="bg-[#5B03B21A] rounded-md flex flex-col justify-center items-center mb-10 py-5 text-center relative">
             <div className="flex flex-col">
               <p>Form created by</p>
               <Image src={pollsensei_new_logo} alt="Logo" />
@@ -192,7 +192,7 @@ const Preview = () => {
             <span className="absolute bottom-2 right-4 text-[#828282]">
               Remove watermark
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

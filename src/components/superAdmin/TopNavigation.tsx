@@ -250,7 +250,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({ onClick }) => {
                     <BellOffIcon className="size-16 mx-auto text-muted-foreground" />
                   </div>
                   <p className="text-sm text-muted-foreground mb-4">
-                    You're all caught up! No new notifications.
+                    You&apos;re all caught up! No new notifications.
                   </p>
                 </div>
               ) : (

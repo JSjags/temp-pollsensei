@@ -50,7 +50,8 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   if (isEdit && editIndex === index) {
     if (
       questionType === "matrix_multiple_choice" ||
-      questionType === "matrix_checkbox"
+      questionType === "matrix_checkbox" ||
+      questionType === "matrix"
     ) {
       return (
         <MatrixQuestionEdit
@@ -64,15 +65,17 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
       );
     }
     return (
-      <MultiChoiceQuestionEdit
-        index={index + 1}
-        question={item.question}
-        options={item.options}
-        questionType={questionType}
-        is_required={item.is_required}
-        onSave={handleSave}
-        onCancel={handleCancel}
-      />
+      <>
+        <MultiChoiceQuestionEdit
+          index={index + 1}
+          question={item.question}
+          options={item.options}
+          questionType={questionType}
+          is_required={item.is_required}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
+      </>
     );
   }
 
@@ -97,6 +100,7 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     likert_scale: LikertScaleQuestion,
     star_rating: StarRatingQuestion,
     matrix_multiple_choice: MatrixQuestion,
+    matrix: MatrixQuestion,
     matrix_checkbox: MatrixQuestion,
     single_choice: SingleChoiceQuestion,
     checkbox: CheckboxQuestion,
@@ -121,9 +125,12 @@ const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     ...(item?.columns && {
       columns: item.columns,
     }),
+    ...(item.options?.Step && { step: item.options?.Step }),
+    ...(item.min && { min: item.min }),
+    ...(item.max && { max: item.max }),
     isEdit: true,
   };
-
+  console.log(item);
   return <QuestionComponent key={index} {...commonProps} {...extraProps} />;
 };
 

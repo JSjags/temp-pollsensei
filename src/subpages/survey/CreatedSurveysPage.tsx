@@ -522,6 +522,15 @@ const CreatedSurveysPage = () => {
               totalPages={totalPages}
               onNavigate={navigatePage}
               isLoading={isLoading || isFetching}
+              onPageChange={(page) => {
+                const params = new URLSearchParams(window.location.search);
+                params.set("page", page.toString());
+                window.history.replaceState(
+                  {},
+                  "",
+                  `${window.location.pathname}?${params.toString()}`
+                );
+              }}
             />
           </div>
         </div>

@@ -182,9 +182,27 @@ function useToast() {
     };
   }, [state]);
 
+  const toastSuccess = (message: string, title: string = "Success") => {
+    return toast({
+      title,
+      description: message,
+      variant: "default",
+    });
+  };
+
+  const toastError = (message: string, title: string = "Error") => {
+    return toast({
+      title,
+      description: message,
+      variant: "destructive",
+    });
+  };
+
   return {
     ...state,
     toast,
+    success: toastSuccess,
+    error: toastError,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   };
 }

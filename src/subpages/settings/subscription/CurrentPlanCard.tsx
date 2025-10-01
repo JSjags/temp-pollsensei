@@ -21,7 +21,6 @@ import React, { useEffect } from "react";
 
 export function CurrentPlanCard() {
   const user = useSelector((state: RootState) => state.user.user);
-  console.log(user?.plan);
 
   const userData = useQuery<{ data: User }>({
     queryKey: ["profile"],
@@ -97,14 +96,6 @@ export function CurrentPlanCard() {
             </div>
           </div>
         </div>
-        <motion.div
-          className="absolute -bottom-2 right-0 z-10"
-          initial={{ rotate: -10 }}
-          animate={{ rotate: 0 }}
-          transition={{ duration: 0.6, type: "spring" }}
-        >
-          <Skeleton className="size-40 rounded-full opacity-0" />
-        </motion.div>
       </motion.div>
     );
   }

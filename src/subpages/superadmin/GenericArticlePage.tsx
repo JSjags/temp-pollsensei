@@ -234,7 +234,7 @@ const GenericArticlePage = (props: Props) => {
     if (formData.file) {
       editFormData.append("file", formData.file);
     }
-    console.log(editFormData);
+    // console.log(editFormData);
     try {
       await editTutorial({ id: _id, body: editFormData }).unwrap();
       toast.success("Tutorial edited successfully");
@@ -547,6 +547,9 @@ const GenericArticlePage = (props: Props) => {
             currentPage={currentPage}
             totalPages={totalPages}
             onNavigate={navigatePage}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+            }}
           />
         </div>
       </div>

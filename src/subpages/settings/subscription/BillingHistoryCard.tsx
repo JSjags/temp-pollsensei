@@ -13,7 +13,7 @@ export function BillingHistoryCard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="rounded-lg border-none bg-[#FAF8FB] shadow-sm h-full lg:col-span-2 opacity-0"
+      className="rounded-lg border-none bg-[#FAF8FB] shadow-sm h-full lg:col-span-2 opacity-0 overflow-hidden"
     >
       <div className="flex items-center h-full">
         <div className="relative h-full flex-[0.9]">

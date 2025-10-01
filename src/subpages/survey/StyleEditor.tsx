@@ -66,7 +66,7 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
     surveyData?.color_theme || colorTheme || "#ff5722"
   );
 
-  console.log(surveyData);
+  // console.log(surveyData);
 
   // Update state when props change
   useEffect(() => {
@@ -117,9 +117,9 @@ const StyleEditor: React.FC<StyleEditorProps> = ({
 
   return (
     <div className="style-editor bg-white h-full flex flex-col">
-      <div className="border-b py-4">
+      {/* <div className="border-b py-4">
         <h2 className="px-10 font-bold">Style Editor</h2>
-      </div>
+      </div> */}
 
       <ThemeSelector
         initialTheme={surveyData?.theme}

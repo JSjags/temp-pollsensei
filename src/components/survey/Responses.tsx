@@ -315,11 +315,13 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
               </Button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <span className="font-medium">
-                Page {currentPage} of {totalPages}
-              </span>
-            </div>
+            {totalPages > 0 && (
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <span className="font-medium">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Page Size Controls */}
@@ -478,8 +480,12 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {(activeTab === "Individual Responses" ||
-              activeTab === "Deleted") && (
+            {(activeTab === "Individual Responses" &&
+              validateSource &&
+              validateSource.answers.length > 0) ||
+            (activeTab === "Deleted" &&
+              deletedSource &&
+              deletedSource.answers.length > 0) ? (
               <Card className="p-6">
                 <RespondentDetails
                   data={
@@ -491,7 +497,7 @@ const Responses: React.FC<{ data: any }> = ({ data }) => {
                   isLoading={isLoading}
                 />
               </Card>
-            )}
+            ) : null}
 
             {activeTab === "Individual Responses" && !isLoading && (
               <Card className="p-2 sm:p-6 mt-6">

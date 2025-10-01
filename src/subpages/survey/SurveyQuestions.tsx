@@ -69,7 +69,8 @@ const SurveyQuestions = () => {
             Oops! Something went wrong
           </h2>
           <p className="text-gray-600">
-            We're having trouble loading your survey. Please try again later.
+            We&apos;re having trouble loading your survey. Please try again
+            later.
           </p>
         </motion.div>
       </div>
@@ -100,7 +101,7 @@ const SurveyQuestions = () => {
     );
   }
 
-  console.log(data?.data?.sections[currentSection]?.questions);
+  // console.log(data?.data?.sections[currentSection]?.questions);
 
   const getFontClass = (fontName?: string | null) => {
     if (!fontName || typeof fontName !== "string") return "";
@@ -199,7 +200,7 @@ const SurveyQuestions = () => {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: direction === "next" ? -300 : 300, opacity: 0 }}
                 transition={{ type: "tween", duration: 0.5 }}
-                className="pb-20"
+                className="pb-20 space-y-4"
               >
                 {data?.data?.sections[currentSection]?.questions?.map(
                   (item: any, index: number) => (

@@ -27,8 +27,8 @@ const SuperAdminLiveFaqs = () => {
     });
     refetch();
   };
-  console.log(store);
-  console.log(currentPage);
+  // console.log(store);
+  // console.log(currentPage);
 
   const faqItems = [
     {
@@ -69,6 +69,9 @@ const SuperAdminLiveFaqs = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onNavigate={navigatePage}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+          }}
         />
       </div>
     </div>

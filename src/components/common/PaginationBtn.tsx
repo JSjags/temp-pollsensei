@@ -26,7 +26,10 @@ const PaginationBtn: React.FC<PaginationProps> = ({
                 : "bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] text-white hover:from-[#6d28d9] hover:to-[#a78bfa] shadow-md"
             }
           `}
-          onClick={() => onNavigate("prev")}
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate("prev");
+          }}
           disabled={currentSection === 0}
           aria-label="Previous Section"
         >
@@ -47,7 +50,10 @@ const PaginationBtn: React.FC<PaginationProps> = ({
                 : "bg-gradient-to-r from-[#9D50BB] to-[#5B03B2] text-white hover:from-[#a78bfa] hover:to-[#6d28d9] shadow-md"
             }
           `}
-          onClick={() => onNavigate("next")}
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate("next");
+          }}
           disabled={currentSection === totalSections - 1}
           aria-label="Next Section"
         >

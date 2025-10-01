@@ -98,7 +98,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
   );
   const [dynamicOptions, setDynamicOptions] = useState<string[]>([]);
 
-  console.log(item);
+  // console.log(item);
 
   // Extract range from question text
   const extractRange = (question: string) => {
@@ -209,7 +209,7 @@ const RatingScaleQuestion: React.FC<RatingScaleQuestionProps> = ({
   return (
     <div
       className={cn(
-        "mb-6 bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
+        "bg-gray-50 shadow-sm hover:shadow-md rounded-xl p-6 transition-all duration-300",
         {
           [`font-${questionText?.name
             ?.split(" ")

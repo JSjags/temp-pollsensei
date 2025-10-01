@@ -364,7 +364,7 @@ export default function DragAndDropPage() {
       setShowReport(true);
     },
     onError: (error) => {
-      console.log(error);
+      // console.log(error);
       if ((error as any).response?.status === 503) {
         toast.error("Service currently unavailable. Please try again later.");
       } else if (
@@ -542,7 +542,7 @@ export default function DragAndDropPage() {
         (test: any) => test.variables
       );
 
-      console.log(allVariables);
+      // console.log(allVariables);
     }
   }, [createTestsQuery.isSuccess]);
 
@@ -614,7 +614,11 @@ export default function DragAndDropPage() {
           {(variablesQuery.isLoading || testsLibraryQuery.isLoading) && (
             <AnalysisLoadingScreen isExtractingVariables />
           )}
-          {variablesQuery.isError && <AnalysisErrorComponent />}
+          {variablesQuery.isError && (
+            <AnalysisErrorComponent
+              externalRetry={() => runTestMutation.mutate()}
+            />
+          )}
           {variablesQuery.isSuccess && (
             <>
               {/* Keep the error dialog the same */}
@@ -827,7 +831,7 @@ export default function DragAndDropPage() {
                                 <div className="col-span-full">
                                   <div className="bg-white rounded-lg p-8 text-center border-2 border-dashed border-gray-300">
                                     <h3 className="text-2xl font-semibold mb-4 text-gray-800">
-                                      Let's Start Your Analysis Journey!
+                                      Let&quot;s Start Your Analysis Journey!
                                     </h3>
                                     <p className="text-gray-600 mb-6 max-w-lg mx-auto">
                                       Select tests from the Test Library on the

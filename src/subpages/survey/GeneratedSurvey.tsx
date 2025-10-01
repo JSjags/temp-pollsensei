@@ -129,7 +129,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
     );
     setEditIndex(questionIndex);
     setIsEdit(true);
-    console.log(questions[questionIndex]);
+    // console.log(questions[questionIndex]);
   };
 
   const handleEdit = () => {
@@ -177,9 +177,9 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
               />
             </div>
             <DialogDescription className="text-center md:text-base text-gray-600 leading-relaxed max-w-md mx-auto">
-              You're about to enter the survey editor where you can refine and
-              perfect every detail of your survey. Let's make something amazing
-              together!
+              You&apos;re about to enter the survey editor where you can refine
+              and perfect every detail of your survey. Let&apos;s make something
+              amazing together!
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center pt-8">
@@ -244,7 +244,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="font-normal text-gray-600"
             >
-              Here's your survey. You can choose to continue or use another
+              Here&apos;s your survey. You can choose to continue or use another
               prompt
             </motion.p>
           </motion.div>
@@ -360,6 +360,7 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6 }}
                   >
+                    {/* {console.log(questions)} */}
                     <AnimatePresence>
                       {questions[0]?.questions.map((item: any, index: any) => (
                         <Draggable
@@ -420,7 +421,8 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   options={item.options}
                                   questionType={item.question_type}
                                 />
-                              ) : item.question_type === "matrix_checkbox" ? (
+                              ) : item.question_type === "matrix_checkbox" ||
+                                item.question_type === "matrix" ? (
                                 <MatrixQuestion
                                   key={index}
                                   index={index + 1}
@@ -492,7 +494,11 @@ const GeneratedSurvey: React.FC<GeneratedSurveyProps> = ({ data, onClick }) => {
                                   is_required={item.is_required}
                                   item={item}
                                 />
-                              ) : null}
+                              ) : (
+                                <div className="text-red-500">
+                                  {item.question_type}
+                                </div>
+                              )}
                             </div>
                           )}
                         </Draggable>

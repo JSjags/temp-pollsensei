@@ -23,7 +23,7 @@ export const getTeamMembers = async ({
   query?: string;
   filter?: string;
 }) => {
-  console.log(query);
+  // console.log(query);
 
   const { data } = await axiosInstance.get(
     `/team/members?page=${page}&page_size=${page_size}${
