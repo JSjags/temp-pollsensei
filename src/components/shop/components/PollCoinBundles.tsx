@@ -316,7 +316,7 @@ export function PollCoinBundles() {
   if (isLoading) {
     return (
       <div className="w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-full mx-auto">
           {Array.from({ length: 6 }).map((_, index) => (
             <BundleSkeleton key={index} />
           ))}
@@ -385,7 +385,7 @@ export function PollCoinBundles() {
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mx-auto">
         {bundles.map((bundle) => (
           <div
             key={bundle.id}
