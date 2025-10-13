@@ -249,6 +249,21 @@ export const fetchLoginStreak = async () => {
   }
 };
 
+export const fetchSurveyPrice = async (surveyId: string | null) => {
+  try {
+    const response = await axiosInstance.get(
+      `/purchases/respondents/package/${surveyId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Error fetching login streak";
+    throw new Error(errorMessage);
+  }
+};
+
 export const fetchAvailableSurveys = async (
   page: number = 1,
   limit: number = 8
