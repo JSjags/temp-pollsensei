@@ -38,6 +38,7 @@ import {
   PurchasePaidRespondent,
   PurchaseQualifiedPaidRespondent,
   ScreenerSurveyPurchase,
+  fetchSurveyPrice,
 } from "@/services/api/apiRequest";
 import { APP_KEYS } from "@/constants";
 import { BuyPaidRespondentResponse, SurveyData } from "@/types/survey";
@@ -63,10 +64,9 @@ const BuyRespondent = () => {
     screenerId,
   } = useSelector((state: RootState) => state.respondentDialog);
 
-  // console.log({ screenerId });
-
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string>("");
+  const [surveyPrice, setSurveyPrice] = useState<number>(0);
 
   const {
     register,
@@ -85,6 +85,22 @@ const BuyRespondent = () => {
 
   const surveyType = watch("survey");
   const respondentsNumber = watch("respondentsNumber");
+
+  // Fetch survey price when survey is selected
+  const { data: surveyPriceData, isLoading: isPriceLoading } = useQuery({
+    queryKey: [APP_KEYS.SURVEY_PRICE_BY_ID, surveyType],
+    queryFn: () => fetchSurveyPrice(surveyType),
+    enabled: !!surveyType,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Update price when data is fetched
+  useEffect(() => {
+    if (surveyPriceData?.cost_per_standard_survey_respondent) {
+      setSurveyPrice(surveyPriceData.cost_per_standard_survey_respondent);
+    }
+  }, [surveyPriceData]);
 
   useEffect(() => {
     const savedSurvey = sessionStorage.getItem("selectedSurvey");
@@ -279,7 +295,6 @@ const BuyRespondent = () => {
 
     dispatch(setSelectedRespondentsNumber(data.respondentsNumber));
     sessionStorage.setItem("allowFilterRespondentsAccess", "true");
-    // console.log("allowFilterRespondentsAccess set to true");
     router.push("/filter-respondents");
     dispatch(setSurveyDialog(false));
     dispatch(setPurchaseDialog(false));
@@ -303,12 +318,12 @@ const BuyRespondent = () => {
   });
 
   const userSurveys: SurveyData[] = userSurveysResponse?.data || [];
-  // const totalSurveys = userSurveysResponse?.total || 0;
-  // const currentPage = userSurveysResponse?.page || 1;
-  // const pageSize = userSurveysResponse?.page_size || 6;
-
-  // console.log({ userSurveysResponse, userSurveys });
   const hasActiveSurveys = userSurveys.length > 0;
+
+  // Calculate total cost
+  const totalCost = respondentsNumber
+    ? (respondentsNumber * surveyPrice).toFixed(1)
+    : "0";
 
   return (
     <div className="bg-[#FCFCFD] rounded-lg max-md:gap-3 max-w-[204px] py-2.5 border flex flex-col justify-between w-full">
@@ -433,9 +448,10 @@ const BuyRespondent = () => {
                           height={15}
                           alt="logoGold"
                         />
-                        <span className="font-semibold">5</span>
-
-                        <span className="font-semibold">/Respondent </span>
+                        <span className="font-semibold">
+                          {isPriceLoading ? "..." : surveyPrice}
+                        </span>
+                        <span className="font-semibold">/Respondent</span>
                       </div>
                     </p>
                   </div>
@@ -467,7 +483,7 @@ const BuyRespondent = () => {
                           {respondentsNumber || 0}
                         </span>
                       </p>
-                      <p className="text-[10px]  lg:text-xs">
+                      <p className="text-[10px] lg:text-xs">
                         Cost:{" "}
                         <div className="w-auto flex items-center gap-1">
                           <Image
@@ -477,7 +493,7 @@ const BuyRespondent = () => {
                             alt="logoGold"
                           />
                           <p className="text-base lg:text-lg text-[#5F08B2]">
-                            {respondentsNumber * 5 || 0}
+                            {isPriceLoading ? "..." : totalCost}
                           </p>
                         </div>
                       </p>
@@ -493,10 +509,9 @@ const BuyRespondent = () => {
                     }`}
                     type="button"
                     onClick={handleClick}
-                    disabled={!hasActiveSurveys}
+                    disabled={!hasActiveSurveys || isPriceLoading}
                   >
                     <span className="hidden lg:inline-block">
-                      {" "}
                       Filter Respondents
                     </span>
                     <span className="inline-block lg:hidden text-xs">
@@ -510,7 +525,7 @@ const BuyRespondent = () => {
                       surveyType && respondentsNumber ? "w-1/2" : "w-full"
                     } bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 hover:scale-x-105 transition-all`}
                     type="submit"
-                    disabled={!hasActiveSurveys}
+                    disabled={!hasActiveSurveys || isPriceLoading}
                   >
                     <span
                       className={`${
@@ -553,9 +568,8 @@ const BuyRespondent = () => {
                 Title of Survey
               </p>
               <p className="text-sm capitalize">
-                {" "}
                 {selectedSurvey?.topic || "No survey selected"}
-              </p>{" "}
+              </p>
             </div>
             <p className="font-bold text-sm">Respondents:</p>
             <div className="w-full flex flex-col gap-7">
@@ -565,7 +579,7 @@ const BuyRespondent = () => {
                 </p>
                 <p className="text-base lg:text-lg text-[#5F08B2]">
                   {selectedRespondentsNumber}
-                </p>{" "}
+                </p>
               </div>
               <div className="w-full flex justify-between items-center border-b border-dotted border-[#A9A9B1] pb-2">
                 <p className="text-xs lg:text-sm font-bold">
@@ -573,7 +587,9 @@ const BuyRespondent = () => {
                 </p>
                 <div className="w-auto flex items-center gap-1">
                   <Image src={logoGold} width={15} height={15} alt="logoGold" />
-                  <p className="text-base lg:text-lg text-[#5F08B2]">5</p>
+                  <p className="text-base lg:text-lg text-[#5F08B2]">
+                    {surveyPrice}
+                  </p>
                 </div>
               </div>
               <div className="w-full flex justify-between items-center border-b border-dotted border-[#A9A9B1] pb-2">
@@ -583,7 +599,7 @@ const BuyRespondent = () => {
                 <div className="w-auto flex items-center gap-1">
                   <Image src={logoGold} width={15} height={15} alt="logoGold" />
                   <p className="text-base lg:text-lg text-[#5F08B2]">
-                    {selectedRespondentsNumber * 5}
+                    {(selectedRespondentsNumber * surveyPrice).toFixed(1)}
                   </p>
                 </div>
               </div>

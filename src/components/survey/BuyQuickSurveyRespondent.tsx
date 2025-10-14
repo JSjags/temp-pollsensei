@@ -39,12 +39,14 @@ import {
   DirectQuickSurvey,
   QuickSurveyQualifyingPurchase,
   QuickSurveyScreenerPurchase,
+  fetchSurveyPrice,
 } from "@/services/api/apiRequest";
 import { resetQuestion } from "@/redux/slices/questions.slice";
 import { resetSurvey } from "@/redux/slices/survey.slice";
 import { useQueryClient } from "@tanstack/react-query";
 import { CiClock2 } from "react-icons/ci";
 import quick from "@/assets/images/quick.png";
+import { APP_KEYS } from "@/constants";
 
 interface Props {
   surveyId: string | null;
@@ -112,13 +114,13 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
 
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string>("");
+  const [quickSurveyPrice, setQuickSurveyPrice] = useState<number>(0);
+
   const surveyTopic = useSelector(
     (state: RootState) =>
       state?.quickSurvey?.formData?.surveyTopic || state?.survey?.topic
   );
-  // const surveyLog = useSelector((state: RootState) => state?.survey);
 
-  // console.log({ surveyLog });
   // Initialize default duration (1 hour)
   const defaultDuration = React.useMemo(() => {
     const date = new Date();
@@ -153,6 +155,22 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
   const duration = watch("duration");
   const conditions = watch("conditions");
 
+  // Fetch survey price for QuickSurvey
+  const { data: surveyPriceData, isLoading: isPriceLoading } = useQuery({
+    queryKey: [APP_KEYS.SURVEY_PRICE_BY_ID, surveyId],
+    queryFn: () => fetchSurveyPrice(surveyId),
+    enabled: !!surveyId && showQuickSurveyFlow,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Update price when data is fetched
+  useEffect(() => {
+    if (surveyPriceData?.cost_per_quick_survey_respondent) {
+      setQuickSurveyPrice(surveyPriceData.cost_per_quick_survey_respondent);
+    }
+  }, [surveyPriceData]);
+
   const handleProceedToBuyRespondent = async () => {
     setIsProceedConvertion(true);
     try {
@@ -178,7 +196,6 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     dispatch(setQuickSurveyQualifyingTemplateId(null));
   };
 
-  // Close the entire flow
   const handleCloseFlow = () => {
     dispatch(closeQuickSurveyFlow());
     router.push("/surveys/survey-list");
@@ -193,8 +210,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       setValue("respondentsNumber", formData.respondentsNumber);
     }
     if (formData.duration) {
-      // FIXED: formData.duration is now stored as total minutes, not hours
-      const durationInMinutes = parseInt(formData.duration); // Direct minutes value
+      const durationInMinutes = parseInt(formData.duration);
       setValue("duration", createDateFromMinutes(durationInMinutes));
     }
     if (formData.conditions) {
@@ -203,7 +219,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
   }, [formData, setValue]);
 
   const handleNext = (data: QuickSurveyFormData) => {
-    const totalMinutes = getTotalMinutes(data.duration); // This will be 5, 60, 120, etc.
+    const totalMinutes = getTotalMinutes(data.duration);
 
     dispatch(setSelectedRespondentsNumber(data.respondentsNumber));
     sessionStorage.setItem(
@@ -211,7 +227,6 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       data.respondentsNumber.toString()
     );
 
-    // FIXED: Store total minutes instead of hours
     dispatch(setDuration(totalMinutes.toString()));
     dispatch(setConditions(data.conditions));
 
@@ -219,7 +234,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       setFormData({
         surveyTopic: surveyTopic,
         respondentsNumber: data.respondentsNumber,
-        duration: totalMinutes.toString(), // Send minutes: 5, 60, 120, etc.
+        duration: totalMinutes.toString(),
         conditions: data.conditions,
       })
     );
@@ -386,7 +401,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
       setFormData({
         surveyTopic: surveyTopic,
         respondentsNumber: data.respondentsNumber,
-        duration: totalMinutes.toString(), // FIXED: Send total minutes
+        duration: totalMinutes.toString(),
         conditions: data.conditions,
       })
     );
@@ -402,18 +417,11 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     return getTotalMinutes(duration);
   }, [duration]);
 
-  // Get formatted duration for display
   const selectedDurationLabel = useMemo(() => {
     if (!duration) return "";
 
     const hours = duration.getHours();
     const minutes = duration.getMinutes();
-
-    // console.log("Duration debug:", {
-    //   hours,
-    //   minutes,
-    //   totalMinutes: totalMinutesValue,
-    // });
 
     if (hours === 0) {
       return `${minutes} minute${minutes === 1 ? "" : "s"}`;
@@ -422,7 +430,12 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
     } else {
       return `${hours}h ${minutes}m`;
     }
-  }, [duration]); // Correct dependencies
+  }, [duration]);
+
+  // Calculate total cost
+  const totalCost = respondentsNumber
+    ? (respondentsNumber * quickSurveyPrice).toFixed(1)
+    : "0";
 
   if (!showQuickSurveyFlow) {
     return null;
@@ -599,7 +612,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                         alt="logoGold"
                       />
                       <p className="text-base lg:text-lg text-[#5F08B2]">
-                        {respondentsNumber * 5 || 0}
+                        {isPriceLoading ? "..." : totalCost}
                       </p>
                     </div>
                   </p>
@@ -672,7 +685,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                 className="w-full lg:w-1/2 border-[#5B03B2] outline-[#5B03B2] hover:bg-none hover:scale-x-105 transition-all"
                 type="button"
                 onClick={handleClick}
-                disabled={!respondentsNumber || !duration}
+                disabled={!respondentsNumber || !duration || isPriceLoading}
               >
                 <span className="hidden lg:inline-block">
                   Filter Respondents
@@ -686,7 +699,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                 size="sm"
                 className="w-full lg:w-1/2 bg-gradient-to-r from-[#5B03B2] to-[#9D50BB] shadow-[-5px_5px_10px_#563BFF42] hover:bg-purple-700 hover:scale-x-105 transition-all"
                 type="submit"
-                disabled={!respondentsNumber || !duration}
+                disabled={!respondentsNumber || !duration || isPriceLoading}
               >
                 Proceed
               </Button>
@@ -762,7 +775,9 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                 </p>
                 <div className="w-auto flex items-center gap-1">
                   <Image src={logoGold} width={15} height={15} alt="logoGold" />
-                  <p className="text-base lg:text-lg text-[#5F08B2]">5</p>
+                  <p className="text-base lg:text-lg text-[#5F08B2]">
+                    {quickSurveyPrice}
+                  </p>
                 </div>
               </div>
               <div className="w-full flex justify-between items-center border-b border-dotted border-[#A9A9B1] pb-2">
@@ -772,7 +787,7 @@ const BuyQuickSurveyRespondent: FC<Props> = ({ surveyId }) => {
                 <div className="w-auto flex items-center gap-1">
                   <Image src={logoGold} width={15} height={15} alt="logoGold" />
                   <p className="text-base lg:text-lg text-[#5F08B2]">
-                    {selectedRespondentsNumber * 5}
+                    {(selectedRespondentsNumber * quickSurveyPrice).toFixed(1)}
                   </p>
                 </div>
               </div>
