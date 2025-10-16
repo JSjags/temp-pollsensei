@@ -13,9 +13,11 @@ const LoadRedirect: React.FC<LoadRedirectProps> = ({ text, goto }) => {
   const router = useRouter();
 
   useEffect(() => {
-    toast.error(text, {
-      toastId: "error",
-    });
+    if (text.length >= 1) {
+      toast.error(text, {
+        toastId: "error",
+      });
+    }
     router.replace(goto);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -94,7 +94,7 @@ const customBaseQuery: BaseQueryFn<
         toastMessage = errorMessage || "An error occurred";
     }
 
-    if (toastMessage) {
+    if (toastMessage && toastMessage.length >= 1) {
       toast.dismiss();
       toast.error(toastMessage, { toastId: "error" });
     }
