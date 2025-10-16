@@ -179,7 +179,7 @@ const SurveyCard: FC<Props> = ({ survey, activeTab, applicationSurveys }) => {
         </p>
         <div className="w-full h-auto flex items-center gap-2">
           <div className="bg-[#E5ECF680] text-[#333333] text-[8px] lg:text-[10px] rounded-full py-1 px-3 flex items-center gap-1">
-            3<Image src={logoGold} width={10} height={10} alt="logoGold" />
+            <Image src={logoGold} width={10} height={10} alt="logoGold" />3
           </div>
         </div>
       </div>

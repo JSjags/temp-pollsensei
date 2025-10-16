@@ -52,6 +52,12 @@ const GetAppSection: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center h-10 gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
+            // onClick={() => {
+            //   window.open(
+            //     "https://apps.apple.com/us/app/pollsensei/id6444045903",
+            //     "_blank"
+            //   );
+            // }}
           >
             <FaAppStore />
             <span className="text-sm font-medium">Get on iPhone</span>
@@ -61,6 +67,12 @@ const GetAppSection: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center h-10 gap-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 px-4 py-2"
+            onClick={() => {
+              window.open(
+                "https://play.google.com/store/apps/details?id=com.oaks.pollsensei",
+                "_blank"
+              );
+            }}
           >
             <BiLogoPlayStore />
             <span className="text-sm font-medium">Get on Android</span>
